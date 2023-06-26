@@ -22,6 +22,8 @@
     #include "BOOL.h"
 #elif DATTYPE == 8 
     #include "CHAR.h"
+#elif DATTYPE == 32
+    #include "UINT32.h"
 #elif DATTYPE == 64 
     #include "STD.h"
 #elif DATTYPE == 128 
@@ -30,6 +32,9 @@
     #include "AVX.h"
 #elif DATTYPE == 512 
     #include "AVX512.h"
+#else
+    printf("Datatype not supported \n");
+    exit(1);
 #endif
 
 #if num_players == 3

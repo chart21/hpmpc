@@ -337,8 +337,7 @@ void compare_views() {
         }
     }
             if (!verified) {
-                            printf("Compareviews of Player %i "
-                       "failed! \n",
+                            printf("P%i: Compareviews failed! \n",
                        PARTY);
                 /* exit(0); */
               } 

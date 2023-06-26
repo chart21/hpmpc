@@ -1,4 +1,3 @@
-
 /* ******************************************** *\
  *
  *
@@ -13,15 +12,15 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#ifndef CHAR
-#define CHAR
+#ifndef STD
+#define STD
 #endif
 
 #ifndef BITS_PER_REG
-#define BITS_PER_REG 8
+#define BITS_PER_REG 32
 #endif
 #ifndef LOG2_BITS_PER_REG
-#define LOG2_BITS_PER_REG 1
+#define LOG2_BITS_PER_REG 5
 #endif
 
 /* Defining 0 and 1 */
@@ -30,7 +29,7 @@
 
 /* Defining macros */
 #define REG_SIZE BITS_PER_REG
-#define CHUNK_SIZE 64
+#define CHUNK_SIZE 32
 
 #define AND(a,b)  ((a) & (b))
 #define OR(a,b)   ((a) | (b))
@@ -45,7 +44,30 @@
 #define ADD_SIGNED(a,b,c) a + b
 #define SUB_SIGNED(a,b,c) a - b
 
+#define ROTATE_MASK(x) (x == 64 ? -1ULL : x == 32 ? -1 : x == 16 ? 0xFFFF : \
+    ({ fprintf(stderr,"Not implemented rotate [uint%d_t]. Exiting.\n",x); \
+      exit(1); 1; }))
 
+#define L_SHIFT(a,b,c) (c == 4 ? ((a) << (b)) & 0xf : ((a) << (b)))
+#define R_SHIFT(a,b,c) ((a) >> (b))
+#define RA_SHIFT(a,b,c) (((SDATATYPE)(a)) >> (b))
+#define L_ROTATE(a,b,c) ((a << b) | ((a&ROTATE_MASK(c)) >> (c-b)))
+#define R_ROTATE(a,b,c) (((a&ROTATE_MASK(c)) >> b) | (a << (c-b)))
+
+#define LIFT_4(x)  (x)
+#define LIFT_8(x)  (x)
+#define LIFT_16(x) (x)
+#define LIFT_32(x) (x)
+#define LIFT_64(x) (x)
+
+#define BITMASK(x,n,c) -(((x) >> (n)) & 1)
+
+#define PACK_8x2_to_16(a,b)  ((((uint16_t)(a)) << 8) | ((uint16_t) (b)))
+#define PACK_16x2_to_32(a,b) ((((uint32_t)(a)) << 16) | ((uint32_t) (b)))
+#define PACK_32x2_to_64(a,b) ((((uint64_t)(a)) << 32) | ((uint64_t) (b)))
+
+
+#define refresh(x,y) *(y) = x
 
 #ifndef DATATYPE
 #if BITS_PER_REG == 4
@@ -73,8 +95,9 @@
 #define ORTHOGONALIZE(in,out)   orthogonalize(in,out)
 #define UNORTHOGONALIZE(in,out) unorthogonalize(in,out)
 
-#define ALLOC(size) malloc(size * sizeof(uint8_t))
-#define NEW(var) new var;
+#define ALLOC(size) malloc(size * sizeof(uint64_t))
+/* #define NEW(var) (sizeof(var) > 0) ? new var : NULL */ 
+#define NEW(var) new var 
 
 
 #ifdef RUNTIME
@@ -101,44 +124,46 @@ static uint64_t mask_r[6] = {
 
 
 void real_ortho(uint64_t data[]) {
-  for (int i = 0; i < 3; i ++) {
-    int n = (1UL << i);
-    for (int j = 0; j < 8; j += (2 * n))
-      for (int k = 0; k < n; k ++) {
+  for (int i = 0; i < 5; i ++) {
+    int nu = (1UL << i);
+    for (int j = 0; j < 32; j += (2 * nu))
+      for (int k = 0; k < nu; k ++) {
         uint64_t u = data[j + k] & mask_l[i];
         uint64_t v = data[j + k] & mask_r[i];
-        uint64_t x = data[j + n + k] & mask_l[i];
-        uint64_t y = data[j + n + k] & mask_r[i];
-        data[j + k] = u | (x >> n);
-        data[j + n + k] = (v << n) | y;
+        uint64_t x = data[j + nu + k] & mask_l[i];
+        uint64_t y = data[j + nu + k] & mask_r[i];
+        data[j + k] = u | (x >> nu);
+        data[j + nu + k] = (v << nu) | y;
       }
   }
 }
 
 #ifdef ORTHO
 
-void orthogonalize(uint64_t* data, uint8_t* out) {
+void orthogonalize(uint64_t* data, uint32_t* out) {
   real_ortho(data);
   for (int i = 0; i < 64; i++)
-    out[i] = ((uint8_t*) data)[i];
+    out[i] = ((uint32_t*) data)[i];
   
 }
 
-void unorthogonalize(uint8_t *in, uint64_t* data) {
-  for (int i = 0; i < 8; i++)
+void unorthogonalize(uint32_t *in, uint64_t* data) {
+  for (int i = 0; i < 32; i++)
     data[i] = ((uint64_t*)in)[i];
   real_ortho(data);
 }
 
+
+
 #else
 
-void orthogonalize(uint64_t* data, uint64_t* out) {
-  for (int i = 0; i < 64; i++)
+void orthogonalize(uint32_t* data, uint32_t* out) {
+  for (int i = 0; i < 32; i++)
     out[i] = data[i];
 }
 
-void unorthogonalize(uint64_t *in, uint64_t* data) {
-  for (int i = 0; i < 64; i++)
+void unorthogonalize(uint32_t *in, uint32_t* data) {
+  for (int i = 0; i < 32; i++)
     data[i] = in[i];
 }
 

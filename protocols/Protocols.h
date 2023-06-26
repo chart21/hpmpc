@@ -119,7 +119,7 @@
     #if PRE == 1
         #if PARTY == 0
             #define PROTOCOL_PRE OECL0
-            #include "oecl-P0_template.hpp"
+            #include "3-PC/ours/oecl-P0_template.hpp"
         #endif
         #if PARTY == 1
             #define PROTOCOL_PRE -1
@@ -165,10 +165,10 @@
         #define PROTOCOL_LIVE TTP
         #define PROTOCOL_INIT TTP_init
         #if INIT == 1 
-            #include "ttp/ttp_init_template.hpp"
+            #include "TTP/ttp_init_template.hpp"
         #endif
         #if LIVE == 1
-            #include "ttp/ttp_template.hpp"
+            #include "TTP/ttp_template.hpp"
         #endif
 #elif PROTOCOL == OEC_mal || PROTOCOL == OEC_mal_het || PROTOCOL == OEC_mal_OffOn
     #if PRE == 1

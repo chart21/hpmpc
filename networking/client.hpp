@@ -57,7 +57,7 @@ void *receiver(void* threadParameters)
     Socket client;
     client.Connect(((receiver_args*) threadParameters)->ip, ((receiver_args*) threadParameters)->port);
     #if PRINT == 1
-    printf("Player %i: Client Connected to Player %i \n",  ((receiver_args*) threadParameters)->player_id, ((receiver_args*) threadParameters)->connected_to);
+    printf("P%i: Receiving Socket connected to Player %i \n",  ((receiver_args*) threadParameters)->player_id, ((receiver_args*) threadParameters)->connected_to);
     #endif
     client_signal_connection_established(((receiver_args*) threadParameters)->player_count);
 
@@ -85,7 +85,7 @@ delete[] rec_buffer;
 #endif
     client.Receive_all( ((char*) ((receiver_args*) threadParameters)->received_elements[rounds]), &elements_to_rec);
     #if PRINT == 1
-    printf("Player %i: Received %li bytes from player %i in round %i out of %i \n", PARTY, elements_to_rec, ((receiver_args*) threadParameters)->connected_to, rounds + 1, ((receiver_args*) threadParameters)->rec_rounds);
+    printf("P%i: Received %li bytes from player %i in round %i out of %i \n", PARTY, elements_to_rec, ((receiver_args*) threadParameters)->connected_to, rounds + 1, ((receiver_args*) threadParameters)->rec_rounds);
 #endif
 }
 //If all sockets received, signal main_thread

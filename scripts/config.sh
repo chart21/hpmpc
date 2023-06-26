@@ -8,7 +8,7 @@ helpFunction()
    echo -e "\t-b base_port: Needs to be the same for all players for successful networking (e.g. 6000)"
    echo -e "\t-d Datatype used for slicing: 1(bool),8(char),64(uint64),128(SSE),256(AVX),512(AVX512)"
    echo -e "\t-p Player ID (0/1/2). Use all3 or all4 for compilling all players"
-   echo -e "\t-f Function Idenftifier (0: Search, 2: AND, ...)"
+   echo -e "\t-f Function Idenftifier (0: run, 2: AND, ...)"
    echo -e "\t-c Pack Bool in Char before sending? (0/1). Only used with -d 1"
    echo -e "\t-s MPC Protocol (1(Sharemind),2(Replicated),3(Astra),4(OEC DUP),5(OEC REP),6(TTP))"
    echo -e "\t-i Initialize circuit seperatly (0) or at runtime (1)?"
@@ -199,13 +199,13 @@ do
             sed -i -e "s/\(LIVE \).*/\10/" config.h
             sed -i -e "s/\(INIT \).*/\11/" config.h
             echo "Compiling INIT executable for P-$i ..."
-            "$comp" tmain.cpp -o ./search-P"$i"-INIT.o $flags
-            ./search-P"$i"-INIT.o
+            "$comp" main.cpp -o ./run-P"$i"-INIT.o $flags
+            ./run-P"$i"-INIT.o
             sed -i -e "s/\(LIVE \).*/\11/" config.h
             sed -i -e "s/\(INIT \).*/\10/" config.h
         fi
             echo "Compiling executable for P-$i ..."
-            "$comp" tmain.cpp -o ./search-P"$i".o $flags
+            "$comp" main.cpp -o ./run-P"$i".o $flags
     fi
 done
 
@@ -217,13 +217,13 @@ then
             sed -i -e "s/\(LIVE \).*/\10/" config.h
             sed -i -e "s/\(INIT \).*/\11/" config.h
             echo "Compiling INIT executable for P-3 ..."
-            "$comp" tmain.cpp -o ./search-P3-INIT.o $flags
-            ./search-P"$i"-INIT.o
+            "$comp" main.cpp -o ./run-P3-INIT.o $flags
+            ./run-P"$i"-INIT.o
             sed -i -e "s/\(LIVE \).*/\11/" config.h
             sed -i -e "s/\(INIT \).*/\10/" config.h
         fi
             echo "Compiling executable for P-3 ..."
-            "$comp" tmain.cpp -o ./search-P3.o $flags
+            "$comp" main.cpp -o ./run-P3.o $flags
     fi
 
 echo "Finished compiling"

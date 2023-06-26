@@ -12,7 +12,6 @@
 #include "arch/DATATYPE.h"
 #include "protocols/init_protocol_base.hpp"
 #include "protocols/live_protocol_base.hpp"
-/* #include "circuits/searchBitSlice.c" */
 
 #if FUNCTION_IDENTIFIER == 0
 #include "programs/search_init.hpp"
@@ -31,6 +30,7 @@
 
 #include "utils/randomizer.h"
 #include "utils/timing.hpp"
+#include "utils/print.hpp"
 #include "networking/client.hpp"
 #include "networking/server.hpp"
 
@@ -149,7 +149,7 @@ void init_circuit(std::string ips[])
 /* clock_t time_init_start = clock (); */
 /* std::chrono::high_resolution_clock::time_point t_init = std::chrono::high_resolution_clock::now(); */
 #if PRINT == 1
-std::cout << "Initialzing circuit ..." << "\n";
+print("Initializing circuit ...\n");
 #endif
 /* //replace with vector soon !! */
 sockets_received.push_back(0);
@@ -192,10 +192,6 @@ for(int t=0;t<(num_players-1);t++) { // ???
     finalize(ips);
 #endif
 
-/* clock_t time_init_finished = clock (); */
-/* std::chrono::high_resolution_clock::time_point t_init_end = std::chrono::high_resolution_clock::now(); */
-/* printf("creating receiving servers\n"); */
-/* printf("Time measured to initialize program: %fs \n", double((time_init_finished - time_init_start)) / CLOCKS_PER_SEC); */
 
 }
 
@@ -210,7 +206,7 @@ int ret_pre;
     for(int t=0;t<(num_players-1);t++) {
         ret_pre = pthread_create(&receiving_threads_pre[t], NULL, receiver, &receiving_args_pre[t]);
         if (ret_pre){
-            printf("ERROR; return code from pthread_create() is %d\n", ret_pre);
+            print("ERROR; return code from pthread_create() is %d\n", ret_pre);
             exit(-1);
             }
     }
@@ -219,7 +215,7 @@ int ret_pre;
     for(int t=0;t<(num_players-1);t++) {
         ret_pre = pthread_create(&sending_Threads_pre[t], NULL, sender, &sending_args_pre[t]);
         if (ret_pre){
-            printf("ERROR; return code from pthread_create() is %d\n", ret_pre);
+            print("ERROR; return code from pthread_create() is %d\n", ret_pre);
             exit(-1);
             }
     }
@@ -236,11 +232,11 @@ int ret_pre;
     num_successful_connections = -1; 
     pthread_cond_broadcast(&cond_start_signal); //signal all threads to start receiving
     pthread_mutex_unlock(&mtx_connection_established);
-    printf("All parties connected sucessfully, starting protocol and timer! \n");
+    print("All parties connected sucessfully, starting protocol and timer! \n");
 
 
 #if PRINT == 1
-std::cout << "Preprocessing phase ..." << "\n";
+print("Preprocessing phase ...\n");
 #endif
 clock_t time_pre_function_start = clock ();
 clock_gettime(CLOCK_REALTIME, &p1);
@@ -291,12 +287,11 @@ std::chrono::high_resolution_clock::time_point p =
     double accum_pre = ( p2.tv_sec - p1.tv_sec )
     + (double)( p2.tv_nsec - p1.tv_nsec ) / (double) 1000000000L;
     clock_t time_pre_function_finished = clock ();
-    /* printf("Time measured to read and receive inputs: %fs \n", double((time_data_received - time_application_start)) / CLOCKS_PER_SEC); */
    
 
-    printf("Time measured to perform preprocessing clock: %fs \n", double((time_pre_function_finished - time_pre_function_start)) / CLOCKS_PER_SEC);
-    printf("Time measured to perform preprocessing getTime: %fs \n", accum_pre);
-    printf("Time measured to perform preprocessing chrono: %fs \n", time_pre / 1000000);
+    print("Time measured to perform preprocessing clock: %fs \n", double((time_pre_function_finished - time_pre_function_start)) / CLOCKS_PER_SEC);
+    print("Time measured to perform preprocessing getTime: %fs \n", accum_pre);
+    print("Time measured to perform preprocessing chrono: %fs \n", time_pre / 1000000);
 
 #if LIVE == 1
     // reset all variables
@@ -336,20 +331,19 @@ int ret;
     for(int t=0;t<(num_players-1);t++) {
         ret = pthread_create(&receiving_threads[t], NULL, receiver, &receiving_args[t]);
         if (ret){
-            printf("ERROR; return code from pthread_create() is %d\n", ret);
+            print("ERROR; return code from pthread_create() is %d\n", ret);
             exit(-1);
             }
     }
 
     /// Creating sending threads
 
-    /* printf("creating receiving servers\n"); */
 
 
     for(int t=0;t<(num_players-1);t++) {
         ret = pthread_create(&sending_Threads[t], NULL, sender, &sending_args[t]);
         if (ret){
-            printf("ERROR; return code from pthread_create() is %d\n", ret);
+            print("ERROR; return code from pthread_create() is %d\n", ret);
             exit(-1);
             }
     }
@@ -370,7 +364,7 @@ int ret;
     pthread_cond_broadcast(&cond_start_signal); //signal all threads to start receiving
     pthread_mutex_unlock(&mtx_connection_established);
     /* printf("m: unlocked conn \n"); */
-    printf("All parties connected sucessfully, starting protocol and timer! \n");
+    print("All parties connected sucessfully, starting protocol and timer! \n");
     clock_gettime(CLOCK_REALTIME, &l1);
     /* clock_gettime(CLOCK_REALTIME, &i3); */
 
@@ -419,11 +413,11 @@ int ret;
     + (double)( p2.tv_nsec - p1.tv_nsec ) / (double) 1000000000L;
     init_time = init_time - accum_pre;
     #endif
-    printf("Time measured to initialize program: %fs \n", init_time);
+    print("Time measured to initialize program: %fs \n", init_time);
     /* printf("Time measured to read and receive inputs: %fs \n", double((time_data_received - time_application_start)) / CLOCKS_PER_SEC); */
-    printf("Time measured to perform computation clock: %fs \n", double((time_function_finished - time_function_start)) / CLOCKS_PER_SEC);
-    printf("Time measured to perform computation getTime: %fs \n", accum);
-    printf("Time measured to perform computation chrono: %fs \n", time / 1000000);
+    print("Time measured to perform computation clock: %fs \n", double((time_function_finished - time_function_start)) / CLOCKS_PER_SEC);
+    print("Time measured to perform computation getTime: %fs \n", accum);
+    print("Time measured to perform computation chrono: %fs \n", time / 1000000);
     // Join threads to ensure closing of sockets
 
 }
@@ -496,10 +490,10 @@ init_circuit(ips);
 
 #if PRE == 1 && LIVE == 0
 double dummy_time = 0.00;
-    printf("Time measured to initialize program: %fs \n", dummy_time);
-    printf("Time measured to perform computation clock: %fs \n", dummy_time);
-    printf("Time measured to perform computation getTime: %fs \n", dummy_time);
-    printf("Time measured to perform computation chrono: %fs \n", dummy_time);
+    print("Time measured to initialize program: %fs \n", dummy_time);
+    print("Time measured to perform computation clock: %fs \n", dummy_time);
+    print("Time measured to perform computation getTime: %fs \n", dummy_time);
+    print("Time measured to perform computation chrono: %fs \n", dummy_time);
 #endif
 
 #if LIVE == 1

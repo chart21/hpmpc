@@ -20,38 +20,38 @@ done
 
 
 if [ "$PARTY" == "all" ]; then
-    ./search-P0-0-0.o &
-    ./search-P0-1-1.o &
-    ./search-P0-2-0.o &
-    ./search-P0-0-1.o &
-    ./search-P0-1-0.o &
-    ./search-P0-2-1.o &
-    ./search-P1-0-0.o &
-    ./search-P1-1-1.o &
-    ./search-P1-2-0.o &
-    ./search-P1-0-1.o &
-    ./search-P1-1-0.o &
-    ./search-P1-2-1.o &
-    ./search-P2-0-0.o &
-    ./search-P2-1-1.o &
-    ./search-P2-2-0.o &
-    ./search-P2-0-1.o &
-    ./search-P2-1-0.o &
-    ./search-P2-2-1.o &
+    ./run-P0-0-0.o &
+    ./run-P0-1-1.o &
+    ./run-P0-2-0.o &
+    ./run-P0-0-1.o &
+    ./run-P0-1-0.o &
+    ./run-P0-2-1.o &
+    ./run-P1-0-0.o &
+    ./run-P1-1-1.o &
+    ./run-P1-2-0.o &
+    ./run-P1-0-1.o &
+    ./run-P1-1-0.o &
+    ./run-P1-2-1.o &
+    ./run-P2-0-0.o &
+    ./run-P2-1-1.o &
+    ./run-P2-2-0.o &
+    ./run-P2-0-1.o &
+    ./run-P2-1-0.o &
+    ./run-P2-2-1.o &
 elif [ "$PARTY" == "0" ] || [ "$PARTY" == "2" ]; then
-    ./search-P0-"$PARTY"-0.o "$IP1" "$IP2" &
-    ./search-P0-"$PARTY"-1.o "$IP2" "$IP1" &
-    ./search-P1-"$PARTY"-0.o "$IP2" "$IP1" &
-    ./search-P1-"$PARTY"-1.o "$IP1" "$IP2" &
-    ./search-P2-"$PARTY"-0.o "$IP1" "$IP2" &
-    ./search-P2-"$PARTY"-1.o "$IP2" "$IP1" &
+    ./run-P0-"$PARTY"-0.o "$IP1" "$IP2" &
+    ./run-P0-"$PARTY"-1.o "$IP2" "$IP1" &
+    ./run-P1-"$PARTY"-0.o "$IP2" "$IP1" &
+    ./run-P1-"$PARTY"-1.o "$IP1" "$IP2" &
+    ./run-P2-"$PARTY"-0.o "$IP1" "$IP2" &
+    ./run-P2-"$PARTY"-1.o "$IP2" "$IP1" &
 elif [ "$PARTY" == "1" ]; then
-    ./search-P0-"$PARTY"-0.o "$IP2" "$IP1" &
-    ./search-P0-"$PARTY"-1.o "$IP1" "$IP2" &
-    ./search-P1-"$PARTY"-0.o "$IP1" "$IP2" &
-    ./search-P1-"$PARTY"-1.o "$IP2" "$IP1" &
-    ./search-P2-"$PARTY"-0.o "$IP2" "$IP1" &
-    ./search-P2-"$PARTY"-1.o "$IP1" "$IP2" &
+    ./run-P0-"$PARTY"-0.o "$IP2" "$IP1" &
+    ./run-P0-"$PARTY"-1.o "$IP1" "$IP2" &
+    ./run-P1-"$PARTY"-0.o "$IP1" "$IP2" &
+    ./run-P1-"$PARTY"-1.o "$IP2" "$IP1" &
+    ./run-P2-"$PARTY"-0.o "$IP2" "$IP1" &
+    ./run-P2-"$PARTY"-1.o "$IP1" "$IP2" &
 fi
 
 FAIL=0

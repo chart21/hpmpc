@@ -68,103 +68,103 @@ then
     echo "Compiling executables for P0 ..."
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"6000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--1-2-3-4.o $flags
+    "$comp" main.cpp -o ./run-P1--1-2-3-4.o $flags
     
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"7000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--1-3-2-4.o $flags
+    "$comp" main.cpp -o ./run-P1--1-3-2-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"8000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--2-1-3-4.o $flags
+    "$comp" main.cpp -o ./run-P1--2-1-3-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"9000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--2-3-1-4.o $flags
+    "$comp" main.cpp -o ./run-P1--2-3-1-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"10000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--3-1-2-4.o $flags
+    "$comp" main.cpp -o ./run-P1--3-1-2-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"11000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--3-2-1-4.o $flags
+    "$comp" main.cpp -o ./run-P1--3-2-1-4.o $flags
 
     
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"61000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--1-2-4-3.o $flags
+    "$comp" main.cpp -o ./run-P1--1-2-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"64000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--1-4-2-3.o $flags
+    "$comp" main.cpp -o ./run-P1--1-4-2-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"62000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--2-1-4-3.o $flags
+    "$comp" main.cpp -o ./run-P1--2-1-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"15000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--2-4-1-3.o $flags
+    "$comp" main.cpp -o ./run-P1--2-4-1-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"63000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--4-1-2-3.o $flags
+    "$comp" main.cpp -o ./run-P1--4-1-2-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"65000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--4-2-1-3.o $flags
+    "$comp" main.cpp -o ./run-P1--4-2-1-3.o $flags
 
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"18000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--1-3-4-2.o $flags
+    "$comp" main.cpp -o ./run-P1--1-3-4-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"19000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--1-4-3-2.o $flags
+    "$comp" main.cpp -o ./run-P1--1-4-3-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"20000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--3-1-4-2.o $flags
+    "$comp" main.cpp -o ./run-P1--3-1-4-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"21000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--3-4-1-2.o $flags
+    "$comp" main.cpp -o ./run-P1--3-4-1-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"22000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--4-1-3-2.o $flags
+    "$comp" main.cpp -o ./run-P1--4-1-3-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"23000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--4-3-1-2.o $flags
+    "$comp" main.cpp -o ./run-P1--4-3-1-2.o $flags
 
 
         sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"24000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--2-3-4-1.o $flags
+    "$comp" main.cpp -o ./run-P1--2-3-4-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"25000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--2-4-3-1.o $flags
+    "$comp" main.cpp -o ./run-P1--2-4-3-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"26000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--3-2-4-1.o $flags
+    "$comp" main.cpp -o ./run-P1--3-2-4-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"27000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--3-4-2-1.o $flags
+    "$comp" main.cpp -o ./run-P1--3-4-2-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"28000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--4-2-3-1.o $flags
+    "$comp" main.cpp -o ./run-P1--4-2-3-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"29000"/" config.h
-    "$comp" tmain.cpp -o ./search-P1--4-3-2-1.o $flags
+    "$comp" main.cpp -o ./run-P1--4-3-2-1.o $flags
 
 fi
 
@@ -174,104 +174,104 @@ then
     echo "Compiling executables for P1 ..."
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"6000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--1-2-3-4.o $flags
+    "$comp" main.cpp -o ./run-P2--1-2-3-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"7000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--1-3-2-4.o $flags
+    "$comp" main.cpp -o ./run-P2--1-3-2-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"8000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--2-1-3-4.o $flags
+    "$comp" main.cpp -o ./run-P2--2-1-3-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"9000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--2-3-1-4.o $flags
+    "$comp" main.cpp -o ./run-P2--2-3-1-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"10000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--3-1-2-4.o $flags
+    "$comp" main.cpp -o ./run-P2--3-1-2-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"11000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--3-2-1-4.o $flags
+    "$comp" main.cpp -o ./run-P2--3-2-1-4.o $flags
 
 
     
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"61000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--1-2-4-3.o $flags
+    "$comp" main.cpp -o ./run-P2--1-2-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"64000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--1-4-2-3.o $flags
+    "$comp" main.cpp -o ./run-P2--1-4-2-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"62000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--2-1-4-3.o $flags
+    "$comp" main.cpp -o ./run-P2--2-1-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"15000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--2-4-1-3.o $flags
+    "$comp" main.cpp -o ./run-P2--2-4-1-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"63000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--4-1-2-3.o $flags
+    "$comp" main.cpp -o ./run-P2--4-1-2-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"65000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--4-2-1-3.o $flags
+    "$comp" main.cpp -o ./run-P2--4-2-1-3.o $flags
 
 
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"24000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--2-3-4-1.o $flags
+    "$comp" main.cpp -o ./run-P2--2-3-4-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"25000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--2-4-3-1.o $flags
+    "$comp" main.cpp -o ./run-P2--2-4-3-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"26000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--3-2-4-1.o $flags
+    "$comp" main.cpp -o ./run-P2--3-2-4-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"27000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--3-4-2-1.o $flags
+    "$comp" main.cpp -o ./run-P2--3-4-2-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"28000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--4-2-3-1.o $flags
+    "$comp" main.cpp -o ./run-P2--4-2-3-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"29000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--4-3-2-1.o $flags
+    "$comp" main.cpp -o ./run-P2--4-3-2-1.o $flags
 
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"18000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--1-3-4-2.o $flags
+    "$comp" main.cpp -o ./run-P2--1-3-4-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"19000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--1-4-3-2.o $flags
+    "$comp" main.cpp -o ./run-P2--1-4-3-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"20000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--3-1-4-2.o $flags
+    "$comp" main.cpp -o ./run-P2--3-1-4-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"21000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--3-4-1-2.o $flags
+    "$comp" main.cpp -o ./run-P2--3-4-1-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"22000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--4-1-3-2.o $flags
+    "$comp" main.cpp -o ./run-P2--4-1-3-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"23000"/" config.h
-    "$comp" tmain.cpp -o ./search-P2--4-3-1-2.o $flags
+    "$comp" main.cpp -o ./run-P2--4-3-1-2.o $flags
 
 fi
 
@@ -281,103 +281,103 @@ then
     echo "Compiling executables for P2 ..."
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"6000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--1-2-3-4.o $flags
+    "$comp" main.cpp -o ./run-P3--1-2-3-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"7000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--1-3-2-4.o $flags
+    "$comp" main.cpp -o ./run-P3--1-3-2-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"8000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--2-1-3-4.o $flags
+    "$comp" main.cpp -o ./run-P3--2-1-3-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"9000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--2-3-1-4.o $flags
+    "$comp" main.cpp -o ./run-P3--2-3-1-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"10000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--3-1-2-4.o $flags
+    "$comp" main.cpp -o ./run-P3--3-1-2-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"11000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--3-2-1-4.o $flags
+    "$comp" main.cpp -o ./run-P3--3-2-1-4.o $flags
 
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"18000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--1-3-4-2.o $flags
+    "$comp" main.cpp -o ./run-P3--1-3-4-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"19000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--1-4-3-2.o $flags
+    "$comp" main.cpp -o ./run-P3--1-4-3-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"20000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--3-1-4-2.o $flags
+    "$comp" main.cpp -o ./run-P3--3-1-4-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"21000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--3-4-1-2.o $flags
+    "$comp" main.cpp -o ./run-P3--3-4-1-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"22000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--4-1-3-2.o $flags
+    "$comp" main.cpp -o ./run-P3--4-1-3-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"23000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--4-3-1-2.o $flags
+    "$comp" main.cpp -o ./run-P3--4-3-1-2.o $flags
 
 
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"24000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--2-3-4-1.o $flags
+    "$comp" main.cpp -o ./run-P3--2-3-4-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"25000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--2-4-3-1.o $flags
+    "$comp" main.cpp -o ./run-P3--2-4-3-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"26000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--3-2-4-1.o $flags
+    "$comp" main.cpp -o ./run-P3--3-2-4-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"27000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--3-4-2-1.o $flags
+    "$comp" main.cpp -o ./run-P3--3-4-2-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"28000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--4-2-3-1.o $flags
+    "$comp" main.cpp -o ./run-P3--4-2-3-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"29000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--4-3-2-1.o $flags
+    "$comp" main.cpp -o ./run-P3--4-3-2-1.o $flags
 
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"61000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--1-2-4-3.o $flags
+    "$comp" main.cpp -o ./run-P3--1-2-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"64000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--1-4-2-3.o $flags
+    "$comp" main.cpp -o ./run-P3--1-4-2-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"62000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--2-1-4-3.o $flags
+    "$comp" main.cpp -o ./run-P3--2-1-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"15000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--2-4-1-3.o $flags
+    "$comp" main.cpp -o ./run-P3--2-4-1-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"63000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--4-1-2-3.o $flags
+    "$comp" main.cpp -o ./run-P3--4-1-2-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"65000"/" config.h
-    "$comp" tmain.cpp -o ./search-P3--4-2-1-3.o $flags
+    "$comp" main.cpp -o ./run-P3--4-2-1-3.o $flags
 
 fi
 
@@ -387,104 +387,104 @@ then
     echo "Compiling executables for P3 ..."
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"61000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--1-2-4-3.o $flags
+    "$comp" main.cpp -o ./run-P4--1-2-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"64000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--1-4-2-3.o $flags
+    "$comp" main.cpp -o ./run-P4--1-4-2-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"62000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--2-1-4-3.o $flags
+    "$comp" main.cpp -o ./run-P4--2-1-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"15000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--2-4-1-3.o $flags
+    "$comp" main.cpp -o ./run-P4--2-4-1-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"63000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--4-1-2-3.o $flags
+    "$comp" main.cpp -o ./run-P4--4-1-2-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"65000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--4-2-1-3.o $flags
+    "$comp" main.cpp -o ./run-P4--4-2-1-3.o $flags
 
 
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"18000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--1-3-4-2.o $flags
+    "$comp" main.cpp -o ./run-P4--1-3-4-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"19000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--1-4-3-2.o $flags
+    "$comp" main.cpp -o ./run-P4--1-4-3-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"20000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--3-1-4-2.o $flags
+    "$comp" main.cpp -o ./run-P4--3-1-4-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"21000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--3-4-1-2.o $flags
+    "$comp" main.cpp -o ./run-P4--3-4-1-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"22000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--4-1-3-2.o $flags
+    "$comp" main.cpp -o ./run-P4--4-1-3-2.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"23000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--4-3-1-2.o $flags
+    "$comp" main.cpp -o ./run-P4--4-3-1-2.o $flags
 
 
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"24000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--2-3-4-1.o $flags
+    "$comp" main.cpp -o ./run-P4--2-3-4-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"25000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--2-4-3-1.o $flags
+    "$comp" main.cpp -o ./run-P4--2-4-3-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"26000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--3-2-4-1.o $flags
+    "$comp" main.cpp -o ./run-P4--3-2-4-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"27000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--3-4-2-1.o $flags
+    "$comp" main.cpp -o ./run-P4--3-4-2-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"28000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--4-2-3-1.o $flags
+    "$comp" main.cpp -o ./run-P4--4-2-3-1.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"29000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--4-3-2-1.o $flags
+    "$comp" main.cpp -o ./run-P4--4-3-2-1.o $flags
 
 
         sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"6000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--1-2-3-4.o $flags
+    "$comp" main.cpp -o ./run-P4--1-2-3-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"7000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--1-3-2-4.o $flags
+    "$comp" main.cpp -o ./run-P4--1-3-2-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"8000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--2-1-3-4.o $flags
+    "$comp" main.cpp -o ./run-P4--2-1-3-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"9000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--2-3-1-4.o $flags
+    "$comp" main.cpp -o ./run-P4--2-3-1-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"10000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--3-1-2-4.o $flags
+    "$comp" main.cpp -o ./run-P4--3-1-2-4.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"11000"/" config.h
-    "$comp" tmain.cpp -o ./search-P4--3-2-1-4.o $flags
+    "$comp" main.cpp -o ./run-P4--3-2-1-4.o $flags
 
 fi
 

@@ -267,7 +267,7 @@ void Close_Context() {
             if (SSL_shutdown(ssl_) < 0)
             {
                 
-                std::cout << "SSL_shutdown failed" << std::endl;
+                std::cout <<   "P" << PARTY << ": SSL_shutdown failed" << std::endl;
             }
         }
         SSL_free(ssl_);

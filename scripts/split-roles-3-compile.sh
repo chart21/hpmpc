@@ -1,4 +1,4 @@
-#!/bin/bash
+runbin/bash
 helpFunction()
 {
    echo "Script to compile and run 6 mixed constellations of players in parallel"
@@ -47,13 +47,13 @@ for i in {0..2}
                     sed -i -e "s/\(LIVE \).*/\10/" config.h
                     sed -i -e "s/\(INIT \).*/\11/" config.h
                     echo "Compiling INIT executable for P-"$s"-"$i"-"$z" ..."
-                    "$comp" tmain.cpp -o ./search-P"$s"-"$i"-"$z"-INIT.o $flags
-                    ./search-P"$j"-"$i"-"$z"-INIT.o
+                    "$comp" main.cpp -o ./run-P"$s"-"$i"-"$z"-INIT.o $flags
+                    ./run-P"$j"-"$i"-"$z"-INIT.o
                     sed -i -e "s/\(LIVE \).*/\11/" config.h
                     sed -i -e "s/\(INIT \).*/\10/" config.h
                 fi
                     echo "Compiling executable for P-"$s"-"$i"-"$z" ..."
-                    "$comp" tmain.cpp -o ./search-P"$s"-"$i"-"$z".o $flags
+                    "$comp" main.cpp -o ./run-P"$s"-"$i"-"$z".o $flags
             fi
         done
     done

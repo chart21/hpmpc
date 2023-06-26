@@ -27,13 +27,6 @@ OECL_Share Xor(OECL_Share a, OECL_Share b)
 //prepare AND -> send real value a&b to other P
 void prepare_and(OECL_Share a, OECL_Share b, OECL_Share &c)
 {
-/* DATATYPE rl = getRandomVal(0); */
-/* DATATYPE rr = getRandomVal(0); */
-
-/* DATATYPE rx = getRandomVal(0); */
-/* DATATYPE ry = getRandomVal(1); */
-/* DATATYPE maskP1 = XOR(a.p1,b.p1); */
-/* DATATYPE maskP2 = XOR(a.p2,b.p2); */
 
 }
 
@@ -41,6 +34,15 @@ void complete_and(OECL_Share &c)
 {
 }
 
+#if FUNCTION_IDENTIFIER > 4
+void perpare_mult(OECL_Share a, OECL_Share b, OECL_Share &c)
+{
+}
+
+void complete_mult(OECL_Share &c)
+{
+}
+#endif
 void prepare_reveal_to_all(OECL_Share a)
 {
 }    

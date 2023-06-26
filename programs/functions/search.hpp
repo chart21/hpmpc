@@ -5,7 +5,7 @@
 #include <bitset>
 
 
-#define FUNCTION searchComm__
+#define FUNCTION search
 #define RESULTTYPE DATATYPE
 
 template<typename Pr, typename S>
@@ -82,11 +82,12 @@ P.communicate();
 
 void print_result(DATATYPE* var) 
 {
+    printf("P%i: Result: ", PARTY);
     uint8_t v8val[sizeof(DATATYPE)];
     std::memcpy(v8val, var, sizeof(v8val));
     for (uint i = sizeof(DATATYPE); i > 0; i--)
-        std::cout << std::bitset<sizeof(uint8_t)*8>(v8val[i-1]) << std::endl;
-        //std::cout << v8val[i]<< std::endl;
+        std::cout << std::bitset<sizeof(uint8_t)*8>(v8val[i-1]);
+    printf("\n");
 }
 
 
