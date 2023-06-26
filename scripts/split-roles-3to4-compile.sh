@@ -307,7 +307,7 @@ fi
 # Compile all executables for P3
 if [ "$O_PARTY" = "3" ] || [ "$O_PARTY" = "all" ]
 then
-    echo "Compiling executables for P4 ..."
+    echo "Compiling executables for P3 ..."
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
     sed -i -e "s/\(BASE_PORT \).*/\1"61000"/" config.h
     "$comp" main.cpp -o ./run-P4--1-2-4.o $flags
