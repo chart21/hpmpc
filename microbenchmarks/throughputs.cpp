@@ -161,13 +161,14 @@ for (int i = 0; i < 1000; i++) {
 for (int i = 0; i < 1000; i++) {
     sha256_process_x86(state, message, sizeof(message));
 }
+ finish5 = std::chrono::high_resolution_clock::now();
+std::cout << "SHA256 (hardware module): " << std::chrono::duration_cast<std::chrono::milliseconds>(finish5 - finish4).count() << std::endl;
+std::cout << "SHA256 (hardware module) Throughput: " << 1.024 / ((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish5 - finish4).count() /1000) << "GB/s"<< std::endl;
 #elif ARM == 1
 for (int i = 0; i < 1000; i++) {
     sha256_process_arm(state, message, sizeof(message));
 }
  finish5 = std::chrono::high_resolution_clock::now();
-std::cout << "SHA256 (hardware module): " << std::chrono::duration_cast<std::chrono::milliseconds>(finish5 - finish4).count() << std::endl;
-std::cout << "SHA256 (hardware module) Throughput: " << 1.024 / ((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish5 - finish4).count() /1000) << "GB/s"<< std::endl;
 #endif
 std::cout << "AES_NI: " << std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count() << std::endl;
 std::cout << "AES_NI Throughput: " << (0.128*DATTYPE) / ((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count() / 1000)<< "GBit/s"<< std::endl;
@@ -343,6 +344,8 @@ finish23 = std::chrono::high_resolution_clock::now();
 
 delete[] data;
 delete[] ortho_data;
+
+
 
 std::cout << "Orthogonalize Throughput in Gbps: " << DATTYPE / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish22 - finish21).count() * factor)  / 1000) << std::endl;
 std::cout << "Unorthogonalize Throughput in Gbps: " << DATTYPE / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish23 - finish22).count() * factor)  / 1000) << std::endl;

@@ -4,7 +4,7 @@
 #define PROTOCOL 5
 
 // Party ID (starting from 0)
-#define PARTY 1
+#define PARTY 3
 
 //0: Search 1: XORNOTAND, 2: AND 1 comm round 3: AND 1000 comm rounds  4: Debug 5: MULT32 1 comm round 6: MULT64 1 comm round 7: Debug 9: Mult_32 1000 comm rounds 10: Mult64 1000 comm rounds. Currently, Protocols 9-12 support MULT. MULT64 is supported by DATATYPE 64 and 512. MULT32 is supported for DATATYPE 32 and all DATATYPEs >= 128
 #define FUNCTION_IDENTIFIER 0
@@ -29,7 +29,7 @@
 int base_port = BASE_PORT; // temporary solution
 
 // Use SSL encrypted communication?
-#define USE_SSL 1
+#define USE_SSL 0
 
 // How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered
 #define SEND_BUFFER 0
@@ -40,7 +40,7 @@ int base_port = BASE_PORT; // temporary solution
 // How many messages should be buffered until a combined hash is performed? 0 means all hashes are calculated at the very end of the protocol.
 #define VERIFY_BUFFER 0
 // Print additional info?
-#define PRINT 1
+#define PRINT 0
 
 // Timeout in seconds when connecting to a socket
 #define CONNECTION_TIMEOUT 30 
