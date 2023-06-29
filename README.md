@@ -61,10 +61,10 @@ Changes can be applied either directly in the file or via running ```scripts/con
 ```
 
 The following configuration compiles an executable for P2, 1024 inputs, sliced 256 times in an AVX-2 variable, using Protocol Replicated.
-> ./Scripts/config.sh -p 2 -n 1024 -d 256 -s 2 
+> ./scripts/config.sh -p 2 -n 1024 -d 256 -s 2 
 
 The following configuration uses the previous configuration but compiles an executable for all players. This is useful when running the parties on the same host.
-> ./Scripts/config.sh -p all3
+> ./scripts/config.sh -p all3
 
 The following script compiles six executables for player 2 (all player combinations) to run all executables in parallel.
 > ./scripts/split-roles-3-compile.sh -p 2
