@@ -24,10 +24,6 @@
 // 0 = xorshift, 1 = AES_BS, 2 = VAES/AES-NI. 0 is not secure.
 #define RANDOM_ALGORITHM 2 
 
-// Starting port for required port range of the sockets
-#define BASE_PORT 11000
-int base_port = BASE_PORT; // temporary solution
-
 // Use SSL encrypted communication?
 #define USE_SSL 0
 
@@ -41,6 +37,10 @@ int base_port = BASE_PORT; // temporary solution
 #define VERIFY_BUFFER 0
 // Print additional info?
 #define PRINT 0
+
+// Starting port for required port range of the sockets
+#define BASE_PORT 11000
+int base_port = BASE_PORT; // temporary solution
 
 // Timeout in seconds when connecting to a socket
 #define CONNECTION_TIMEOUT 30 
