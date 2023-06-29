@@ -29,7 +29,7 @@ Most configuration is contained in the file config.h. Here is an overview of the
 - VERIFY_BUFFER: Define how many messages should be buffered until a combined hash is calculated. 
 - PRINT: Print additional info?
 
-Changes can be applied either directly in the file or via running scripts/config.sh
+Changes can be applied either directly in the file or via running ```scripts/config.sh```
 
 ```
   Script to configure and compile executables for a run.
@@ -78,8 +78,8 @@ or when using Split-Roles
 Execute P1 executable.
 > ./run-P1.o IP_P0 IP_P2
 
-Execute all players locally on one host (requires previous config.sh with -p all3 or -p all4):
-> ./Scripts/run_protocol.sh -f search
+Run Split-roles executables.
+> ./Scripts/run_protocol.sh -a IP_0 -b IP_1 -c IP_2 -d IP_3
 
-
+To run executables locally simply omit the ip addresses or set them to 127.0.0.1
 
