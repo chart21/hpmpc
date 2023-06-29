@@ -8,6 +8,7 @@ The only dependency is OpenSSL. Install on your target system, for instance via 
 
 The following command is a quick way to compile the current configuration for 3 players and run all executables locally.
 > ./scripts/config.sh -p all3
+
 > ./scripts/run_loally.sh -p all3
 
 
