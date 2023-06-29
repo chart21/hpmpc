@@ -76,8 +76,8 @@ Execute P0 executable.
 Execute P1 executable.
 > ./run-P1.o IP_P0 IP_P2
 
-Run Split-roles executables for Player 0.
-> ./Scripts/run_protocol.sh -p 0 -a IP_0 -b IP_1 -c IP_2 -d IP_3
+Run Split-Roles (3) executables for Player 0.
+> ./scripts/split-roles-3-execute.sh -p 0 -a IP_0 -b IP_1 -c IP_2 -d IP_3
 
 To run all players locally on one machine, simply omit the IP addresses or set them to 127.0.0.1, and use -p all
-
+> ./scripts/split-roles-3-execute.sh -p all
