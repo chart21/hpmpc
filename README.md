@@ -6,12 +6,12 @@ This project implements multiple MPC protocols in the honest majority setting.
 
 The only dependency is OpenSSL. Install on your target system, for instance via ```apt install libssl-dev```
 You can select a protocol and function in the file `config.h`.
-The following commands are a quick way to compile the current configuration for 3 players and run all executables locally.
+The following commands are a quick way to compile the current configuration for a 3-PC protocol and run all executables locally.
 > ./scripts/config.sh -p all3
 
 > ./scripts/run_loally.sh -n 3
 
-For a 4-party protocol you can run.
+For a 4-PC protocol you can run.
 
 > ./scripts/config.sh -p all4
 
