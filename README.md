@@ -5,7 +5,7 @@ This project implements multiple MPC protocols in the honest majority setting.
 ## Getting Started
 
 The only dependency is OpenSSL. Install on your target system, for instance via ```apt install libssl-dev```
-You can select a protocol and function in the file config.h.
+You can select a protocol and function in the file `config.h`.
 The following commands are a quick way to compile the current configuration for 3 players and run all executables locally.
 > ./scripts/config.sh -p all3
 
@@ -19,7 +19,7 @@ For a 4-party protocol you can run.
 
 ## Configuration and Compilation
 
-Most configuration is contained in the file config.h. Here is an overview of the most important settings.
+Most configuration is contained in the file `config.h`. Here is an overview of the most important settings.
 
 - PROTOCOL: Select the protocol to be used. Options are: 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC).
 - PARTY: Define the party ID for the current node, starting from 0.
@@ -34,7 +34,7 @@ Most configuration is contained in the file config.h. Here is an overview of the
 - VERIFY_BUFFER: Define how many messages should be buffered until a combined hash is calculated. 
 - PRINT: Print additional info?
 
-Changes can be applied either directly in the file or via running ```scripts/config.sh```. The script does not assume any default options but always uses the current configuration stored in config.h as a basis. In a distributed setup, ensure all configurations are the same (except PARTY).
+Changes can be applied either directly in the file or via running ```scripts/config.sh```. The script does not assume any default options but always uses the current configuration stored in `config.h` as a basis. In a distributed setup, ensure all configurations are the same (except PARTY).
 
 ```
   Script to configure and compile executables for a run.
@@ -106,8 +106,8 @@ To run all players locally on one machine, omit the IP addresses or set them to 
 
 
 ### Measuring Throughput
+`
+To measure the throughput of a specific function such as 64-bit mult, AND, or secure search, first, specify the function in `config.h`. Each process prints a time for running the computation and initialization. The initialization time measures setup costs, such as establishing a connection. When choosing multiple processes or Split-Roles, we recommend timing the whole script or executable with libraries such as /bin/time. To get accurate measurements with this approach, all nodes should connect simultaneously.
 
-To measure the throughput of a specific function such as 64-bit mult, AND, or secure search, first, specify the function in config.h. Each process prints a time for running the computation and initialization. The initialization time measures setup costs, such as establishing a connection. When choosing multiple processes or Split-Roles, we recommend timing the whole script or executable with libraries such as /bin/time. To get accurate measurements with this approach, all nodes should connect simultaneously.
-
-The throughput in AND gates per second for instance, can then be calculated as (NUM_INPUTS*DATTYPE*PROCESS_NUM*Split_Roles_Multiplier)/<Total time measured>.
+The throughput in AND gates per second for instance, can then be calculated as `(NUM_INPUTS*DATTYPE*PROCESS_NUM*Split_Roles_Multiplier)/<Total time measured>`.
 
