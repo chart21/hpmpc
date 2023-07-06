@@ -65,7 +65,7 @@ Changes can be applied either directly in the file or via running ```scripts/con
    -z RECV_BUFFER: How many receiving messages should be buffered until the main thread is signaled that data is ready? 0 means that all data of a communication round needs to be ready before the main thread is signaled.
 ```
 
-The following configuration compiles an executable for P2, 1024 inputs, sliced 256 times in AVX-2 variables, using Protocol Replicated. All other configuarations are fetched from config.h
+The following configuration compiles an executable for P2, 1024 inputs, sliced 256 times in AVX-2 variables, using Protocol Replicated. All other configuarations are fetched from `config.h`.
 > ./scripts/config.sh -p 2 -n 1024 -d 256 -s 2 
 
 The following configuration uses the previous configuration but compiles an executable for all players. This is useful when running the parties on the same host.
@@ -106,7 +106,7 @@ To run all players locally on one machine, omit the IP addresses or set them to 
 
 
 ### Measuring Throughput
-`
+
 To measure the throughput of a specific function such as 64-bit mult, AND, or secure search, first, specify the function in `config.h`. Each process prints a time for running the computation and initialization. The initialization time measures setup costs, such as establishing a connection. When choosing multiple processes or Split-Roles, we recommend timing the whole script or executable with libraries such as /bin/time. To get accurate measurements with this approach, all nodes should connect simultaneously.
 
 The throughput in AND gates per second for instance, can then be calculated as `(NUM_INPUTS*DATTYPE*PROCESS_NUM*Split_Roles_Multiplier)/<Total time measured>`.
