@@ -70,9 +70,6 @@ void prepare_reveal_to_all(DATATYPE)
 #else
     send_to_(P0);
 #endif
-    receive_from_(P0);
-    store_compare_view_init(P123);
-    store_compare_view_init(P0123);
 #endif
 }    
 
@@ -84,6 +81,7 @@ receive_from_(P0);
 #if PROTOCOL == 8
 store_compare_view_init(P1);
 #else
+store_compare_view_init(P123);
 store_compare_view_init(P0123);
 #endif
 return a;

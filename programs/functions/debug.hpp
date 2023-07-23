@@ -4,23 +4,6 @@
 
 #define FUNCTION debug
 #define RESULTTYPE DATATYPE[num_players][BITLENGTH]
-/* void receive_from_SRNG(DATATYPE a[], int id, int l) */
-/* { */
-/* if(id == player_id) */
-/* { */
-/* for (int i = 0; i < l; i++) { */
-/*   a[i] = player_input[share_buffer[id]]; */
-/*   a[i] = P_share_SRNG(a[i]); */  
-/*   share_buffer[id]+=1; */
-/* } */
-/* } */
-/* else{ */
-/* int offset = {id > player_id ? 1 : 0}; */
-/* for (int i = 0; i < l; i++) { */
-/*     a[i] = getRandomVal(id - offset); */
-/* } */
-/* } */
-/* } */
 
 void compare(DATATYPE var[num_players][BITLENGTH]) 
 {
@@ -77,22 +60,23 @@ S (*inputs)[BITLENGTH] = (S ((*)[BITLENGTH])) P.alloc_Share(((int) num_players)*
 /*     /1*   element[j] = P.share(element[j]); *1/ */
 /* /1* P_share(element,BITLENGTH); *1/ */
 /* } */
-P.prepare_receive_from(inputs[0] ,P0,BITLENGTH);
-P.prepare_receive_from(inputs[1] ,P1,BITLENGTH);
-P.prepare_receive_from(inputs[2] ,P2,BITLENGTH);
+P.prepare_receive_from(inputs[0] ,P0,BITLENGTH, OP_ADD, OP_SUB);
+P.prepare_receive_from(inputs[1] ,P1,BITLENGTH, OP_ADD, OP_SUB);
+P.prepare_receive_from(inputs[2] ,P2,BITLENGTH, OP_ADD, OP_SUB);
 #if num_players > 3
-P.prepare_receive_from(inputs[3] ,P3,BITLENGTH);
+P.prepare_receive_from(inputs[3] ,P3,BITLENGTH, OP_ADD, OP_SUB);
 #endif
 
 P.communicate();
 
-// change to receive from
-P.complete_receive_from(inputs[0] ,P0,BITLENGTH);
-P.complete_receive_from(inputs[1] ,P1,BITLENGTH);
-P.complete_receive_from(inputs[2] ,P2,BITLENGTH);
+
+P.complete_receive_from(inputs[0] ,P0,BITLENGTH, OP_ADD, OP_SUB);
+P.complete_receive_from(inputs[1] ,P1,BITLENGTH, OP_ADD, OP_SUB);
+P.complete_receive_from(inputs[2] ,P2,BITLENGTH, OP_ADD, OP_SUB);
 #if num_players > 3
-P.complete_receive_from(inputs[3] ,P3,BITLENGTH);
+P.complete_receive_from(inputs[3] ,P3,BITLENGTH, OP_ADD, OP_SUB);
 #endif
+
 P.communicate();
 
 for(int j = 0; j < num_players; j++)
@@ -110,9 +94,10 @@ for(int j = 0; j < num_players; j++)
 
 for (int i = 0; i < BITLENGTH; i++) {
 
-    result[j][i] = P.complete_Reveal(inputs[j][i]);
+    result[j][i] = P.complete_Reveal(inputs[j][i], OP_ADD, OP_SUB);
 }
 }
+
 P.communicate();
 
 
@@ -125,12 +110,7 @@ for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
-#if FUNCTION_IDENTIFIER == 7
-   inputs[j][i] = P.Add(inputs[j][i],inputs[j][i]);
-    P.prepare_mult(inputs[j][i],inputs[j][i],inputs[j][i]);
-#else
-    P.prepare_and(inputs[j][i],inputs[j][i],inputs[j][i]);
-#endif
+    P.prepare_mult(inputs[j][i],inputs[j][i],inputs[j][i],OP_ADD, OP_SUB, OP_MULT);
 }
 }
 P.communicate();
@@ -138,11 +118,7 @@ for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
-#if FUNCTION_IDENTIFIER == 7
-P.complete_mult(inputs[j][i]);
-#else
-    P.complete_and(inputs[j][i]);
-#endif
+    P.complete_and(inputs[j][i], OP_ADD, OP_SUB);
 }
 }
 
@@ -161,7 +137,7 @@ for(int j = 0; j < num_players; j++)
 
 for (int i = 0; i < BITLENGTH; i++) {
 
-    result[j][i] = P.complete_Reveal(inputs[j][i]);
+    result[j][i] = P.complete_Reveal(inputs[j][i], OP_ADD, OP_SUB);
 }
 }
 
@@ -174,7 +150,7 @@ for(int j = 0; j < num_players; j++)
 {
 for (int i = 0; i < BITLENGTH; i++) {
 
-    inputs[j][i] = P.Xor(inputs[j][i],inputs[j][i]);
+    inputs[j][i] = P.Add(inputs[j][i],inputs[j][i],OP_ADD);
     if(i != j)
         inputs[j][i] = P.Not(inputs[j][i]);
 }
@@ -195,7 +171,7 @@ for(int j = 0; j < num_players; j++)
 
 for (int i = 0; i < BITLENGTH; i++) {
 
-    result[j][i] = P.complete_Reveal(inputs[j][i]);
+    result[j][i] = P.complete_Reveal(inputs[j][i], OP_ADD, OP_SUB);
 }
 }
 

@@ -18,21 +18,21 @@ S* element = P.alloc_Share(BITLENGTH);
 
 
 
-P.prepare_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH);
-P.prepare_receive_from(element,P1,BITLENGTH);
+P.prepare_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB);
+P.prepare_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB);
 
 
 P.communicate();
 
 
 
-P.complete_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH);
-P.complete_receive_from(element,P1,BITLENGTH);
+P.complete_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB);
+P.complete_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB);
 
 
 for (int i = 0; i < NUM_INPUTS; i++) {
     for (int j = 0; j < BITLENGTH; j++) {
-      dataset[i][j] = P.Not(P.Xor(dataset[i][j], element[j]));
+      dataset[i][j] = P.Not(P.Add(dataset[i][j], element[j], FUNC_XOR));
     }
   }
   
@@ -41,7 +41,7 @@ int c = 1;
     for (int i = 0; i < k; i++) {
         int j = i * 2;
       for (int s = 0; s < NUM_INPUTS; s++) {
-          P.prepare_and(dataset[s][j],dataset[s][j +1], dataset[s][i]);
+          P.prepare_mult(dataset[s][j],dataset[s][j +1], dataset[s][i], FUNC_XOR, FUNC_XOR, FUNC_AND);
       }
     }
 
@@ -50,7 +50,7 @@ int c = 1;
     for (int i = 0; i < k; i++) {
         int j = i * 2;
       for (int s = 0; s < NUM_INPUTS; s++) {
-            P.complete_and(dataset[s][i]);
+            P.complete_mult(dataset[s][i], FUNC_XOR, FUNC_XOR);
       }
       
 
@@ -67,13 +67,13 @@ int c = 1;
   S sfound = dataset[0][0];
 
   for (int i = 1; i < NUM_INPUTS; i++) {
-    sfound = P.Xor(dataset[i][0],sfound); 
+    sfound = P.Add(dataset[i][0],sfound, FUNC_XOR);
 
   }
 
 P.prepare_reveal_to_all(sfound);
 P.communicate();
-*found = P.complete_Reveal(sfound);
+*found = P.complete_Reveal(sfound,FUNC_XOR,FUNC_XOR);
 P.communicate();
 
 }
