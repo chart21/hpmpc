@@ -16,33 +16,34 @@ Dealer_Share Not(Dealer_Share a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-Dealer_Share Xor(Dealer_Share a, Dealer_Share b)
+
+template <typename func_add>
+Dealer_Share Add(Dealer_Share a, Dealer_Share b, func_add ADD)
 {
-   return a; 
+    return a;
 }
 
-
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(Dealer_Share a, Dealer_Share b, Dealer_Share &c)
-{
-}
-
-void complete_and(Dealer_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(Dealer_Share a, Dealer_Share b, Dealer_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 }
 
+template <typename func_add, typename func_sub>
+void complete_mult(Dealer_Share &c, func_add ADD, func_sub SUB)
+{
+}
 
-void prepare_reveal_to_all(Dealer_Share a)
+template <typename func_add, typename func_sub>
+void prepare_reveal_to_all(Dealer_Share a, func_add ADD, func_sub SUB)
 {
 }    
 
 
-
-DATATYPE complete_Reveal(Dealer_Share a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(Dealer_Share a, func_add ADD, func_sub SUB)
 {
-DATATYPE result = receive_from_live(P0);
+DATATYPE result = SUB(receive_from_live(P0),a.r0);
+store_compare_view(P123, a.r1);
 store_compare_view(P0123, result);
 return result;
 }
@@ -54,12 +55,13 @@ Dealer_Share* alloc_Share(int l)
 }
 
 
-
-void prepare_receive_from(Dealer_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(Dealer_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 }
 
-void complete_receive_from(Dealer_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(Dealer_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 }
 

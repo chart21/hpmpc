@@ -44,6 +44,18 @@
 #define ADD_SIGNED(a,b,c) a + b
 #define SUB_SIGNED(a,b,c) a - b
 
+#define FUNC_AND  &&
+#define FUNC_OR   ||
+#define FUNC_XOR  ^
+#define FUNC_NOT  ~
+#define FUNC_ADD32 +
+#define FUNC_SUB32 -
+#define FUNC_MUL32 *
+#define FUNC_ADD64 +
+#define FUNC_SUB64 -
+#define FUNC_MUL64 *
+
+
 #define ROTATE_MASK(x) (x == 64 ? -1ULL : x == 32 ? -1 : x == 16 ? 0xFFFF : \
     ({ fprintf(stderr,"Not implemented rotate [uint%d_t]. Exiting.\n",x); \
       exit(1); 1; }))

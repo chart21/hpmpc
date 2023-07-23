@@ -40,6 +40,17 @@
 #define ADD_SIGNED(a,b,c) XOR(a,b)
 #define SUB_SIGNED(a,b,c) XOR(a,b)
 
+#define FUNC_AND  &&
+#define FUNC_OR   ||
+#define FUNC_XOR  ^
+#define FUNC_NOT  !
+#define FUNC_ADD32 ^
+#define FUNC_SUB32 ^
+#define FUNC_MUL32 &&
+#define FUNC_ADD64 ^
+#define FUNC_SUB64 ^
+#define FUNC_MUL64 &&
+
 #ifndef DATATYPE
 #define DATATYPE bool 
 #endif

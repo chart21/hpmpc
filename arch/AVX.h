@@ -42,6 +42,19 @@
 #define ANDN(a,b) _mm256_andnot_si256(a,b)
 #define NOT(a)    _mm256_xor_si256(ONES,a)
 
+#define FUNC_AND  _mm256_and_si256
+#define FUNC_OR   _mm256_or_si256
+#define FUNC_XOR  _mm256_xor_si256
+#define FUNC_ANDN _mm256_andnot_si256
+#define FUNC_NOT  _mm256_xor_si256(ONES,a)
+#define FUNC_ADD32 _mm256_add_epi32
+#define FUNC_SUB32 _mm256_sub_epi32
+#define FUNC_MUL32 _mm256_mullo_epi32
+#define FUNC_ADD64 _mm256_add_epi64
+#define FUNC_SUB64 _mm256_sub_epi64
+#define FUNC_MUL64 _mm256_mullo_epi64
+
+
 #define MUL_SIGNED(a,b,c) _mm256_mullo_epi##c(a,b)
 #define ADD_SIGNED(a,b,c) _mm256_add_epi##c(a,b)
 #define SUB_SIGNED(a,b,c) _mm256_sub_epi##c(a,b)

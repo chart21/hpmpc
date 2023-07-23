@@ -49,6 +49,16 @@
 #define MUL_SIGNED(a,b,c) _mm512_mullo_epi##c(a,b)
 #define MUL_SINGED_64(a,b) _mm512_mullox_epi64(a,b)
 
+#define FUNC_AND __mm512_and_si512
+#define FUNC_OR  __mm512_or_si512
+#define FUNC_XOR __mm512_xor_si512
+#define FUNC_ADD32 __mm512_add_epi32
+#define FUNC_ADD64 __mm512_add_epi64
+#define FUNC_SUB32 __mm512_sub_epi32
+#define FUNC_SUB64 __mm512_sub_epi64
+#define FUNC_MUL32 __mm512_mullo_epi32
+#define FUNC_MUL64 __mm512_mullo_epi64
+
 
 #define L_SHIFT(a,b,c)  _mm512_slli_epi##c(a,b)
 #define R_SHIFT(a,b,c)  _mm512_srli_epi##c(a,b)

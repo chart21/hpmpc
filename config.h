@@ -1,13 +1,13 @@
 #pragma once
 
 // 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC)
-#define PROTOCOL 5
+#define PROTOCOL 10
 
 // Party ID (starting from 0)
 #define PARTY 3
 
 //0: Search 1: XORNOTAND, 2: AND 1 comm round 3: AND 1000 comm rounds  4: Debug 5: MULT32 1 comm round 6: MULT64 1 comm round 7: Debug 9: Mult_32 1000 comm rounds 10: Mult64 1000 comm rounds. Currently, Protocols 9-12 support MULT. MULT64 is supported by DATATYPE 64 and 512. MULT32 is supported for DATATYPE 32 and all DATATYPEs >= 128
-#define FUNCTION_IDENTIFIER 0
+#define FUNCTION_IDENTIFIER 2
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
 #define DATTYPE 128
@@ -84,28 +84,17 @@ int base_port = BASE_PORT; // temporary solution
 #define MAL 1
 #endif
 
-#if FUNCTION_IDENTIFIER == 5 || FUNCTION_IDENTIFIER == 7 || FUNCTION_IDENTIFIER == 9
-    #define MULT(a,b) MUL_SIGNED(a,b,32) 
-    #define ADD(a,b) ADD_SIGNED(a,b,32)
-    #define SUB(a,b) SUB_SIGNED(a,b,32)
-    
+#if FUNCTION_IDENTIFIER == 2
+#define OP_ADD FUNC_XOR
+#define OP_SUB FUNC_XOR
+#define OP_MULT FUNC_AND
+#elif FUNCTION_IDENTIFIER == 5 || FUNCTION_IDENTIFIER == 7 || FUNCTION_IDENTIFIER == 9
+#define OP_ADD FUNC_ADD32
+#define OP_SUB FUNC_SUB32
+#define OP_MULT FUNC_MULT32
 #elif FUNCTION_IDENTIFIER == 6 || FUNCTION_IDENTIFIER == 10
-    #define MULT(a,b) MUL_SIGNED(a,b,64)
-    #define ADD(a,b) ADD_SIGNED(a,b,64)
-    #define SUB(a,b) SUB_SIGNED(a,b,64)
-#elif FUNCTION_IDENTIFIER == 8
-    #if DATTYPE == 128
-        #define MULT32 _mm_mullo_epi32
-        #define ADD32 _mm_add_epi32
-        #define SUB32 _mm_sub_epi32
-    #elif DATTYPE == 256
-        #define MULT32 _mm256_mullo_epi32
-        #define ADD32 _mm256_add_epi32
-        #define SUB32 _mm256_sub_epi32
-    #elif DATTYPE == 512
-        #define MULT32 _mm512_mullo_epi32
-        #define ADD32 _mm512_add_epi32
-        #define SUB32 _mm512_sub_epi32
-    #endif
+#define OP_ADD FUNC_ADD64
+#define OP_SUB FUNC_SUB64
+#define OP_MULT FUNC_MULT64
 #endif
 

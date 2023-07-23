@@ -17,16 +17,14 @@ DATATYPE Not(DATATYPE a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-DATATYPE Xor(DATATYPE a, DATATYPE b)
+template <typename func_add>
+DATATYPE Add(DATATYPE a, DATATYPE b, func_add ADD)
 {
-   return a;
+    return a;
 }
 
-
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(DATATYPE a, DATATYPE b, DATATYPE &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 #if PROTOCOL == 12 || PROTOCOL == 8
 #if PRE == 1
@@ -48,38 +46,39 @@ store_compare_view_init(P0);
 #endif
 }
 
-// NAND both real Values to receive sharing of ~ (a&b) 
-void complete_and(DATATYPE &c)
+template <typename func_add, typename func_sub>
+void complete_mult(DATATYPE &c, func_add ADD, func_sub SUB)
 {
-}
-#if FUNCTION_IDENTIFIER > 4
-void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c)
-{
-    prepare_and(a,b,c);
 }
 
-void complete_mult(DATATYPE &c)
-{
-    complete_and(c);
-}
-#endif
 
-void prepare_reveal_to_all(DATATYPE a)
+void prepare_reveal_to_all(DATATYPE)
 {
+    #if PROTOCOL == 8
     for(int t = 0; t < 3; t++) 
     {
         #if PRE == 1 
     pre_send_to_(t);
-#else
+    #else
     send_to_(t);
-#endif
+    #endif
 
-    }//add to send buffer
+    }
+ #else
+#if PRE == 1
+    pre_send_to_(P0);
+#else
+    send_to_(P0);
+#endif
+    receive_from_(P0);
+    store_compare_view_init(P123);
+    store_compare_view_init(P0123);
+#endif
 }    
 
 
-
-DATATYPE complete_Reveal(DATATYPE a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 {
 receive_from_(P0);
 #if PROTOCOL == 8
@@ -96,8 +95,8 @@ XOR_Share* alloc_Share(int l)
     return new DATATYPE[l];
 }
 
-
-void prepare_receive_from(DATATYPE a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
 /* return; */
 /* old: */
@@ -113,7 +112,8 @@ if(id == PSELF)
 }
 }
 
-void complete_receive_from(DATATYPE a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
 }
 

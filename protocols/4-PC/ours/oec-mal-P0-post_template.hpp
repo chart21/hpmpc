@@ -16,42 +16,33 @@ OECL_Share Not(OECL_Share a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-OECL_Share Xor(OECL_Share a, OECL_Share b)
+template <typename func_add>
+OECL_Share Xor(OECL_Share a, OECL_Share b, func_add ADD)
 {
-   return a;
+    return OECL_Share();
 }
 
 
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(OECL_Share a, OECL_Share b, OECL_Share &c)
-{
-
-}
-
-void complete_and(OECL_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void perpare_mult(OECL_Share a, OECL_Share b, OECL_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 }
 
-#if FUNCTION_IDENTIFIER > 4
-void perpare_mult(OECL_Share a, OECL_Share b, OECL_Share &c)
+template <typename func_add, typename func_sub>
+void complete_mult(OECL_Share &c, func_add ADD, func_sub SUB)
 {
 }
 
-void complete_mult(OECL_Share &c)
+template <typename func_add, typename func_sub>
+void prepare_reveal_to_all(OECL_Share a, func_add ADD, func_sub SUB)
 {
 }
-#endif
-void prepare_reveal_to_all(OECL_Share a)
+
+
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(OECL_Share a, func_add ADD, func_sub SUB)
 {
-}    
-
-
-
-DATATYPE complete_Reveal(OECL_Share a)
-{
-return XOR(a.p2, receive_from_live(P2));
+    return SUB(receive_from_live(P2),a.p2);
 }
 
 
@@ -61,8 +52,8 @@ OECL_Share* alloc_Share(int l)
 }
 
 
-
-void prepare_receive_from(OECL_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(OECL_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 #if OPT_SHARE == 1 && SHARE_PREP == 0
 if(id == P0)
@@ -70,16 +61,17 @@ if(id == P0)
     for(int i = 0; i < l; i++)
     {
     a[i].p1 = get_input_live();
-    a[i].p2 = getRandomVal(P1);
-    send_to_live(P2, XOR(a[i].p1,a[i].p2));
+    a[i].p2 = ADD(getRandomVal(P013),getRandomVal(P023));
+    send_to_live(P1, ADD(a[i].p1,a[i].p2));
+    send_to_live(P2, ADD(a[i].p1,a[i].p2));
     }
 }
 #endif
 }
 
-void complete_receive_from(OECL_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(OECL_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
-    return;
 }
 
 

@@ -17,16 +17,14 @@ DATATYPE Not(DATATYPE a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-DATATYPE Xor(DATATYPE a, DATATYPE b)
+template <typename func_add>
+DATATYPE Add(DATATYPE a, DATATYPE b, func_add ADD)
 {
-   return a;
+    return a;
 }
 
-
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(DATATYPE a, DATATYPE b, DATATYPE &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 send_to_(P2);
 #if PROTOCOL == 10 || PROTOCOL == 12
@@ -36,8 +34,8 @@ store_compare_view_init(P0); // compare a1b1 + r123_2 with P0
 //return u[player_id] * v[player_id];
 }
 
-// NAND both real Values to receive sharing of ~ (a&b) 
-void complete_and(DATATYPE &c)
+template <typename func_add, typename func_sub>
+void complete_mult(DATATYPE &c, func_add ADD, func_sub SUB)
 {
     receive_from_(P2);
 #if PROTOCOL == 10 || PROTOCOL == 12 || PROTOCOL == 8
@@ -50,17 +48,6 @@ store_compare_view_init(P0);
 store_compare_view_init(P0);
 #endif
 }
-#if FUNCTION_IDENTIFIER > 4
-void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c)
-{
-    prepare_and(a,b,c);
-}
-
-void complete_mult(DATATYPE &c)
-{
-    complete_and(c);
-}
-#endif
 
 void prepare_reveal_to_all(DATATYPE a)
 {
@@ -68,25 +55,24 @@ return;
 }    
 
 
-
-DATATYPE complete_Reveal(DATATYPE a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 {
-/* for(int t = 0; t < num_players-1; t++) */ 
-/*     receiving_args[t].elements_to_rec[rounds-1]+=1; */
-#if PRE == 1 
+receive_from_(P0);
+#if PROTOCOL == 8
+    #if PRE == 1 
     pre_receive_from_(P3);
 #else
     receive_from_(P3);
 #endif
-#if PROTOCOL == 8
-store_compare_view_init(P0);
-store_compare_view_init(P3);
 
-store_compare_view_init(P0);
+    store_compare_view_init(P0);
+    store_compare_view_init(P3);
 #else
+    store_compare_view_init(P123);
     store_compare_view_init(P0123);
 #endif
-    return a;
+return a;
 }
 
 
@@ -95,8 +81,8 @@ XOR_Share* alloc_Share(int l)
     return new DATATYPE[l];
 }
 
-
-void prepare_receive_from(DATATYPE a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == PSELF)
 {
@@ -109,8 +95,8 @@ if(id == PSELF)
 }
 }
 
-
-void complete_receive_from(DATATYPE a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
     if(id != PSELF)
     {
@@ -124,12 +110,6 @@ void complete_receive_from(DATATYPE a[], int id, int l)
                 store_compare_view_init(P2);
     }
 }
-/* if(id == player_id) */
-/*     return; */
-/* int offset = {id > player_id ? 1 : 0}; */
-/* int player = id - offset; */
-/* for(int i = 0; i < l; i++) */
-/*     receiving_args[player].elements_to_rec[receiving_args[player].rec_rounds -1] += 1; */
 
 
 void send()

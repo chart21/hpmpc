@@ -50,6 +50,18 @@
 #define ADD_SIGNED(a,b,c) _mm_add_epi##c(a,b)
 #define SUB_SIGNED(a,b,c) _mm_sub_epi##c(a,b)
 
+#define FUNC_AND _mm_and_si128
+#define FUNC_OR _mm_or_si128
+#define FUNC_XOR _mm_xor_si128
+#define FUNC_ANDN _mm_andnot_si128
+#define FUNC_ADD32 _mm_add_epi32
+#define FUNC_ADD64 _mm_add_epi64
+#define FUNC_SUB32 _mm_sub_epi32
+#define FUNC_SUB64 _mm_sub_epi64
+#define FUNC_MUL32 _mm_mullo_epi32
+#define FUNC_MUL64 _mm_mullo_epi64
+
+
 #define L_SHIFT(a,b,c)  _mm_slli_epi##c(a,b)
 #define R_SHIFT(a,b,c)  _mm_srli_epi##c(a,b)
 #define RA_SHIFT(a,b,c) _mm_sra_epi##c(a,_mm_set1_epi##c(b))
