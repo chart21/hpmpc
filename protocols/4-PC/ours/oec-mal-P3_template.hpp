@@ -147,7 +147,8 @@ else if(id == P2)
 }
 }
 
-void complete_receive_from(Dealer_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(Dealer_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 }
 

@@ -158,19 +158,17 @@ void complete_receive_from(OEC_MAL_Share a[], int id, int l, func_add ADD, func_
 {
 if(id != PSELF)
 {
-
-    if(id != P0)
-        for(int i = 0; i < l; i++)
-            store_compare_view(P0,a[i].v);
-    if(id != P1)
-        for(int i = 0; i < l; i++)
-            store_compare_view(P1,a[i].v);
     
     for(int i = 0; i < l; i++)
     {
-        a[i].v = SUB(receive_from_live(id),a[i].v); //convert locally to a_0
+    DATATYPE val = receive_from_live(id);
+    if(id != P0)
+            store_compare_view(P0,val);
+    if(id != P1)
+            store_compare_view(P1,val);
+    a[i].v = SUB(val,a[i].v); // convert locally to a + x_0
     }
-    
+
 
 
 }

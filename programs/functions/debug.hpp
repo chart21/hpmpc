@@ -118,7 +118,7 @@ for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
-    P.complete_and(inputs[j][i], OP_ADD, OP_SUB);
+    P.complete_mult(inputs[j][i], OP_ADD, OP_SUB);
 }
 }
 
