@@ -33,8 +33,7 @@ void complete_mult(Dealer_Share &c, func_add ADD, func_sub SUB)
 {
 }
 
-template <typename func_add, typename func_sub>
-void prepare_reveal_to_all(Dealer_Share a, func_add ADD, func_sub SUB)
+void prepare_reveal_to_all(Dealer_Share a)
 {
 }    
 

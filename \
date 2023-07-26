@@ -1,11 +1,11 @@
 #pragma once
 #include "tetrad_base.hpp"
 #define PRE_SHARE Tetrad_Share
-class Tetrad1
+class Tetrad2
 {
 bool optimized_sharing;
 public:
-Tetrad1(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
+Tetrad2(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
 
 Tetrad_Share public_val(DATATYPE a)
 {
@@ -32,24 +32,25 @@ void prepare_mult(Tetrad_Share a, Tetrad_Share b, Tetrad_Share &c, func_add ADD,
 {
 
 
-DATATYPE y1ab = ADD( ADD(MULT(a.l0,b.l1),MULT(a.l1,b.l0)), MULT(a.l1,a.l1));
-DATATYPE u1 = getRandomVal(P013);
+DATATYPE y2ab = ADD( ADD(MULT(a.l0,b.l1),MULT(a.l1,b.l0)), MULT(a.l0,a.l0));
+DATATYPE u2 = getRandomVal(P023);
 
 //q:
 c.mv = SET_ALL_ZERO();
-c.l0 = getRandomVal(P013); //lambda1
+c.l0 = receive_from_live(P3);
+store_compare_view(P0, c.l0);
 c.l1 = SET_ALL_ZERO();  //lambda3
 
 DATATYPE s = getRandomVal(P123);
 
-DATATYPE y2 = SUB( ADD(y1ab,u1), ADD(AND(a.l0,b.mv),AND(a.mv,b.l0))) ;
-DATATYPE y3 = SUB(SET_ALL_ZERO(),ADD(MULT(a.l1,b.mv),MULT(a.mv,b.l1)));
-send_to_live(P2, y2);
-DATATYPE z_r = ADD( ADD(y2, y3), MULT(a.mv,b.mv));
+DATATYPE y1 = SUB( XOR(y2ab,u2), ADD(MULT(a.l0,b.mv),MULT(a.mv,b.l0)) );
+DATATYPE y3 = SUB(SET_ALL_ZERO(), ADD(MULT(a.l1,b.mv),MULT(a.mv,b.l1)));
+send_to_live(P1, y1);
+DATATYPE z_r = ADD( ADD(y1, y3), MULT(a.mv,b.mv));
 
 //Trick to store values neede later
 c.storage = c.l0;
-c.l0 = y2;
+c.l0 = y1;
 c.l1 = s;
 c.mv = z_r;
 
@@ -58,26 +59,25 @@ c.mv = z_r;
 template <typename func_add, typename func_sub>
 void complete_mult(Tetrad_Share &c, func_add ADD, func_sub SUB)
 {
-    DATATYPE y1 = receive_from_live(P2);
-    DATATYPE v = ADD(ADD(c.l0,c.l1),y1); // y1 + y2 + s for verification
+    DATATYPE y2 = receive_from_live(P1);
+    DATATYPE v = ADD(ADD(c.l0,c.l1),y2); // y1 + y2 + s for verification
     store_compare_view(P012, v);
-    c.mv = ADD(c.mv, y1);
+    c.mv = ADD(c.mv, y2);
 
     //p:
-    /* DATATYPE pl1 = SET_ALL_ZERO(); // known by all */
-    /* DATATYPE pl2 = SET_ALL_ZERO(); // known by all */
+    DATATYPE pl1 = SET_ALL_ZERO(); // known by all
+    DATATYPE pl2 = SET_ALL_ZERO(); // known by all
     DATATYPE pl3 = getRandomVal(P123); //hide from P0
-    DATATYPE pmv = ADD(c.mv,pl3);                                   //
-    store_compare_view(P0, pmv);
+    DATATYPE pmv = ADD(c.mv,pl3);                                   
+    send_to_live(P0, pmv);
 
 
 
     //o = p + q
     c.mv = pmv;
-    c.l0 = c.storage; //lambda1
+    c.l0 = c.storage; //lambda2
     c.l1 = pl3; //lambda3
 }
-
 
 
 void prepare_reveal_to_all(Tetrad_Share a)
@@ -85,17 +85,15 @@ void prepare_reveal_to_all(Tetrad_Share a)
 }    
 
 
+
 template <typename func_add, typename func_sub>
 DATATYPE complete_Reveal(Tetrad_Share a, func_add ADD, func_sub SUB)
 {
 
-//receive lambda3 from P3
-store_compare_view(P0, a.l0); //help P0 verifying
-store_compare_view(P3, a.mv); //help P3 verifying
                               
-DATATYPE lambda2 = receive_from_live(P3);
-store_compare_view(P0, lambda2); //get help from P0 to veriy
-DATATYPE result = SUB(a.mv, lambda2);
+DATATYPE lambda1 = receive_from_live(P3);
+store_compare_view(P0, lambda1); //get help from P0 to veriy
+DATATYPE result = SUB(a.mv, lambda1);
 result = SUB(result, a.l0);
 result = SUB(result, a.l1);
 return result;
@@ -116,12 +114,12 @@ if(id == PSELF)
     for(int i = 0; i < l; i++)
     {
     a[i].mv = get_input_live();
-    a[i].l0 = getRandomVal(P013); //l1
+    a[i].l0 = getRandomVal(P023); //l2
     a[i].l1 = getRandomVal(P123); //l3
     DATATYPE l2 = SET_ALL_ZERO();
-    a[i].mv = ADD( ADD(a[i].mv, l2), ADD(a[i].l0,a[i].l1));
+    a[i].mv = SUB( SUB(a[i].mv, l2), ADD(a[i].l0,a[i].l1));
     send_to_live(P0, a[i].mv);
-    send_to_live(P2, a[i].mv);
+    send_to_live(P1, a[i].mv);
 
     
     
@@ -131,11 +129,11 @@ else if(id == P0)
 {
     for(int i = 0; i < l; i++)
     {
-    a[i].l0 = getRandomVal(P013);
+    a[i].l0 = getRandomVal(P023);
     a[i].l1 = SET_ALL_ZERO();
     }
 }
-else if(id == P2)
+else if(id == P1)
 {
     for(int i = 0; i < l; i++)
     {
@@ -147,14 +145,12 @@ else if(id == P3)
 {
     for(int i = 0; i < l; i++)
     {
-    a[i].l0 = getRandomVal(P013);
+    a[i].l0 = getRandomVal(P023);
     a[i].l1 = getRandomVal(P123);
     }
 }
 }
-
-template <typename func_add, typename func_sub>
-void complete_receive_from(Tetrad_Share a[], int id, int l, func_add ADD, func_sub SUB)
+void complete_receive_from(Tetrad_Share a[], int id, int l)
 {
 if(id != PSELF)
 {
@@ -166,9 +162,9 @@ if(id != PSELF)
         if(id != P0)
             for(int i = 0; i < l; i++)
                 store_compare_view(P0,a[i].mv);
-        if(id != P2)
+        if(id != P1)
             for(int i = 0; i < l; i++)
-                store_compare_view(P2,a[i].mv);
+                store_compare_view(P1,a[i].mv);
 
 
     

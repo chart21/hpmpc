@@ -18,45 +18,47 @@ XOR_Share Not(XOR_Share a)
     return NOT(a);
 }
 
-// Receive sharing of ~XOR(a,b) locally
-XOR_Share Xor(XOR_Share a, XOR_Share b)
+template <typename func_add>
+XOR_Share Add(XOR_Share a, XOR_Share b, func_add ADD)
 {
-   return XOR(a,b);
+    return ADD(a,b);
 }
 
 
-
-void prepare_and(XOR_Share a, XOR_Share b, XOR_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(XOR_Share a, XOR_Share b, XOR_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 
 XOR_Share ap1 = getRandomVal(P0); // P2 mask for P1
 
 #if PRE == 1
-c = XOR(pre_receive_from_live(P0), AND(a,b)); // P0_message + (a+rr) (b+rl)
+c = ADD(pre_receive_from_live(P0), MULT(a,b)); // P0_message + (a+rr) (b+rl)
 #else
-c = XOR(receive_from_live(P0), AND(a,b)); // P0_message + (a+rr) (b+rl)
+c = ADD(receive_from_live(P0), MULT(a,b)); // P0_message + (a+rr) (b+rl)
 #endif
 
-send_to_live(P1, XOR(ap1,c)); 
+send_to_live(P1, ADD(ap1,c)); 
 }
 
-void complete_and(XOR_Share &c)
+template <typename func_add, typename func_sub>
+void complete_mult(XOR_Share &c, func_add ADD, func_sub SUB)
 {
-c = XOR(c, receive_from_live(P1)); 
+c = SUB(c, receive_from_live(P1)); 
 }
+
 
 void prepare_reveal_to_all(XOR_Share a)
 {
 send_to_live(P0, a);
 }
 
-
-DATATYPE complete_Reveal(XOR_Share a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(XOR_Share a, func_add ADD, func_sub SUB)
 {
 #if PRE == 1 && (OPT_SHARE == 0 || SHARE_PREP == 1) // OPT_SHARE is input dependent, can only be sent in prepocessing phase if allowed
-return XOR(a, pre_receive_from_live(P0));
+return SUB(a, pre_receive_from_live(P0));
 #else
-return XOR(a, receive_from_live(P0));
+return SUB(a, receive_from_live(P0));
 #endif
 }
 
@@ -65,8 +67,8 @@ XOR_Share* alloc_Share(int l)
     return new XOR_Share[l];
 }
 
-
-void prepare_receive_from(XOR_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(XOR_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P2)
 {
@@ -74,12 +76,13 @@ for(int i = 0; i < l; i++)
 {
     a[i] = get_input_live();     
     /* a[i].p1 = getRandomVal(0); *1/ */
-    send_to_live(P1, XOR(getRandomVal(P0),a[i]));
+    send_to_live(P1, ADD(getRandomVal(P0),a[i]));
 }
 }
 }
 
-void complete_receive_from(XOR_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(XOR_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P0)
 {

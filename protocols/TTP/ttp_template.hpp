@@ -8,23 +8,6 @@ bool input_srngs;
     public:
 TTP(bool use_srngs) {input_srngs = use_srngs;}
 
-DATATYPE share(DATATYPE a)
-{
-send_to_live(P2, a);
-return a;
-}
-
-
-
-
-void share(DATATYPE a[], int length)
-{
-if(PARTY != 2)
-{
-for(int l = 0; l < length; l++)
-    a[l] = share(a[l]);
-}
-}
 
 XOR_Share public_val(DATATYPE a)
 {
@@ -36,35 +19,22 @@ DATATYPE Not(DATATYPE a)
    return NOT(a);
 }
 
-// Receive sharing of ~XOR(a,b) locally
-DATATYPE Xor(DATATYPE a, DATATYPE b)
+template <typename func_add>
+DATATYPE Add(DATATYPE a, DATATYPE b, func_add ADD)
 {
-   return XOR(a, b);
+   return ADD(a, b);
 }
 
 
-
-void prepare_and(XOR_Share a, XOR_Share b, XOR_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(XOR_Share a, XOR_Share b, XOR_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
-c = AND(a,b);
-/* #if VERIFY_BUFFER > 0 */
-/* for (int i = 0; i < VERIFY_BUFFER; i++) */
-/* { */
-/*     send_to_live(PNEXT, c); */
-
-/* } */
-/* #endif */
+c = MULT(a,b);
 }
-// NAND both real Values to receive sharing of ~ (a&b) 
-void complete_and(XOR_Share &c)
-{
-/* #if VERIFY_BUFFER > 0 */
-/* for (int i = 0; i < VERIFY_BUFFER; i++) */
-/* { */
-/*    c = receive_from_live(PPREV); */
 
-/* } */
-/* #endif */
+template <typename func_add, typename func_sub>
+void complete_mult(XOR_Share &c, func_add ADD, func_sub SUB)
+{
 }
 
 void prepare_reveal_to_all(DATATYPE a)
@@ -76,8 +46,8 @@ void prepare_reveal_to_all(DATATYPE a)
 }
 
 
-
-DATATYPE complete_Reveal(DATATYPE a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 {
 DATATYPE result = a;
 if(PARTY != 2)
@@ -90,19 +60,23 @@ return result;
 
 
 
-
-void prepare_receive_from(DATATYPE a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
-if(id == PSELF && PARTY != 2)
+#if PARTY != 2
+if(id == PSELF)
 {
     for(int s = 0; s < l; s++)
     {
-        share(get_input_live());
+        send_to_live(P2, get_input_live());
     }
 }
+#endif
 }
 
-void complete_receive_from(DATATYPE a[], int id, int l)
+
+template <typename func_add, typename func_sub>
+void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
 
 #if PARTY == 2
@@ -152,3 +126,4 @@ void communicate()
 }
 
 };
+

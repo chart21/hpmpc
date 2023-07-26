@@ -17,26 +17,26 @@ OECL_Share Not(OECL_Share a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-OECL_Share Xor(OECL_Share a, OECL_Share b)
+template <typename func_add>
+OECL_Share Add(OECL_Share a, OECL_Share b, func_add ADD)
 {
-   return OECL_Share(XOR(a.p1,b.p1),XOR(a.p2,b.p2));
+   return OECL_Share(ADD(a.p1,b.p1),ADD(a.p2,b.p2));
 }
 
 
 
-//prepare AND -> send real value a&b to other P
-void prepare_and(OECL_Share a, OECL_Share b , OECL_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(OECL_Share a, OECL_Share b , OECL_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
-c.p1 = XOR(getRandomVal(P0), XOR(AND(a.p1,b.p2), AND(b.p1,a.p2))); //remove P1_mask, then (a+ra)rl + (b+rb)rr 
+c.p1 = ADD(getRandomVal(P0), ADD(MULT(a.p1,b.p2), MULT(b.p1,a.p2))); //remove P1_mask, then (a+ra)rl + (b+rb)rr 
 c.p2 = getRandomVal(P0); //generate P1_2 mask
-send_to_live(P2,XOR(c.p1,c.p2)); 
+send_to_live(P2,SUB(c.p1,c.p2)); 
 }
 
-// NAND both real Values to receive sharing of ~ (a&b) 
-void complete_and(OECL_Share &c)
+template <typename func_add, typename func_sub>
+void complete_mult(OECL_Share &c, func_add ADD, func_sub SUB)
 {
-c.p1 = XOR(c.p1, receive_from_live(P2));
+c.p1 = SUB(receive_from_live(P2),c.p1);
 }
 
 void prepare_reveal_to_all(OECL_Share a)
@@ -45,13 +45,13 @@ return;
 }    
 
 
-
-DATATYPE complete_Reveal(OECL_Share a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(OECL_Share a, func_add ADD, func_sub SUB)
 {
 #if PRE == 1 && (OPT_SHARE == 0 || SHARE_PREP == 1) // OPT_SHARE is input dependent, can only be sent in prepocessing phase if allowed
-return XOR(a.p1, pre_receive_from_live(P0));
+return SUB(a.p1, pre_receive_from_live(P0));
 #else
-return XOR(a.p1, receive_from_live(P0));
+return SUB(a.p1, receive_from_live(P0));
 #endif
 
 }
@@ -63,7 +63,8 @@ OECL_Share* alloc_Share(int l)
 }
 
 
-void prepare_receive_from(OECL_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(OECL_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P0)
 {
@@ -78,12 +79,13 @@ for(int i = 0; i < l; i++)
 {
     a[i].p1 = get_input_live();
     a[i].p2 = getRandomVal(P0);
-    send_to_live(P2,XOR(a[i].p1,a[i].p2));
+    send_to_live(P2,ADD(a[i].p1,a[i].p2));
 }
 }
 }
 
-void complete_receive_from(OECL_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(OECL_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P0)
 {

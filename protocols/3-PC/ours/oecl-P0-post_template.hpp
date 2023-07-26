@@ -16,16 +16,15 @@ OECL_Share Not(OECL_Share a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-OECL_Share Xor(OECL_Share a, OECL_Share b)
+template <typename func_add>
+OECL_Share Add(OECL_Share a, OECL_Share b, func_add ADD)
 {
    return a;
 }
 
 
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(OECL_Share a, OECL_Share b, OECL_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(OECL_Share a, OECL_Share b, OECL_Share &c, func_add ADD, func_sub SUB, func_mul MUL)
 {
 /* DATATYPE rl = getRandomVal(0); */
 /* DATATYPE rr = getRandomVal(0); */
@@ -37,7 +36,8 @@ void prepare_and(OECL_Share a, OECL_Share b, OECL_Share &c)
 
 }
 
-void complete_and(OECL_Share &c)
+template <typename func_add, typename func_sub>
+void complete_mult(OECL_Share &c, func_add ADD, func_sub SUB)
 {
 }
 
@@ -46,8 +46,8 @@ void prepare_reveal_to_all(OECL_Share a)
 }    
 
 
-
-DATATYPE complete_Reveal(OECL_Share a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(OECL_Share a, func_add ADD, func_sub SUB)
 {
 return XOR(a.p2, receive_from_live(P2));
 }
@@ -59,8 +59,8 @@ OECL_Share* alloc_Share(int l)
 }
 
 
-
-void prepare_receive_from(OECL_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(OECL_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 #if OPT_SHARE == 1 && SHARE_PREP == 0
 if(id == P0)
@@ -75,7 +75,8 @@ if(id == P0)
 #endif
 }
 
-void complete_receive_from(OECL_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(OECL_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
     return;
 }

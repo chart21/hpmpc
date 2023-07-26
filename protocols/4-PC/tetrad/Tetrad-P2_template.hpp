@@ -17,23 +17,22 @@ Tetrad_Share Not(Tetrad_Share a)
    return Tetrad_Share(NOT(a.mv),a.l0,a.l1);
 }
 
-// Receive sharing of ~XOR(a,b) locally
-Tetrad_Share Xor(Tetrad_Share a, Tetrad_Share b)
+template <typename func_add>
+Tetrad_Share Add(Tetrad_Share a, Tetrad_Share b, func_add ADD)
 {
-    a.mv = XOR(a.mv,b.mv);
-    a.l0 = XOR(a.l0,b.l0);
-    a.l1 = XOR(a.l1,b.l1);
+    a.mv = ADD(a.mv,b.mv);
+    a.l0 = ADD(a.l0,b.l0);
+    a.l1 = ADD(a.l1,b.l1);
    return a;
 }
 
 
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(Tetrad_Share a, Tetrad_Share b, Tetrad_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(Tetrad_Share a, Tetrad_Share b, Tetrad_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 
 
-DATATYPE y2ab = XOR( XOR(AND(a.l0,b.l1),AND(a.l1,b.l0)), AND(a.l0,a.l0));
+DATATYPE y2ab = ADD( ADD(MULT(a.l0,b.l1),MULT(a.l1,b.l0)), MULT(a.l0,a.l0));
 DATATYPE u2 = getRandomVal(P023);
 
 //q:
@@ -44,10 +43,10 @@ c.l1 = SET_ALL_ZERO();  //lambda3
 
 DATATYPE s = getRandomVal(P123);
 
-DATATYPE y1 = XOR( XOR(AND(a.l0,b.mv),AND(a.mv,b.l0)), XOR(y2ab,u2));
-DATATYPE y3 = XOR(AND(a.l1,b.mv),AND(a.mv,b.l1));
+DATATYPE y1 = SUB( XOR(y2ab,u2), ADD(MULT(a.l0,b.mv),MULT(a.mv,b.l0)) );
+DATATYPE y3 = SUB(SET_ALL_ZERO(), ADD(MULT(a.l1,b.mv),MULT(a.mv,b.l1)));
 send_to_live(P1, y1);
-DATATYPE z_r = XOR( XOR(y1, y3), AND(a.mv,b.mv));
+DATATYPE z_r = ADD( ADD(y1, y3), MULT(a.mv,b.mv));
 
 //Trick to store values neede later
 c.storage = c.l0;
@@ -57,18 +56,19 @@ c.mv = z_r;
 
 }
 
-void complete_and(Tetrad_Share &c)
+template <typename func_add, typename func_sub>
+void complete_mult(Tetrad_Share &c, func_add ADD, func_sub SUB)
 {
     DATATYPE y2 = receive_from_live(P1);
-    DATATYPE v = XOR(XOR(c.l0,c.l1),y2); // y1 + y2 + s for verification
+    DATATYPE v = ADD(ADD(c.l0,c.l1),y2); // y1 + y2 + s for verification
     store_compare_view(P012, v);
-    c.mv = XOR(c.mv, y2);
+    c.mv = ADD(c.mv, y2);
 
     //p:
     DATATYPE pl1 = SET_ALL_ZERO(); // known by all
     DATATYPE pl2 = SET_ALL_ZERO(); // known by all
     DATATYPE pl3 = getRandomVal(P123); //hide from P0
-    DATATYPE pmv = XOR(c.mv,pl3);                                   
+    DATATYPE pmv = ADD(c.mv,pl3);                                   
     send_to_live(P0, pmv);
 
 
@@ -80,22 +80,22 @@ void complete_and(Tetrad_Share &c)
 }
 
 
-
 void prepare_reveal_to_all(Tetrad_Share a)
 {
 }    
 
 
 
-DATATYPE complete_Reveal(Tetrad_Share a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(Tetrad_Share a, func_add ADD, func_sub SUB)
 {
 
                               
 DATATYPE lambda1 = receive_from_live(P3);
 store_compare_view(P0, lambda1); //get help from P0 to veriy
-DATATYPE result = XOR(a.mv, lambda1);
-result = XOR(result, a.l0);
-result = XOR(result, a.l1);
+DATATYPE result = SUB(a.mv, lambda1);
+result = SUB(result, a.l0);
+result = SUB(result, a.l1);
 return result;
 }
 
@@ -106,8 +106,8 @@ Tetrad_Share* alloc_Share(int l)
 }
 
 
-
-void prepare_receive_from(Tetrad_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(Tetrad_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == PSELF)
 {
@@ -117,7 +117,7 @@ if(id == PSELF)
     a[i].l0 = getRandomVal(P023); //l2
     a[i].l1 = getRandomVal(P123); //l3
     DATATYPE l2 = SET_ALL_ZERO();
-    a[i].mv = XOR( XOR(a[i].mv, l2), XOR(a[i].l0,a[i].l1));
+    a[i].mv = ADD( ADD(a[i].mv, l2), ADD(a[i].l0,a[i].l1));
     send_to_live(P0, a[i].mv);
     send_to_live(P1, a[i].mv);
 
@@ -150,7 +150,9 @@ else if(id == P3)
     }
 }
 }
-void complete_receive_from(Tetrad_Share a[], int id, int l)
+
+template <typename func_add, typename func_sub>
+void complete_receive_from(Tetrad_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id != PSELF)
 {

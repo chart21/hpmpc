@@ -17,42 +17,45 @@ Tetrad_Share Not(Tetrad_Share a)
    return Tetrad_Share(NOT(a.mv),a.l0,a.l1);
 }
 
-// Receive sharing of ~XOR(a,b) locally
-Tetrad_Share Xor(Tetrad_Share a, Tetrad_Share b)
+template <typename func_add>
+Tetrad_Share Add(Tetrad_Share a, Tetrad_Share b, func_add ADD)
 {
-    a.mv = XOR(a.mv,b.mv);
-    a.l0 = XOR(a.l0,b.l0);
-    a.l1 = XOR(a.l1,b.l1);
+    a.mv = ADD(a.mv,b.mv);
+    a.l0 = ADD(a.l0,b.l0);
+    a.l1 = ADD(a.l1,b.l1);
    return a;
 }
 
 
 
 //prepare AND -> send real value a&b to other P
-void prepare_and(Tetrad_Share a, Tetrad_Share b, Tetrad_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(Tetrad_Share a, Tetrad_Share b, Tetrad_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
-DATATYPE y3ab = XOR( XOR(AND(a.l0,b.l1),AND(a.l1,b.l0)), AND(a.l0,a.l0));
+DATATYPE y3ab = ADD( ADD(MULT(a.l0,b.l1),MULT(a.l1,b.l0)), MULT(a.l0,a.l0));
 DATATYPE u1 = getRandomVal(P013);
 DATATYPE u2 = getRandomVal(P023);
-DATATYPE r = XOR(y3ab, XOR(u1,u2));
+DATATYPE r = SUB(y3ab, ADD(u1,u2));
 Tetrad_Share q;
 
 //q:
 c.mv = SET_ALL_ZERO();
-c.l0 = getRandomVal(P013); //lambda1
-c.l1 = XOR(r,c.l0);  //lambda2 
-store_compare_view(P2, c.l1); // verify if P2 gets correct value from P3
+c.l1 = getRandomVal(P013); //lambda2
+c.l0 = SUB(SET_ALL_ZERO(),ADD(r,c.l1));  //lambda1
+store_compare_view(P2, c.l0); // verify if P2 gets correct value from P3
 
+DATATYPE v = ADD(u1,u2);
 
-DATATYPE v = XOR( AND( XOR(a.l0,a.l1), b.mv) , AND ( XOR(b.l0,b.l1), a.mv));
-v = XOR(XOR(v,u1),u2);
-c.mv = v; //Trick, can be set to zero lateron
+v = SUB( v, ADD( MULT( ADD(a.l0,a.l1), b.mv) , MULT ( ADD(b.l0,b.l1), a.mv)));
+c.mv = v; //Trick, can be set to zero later on
 }
 
-void complete_and(Tetrad_Share &c)
+template <typename func_add, typename func_sub>
+void complete_mult(Tetrad_Share &c, func_add ADD, func_sub SUB)
 {
     DATATYPE w = receive_from_live(P3);
-    c.mv = XOR(c.mv,w);
+    c.mv = ADD(c.mv,w);
+    store_compare_view(P012,c.mv);
     c.mv = SET_ALL_ZERO(); //restore actual value of c.mv
 
     Tetrad_Share p; 
@@ -61,12 +64,11 @@ void complete_and(Tetrad_Share &c)
     p.mv = receive_from_live(P2);
     store_compare_view(P1,p.mv);
     
-    store_compare_view(P012,c.mv);
 
     //o = p + q
-    c.mv = XOR(c.mv,p.mv);
-    c.l0 = XOR(c.l0,p.l0);
-    c.l1 = XOR(c.l1,p.l1);
+    c.mv = ADD(c.mv,p.mv);
+    c.l0 = ADD(c.l0,p.l0);
+    c.l1 = ADD(c.l1,p.l1);
 }
 
 
@@ -80,20 +82,20 @@ void prepare_reveal_to_all(Tetrad_Share a)
 
 
 
-DATATYPE complete_Reveal(Tetrad_Share a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(Tetrad_Share a, func_add ADD, func_sub SUB)
 {
+    DATATYPE l3 = receive_from_live(P3);
+    DATATYPE result = SUB(a.mv, l3);
+    result = SUB(result, a.l0);
+    result = SUB(result, a.l1);
+    store_compare_view(P1, l3); //verify own value
 
-//receive lambda3 from P3
-DATATYPE l3 = receive_from_live(P3);
-DATATYPE result = XOR(a.mv, l3);
-result = XOR(result, a.l0);
-result = XOR(result, a.l1);
-store_compare_view(P1, l3); //verify own value
-
-store_compare_view(P1, a.l1);  // verify others
-store_compare_view(P2, a.l0); 
-return result;
+    store_compare_view(P1, a.l1);  // verify others
+    store_compare_view(P2, a.l0); 
+    return result;
 }
+
 
 
 Tetrad_Share* alloc_Share(int l)
@@ -103,7 +105,8 @@ Tetrad_Share* alloc_Share(int l)
 
 
 
-void prepare_receive_from(Tetrad_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(Tetrad_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == PSELF)
 {
@@ -113,7 +116,7 @@ if(id == PSELF)
     a[i].l0 = getRandomVal(P013); //l1
     a[i].l1 = getRandomVal(P023);
     DATATYPE l3 = SET_ALL_ZERO();
-    a[i].mv = XOR( XOR(a[i].mv, l3), XOR(a[i].l0,a[i].l1));
+    a[i].mv = ADD( ADD(a[i].mv, l3), ADD(a[i].l0,a[i].l1));
     send_to_live(P1, a[i].mv);
     send_to_live(P2, a[i].mv);
 
@@ -146,7 +149,9 @@ else if(id == P3)
     }
 }
 }
-void complete_receive_from(Tetrad_Share a[], int id, int l)
+
+template <typename func_add, typename func_sub>
+void complete_receive_from(Tetrad_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id != PSELF)
 {

@@ -11,32 +11,6 @@ TTP_init(bool use_srngs) {input_srngs = use_srngs;}
 
 
 
-DATATYPE share_SRNG(DATATYPE a)
-{
-    return a;
-}
-
-XOR_Share receive_share_SRNG(int player)
-{
-XOR_Share dummy;
-return dummy;
-}
-
-DATATYPE share(DATATYPE a)
-{
-send_to_(P2);
-return a;
-}
-
-
-void share(DATATYPE a[], int length)
-{
-if(PARTY != 2)
-{
-    for(int l = 0; l < length; l++)
-        a[l] = share(a[l]);
-}
-}
 XOR_Share public_val(DATATYPE a)
 {
     return a;
@@ -47,37 +21,21 @@ DATATYPE Not(DATATYPE a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-DATATYPE Xor(DATATYPE a, DATATYPE b)
+template <typename func_add>
+DATATYPE Add(DATATYPE a, DATATYPE b, func_add ADD)
 {
    return a;
 }
 
 
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(DATATYPE &a, DATATYPE &b, DATATYPE &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(DATATYPE &a, DATATYPE &b, DATATYPE &c, func_add ADD, func_sub SUB, func_mul MUL)
 {
-/* #if VERIFY_BUFFER < 0 */
-/* for (int i = 0; i < VERIFY_BUFFER; i++) */
-/* { */
-/*     send_to_(PNEXT); */
-
-/* } */
-/* #endif */
-//return u[player_id] * v[player_id];
 }
 
-// NAND both real Values to receive sharing of ~ (a&b) 
-void complete_and(DATATYPE c)
+template <typename func_add, typename func_sub>
+void complete_mult(DATATYPE c, func_add ADD, func_sub SUB)
 {
-/* #if VERIFY_BUFFER > 0 */
-/* for (int i = 0; i < VERIFY_BUFFER; i++) */
-/* { */
-/*     receive_from_(PPREV); */
-
-/* } */
-/* #endif */
 }
 
 void prepare_reveal_to_all(DATATYPE a)
@@ -93,9 +51,8 @@ void prepare_reveal_to_all(DATATYPE a)
 }    
 
 
-// These functions need to be somewhere else
-
-DATATYPE complete_Reveal(DATATYPE a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 {
 if(PARTY != 2)
 {
@@ -109,9 +66,21 @@ XOR_Share* alloc_Share(int l)
     return new DATATYPE[l];
 }
 
-void receive_from_comm(DATATYPE a[], int id, int l)
+
+template <typename func_add, typename func_sub>
+void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
-if(id == PSELF)
+if(id == PSELF && PARTY != 2)
+{
+    for(int i = 0; i < l; i++) 
+        send_to_(P2);
+}
+}
+
+template <typename func_add, typename func_sub>
+void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
+{
+    if(id == PSELF)
 {
     return;
 }
@@ -121,37 +90,7 @@ if(PARTY == 2)
 receive_from_(id);
         }
     }
-}
 
-void receive_from(DATATYPE a[], int id, int l)
-{
-receive_from_comm(a, id, l);
-}
-
-void complete_receive_from_comm(DATATYPE a[], int id, int l)
-{
-receive_from_comm(a, id, l);
-}
-
-
-void prepare_receive_from_comm(DATATYPE a[], int id, int l)
-{
-
-if(id == PSELF && PARTY != 2)
-{
-    for(int i = 0; i < l; i++) 
-    send_to_(P2);
-}
-}
-void prepare_receive_from(DATATYPE a[], int id, int l)
-{
-prepare_receive_from_comm(a, id, l);
-}
-
-
-void complete_receive_from(DATATYPE a[], int id, int l)
-{
-complete_receive_from_comm(a, id, l);
 }
 
 void send()

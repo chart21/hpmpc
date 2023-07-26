@@ -34,13 +34,15 @@ void share(XOR_Share a[], int length)
 }
 
 
-void prepare_receive_from(XOR_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(XOR_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
     if(id == PSELF)
         share(a,l);
 }
 
-void complete_receive_from(XOR_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(XOR_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == PSELF)
     return;
@@ -50,17 +52,12 @@ for (int i = 0; i < l; i++) {
 }
 }
 
-
-// Receive sharing of ~XOR(a,b) locally
-XOR_Share Xor(XOR_Share a, XOR_Share b)
+template <typename func_add>
+XOR_Share Add(XOR_Share a, XOR_Share b, func_add ADD)
 {
     return a; 
 }
 
-XOR_Share Xor_pub(XOR_Share a, DATATYPE b)
-{
-    return a; 
-}
 
 XOR_Share public_val(DATATYPE a)
 {
@@ -73,19 +70,19 @@ XOR_Share Not(XOR_Share a)
     return a; 
 }
 
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(XOR_Share a, XOR_Share b, XOR_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(XOR_Share a, XOR_Share b, XOR_Share &c, func_add ADD, func_sub SUB, func_mul MUL)
 {
 send_to_(pnext);
 }
 
-// NAND both real Values to receive sharing of ~ (a&b) 
-void complete_and(XOR_Share &c)
+template <typename func_add, typename func_sub>
+void complete_mult(XOR_Share &c, func_add ADD, func_sub SUB)
 {
 receive_from_(pprev);
 
 }
+
 
 void prepare_reveal_to_all(XOR_Share a)
 {
@@ -94,8 +91,8 @@ void prepare_reveal_to_all(XOR_Share a)
 }    
 
 
-
-DATATYPE complete_Reveal(XOR_Share a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(XOR_Share a, func_add ADD, func_sub SUB)
 {
 DATATYPE result;
 receive_from_(pprev);

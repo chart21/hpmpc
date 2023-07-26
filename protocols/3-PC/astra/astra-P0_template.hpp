@@ -16,24 +16,25 @@ Coordinator_Share Not(Coordinator_Share a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-Coordinator_Share Xor(Coordinator_Share a, Coordinator_Share b)
+template <typename func_add>
+Coordinator_Share Add(Coordinator_Share a, Coordinator_Share b, func_add ADD)
 {
-   return XOR(a,b);
+   return ADD(a,b);
 }
 
 
 
-//prepare AND -> send real value a&b to other P
-void prepare_and(Coordinator_Share a, Coordinator_Share b, Coordinator_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(Coordinator_Share a, Coordinator_Share b, Coordinator_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
-DATATYPE yxy = AND(a,b);
-c = XOR(getRandomVal(P1),getRandomVal(P2)); //yz
-DATATYPE yxy2 = XOR(getRandomVal(P1),yxy);
+DATATYPE yxy = MULT(a,b);
+c = ADD(getRandomVal(P1),getRandomVal(P2)); //yz
+DATATYPE yxy2 = SUB(yxy,getRandomVal(P1)); //yxy,2
 send_to_live(P2, yxy2);
 }
 
-void complete_and(Coordinator_Share &c)
+template <typename func_add, typename func_sub>
+void complete_mult(Coordinator_Share &c, func_add ADD, func_sub SUB)
 {
 }
 
@@ -44,10 +45,10 @@ void prepare_reveal_to_all(Coordinator_Share a)
 }    
 
 
-
-DATATYPE complete_Reveal(Coordinator_Share a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(Coordinator_Share a, func_add ADD, func_sub SUB)
 {
-return XOR(a,receive_from_live(P2));
+return SUB(receive_from_live(P2),a);
 }
 
 
@@ -57,8 +58,8 @@ Coordinator_Share* alloc_Share(int l)
 }
 
 
-
-void prepare_receive_from(Coordinator_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(Coordinator_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P0)
 {
@@ -68,7 +69,7 @@ if(id == P0)
     {
     a[i] = get_input_live(); 
     DATATYPE lx1 = getRandomVal(P1);
-    send_to_live(P2, XOR(a[i],lx1));
+    send_to_live(P2, ADD(a[i],lx1));
     }
 
     }
@@ -78,8 +79,8 @@ if(id == P0)
     {
     DATATYPE lv1 = getRandomVal(P1); 
     DATATYPE lv2 = getRandomVal(P2);
-    a[i] = XOR(lv1,lv2);// lv
-    DATATYPE mv = XOR(a[i],get_input_live());
+    a[i] = ADD(lv1,lv2);// lv
+    DATATYPE mv = ADD(a[i],get_input_live());
     send_to_live(P1, mv);
     send_to_live(P2, mv);
     }
@@ -105,7 +106,8 @@ else if(id == P2)// id ==2
 }
 }
 
-void complete_receive_from(Coordinator_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(Coordinator_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
     return;
 }

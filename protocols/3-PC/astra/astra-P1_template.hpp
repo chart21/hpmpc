@@ -17,29 +17,28 @@ Evaluator_Share Not(Evaluator_Share a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-Evaluator_Share Xor(Evaluator_Share a, Evaluator_Share b)
+template <typename func_add>
+Evaluator_Share Add(Evaluator_Share a, Evaluator_Share b, func_add ADD)
 {
-   return Evaluator_Share(XOR(a.mv,b.mv),XOR(a.lv,b.lv));
+   return Evaluator_Share(ADD(a.mv,b.mv),ADD(a.lv,b.lv));
 }
 
 
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(Evaluator_Share a, Evaluator_Share b, Evaluator_Share &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(Evaluator_Share a, Evaluator_Share b, Evaluator_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 DATATYPE yz1 = getRandomVal(P0); //yz1
 DATATYPE yxy1 = getRandomVal(P0); 
-c.mv = XOR( XOR(  XOR( AND(a.mv,b.lv), AND(b.mv, a.lv) ), yz1 ), yxy1); 
+c.mv = SUB(ADD(yz1,yxy1),ADD( MULT(a.mv,b.lv), MULT(b.mv, a.lv)));
 c.lv = yz1;
 send_to_live(P2,c.mv);
 }
 
-// NAND both real Values to receive sharing of ~ (a&b) 
-void complete_and(Evaluator_Share &c)
+template <typename func_add, typename func_sub>
+void complete_mult(Evaluator_Share &c, func_add ADD, func_sub SUB)
 {
 // a.p2 already set in last round
-c.mv = XOR(c.mv, receive_from_live(P2));
+c.mv = ADD(c.mv, receive_from_live(P2));
 }
 
 void prepare_reveal_to_all(Evaluator_Share a)
@@ -48,13 +47,10 @@ return;
 }    
 
 
-
-DATATYPE complete_Reveal(Evaluator_Share a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(Evaluator_Share a, func_add ADD, func_sub SUB)
 {
-/* for(int t = 0; t < num_players-1; t++) */ 
-/*     receiving_args[t].elements_to_rec[rounds-1]+=1; */
-
-return XOR(a.mv, receive_from_live(P0));
+return SUB(a.mv, receive_from_live(P0));
 }
 
 
@@ -67,7 +63,8 @@ Evaluator_Share* alloc_Share(int l)
 }
 
 
-void prepare_receive_from(Evaluator_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(Evaluator_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P0)
 {
@@ -81,13 +78,14 @@ else if(id == P1) // -> lv = lv2, lv1=0
 for(int i = 0; i < l; i++)
 {
     a[i].lv = getRandomVal(P0);
-    a[i].mv = XOR(get_input_live(),a[i].lv);
+    a[i].mv = ADD(get_input_live(),a[i].lv);
     send_to_live(P2,a[i].mv);
 }
 }
 }
 
-void complete_receive_from(Evaluator_Share a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(Evaluator_Share a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P0)
 {

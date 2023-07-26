@@ -18,16 +18,16 @@ DATATYPE Not(DATATYPE a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-DATATYPE Xor(DATATYPE a, DATATYPE b)
+template <typename func_add>
+DATATYPE Add(DATATYPE a, DATATYPE b, func_add ADD)
 {
    return a;
 }
 
 
 
-//prepare AND -> send real value a&b to other P
-void prepare_and(DATATYPE a, DATATYPE b, DATATYPE &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c, func_add ADD, func_sub SUB, func_mul MUL)
 {
 #if PRE == 1
 pre_receive_from_(P0);
@@ -39,11 +39,12 @@ send_to_(P1);
 //return u[player_id] * v[player_id];
 }
 
-// NAND both real Values to receive sharing of ~ (a&b) 
-void complete_and(DATATYPE &c)
+template <typename func_add, typename func_sub>
+void complete_mult(DATATYPE &c, func_add ADD, func_sub SUB)
 {
     receive_from_(P1);
 }
+
 
 void prepare_reveal_to_all(DATATYPE a)
 {
@@ -51,8 +52,8 @@ send_to_(P0);
 }    
 
 
-
-DATATYPE complete_Reveal(DATATYPE a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 {
 /* for(int t = 0; t < num_players-1; t++) */ 
 /*     receiving_args[t].elements_to_rec[rounds-1]+=1; */
@@ -71,7 +72,8 @@ XOR_Share* alloc_Share(int l)
 }
 
 
-void prepare_receive_from(DATATYPE a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P2)
 {
@@ -84,7 +86,8 @@ if(id == P2)
 }
 
 
-void complete_receive_from(DATATYPE a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P1)
 {
