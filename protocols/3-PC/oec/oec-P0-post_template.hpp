@@ -17,21 +17,21 @@ DATATYPE Not(DATATYPE a)
    return a;
 }
 
-// Receive sharing of ~XOR(a,b) locally
-DATATYPE Xor(DATATYPE a, DATATYPE b)
+template <typename func_add>
+DATATYPE Add(DATATYPE a, DATATYPE b, func_add ADD)
 {
    return a;
 }
 
 
-
-//prepare AND -> send real value a&b to other P
-void prepare_and(DATATYPE a, DATATYPE b, DATATYPE &c)
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 }
 
 
-void complete_and(DATATYPE &c)
+template <typename func_add, typename func_sub>
+void complete_mult(DATATYPE &c, func_add ADD, func_sub SUB)
 {
 }
 
@@ -41,7 +41,8 @@ void prepare_reveal_to_all(DATATYPE a)
 
 
 
-DATATYPE complete_Reveal(DATATYPE a)
+template <typename func_add, typename func_sub>
+DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 {
 a = XOR(a,receive_from_live(P2));
 return a;
@@ -77,7 +78,8 @@ if(id == P0)
 }
 #endif
 
-void prepare_receive_from(DATATYPE a[], int id, int l)
+template <typename func_add, typename func_sub>
+void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
 if(id == P0)
 {
@@ -108,8 +110,8 @@ for(int i = 0; i < l; i++)
 }
 }
 
-// party will not receive output
-void complete_receive_from(DATATYPE a[], int id, int l)
+template <typename func_add, typename func_sub>
+void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
 {
     return;
 }

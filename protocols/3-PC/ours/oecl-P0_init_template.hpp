@@ -38,7 +38,6 @@ send_to_(P2);
 template <typename func_add, typename func_sub>
 void complete_mult(DATATYPE &c, func_add ADD, func_sub SUB)
 {
-    receive_from_(P2);
 }
 
 void prepare_reveal_to_all(DATATYPE a)

@@ -41,9 +41,9 @@ DATATYPE maskP1 = getRandomVal(P1);
 DATATYPE maskP1_2 = getRandomVal(P1);
 DATATYPE maskP2 = getRandomVal(P2);
 #if PRE == 1
-pre_send_to_live(P2, SUB( ADD(MULT(a.p2,b.p2),maskP1), MULT( SUB(a.p1,b.p2), SUB(a.p2,b.p1)  ))); 
+pre_send_to_live(P2, SUB( ADD(MULT(a.p1,b.p1),maskP1), MULT( SUB(a.p1,a.p2), SUB(b.p1,b.p2)  ))); 
 #else
-send_to_live(P2, SUB( ADD(MULT(a.p2,b.p2),maskP1), MULT( SUB(a.p1,b.p2), SUB(a.p2,b.p1)  ))); 
+send_to_live(P2, SUB( ADD(MULT(a.p1,b.p1),maskP1), MULT( SUB(a.p1,a.p2), SUB(b.p1,b.p2)  ))); 
 #endif
 // for arithmetic circuikts this will be more efficient to reduce mult from 3 to 2: a.p1 b.p1 + (a.p1 + a.p2) (b.p1 + b.p2)
 c.p1 = maskP2;

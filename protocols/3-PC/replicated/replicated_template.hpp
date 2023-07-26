@@ -4,7 +4,6 @@ class Replicated{
 bool input_srngs;
     public:
 Replicated(bool use_srngs) {input_srngs = use_srngs;}
-
 Share share_SRNG(DATATYPE a)
 {
 Share s[3];
@@ -119,11 +118,11 @@ for (int i = 0; i < l; i++) {
 }
 
 template <typename func_add>
-Share Add(Share a, Share b, func_add Add)
+Share Add(Share a, Share b, func_add ADD)
 {
     Share result;
-    result.x = Add(a.x,b.x);
-    result.a = Add(a.a,b.a);
+    result.x = ADD(a.x,b.x);
+    result.a = ADD(a.a,b.a);
     return result; 
 }
 
@@ -155,7 +154,7 @@ u[2] = XOR(a,u[2]);
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(Share a, Share b, Share &c, func_add Add, func_sub Sub, func_mul Mul)
+void prepare_mult(Share a, Share b, Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 DATATYPE corr = XOR( getRandomVal(pprev), getRandomVal(pnext) );
 DATATYPE r =  XOR( XOR(  AND(a.x,b.x), AND(a.a,b.a) ) , corr);  
@@ -164,7 +163,7 @@ send_to_live(pnext, r);
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(Share &c, func_add Add, func_sub Sub)
+void complete_mult(Share &c, func_add ADD, func_sub SUB)
 {
 c.x = XOR(c.a, receive_from_live(pprev));
 }
@@ -187,7 +186,7 @@ template <typename func_add, typename func_sub>
 DATATYPE complete_Reveal(Share a, func_add Add, func_sub Sub)
 {
     DATATYPE result;
-    result = XOR(a.x, receive_from_live(pnext));
+    result = XOR(a.a, receive_from_live(pprev));
     return result;
 }
 
