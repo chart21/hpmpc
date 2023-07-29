@@ -5,7 +5,7 @@
 #define FUNCTION debug
 #define RESULTTYPE DATATYPE[num_players][BITLENGTH]
 
-void compare(DATATYPE var[num_players][BITLENGTH]) 
+void compare(DATATYPE var[num_players][BITLENGTH], std::string test_func)
 {
 if (current_phase != 1)
     return;
@@ -22,7 +22,7 @@ for(int j = 0; j < BITLENGTH; j++)
 if(var[i][j] > 242)
 {
     num_erros++;
-    std::cout << PARTY << " " << var[i][j] << " " << i << " " << j << std::endl;
+    /* std::cout << PARTY << " " << var[i][j] << " " << i << " " << j << std::endl; */
 }
 #else
 inputs[i][j] = SET_ALL_ONE();
@@ -32,7 +32,7 @@ if(inputs[i][j] != var[i][j])
     num_erros++;
 #endif
 }
-    std::cout << num_erros << " Errors in compare, input from player " << i << std::endl;
+    std::cout << "P" << PARTY << ": " << num_erros << " Errors while testing " << test_func << ", input from player " << i << "\n";
 
 }
 
@@ -104,8 +104,9 @@ for (int i = 0; i < BITLENGTH; i++) {
 P.communicate();
 
 
-std::cout << "Testing secret sharing and revealing: " << std::endl;
-compare(result);
+std::cout <<   "P" << PARTY <<  ": ""Testing secret sharing and revealing: " << std::endl;
+compare(result, "secret sharing and revealing");
+
 
 
 
@@ -144,8 +145,8 @@ for (int i = 0; i < BITLENGTH; i++) {
 }
 }
 
-std::cout << "Testing and gates: " << std::endl;
-compare(result);
+std::cout <<"P" << PARTY <<  ": " "Testing and/mult gates: " << std::endl;
+compare(result, "and/mult gates");
 
 
 for(int j = 0; j < num_players; j++)
@@ -179,8 +180,8 @@ for (int i = 0; i < BITLENGTH; i++) {
 }
 }
 
-std::cout << "Testing NOT, XOR gates: " << std::endl;
-compare(result);
+std::cout <<"P" << PARTY <<  ": " "Testing NOT, XOR/ADD gates: " << std::endl;
+compare(result, "NOT, XOR/ADD gates");
 
 }
 // Reveal

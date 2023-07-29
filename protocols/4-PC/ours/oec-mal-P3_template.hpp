@@ -124,9 +124,15 @@ if(id == PSELF)
     a[i].r0 = u;
     a[i].r1 = ADD(x_1,x_2);
     DATATYPE complete_masked = ADD(v, ADD(a[i].r1, a[i].r0));
+    #if PRE == 1
+    pre_send_to_live(P0, complete_masked);
+    pre_send_to_live(P1, complete_masked);
+    pre_send_to_live(P2, complete_masked);
+    #else
     send_to_live(P0, complete_masked);
     send_to_live(P1, complete_masked);
     send_to_live(P2, complete_masked);
+    #endif
     } 
 }
 else if(id == P0)

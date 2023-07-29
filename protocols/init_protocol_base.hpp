@@ -273,6 +273,7 @@ rb = 0;
 sb = 0;
 current_phase = 1;
 }
+
 void init(){
     for(int t=0;t<(num_players-1);t++) {
 sending_args[t].elements_to_send[0] = 0;

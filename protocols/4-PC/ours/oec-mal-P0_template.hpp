@@ -165,7 +165,14 @@ if(id != PSELF)
 
     for(int i = 0; i < l; i++)
     {
+            #if PRE == 1
+        if(id == P3)
+            a[i].v = pre_receive_from_live(id);
+        else
+            a[i].v = receive_from_live(id);
+    #else
     a[i].v = receive_from_live(id);
+    #endif
     }
 
 

@@ -109,9 +109,15 @@ if(id == PSELF)
 {
     for(int i = 0; i < l; i++)
     {
+        #if PRE == 1
+        pre_send_to_(P0);
+        pre_send_to_(P1);
+        pre_send_to_(P2);
+        #else
         send_to_(P0);
         send_to_(P1);
         send_to_(P2);
+        #endif
     }
 }
 }

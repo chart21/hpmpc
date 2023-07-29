@@ -162,7 +162,15 @@ if(id != PSELF)
     
     for(int i = 0; i < l; i++)
     {
+    #if PRE == 1
+        DATATYPE val;
+        if(id == P3)
+            val = pre_receive_from_live(P3);
+        else
+            val = receive_from_live(id);
+    #else
     DATATYPE val = receive_from_live(id);
+    #endif
     if(id != P0)
             store_compare_view(P0,val);
     if(id != P1)

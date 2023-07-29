@@ -118,7 +118,14 @@ void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub S
     if(id != PSELF)
     {
         for(int i = 0; i < l; i++)
+#if PRE == 1
+            if(id == P3)
+                pre_receive_from_(P3);
+            else
+                receive_from_(id);
+#else
             receive_from_(id);
+#endif
         if(id != P0)
             for(int i = 0; i < l; i++)
                 store_compare_view_init(P0);
