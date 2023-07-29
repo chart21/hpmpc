@@ -107,7 +107,8 @@ To run all players locally on one machine, omit the IP addresses or set them to 
 
 To measure the throughput of a specific function such as 64-bit mult, AND, or secure search, first, specify the function in `config.h`. Each process prints a time for running the computation and initialization. The initialization time measures setup costs, such as establishing a connection. When choosing multiple processes or Split-Roles, we recommend timing the whole script or executable with libraries such as /bin/time. To get accurate measurements with this approach, all nodes should connect simultaneously.
 
-The throughput in AND gates per second for instance, can then be calculated as $$ \frac{(NUM_INPUTS*DATTYPE*PROCESS_NUM*Split_Roles_Multiplier)}{<Total time measured>}$$.
+The throughput in AND gates per second for instance, can then be calculated as 
+$$ \frac{(\text{NUM\_INPUTS} \times \text{DATATYPE} \times \text{PROCESS\_NUM} \times \text{Split\_Roles\_Multiplier})}{\text{Total time measured}} $$
 
 
 ### Debugging
