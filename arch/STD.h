@@ -44,16 +44,16 @@
 #define ADD_SIGNED(a,b,c) a + b
 #define SUB_SIGNED(a,b,c) a - b
 
-#define FUNC_AND  &&
-#define FUNC_OR   ||
-#define FUNC_XOR  ^
-#define FUNC_NOT  ~
-#define FUNC_ADD32 +
-#define FUNC_SUB32 -
-#define FUNC_MUL32 *
-#define FUNC_ADD64 +
-#define FUNC_SUB64 -
-#define FUNC_MUL64 *
+#define FUNC_AND  std::bit_and<uint64_t>()
+#define FUNC_OR   std::bit_or<uint64_t>()
+#define FUNC_XOR  std::bit_xor<uint64_t>()
+#define FUNC_NOT  std::bit_not<uint64_t>()
+#define FUNC_ADD32 std::plus<uint64_t>()
+#define FUNC_SUB32 std::minus<uint64_t>()
+#define FUNC_MUL32 std::multiplies<uint64_t>()
+#define FUNC_ADD64 std::plus<uint64_t>()
+#define FUNC_SUB64 std::minus<uint64_t>()
+#define FUNC_MUL64 std::multiplies<uint64_t>()
 
 
 #define ROTATE_MASK(x) (x == 64 ? -1ULL : x == 32 ? -1 : x == 16 ? 0xFFFF : \

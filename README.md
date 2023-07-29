@@ -6,7 +6,7 @@ This project implements multiple MPC protocols in the honest majority setting.
 
 The only dependency is OpenSSL. Install on your target system, for instance via ```apt install libssl-dev```
 You can select a protocol and function in the file `config.h`.
-The following commands are a quick way to compile the current configuration for a 3-PC protocol and run all executables locally.
+The following commands are a quick way to compile the current configuration for a 3-PC protocol and run all executables locally. This compiles all player executables using g++ with -Ofast and runs all executables on localhost on the same machine.
 > ./scripts/config.sh -p all3
 
 > ./scripts/run_loally.sh -n 3
@@ -21,9 +21,9 @@ For a 4-PC protocol you can run.
 
 Most configuration is contained in the file `config.h`. Here is an overview of the most important settings.
 
-- PROTOCOL: Select the protocol to be used. Options are: 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC).
-- PARTY: Define the party ID for the current node, starting from 0.
-- FUNCTION_IDENTIFIER: Select the function for computation. Currently includes running secure search, AND gates, and 32-bit/64-bit multiplication gates. 
+- PROTOCOL: Select the protocol to be used. Options are: 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC). Protocols 1 and 2 only support boolean circuits currently.
+- PARTY: Define the party ID for the current node, starting from 0. 
+- FUNCTION_IDENTIFIER: Select the function for computation. Currently includes running secure search (0), AND gates (2), and 32-bit/64-bit multiplication gates (5/6). Also includes a debug funtcion for boolean/arithemtic circuit to check if all basic functions of a protocol are working correctly (4/7)
 - DATTYPE: Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported sizes are 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512).
 - PRE: Option to use a preprocessing phase. Currently supported by Protocols 4,5,12.
 - NUM_INPUTS: Define the number of inputs.
@@ -40,13 +40,12 @@ Changes can be applied either directly in the file or via running ```scripts/con
   Script to configure and compile executables for a run.
   Only arguments you want to change have to be set.
    -n Number of elements"
-   -a Default Bitlength of integers"
    -b base_port: Needs to be the same for all players for successful networking (e.g. 6000)"
-   -d Datatype used for slicing: 1(bool),8(char),64(uint64),128(SSE),256(AVX),512(AVX512)"
-   -p Player ID (0/1/2). Use all3 or all4 for compiling for all players"
+   -d Datatype used for slicing: 1(bool),8(uint8), 32(uint32), 64(uint64),128(SSE),256(AVX),512(AVX512)"
+   -p Player ID (0/1/2/3). Use all3 or all4 for compiling for all players"
    -f Function Idenftifier (0: search, 2: AND, ...)"
    -c Pack Bool in Char before sending? (0/1). Only used with -d 1"
-   -s MPC Protocol (1(Sharemind),2(Replicated),3(Astra),4(OEC DUP),5(OEC REP),6(TTP))"
+   -s MPC Protocol (1(Sharemind),2(Replicated),3(Astra),4(OEC DUP),5(OEC REP),6(TTP),...)"
    -i Initialize circuit separately (0) or at runtime (1)?"
    -l Include the Online Phase in this executable  (0/1)?"
    -e Compile circuit with Preprocessing phase before online phase  (0/1)?"
@@ -56,7 +55,7 @@ Changes can be applied either directly in the file or via running ```scripts/con
    -x Compiler (g++/clang++/..)"
    -h USE SSL? (0/1)"
    -j Number of parallel processes to use"
-   -v Random Number Generator (0: XOR_Shift/1 AES Bitsliced/2: AES_NI)"
+   -v Random Number Generator (0: XOR_Shift (insecure)/1 AES Bitsliced/2: AES_NI)"
    -t Total Timeout in seconds for attempting to connect to a player"
    -m VERIFY_BUFFER: How many gates should be buffered until verifying them? 0 means the data of an entire communication round is buffered "
    -k Timeout in milliseconds before attempting to connect again to a socket "
@@ -70,7 +69,6 @@ The following configuration compiles an executable for P2, 1024 inputs, sliced 2
 
 The following configuration uses the previous configuration but compiles an executable for all players. This is useful when running the parties on the same host.
 > ./scripts/config.sh -p all3
-
 
 The Split-Roles scripts transform a protocol into a homogeneous protocol by running multiple executables with different player assignments in parallel.
 
@@ -109,5 +107,11 @@ To run all players locally on one machine, omit the IP addresses or set them to 
 
 To measure the throughput of a specific function such as 64-bit mult, AND, or secure search, first, specify the function in `config.h`. Each process prints a time for running the computation and initialization. The initialization time measures setup costs, such as establishing a connection. When choosing multiple processes or Split-Roles, we recommend timing the whole script or executable with libraries such as /bin/time. To get accurate measurements with this approach, all nodes should connect simultaneously.
 
-The throughput in AND gates per second for instance, can then be calculated as `(NUM_INPUTS*DATTYPE*PROCESS_NUM*Split_Roles_Multiplier)/<Total time measured>`.
+The throughput in AND gates per second for instance, can then be calculated as $\frac{(NUM_INPUTS*DATTYPE*PROCESS_NUM*Split_Roles_Multiplier)}{<Total time measured>}$.
 
+
+### Debugging
+
+To check correctness of a protocol, the debug function (function 4) checks the correctness of all basic gates in the boolean domain. Function 7 does the same in the arithmetic domain using a ring size of $2^{32}$ for $32 \le DATTYPE \le 64$. Note that our implementation of protocols 1 and 2 do not support arithmetic circuits as of now.  
+
+You can also run secure search (function 0). The expected result is a string of only zeros and a single 1 at index 7. Make sure PRINT is set to 1 in the config to verify the result.

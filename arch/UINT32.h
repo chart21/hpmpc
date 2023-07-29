@@ -51,9 +51,9 @@
 #define FUNC_ADD32 std::plus<uint32_t>()
 #define FUNC_SUB32 std::minus<uint32_t>()
 #define FUNC_MUL32 std::multiplies<uint32_t>()
-#define FUNC_ADD64 std::plus<uint64_t>()
-#define FUNC_SUB64 std::minus<uint64_t>()
-#define FUNC_MUL64 std::multiplies<uint64_t>()
+#define FUNC_ADD64 std::plus<uint32_t>()
+#define FUNC_SUB64 std::minus<uint32_t>()
+#define FUNC_MUL64 std::multiplies<uint32_t>()
 
 
 #define ROTATE_MASK(x) (x == 64 ? -1ULL : x == 32 ? -1 : x == 16 ? 0xFFFF : \

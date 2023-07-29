@@ -40,16 +40,16 @@
 #define ADD_SIGNED(a,b,c) XOR(a,b)
 #define SUB_SIGNED(a,b,c) XOR(a,b)
 
-#define FUNC_AND  &&
-#define FUNC_OR   ||
-#define FUNC_XOR  ^
-#define FUNC_NOT  !
-#define FUNC_ADD32 ^
-#define FUNC_SUB32 ^
-#define FUNC_MUL32 &&
-#define FUNC_ADD64 ^
-#define FUNC_SUB64 ^
-#define FUNC_MUL64 &&
+#define FUNC_AND  std::bit_and<bool>()
+#define FUNC_OR   std::bit_or<bool>()
+#define FUNC_XOR  std::bit_xor<bool>()
+#define FUNC_NOT  std::bit_not<bool>()
+#define FUNC_ADD32 std::bit_xor<bool>()
+#define FUNC_SUB32 std::bit_xor<bool>()
+#define FUNC_MUL32 std::bit_and<bool>()
+#define FUNC_ADD64 std::bit_xor<bool>()
+#define FUNC_SUB64 std::bit_xor<bool>()
+#define FUNC_MUL64 std::bit_and<bool>()
 
 #ifndef DATATYPE
 #define DATATYPE bool 

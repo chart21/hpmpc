@@ -45,16 +45,16 @@
 #define ADD_SIGNED(a,b,c) a + b
 #define SUB_SIGNED(a,b,c) a - b
 
-#define FUNC_AND  &&
-#define FUNC_OR   ||
-#define FUNC_XOR  ^
-#define FUNC_NOT  ~
-#define FUNC_ADD32 +
-#define FUNC_SUB32 -
-#define FUNC_MUL32 *
-#define FUNC_ADD64 +
-#define FUNC_SUB64 -
-#define FUNC_MUL64 *
+#define FUNC_AND  std::bit_and<uint8_t>()
+#define FUNC_OR   std::bit_or<uint8_t>()
+#define FUNC_XOR  std::bit_xor<uint8_t>()
+#define FUNC_NOT  std::bit_not<uint8_t>()
+#define FUNC_ADD32 std::plus<uint8_t>()
+#define FUNC_SUB32 std::minus<uint8_t>()
+#define FUNC_MUL32 std::multiplies<uint8_t>()
+#define FUNC_ADD64 std::plus<uint8_t>()
+#define FUNC_SUB64 std::minus<uint8_t>()
+#define FUNC_MUL64 std::multiplies<uint8_t>()
 
 
 
