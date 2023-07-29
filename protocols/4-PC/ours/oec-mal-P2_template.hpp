@@ -118,7 +118,7 @@ for(int i = 0; i < l; i++)
     DATATYPE x_0 = getRandomVal(P023);
     DATATYPE u = getRandomVal(P123);
     a[i].r = x_0; //  = x_2, x_1 = 0
-    a[i].v = XOR(get_input_live(),x_0);
+    a[i].v = ADD(get_input_live(),x_0);
     send_to_live(P0,ADD(a[i].v,u));
     send_to_live(P1,ADD(a[i].v,u));
 }
@@ -128,6 +128,7 @@ else if(id == P0)
 for(int i = 0; i < l; i++)
 {
     a[i].r = getRandomVal(P023);
+    a[i].v = SET_ALL_ZERO();
     // u = 0
 }
 }

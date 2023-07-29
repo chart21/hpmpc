@@ -37,9 +37,10 @@ DATATYPE o1 = ADD(c.r1, ADD(MULT(a.r1,b.r1), getRandomVal(P013)));
 
 #if PROTOCOL == 11
 /* DATATYPE o4 = ADD(SUB(SUB(x1y1, MULT(a.r0,b.r1)) ,MULT(a.r1,b.r0)),getRandomVal(P123_2)); // r123_2 */
-DATATYPE o4 = ADD(SUB(MULT(a.r1, SUB(b.r0,b.r1)) ,MULT(b.r1,a.r0)),getRandomVal(P123_2)); // r123_2
+/* DATATYPE o4 = ADD(SUB(MULT(a.r1, SUB(b.r0,b.r1)) ,MULT(b.r1,a.r0)),getRandomVal(P123_2)); // r123_2 */
+DATATYPE o4 = ADD(SUB(MULT(a.r1, SUB(b.r1,b.r0)) ,MULT(b.r1,a.r0)),getRandomVal(P123_2)); // r123_2
 #else
-DATATYPE o4 = ADD(SUB(MULT(a.r1, SUB(b.r0,b.r1)) ,MULT(b.r1,a.r0)),SUB(getRandomVal(P123_2),c.r0)); // r123_2
+DATATYPE o4 = ADD(SUB(MULT(a.r1, SUB(b.r1,b.r0)) ,MULT(b.r1,a.r0)),SUB(getRandomVal(P123_2),c.r0)); // r123_2
 #endif
 
 /* DATATYPE o4 = ADD( SUB( MULT(a.r0,b.r1) ,MULT(a.r1,b.r0)),getRandomVal(P123)); */
@@ -122,9 +123,10 @@ if(id == PSELF)
 
     a[i].r0 = u;
     a[i].r1 = ADD(x_1,x_2);
-    send_to_live(P0, XOR(a[i].r0,v));
-    send_to_live(P1, XOR(a[i].r1,v));
-    send_to_live(P2, XOR(a[i].r1,v));
+    DATATYPE complete_masked = ADD(v, ADD(a[i].r1, a[i].r0));
+    send_to_live(P0, complete_masked);
+    send_to_live(P1, complete_masked);
+    send_to_live(P2, complete_masked);
     } 
 }
 else if(id == P0)

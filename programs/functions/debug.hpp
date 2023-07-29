@@ -7,6 +7,8 @@
 
 void compare(DATATYPE var[num_players][BITLENGTH]) 
 {
+if (current_phase != 1)
+    return;
 auto inputs = new DATATYPE[num_players][BITLENGTH];
 for(int i = 0; i < num_players; i++)
 {
@@ -15,11 +17,12 @@ for(int j = 0; j < BITLENGTH; j++)
 {
 
 #if FUNCTION_IDENTIFIER == 7
-inputs[i][j] = 3;
-if(3 != var[i][j] && 9 != var[i][j])
+/* inputs[i][j] = 3; */
+/* if(3 != var[i][j] && 9 != var[i][j]) */
+if(var[i][j] > 242)
 {
     num_erros++;
-    std::cout << var[i][j] << " " << i << " " << j << std::endl;
+    std::cout << PARTY << " " << var[i][j] << " " << i << " " << j << std::endl;
 }
 #else
 inputs[i][j] = SET_ALL_ONE();
@@ -144,15 +147,16 @@ for (int i = 0; i < BITLENGTH; i++) {
 std::cout << "Testing and gates: " << std::endl;
 compare(result);
 
-#if FUNCTION_IDENTIFIER != 7
 
 for(int j = 0; j < num_players; j++)
 {
 for (int i = 0; i < BITLENGTH; i++) {
 
     inputs[j][i] = P.Add(inputs[j][i],inputs[j][i],OP_ADD);
+#if FUNCTION_IDENTIFIER != 7
     if(i != j)
         inputs[j][i] = P.Not(inputs[j][i]);
+#endif
 }
 }
 
@@ -177,7 +181,6 @@ for (int i = 0; i < BITLENGTH; i++) {
 
 std::cout << "Testing NOT, XOR gates: " << std::endl;
 compare(result);
-#endif
 
 }
 // Reveal

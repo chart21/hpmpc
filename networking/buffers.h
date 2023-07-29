@@ -49,3 +49,4 @@ int pmiddle;
 
 int use_srng_for_inputs = 1;
 
+int current_phase = 0; //Keeping track of current pahse

@@ -110,11 +110,11 @@ for(int j = 0; j < BITLENGTH; j++)
 
 #if PARTY == 0
 inputs[i][j] = 11;
-#elif PARTY == 2
-inputs[i][j] = 7;
 #elif PARTY == 1
 inputs[i][j] = 5;
-#else
+#elif PARTY == 2
+inputs[i][j] = 7;
+#elif PARTY == 3
 inputs[i][j] = 3;
 #endif
 }

@@ -53,7 +53,7 @@ store_compare_view(P2,o1);
 
 }
 
-    template <typename func_add, typename func_sub>
+template <typename func_add, typename func_sub>
 void complete_mult(OEC_MAL_Share &c, func_add ADD, func_sub SUB)
 {
 #if PROTOCOL == 10 || PROTOCOL == 12
