@@ -79,6 +79,12 @@ DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 a = XOR(a, receive_from_live(P2));
 rb+=1;
 #endif
+
+#if PRE == 1 && HAS_POST_PROTOCOL == 1
+store_output_share(a);
+#endif
+
+
 return a;
 }
 

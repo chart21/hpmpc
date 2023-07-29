@@ -104,6 +104,8 @@ DATATYPE result = SUB(a.v, receive_from_live(P3));
 #endif
 store_compare_view(P0123, result); 
 // Problem, P3 sends all the values -> send in circle
+
+
 return result;
 }
 

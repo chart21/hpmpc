@@ -84,6 +84,12 @@ store_compare_view_init(P1);
 store_compare_view_init(P123);
 store_compare_view_init(P0123);
 #endif
+
+#if PRE == 1 && HAS_POST_PROTOCOL == 1
+store_output_share_();
+store_output_share_();
+#endif
+
 return a;
 }
 

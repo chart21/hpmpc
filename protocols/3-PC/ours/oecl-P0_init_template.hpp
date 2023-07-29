@@ -61,6 +61,9 @@ DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 /* for(int t = 0; t < num_players-1; t++) */ 
 /*     receiving_args[t].elements_to_rec[rounds-1]+=1; */
 receive_from_(P2);
+#if PRE == 1 && HAS_POST_PROTOCOL == 1
+store_output_share_();
+#endif
 return a;
 }
 

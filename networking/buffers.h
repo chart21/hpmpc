@@ -38,6 +38,10 @@ uint64_t elements_to_compare[num_players*multiplier] = {0};
 #endif
 //DATATYPE srng[num_players -1] = {0};
 //DATATYPE* input_seed;
+#if PRE == 1 && HAS_POST_PROTOCOL == 1 // Store preprocessed-output to get the correct results during post-processing
+DATATYPE* preprocessed_outputs;
+uint64_t preprocessed_outputs_index = 0;
+#endif
 int num_generated[num_players*multiplier] = {0};
 int pnext;
 int pprev;

@@ -216,6 +216,13 @@ void compare_views_init()
 
 #endif
 
+#if PRE == 1 &&  HAS_POST_PROTOCOL == 1
+void store_output_share_()
+{
+   preprocessed_outputs_index+=1; 
+}
+#endif
+
 
 void finalize_(std::string* ips)
 {
@@ -255,6 +262,10 @@ for(int t=0;t<(num_players*multiplier);t++) {
     verify_buffer[t] = new DATATYPE[elements_to_compare[t]];
 #endif
 }
+#endif
+
+#if PRE == 1 && HAS_POST_PROTOCOL == 1
+preprocessed_outputs_index = 0; // reset index for post phase
 #endif
 rounds = 0;
 sending_rounds = 0;
@@ -303,6 +314,11 @@ for(int t=0;t<(num_players-1);t++) {
     share_buffer[t] = 0;  
 
 }
+#if PRE == 1 && HAS_POST_PROTOCOL == 1
+preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
+preprocessed_outputs_index = 0;
+#endif
+
 rounds = 0;
 sending_rounds = 0;
 rb = 0;

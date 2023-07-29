@@ -98,3 +98,9 @@ int base_port = BASE_PORT; // temporary solution
 #define OP_MULT FUNC_MULT64
 #endif
 
+//temporary solution
+#if (PROTOCOL == 4 || PROTOCOL == 5) && PARTY == 0
+#define HAS_POST_PROTOCOL 1
+#elif PROTOCOL == 12 && PARTY == 3
+#define HAS_POST_PROTOCOL 1
+#endif

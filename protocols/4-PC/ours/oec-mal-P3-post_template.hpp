@@ -41,8 +41,9 @@ void prepare_reveal_to_all(Dealer_Share a)
 template <typename func_add, typename func_sub>
 DATATYPE complete_Reveal(Dealer_Share a, func_add ADD, func_sub SUB)
 {
-DATATYPE result = SUB(receive_from_live(P0),a.r0);
-store_compare_view(P123, a.r1);
+
+DATATYPE result = SUB(receive_from_live(P0),retrieve_output_share());
+store_compare_view(P123, retrieve_output_share());
 store_compare_view(P0123, result);
 return result;
 }

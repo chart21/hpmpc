@@ -44,7 +44,7 @@ void prepare_reveal_to_all(DATATYPE a)
 template <typename func_add, typename func_sub>
 DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 {
-a = XOR(a,receive_from_live(P2));
+a = XOR(retrieve_output_share(),receive_from_live(P2));
 return a;
 }
 

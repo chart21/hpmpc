@@ -192,7 +192,7 @@ do
     then
         if [ "$PARTY" = "all3" ] || [ "$PARTY" = "all4" ];
         then        
-            sed -i -e "s/\(PARTY \).*/\1"$i"/" config.h
+            sed -i -e "s/\(define PARTY \).*/\1"$i"/" config.h
         fi
         if [ "$LIVE" = "0" ] && [ "$INIT" = "1" ]; 
         then
@@ -211,7 +211,7 @@ done
 
 if [ "$PARTY" = "all4" ] || [ "$PARTY" = "3" ];
 then
-        sed -i -e "s/\(PARTY \).*/\1"3"/" config.h
+        sed -i -e "s/\(define PARTY \).*/\1"3"/" config.h
         if [ "$LIVE" = "0" ] && [ "$INIT" = "1" ]; 
         then
             sed -i -e "s/\(LIVE \).*/\10/" config.h

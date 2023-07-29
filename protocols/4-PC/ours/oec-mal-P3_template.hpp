@@ -91,8 +91,14 @@ store_compare_view(P123, a.r1);
 store_compare_view(P0123, result);
 return result;
 #else
+#if PRE == 1 && HAS_POST_PROTOCOL == 1
+store_output_share(a.r0);
+store_output_share(a.r1);
+#endif
 return a.r0;
 #endif
+
+
 }
 
 

@@ -71,11 +71,15 @@ void prepare_reveal_to_all(OECL_Share a)
 template <typename func_add, typename func_sub>
 DATATYPE complete_Reveal(OECL_Share a, func_add ADD, func_sub SUB)
 {
+#if PRE == 1 && HAS_POST_PROTOCOL == 1
+store_output_share(a.p2);
+#endif
 #if PRE == 1
     return a.p1;
 #else
 return SUB(receive_from_live(P2),a.p2);
 #endif
+
 }
 
 

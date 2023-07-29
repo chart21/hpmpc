@@ -49,7 +49,7 @@ void prepare_reveal_to_all(OECL_Share a)
 template <typename func_add, typename func_sub>
 DATATYPE complete_Reveal(OECL_Share a, func_add ADD, func_sub SUB)
 {
-return XOR(a.p2, receive_from_live(P2));
+return SUB(retrieve_output_share(), receive_from_live(P2));
 }
 
 

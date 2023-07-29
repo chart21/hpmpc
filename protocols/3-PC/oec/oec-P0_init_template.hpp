@@ -61,6 +61,9 @@ DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 {
 receive_from_(P2);
 return a;
+#if PRE == 1 && HAS_POST_PROTOCOL == 1
+store_output_share_();
+#endif
 }
 
 

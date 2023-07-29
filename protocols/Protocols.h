@@ -100,6 +100,7 @@
         #if PARTY == 0
             #if PRE == 1
                 #define PROTOCOL_LIVE OEC0_POST
+                /* #define HAS_POST_PROTOCOL 1 */
                 #include "3-PC/oec/oec-P0-post_template.hpp"
             #else
                 #define PROTOCOL_LIVE OEC0
@@ -146,6 +147,7 @@
         #if PARTY == 0
             #if PRE == 1
                 #define PROTOCOL_LIVE OECL0_POST
+                /* #define HAS_POST_PROTOCOL 1 */
                 #include "3-PC/ours/oecl-P0-post_template.hpp"
             #else
                 #define PROTOCOL_LIVE OECL0
@@ -225,6 +227,7 @@
         #if PARTY == 3
             #if PRE == 1
                 #define PROTOCOL_LIVE OEC_MAL3_POST
+                /* #define HAS_POST_PROTOCOL 1 */
                 #include "4-PC/ours/oec-mal-P3-post_template.hpp"
             #else
                 #define PROTOCOL_LIVE OEC_MAL3
