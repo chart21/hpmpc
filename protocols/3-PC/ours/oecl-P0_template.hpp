@@ -97,12 +97,12 @@ if(id == P0)
 #if OPT_SHARE == 1
     for(int i = 0; i < l; i++)
     {
-    a[i].p1 = get_input_live();
+    a[i].p1 = SUB(SET_ALL_ZERO(), get_input_live());
     a[i].p2 = getRandomVal(P1);
     #if PRE == 1 && SHARE_PREP == 1
-        pre_send_to_live(P2, ADD(a[i].p1,a[i].p2));
+        pre_send_to_live(P2, SUB(a[i].p2,a[i].p1));
     #else
-        send_to_live(P2, ADD(a[i].p1,a[i].p2));
+        send_to_live(P2, SUB(a[i].p2,a[i].p1));
     #endif
     }
 
