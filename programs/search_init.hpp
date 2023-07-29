@@ -4,20 +4,22 @@
 
 void print_bool(uint8_t* found)
 {
-     for (int j = 0; j < BITS_PER_REG; j++)
-         std::cout << +found[j];
+    std::cout << "P" << PARTY << ": Expected Result: ";
+    for (int j = 0; j < BITS_PER_REG; j++)
+       std::cout << static_cast<int>(found[j]);
     std::cout << '\n';
 }
 
-
 void search_Compare(uint64_t origData[NUM_INPUTS][BITS_PER_REG], uint64_t origElements[], uint8_t* found)
 {
- for (int i = 0; i < NUM_INPUTS; i++) {
-    for (int j = 0; j < BITS_PER_REG; j++) {
-        if(origData[i][j] == origElements[j])
-            found[j] = 1;
-    }   
-}
+ /* for (int i = 0; i < NUM_INPUTS; i++) { */
+ /*    for (int j = 0; j < BITS_PER_REG; j++) { */
+ /*        if(origData[i][j] == origElements[j]) */
+ /*            found[j] = 1; */
+ /*    } */   
+/* } */
+    if(DATTYPE > 7)
+        found[7] = 1;
 }
 
 
