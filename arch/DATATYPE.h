@@ -22,8 +22,10 @@
     #include "BOOL.h"
 #elif DATTYPE == 8 
     #include "CHAR.h"
+#elif DATTYPE == 16
+    #include "STD.h"
 #elif DATTYPE == 32
-    #include "UINT32.h"
+    #include "STD.h"
 #elif DATTYPE == 64 
     #include "STD.h"
 #elif DATTYPE == 128 

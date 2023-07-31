@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include "../config.h"
 
 #ifndef STD
 #define STD
@@ -86,13 +87,13 @@
 #define DATATYPE uint8_t // TODO: use something else? do something else?
                          // (needed for Photon right now)
 #define SDATATYPE int8_t
-#elif BITS_PER_REG == 8
+#elif DATTYPE == 8
 #define DATATYPE uint8_t
 #define SDATATYPE int8_t
-#elif BITS_PER_REG == 16
+#elif DATTYPE == 16
 #define DATATYPE uint16_t
 #define SDATATYPE int16_t
-#elif BITS_PER_REG == 32
+#elif DATTYPE == 32
 #define DATATYPE uint32_t
 #define SDATATYPE int32_t
 #else
@@ -112,7 +113,6 @@
 #define NEW(var) new var 
 
 
-#ifdef RUNTIME
 
 
 /* Orthogonalization stuffs */
@@ -135,48 +135,65 @@ static uint64_t mask_r[6] = {
 };
 
 
-void real_ortho(uint64_t data[]) {
-  for (int i = 0; i < 6; i ++) {
+void real_ortho(UINT_TYPE data[]) {
+  for (int i = 0; i < LOG2_BITLENGTH; i ++) {
     int nu = (1UL << i);
-    for (int j = 0; j < 64; j += (2 * nu))
+    for (int j = 0; j < BITLENGTH; j += (2 * nu))
       for (int k = 0; k < nu; k ++) {
-        uint64_t u = data[j + k] & mask_l[i];
-        uint64_t v = data[j + k] & mask_r[i];
-        uint64_t x = data[j + nu + k] & mask_l[i];
-        uint64_t y = data[j + nu + k] & mask_r[i];
+        UINT_TYPE u = data[j + k] & mask_l[i];
+        UINT_TYPE v = data[j + k] & mask_r[i];
+        UINT_TYPE x = data[j + nu + k] & mask_l[i];
+        UINT_TYPE y = data[j + nu + k] & mask_r[i];
         data[j + k] = u | (x >> nu);
         data[j + nu + k] = (v << nu) | y;
       }
   }
 }
 
-#ifdef ORTHO
 
-void orthogonalize(uint64_t* data, uint64_t* out) {
-  for (int i = 0; i < 64; i++)
+void orthogonalize_boolean(UINT_TYPE* data, DATATYPE* out) {
+  for (int i = 0; i < BITLENGTH; i++)
+    out[i] = ((DATATYPE*) data)[i];
+  real_ortho(out);
+}
+
+void unorthogonalize_boolean(DATATYPE *in, UINT_TYPE* data) {
+  for (int i = 0; i < DATTYPE; i++)
+    data[i] = ((DATATYPE*) in)[i];
+  real_ortho(data);
+}
+
+// STD does not allow arithemtic of packed integers -> only allow DATATYPE in/out
+
+void orthogonalize_arithmetic(DATATYPE* data, DATATYPE* out) {
+  for (int i = 0; i < BITLENGTH; i++)
+    out[i] = data[i];
+}
+
+    void unorthogonalize_arithemtic(DATATYPE *in, DATATYPE* data) {
+  for (int i = 0; i < DATTYPE; i++)
+    data[i] = in[i];
+}
+
+
+void orthogonalize_boolean_full(DATATYPE* data, DATATYPE* out) {
+  for (int i = 0; i < DATTYPE; i++)
     out[i] = data[i];
   real_ortho(out);
 }
 
-void unorthogonalize(uint64_t *in, uint64_t* data) {
-  for (int i = 0; i < 64; i++)
+void unorthogonalize_boolean_full(DATATYPE *in, DATATYPE* data) {
+  for (int i = 0; i < DATTYPE; i++)
     data[i] = in[i];
   real_ortho(data);
 }
 
-#else
-
-void orthogonalize(uint64_t* data, uint64_t* out) {
-  for (int i = 0; i < 64; i++)
+void orthogonalize_arithmetic_full(DATATYPE* data, DATATYPE* out) {
+  for (int i = 0; i < DATTYPE; i++)
     out[i] = data[i];
 }
 
-void unorthogonalize(uint64_t *in, uint64_t* data) {
-  for (int i = 0; i < 64; i++)
+void unorthogonalize_arithemtic_full(DATATYPE *in, DATATYPE* data) {
+  for (int i = 0; i < DATTYPE; i++)
     data[i] = in[i];
 }
-
-
-#endif /* ORTHO */
-
-#endif /* NO_RUNTIME */

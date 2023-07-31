@@ -12,12 +12,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "../config.h"
 
 #ifndef BOOL
 #define BOOL
 #endif
-#define BITSIZE 64
 #ifndef BITS_PER_REG
 #define BITS_PER_REG 1
 #endif
@@ -63,21 +62,21 @@
 #define ALLOC(size) malloc(size * sizeof(bool))
 
 
-void orthogonalize(uint64_t* num, bool* out) {
-  for (int i = 0; i < BITSIZE; i++)
+void orthogonalize_boolean(UINT_TYPE* num, bool* out) {
+  for (int i = 0; i < BITLENGTH; i++)
   {
-    out[BITSIZE-i-1] = *num & 1;
+    out[BITLENGTH-i-1] = *num & 1;
     *num /= 2;
   }
 }
 
 //convert bool array to uint64 number
-void unorthogonalize(bool *arr, uint64_t *num) {
+void unorthogonalize_boolean(bool *arr, uint64_t *num) {
    uint64_t tmp;
-    for (int i = 0; i < BITSIZE; i++)
+    for (int i = 0; i < BITLENGTH; i++)
     {
     tmp = arr[i];
-    *num |= tmp << (BITSIZE - i - 1);    
+    *num |= tmp << (BITLENGTH - i - 1);    
     }
 }
 

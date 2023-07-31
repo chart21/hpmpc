@@ -11,13 +11,11 @@
 #include <x86intrin.h>
 #include <stdint.h>
 #include <wmmintrin.h>
+#include "../config.h"
 #ifndef SSE
 #define SSE
 #endif
 
-#ifndef BITS_PER_REG
-#define BITS_PER_REG 128
-#endif
 
 /* #ifdef __WMMINTRIN_AES_H */
 #define MM_XOR _mm_xor_si128
@@ -109,7 +107,6 @@
 
 
 
-#ifdef RUNTIME
 
 
 /* Orthogonalization stuffs */
@@ -132,15 +129,15 @@ static uint64_t mask_r[6] = {
 };
 
 
-void real_ortho(uint64_t data[]) {
-  for (int i = 0; i < 6; i ++) {
+void real_ortho(UINT_TYPE data[]) {
+  for (int i = 0; i < LOG2_BITLENGTH; i ++) {
     int nu = (1UL << i);
-    for (int j = 0; j < 64; j += (2 * nu))
+    for (int j = 0; j < BITLENGTH; j += (2 * nu))
       for (int k = 0; k < nu; k ++) {
-        uint64_t u = data[j + k] & mask_l[i];
-        uint64_t v = data[j + k] & mask_r[i];
-        uint64_t x = data[j + nu + k] & mask_l[i];
-        uint64_t y = data[j + nu + k] & mask_r[i];
+        UINT_TYPE u = data[j + k] & mask_l[i];
+        UINT_TYPE v = data[j + k] & mask_r[i];
+        UINT_TYPE x = data[j + nu + k] & mask_l[i];
+        UINT_TYPE y = data[j + nu + k] & mask_r[i];
         data[j + k] = u | (x >> nu);
         data[j + nu + k] = (v << nu) | y;
       }
@@ -170,9 +167,9 @@ void real_ortho_128x64(__m128i data[]) {
     _mm_set_epi64x(0xffffffffffffffffUL,0x0000000000000000UL),
   };
 
-  for (int i = 0; i < 6; i ++) {
+  for (int i = 0; i < LOG2_BITLENGTH; i ++) {
     int nu = (1UL << i);
-    for (int j = 0; j < 64; j += (2 * nu))
+    for (int j = 0; j < BITLENGTH; j += (2 * nu))
       for (int k = 0; k < nu; k ++) {
         __m128i u = _mm_and_si128(data[j + k], mask_l[i]);
         __m128i v = _mm_and_si128(data[j + k], mask_r[i]);
@@ -295,39 +292,52 @@ void real_ortho_128x128_blend(__m128i data[]) {
   }
 }
 
-#ifdef ORTHO
 
-void orthogonalize_128x64(uint64_t* data, __m128i* out) {
-  real_ortho(data);
-  real_ortho(&(data[64]));
-  for (int i = 0; i < 64; i++)
+void orthogonalize_boolean(UINT_TYPE* data, __m128i* out) {
+  for (int i = 0; i < DATTYPE/BITLENGTH; i+=BITLENGTH)
+      real_ortho(&(data[i]));
+  for (int i = 0; i < BITLENGTH; i++)
+#if BITLENGTH == 64
     out[i] = _mm_set_epi64x(data[i], data[64+i]);
+#elif BITLENGTH == 32
+    out[i] = _mm_set_epi32(data[i], data[32+i], data[64+i], data[96+i]);
+#elif BITLENGTH == 16
+    out[i] = _mm_set_epi16(data[i], data[16+i], data[32+i], data[48+i],
+                           data[64+i], data[80+i], data[96+i], data[112+i]);
+#endif
 }
 
-void unorthogonalize_64x128(__m128i *in, uint64_t* data) {
-  for (int i = 0; i < 64; i++) {
-    alignas(16) uint64_t tmp[2];
+void unorthogonalize_boolean(__m128i *in, UINT_TYPE* data) {
+  for (int i = 0; i < BITLENGTH; i++) {
+    alignas(16) UINT_TYPE tmp[DATTYPE/BITLENGTH];
     _mm_store_si128 ((__m128i*)tmp, in[i]);
-    data[i] = tmp[1];
-    data[64+i] = tmp[0];
+    for (int j = 0; j < DATTYPE/BITLENGTH; j++)
+      data[j*BITLENGTH+i] = tmp[j];
   }
-  real_ortho(data);
-  real_ortho(&(data[64]));
+  for (int i = 0; i < DATTYPE/BITLENGTH; i+=BITLENGTH)
+      real_ortho(&(data[i]));
 }
 
-void orthogonalize_128x128(uint64_t* data, __m128i* out) {
+void orthogonalize_boolean_full(UINT_TYPE* data, __m128i* out) {
   for (int i = 0; i < 128; i++)
+  #if BITLENGTH == 64
     out[i] = _mm_set_epi64x(data[i], data[128+i]);
+  #elif BITLENGTH == 32
+    out[i] = _mm_set_epi32(data[i], data[128+i], data[256+i], data[384+i]);
+  #elif BITLENGTH == 16
+    out[i] = _mm_set_epi16(data[i], data[128+i], data[256+i], data[384+i],
+                           data[512+i], data[640+i], data[768+i], data[896+i]);
+    #endif
   real_ortho_128x128(out);
 }
 
-void unorthogonalize_128x128(__m128i *in, uint64_t* data) {
+void unorthogonalize_boolean_full(__m128i *in, UINT_TYPE* data) {
   real_ortho_128x128(in);
   for (int i = 0; i < 128; i++) {
-    alignas(16) uint64_t tmp[2];
+    alignas(16) UINT_TYPE tmp[DATTYPE/BITLENGTH];
     _mm_store_si128 ((__m128i*)tmp, in[i]);
-    data[i] = tmp[1];
-    data[128+i] = tmp[0];
+    for (int j = 0; j < DATTYPE/BITLENGTH; j++)
+      data[j*128+i] = tmp[j];
   }
 }
 
@@ -337,26 +347,46 @@ void unorthogonalize_128x128(__m128i *in, uint64_t* data) {
 /* void unorthogonalize(__m128i *in, uint64_t* data) { */
 /*   unorthogonalize_128x128(in,data); */
 /* } */
-void orthogonalize(uint64_t* data, __m128i* out) {
-  orthogonalize_128x64(data,out);
-}
-void unorthogonalize(__m128i *in, uint64_t* data) {
-  unorthogonalize_64x128(in,data);
-}
+
+/* void orthogonalize(uint64_t* data, __m128i* out) { */
+/*   orthogonalize_128x64(data,out); */
+/* } */
+/* void unorthogonalize(__m128i *in, uint64_t* data) { */
+/*   unorthogonalize_64x128(in,data); */
+/* } */
 
 
-#else
 
-void orthogonalize(uint64_t *in, __m128i *out) {
+void orthogonalize_arithemtic(UINT_TYPE *in, __m128i *out) {
   for (int i = 0; i < 128; i++)
+#if BITLENGTH == 64
     out[i] = _mm_set_epi64x (in[i*2], in[i*2+1]);
+#elif BITLENGTH == 32
+    out[i] = _mm_set_epi32 (in[i*4], in[i*4+1], in[i*4+2], in[i*4+3]);
+#elif BITLENGTH == 16
+    out[i] = _mm_set_epi16 (in[i*8], in[i*8+1], in[i*8+2], in[i*8+3],
+                            in[i*8+4], in[i*8+5], in[i*8+6], in[i*8+7]);
+#endif
 }
 
-void unorthogonalize(__m128i *in, uint64_t *out) {
+void unorthogonalize_arithmetic(__m128i *in, uint64_t *out) {
   for (int i = 0; i < 128; i++)
-    _mm_store_si128 ((__m128i*)&(out[i*2]), in[i]);
+    _mm_store_si128 ((__m128i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
 }
 
-#endif /* ORTHO */
+void orthogonalize_arithmetic_full(UINT_TYPE *in, __m128i *out) {
+  for (int i = 0; i < 128; i++)
+#if BITLENGTH == 64
+    out[i] = _mm_set_epi64x (in[i*2], in[i*2+1]);
+#elif BITLENGTH == 32
+    out[i] = _mm_set_epi32 (in[i*4], in[i*4+1], in[i*4+2], in[i*4+3]);
+#elif BITLENGTH == 16
+    out[i] = _mm_set_epi16 (in[i*8], in[i*8+1], in[i*8+2], in[i*8+3],
+                            in[i*8+4], in[i*8+5], in[i*8+6], in[i*8+7]);
+#endif
+}
 
-#endif /* NO_RUNTIME */
+void unorthogonalize_arithmetic_full(__m128i *in, UINT_TYPE *out) {
+  for (int i = 0; i < 128; i++)
+    _mm_store_si128 ((__m128i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
+}

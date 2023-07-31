@@ -104,3 +104,19 @@ int base_port = BASE_PORT; // temporary solution
 #elif PROTOCOL == 12 && PARTY == 3
 #define HAS_POST_PROTOCOL 1
 #endif
+
+#if BITLENGTH == 64
+    #define INT_TYPE int64_t
+    #define UINT_TYPE uint64_t
+    #define LOG2_BITLENGTH 6
+#elif BITLENGTH == 32
+    #define INT_TYPE int32_t
+    #define UINT_TYPE uint32_t
+    #define LOG2_BITLENGTH 5
+#elif BITLENGTH == 16
+    #define INT_TYPE int16_t
+    #define UINT_TYPE uint16_t
+    #define LOG2_BITLENGTH 4
+#endif
+
+

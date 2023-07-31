@@ -144,15 +144,15 @@ static uint64_t mask_r[6] = {
 };
 
 
-void real_ortho(uint64_t data[]) {
-  for (int i = 0; i < 6; i ++) {
+void real_ortho(UINT_TYPE data[]) {
+  for (int i = 0; i < LOG2_BITLENGTH; i ++) {
     int nu = (1UL << i);
-    for (int j = 0; j < 64; j += (2 * nu))
+    for (int j = 0; j < BITLENGTH; j += (2 * nu))
       for (int k = 0; k < nu; k ++) {
-        uint64_t u = data[j + k] & mask_l[i];
-        uint64_t v = data[j + k] & mask_r[i];
-        uint64_t x = data[j + nu + k] & mask_l[i];
-        uint64_t y = data[j + nu + k] & mask_r[i];
+        UINT_TYPE u = data[j + k] & mask_l[i];
+        UINT_TYPE v = data[j + k] & mask_r[i];
+        UINT_TYPE x = data[j + nu + k] & mask_l[i];
+        UINT_TYPE y = data[j + nu + k] & mask_r[i];
         data[j + k] = u | (x >> nu);
         data[j + nu + k] = (v << nu) | y;
       }
@@ -215,89 +215,100 @@ void real_ortho_512x512(__m512i data[]) {
   }
 }
 
-#ifdef ORTHO
 
-void orthogonalize_512x64(uint64_t* data, __m512i* out) {
-  real_ortho(data);
-  real_ortho(&(data[64]));
-  real_ortho(&(data[128]));
-  real_ortho(&(data[192]));
-  real_ortho(&(data[256]));
-  real_ortho(&(data[320]));
-  real_ortho(&(data[384]));
-  real_ortho(&(data[448]));
-  for (int i = 0; i < 64; i++)
+void orthogonalize_boolean(UINT_TYPE* data, __m512i* out) {
+  for (int i = 0; i < DATTYPE/BITLENGTH; i++)
+      real_ortho(&(data[i*BITLENGTH]));
+  for (int i = 0; i < BITLENGTH; i++)
+#if BITLENGTH == 64
     out[i] = _mm512_set_epi64(data[i], data[64+i], data[128+i], data[192+i],
                               data[256+i], data[320+i], data[384+i], data[448+i]);
+#elif BITLENGTH == 32
+    out[i] = _mm512_set_epi32(data[i], data[32+i], data[64+i], data[96+i],
+                              data[128+i], data[160+i], data[192+i], data[224+i],
+                              data[256+i], data[288+i], data[320+i], data[352+i],
+                              data[384+i], data[416+i], data[448+i], data[480+i]);
+#elif BITLENGTH == 16
+    out[i] = _mm512_set_epi16(data[i], data[16+i], data[32+i], data[48+i],
+                              data[64+i], data[80+i], data[96+i], data[112+i],
+                              data[128+i], data[144+i], data[160+i], data[176+i],
+                              data[192+i], data[208+i], data[224+i], data[240+i],
+                              data[256+i], data[272+i], data[288+i], data[304+i],
+                              data[320+i], data[336+i], data[352+i], data[368+i],
+                              data[384+i], data[400+i], data[416+i], data[432+i],
+                              data[448+i], data[464+i], data[480+i], data[496+i]);
 }
 
-void unorthogonalize_64x512(__m512i *in, uint64_t* data) {
-  for (int i = 0; i < 64; i++) {
-    alignas(64) uint64_t tmp[8];
+void unorthogonalize_boolean(__m512i *in, UINT_TYPE* data) {
+  for (int i = 0; i < BITLENGTH; i++) {
+    alignas(64) uint64_t tmp[DATTYPE/BITLENGTH];
     _mm512_store_si512 ((__m512i*)tmp, in[i]);
-    data[i] = tmp[7];
-    data[64+i] = tmp[6];
-    data[128+i] = tmp[5];
-    data[192+i] = tmp[4];
-    data[256+i] = tmp[3];
-    data[320+i] = tmp[2];
-    data[384+i] = tmp[1];
-    data[448+i] = tmp[0];
+    for (int j = 0; j < DATTYPE/BITLENGTH; j++)
+      data[j*BITLENGTH+i] = tmp[j];
   }
-  real_ortho(data);
-  real_ortho(&(data[64]));
-  real_ortho(&(data[128]));
-  real_ortho(&(data[192]));
-  real_ortho(&(data[256]));
-  real_ortho(&(data[320]));
-  real_ortho(&(data[384]));
-  real_ortho(&(data[448]));
+  for (int i = 0; i < DATTYPE/BITLENGTH; i++)
+      real_ortho(&(data[i*BITLENGTH]));
 }
 
-void orthogonalize_512x512(uint64_t* data, __m512i* out) {
+void orthogonalize_boolean_full(UINT_TYPE* data, __m512i* out) {
   for (int i = 0; i < 512; i++)
+#if BITLENGTH == 64
     out[i] = _mm512_set_epi64(data[i], data[512+i], data[1024+i],
                               data[1536+i], data[2048+i],data[2560+i],
                               data[3072+i],data[3584+i]);
+#elif BITLENGTH == 32
+    out[i] = _mm512_set_epi32(data[i], data[512+i], data[1024+i], data[1536+i],
+                              data[2048+i], data[2560+i], data[3072+i], data[3584+i],
+                              data[4096+i], data[4608+i], data[5120+i], data[5632+i],
+                              data[6144+i], data[6656+i], data[7168+i], data[7680+i]);
+#elif BITLENGTH == 16
+    out[i] = _mm512_set_epi16(data[i], data[512+i], data[1024+i], data[1536+i], data[2048+i], data[2560+i], data[3072+i], data[3584+i], data[4096+i], data[4608+i], data[5120+i], data[5632+i], data[6144+i], data[6656+i], data[7168+i], data[7680+i], data[8192+i], data[8704+i], data[9216+i], data[9728+i], data[10240+i], data[10752+i], data[11264+i], data[11776+i], data[12288+i], data[12800+i], data[13312+i], data[13824+i], data[14336+i], data[14848+i], data[15360+i], data[15872+i]);
+#endif
   real_ortho_512x512(out);
 }
 
-void unorthogonalize_512x512(__m512i *in, uint64_t* data) {
+void unorthogonalize_boolean_full(__m512i *in, UINT_TYPE* data) {
   real_ortho_512x512(in);
   for (int i = 0; i < 512; i++) {
-    alignas(64) uint64_t tmp[8];
+    alignas(64) UINT_TYPE tmp[DATTYPE/BITLENGTH];
     _mm512_store_si512 ((__m512i*)tmp, in[i]);
-    data[i]      = tmp[7];
-    data[512+i]  = tmp[6];
-    data[1024+i] = tmp[5];
-    data[1536+i] = tmp[4];
-    data[2048+i] = tmp[3];
-    data[2560+i] = tmp[2];
-    data[3072+i] = tmp[1];
-    data[3584+i] = tmp[0];
+    for (int j = 0; j < DATTYPE/BITLENGTH; j++)
+      data[j*512+i] = tmp[j];
   }
 }
 
-void orthogonalize(uint64_t* data, __m512i* out) {
-  orthogonalize_512x64(data,out);
-}
-void unorthogonalize(__m512i *in, uint64_t* data) {
-  unorthogonalize_64x512(in,data);
-}
+/* void orthogonalize(uint64_t* data, __m512i* out) { */
+/*   orthogonalize_512x64(data,out); */
+/* } */
+/* void unorthogonalize(__m512i *in, uint64_t* data) { */
+/*   unorthogonalize_64x512(in,data); */
+/* } */
 
-#else
 
-void orthogonalize(uint64_t *in, __m512i *out) {
+void orthogonalize_arithemtic(UINT_TYPE *in, __m512i *out) {
   for (int i = 0; i < 512; i++)
+#if BITLENGTH == 64
     out[i] = _mm512_set_epi64(in[i*8], in[i*8+1], in[i*8+2], in[i*8+3],
                               in[i*8+4], in[i*8+5], in[i*8+6], in[i*8+7]);
+#elif BITLENGTH == 32
+    out[i] = _mm512_set_epi32(in[i*16], in[i*16+1], in[i*16+2], in[i*16+3],
+                              in[i*16+4], in[i*16+5], in[i*16+6], in[i*16+7],
+                              in[i*16+8], in[i*16+9], in[i*16+10], in[i*16+11],
+                              in[i*16+12], in[i*16+13], in[i*16+14], in[i*16+15]);
+#elif BITLENGTH == 16
+    out[i] = _mm512_set_epi16(in[i*32], in[i*32+1], in[i*32+2], in[i*32+3],
+                              in[i*32+4], in[i*32+5], in[i*32+6], in[i*32+7],
+                              in[i*32+8], in[i*32+9], in[i*32+10], in[i*32+11],
+                              in[i*32+12], in[i*32+13], in[i*32+14], in[i*32+15],
+                              in[i*32+16], in[i*32+17], in[i*32+18], in[i*32+19],
+                              in[i*32+20], in[i*32+21], in[i*32+22], in[i*32+23],
+                              in[i*32+24], in[i*32+25], in[i*32+26], in[i*32+27],
+                              in[i*32+28], in[i*32+29], in[i*32+30], in[i*32+31]);
+#endif
 }
 
-void unorthogonalize(__m512i *in, uint64_t *out) {
+void unorthogonalize_arithemtic(__m512i *in, UINT_TYPE *out) {
   for (int i = 0; i < 512; i++)
     _mm512_store_si512 ((__m512i*)&(out[i*8]), in[i]);
 }
 
-#endif /* ORTHO */
-
-#endif /* NO_RUNTIME */
