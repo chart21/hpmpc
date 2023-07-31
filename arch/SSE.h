@@ -16,6 +16,10 @@
 #define SSE
 #endif
 
+#ifndef BITS_PER_REG
+#define BITS_PER_REG 128
+#endif
+
 
 /* #ifdef __WMMINTRIN_AES_H */
 #define MM_XOR _mm_xor_si128
@@ -48,16 +52,59 @@
 #define ADD_SIGNED(a,b,c) _mm_add_epi##c(a,b)
 #define SUB_SIGNED(a,b,c) _mm_sub_epi##c(a,b)
 
-#define FUNC_AND _mm_and_si128
-#define FUNC_OR _mm_or_si128
-#define FUNC_XOR _mm_xor_si128
-#define FUNC_ANDN _mm_andnot_si128
-#define FUNC_ADD32 _mm_add_epi32
-#define FUNC_ADD64 _mm_add_epi64
-#define FUNC_SUB32 _mm_sub_epi32
-#define FUNC_SUB64 _mm_sub_epi64
-#define FUNC_MUL32 _mm_mullo_epi32
-#define FUNC_MUL64 _mm_mullo_epi64
+#define FUNC_AND __mm_and_si128_wrapper
+#define FUNC_OR __mm_or_si128_wrapper
+#define FUNC_XOR __mm_xor_si128_wrapper
+#define FUNC_ANDN __mm_andnot_si128_wrapper
+#define FUNC_ADD32 __mm_add_epi32_wrapper
+#define FUNC_ADD64 __mm_add_epi64_wrapper
+#define FUNC_SUB32 __mm_sub_epi32_wrapper
+#define FUNC_SUB64 __mm_sub_epi64_wrapper
+#define FUNC_MUL32 __mm_mullo_epi32_wrapper
+#define FUNC_MUL64 _mm_mullo_epi64_wrapper
+
+// wrapper functions needed for some compilers
+
+inline __m128i __mm_and_si128_wrapper(__m128i a, __m128i b) {
+  return _mm_and_si128(a,b);
+}
+
+inline __m128i __mm_or_si128_wrapper(__m128i a, __m128i b) {
+  return _mm_or_si128(a,b);
+}
+
+inline __m128i __mm_xor_si128_wrapper(__m128i a, __m128i b) {
+  return _mm_xor_si128(a,b);
+}
+
+inline __m128i __mm_andnot_si128_wrapper(__m128i a, __m128i b) {
+  return _mm_andnot_si128(a,b);
+}
+
+inline __m128i __mm_add_epi32_wrapper(__m128i a, __m128i b) {
+  return _mm_add_epi32(a,b);
+}
+
+inline __m128i __mm_add_epi64_wrapper(__m128i a, __m128i b) {
+  return _mm_add_epi64(a,b);
+}
+
+inline __m128i __mm_sub_epi32_wrapper(__m128i a, __m128i b) {
+  return _mm_sub_epi32(a,b);
+}
+
+inline __m128i __mm_sub_epi64_wrapper(__m128i a, __m128i b) {
+  return _mm_sub_epi64(a,b);
+}
+
+inline __m128i __mm_mullo_epi32_wrapper(__m128i a, __m128i b) {
+  return _mm_mullo_epi32(a,b);
+}
+
+inline __m128i __mm_mullo_epi64_wrapper(__m128i a, __m128i b) {
+  return _mm_mullo_epi64(a,b);
+}
+
 
 
 #define L_SHIFT(a,b,c)  _mm_slli_epi##c(a,b)

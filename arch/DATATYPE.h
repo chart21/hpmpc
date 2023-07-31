@@ -9,15 +9,6 @@
 #define US
 
 
-#if DATTYPE == 1
-    #if COMPRESS == 1
-        #define BOOL_COMPRESS
-        #define NEW(var) new (std::align_val_t(sizeof(uint64_t))) var; //align variables for packing/unpacking
-    #else
-        #define NEW(var) new var;
-    #endif
-#endif
-
 #if DATTYPE == 1 
     #include "BOOL.h"
 #elif DATTYPE == 8 
@@ -38,6 +29,35 @@
     printf("Datatype not supported \n");
     exit(1);
 #endif
+
+#if FUNCTION_IDENTIFIER < 5
+#define OP_ADD FUNC_XOR
+#define OP_SUB FUNC_XOR
+#define OP_MULT FUNC_AND
+#elif FUNCTION_IDENTIFIER == 5 || FUNCTION_IDENTIFIER == 7 || FUNCTION_IDENTIFIER == 9
+#define OP_ADD FUNC_ADD32
+#define OP_SUB FUNC_SUB32
+#define OP_MULT FUNC_MUL32
+#elif FUNCTION_IDENTIFIER == 6 || FUNCTION_IDENTIFIER == 10
+#define OP_ADD FUNC_ADD64
+#define OP_SUB FUNC_SUB64
+#define OP_MULT FUNC_MUL64
+#endif
+
+#if DATTYPE == 1
+    #if COMPRESS == 1
+        #define BOOL_COMPRESS
+        #define NEW(var) new (std::align_val_t(sizeof(uint64_t))) var; //align variables for packing/unpacking
+    #else
+        #define NEW(var) new var;
+    #endif
+#endif
+
+
+
+
+
+
 
 #if num_players == 3
     #define PSELF 2

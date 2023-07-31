@@ -57,7 +57,7 @@ P.prepare_mult(data[0][j],data[2][j],data[0][j], OP_ADD, OP_SUB, OP_MULT);
 P.communicate();
 
 for (int j = 0; j < BITLENGTH; j++) {
-P.complete_and(data[0][j], OP_ADD, OP_SUB);
+P.complete_mult(data[0][j], OP_ADD, OP_SUB);
 P.prepare_reveal_to_all(data[0][j]);
   }
 

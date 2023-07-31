@@ -9,7 +9,7 @@ void print_bool(uint8_t* found)
 }
 
 
-void search_Compare(uint64_t origData[NUM_INPUTS][BITS_PER_REG], uint64_t origElements[], uint8_t* found)
+void search_Compare(UINT_TYPE origData[NUM_INPUTS][BITS_PER_REG], UINT_TYPE origElements[], uint8_t* found)
 {
  for (int i = 0; i < NUM_INPUTS; i++) {
     for (int j = 0; j < BITS_PER_REG; j++) {
@@ -20,7 +20,7 @@ void search_Compare(uint64_t origData[NUM_INPUTS][BITS_PER_REG], uint64_t origEl
 }
 
 
-void insertManually(DATATYPE dataset[NUM_INPUTS][BITLENGTH], DATATYPE elements[NUM_INPUTS], uint64_t origData[NUM_INPUTS][BITS_PER_REG], uint64_t origElements[], int c, int b, uint64_t numElement, uint64_t numDataset ){
+void insertManually(DATATYPE dataset[NUM_INPUTS][BITLENGTH], DATATYPE elements[NUM_INPUTS], UINT_TYPE origData[NUM_INPUTS][BITS_PER_REG], UINT_TYPE origElements[], int c, int b, uint64_t numElement, uint64_t numDataset ){
 
 origData[c][b] = numDataset;
 origElements[b] = numElement;
@@ -35,24 +35,24 @@ print_bool(cfound);
 
 
 
-orthogonalize(origElements, elements);
+orthogonalize_boolean(origElements, elements);
 
 for (int i = 0; i < NUM_INPUTS; i++) {
- orthogonalize(origData[i], dataset[i]);   
+ orthogonalize_boolean(origData[i], dataset[i]);   
 }
 }
 void randomizeInputs(DATATYPE dataset[NUM_INPUTS][BITLENGTH], DATATYPE elements[NUM_INPUTS])
 {
     // init randomization
-uint64_t* iseed = NEW(uint64_t[BITS_PER_REG]);
-for (int i = 0; i < BITS_PER_REG; i++) {
+UINT_TYPE* iseed = NEW(UINT_TYPE[DATTYPE]);
+for (int i = 0; i < DATTYPE; i++) {
     iseed[i] = rand();
 }
 DATATYPE* seed = new DATATYPE[BITLENGTH];
-orthogonalize(iseed, seed);
+orthogonalize_boolean(iseed, seed);
 
 //generate random data
-for (int i = 0; i < int( NUM_INPUTS / (sizeof(DATATYPE)*8)/BITS_PER_REG ); i++) {
+for (int i = 0; i < int( NUM_INPUTS / (sizeof(DATATYPE)*8)/DATTYPE ); i++) {
      xor_shift__(seed, dataset[i]);
  }
 xor_shift__(seed, elements);

@@ -51,25 +51,25 @@ int modulo(int x,int N){
 void init_srng(uint64_t link_id, uint64_t link_seed)
 {
     #if RANDOM_ALGORITHM == 0
-    uint64_t gen_seeds[DATTYPE];
+    UINT_TYPE gen_seeds[DATTYPE];
    for (int i = 0; i < DATTYPE; i++) {
       gen_seeds[i] = link_seed * (i+1); // replace with independant seeds in the future
    }
 /* int incr = (DATTYPE -1) / 64 + 1; */
 /* for (int i = 0; i < 64; i+=incr) { */
 /* orthogonalize(gen_seeds+i, srng[link_id]+i); */
-orthogonalize(gen_seeds, srng[link_id]);
+orthogonalize_boolean(gen_seeds, srng[link_id]);
 
 #elif RANDOM_ALGORITHM == 1
-    uint64_t gen_keys[11][DATTYPE*2];
+    UINT_TYPE gen_keys[11][DATTYPE*128/BITLENGTH];
     for (int i = 0; i < 11; i++) {
-        for (int j = 0; j < DATTYPE*2; j++) {
+        for (int j = 0; j < DATTYPE*128/BITLENGTH; j++) {
             gen_keys[i][j] = link_seed * ((i+1)*j); // replace with independant seeds in the future
         }
     }
     for (int i = 0; i < 11; i++) {
-            orthogonalize(gen_keys[i], key[link_id][i]);
-            orthogonalize(gen_keys[i]+64, key[link_id][i]+1);
+            for(int j = 0; j < DATTYPE*128/BITLENGTH; j++)
+                orthogonalize_boolean(gen_keys[i]+j, key[link_id][i]+j);
             }
     
 #elif RANDOM_ALGORITHM == 2

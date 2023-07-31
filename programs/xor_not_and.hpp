@@ -13,7 +13,7 @@ void print_bool(uint8_t* found)
 }
 
 
-void compare(uint64_t origData[num_players][DATTYPE], uint64_t result[DATTYPE])
+void compare(UINT_TYPE origData[num_players][DATTYPE], UINT_TYPE result[DATTYPE])
 {
     for (int j = 0; j < DATTYPE; j++) {
         origData[0][j] = !( origData[0][j] ^ origData[1][j] );
@@ -46,10 +46,10 @@ for (int i = 0; i < num_players; i++) {
 
 player_input = dataset[PARTY];
 
-alignas(DATTYPE) uint64_t regular_data[num_players][DATTYPE];
-alignas(DATTYPE) uint64_t result[DATTYPE];
+alignas(DATTYPE) UINT_TYPE regular_data[num_players][DATTYPE];
+alignas(DATTYPE) UINT_TYPE result[DATTYPE];
 for (int i = 0; i < num_players; i++) {
-UNORTHOGONALIZE(dataset[i], regular_data[i]);
+unorthogonalize_boolean(dataset[i], regular_data[i]);
     }
     //
 #if PRINT == 1

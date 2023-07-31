@@ -10,13 +10,13 @@
 #define FUNCTION_IDENTIFIER 0
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 64
+#define DATTYPE 128
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 100
+#define NUM_INPUTS 128
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -72,7 +72,7 @@ int base_port = BASE_PORT; // temporary solution
 #define INPUT 'r'
 
 // Bitlength of integers (currently not used)
-#define BITLENGTH 64 
+#define BITLENGTH 64
 
 
 #if PROTOCOL < 7
@@ -84,19 +84,6 @@ int base_port = BASE_PORT; // temporary solution
 #define MAL 1
 #endif
 
-#if FUNCTION_IDENTIFIER < 5
-#define OP_ADD FUNC_XOR
-#define OP_SUB FUNC_XOR
-#define OP_MULT FUNC_AND
-#elif FUNCTION_IDENTIFIER == 5 || FUNCTION_IDENTIFIER == 7 || FUNCTION_IDENTIFIER == 9
-#define OP_ADD FUNC_ADD32
-#define OP_SUB FUNC_SUB32
-#define OP_MULT FUNC_MUL32
-#elif FUNCTION_IDENTIFIER == 6 || FUNCTION_IDENTIFIER == 10
-#define OP_ADD FUNC_ADD64
-#define OP_SUB FUNC_SUB64
-#define OP_MULT FUNC_MUL64
-#endif
 
 //temporary solution
 #if (PROTOCOL == 4 || PROTOCOL == 5) && PARTY == 0
@@ -118,5 +105,4 @@ int base_port = BASE_PORT; // temporary solution
     #define UINT_TYPE uint16_t
     #define LOG2_BITLENGTH 4
 #endif
-
 

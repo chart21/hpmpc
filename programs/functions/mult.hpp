@@ -8,6 +8,7 @@
 #include "../../protocols/Protocols.h"
 #define RESULTTYPE DATATYPE
 
+
 template<typename Pr, typename S>
 void AND_BENCH_1 (Pr P,/*outputs*/ DATATYPE* result)
 {

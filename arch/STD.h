@@ -18,10 +18,10 @@
 #endif
 
 #ifndef BITS_PER_REG
-#define BITS_PER_REG 64
+#define BITS_PER_REG DATTYPE
 #endif
 #ifndef LOG2_BITS_PER_REG
-#define LOG2_BITS_PER_REG 6
+#define LOG2_BITS_PER_REG LOG2_DATATYPE
 #endif
 
 /* Defining 0 and 1 */
@@ -159,7 +159,7 @@ void orthogonalize_boolean(UINT_TYPE* data, DATATYPE* out) {
 
 void unorthogonalize_boolean(DATATYPE *in, UINT_TYPE* data) {
   for (int i = 0; i < DATTYPE; i++)
-    data[i] = ((DATATYPE*) in)[i];
+    data[i] = ((UINT_TYPE*) in)[i];
   real_ortho(data);
 }
 
@@ -176,13 +176,13 @@ void orthogonalize_arithmetic(DATATYPE* data, DATATYPE* out) {
 }
 
 
-void orthogonalize_boolean_full(DATATYPE* data, DATATYPE* out) {
+void orthogonalize_boolean_full(UINT_TYPE* data, DATATYPE* out) {
   for (int i = 0; i < DATTYPE; i++)
     out[i] = data[i];
   real_ortho(out);
 }
 
-void unorthogonalize_boolean_full(DATATYPE *in, DATATYPE* data) {
+void unorthogonalize_boolean_full(DATATYPE *in, UINT_TYPE* data) {
   for (int i = 0; i < DATTYPE; i++)
     data[i] = in[i];
   real_ortho(data);

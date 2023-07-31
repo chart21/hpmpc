@@ -333,12 +333,12 @@ DATATYPE* ortho_data = NEW (DATATYPE[1000000000]);
 finish21 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 1000000000/DATTYPE; i+=DATTYPE) 
 {
-    orthogonalize(data+i,ortho_data+i);
+    orthogonalize_boolean(data+i,ortho_data+i);
 }
 finish22 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 1000000000/DATTYPE; i+=DATTYPE) 
 {
-    unorthogonalize(ortho_data+i,data+i);
+    unorthogonalize_boolean(ortho_data+i,data+i);
 }
 finish23 = std::chrono::high_resolution_clock::now();
 
