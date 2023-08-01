@@ -339,18 +339,17 @@ void real_ortho_128x128_blend(__m128i data[]) {
   }
 }
 
-
 void orthogonalize_boolean(UINT_TYPE* data, __m128i* out) {
   for (int i = 0; i < DATTYPE/BITLENGTH; i+=BITLENGTH)
       real_ortho(&(data[i]));
   for (int i = 0; i < BITLENGTH; i++)
 #if BITLENGTH == 64
-    out[i] = _mm_set_epi64x(data[i], data[64+i]);
+    out[i] = _mm_set_epi64x(data[64+i], data[i]);
 #elif BITLENGTH == 32
-    out[i] = _mm_set_epi32(data[i], data[32+i], data[64+i], data[96+i]);
+    out[i] = _mm_set_epi32(data[96+i], data[64+i], data[32+i], data[i]);
 #elif BITLENGTH == 16
-    out[i] = _mm_set_epi16(data[i], data[16+i], data[32+i], data[48+i],
-                           data[64+i], data[80+i], data[96+i], data[112+i]);
+    out[i] = _mm_set_epi16(data[112+i], data[96+i], data[80+i], data[64+i],
+                           data[48+i], data[32+i], data[16+i], data[i]);
 #endif
 }
 
@@ -364,17 +363,16 @@ void unorthogonalize_boolean(__m128i *in, UINT_TYPE* data) {
   for (int i = 0; i < DATTYPE/BITLENGTH; i+=BITLENGTH)
       real_ortho(&(data[i]));
 }
-
 void orthogonalize_boolean_full(UINT_TYPE* data, __m128i* out) {
   for (int i = 0; i < 128; i++)
-  #if BITLENGTH == 64
-    out[i] = _mm_set_epi64x(data[i], data[128+i]);
-  #elif BITLENGTH == 32
-    out[i] = _mm_set_epi32(data[i], data[128+i], data[256+i], data[384+i]);
-  #elif BITLENGTH == 16
-    out[i] = _mm_set_epi16(data[i], data[128+i], data[256+i], data[384+i],
-                           data[512+i], data[640+i], data[768+i], data[896+i]);
-    #endif
+#if BITLENGTH == 64
+    out[i] = _mm_set_epi64x(data[128+i], data[i]);
+#elif BITLENGTH == 32
+    out[i] = _mm_set_epi32(data[384+i], data[256+i], data[128+i], data[i]);
+#elif BITLENGTH == 16
+    out[i] = _mm_set_epi16(data[896+i], data[768+i], data[640+i], data[512+i],
+                           data[384+i], data[256+i], data[128+i], data[i]);
+#endif
   real_ortho_128x128(out);
 }
 
@@ -388,48 +386,32 @@ void unorthogonalize_boolean_full(__m128i *in, UINT_TYPE* data) {
   }
 }
 
-/* void orthogonalize(uint64_t* data, __m128i* out) { */
-/*   orthogonalize_128x128(data,out); */
-/* } */
-/* void unorthogonalize(__m128i *in, uint64_t* data) { */
-/*   unorthogonalize_128x128(in,data); */
-/* } */
-
-/* void orthogonalize(uint64_t* data, __m128i* out) { */
-/*   orthogonalize_128x64(data,out); */
-/* } */
-/* void unorthogonalize(__m128i *in, uint64_t* data) { */
-/*   unorthogonalize_64x128(in,data); */
-/* } */
-
-
-
-void orthogonalize_arithemtic(UINT_TYPE *in, __m128i *out) {
-  for (int i = 0; i < 128; i++)
+void orthogonalize_arithmetic(UINT_TYPE *in, __m128i *out) {
+  for (int i = 0; i < BITLENGTH; i++)
 #if BITLENGTH == 64
-    out[i] = _mm_set_epi64x (in[i*2], in[i*2+1]);
+    out[i] = _mm_set_epi64x (in[i*2+1], in[i*2]);
 #elif BITLENGTH == 32
-    out[i] = _mm_set_epi32 (in[i*4], in[i*4+1], in[i*4+2], in[i*4+3]);
+    out[i] = _mm_set_epi32 (in[i*4+3], in[i*4+2], in[i*4+1], in[i*4]);
 #elif BITLENGTH == 16
-    out[i] = _mm_set_epi16 (in[i*8], in[i*8+1], in[i*8+2], in[i*8+3],
-                            in[i*8+4], in[i*8+5], in[i*8+6], in[i*8+7]);
+    out[i] = _mm_set_epi16 (in[i*8+7], in[i*8+6], in[i*8+5], in[i*8+4],
+                            in[i*8+3], in[i*8+2], in[i*8+1], in[i*8]);
 #endif
 }
 
-void unorthogonalize_arithmetic(__m128i *in, uint64_t *out) {
-  for (int i = 0; i < 128; i++)
+void unorthogonalize_arithmetic(__m128i *in, UINT_TYPE *out) {
+  for (int i = 0; i < BITLENGTH; i++)
     _mm_store_si128 ((__m128i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
 }
 
 void orthogonalize_arithmetic_full(UINT_TYPE *in, __m128i *out) {
   for (int i = 0; i < 128; i++)
 #if BITLENGTH == 64
-    out[i] = _mm_set_epi64x (in[i*2], in[i*2+1]);
+    out[i] = _mm_set_epi64x (in[i*2+1], in[i*2]);
 #elif BITLENGTH == 32
-    out[i] = _mm_set_epi32 (in[i*4], in[i*4+1], in[i*4+2], in[i*4+3]);
+    out[i] = _mm_set_epi32 (in[i*4+3], in[i*4+2], in[i*4+1], in[i*4]);
 #elif BITLENGTH == 16
-    out[i] = _mm_set_epi16 (in[i*8], in[i*8+1], in[i*8+2], in[i*8+3],
-                            in[i*8+4], in[i*8+5], in[i*8+6], in[i*8+7]);
+    out[i] = _mm_set_epi16 (in[i*8+7], in[i*8+6], in[i*8+5], in[i*8+4],
+                            in[i*8+3], in[i*8+2], in[i*8+1], in[i*8]);
 #endif
 }
 

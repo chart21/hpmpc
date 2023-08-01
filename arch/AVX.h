@@ -249,16 +249,18 @@ void real_ortho_256x256(__m256i data[]) {
 }
 
 void orthogonalize_boolean(UINT_TYPE* data, __m256i* out) {
-  for (int i = 0; i < DATTYPE; i+=BITLENGTH)
-        real_ortho(&(data[BITLENGTH]));
-  for (int i = 0; i < BITLENGTH; i++)
+  for (int i = 0; i < DATTYPE; i += BITLENGTH)
+    real_ortho(&(data[i]));
+
+  for (int i = 0; i < BITLENGTH; i++) {
     #if BITLENGTH == 64
-    out[i] = _mm256_set_epi64x(data[i], data[64+i], data[128+i], data[192+i]);
+      out[i] = _mm256_set_epi64x(data[192+i], data[128+i], data[64+i], data[i]);
     #elif BITLENGTH == 32
-    out[i] = _mm256_set_epi32(data[i], data[32+i], data[64+i], data[96+i], data[128+i], data[160+i], data[192+i], data[224+i]);
+      out[i] = _mm256_set_epi32(data[224+i], data[192+i], data[160+i], data[128+i], data[96+i], data[64+i], data[32+i], data[i]);
     #elif BITLENGTH == 16
-    out[i] = _mm256_set_epi16(data[i], data[16+i], data[32+i], data[48+i], data[64+i], data[80+i], data[96+i], data[112+i], data[128+i], data[144+i], data[160+i], data[176+i], data[192+i], data[208+i], data[224+i], data[240+i]);
+      out[i] = _mm256_set_epi16(data[240+i], data[224+i], data[208+i], data[192+i], data[176+i], data[160+i], data[144+i], data[128+i], data[112+i], data[96+i], data[80+i], data[64+i], data[48+i], data[32+i], data[16+i], data[i]);
     #endif
+  }
 }
 
 void unorthogonalize_boolean(__m256i *in, UINT_TYPE* data) {
@@ -268,104 +270,28 @@ void unorthogonalize_boolean(__m256i *in, UINT_TYPE* data) {
     for (int j = 0; j < DATTYPE/BITLENGTH; j++)
       data[i+j*BITLENGTH] = tmp[j];
   }
-  for (int i = 0; i < DATTYPE; i+=BITLENGTH)
-      real_ortho(&(data[BITLENGTH]));
+
+  for (int i = 0; i < DATTYPE; i += BITLENGTH)
+    real_ortho(&(data[i]));
 }
-
-void orthogonalize_boolean_full(UINT_TYPE* data, __m256i* out) {
-  for (int i = 0; i < 256; i++)
-    #if BITLENGTH == 64
-      out[i] = _mm256_set_epi64x(data[i], data[256+i], data[512+i], data[768+i]);
-    #elif BITLENGTH == 32
-      out[i] = _mm256_set_epi32(data[i], data[256+i], data[512+i], data[768+i], data[1024+i], data[1280+i], data[1536+i], data[1792+i]);
-    #elif BITLENGTH == 16
-      out[i] ==_mm256_set_epi16(data[i], data[256+i], data[512+i], data[768+i], data[1024+i], data[1280+i], data[1536+i], data[1792+i], data[2048+i], data[2304+i], data[2560+i], data[2816+i], data[3072+i], data[3328+i], data[3584+i], data[3840+i]);
-    #endif
-  real_ortho_256x256(out);
-}
-
-void unorthogonalize_boolean_full(__m256i *in, UINT_TYPE* data) {
-  real_ortho_256x256(in);
-  for (int i = 0; i < 256; i++) {
-    alignas(32) UINT_TYPE tmp[DATTYPE/BITLENGTH];
-    _mm256_store_si256 ((__m256i*)tmp, in[i]);
-    for (int j = 0; j < DATTYPE/BITLENGTH; j++)
-      data[i+j*256] = tmp[j];
-  }
-}
-
-
-/* void orthogonalize(uint64_t* data, __m256i* out) { */
-/*   orthogonalize_256x64(data,out); */
-/* } */
-/* void unorthogonalize(__m256i *in, uint64_t* data) { */
-/*   unorthogonalize_64x256(in,data); */
-/* } */
-
-#if BITLENGTH == 64
-
-void orthogonalize_arithmetic(uint64_t *in, __m256i *out) {
-  for (int i = 0; i < 64; i++)
-    out[i] = _mm256_set_epi64x (in[i*4], in[i*4+1], in[i*4+2], in[i*4+3]);
-}
-
-void unorthogonalize_arithmetic(__m256i *in, uint64_t *out) {
-  for (int i = 0; i < 64; i++)
-    _mm256_store_si256 ((__m256i*)&(out[i*4]), in[i]);
-}
-
-#elif BITLENGTH == 32
-
-void orthogonalize_arithmetic(uint32_t *in, __m256i *out) {
-  for (int i = 0; i < 32; i++)
-    out[i] = _mm256_set_epi32 (in[i*8], in[i*8+1], in[i*8+2], in[i*8+3],
-                               in[i*8+4], in[i*8+5], in[i*8+6], in[i*8+7]);
-}
-
-
-void unorthogonalize_arithmetic(__m256i *in, uint32_t *out) {
-  for (int i = 0; i < 32; i++)
-    _mm256_store_si256 ((__m256i*)&(out[i*8]), in[i]);
-}
-
-#elif BITLENGTH == 16
-
-void orthogonalize_arithemtic(uint16_t *in, __m256i *out) {
-  for (int i = 0; i < 16; i++)
-    out[i] = _mm256_set_epi16 (in[i*16], in[i*16+1], in[i*16+2], in[i*16+3],
-                               in[i*16+4], in[i*16+5], in[i*16+6], in[i*16+7],
-                               in[i*16+8], in[i*16+9], in[i*16+10], in[i*16+11],
-                               in[i*16+12], in[i*16+13], in[i*16+14], in[i*16+15]);
-}
-
-void unorthogonalize_arithmetic(__m256i *in, uint16_t *out) {
-  for (int i = 0; i < 16; i++)
-    _mm256_store_si256 ((__m256i*)&(out[i*16]), in[i]);
-}
-
-#endif
-
-
-
-
 
 void orthogonalize_arithmetic_full(UINT_TYPE *in, __m256i *out) {
   for (int i = 0; i < 256; i++)
 #if BITLENGTH == 64
-    out[i] = _mm256_set_epi64x (in[i*4], in[i*4+1], in[i*4+2], in[i*4+3]);
+    out[i] = _mm256_set_epi64x(in[i*4+3], in[i*4+2], in[i*4+1], in[i*4]);
 #elif BITLENGTH == 32
-    out[i] = _mm256_set_epi32 (in[i*8], in[i*8+1], in[i*8+2], in[i*8+3],
-                               in[i*8+4], in[i*8+5], in[i*8+6], in[i*8+7]);
+    out[i] = _mm256_set_epi32(in[i*8+7], in[i*8+6], in[i*8+5], in[i*8+4],
+                              in[i*8+3], in[i*8+2], in[i*8+1], in[i*8]);
 #elif BITLENGTH == 16
-    out[i] = _mm256_set_epi16 (in[i*16], in[i*16+1], in[i*16+2], in[i*16+3],
-                               in[i*16+4], in[i*16+5], in[i*16+6], in[i*16+7],
-                               in[i*16+8], in[i*16+9], in[i*16+10], in[i*16+11],
-                               in[i*16+12], in[i*16+13], in[i*16+14], in[i*16+15]);
+    out[i] = _mm256_set_epi16(in[i*16+15], in[i*16+14], in[i*16+13], in[i*16+12],
+                              in[i*16+11], in[i*16+10], in[i*16+9], in[i*16+8],
+                              in[i*16+7], in[i*16+6], in[i*16+5], in[i*16+4],
+                              in[i*16+3], in[i*16+2], in[i*16+1], in[i*16]);
 #endif
 }
 
 void unorthogonalize_arithmetic_full(__m256i *in, UINT_TYPE *out) {
   for (int i = 0; i < 256; i++)
-    _mm256_store_si256 ((__m256i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
+    _mm256_store_si256 ((__m256i*)&(out[i*(DATTYPE/BITLENGTH)]), in[i]);
 }
 
