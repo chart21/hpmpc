@@ -10,6 +10,7 @@
 #include <new>
 #include <memory>
 #include "arch/DATATYPE.h"
+#include "arch/SSE.h"
 #include "protocols/init_protocol_base.hpp"
 #include "protocols/live_protocol_base.hpp"
 
@@ -170,18 +171,18 @@ for(int t=0;t<(num_players-1);t++) { // ???
     #endif
     }
     #if INIT == 1 && NO_INI == 0
-    auto p_init = PROTOCOL_INIT(OPT_SHARE);
+    /* auto p_init = PROTOCOL_INIT<DATATYPE>(); */
     auto garbage = new RESULTTYPE;
-    FUNCTION<PROTOCOL_INIT,INIT_SHARE>(p_init,garbage);
+    FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
     #if MAL==1
         compare_views_init();
         /* p_init.communicate(); */
     #endif
 
     #if PRE == 1
-    p_init.finalize(ips,receiving_args_pre,sending_args_pre);
+        PROTOCOL_INIT<DATATYPE>::finalize(ips,receiving_args_pre,sending_args_pre);
     #else
-    p_init.finalize(ips); //TODO change to new version
+        PROTOCOL_INIT<DATATYPE>::finalize(ips); //TODO change to new version
     #endif
     /* #if LIVE == 0 */
     /*     export_Details_to_file(); */
@@ -377,9 +378,9 @@ int ret;
     std::chrono::high_resolution_clock::time_point c1 =
             std::chrono::high_resolution_clock::now();
     
-    auto p_live = PROTOCOL_LIVE(OPT_SHARE);
+    /* auto p_live = PROTOCOL_LIVE(); */
     auto result = new RESULTTYPE;
-    FUNCTION<PROTOCOL_LIVE,SHARE>(p_live,result);
+    FUNCTION<PROTOCOL_LIVE<DATATYPE>>(result);
     #if MAL==1
         compare_views();
         /* p_live.communicate(); */

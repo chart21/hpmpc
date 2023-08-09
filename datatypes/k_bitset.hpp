@@ -1,59 +1,110 @@
 #include <array>
 #include <stdexcept>
-#include "../arch/DATATYPE.h"
-
-template<typename Int_type, typename Pr>
-class sbitset {
+#include "../protocols/Protocols.h"
+template<typename Pr>
+class sbitset_t {
 private:
-    std::array<DATATYPE, sizeof(Int_type)> arr;
-    size_t k = sizeof(Int_type)*8;
     Pr P; //protocol
-    sbitset(Int_type value, Pr protocol) {
+    DATATYPE shares[BITLENGTH][Pr::VALS_PER_SHARE];
+    sbitset_t(UINT_TYPE value, int id, Pr protocol) {
         P = protocol;
-        Int_type* ptr = reinterpret_cast<Int_type*>(arr);
-        for(std::size_t i = 0; i < k*sizeof(DATATYPE)/sizeof(Int_type); ++i) {
-            ptr[i] = value;
+        if(id == PSELF && current_phase == 1) //read value
+        {
+            #if VALS_PER_SHARE == 1
+            UINT_TYPE* temp_u = (UINT_TYPE*) shares;
+            std::fill_n(temp_u, DATTYPE, value);
+            orthogonalize_boolean(temp_u, (DATATYPE*) shares);
+            #else
+            UINT_TYPE temp_u[DATTYPE] = {value};
+            DATATYPE* temp_d = (DATATYPE*) temp_u;
+            orthogonalize_boolean(temp_u, temp_d);
+            for(int i = 0; i < BITLENGTH; i++) {
+                shares[i][0] = temp_d[i];
+            }
+            #endif
         }
-            orthogonalize(ptr, ptr);
-            
+            P.prepare_receive_from(shares, id, BITLENGTH, OP_ADD, OP_SUB);
+    }
+
+    sbitset_t(UINT_TYPE values[DATTYPE], int id, Pr protocol) {
+        P = protocol;
+        if(id == PSELF && current_phase == 1)
+        {
+            #if VALS_PER_SHARE == 1
+            UINT_TYPE* temp_u = (UINT_TYPE*) shares;
+            memcpy(temp_u, values, DATTYPE * sizeof(UINT_TYPE));
+            orthogonalize_arithmetic(temp_u, (DATATYPE*) shares);
+            #else
+            DATATYPE* temp_d = (DATATYPE*) values;
+            orthogonalize_arithmetic(values, temp_d);
+            for(int i = 0; i < BITLENGTH; i++) {
+                shares[i][0] = temp_d[i];
+            }
+            #endif
+        }
+            P.prepare_receive_from(shares, id, BITLENGTH, OP_ADD, OP_SUB);
+    }
+    
+    DATATYPE* get_shares() {
+        return (DATATYPE*) shares;
     }
 
 
-    int& operator[](std::size_t idx) {
-        if (idx >= k) {
-            throw std::out_of_range("Index out of range");
-        }
-        return arr[idx];
+    DATATYPE* operator[](std::size_t idx) {
+        return shares[idx];
     }
 
-    const int& operator[](std::size_t idx) const {
-        if (idx >= k) {
-            throw std::out_of_range("Index out of range");
-        }
-        return arr[idx];
+    const DATATYPE* operator[](std::size_t idx) const {
+        return shares[idx];
     }
 
     
-    sbitset operator&&(const sbitset& other) const {
-        sbitset result;
-            result = P.Add(arr + other, func_XOR);
+    sbitset_t operator|(const sbitset_t& other) const {
+        sbitset_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            P.Add(shares[i], other[i], result[i], FUNC_XOR);
+        }
         return result;
     }
 
-    sbitset operator-(const sbitset & other) const {
-        sbitset result;
-            result = P.Add(arr + other, func_XOR);
+    sbitset_t operator!() const {
+        sbitset_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            P.Not(shares[i],result[i]);
+        }
         return result;
     }
 
-        sbitset operator*(const sbitset & other) const {
-        sbitset result;
-            P.prepareMult(arr, other,result, func_XOR, func_XOR, func_MUL);
+        sbitset_t operator&(const sbitset_t & other) const {
+        sbitset_t result;
+        for(std::size_t i = 0; i < BITLENGTH; ++i) {
+            P.prepareMult(shares[i], other[i],result[i], FUNC_XOR, FUNC_XOR, FUNC_AND);
+        }
         return result;
     }
 
-        void completeMult() {
-            P.completeMult(arr, func_XOR, func_XOR);
+        void completeAND() {
+        for(std::size_t i = 0; i < BITLENGTH; ++i) {
+            P.completeMult(shares[i], FUNC_XOR, FUNC_XOR);
+        }
+        }
+
+        void complete_receive_from(int id) {
+        P.complete_receive_from(shares, id, BITLENGTH, FUNC_XOR, FUNC_XOR);
+        }
+
+        void prepare_reveal_to_all() {
+            for(int i = 0; i < BITLENGTH; ++i) {
+                P.prepare_reveal_to_all(shares[i]);
+            }
+        }
+
+        void complete_reveal_to_all(UINT_TYPE result[DATTYPE]) {
+            
+            for(int i = 0; i < BITLENGTH; ++i) {
+               ((DATATYPE*) result)[i] = P.complete_reveal_to_all(shares[i], OP_ADD, OP_SUB);
+            }
+            unorthogonalize_boolean((DATATYPE*) result, result);
         }
         
 
@@ -61,4 +112,5 @@ private:
     // ... You can define other operations similarly
 
 };
+
 

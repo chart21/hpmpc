@@ -9,6 +9,6 @@
 #if LIVE == 1
     #include "live_protocol_base.hpp"
 #endif
-#define INIT_SHARE DATATYPE
-#define XOR_Share DATATYPE
+#define INIT_SHARE XOR_Share
+/* #define XOR_Share DATATYPE[BITLENGTH][2] */
 

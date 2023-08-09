@@ -1,6 +1,6 @@
 #pragma once
 #include "../../generic_share.hpp"
-#define SHARE OECL_Share
+#include "../../Share.hpp"
 struct OECL_Share{
     DATATYPE p1;
     DATATYPE p2;

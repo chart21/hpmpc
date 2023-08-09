@@ -1,5 +1,6 @@
 #pragma once
 #include "oecl_base.hpp"
+#define VALS_PER_SHARE 2
 class OECL1
 {
 bool optimized_sharing;
@@ -131,6 +132,50 @@ void receive()
 void communicate()
 {
     communicate_live();
+}
+
+
+void complete_A2B_S1(DATATYPE out[])
+{
+    auto out_pointer = (DATATYPE(*)[2]) out;
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out_pointer[i][0] = receive_from_live(P2); // receive a + x_1 xor r0,2 from P2
+        out_pointer[i][1] = SET_ALL_ZERO(); // set other share to 0
+    }
+}
+
+void prepare_A2B_S2(DATATYPE in[], DATATYPE out[])
+{
+    //convert share a + x1 to boolean
+    DATATYPE temp[2][BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            temp[0][j] = OP_SUB(SET_ALL_ZERO(), ((DATATYPE(*)[2]) in)[j][1]); // set both shares to -x1
+            temp[1][j] = temp[0][j];
+        }
+    unorthogonalize_arithmetic(temp[0], (UINT_TYPE*) temp[0]);
+    orthogonalize_boolean((UINT_TYPE*) temp[0], temp[0]);
+    unorthogonalize_arithmetic(temp[1], (UINT_TYPE*) temp[1]);
+    orthogonalize_boolean((UINT_TYPE*) temp[1], temp[1]);
+
+    auto out_pointer = (DATATYPE(*)[BITLENGTH]) out;
+    for(int i = 0; i < BITLENGTH; i++)
+        for(int j = 0; j < 2; j++)
+            out_pointer[i][j] = temp[j][i];
+    
+}
+
+
+
+void prepare_A2B(DATATYPE in[], DATATYPE out[])
+{
+    prepare_A2B_S2(in, out);
+}
+
+void complete_A2B(DATATYPE out[])
+{
+    complete_A2B_S1(out);
 }
 
 };

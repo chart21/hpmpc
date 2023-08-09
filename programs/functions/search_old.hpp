@@ -2,95 +2,80 @@
 #include "../../protocols/Protocols.h"
 #include <cstring>
 #include <iostream>
-#include <bitset>
-#include "../../protocols/XOR_Share.hpp"
+#include "../../datatypes/k_bitset.hpp"
+
 #define FUNCTION search
 #define RESULTTYPE DATATYPE
 
-
-    template<typename Protocol>
-void search(/*outputs*/ DATATYPE *found)
+    template<typename Pr, typename S>
+void search(Pr P,/*outputs*/ DATATYPE *found)
 {
-    using S = XOR_Share<DATATYPE, Protocol>;
+
+// allocate memory for shares
+DATATYPE (*dataset)[BITLENGTH][Pr::VALS_PER_SHARE] = (DATATYPE ((*)[BITLENGTH][Pr::VALS_PER_SHARE])) P.alloc_Share(((int) NUM_INPUTS)*BITLENGTH);
+/* DATATYPE (*element)[Pr::VALS_PER_SHARE] = P.alloc_Share(BITLENGTH); */
+DATATYPE (&element)[BITLENGTH][Pr::VALS_PER_SHARE] = P.alloc_Share(BITLENGTH);
 
 
-    S (*dataset)[BITLENGTH] = new S [NUM_INPUTS][BITLENGTH];
-    S *element = new S[BITLENGTH];
 
-/* Share (*dataset)[BITLENGTH] = (Share ((*)[BITLENGTH])) new Share[((int) NUM_INPUTS)*BITLENGTH]; */
-/* Share* element = new Share[BITLENGTH]; */
 
-for( int i = 0; i < BITLENGTH; i++)
-{
-    for( int j = 0; j < NUM_INPUTS; j++)
-    {
-dataset[j][i].template prepare_receive_from<P0>();
-    }
-element[i].template prepare_receive_from<P1>();
-}
 /* P.prepare_receive_from( (*dataset)[Pr::VALS_PER_SHARE],P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
+P.prepare_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB);
 
 
-Protocol::communicate();
-
-for( int i = 0; i < BITLENGTH; i++)
-{
-    for( int j = 0; j < NUM_INPUTS; j++)
-    {
-dataset[j][i].template complete_receive_from<P0>();
-    }
-element[i].template complete_receive_from<P1>();
-}
+P.communicate();
 
 
+
+P.complete_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB);
+P.complete_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB);
 
 
 for (int i = 0; i < NUM_INPUTS; i++) {
     for (int j = 0; j < BITLENGTH; j++) {
-      dataset[i][j] = !( dataset[i][j] ^ element[j]);
+      dataset[i][j] = P.Not(P.Add(dataset[i][j], element[j], FUNC_XOR));
     }
   }
   
+int c = 1;
   for (int k = BITLENGTH >> 1; k > 0; k = k >> 1) {
     for (int i = 0; i < k; i++) {
         int j = i * 2;
       for (int s = 0; s < NUM_INPUTS; s++) {
-          dataset[s][i] = dataset[s][j] & dataset[s][j +1];
+          P.prepare_mult(dataset[s][j],dataset[s][j +1], dataset[s][i], FUNC_XOR, FUNC_XOR, FUNC_AND);
       }
     }
 
-    Protocol::communicate(); 
+    P.communicate(); 
 
     for (int i = 0; i < k; i++) {
+        int j = i * 2;
       for (int s = 0; s < NUM_INPUTS; s++) {
-          dataset[s][i].complete_and();
+            P.complete_mult(dataset[s][i], FUNC_XOR, FUNC_XOR);
       }
       
 
 
     }
 
-    Protocol::communicate();
+    P.communicate();
 
 
   }
  
   *found = SET_ALL_ZERO(); 
   
-S sfound = dataset[0][0];
+  S sfound = dataset[0][0];
 
   for (int i = 1; i < NUM_INPUTS; i++) {
-    sfound = dataset[i][0] ^ sfound;
+    sfound = P.Add(dataset[i][0],sfound, FUNC_XOR);
 
   }
 
-sfound.prepare_reveal_to_all();
-
-Protocol::communicate();
-
-*found = sfound.complete_reveal_to_all();
-
-Protocol::communicate();
+P.prepare_reveal_to_all(sfound);
+P.communicate();
+*found = P.complete_Reveal(sfound,FUNC_XOR,FUNC_XOR);
+P.communicate();
 
 }
 

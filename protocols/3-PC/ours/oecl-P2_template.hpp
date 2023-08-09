@@ -1,7 +1,10 @@
 #pragma once
 #include "../sharemind/sharemind_base.hpp"
+/* #include "../../../datatypes/k_bitset.hpp" */
+/* #include "../../../datatypes/k_sint.hpp" */
 //#include "oecl_base.hpp"
 #define SHARE DATATYPE
+#define VALS_PER_SHARE 1
 class OECL2
 {
 bool optimized_sharing;
@@ -121,4 +124,38 @@ void communicate()
     communicate_live();
 }
 
+
+//higher level functions
+
+
+void A2B_S1(DATATYPE in[], DATATYPE out[])
+{
+    //convert share a + x1 to boolean
+    unorthogonalize_arithmetic(in, (UINT_TYPE*) out);
+    orthogonalize_boolean((UINT_TYPE*) out, out);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        send_to_live(P1, XOR(out[i],getRandomVal(P0))); // send all bits a + x_1 XOR r_0,2 to P1
+    }
+}
+
+void A2B_S2(DATATYPE out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i] = SET_ALL_ZERO();
+    }
+}
+
+void prepare_A2B(DATATYPE in[], DATATYPE out[])
+{
+    A2B_S1(in, out);
+    A2B_S2(out);
+}
+
+void complete_A2B(DATATYPE out[])
+{
+}
+
 };
+

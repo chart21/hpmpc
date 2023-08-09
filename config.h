@@ -4,7 +4,7 @@
 #define PROTOCOL 5
 
 // Party ID (starting from 0)
-#define PARTY 2
+#define PARTY 0
 
 //0: Search 1: XORNOTAND, 2: AND 1 comm round 3: AND 1000 comm rounds  4: Debug 5: MULT32 1 comm round 6: MULT64 1 comm round 7: Debug 9: Mult_32 1000 comm rounds 10: Mult64 1000 comm rounds. Currently, Protocols 9-12 support MULT. MULT64 is supported by DATATYPE 64 and 512. MULT32 is supported for DATATYPE 32 and all DATATYPEs >= 128
 #define FUNCTION_IDENTIFIER 0

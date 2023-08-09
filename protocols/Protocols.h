@@ -4,6 +4,7 @@
 #include "../networking/sockethelper.h"
 #include "../networking/buffers.h"
 #include "../utils/randomizer.h"
+
 #if INIT == 1
     #include "init_protocol_base.hpp"
 #endif
@@ -150,7 +151,7 @@
                 /* #define HAS_POST_PROTOCOL 1 */
                 #include "3-PC/ours/oecl-P0-post_template.hpp"
             #else
-                #define PROTOCOL_LIVE OECL0
+                #define PROTOCOL_LIVE OECL0_Share
                 #include "3-PC/ours/oecl-P0_template.hpp"
             #endif
         #endif
