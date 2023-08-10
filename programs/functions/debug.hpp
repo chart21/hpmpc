@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include "../../protocols/Protocols.h"
+#include "../../protocols/XOR_Share.hpp"
+/* #include "../../protocols/Arithmetic_Share.hpp" */
 
 #define FUNCTION debug
 #define RESULTTYPE DATATYPE[num_players][BITLENGTH]
@@ -29,7 +31,10 @@ inputs[i][j] = SET_ALL_ONE();
 if(j == i)
     inputs[i][j] = SET_ALL_ZERO();
 if(inputs[i][j] != var[i][j])
+{
     num_erros++;
+    std::cout << "P" << PARTY << " " << var[i][j] << " " << i << " " << j << " " << inputs[i][j] << std::endl;
+}
 #endif
 }
     std::cout << "P" << PARTY << ": " << num_erros << " Errors while testing " << test_func << ", input from player " << i << "\n";
@@ -38,12 +43,12 @@ if(inputs[i][j] != var[i][j])
 
 }
 
-template<typename Pr, typename S>
-void debug (Pr P,/*outputs*/ DATATYPE result[num_players][BITLENGTH])
+template<typename Protocol>
+void debug (/*outputs*/ DATATYPE result[num_players][BITLENGTH])
 {
-
+using S = XOR_Share<DATATYPE, Protocol>;
 // allocate memory for shares
-S (*inputs)[BITLENGTH] = (S ((*)[BITLENGTH])) P.alloc_Share(((int) num_players)*BITLENGTH);
+S (*inputs)[BITLENGTH] = new S[num_players][BITLENGTH];
 
 /* if(player_id == 0) */
 /* { */
@@ -63,45 +68,49 @@ S (*inputs)[BITLENGTH] = (S ((*)[BITLENGTH])) P.alloc_Share(((int) num_players)*
 /*     /1*   element[j] = P.share(element[j]); *1/ */
 /* /1* P_share(element,BITLENGTH); *1/ */
 /* } */
-P.prepare_receive_from(inputs[0] ,P0,BITLENGTH, OP_ADD, OP_SUB);
-P.prepare_receive_from(inputs[1] ,P1,BITLENGTH, OP_ADD, OP_SUB);
-P.prepare_receive_from(inputs[2] ,P2,BITLENGTH, OP_ADD, OP_SUB);
+for(int i = 0; i < BITLENGTH; i++)
+{
+inputs[0][i].template prepare_receive_from<P0>();
+inputs[1][i].template prepare_receive_from<P1>();
+inputs[2][i].template prepare_receive_from<P2>();
 #if num_players > 3
-P.prepare_receive_from(inputs[3] ,P3,BITLENGTH, OP_ADD, OP_SUB);
+inputs[3][i].template prepare_receive_from<P3>();
 #endif
+}
+Protocol::communicate();
 
-P.communicate();
-
-
-P.complete_receive_from(inputs[0] ,P0,BITLENGTH, OP_ADD, OP_SUB);
-P.complete_receive_from(inputs[1] ,P1,BITLENGTH, OP_ADD, OP_SUB);
-P.complete_receive_from(inputs[2] ,P2,BITLENGTH, OP_ADD, OP_SUB);
+for(int i = 0; i < BITLENGTH; i++)
+{
+inputs[0][i].template complete_receive_from<P0>();
+inputs[1][i].template complete_receive_from<P1>();
+inputs[2][i].template complete_receive_from<P2>();
 #if num_players > 3
-P.complete_receive_from(inputs[3] ,P3,BITLENGTH, OP_ADD, OP_SUB);
+inputs[3][i].template complete_receive_from<P3>();
 #endif
+}
 
-P.communicate();
+Protocol::communicate();
 
 for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
 
-    P.prepare_reveal_to_all(inputs[j][i]);
+    inputs[j][i].prepare_reveal_to_all();
 }
 }
-P.communicate();
+Protocol::communicate();
 
 for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
 
-    result[j][i] = P.complete_Reveal(inputs[j][i], OP_ADD, OP_SUB);
+    result[j][i] = inputs[j][i].complete_reveal_to_all();
 }
 }
 
-P.communicate();
+Protocol::communicate();
 
 
 std::cout <<   "P" << PARTY <<  ": ""Testing secret sharing and revealing: " << std::endl;
@@ -114,34 +123,36 @@ for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
-    P.prepare_mult(inputs[j][i],inputs[j][i],inputs[j][i],OP_ADD, OP_SUB, OP_MULT);
+    inputs[j][i] = inputs[j][i] & inputs[j][i];
 }
 }
-P.communicate();
-for(int j = 0; j < num_players; j++)
-{
 
-for (int i = 0; i < BITLENGTH; i++) {
-    P.complete_mult(inputs[j][i], OP_ADD, OP_SUB);
-}
-}
+Protocol::communicate();
 
 for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
-
-    P.prepare_reveal_to_all(inputs[j][i]);
+    inputs[j][i].complete_and();
 }
 }
-P.communicate();
 
 for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
 
-    result[j][i] = P.complete_Reveal(inputs[j][i], OP_ADD, OP_SUB);
+    inputs[j][i].prepare_reveal_to_all();
+}
+}
+Protocol::communicate();
+
+for(int j = 0; j < num_players; j++)
+{
+
+for (int i = 0; i < BITLENGTH; i++) {
+
+    result[j][i] = inputs[j][i].complete_reveal_to_all();
 }
 }
 
@@ -153,10 +164,10 @@ for(int j = 0; j < num_players; j++)
 {
 for (int i = 0; i < BITLENGTH; i++) {
 
-    inputs[j][i] = P.Add(inputs[j][i],inputs[j][i],OP_ADD);
+    inputs[j][i] = inputs[j][i] ^ inputs[j][i];
 #if FUNCTION_IDENTIFIER != 7
     if(i != j)
-        inputs[j][i] = P.Not(inputs[j][i]);
+        inputs[j][i] = !inputs[j][i];
 #endif
 }
 }
@@ -165,18 +176,20 @@ for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
+    inputs[j][i].prepare_reveal_to_all();
+}
 
-    P.prepare_reveal_to_all(inputs[j][i]);
 }
-}
-P.communicate();
+
+Protocol::communicate();
+
 
 for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
 
-    result[j][i] = P.complete_Reveal(inputs[j][i], OP_ADD, OP_SUB);
+    result[j][i] = inputs[j][i].complete_reveal_to_all();
 }
 }
 

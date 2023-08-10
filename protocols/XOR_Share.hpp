@@ -27,7 +27,7 @@ public:
 
     void complete_and()
     {
-        Share_Type::complete_mult(std::bit_xor<Datatype>(), std::bit_and<Datatype>());
+        Share_Type::complete_mult(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
     }
 
     template <int id>

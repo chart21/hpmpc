@@ -1,143 +1,127 @@
 #pragma once
 #include "oecl_base.hpp"
-#define VALS_PER_SHARE 2
-class OECL1
+template <typename Datatype>
+class OECL1_Share
 {
-bool optimized_sharing;
+Datatype p1;
+Datatype p2;
 public:
-OECL1(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
+OECL1_Share() {}
+OECL1_Share(Datatype p1, Datatype p2) : p1(p1), p2(p2) {}
+OECL1_Share(Datatype p1) : p1(p1) {}
 
-OECL_Share public_val(DATATYPE a)
+OECL1_Share public_val(Datatype a)
 {
-    return OECL_Share(a,SET_ALL_ZERO());
+    return OECL1_Share(a,SET_ALL_ZERO());
 }
 
-OECL_Share Not(OECL_Share a)
+OECL1_Share Not() const
 {
-    a.p1 = NOT(a.p1);
-   return a;
+   return OECL1_Share(NOT(p1),p2);
 }
 
 template <typename func_add>
-OECL_Share Add(OECL_Share a, OECL_Share b, func_add ADD)
+OECL1_Share Add(OECL1_Share b, func_add ADD) const
 {
-   return OECL_Share(ADD(a.p1,b.p1),ADD(a.p2,b.p2));
+   return OECL1_Share(ADD(p1,b.p1),ADD(p2,b.p2));
 }
 
 
 
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(OECL_Share a, OECL_Share b , OECL_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+    OECL1_Share prepare_mult(OECL1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-c.p1 = ADD(getRandomVal(P0), ADD(MULT(a.p1,b.p2), MULT(b.p1,a.p2))); //remove P1_mask, then (a+ra)rl + (b+rb)rr 
+OECL1_Share c;
+c.p1 = ADD(getRandomVal(P0), ADD(MULT(p1,b.p2), MULT(b.p1,p2))); //remove P1_mask, then (a+ra)rl + (b+rb)rr 
 c.p2 = getRandomVal(P0); //generate P1_2 mask
 send_to_live(P2,SUB(c.p1,c.p2)); 
+return c;
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(OECL_Share &c, func_add ADD, func_sub SUB)
+void complete_mult(func_add ADD, func_sub SUB)
 {
-c.p1 = SUB(receive_from_live(P2),c.p1);
+p1 = SUB(receive_from_live(P2),p1);
 }
 
-void prepare_reveal_to_all(OECL_Share a)
+void prepare_reveal_to_all()
 {
-return;
 }    
 
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(OECL_Share a, func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
 #if PRE == 1 && (OPT_SHARE == 0 || SHARE_PREP == 1) // OPT_SHARE is input dependent, can only be sent in prepocessing phase if allowed
-return SUB(a.p1, pre_receive_from_live(P0));
+return SUB(p1, pre_receive_from_live(P0));
 #else
-return SUB(a.p1, receive_from_live(P0));
+return SUB(p1, receive_from_live(P0));
 #endif
 
 }
 
 
-OECL_Share* alloc_Share(int l)
-{
-    return new OECL_Share[l];
-}
 
 
-template <typename func_add, typename func_sub>
-void prepare_receive_from(OECL_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == P0)
+if constexpr(id == P0)
 {
-    for(int i = 0; i < l; i++)
-    {
-        a[i].p2 = getRandomVal(P0);
-    }
+        p2 = getRandomVal(P0);
 }
-else if(id == P1)
+else if constexpr(id == P1)
 {
-for(int i = 0; i < l; i++)
-{
-    a[i].p1 = get_input_live();
-    a[i].p2 = getRandomVal(P0);
-    send_to_live(P2,ADD(a[i].p1,a[i].p2));
-}
+    p1 = get_input_live();
+    p2 = getRandomVal(P0);
+    send_to_live(P2,ADD(p1,p2));
 }
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(OECL_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == P0)
+if constexpr(id == P0)
 {
 
 #if OPT_SHARE == 1
-    for(int i = 0; i < l; i++)
-    {
-        a[i].p1 = SET_ALL_ZERO(); 
-    }
+        p1 = SET_ALL_ZERO(); 
 #else
-    for(int i = 0; i < l; i++)
-    {
     #if PRE == 1 && SHARE_PREP == 1
-        a[i].p1 = pre_receive_from_live(P0);
+        p1 = pre_receive_from_live(P0);
     #else
-        a[i].p1 = receive_from_live(P0);
+        p1 = receive_from_live(P0);
     #endif
-    }
 #endif 
 }
-else if(id == P2)
+else if constexpr(id == P2)
 {
-for(int i = 0; i < l; i++)
-{
-a[i].p1 = receive_from_live(P2);
-a[i].p2 = SET_ALL_ZERO();
-}
+p1 = receive_from_live(P2);
+p2 = SET_ALL_ZERO();
 }
 
 }
 
 
-void send()
+static void send()
 {
     send_live();
 }
 
-void receive()
+static void receive()
 {
     receive_live();
 }
 
-void communicate()
+static void communicate()
 {
     communicate_live();
 }
 
 
-void complete_A2B_S1(DATATYPE out[])
+static void complete_A2B_S1(Datatype out[])
 {
-    auto out_pointer = (DATATYPE(*)[2]) out;
+    auto out_pointer = (Datatype(*)[2]) out;
     for(int i = 0; i < BITLENGTH; i++)
     {
         out_pointer[i][0] = receive_from_live(P2); // receive a + x_1 xor r0,2 from P2
@@ -145,13 +129,13 @@ void complete_A2B_S1(DATATYPE out[])
     }
 }
 
-void prepare_A2B_S2(DATATYPE in[], DATATYPE out[])
+static void prepare_A2B_S2(Datatype in[], Datatype out[])
 {
     //convert share a + x1 to boolean
-    DATATYPE temp[2][BITLENGTH];
+    Datatype temp[2][BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
-            temp[0][j] = OP_SUB(SET_ALL_ZERO(), ((DATATYPE(*)[2]) in)[j][1]); // set both shares to -x1
+            temp[0][j] = OP_SUB(SET_ALL_ZERO(), ((Datatype(*)[2]) in)[j][1]); // set both shares to -x1
             temp[1][j] = temp[0][j];
         }
     unorthogonalize_arithmetic(temp[0], (UINT_TYPE*) temp[0]);
@@ -159,7 +143,7 @@ void prepare_A2B_S2(DATATYPE in[], DATATYPE out[])
     unorthogonalize_arithmetic(temp[1], (UINT_TYPE*) temp[1]);
     orthogonalize_boolean((UINT_TYPE*) temp[1], temp[1]);
 
-    auto out_pointer = (DATATYPE(*)[BITLENGTH]) out;
+    auto out_pointer = (Datatype(*)[BITLENGTH]) out;
     for(int i = 0; i < BITLENGTH; i++)
         for(int j = 0; j < 2; j++)
             out_pointer[i][j] = temp[j][i];
@@ -168,12 +152,12 @@ void prepare_A2B_S2(DATATYPE in[], DATATYPE out[])
 
 
 
-void prepare_A2B(DATATYPE in[], DATATYPE out[])
+static void prepare_A2B(Datatype in[], Datatype out[])
 {
     prepare_A2B_S2(in, out);
 }
 
-void complete_A2B(DATATYPE out[])
+static void complete_A2B(Datatype out[])
 {
     complete_A2B_S1(out);
 }

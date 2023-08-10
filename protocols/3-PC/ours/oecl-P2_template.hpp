@@ -3,123 +3,110 @@
 /* #include "../../../datatypes/k_bitset.hpp" */
 /* #include "../../../datatypes/k_sint.hpp" */
 //#include "oecl_base.hpp"
-#define SHARE DATATYPE
-#define VALS_PER_SHARE 1
-class OECL2
+template <typename Datatype>
+class OECL2_Share
 {
+Datatype p1;
 bool optimized_sharing;
 public:
-OECL2(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
+OECL2_Share() {}
+OECL2_Share(Datatype p1) : p1(p1) {}
 
-XOR_Share public_val(DATATYPE a)
+OECL2_Share public_val(Datatype a)
 {
     return a;
 }
 
-XOR_Share Not(XOR_Share a)
+OECL2_Share Not() const
 {
-    return NOT(a);
+    return OECL2_Share(NOT(p1));
 }
 
 template <typename func_add>
-XOR_Share Add(XOR_Share a, XOR_Share b, func_add ADD)
+OECL2_Share Add(OECL2_Share b, func_add ADD) const
 {
-    return ADD(a,b);
+    return ADD(p1,b.p1);
 }
-
 
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(XOR_Share a, XOR_Share b, XOR_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+    OECL2_Share prepare_mult(OECL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-
-XOR_Share ap1 = getRandomVal(P0); // P2 mask for P1
-
+Datatype ap1 = getRandomVal(P0); // P2 mask for P1
+OECL2_Share c;
 #if PRE == 1
-c = ADD(pre_receive_from_live(P0), MULT(a,b)); // P0_message + (a+rr) (b+rl)
+c.p1 = ADD(pre_receive_from_live(P0), MULT(p1,b.1)); // P0_message + (a+rr) (b+rl)
 #else
-c = ADD(receive_from_live(P0), MULT(a,b)); // P0_message + (a+rr) (b+rl)
+c.p1 = ADD(receive_from_live(P0), MULT(p1,b.p1)); // P0_message + (a+rr) (b+rl)
 #endif
 
-send_to_live(P1, ADD(ap1,c)); 
+send_to_live(P1, ADD(ap1,c.p1)); 
+return c;
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(XOR_Share &c, func_add ADD, func_sub SUB)
+void complete_mult(func_add ADD, func_sub SUB)
 {
-c = SUB(c, receive_from_live(P1)); 
+p1 = SUB(p1, receive_from_live(P1)); 
 }
 
 
-void prepare_reveal_to_all(XOR_Share a)
+void prepare_reveal_to_all()
 {
-send_to_live(P0, a);
+send_to_live(P0, p1);
 }
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(XOR_Share a, func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
 #if PRE == 1 && (OPT_SHARE == 0 || SHARE_PREP == 1) // OPT_SHARE is input dependent, can only be sent in prepocessing phase if allowed
-return SUB(a, pre_receive_from_live(P0));
+return SUB(p1, pre_receive_from_live(P0));
 #else
-return SUB(a, receive_from_live(P0));
+return SUB(p1, receive_from_live(P0));
 #endif
 }
 
-XOR_Share* alloc_Share(int l)
-{
-    return new XOR_Share[l];
-}
 
-template <typename func_add, typename func_sub>
-void prepare_receive_from(XOR_Share a[], int id, int l, func_add ADD, func_sub SUB)
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == P2)
+if constexpr(id == P2)
 {
-for(int i = 0; i < l; i++)
-{
-    a[i] = get_input_live();     
-    /* a[i].p1 = getRandomVal(0); *1/ */
-    send_to_live(P1, ADD(getRandomVal(P0),a[i]));
-}
+    p1 = get_input_live();     
+    /* p1 = getRandomVal(0); *1/ */
+    send_to_live(P1, ADD(getRandomVal(P0),p1));
 }
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(XOR_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == P0)
+if constexpr(id == P0)
 {
-    for(int i = 0; i < l; i++)
-    {
 #if (SHARE_PREP == 1 || OPT_SHARE == 0) && PRE == 1
-        a[i] = pre_receive_from_live(P0);
+        p1 = pre_receive_from_live(P0);
 #else
-        a[i] = receive_from_live(P0);
+        p1 = receive_from_live(P0);
 #endif
-    }
 }
-else if(id == P1)
+else if constexpr(id == P1)
 {
-for(int i = 0; i < l; i++)
-{
-a[i] = receive_from_live(P1);
-}
+p1 = receive_from_live(P1);
 }
 
 }
 
 
-void send()
+static void send()
 {
     send_live();
 }
 
-void receive()
+static void receive()
 {
     receive_live();
 }
 
-void communicate()
+static void communicate()
 {
     communicate_live();
 }
@@ -128,7 +115,7 @@ void communicate()
 //higher level functions
 
 
-void A2B_S1(DATATYPE in[], DATATYPE out[])
+static void A2B_S1(Datatype in[], Datatype out[])
 {
     //convert share a + x1 to boolean
     unorthogonalize_arithmetic(in, (UINT_TYPE*) out);
@@ -139,7 +126,7 @@ void A2B_S1(DATATYPE in[], DATATYPE out[])
     }
 }
 
-void A2B_S2(DATATYPE out[])
+static void A2B_S2(Datatype out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
@@ -147,13 +134,13 @@ void A2B_S2(DATATYPE out[])
     }
 }
 
-void prepare_A2B(DATATYPE in[], DATATYPE out[])
+static void prepare_A2B(Datatype in[], Datatype out[])
 {
     A2B_S1(in, out);
     A2B_S2(out);
 }
 
-void complete_A2B(DATATYPE out[])
+static void complete_A2B(Datatype out[])
 {
 }
 

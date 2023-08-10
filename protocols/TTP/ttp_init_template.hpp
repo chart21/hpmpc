@@ -1,112 +1,96 @@
 #pragma once
 #include "../generic_share.hpp"
-#define INIT_SHARE DATATYPE
-
+template <typename Datatype>
 class TTP_init
 {
-bool input_srngs;
 public:
-TTP_init(bool use_srngs) {input_srngs = use_srngs;}
+TTP_init() {}
 
 
 
 
-XOR_Share public_val(DATATYPE a)
+TTP_init public_val(Datatype a)
 {
-    return a;
+    return TTP_init();
 }
 
-DATATYPE Not(DATATYPE a)
+TTP_init Not() const
 {
-   return a;
+    return TTP_init();
 }
 
 template <typename func_add>
-DATATYPE Add(DATATYPE a, DATATYPE b, func_add ADD)
+TTP_init Add(TTP_init b, func_add ADD) const
 {
-   return a;
+    return TTP_init();
 }
 
 
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(DATATYPE &a, DATATYPE &b, DATATYPE &c, func_add ADD, func_sub SUB, func_mul MUL)
+    TTP_init prepare_mult(TTP_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
+    return TTP_init();
 }
-
 template <typename func_add, typename func_sub>
-void complete_mult(DATATYPE c, func_add ADD, func_sub SUB)
-{
-}
+void complete_mult(func_add ADD, func_sub SUB){}
 
-void prepare_reveal_to_all(DATATYPE a)
+
+void prepare_reveal_to_all()
 {
-    if(PARTY == 2)
-    {
+#if PARTY == 2
         for(int t = 0; t < num_players-1; t++) 
         {
             send_to_(t);
         }//add to send buffer
-    
-    }
+#endif 
 }    
 
-
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
-if(PARTY != 2)
-{
+#if PARTY != 2
     receive_from_(P2);
-}
-return a;
-}
-
-XOR_Share* alloc_Share(int l)
-{
-    return new DATATYPE[l];
+#endif
+return SET_ALL_ZERO();
 }
 
 
-template <typename func_add, typename func_sub>
-void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
+
+template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == PSELF && PARTY != 2)
+if constexpr(id == PSELF && PARTY != 2)
 {
-    for(int i = 0; i < l; i++) 
         send_to_(P2);
 }
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
+    template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-    if(id == PSELF)
+    if constexpr(id == PSELF)
 {
     return;
 }
-if(PARTY == 2)
-{
-        for (int i = 0; i < l; i++) {
+#if PARTY == 2
 receive_from_(id);
-        }
-    }
-
+#endif
 }
 
-void send()
+static void send()
 {
 send_();
 }
-void receive()
+static void receive()
 {
     receive_();
 }
-void communicate()
+static void communicate()
 {
 communicate_();
 }
 
-void finalize(std::string* ips)
+static void finalize(std::string* ips)
 {
     finalize_(ips);
 }

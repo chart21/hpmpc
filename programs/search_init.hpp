@@ -130,11 +130,11 @@ DATATYPE* elements = NEW(DATATYPE[BITLENGTH]);
 
 insertManually(dataset, elements, origData, origElements, 1,7 , 200, 200);
 
-if(player_id == 0)
+if(PARTY == 0)
 {
     player_input = (DATATYPE*) dataset;
 }
-else if(player_id == 1)
+else if(PARTY == 1)
     player_input = elements;
 
 }

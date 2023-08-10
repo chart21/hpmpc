@@ -26,6 +26,9 @@ for( int i = 0; i < BITLENGTH; i++)
     {
 dataset[j][i].template prepare_receive_from<P0>();
     }
+}
+for( int i = 0; i < BITLENGTH; i++)
+{
 element[i].template prepare_receive_from<P1>();
 }
 /* P.prepare_receive_from( (*dataset)[Pr::VALS_PER_SHARE],P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
@@ -39,6 +42,9 @@ for( int i = 0; i < BITLENGTH; i++)
     {
 dataset[j][i].template complete_receive_from<P0>();
     }
+}
+for( int i = 0; i < BITLENGTH; i++)
+{
 element[i].template complete_receive_from<P1>();
 }
 

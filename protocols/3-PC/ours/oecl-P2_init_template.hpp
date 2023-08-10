@@ -1,33 +1,33 @@
 #pragma once
 #include "../sharemind/sharemind_base.hpp"
+template <typename Datatype>
 class OECL2_init
 {
-bool optimized_sharing;
 public:
-OECL2_init(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
+OECL2_init() {}
 
 
 
-XOR_Share public_val(DATATYPE a)
+OECL2_init public_val(Datatype a)
 {
     return a;
 }
 
-DATATYPE Not(DATATYPE a)
+OECL2_init Not() const
 {
-   return a;
+    return OECL2_init();
 }
 
 template <typename func_add>
-DATATYPE Add(DATATYPE a, DATATYPE b, func_add ADD)
+OECL2_init Add(OECL2_init b, func_add ADD) const
 {
-   return a;
+   return OECL2_init();
 }
 
 
 
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c, func_add ADD, func_sub SUB, func_mul MUL)
+    OECL2_init prepare_mult(OECL2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 #if PRE == 1
 pre_receive_from_(P0);
@@ -37,23 +37,23 @@ receive_from_(P0);
 
 send_to_(P1);
 //return u[player_id] * v[player_id];
+return OECL2_init();
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(DATATYPE &c, func_add ADD, func_sub SUB)
+void complete_mult(func_add ADD, func_sub SUB)
 {
     receive_from_(P1);
 }
 
-
-void prepare_reveal_to_all(DATATYPE a)
+void prepare_reveal_to_all()
 {
 send_to_(P0);
 }    
 
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
 /* for(int t = 0; t < num_players-1; t++) */ 
 /*     receiving_args[t].elements_to_rec[rounds-1]+=1; */
@@ -62,41 +62,31 @@ DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
 #else
     receive_from_(P0);
 #endif
-return a;
+return SET_ALL_ZERO();
 }
 
 
-XOR_Share* alloc_Share(int l)
-{
-    return new DATATYPE[l];
-}
 
-
-template <typename func_add, typename func_sub>
-void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == P2)
+if constexpr(id == P2)
 {
-    for(int i = 0; i < l; i++)
-    {
         send_to_(P1);
-    }
 
 }
 }
 
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
+    template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == P1)
+if constexpr(id == P1)
 {
-for(int i = 0; i < l; i++)
     receive_from_(P1);
 }
-else if(id == P0)
+else if constexpr(id == P0)
 {
-for(int i = 0; i < l; i++)
 #if (SHARE_PREP == 1 || OPT_SHARE == 0) && PRE == 1
     pre_receive_from_(P0);
 #else
@@ -114,25 +104,25 @@ for(int i = 0; i < l; i++)
 
 
 
-void send()
+static void send()
 {
 send_();
 }
-void receive()
+static void receive()
 {
     receive_();
 }
-void communicate()
+static void communicate()
 {
 communicate_();
 }
 
-void finalize(std::string* ips)
+static void finalize(std::string* ips)
 {
     finalize_(ips);
 }
 
-void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
+static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
 {
     finalize_(ips, ra, sa);
 }

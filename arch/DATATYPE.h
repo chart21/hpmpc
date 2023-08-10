@@ -12,7 +12,7 @@
 #if DATTYPE == 1 
     #include "BOOL.h"
 #elif DATTYPE == 8 
-    #include "CHAR.h"
+    #include "STD.h"
 #elif DATTYPE == 16
     #include "STD.h"
 #elif DATTYPE == 32

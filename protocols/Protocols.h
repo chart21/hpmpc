@@ -156,16 +156,16 @@
             #endif
         #endif
         #if PARTY == 1
-            #define PROTOCOL_LIVE OECL1
+            #define PROTOCOL_LIVE OECL1_Share
             #include "3-PC/ours/oecl-P1_template.hpp"
         #endif
         #if PARTY == 2
-            #define PROTOCOL_LIVE OECL2
+            #define PROTOCOL_LIVE OECL2_Share
             #include "3-PC/ours/oecl-P2_template.hpp"
         #endif
     #endif
 #elif PROTOCOL == ttp3 || PROTOCOL == ttp4
-        #define PROTOCOL_LIVE TTP
+        #define PROTOCOL_LIVE TTP_Share
         #define PROTOCOL_INIT TTP_init
         #if INIT == 1 
             #include "TTP/ttp_init_template.hpp"

@@ -9,6 +9,7 @@
 template <typename Datatype>
 class OECL0_Share 
 {
+private:
     Datatype p1;
     Datatype p2;
     public:
@@ -49,7 +50,7 @@ pre_send_to_live(P2, SUB( ADD(MULT(p1,b.p1),maskP1), MULT( SUB(p1,p2), SUB(b.p1,
 send_to_live(P2, SUB( ADD(MULT(p1,b.p1),maskP1), MULT( SUB(p1,p2), SUB(b.p1,b.p2)  ))); 
 #endif
 // for arithmetic circuikts this will be more efficient to reduce mult from 3 to 2: p1 b.p1 + (p1 + p2) (b.p1 + b.p2)
-return OECL0_Share(maskP1,maskP1_2);
+return OECL0_Share(maskP2,maskP1_2);
 }
 
 template <typename func_add, typename func_sub>
@@ -122,7 +123,6 @@ else if constexpr(id == P2)// id ==2
 template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)
 {
-    return;
 }
 
 

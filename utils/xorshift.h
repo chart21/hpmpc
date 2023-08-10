@@ -272,12 +272,32 @@ void xor_shift(DATATYPE x__[16]) {
 
 void xor_shift__ (/*inputs*/ DATATYPE x__[16], /*outputs*/ DATATYPE z__[16]) {
   // Instructions (body)
-memcpy(z__, x__, sizeof(DATATYPE) * 32);
+memcpy(z__, x__, sizeof(DATATYPE) * 16);
 xor_shift(z__);
 }
 
 #endif
 
+#if BITLENGTH == 8
+
+void xor_shift(DATATYPE x__[8]) {
+  x__[0] = XOR(x__[0],x__[3]);
+  x__[1] = XOR(x__[1],x__[4]);
+  x__[2] = XOR(x__[2],x__[5]);
+  x__[3] = XOR(x__[3],x__[6]);
+  x__[4] = XOR(x__[4],x__[7]);
+  x__[5] = XOR(x__[5],x__[0]);
+  x__[6] = XOR(x__[6],x__[1]);
+  x__[7] = XOR(x__[7],x__[2]);
+}
+
+void xor_shift__ (/*inputs*/ DATATYPE x__[8], /*outputs*/ DATATYPE z__[8]) {
+  // Instructions (body)
+memcpy(z__, x__, sizeof(DATATYPE) * 32);
+xor_shift(z__);
+}
+
+#endif
 /* Additional functions */
 
 
