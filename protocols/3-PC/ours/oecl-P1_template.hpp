@@ -119,47 +119,44 @@ static void communicate()
 }
 
 
-static void complete_A2B_S1(Datatype out[])
+static void prepare_A2B_S1(OECL1_Share in[], OECL1_Share out[])
+{}
+
+static void complete_A2B_S1(OECL1_Share out[])
 {
-    auto out_pointer = (Datatype(*)[2]) out;
     for(int i = 0; i < BITLENGTH; i++)
     {
-        out_pointer[i][0] = receive_from_live(P2); // receive a + x_1 xor r0,2 from P2
-        out_pointer[i][1] = SET_ALL_ZERO(); // set other share to 0
+        out[i].p1 = receive_from_live(P2); // receive a + x_1 xor r0,2 from P2
+        out[i].p2 = SET_ALL_ZERO(); // set other share to 0
     }
 }
 
-static void prepare_A2B_S2(Datatype in[], Datatype out[])
+static void prepare_A2B_S2(const OECL1_Share in[], OECL1_Share out[])
 {
     //convert share a + x1 to boolean
-    Datatype temp[2][BITLENGTH];
+    Datatype temp_p1[BITLENGTH];
+    Datatype temp_p2[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
-            temp[0][j] = OP_SUB(SET_ALL_ZERO(), ((Datatype(*)[2]) in)[j][1]); // set both shares to -x1
-            temp[1][j] = temp[0][j];
+            temp_p1[j] = OP_SUB(SET_ALL_ZERO(), in[j].p2); // set first share to -x1
+            temp_p2[j] = in[j].p2; // set second share to x1
         }
-    unorthogonalize_arithmetic(temp[0], (UINT_TYPE*) temp[0]);
-    orthogonalize_boolean((UINT_TYPE*) temp[0], temp[0]);
-    unorthogonalize_arithmetic(temp[1], (UINT_TYPE*) temp[1]);
-    orthogonalize_boolean((UINT_TYPE*) temp[1], temp[1]);
+    unorthogonalize_arithmetic(temp_p1, (UINT_TYPE*) temp_p1);
+    orthogonalize_boolean((UINT_TYPE*) temp_p1, temp_p1);
+    unorthogonalize_arithmetic(temp_p2, (UINT_TYPE*) temp_p2);
+    orthogonalize_boolean((UINT_TYPE*) temp_p2, temp_p2);
 
-    auto out_pointer = (Datatype(*)[BITLENGTH]) out;
     for(int i = 0; i < BITLENGTH; i++)
-        for(int j = 0; j < 2; j++)
-            out_pointer[i][j] = temp[j][i];
-    
+    {
+        out[i].p1 = temp_p1[i];
+        out[i].p2 = temp_p2[i];
+    } 
 }
 
-
-
-static void prepare_A2B(Datatype in[], Datatype out[])
+static void complete_A2B_S2(OECL1_Share out[])
 {
-    prepare_A2B_S2(in, out);
 }
 
-static void complete_A2B(Datatype out[])
-{
-    complete_A2B_S1(out);
-}
+
 
 };

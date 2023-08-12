@@ -16,7 +16,8 @@
 #if FUNCTION_IDENTIFIER == 0
 #include "programs/search_init.hpp"
 #elif FUNCTION_IDENTIFIER == 1
-#include "programs/xor_not_and.hpp"
+/* #include "programs/xor_not_and.hpp" */
+#include "programs/share_conversion_init.hpp"
 #elif FUNCTION_IDENTIFIER == 2 || FUNCTION_IDENTIFIER == 3 || FUNCTION_IDENTIFIER == 5 || FUNCTION_IDENTIFIER == 6 || FUNCTION_IDENTIFIER == 8 || FUNCTION_IDENTIFIER == 9 || FUNCTION_IDENTIFIER == 10
 #include "programs/mult_init.hpp"
 #elif FUNCTION_IDENTIFIER == 4 || FUNCTION_IDENTIFIER == 7

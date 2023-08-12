@@ -4,6 +4,7 @@
 #include <iostream>
 #include <bitset>
 #include "../../protocols/XOR_Share.hpp"
+#include "../../datatypes/k_bitset.hpp"
 #define FUNCTION search
 #define RESULTTYPE DATATYPE
 
@@ -22,52 +23,34 @@ void print_result(DATATYPE* var)
 void search(/*outputs*/ DATATYPE *found)
 {
     using S = XOR_Share<DATATYPE, Protocol>;
+    using Bitset = sbitset_t<S>;
 
-
-    S (*dataset)[BITLENGTH] = new S [NUM_INPUTS][BITLENGTH];
-    S *element = new S[BITLENGTH];
+    /* S (*dataset)[BITLENGTH] = new S [NUM_INPUTS][BITLENGTH]; */
+    /* S *element = new S[BITLENGTH]; */
+    Bitset* dataset = new Bitset[NUM_INPUTS];
+    Bitset element;
 
 /* Share (*dataset)[BITLENGTH] = (Share ((*)[BITLENGTH])) new Share[((int) NUM_INPUTS)*BITLENGTH]; */
 /* Share* element = new Share[BITLENGTH]; */
 
 
 for( int i = 0; i < NUM_INPUTS; i++)
-{
-    for( int j = 0; j < BITLENGTH; j++)
-    {
-dataset[i][j].template prepare_receive_from<P0>();
-    }
-}
-for( int i = 0; i < BITLENGTH; i++)
-{
-element[i].template prepare_receive_from<P1>();
-}
-/* P.prepare_receive_from( (*dataset)[Pr::VALS_PER_SHARE],P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
+    dataset[i].template prepare_receive_from<P0>();
+
+element.template prepare_receive_from<P1>();
 
 
 Protocol::communicate();
 
 for( int i = 0; i < NUM_INPUTS; i++)
-{
-    for( int j = 0; j < BITLENGTH; j++)
-    {
-dataset[i][j].template complete_receive_from<P0>();
-    }
-}
-for( int i = 0; i < BITLENGTH; i++)
-{
-element[i].template complete_receive_from<P1>();
-}
+    dataset[i].template complete_receive_from<P0>();
 
-
+element.template complete_receive_from<P1>();
 
 
 for (int i = 0; i < NUM_INPUTS; i++) {
-    for (int j = 0; j < BITLENGTH; j++) {
-      dataset[i][j] = dataset[i][j] ^ element[j];
-      dataset[i][j] = ~ dataset[i][j];
+      dataset[i] = ~ (dataset[i] ^ element);
       
-    }
   }
   
   for (int k = BITLENGTH >> 1; k > 0; k = k >> 1) {

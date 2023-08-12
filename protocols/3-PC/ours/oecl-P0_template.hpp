@@ -154,34 +154,32 @@ static void prepare_A2B_S1(OECL0_Share in[], OECL0_Share out[])
 }
 
 
-static void prepare_A2B_S2(Datatype in[], Datatype out[])
+static void prepare_A2B_S2(OECL0_Share in[], OECL0_Share out[])
 {
     //convert share a + x1 to boolean
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
-            temp[j] = SET_ALL_ZERO() -  in[j].p2; // set share to -x1
+            temp[j] = in[j].p2; // set share to x1
         }
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
 
     for(int i = 0; i < BITLENGTH; i++)
     {
-            out[i].p0 = SET_ALL_ZERO(); // set first share to 0
-            out[i].p1 = temp[i]; // set second share to -x1
+            out[i].p1 = SET_ALL_ZERO(); // set first share to 0
+            out[i].p2 = temp[i]; // set second share to x1
     } 
 }
 
-
-static void prepare_A2B(Datatype in[], Datatype out[])
+static void complete_A2B_S1(OECL0_Share out[])
 {
-    prepare_A2B_S1(in, out);
-    prepare_A2B_S2(in, out);
+
+}
+static void complete_A2B_S2(OECL0_Share out[])
+{
+
 }
 
-static void complete_A2B(Datatype in[], Datatype out[])
-{
-}
-}
-;
+};
 

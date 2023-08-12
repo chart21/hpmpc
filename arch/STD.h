@@ -163,14 +163,14 @@ void unorthogonalize_boolean(DATATYPE *in, UINT_TYPE* data) {
   real_ortho(data);
 }
 
-// STD does not allow arithemtic of packed integers -> only allow DATATYPE in/out
+// STD does not allow arithmetic of packed integers -> only allow DATATYPE in/out
 
 void orthogonalize_arithmetic(DATATYPE* data, DATATYPE* out) {
   for (int i = 0; i < BITLENGTH; i++)
     out[i] = data[i];
 }
 
-    void unorthogonalize_arithemtic(DATATYPE *in, DATATYPE* data) {
+    void unorthogonalize_arithmetic(DATATYPE *in, DATATYPE* data) {
   for (int i = 0; i < DATTYPE; i++)
     data[i] = in[i];
 }
@@ -193,7 +193,7 @@ void orthogonalize_arithmetic_full(DATATYPE* data, DATATYPE* out) {
     out[i] = data[i];
 }
 
-void unorthogonalize_arithemtic_full(DATATYPE *in, DATATYPE* data) {
+void unorthogonalize_arithmetic_full(DATATYPE *in, DATATYPE* data) {
   for (int i = 0; i < DATTYPE; i++)
     data[i] = in[i];
 }

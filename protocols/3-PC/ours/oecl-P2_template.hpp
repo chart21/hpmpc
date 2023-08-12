@@ -115,34 +115,39 @@ static void communicate()
 //higher level functions
 
 
-static void A2B_S1(Datatype in[], Datatype out[])
+static void prepare_A2B_S1(OECL2_Share in[], OECL2_Share out[])
 {
     //convert share a + x1 to boolean
-    unorthogonalize_arithmetic(in, (UINT_TYPE*) out);
-    orthogonalize_boolean((UINT_TYPE*) out, out);
+    Datatype temp[BITLENGTH];
     for(int i = 0; i < BITLENGTH; i++)
     {
-        send_to_live(P1, XOR(out[i],getRandomVal(P0))); // send all bits a + x_1 XOR r_0,2 to P1
+        temp[i] = in[i].p1;
+    }
+    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
+    orthogonalize_boolean((UINT_TYPE*) temp, temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].p1 = temp[i];
+        send_to_live(P1, XOR(out[i].p1,getRandomVal(P0))); // send all bits a + x_1 XOR r_0,2 to P1
     }
 }
 
-static void A2B_S2(Datatype out[])
+static void prepare_A2B_S2(OECL2_Share in[], OECL2_Share out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-        out[i] = SET_ALL_ZERO();
+        out[i].p1 = SET_ALL_ZERO();
     }
 }
 
-static void prepare_A2B(Datatype in[], Datatype out[])
+static void complete_A2B_S1(OECL2_Share out[])
 {
-    A2B_S1(in, out);
-    A2B_S2(out);
 }
 
-static void complete_A2B(Datatype out[])
+static void complete_A2B_S2(OECL2_Share out[])
 {
 }
 
 };
+
 

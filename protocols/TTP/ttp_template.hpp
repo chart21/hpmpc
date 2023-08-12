@@ -112,5 +112,47 @@ static void communicate()
     communicate_live();
 }
 
+static void prepare_A2B_S1(TTP_Share in[], TTP_Share out[])
+{
+    Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            temp[j] = in[j].p1;
+        }
+    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
+    orthogonalize_boolean((UINT_TYPE*) temp, temp);
+
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].p1 = temp[i];
+    } 
+}
+
+
+static void prepare_A2B_S2(TTP_Share in[], TTP_Share out[])
+{
+    Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            temp[j] = SET_ALL_ZERO();
+        }
+    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
+    orthogonalize_boolean((UINT_TYPE*) temp, temp);
+
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].p1 = temp[i];
+    } 
+}
+
+static void complete_A2B_S1(TTP_Share out[])
+{
+
+}
+static void complete_A2B_S2(TTP_Share out[])
+{
+
+}
+
 };
 

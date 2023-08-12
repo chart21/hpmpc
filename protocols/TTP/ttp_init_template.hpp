@@ -95,5 +95,23 @@ static void finalize(std::string* ips)
     finalize_(ips);
 }
 
+static void prepare_A2B_S1(TTP_init in[], TTP_init out[])
+{
+}
+
+
+static void prepare_A2B_S2(TTP_init in[], TTP_init out[])
+{
+}
+
+static void complete_A2B_S1(TTP_init out[])
+{
+
+}
+static void complete_A2B_S2(TTP_init out[])
+{
+
+}
+
 
 };
