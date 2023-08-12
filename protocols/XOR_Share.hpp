@@ -10,7 +10,7 @@ public:
 
     XOR_Share(const Share_Type& s) : Share_Type(s) {}
 
-    XOR_Share operator!() const
+    XOR_Share operator~() const
     {
         return XOR_Share(Share_Type::Not());
     }

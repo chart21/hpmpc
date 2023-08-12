@@ -1,6 +1,6 @@
 #pragma once
 #include "../generic_share.hpp"
-
+#include "inttypes.h"
 template <typename Datatype>
 class TTP_Share
 {
@@ -64,7 +64,9 @@ void prepare_receive_from(func_add ADD, func_sub SUB)
 #if PARTY != 2
 if constexpr(id == PSELF)
 {
-        send_to_live(P2, get_input_live());
+            Datatype tmp = get_input_live();
+        send_to_live(P2, tmp);
+        
 }
 #endif
 }
