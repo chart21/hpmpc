@@ -117,7 +117,9 @@ static void prepare_A2B_S1(TTP_Share in[], TTP_Share out[])
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
-            temp[j] = in[j].p1;
+            /* temp[j] = in[j].p1; */
+            temp[j] = getRandomVal(PNEXT);
+            in[j].p1 -= temp[j];
         }
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
@@ -134,7 +136,8 @@ static void prepare_A2B_S2(TTP_Share in[], TTP_Share out[])
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
-            temp[j] = SET_ALL_ZERO();
+            /* temp[j] = SET_ALL_ZERO(); */
+            temp[j] = in[j].p1;
         }
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);

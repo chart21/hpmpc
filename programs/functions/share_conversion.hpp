@@ -5,6 +5,7 @@
 #include <iostream>
 #include <bitset>
 #include "../../protocols/XOR_Share.hpp"
+#include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
 #include "boolean_adder.hpp"
@@ -15,8 +16,9 @@ template<typename Share>
 void convert_share(/*outputs*/ DATATYPE *result)
 {
     using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<S>;
-    using sint = sint_t<S>;
+    using sint = sint_t<A>;
 
     sint val;
     Bitset y;
@@ -24,8 +26,8 @@ void convert_share(/*outputs*/ DATATYPE *result)
     Share::communicate();
     val.template complete_receive_from<P0>();
     Share::communicate();
-    Bitset s1 = sbitset_t<S>::prepare_A2B_S1(val.get_share_pointer());
-    Bitset s2 = sbitset_t<S>::prepare_A2B_S2(val.get_share_pointer());
+    Bitset s1 = sbitset_t<S>::prepare_A2B_S1( (S*) val.get_share_pointer());
+    Bitset s2 = sbitset_t<S>::prepare_A2B_S2( (S*) val.get_share_pointer());
     Share::communicate();
     s1.complete_A2B_S1();
     s2.complete_A2B_S2();

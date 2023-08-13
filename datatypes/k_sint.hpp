@@ -105,8 +105,8 @@ public:
             
             for(int i = 0; i < BITLENGTH; ++i) {
                ((DATATYPE*) result)[i] = shares[i].complete_reveal_to_all();
-            unorthogonalize_arithmetic((DATATYPE*) result, result);
             }
+            unorthogonalize_arithmetic((DATATYPE*) result, result);
         }
        
 

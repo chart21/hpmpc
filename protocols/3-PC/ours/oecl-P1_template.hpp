@@ -138,8 +138,8 @@ static void prepare_A2B_S2(const OECL1_Share in[], OECL1_Share out[])
     Datatype temp_p2[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
-            temp_p1[j] = OP_SUB(SET_ALL_ZERO(), in[j].p2); // set first share to -x1
-            temp_p2[j] = in[j].p2; // set second share to x1
+            temp_p1[j] = FUNC_SUB64(SET_ALL_ZERO(), in[j].p2); // set first share to -x1
+            temp_p2[j] = temp_p1[j]; // set second share to -x1
         }
     unorthogonalize_arithmetic(temp_p1, (UINT_TYPE*) temp_p1);
     orthogonalize_boolean((UINT_TYPE*) temp_p1, temp_p1);

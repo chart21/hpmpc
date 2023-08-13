@@ -105,8 +105,8 @@ public:
            DATATYPE temp[BITLENGTH];
             for(int i = 0; i < BITLENGTH; ++i) {
                temp[i] = shares[i].complete_reveal_to_all();
-            unorthogonalize_boolean((DATATYPE*) temp, result);
             }
+            unorthogonalize_boolean((DATATYPE*) temp, result);
         }
        
 
