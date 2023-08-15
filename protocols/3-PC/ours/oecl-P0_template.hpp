@@ -89,15 +89,15 @@ void prepare_receive_from(func_add ADD, func_sub SUB)
 if constexpr(id == P0)
 {
 #if OPT_SHARE == 1
-    p1 = SUB(SET_ALL_ZERO(), get_input_live());
-    p2 = getRandomVal(P1);
+    p2 = getRandomVal(P1); // r0,1
+    p1 = SUB(SET_ALL_ZERO(), ADD(get_input_live(),p2)); // share -(a + r0,1)
     #if PRE == 1 && SHARE_PREP == 1
-        pre_send_to_live(P2, SUB(p2,p1));
+        pre_send_to_live(P2, p1); // share -(a + r0,1) to P2
     #else
-        send_to_live(P2, SUB(p2,p1));
+        send_to_live(P2, p1);
     #endif
 #else
-    p1 = getRandomVal(P0); // P1 does not need to the share -> thus not srng but 2 
+    p1 = getRandomVal(P2); // P1 does not need to the share -> thus not srng but 2 -> with updated share conversion it needs it
     p2 = getRandomVal(P1);
     Datatype input = get_input_live();
     #if PRE == 1
@@ -148,7 +148,8 @@ static void prepare_A2B_S1(OECL0_Share in[], OECL0_Share out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-        out[i].p1 = getRandomVal(P2); // set share to r0,2 
+        /* out[i].p1 = getRandomVal(P2); // set share to r0,2 */ 
+        out[i].p1 = SET_ALL_ZERO(); // set share to 0
         out[i].p2 = SET_ALL_ZERO(); // set other share to 0
     }
 }
@@ -156,20 +157,26 @@ static void prepare_A2B_S1(OECL0_Share in[], OECL0_Share out[])
 
 static void prepare_A2B_S2(OECL0_Share in[], OECL0_Share out[])
 {
-    //convert share a + x1 to boolean
+    //convert share x0 to boolean
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
-            temp[j] = FUNC_SUB64(SET_ALL_ZERO(), in[j].p2); // set share to -x1
+            temp[j] = FUNC_SUB64(SET_ALL_ZERO(), FUNC_ADD64(in[j].p1, in[j].p2)); // set share to -x0
         }
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
 
     for(int i = 0; i < BITLENGTH; i++)
     {
-            out[i].p1 = SET_ALL_ZERO(); // set first share to 0
-            out[i].p2 = temp[i]; // set second share to -x1
+            out[i].p2 = getRandomVal(P1); // set second share to r0,1
+            out[i].p1 = FUNC_XOR(temp[i],out[i].p2); // set first share to -x0 xor r0,1
+            #if PRE == 1
+                pre_send_to_live(P2, out[i].p1); // -x0 xor r0,1 to P2
+            #else
+                send_to_live(P2, out[i].p1); // -x0 xor r0,1 to P2
+            #endif
     } 
+            /* out[0].p1 = FUNC_NOT(out[0].p1);// change sign bit -> -x0 xor r0,1 to x0 xor r0,1 */
 }
 
 static void complete_A2B_S1(OECL0_Share out[])

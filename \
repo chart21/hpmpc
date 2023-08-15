@@ -141,15 +141,11 @@ static void prepare_A2B_S1(OECL0_init in[], OECL0_init out[])
 
 static void prepare_A2B_S2(OECL0_init in[], OECL0_init out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
-    {
 #if PRE == 1
     pre_send_to_(P2);
 #else
     send_to_(P2);
 #endif
-    }
-    
 }
 
 static void complete_A2B_S1(OECL0_init out[])

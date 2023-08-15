@@ -123,9 +123,6 @@ static void prepare_A2B_S2(OECL1_init in[], OECL1_init out[])
 
 static void complete_A2B_S1(OECL1_init out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
-        receive_from_(P2);
-
 }
 static void complete_A2B_S2(OECL1_init out[])
 {

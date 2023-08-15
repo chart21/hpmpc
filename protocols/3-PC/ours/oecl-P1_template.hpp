@@ -69,6 +69,7 @@ void prepare_receive_from(func_add ADD, func_sub SUB)
 if constexpr(id == P0)
 {
         p2 = getRandomVal(P0);
+        p1 = SUB(SET_ALL_ZERO(), p2); // set p1 to - r0,1
 }
 else if constexpr(id == P1)
 {
@@ -81,20 +82,18 @@ else if constexpr(id == P1)
 template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)
 {
+    
+#if OPT_SHARE == 0
 if constexpr(id == P0)
 {
-
-#if OPT_SHARE == 1
-        p1 = SET_ALL_ZERO(); 
-#else
     #if PRE == 1 && SHARE_PREP == 1
         p1 = pre_receive_from_live(P0);
     #else
         p1 = receive_from_live(P0);
     #endif
-#endif 
 }
-else if constexpr(id == P2)
+#endif 
+if constexpr(id == P2)
 {
 p1 = receive_from_live(P2);
 p2 = SET_ALL_ZERO();
@@ -120,36 +119,34 @@ static void communicate()
 
 
 static void prepare_A2B_S1(OECL1_Share in[], OECL1_Share out[])
-{}
+{
+    Datatype temp_p1[BITLENGTH];
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        temp_p1[i] = FUNC_ADD64(in[i].p1,in[i].p2) ; // set first share to a+x_0
+    }
+    unorthogonalize_arithmetic(temp_p1, (UINT_TYPE*) temp_p1);
+    orthogonalize_boolean((UINT_TYPE*) temp_p1, temp_p1);
+    
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].p1 = temp_p1[i];
+        out[i].p2 = SET_ALL_ZERO(); // set other share to 0
+    }
+
+}
 
 static void complete_A2B_S1(OECL1_Share out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
-    {
-        out[i].p1 = receive_from_live(P2); // receive a + x_1 xor r0,2 from P2
-        out[i].p2 = SET_ALL_ZERO(); // set other share to 0
-    }
 }
 
 static void prepare_A2B_S2(const OECL1_Share in[], OECL1_Share out[])
 {
-    //convert share a + x1 to boolean
-    Datatype temp_p1[BITLENGTH];
-    Datatype temp_p2[BITLENGTH];
-        for (int j = 0; j < BITLENGTH; j++)
-        {
-            temp_p1[j] = FUNC_SUB64(SET_ALL_ZERO(), in[j].p2); // set first share to -x1
-            temp_p2[j] = temp_p1[j]; // set second share to -x1
-        }
-    unorthogonalize_arithmetic(temp_p1, (UINT_TYPE*) temp_p1);
-    orthogonalize_boolean((UINT_TYPE*) temp_p1, temp_p1);
-    unorthogonalize_arithmetic(temp_p2, (UINT_TYPE*) temp_p2);
-    orthogonalize_boolean((UINT_TYPE*) temp_p2, temp_p2);
 
     for(int i = 0; i < BITLENGTH; i++)
     {
-        out[i].p1 = temp_p1[i];
-        out[i].p2 = temp_p2[i];
+        out[i].p1 = getRandomVal(P0); 
+        out[i].p2 = out[i].p1; // set both shares to r0,1
     } 
 }
 

@@ -129,8 +129,6 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
 
 static void prepare_A2B_S1(OECL2_init in[], OECL2_init out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
-        send_to_(P1);
 }
 
 
@@ -144,8 +142,17 @@ static void complete_A2B_S1(OECL2_init out[])
 }
 static void complete_A2B_S2(OECL2_init out[])
 {
-
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        #if PRE == 1
+        pre_receive_from_(P0);
+        #else
+        receive_from_(P0);
+        #endif
+    }
 }
+
+
 
 
 };
