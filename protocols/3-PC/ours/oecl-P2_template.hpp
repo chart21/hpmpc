@@ -90,7 +90,7 @@ if constexpr(id == P0)
 #else
         p2 = receive_from_live(P0);
 #endif
-        p1 = SUB(SET_ALL_ZERO(), p2); // set share to - - (a + r0,1)
+        p1 = SUB(SET_ALL_ZERO(), p2); // set own share to - - (a + r0,1)
 }
 else if constexpr(id == P1)
 {
@@ -157,6 +157,43 @@ static void complete_A2B_S2(OECL2_Share out[])
         out[i].p2 = out[i].p1; // set both shares to -x0 xor r0,1
     }
         /* out[0].p2 = FUNC_NOT(out[0].p2);// change sign bit -> -x0 xor r0,1 to x0 xor r0,1 */
+}
+
+void prepare_bit_injection_S1(OECL2_Share out[])
+{
+    DATATYPE temp[BITLENGTH]{0};
+    temp[BITLENGTH - 1] = FUNC_XOR(p1,p2);
+    unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
+    orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].p1 = temp[i];// set share to b xor x_0
+        out[i].p2 = SET_ALL_ZERO(); // set other share to 0
+    }
+}
+
+void prepare_bit_injection_S2( OECL2_Share out[])
+{
+}
+
+static void complete_bit_injection_S1(OECL2_Share out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OECL2_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+     #if PRE == 1
+        out[i].p2 = pre_receive_from_live(P0);
+        #else
+        out[i].p2 = receive_from_live(P0);
+        #endif
+        out[i].p1 = FUNC_SUB64(SET_ALL_ZERO(), out[i].p2); // set first share to x0 + r0,1
+    }
+
+
 }
 
 };

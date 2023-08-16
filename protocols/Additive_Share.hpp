@@ -17,7 +17,7 @@ public:
     
     Additive_Share operator-(const Additive_Share<Datatype,Share_Type>& b) const
     {
-        return Additive_Share(Share_Type::Sub(b, std::plus<Datatype>()));
+        return Additive_Share(Share_Type::Add(b, std::minus<Datatype>()));
     }
 
     Additive_Share operator*(const Additive_Share<Datatype, Share_Type>& b) const

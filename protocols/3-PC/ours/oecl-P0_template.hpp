@@ -188,5 +188,46 @@ static void complete_A2B_S2(OECL0_Share out[])
 
 }
 
+void prepare_bit_injection_S1(OECL0_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].p1 = SET_ALL_ZERO(); // set share to 0
+        out[i].p2 = SET_ALL_ZERO(); // set other share to 0
+    }
+}
+
+void prepare_bit_injection_S2(OECL0_Share out[])
+{
+    DATATYPE temp[BITLENGTH]{0};
+    temp[BITLENGTH - 1] = FUNC_XOR(p1,p2);
+    unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
+    orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].p2 = getRandomVal(P1); // set second share to r0,1 
+        out[i].p1 = FUNC_SUB64(SET_ALL_ZERO(), FUNC_ADD64(temp[i], out[i].p2)) ; // set first share to -(x0 + r0,1)
+        #if PRE == 1
+            pre_send_to_live(P2, out[i].p1); //  - (x0 + r0,1) to P2
+        #else
+            send_to_live(P2, out[i].p1); // - (x0 + r0,1) to P2
+        #endif
+        
+    }
+}
+
+static void complete_bit_injection_S1(OECL0_Share out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OECL0_Share out[])
+{
+
+
+}
+
+
+
 };
 

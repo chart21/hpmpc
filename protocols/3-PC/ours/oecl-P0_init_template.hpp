@@ -161,5 +161,34 @@ static void complete_A2B_S2(OECL0_init out[])
 
 }
 
+void prepare_bit_injection_S1( OECL0_init out[])
+{
+}
+
+void prepare_bit_injection_S2( OECL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        #if PRE == 1
+            pre_send_to_(P2);
+        #else
+            send_to_(P2);
+        #endif
+        
+    }
+}
+
+static void complete_bit_injection_S1(OECL0_init out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OECL0_init out[])
+{
+
+
+}
+
+
 
 };

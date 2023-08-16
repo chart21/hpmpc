@@ -146,6 +146,16 @@ public:
             Share::complete_A2B_S2(shares);
         }
 
+        void complete_bit_injection_S1()
+        {
+            Share::complete_bit_injection_S1(shares);
+        }
+
+        void complete_bit_injection_S2()
+        {
+            Share::complete_bit_injection_S2(shares);
+        }
+
 };
 
 

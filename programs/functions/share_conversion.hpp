@@ -9,9 +9,56 @@
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
 #include "boolean_adder.hpp"
-#define FUNCTION convert_share
+#define FUNCTION bit_injection
 #define RESULTTYPE DATATYPE
 
+
+    template<typename Share>
+void bit_injection(DATATYPE* res)
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<S>;
+    using sint = sint_t<A>;
+
+    Bitset val;
+    val.template prepare_receive_from<P0>();
+    Share::communicate();
+    val.template complete_receive_from<P0>();
+    Share::communicate();
+    S s = val[0];
+    
+    sint s1;
+    sint s2;
+    s.prepare_bit_injection_S1(s1.get_share_pointer());
+    s.prepare_bit_injection_S2(s2.get_share_pointer());
+    Share::communicate();
+    s1.complete_bit_injection_S1();
+    s2.complete_bit_injection_S2();
+    sint result;
+    result.prepare_XOR(s1,s2);
+    Share::communicate();
+    result.complete_XOR(s1,s2);
+
+    /* Bitset result = val; */
+    result.prepare_reveal_to_all();
+    Share::communicate();
+    uint64_t result_arr[DATTYPE];
+    result.complete_reveal_to_all(result_arr);
+    if(current_phase == 1)
+    {
+        std::cout << "P" << PARTY << ": Result: ";
+    for(int i = 0; i < DATTYPE; i++)
+    {
+        /* std::cout << std::bitset<sizeof(uint64_t)*8>(s1_arr[i] + s2_arr[i]); */
+    /* std::cout << std::endl; */
+        std::cout << std::bitset<sizeof(uint64_t)*8>(result_arr[i]);
+    std::cout << std::endl;
+    }
+
+}
+
+}
 template<typename Share>
 void convert_share(/*outputs*/ DATATYPE *result)
 {
@@ -37,6 +84,7 @@ void convert_share(/*outputs*/ DATATYPE *result)
         adder.step();
         Share::communicate();
     }
+    
     /* y = val; */
     y.prepare_reveal_to_all();
     /* s1.prepare_reveal_to_all(); */

@@ -152,6 +152,31 @@ static void complete_A2B_S2(OECL2_init out[])
     }
 }
 
+void prepare_bit_injection_S1( OECL2_init out[])
+{
+}
+
+void prepare_bit_injection_S2( OECL2_init out[])
+{
+}
+
+static void complete_bit_injection_S1(OECL2_init out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OECL2_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        #if PRE == 1
+        pre_receive_from_(P0);
+        #else
+        receive_from_(P0);
+        #endif
+    }
+
+}
 
 
 

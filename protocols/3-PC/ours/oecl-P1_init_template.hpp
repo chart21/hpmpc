@@ -129,5 +129,24 @@ static void complete_A2B_S2(OECL1_init out[])
 
 }
 
+void prepare_bit_injection_S1( OECL1_init out[])
+{
+}
+
+void prepare_bit_injection_S2( OECL1_init out[])
+{
+}
+
+static void complete_bit_injection_S1(OECL1_init out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OECL1_init out[])
+{
+
+
+}
+
 
 };
