@@ -16,9 +16,22 @@ private:
    
 public:
 //constructor
+
+BooleanAdder()
+    {
+        r = 0;
+    }
+
 BooleanAdder(Bitset &x0, Bitset &x1, Bitset &y0) : x0__(x0), x1__(x1), y0__(y0) 
     {
         r = 0;
+    }
+
+void set_values(Bitset &x0, Bitset &x1, Bitset &y0) 
+    {
+        x0__ = x0;
+        x1__ = x1;
+        y0__ = y0;
     }
 
 int get_rounds() {

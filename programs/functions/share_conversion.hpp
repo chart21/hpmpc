@@ -8,9 +8,177 @@
 #include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
-#include "boolean_adder.hpp"
-#define FUNCTION bit_injection
+#include "boolean_adder_updated.hpp"
+/* #include "boolean_adder.hpp" */
+#define FUNCTION RELU
 #define RESULTTYPE DATATYPE
+    template<typename Share>
+void adder(DATATYPE* res)
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<S>;
+    using sint = sint_t<A>;
+    
+    Bitset x;
+    Bitset y;
+    x.template prepare_receive_from<P0>();
+    y.template prepare_receive_from<P0>();
+    Share::communicate();
+    x.template complete_receive_from<P0>();
+    y.template complete_receive_from<P0>();
+    Share::communicate();
+    Bitset z;
+    BooleanAdder<S> adder(x, y, z);
+    while(!adder.is_done())
+    {
+        adder.step();
+        Share::communicate();
+    }
+    z.prepare_reveal_to_all();
+    Share::communicate();
+    uint64_t result_arr[DATTYPE];
+
+    z.complete_reveal_to_all(result_arr);
+    if(current_phase == 1)
+    {
+        std::cout << "P" << PARTY << ": Result: ";
+    for(int i = 0; i < DATTYPE; i++)
+    {
+        /* std::cout << std::bitset<sizeof(uint64_t)*8>(s1_arr[i] + s2_arr[i]); */
+    /* std::cout << std::endl; */
+        std::cout << std::bitset<sizeof(uint64_t)*8>(result_arr[i]);
+    std::cout << std::endl;
+    }
+
+}
+}
+    template<typename Share>
+void RELU(DATATYPE* res)
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<S>;
+    using sint = sint_t<A>;
+    
+    sint* val = new sint[NUM_INPUTS];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        val[i].template prepare_receive_from<P0>();
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        val[i].template complete_receive_from<P0>();
+    }
+    Share::communicate();
+    Bitset *s1 = new Bitset[NUM_INPUTS];
+    Bitset *s2 = new Bitset[NUM_INPUTS];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        s1[i] = sbitset_t<S>::prepare_A2B_S1( (S*) val[i].get_share_pointer());
+        s2[i] = sbitset_t<S>::prepare_A2B_S2( (S*) val[i].get_share_pointer());
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        s1[i].complete_A2B_S1();
+        s2[i].complete_A2B_S2();
+    }
+    Bitset* y = new Bitset[NUM_INPUTS];
+    /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
+    std::vector<BooleanAdder<S>> adders;
+    adders.reserve(NUM_INPUTS);
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        /* adder[i].set_values(s1[i], s2[i], y[i]); */
+        adders.emplace_back(s1[i], s2[i], y[i]);
+    }
+    while(!adders[0].is_done())
+    {
+        for(int i = 0; i < NUM_INPUTS; i++)
+        {
+            adders[i].step();
+        }
+        Share::communicate();
+    }
+    delete[] s1;
+    delete[] s2;
+    adders.clear();
+    adders.shrink_to_fit();
+    
+    S *msb = new S[NUM_INPUTS];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        msb[i] = ~ y[i][0];
+    }
+    sint* t1 = new sint[NUM_INPUTS];
+    sint* t2 = new sint[NUM_INPUTS];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        msb[i].prepare_bit_injection_S1(t1[i].get_share_pointer());
+        msb[i].prepare_bit_injection_S2(t2[i].get_share_pointer());
+    }
+    delete[] msb;
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        t1[i].complete_bit_injection_S1();
+        t2[i].complete_bit_injection_S2();
+    }
+    sint* result = new sint[NUM_INPUTS];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        result[i].prepare_XOR(t1[i],t2[i]);
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        result[i].complete_XOR(t1[i],t2[i]);
+    }
+    delete[] t1;
+    delete[] t2;
+
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        result[i] = result[i] * val[i];
+    }
+    delete[] val;
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        result[i].complete_mult();
+    }
+
+
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        result[i].prepare_reveal_to_all();
+    }
+    Share::communicate();
+    auto result_arr = new UINT_TYPE[NUM_INPUTS][DATTYPE];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        result[i].complete_reveal_to_all(result_arr[i]);
+    }
+    delete[] result;
+#if PRINT == 1
+    if(current_phase == 1)
+    {
+        std::cout << "P" << PARTY << ": Result: ";
+        for(int i = 0; i < NUM_INPUTS; i++)
+        {
+    for(int j = 0; j < DATTYPE; j++)
+    {
+        std::cout << std::bitset<sizeof(uint64_t)*8>(result_arr[i][j]);
+    std::cout << std::endl;
+    }
+    std::cout << std::endl;
+        }
+    }
+#endif
+
+}
 
 
     template<typename Share>
