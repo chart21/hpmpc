@@ -8,9 +8,10 @@
 #include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
-#include "boolean_adder_updated.hpp"
+/* #include "boolean_adder_updated.hpp" */
 /* #include "boolean_adder.hpp" */
-#define FUNCTION RELU
+#include "ppa.hpp"
+#define FUNCTION adder
 #define RESULTTYPE DATATYPE
     template<typename Share>
 void adder(DATATYPE* res)

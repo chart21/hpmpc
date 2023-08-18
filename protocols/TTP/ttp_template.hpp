@@ -157,5 +157,40 @@ static void complete_A2B_S2(TTP_Share out[])
 
 }
 
+void prepare_bit_injection_S1(TTP_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].p1 = SET_ALL_ZERO(); // set first summand to zero
+    }
+}
+
+void prepare_bit_injection_S2(TTP_Share out[])
+{
+    DATATYPE temp[BITLENGTH]{0};
+    temp[BITLENGTH - 1] = p1;
+    unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
+    orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].p1 = temp[i]; // set second summand to the msb
+    }
+}
+
+static void complete_bit_injection_S1(TTP_Share out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(TTP_Share out[])
+{
+
+
+}
+
+
+
+
+
 };
 

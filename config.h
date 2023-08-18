@@ -36,7 +36,7 @@
 // How many messages should be buffered until a combined hash is performed? 0 means all hashes are calculated at the very end of the protocol.
 #define VERIFY_BUFFER 0
 // Print additional info?
-#define PRINT 0
+#define PRINT 1
 
 // Starting port for required port range of the sockets
 #define BASE_PORT 11000
