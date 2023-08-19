@@ -12,6 +12,7 @@
 #include "boolean_adder_msb.hpp"
 #include "ppa_msb.hpp"
 #include "ppa.hpp"
+#include "ppa_msb_unsafe.hpp"
 
 /* #include "boolean_adder.hpp" */
 /* #include "ppa.hpp" */
@@ -92,7 +93,7 @@ void RELU(DATATYPE* res)
     }
     Bitset* y = new Bitset[NUM_INPUTS];
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
-    std::vector<PPA_MSB<S>> adders;
+    std::vector<PPA_MSB_Unsafe<S>> adders;
     adders.reserve(NUM_INPUTS);
     for(int i = 0; i < NUM_INPUTS; i++)
     {

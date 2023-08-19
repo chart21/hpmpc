@@ -7,9 +7,9 @@ void generateElements()
         for(int i = 0; i < NUM_INPUTS; ++i) {
         for(int j = 0; j < DATTYPE; ++j) {
             if(i % 2 == 0)
-                input[i][j] = -j*(NUM_INPUTS);
+                input[i][j] = -j*(i);
             else
-                input[i][j] = j*(NUM_INPUTS);
+                input[i][j] = j*(i);
 
             /* if (j % (i+1) == 0) */
             /*     input[i][j] = j; */
