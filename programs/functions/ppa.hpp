@@ -5,7 +5,7 @@
 #include <iostream>
 
 template<typename Share>
-class BooleanAdder {
+class PPA {
     using Bitset = sbitset_t<Share>;
 private:
     Bitset &a;
@@ -95,7 +95,7 @@ void step() {
 
 
 
-BooleanAdder(Bitset &x0, Bitset &x1, Bitset &y0) : a(x0), b(x1), sum(y0) 
+PPA(Bitset &x0, Bitset &x1, Bitset &y0) : a(x0), b(x1), sum(y0) 
     {
         level = -2;
     }

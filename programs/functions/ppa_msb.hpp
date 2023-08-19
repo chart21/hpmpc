@@ -5,12 +5,12 @@
 #include <iostream>
 
 template<typename Share>
-class BooleanAdder {
+class PPA_MSB {
     using Bitset = sbitset_t<Share>;
 private:
     Bitset &a;
     Bitset &b;
-    Share &sum;
+    Share &msb;
     Bitset G;
     Bitset P;
     int level;
@@ -35,7 +35,7 @@ void prepare_step() {
                 if (!first) {
 
                     // P1 = P1 & P0
-                    P[curWire] = P[curWire] ^ P[lowWire];
+                    P[curWire] = P[lowWire] & P[curWire];
                 }
 
                 first = false;
@@ -73,23 +73,26 @@ void step() {
             P[0] = a[0] ^ b[0];
            for (int i = 1; i < BITLENGTH; ++i) {
                 P[i] = a[i] ^ b[i];
-                G[i - 1] = a[i - 1] & b[i - 1];
+                /* G[i - 1] = a[i - 1] & b[i - 1]; */
+                G[i] = a[i] & b[i]; // possibly wrong and above is correct
             }
             level++;
             break;
         case -1:
            for (int i = 1; i < BITLENGTH; ++i) 
-                G[i].complete_and();
+               // G[i - 1].complete_and();
+                G[i].complete_and(); // possibly wrong and above is correct
+
             level++;
             prepare_step();
             break;
         default:
             complete_Step();
             prepare_step();
-            break;
-        case LOG2_BITLENGTH-1:
+        break;
+    case LOG2_BITLENGTH-1:
             complete_Step();
-            sum = a[0] ^ b[0] ^ G[1];
+            msb = a[0] ^ b[0] ^ G[1];
             level = -3;
             break;
     }
@@ -97,7 +100,7 @@ void step() {
 
 
 
-BooleanAdder(Bitset &x0, Bitset &x1, Bitset &y0) : a(x0), b(x1), sum(y0) 
+PPA_MSB(Bitset &x0, Bitset &x1, Share &y0) : a(x0), b(x1), msb(y0) 
     {
         level = -2;
     }

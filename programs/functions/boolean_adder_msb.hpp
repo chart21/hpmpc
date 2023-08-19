@@ -5,7 +5,7 @@
 #include <iostream>
 
 template<typename Share>
-class BooleanAdder {
+class BooleanAdder_MSB {
     using Bitset = sbitset_t<Share>;
 private:
     int r;
@@ -18,12 +18,12 @@ private:
 public:
 //constructor
 
-BooleanAdder()
+BooleanAdder_MSB()
     {
         r = BITLENGTH;
     }
 
-BooleanAdder(Bitset &x0, Bitset &x1, Share &y0) : x(x0), y(x1), z(y0) 
+BooleanAdder_MSB(Bitset &x0, Bitset &x1, Share &y0) : x(x0), y(x1), z(y0) 
     {
         r = BITLENGTH;
     }
@@ -85,7 +85,7 @@ void complete_carry()
 
 void update_z()
 {
-    z[0] = x[0] ^ y[0] ^ carry_last;
+    z = x[0] ^ y[0] ^ carry_last;
 
 }
 

@@ -8,10 +8,14 @@
 #include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
-/* #include "boolean_adder_updated.hpp" */
-/* #include "boolean_adder.hpp" */
+#include "boolean_adder_updated.hpp"
+#include "boolean_adder_msb.hpp"
+#include "ppa_msb.hpp"
 #include "ppa.hpp"
-#define FUNCTION adder
+
+/* #include "boolean_adder.hpp" */
+/* #include "ppa.hpp" */
+#define FUNCTION RELU
 #define RESULTTYPE DATATYPE
     template<typename Share>
 void adder(DATATYPE* res)
@@ -88,12 +92,12 @@ void RELU(DATATYPE* res)
     }
     Bitset* y = new Bitset[NUM_INPUTS];
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
-    std::vector<BooleanAdder<S>> adders;
+    std::vector<PPA_MSB<S>> adders;
     adders.reserve(NUM_INPUTS);
     for(int i = 0; i < NUM_INPUTS; i++)
     {
         /* adder[i].set_values(s1[i], s2[i], y[i]); */
-        adders.emplace_back(s1[i], s2[i], y[i]);
+        adders.emplace_back(s1[i], s2[i], y[i][0]);
     }
     while(!adders[0].is_done())
     {

@@ -6,9 +6,11 @@ void generateElements()
         player_input = new DATATYPE[NUM_INPUTS*BITLENGTH];
         for(int i = 0; i < NUM_INPUTS; ++i) {
         for(int j = 0; j < DATTYPE; ++j) {
-            input[i][j] = j;
-            if(i > 0)
-                input[i][j] += 1;
+            if(i % 2 == 0)
+                input[i][j] = -j*(NUM_INPUTS);
+            else
+                input[i][j] = j*(NUM_INPUTS);
+
             /* if (j % (i+1) == 0) */
             /*     input[i][j] = j; */
             /* else */
@@ -28,7 +30,8 @@ void generateElements()
         
     /* orthogonalize_boolean(input, player_input); */
     for(int i = 0; i < NUM_INPUTS; ++i) {
-    orthogonalize_boolean(input[i], player_input + BITLENGTH*i);
+    /* orthogonalize_boolean(input[i], player_input + BITLENGTH*i); */
+        orthogonalize_arithmetic(input[i], player_input + BITLENGTH*i);
     }
 }
 
