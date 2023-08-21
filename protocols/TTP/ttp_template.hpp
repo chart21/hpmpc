@@ -119,10 +119,13 @@ static void prepare_A2B_S1(TTP_Share in[], TTP_Share out[])
         {
             /* temp[j] = in[j].p1; */
             temp[j] = getRandomVal(PNEXT);
-            in[j].p1 -= temp[j];
+            in[j].p1 = FUNC_SUB32(in[j].p1,temp[j]);
         }
-    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
-    orthogonalize_boolean((UINT_TYPE*) temp, temp);
+    /* unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp); */
+    /* orthogonalize_boolean((UINT_TYPE*) temp, temp); */
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_arithmetic(temp, temp2);
+    orthogonalize_boolean(temp2, temp);
 
     for(int i = 0; i < BITLENGTH; i++)
     {
@@ -139,8 +142,9 @@ static void prepare_A2B_S2(TTP_Share in[], TTP_Share out[])
             /* temp[j] = SET_ALL_ZERO(); */
             temp[j] = in[j].p1;
         }
-    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
-    orthogonalize_boolean((UINT_TYPE*) temp, temp);
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_arithmetic(temp, temp2);
+    orthogonalize_boolean(temp2, temp);
 
     for(int i = 0; i < BITLENGTH; i++)
     {

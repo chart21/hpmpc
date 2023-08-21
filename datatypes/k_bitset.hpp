@@ -103,6 +103,7 @@ public:
 
         void complete_reveal_to_all(UINT_TYPE result[DATTYPE]) {
            DATATYPE temp[BITLENGTH];
+            /* DATATYPE* temp = (DATATYPE*) result; */
             for(int i = 0; i < BITLENGTH; ++i) {
                temp[i] = shares[i].complete_reveal_to_all();
             }

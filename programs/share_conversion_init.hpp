@@ -2,14 +2,14 @@
 #include "functions/share_conversion.hpp"
 void generateElements()
 {
-        auto input = new DATATYPE[NUM_INPUTS][DATTYPE];
-        player_input = new DATATYPE[NUM_INPUTS*BITLENGTH];
+        auto input = NEW(UINT_TYPE[NUM_INPUTS][DATTYPE]);
+        player_input = NEW(DATATYPE[NUM_INPUTS*BITLENGTH]);
         for(int i = 0; i < NUM_INPUTS; ++i) {
         for(int j = 0; j < DATTYPE; ++j) {
-            if(i % 2 == 0)
-                input[i][j] = -j*(i);
-            else
-                input[i][j] = j*(i);
+            /* if(i % 2 == 0) */
+            /*     input[i][j] = -j*(i+1); */
+            /* else */
+                input[i][j] = j;
 
             /* if (j % (i+1) == 0) */
             /*     input[i][j] = j; */
@@ -21,7 +21,7 @@ void generateElements()
         std::cout << PARTY << " input: ";
         for(int i = 0; i < NUM_INPUTS; ++i) {
     for(int j = 0; j < DATTYPE; j++)
-    {    std::cout << std::bitset<sizeof(uint64_t)*8>(input[i][j]);
+    {    std::cout << std::bitset<sizeof(UINT_TYPE)*8>(input[i][j]);
     std::cout << std::endl;
     }
     std::cout << std::endl;

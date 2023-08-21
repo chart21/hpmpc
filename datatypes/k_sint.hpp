@@ -102,11 +102,11 @@ public:
         }
 
         void complete_reveal_to_all(UINT_TYPE result[DATTYPE]) {
-            
+            DATATYPE temp[BITLENGTH];
             for(int i = 0; i < BITLENGTH; ++i) {
-               ((DATATYPE*) result)[i] = shares[i].complete_reveal_to_all();
+               temp[i] = shares[i].complete_reveal_to_all();
             }
-            unorthogonalize_arithmetic((DATATYPE*) result, result);
+            unorthogonalize_arithmetic(temp, result);
         }
        
 

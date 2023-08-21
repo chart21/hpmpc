@@ -62,7 +62,6 @@
 #define FUNC_SUB64 __mm_sub_epi64_wrapper
 #define FUNC_MUL32 __mm_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm_mullo_epi64_wrapper
-
 // wrapper functions needed for some compilers
 
 inline __m128i __mm_and_si128_wrapper(__m128i a, __m128i b) {
@@ -340,16 +339,17 @@ void real_ortho_128x128_blend(__m128i data[]) {
 }
 
 void orthogonalize_boolean(UINT_TYPE* data, __m128i* out) {
-  for (int i = 0; i < DATTYPE/BITLENGTH; i+=BITLENGTH)
+    /* orthogonalize_128x64(data, out); */
+  for (int i = 0; i < DATTYPE; i+=BITLENGTH)
       real_ortho(&(data[i]));
   for (int i = 0; i < BITLENGTH; i++)
 #if BITLENGTH == 64
-    out[i] = _mm_set_epi64x(data[64+i], data[i]);
+    out[i] = _mm_set_epi64x(data[i], data[64+i]);
+    
 #elif BITLENGTH == 32
-    out[i] = _mm_set_epi32(data[96+i], data[64+i], data[32+i], data[i]);
+    out[i] = _mm_set_epi32(data[i], data[32+i], data[64+i], data[96+i]);
 #elif BITLENGTH == 16
-    out[i] = _mm_set_epi16(data[112+i], data[96+i], data[80+i], data[64+i],
-                           data[48+i], data[32+i], data[16+i], data[i]);
+    out[i] = _mm_set_epi16(data[i], data[16+i], data[32+i], data[48+i], data[64+i], data[80+i], data[96+i], data[112+i]);
 #endif
 }
 
@@ -358,20 +358,21 @@ void unorthogonalize_boolean(__m128i *in, UINT_TYPE* data) {
     alignas(16) UINT_TYPE tmp[DATTYPE/BITLENGTH];
     _mm_store_si128 ((__m128i*)tmp, in[i]);
     for (int j = 0; j < DATTYPE/BITLENGTH; j++)
-      data[j*BITLENGTH+i] = tmp[j];
+      data[i+j*BITLENGTH] = tmp[DATTYPE/BITLENGTH-j-1];
+        /* data[i+j*BITLENGTH] = tmp[j]; */
   }
-  for (int i = 0; i < DATTYPE/BITLENGTH; i+=BITLENGTH)
+  for (int i = 0; i < DATTYPE; i+=BITLENGTH)
       real_ortho(&(data[i]));
 }
 void orthogonalize_boolean_full(UINT_TYPE* data, __m128i* out) {
   for (int i = 0; i < 128; i++)
 #if BITLENGTH == 64
-    out[i] = _mm_set_epi64x(data[128+i], data[i]);
+    out[i] = _mm_set_epi64x(data[i], data[128+i]);
 #elif BITLENGTH == 32
-    out[i] = _mm_set_epi32(data[384+i], data[256+i], data[128+i], data[i]);
+    out[i] = _mm_set_epi32(data[i], data[128+i], data[256+i], data[384+i]);
 #elif BITLENGTH == 16
-    out[i] = _mm_set_epi16(data[896+i], data[768+i], data[640+i], data[512+i],
-                           data[384+i], data[256+i], data[128+i], data[i]);
+    out[i] = _mm_set_epi16(data[i], data[128+i], data[256+i], data[384+i], data[512+i], data[640+i], data[768+i], data[896+i]);
+
 #endif
   real_ortho_128x128(out);
 }
@@ -382,7 +383,8 @@ void unorthogonalize_boolean_full(__m128i *in, UINT_TYPE* data) {
     alignas(16) UINT_TYPE tmp[DATTYPE/BITLENGTH];
     _mm_store_si128 ((__m128i*)tmp, in[i]);
     for (int j = 0; j < DATTYPE/BITLENGTH; j++)
-      data[j*128+i] = tmp[j];
+      data[j*128+i] = tmp[DATTYPE/BITLENGTH-j-1];
+        /* data[i+j*BITLENGTH] = tmp[j]; */
   }
 }
 

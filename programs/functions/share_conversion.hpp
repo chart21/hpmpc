@@ -8,7 +8,9 @@
 #include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
-#include "boolean_adder_updated.hpp"
+#include "boolean_adder.hpp"
+/* #include "boolean_adder_updated.hpp" */
+
 #include "boolean_adder_msb.hpp"
 #include "ppa_msb.hpp"
 #include "ppa.hpp"
@@ -16,7 +18,7 @@
 
 /* #include "boolean_adder.hpp" */
 /* #include "ppa.hpp" */
-#define FUNCTION RELU
+#define FUNCTION convert_share
 #define RESULTTYPE DATATYPE
     template<typename Share>
 void adder(DATATYPE* res)
@@ -243,6 +245,8 @@ void convert_share(/*outputs*/ DATATYPE *result)
 
     sint val;
     Bitset y;
+    /* Bitset val; */
+    /* sint y; */
     val.template prepare_receive_from<P0>();
     Share::communicate();
     val.template complete_receive_from<P0>();
@@ -252,25 +256,31 @@ void convert_share(/*outputs*/ DATATYPE *result)
     Share::communicate();
     s1.complete_A2B_S1();
     s2.complete_A2B_S2();
-    BooleanAdder<S> adder(s1, s2,y);
+    PPA<S> adder(s1, s2,y);
     while(!adder.is_done())
     {
         adder.step();
         Share::communicate();
     }
+    /* val = val + val; */
     
     /* y = val; */
     y.prepare_reveal_to_all();
     /* s1.prepare_reveal_to_all(); */
     /* s2.prepare_reveal_to_all(); */
     Share::communicate();
-    uint64_t result_arr[DATTYPE];
+    auto result_arr = NEW(UINT_TYPE[DATTYPE]);
     /* uint64_t s1_arr[DATTYPE]; */
     /* uint64_t s2_arr[DATTYPE]; */
     /* s1.complete_reveal_to_all(s1_arr); */
     /* s2.complete_reveal_to_all(s2_arr); */
 
     y.complete_reveal_to_all(result_arr);
+    /* DATATYPE temp[DATTYPE]; */
+    /* orthogonalize_boolean(result_arr, temp); */
+    /* temp[0] = ~ temp[0]; */
+    /* temp[0] = NOT(temp[0]); */
+    /* unorthogonalize_boolean(  temp, result_arr); */
     if(current_phase == 1)
     {
         std::cout << "P" << PARTY << ": Result: ";
@@ -278,7 +288,7 @@ void convert_share(/*outputs*/ DATATYPE *result)
     {
         /* std::cout << std::bitset<sizeof(uint64_t)*8>(s1_arr[i] + s2_arr[i]); */
     /* std::cout << std::endl; */
-        std::cout << std::bitset<sizeof(uint64_t)*8>(result_arr[i]);
+        std::cout << std::bitset<sizeof(UINT_TYPE)*8>(result_arr[i]);
     std::cout << std::endl;
     }
     
