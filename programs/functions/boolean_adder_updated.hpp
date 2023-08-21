@@ -75,7 +75,7 @@ case BITLENGTH-2:
 
 void prepare_carry()
 {
-    carry_last = (carry_last ^ x[r]) & (carry_last ^ y[r]);
+    carry_this = (carry_last ^ x[r]) & (carry_last ^ y[r]);
 }
 
 void complete_carry()

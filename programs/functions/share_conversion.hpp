@@ -8,8 +8,8 @@
 #include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
-#include "boolean_adder.hpp"
-/* #include "boolean_adder_updated.hpp" */
+/* #include "boolean_adder.hpp" */
+#include "boolean_adder_updated.hpp"
 
 #include "boolean_adder_msb.hpp"
 #include "ppa_msb.hpp"
@@ -256,7 +256,7 @@ void convert_share(/*outputs*/ DATATYPE *result)
     Share::communicate();
     s1.complete_A2B_S1();
     s2.complete_A2B_S2();
-    PPA<S> adder(s1, s2,y);
+    BooleanAdder<S> adder(s1, s2,y);
     while(!adder.is_done())
     {
         adder.step();
