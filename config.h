@@ -72,7 +72,7 @@ int base_port = BASE_PORT; // temporary solution
 #define INPUT 'r'
 
 // Bitlength of integers (currently not used)
-#define BITLENGTH 32
+#define BITLENGTH 64
 
 
 #if PROTOCOL < 7
