@@ -26,6 +26,20 @@ OECL1_Share Add(OECL1_Share b, func_add ADD) const
    return OECL1_Share(ADD(p1,b.p1),ADD(p2,b.p2));
 }
 
+    template <typename func_add, typename func_sub, typename func_mul>
+void prepare_dot(OECL1_Share a, OECL1_Share b , OECL1_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+{
+c.p1 = ADD(c.p1, ADD(MULT(a.p1,b.p2), MULT(b.p1,a.p2)));
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(OECL1_Share &c, func_add ADD, func_sub SUB)
+{
+    c.p1 = ADD(getRandomVal(P0), c.p1);
+    c.p2 = getRandomVal(P2);
+    send_to_live(P2,SUB(c.p1,c.p2));
+}
+
 
 
 template <typename func_add, typename func_sub, typename func_mul>

@@ -26,6 +26,17 @@ TTP_Share Add(TTP_Share b, func_add ADD) const
     return TTP_Share(ADD(p1, b.p1));
 }
 
+    template <typename func_add, typename func_sub, typename func_mul>
+void prepare_dot(OECL0_Share a, OECL0_Share b , OECL0_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+{
+c.p1 = ADD(c.p1, MULT(a.p1,b.p1));
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(OECL0_Share &c, func_add ADD, func_sub SUB)
+{
+}
+
 
 template <typename func_add, typename func_sub, typename func_mul>
     TTP_Share prepare_mult(TTP_Share b, func_add ADD, func_sub SUB, func_mul MULT) const

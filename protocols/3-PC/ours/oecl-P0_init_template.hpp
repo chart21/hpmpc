@@ -25,6 +25,22 @@ OECL0_init Add(OECL0_init b, func_add ADD) const
 {
    return OECL0_init();
 }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+void prepare_dot(OECL0_init a, OECL0_init b , OECL0_init &c, func_add ADD, func_sub SUB, func_mul MULT)
+{
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(OECL0_init &c, func_add ADD, func_sub SUB)
+{
+#if PRE == 1
+    pre_send_to_(P2);
+#else
+    send_to_(P2);
+#endif
+}
+
 
 template <typename func_add, typename func_sub, typename func_mul>
     OECL0_init prepare_mult(OECL0_init b, func_add ADD, func_sub SUB, func_mul MULT) const

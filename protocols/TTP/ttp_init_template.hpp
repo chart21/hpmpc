@@ -24,6 +24,17 @@ TTP_init Add(TTP_init b, func_add ADD) const
 {
     return TTP_init();
 }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+void prepare_dot(TTP_init a, TTP_init b , TTP_init &c, func_add ADD, func_sub SUB, func_mul MULT)
+{
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(TTP_init &c, func_add ADD, func_sub SUB)
+{
+}
+
 
 
 template <typename func_add, typename func_sub, typename func_mul>
