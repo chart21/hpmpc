@@ -50,15 +50,15 @@
 #define MUL_SIGNED(a,b,c) _mm512_mullo_epi##c(a,b)
 #define MUL_SINGED_64(a,b) _mm512_mullox_epi64(a,b)
 
-#define FUNC_AND __mm512_and_si512_wrapper
-#define FUNC_OR  __mm512_or_si512_wrapper
-#define FUNC_XOR __mm512_xor_si512_wrapper
-#define FUNC_ADD32 __mm512_add_epi32_wrapper
-#define FUNC_ADD64 __mm512_add_epi64_wrapper
-#define FUNC_SUB32 __mm512_sub_epi32_wrapper
-#define FUNC_SUB64 __mm512_sub_epi64_wrapper
-#define FUNC_MUL32 __mm512_mullo_epi32_wrapper
-#define FUNC_MUL64 __mm512_mullo_epi64_wrapper
+#define FUNC_AND _mm512_and_si512_wrapper
+#define FUNC_OR  _mm512_or_si512_wrapper
+#define FUNC_XOR _mm512_xor_si512_wrapper
+#define FUNC_ADD32 _mm512_add_epi32_wrapper
+#define FUNC_ADD64 _mm512_add_epi64_wrapper
+#define FUNC_SUB32 _mm512_sub_epi32_wrapper
+#define FUNC_SUB64 _mm512_sub_epi64_wrapper
+#define FUNC_MUL32 _mm512_mullo_epi32_wrapper
+#define FUNC_MUL64 _mm512_mullo_epi64_wrapper
 
 // wrapper functions needed for some compilers
 
