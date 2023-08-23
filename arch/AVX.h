@@ -20,13 +20,13 @@
 #define BITS_PER_REG 256
 #endif
 
-#ifdef __VAES__
-#define MM_XOR _mm256_xor_si256
-#define MM_AES_ENC _mm256_aesenc_epi128
-#define MM_AES_DEC _mm256_aesdec_epi128
-#define MM_AES_ENC_LAST _mm256_aesenclast_epi128
-#define MM_AES_DEC_LAST _mm256_aesdeclast_epi128
-#endif
+/* #ifdef __VAES__ */
+/* #define MM_XOR _mm256_xor_si256 */
+/* #define MM_AES_ENC _mm256_aesenc_epi128 */
+/* #define MM_AES_DEC _mm256_aesdec_epi128 */
+/* #define MM_AES_ENC_LAST _mm256_aesenclast_epi128 */
+/* #define MM_AES_DEC_LAST _mm256_aesdeclast_epi128 */
+/* #endif */
 
 /* Defining 0 and 1 */
 #define ZERO _mm256_setzero_si256()
