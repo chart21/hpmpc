@@ -346,12 +346,12 @@ void unorthogonalize_boolean_full(__m512i *in, UINT_TYPE* data) {
   }
 }
 
-void unorthogonalize_arithemtic(__m512i *in, UINT_TYPE *out) {
+void unorthogonalize_arithmetic(__m512i *in, UINT_TYPE *out) {
   for (int i = 0; i < BITLENGTH; i++)
     _mm512_store_si512 ((__m512i*)&(out[i*8]), in[i]);
 }
 
-void unorthogonalize_arithemtic_full(__m512i *in, UINT_TYPE *out) {
+void unorthogonalize_arithmetic_full(__m512i *in, UINT_TYPE *out) {
   for (int i = 0; i < 512; i++)
     _mm512_store_si512 ((__m512i*)&(out[i*8]), in[i]);
 }
