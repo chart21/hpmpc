@@ -27,17 +27,24 @@ OECL1_Share Add(OECL1_Share b, func_add ADD) const
 }
 
     template <typename func_add, typename func_sub, typename func_mul>
-void prepare_dot(OECL1_Share a, OECL1_Share b , OECL1_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+void prepare_dot_add(OECL1_Share a, OECL1_Share b , OECL1_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 c.p1 = ADD(c.p1, ADD(MULT(a.p1,b.p2), MULT(b.p1,a.p2)));
 }
+    template <typename func_add, typename func_sub, typename func_mul>
+OECL1_Share prepare_dot(const OECL1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OECL1_Share c;
+c.p1 = ADD(c.p1, ADD(MULT(p1,b.p2), MULT(b.p1,p2)));
+return c;
+}
 
 template <typename func_add, typename func_sub>
-void mask_and_send_dot(OECL1_Share &c, func_add ADD, func_sub SUB)
+void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
-    c.p1 = ADD(getRandomVal(P0), c.p1);
-    c.p2 = getRandomVal(P2);
-    send_to_live(P2,SUB(c.p1,c.p2));
+    p1 = ADD(getRandomVal(P0), p1);
+    p2 = getRandomVal(P2);
+    send_to_live(P2,SUB(p1,p2));
 }
 
 

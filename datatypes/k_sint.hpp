@@ -11,6 +11,9 @@ public:
     //temporary constructor
     sint_t() {
         }
+    
+    sint_t(UINT_TYPE value) {
+        }
 
     template<int id>
     sint_t(UINT_TYPE value) {
@@ -82,6 +85,21 @@ public:
         }
         return result;
     }
+    
+        sint_t& operator+=(const sint_t& other) {
+        for(int i = 0; i < BITLENGTH; ++i) {
+            shares[i] = shares[i] - other[i];
+        }
+        return *this;
+    }
+
+    sint_t& operator*=(const sint_t& other) {
+        for(int i = 0; i < BITLENGTH; ++i) {
+            shares[i] = shares[i] - other[i];
+        }
+        return *this;
+    }
+
 
         void complete_mult() {
         for(int i = 0; i < BITLENGTH; ++i) {
@@ -137,6 +155,12 @@ public:
 
         void complete_bit_injection_S1() {
             Share::complete_bit_injection_S1(shares);
+        }
+
+        void mask_and_send_dot()
+        {
+            for(int i = 0; i < BITLENGTH; ++i) 
+                shares[i].mask_and_send_dot();
         }
 
         void complete_bit_injection_S2() {

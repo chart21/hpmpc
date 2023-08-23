@@ -41,32 +41,32 @@
 #define MM_AES_DEC_LAST _mm_aesdeclast_si128
 #define COUNT_TYPE __m128i
     #endif
-COUNT_TYPE key[num_players*multiplier][11]{0};
+COUNT_TYPE key[num_players*player_multiplier][11]{0};
 #else
 #define USE_SSL_AES 1
 #include "../crypto/aes/AES_SSL.h"
 #define COUNT_TYPE uint64_t
-EVP_CIPHER_CTX* key[num_players*multiplier];
+EVP_CIPHER_CTX* key[num_players*player_multiplier];
 #endif
 
 #endif
 
 #if RANDOM_ALGORITHM == 0
-DATATYPE srng[num_players*multiplier][64]{0};
+DATATYPE srng[num_players*player_multiplier][64]{0};
 #elif RANDOM_ALGORITHM == 1
-DATATYPE counter[num_players*multiplier][128]{0};
-DATATYPE cipher[num_players*multiplier][128]{0};
-DATATYPE key[num_players*multiplier][11][128]{0};
+DATATYPE counter[num_players*player_multiplier][128]{0};
+DATATYPE cipher[num_players*player_multiplier][128]{0};
+DATATYPE key[num_players*player_multiplier][11][128]{0};
 #elif RANDOM_ALGORITHM == 2
 #if DATTYPE == BUF
-DATATYPE counter[num_players*multiplier]{0};
+DATATYPE counter[num_players*player_multiplier]{0};
 /* DATATYPE key[num_players*multiplier][11]{0}; */
 #else
 #define BUFFER_SIZE BUF/DATTYPE 
 #if USE_SSL_AES == 1
-uint64_t counter[num_players*multiplier][2] = {0};
+uint64_t counter[num_players*player_multiplier][2] = {0};
 #else
-DATATYPE counter[num_players*multiplier][BUFFER_SIZE] = {0};
+DATATYPE counter[num_players*player_multiplier][BUFFER_SIZE] = {0};
 #endif
 #endif
 #endif

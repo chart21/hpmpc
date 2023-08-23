@@ -1,6 +1,7 @@
 #pragma once
-#include "Share.hpp"
+/* #include "Share.hpp" */
 #include <functional>
+#include "../arch/DATATYPE.h"
 
 template <typename Datatype, typename Share_Type>
 class Additive_Share : public Share_Type
@@ -12,34 +13,34 @@ public:
 
     Additive_Share operator+(const Additive_Share<Datatype,Share_Type>& b) const
     {
-        return Additive_Share(Share_Type::Add(b, std::plus<Datatype>()));
+        return Additive_Share(Share_Type::Add(b, OP_ADD));
     }
     
     Additive_Share operator-(const Additive_Share<Datatype,Share_Type>& b) const
     {
-        return Additive_Share(Share_Type::Add(b, std::minus<Datatype>()));
+        return Additive_Share(Share_Type::Add(b, OP_SUB));
     }
 
     Additive_Share operator*(const Additive_Share<Datatype, Share_Type>& b) const
     {
-        return Additive_Share(Share_Type::prepare_mult(b, std::plus<Datatype>(), std::minus<Datatype>(), std::multiplies<Datatype>()));
+        return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT));
     }
 
     void complete_mult()
     {
-        Share_Type::complete_mult(std::plus<Datatype>(), std::minus<Datatype>());
+        Share_Type::complete_mult(OP_ADD, OP_SUB);
     }
 
     template <int id>
     void prepare_receive_from()
     {
-        Share_Type::template prepare_receive_from<id>(std::plus<Datatype>(), std::minus<Datatype>());
+        Share_Type::template prepare_receive_from<id>(OP_ADD, OP_SUB);
     }
 
     template <int id>
     void complete_receive_from()
     {
-        Share_Type::template complete_receive_from<id>(std::plus<Datatype>(), std::minus<Datatype>());
+        Share_Type::template complete_receive_from<id>(OP_ADD, OP_SUB);
     }
     
     void prepare_reveal_to_all()
@@ -49,7 +50,7 @@ public:
 
     Datatype complete_reveal_to_all()
     {
-        return Share_Type::complete_Reveal(std::plus<Datatype>(), std::minus<Datatype>());
+        return Share_Type::complete_Reveal(OP_ADD, OP_SUB);
     }
 };
 

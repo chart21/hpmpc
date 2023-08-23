@@ -29,23 +29,30 @@ OECL2_Share Add(OECL2_Share b, func_add ADD) const
 {
     return OECL2_Share(ADD(p1,b.p1),ADD(p2,b.p2));
 }
-    
+
     template <typename func_add, typename func_sub, typename func_mul>
-void prepare_dot(OECL2_Share a, OECL2_Share b , OECL2_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+void prepare_dot_add(OECL2_Share a, OECL2_Share b , OECL2_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
-c.p1 = ADD(c.p1, Mult(a.p1,b.p1));
+c.p1 = ADD(c.p1, MULT(a.p1,b.p1));
+}    
+    template <typename func_add, typename func_sub, typename func_mul>
+OECL2_Share prepare_dot( const OECL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OECL2_Share c;
+c.p1 = ADD(c.p1, MULT(p1,b.p1));
+return c;
 }
 
 template <typename func_add, typename func_sub>
-void mask_and_send_dot(OECL2_Share &c, func_add ADD, func_sub SUB)
+void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
 #if PRE == 1
-    c.p1 = ADD(pre_receive_from_live(P0), c.p1);
+    p1 = ADD(pre_receive_from_live(P0), p1);
 #else
-    c.p1 = ADD(receive_from_live(P0), c.p1);
+    p1 = ADD(receive_from_live(P0), p1);
 #endif
-    c.p2 = getRandomVal(P0);
-    send_to_live(P2,SUB(c.p1,c.p2));
+    p2 = getRandomVal(P0);
+    send_to_live(P1,ADD(p1,p2));
 }
 
 template <typename func_add, typename func_sub, typename func_mul>

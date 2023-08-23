@@ -42,6 +42,16 @@
 #define OP_ADD FUNC_ADD64
 #define OP_SUB FUNC_SUB64
 #define OP_MULT FUNC_MUL64
+#else
+#if BITLENGTH == 32
+#define OP_ADD FUNC_ADD32
+#define OP_SUB FUNC_SUB32
+#define OP_MULT FUNC_MUL32
+#elif BITLENGTH == 64
+#define OP_ADD FUNC_ADD64
+#define OP_SUB FUNC_SUB64
+#define OP_MULT FUNC_MUL64
+#endif
 #endif
 
 #if DATTYPE == 1
