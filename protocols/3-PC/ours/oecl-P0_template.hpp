@@ -190,7 +190,7 @@ static void prepare_A2B_S2(OECL0_Share in[], OECL0_Share out[])
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
-            temp[j] = OP_SUB(SET_ALL_ZERO(), FUNC_ADD64(in[j].p1, in[j].p2)); // set share to -x0
+            temp[j] = OP_SUB(SET_ALL_ZERO(), OP_SUB(in[j].p1, in[j].p2)); // set share to -x0
         }
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
@@ -235,7 +235,7 @@ void prepare_bit_injection_S2(OECL0_Share out[])
     for(int i = 0; i < BITLENGTH; i++)
     {
         out[i].p2 = getRandomVal(P1); // set second share to r0,1 
-        out[i].p1 = FUNC_SUB64(SET_ALL_ZERO(), FUNC_ADD64(temp[i], out[i].p2)) ; // set first share to -(x0 + r0,1)
+        out[i].p1 = OP_SUB(SET_ALL_ZERO(), OP_SUB(temp[i], out[i].p2)) ; // set first share to -(x0 + r0,1)
         #if PRE == 1
             pre_send_to_live(P2, out[i].p1); //  - (x0 + r0,1) to P2
         #else
