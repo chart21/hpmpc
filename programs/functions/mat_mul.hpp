@@ -21,7 +21,7 @@
 
 /* #include "boolean_adder.hpp" */
 /* #include "ppa.hpp" */
-#if FUNCTION_IDENTIFIER == 12
+#if FUNCTION_IDENTIFIER == 16
 #define FUNCTION RELU_bench
 #elif FUNCTION_IDENTIFIER == 13
 #define FUNCTION dot_prod_bench
@@ -274,7 +274,11 @@ void RELU_bench(DATATYPE* res)
     /* Bitset* y = new Bitset[NUM_INPUTS]; */
     S *y = new S[NUM_INPUTS];
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
+    #if FUNCTION_IDENTIFIER == 16
     std::vector<PPA_MSB_Unsafe<S>> adders;
+    #else
+    std::vector<BooleanAdder_MSB<S>> adders;
+    #endif
     adders.reserve(NUM_INPUTS);
     for(int i = 0; i < NUM_INPUTS; i++)
     {
