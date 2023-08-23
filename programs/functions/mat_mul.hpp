@@ -21,7 +21,7 @@
 
 /* #include "boolean_adder.hpp" */
 /* #include "ppa.hpp" */
-#if FUNCTION_IDENTIFIER == 16
+#if FUNCTION_IDENTIFIER > 16
 #define FUNCTION RELU_bench
 #elif FUNCTION_IDENTIFIER == 13
 #define FUNCTION dot_prod_bench
