@@ -190,7 +190,7 @@ static void prepare_A2B_S2(OECL0_Share in[], OECL0_Share out[])
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
-            temp[j] = FUNC_SUB64(SET_ALL_ZERO(), FUNC_ADD64(in[j].p1, in[j].p2)); // set share to -x0
+            temp[j] = OP_SUB(SET_ALL_ZERO(), FUNC_ADD64(in[j].p1, in[j].p2)); // set share to -x0
         }
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
