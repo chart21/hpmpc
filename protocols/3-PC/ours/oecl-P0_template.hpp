@@ -48,7 +48,13 @@ template <typename func_add, typename func_sub, typename func_mul>
 OECL0_Share prepare_dot(const OECL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 OECL0_Share c;
-c.p1 = ADD(c.p1, SUB( MULT(p1,b.p1), MULT( SUB(p1,p2), SUB(b.p1,b.p2)  )) );
+#if FRACTIONAL > 0
+/* c.p1 = SUB( MULT(p1,b.p1), MULT( SUB(p1,p2), SUB(b.p1,b.p2)  )); // -> -e = x2y2 - (x1-x2)(y1-y2) = x1 y2 +  x2 y+1 - x1_y1 */
+c.p1 = SUB( MULT( SUB(p1,p2), SUB(b.p1,b.p2)), MULT(p1,b.p1)  ); // -> e = (x1-x2)(y1-y2) - x2y2 = x1 y1 - x1 y2 - x2 y1
+#else
+c.p1 = SUB( MULT(p1,b.p1), MULT( SUB(p1,p2), SUB(b.p1,b.p2)  )); // e = x2y2 - (x1-x2)(y1-y2)
+
+#endif
 return c;
 }
 
@@ -66,6 +72,10 @@ send_to_live(P2, ADD(p1,maskP1));
     p1 = maskP2;
     p2 = maskP1_2;
 }
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+}
 
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
@@ -75,7 +85,7 @@ DATATYPE maskP1_2 = getRandomVal(P1);
 DATATYPE maskP2 = getRandomVal(P2);
 
 p1 = ADD( TRUNC(ADD(ADD(p1,maskP1),maskP2)), maskP1_2); // (e + r0,1 + r0,2)^t + r0,1_2
-p2 = SUB(SET_ALL_ZERO(),maskP1_2); // -r0,1_2
+p2 = SUB(SET_ALL_ZERO(),maskP1_2); // - r0,1_2
 
 
 #if PRE == 1

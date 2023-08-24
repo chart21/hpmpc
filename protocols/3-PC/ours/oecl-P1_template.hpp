@@ -35,7 +35,7 @@ c.p1 = ADD(c.p1, ADD(MULT(a.p1,b.p2), MULT(b.p1,a.p2)));
 OECL1_Share prepare_dot(const OECL1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 OECL1_Share c;
-c.p1 = ADD(c.p1, ADD(MULT(p1,b.p2), MULT(b.p1,p2)));
+c.p1 = ADD(MULT(p1,b.p2), MULT(b.p1,p2)); // ab_2, e_1 = x1 y2 + x2 y1 -> since substraction: e_1 = - x1 y2 - x2 y1
 return c;
 }
 
@@ -43,17 +43,17 @@ template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
     p1 = ADD(getRandomVal(P0), p1);
-    p2 = getRandomVal(P2);
+    p2 = getRandomVal(P0);
     send_to_live(P2,SUB(p1,p2));
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-DATATYPE maskP1 = getRandomVal(P1);
+DATATYPE maskP1 = getRandomVal(P0);
 
-p1 = SUB(p1, maskP1); // ab_2 + e - r0,1
-p2 = getRandomVal(P1); // r0,1_2
+p1 = SUB(p1, maskP1); // - ab_1 - e_1 - r0,1
+p2 = getRandomVal(P0); // r0,1_2
 
 send_to_live(P2, p1);
 

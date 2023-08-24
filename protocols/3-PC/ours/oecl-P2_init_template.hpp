@@ -44,6 +44,22 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     send_to_(P1);
 }
 
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+    send_to_(P1);
+}
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PRE == 1
+    pre_receive_from_(P0);
+#else
+    receive_from_(P0);
+#endif
+    receive_from_(P1);
+}
 
 
 

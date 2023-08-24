@@ -125,6 +125,7 @@ void fixed_test(DATATYPE* res)
             c[i][j].complete_mult();
         }
 }
+    Share::communicate();
 delete[] a;
 delete[] b;
 

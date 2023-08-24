@@ -1,7 +1,7 @@
 #pragma once
 
 // 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC)
-#define PROTOCOL 6
+#define PROTOCOL 5
 
 // Party ID (starting from 0)
 #define PARTY 2

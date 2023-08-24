@@ -40,7 +40,8 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-p1 = TRUNC(p1);
+DATATYPE dummy = getRandomVal(0);
+p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy));
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>

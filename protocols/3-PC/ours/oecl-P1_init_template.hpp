@@ -38,6 +38,11 @@ send_to_(P2);
 void prepare_dot_add(OECL1_init a, OECL1_init b , OECL1_init &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 }
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+send_to_(P2);
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
     OECL1_init prepare_mult(OECL1_init b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -46,6 +51,11 @@ send_to_(P2);
 return OECL1_init();
 
 //return u[player_id] * v[player_id];
+}
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+    receive_from_(P2);
 }
 
 template <typename func_add, typename func_sub>
