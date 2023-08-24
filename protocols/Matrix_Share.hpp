@@ -25,23 +25,27 @@ public:
     {
         return Matrix_Share(Share_Type::prepare_dot(b, OP_ADD, OP_SUB, OP_MULT));
     }
-        void operator+=(const Matrix_Share& other) {
-            *this = Matrix_Share(Share_Type::Add(other, OP_ADD));
-    }
-
-    void operator*=(const Matrix_Share& other) {
-            *this = Matrix_Share(Share_Type::prepare_dot(other, OP_ADD, OP_SUB, OP_MULT)); 
-    }
 
     void mask_and_send_dot()
     {
+        #if FRACTIONAL > 0
+        Share_Type::mask_and_send_dot_with_trunc(OP_ADD, OP_SUB, OP_TRUNC);
+        #else
         Share_Type::mask_and_send_dot(OP_ADD, OP_SUB);
+        #endif
     }
 
     void complete_mult()
     {
+        #if FRACTIONAL > 0
+        Share_Type::complete_mult_with_trunc(OP_ADD, OP_SUB, OP_TRUNC);
+        #else
         Share_Type::complete_mult(OP_ADD, OP_SUB);
+        #endif
     }
+
+
+
 
     template <int id>
     void prepare_receive_from()

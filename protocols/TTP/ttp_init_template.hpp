@@ -35,6 +35,16 @@ template <typename func_add, typename func_sub>
 void mask_and_send_dot(func_add ADD, func_sub SUB)
 {
 }
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+}
 
 
 

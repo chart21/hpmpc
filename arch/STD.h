@@ -56,6 +56,30 @@
 #define FUNC_SUB64 std::minus<uint64_t>()
 #define FUNC_MUL64 std::multiplies<uint64_t>()
 
+#define SHIFT_RIGHT32 arithmetic_right_shift_32
+#define SHIFT_RIGHT64 arithmetic_right_shift_64
+#define SHIFT_LEFT32(a) ((a) << FRACTIONAL)
+#define SHIFT_LEFT64(a) ((a) << FRACTIONAL)
+
+#if BITLENGTH == 64
+uint64_t arithmetic_right_shift_64(uint64_t value) {
+    if (value & 0x8000000000000000) {
+        uint64_t mask = ~((1ULL << (64 - FRACTIONAL)) - 1);
+        return value >> FRACTIONAL | mask;
+    }
+    return value >> FRACTIONAL;
+}
+
+#elif BITLENGTH == 32
+
+uint32_t arithmetic_right_shift_32(uint32_t value) {
+    if (value & 0x80000000) {
+        uint32_t mask = ~((1U << (32 - FRACTIONAL)) - 1);
+        return value >> FRACTIONAL | mask;
+    }
+    return value >> FRACTIONAL;
+}
+#endif
 
 #define ROTATE_MASK(x) (x == 64 ? -1ULL : x == 32 ? -1 : x == 16 ? 0xFFFF : \
     ({ fprintf(stderr,"Not implemented rotate [uint%d_t]. Exiting.\n",x); \

@@ -62,6 +62,10 @@
 #define FUNC_SUB64 __mm_sub_epi64_wrapper
 #define FUNC_MUL32 __mm_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm_mullo_epi64_wrapper
+#define SHIFT_LEFT32 __mm_sla_epi32_wrapper
+#define SHIFT_LEFT64 __mm_sla_epi64_wrapper
+#define SHIFT_RIGHT32 __mm_sra_epi32_wrapper
+#define SHIFT_RIGHT64 __mm_sra_epi64_wrapper
 // wrapper functions needed for some compilers
 
 inline __m128i __mm_and_si128_wrapper(__m128i a, __m128i b) {
@@ -104,11 +108,29 @@ inline __m128i __mm_mullo_epi64_wrapper(__m128i a, __m128i b) {
   return _mm_mullo_epi64(a,b);
 }
 
+//shifting wrapper
+inline __m128i __mm_sra_epi32_wrapper(__m128i a) {
+    return _mm_srai_epi32(a,FRACTIONAL);
+}
+
+//shifting wrapper
+inline __m128i __mm_sla_epi32_wrapper(__m128i a) {
+    return _mm_slli_epi32(a,FRACTIONAL);
+}
+
+inline __m128i __mm_sra_epi64_wrapper(__m128i a) {
+    return _mm_srai_epi64(a,FRACTIONAL);
+}
+
+//shifting wrapper
+inline __m128i __mm_sla_epi64_wrapper(__m128i a) {
+    return _mm_slli_epi64(a,FRACTIONAL);
+}
 
 
-#define L_SHIFT(a,b,c)  _mm_slli_epi##c(a,b)
-#define R_SHIFT(a,b,c)  _mm_srli_epi##c(a,b)
-#define RA_SHIFT(a,b,c) _mm_sra_epi##c(a,_mm_set1_epi##c(b))
+/* #define L_SHIFT(a,b,c)  _mm_slli_epi##c(a,b) */
+/* #define R_SHIFT(a,b,c)  _mm_srli_epi##c(a,b) */
+/* #define RA_SHIFT(a,b,c) _mm_sra_epi##c(a,_mm_set1_epi##c(b)) */
 
 #define L_ROTATE(a,b,c)                                                 \
   b == 8 && c == 32 ?                                                   \

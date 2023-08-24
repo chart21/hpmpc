@@ -54,6 +54,10 @@
 #define FUNC_SUB64 _mm256_sub_epi64_wrapper
 #define FUNC_MUL64 _mm256_mullo_epi64_wrapper
 
+#define SHIFT_LEFT32 _mm256_slli_epi32_wrapper
+#define SHIFT_LEFT64 _mm256_slli_epi64_wrapper
+#define SHIFT_RIGHT32 _mm256_sra_epi32_wrapper
+#define SHIFT_RIGHT64 _mm256_sra_epi64_wrapper
 // wrapper functions needed for some compilers
 
 inline __m256i _mm256_and_si256_wrapper(__m256i a, __m256i b) {
@@ -100,6 +104,24 @@ inline __m256i _mm256_mullo_epi64_wrapper(__m256i a, __m256i b) {
     return _mm256_mullo_epi64(a, b);
 }
 
+// shift left arithmetic
+inline __m256i _mm256_slli_epi32_wrapper(__m256i a) {
+    return _mm256_slli_epi32(a, FRACTIONAL);
+}
+
+inline __m256i _mm256_slli_epi64_wrapper(__m256i a) {
+    return _mm256_slli_epi64(a, FRACTIONAL);
+}
+
+// shift right arithemtic
+
+inline __m256i _mm256_sra_epi32_wrapper(__m256i a) {
+    return _mm256_srai_epi32(a, FRACTIONAL);
+}
+
+inline __m256i _mm256_sra_epi64_wrapper(__m256i a) {
+    return _mm256_srai_epi64(a, FRACTIONAL);
+}
 
 
 

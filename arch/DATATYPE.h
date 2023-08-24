@@ -47,10 +47,12 @@
 #define OP_ADD FUNC_ADD32
 #define OP_SUB FUNC_SUB32
 #define OP_MULT FUNC_MUL32
+#define OP_TRUNC SHIFT_RIGHT32
 #elif BITLENGTH == 64
 #define OP_ADD FUNC_ADD64
 #define OP_SUB FUNC_SUB64
 #define OP_MULT FUNC_MUL64
+#define OP_TRUNC SHIFT_RIGHT64
 #endif
 #endif
 

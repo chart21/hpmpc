@@ -54,7 +54,26 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     p2 = getRandomVal(P0);
     send_to_live(P1,ADD(p1,p2));
 }
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
 
+p1 = ADD(p1, getRandomVal(P0)); // ab_2 + e + r0,2
+send_to_live(P2, p1); // ab_2 + e + r0,2
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PRE == 1
+p2 = pre_receive_from_live(P0); // (e + r0,1 + r0,2)^T + r0,1_2
+#else
+p2 = receive_from_live(P0); // (e + r0,1 + r0,2)^T + r0,1_2
+#endif
+p1 = TRUNC( SUB(p1,receive_from_live(P2))); // (ab + e + r01 + r0,2)^T 
+p1 = SUB(p1, p2); // - [ ( (e + r0,1 + r0,2)^T + r0,1_2 ) ]
+}
 template <typename func_add, typename func_sub, typename func_mul>
     OECL2_Share prepare_mult(OECL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {

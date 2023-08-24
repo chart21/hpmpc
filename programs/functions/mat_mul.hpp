@@ -17,12 +17,15 @@
 #include "ppa.hpp"
 #include "ppa_msb_unsafe.hpp"
 
+#include <cmath>
 /* #include <eigen/Eigen/Core> */
 
 /* #include "boolean_adder.hpp" */
 /* #include "ppa.hpp" */
-#if FUNCTION_IDENTIFIER > 16
+#if FUNCTION_IDENTIFIER == 16 || FUNCTION_IDENTIFIER == 17
 #define FUNCTION RELU_bench
+#elif FUNCTION_IDENTIFIER == 18
+#define FUNCTION fixed_test
 #elif FUNCTION_IDENTIFIER == 13
 #define FUNCTION dot_prod_bench
 #elif FUNCTION_IDENTIFIER == 14
@@ -32,6 +35,150 @@
 #define FUNCTION conv2D
 #endif
 #define RESULTTYPE DATATYPE
+
+#if FRACTIONAL > 0
+
+template <typename float_type, typename uint_type, size_t fractional>
+float_type fixedToFloat(uint_type val) {
+    static_assert(std::is_integral<uint_type>::value, "uint_type must be an integer type");
+    static_assert(fractional <= (sizeof(uint_type) * 8 - 1), "fractional bits are too large for the uint_type");
+
+    using sint_type = typename std::make_signed<uint_type>::type;
+    float_type scaleFactor = static_cast<float_type>(1ULL << fractional);
+    return static_cast<float_type>(static_cast<sint_type>(val)) / scaleFactor;
+}
+
+template <typename float_type, typename uint_type, size_t fractional>
+uint_type floatToFixed(float_type val) {
+    static_assert(std::is_integral<uint_type>::value, "uint_type must be an integer type");
+    static_assert(fractional <= (sizeof(uint_type) * 8 - 1), "fractional bits are too large for the uint_type");
+
+    bool isNegative = (val < 0);
+    if (isNegative) val = -val; // Make it positive for easier handling
+
+    // Split into integer and fractional parts
+    uint_type intPart = static_cast<uint_type>(val);
+    float_type fracPart = val - intPart;
+
+    // Convert fractional part
+    fracPart *= static_cast<float_type>(1ULL << fractional);
+    uint_type fracInt = static_cast<uint_type>(fracPart + 0.5); // Adding 0.5 for rounding
+
+    // Combine
+    uint_type result = (intPart << fractional) | fracInt;
+
+    // Apply two's complement if negative
+    if (isNegative) {
+        result = ~result + 1;
+    }
+
+    return result;
+}
+
+#endif
+    template<typename Share>
+void fixed_test(DATATYPE* res)
+{
+    using M = Matrix_Share<DATATYPE, Share>;
+    using sint = sint_t<M>;
+    auto a = new sint[NUM_INPUTS][NUM_INPUTS];
+    auto b = new sint[NUM_INPUTS][NUM_INPUTS];
+    auto c = new sint[NUM_INPUTS][NUM_INPUTS];
+    std::memset(c, 0, sizeof(M) * NUM_INPUTS * NUM_INPUTS);
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            a[i][j]. template prepare_receive_from<P0>();
+            b[i][j]. template prepare_receive_from<P1>();
+        }
+}
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            a[i][j]. template complete_receive_from<P0>();
+            b[i][j]. template complete_receive_from<P1>();
+        }
+    }
+
+
+    Share::communicate(); // dummy round
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            for(int k = 0; k < NUM_INPUTS; k++)
+            {
+                c[i][j] = c[i][j] + a[i][k] * b[k][j];
+                /* c[i][j].prepare_dot_add(a[i][k], b[k][j]); */
+            }
+                c[i][j].mask_and_send_dot();
+        }
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            c[i][j].complete_mult();
+        }
+}
+delete[] a;
+delete[] b;
+
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            c[i][j].prepare_reveal_to_all();
+        }
+    }
+    auto result_arr = new UINT_TYPE[NUM_INPUTS*2][DATTYPE];
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            c[i][j].complete_reveal_to_all(result_arr[2*i+j]);
+            /* if(current_phase == 1) */
+            /* { */
+            /* #if FRACTIONAL > 0 */
+            /* std::cout << fixedToFloat<float, UINT_TYPE, FRACTIONAL>(result_arr[i][j][0]) << std::endl; */
+            /* #else */
+            /* std::cout << result_arr[2+i+j][0] << std::endl; */
+            /* #endif */
+            }
+        }
+            if(current_phase == 1)
+    {
+        std::cout << "P" << PARTY << ": Result: ";
+        for (int i = 0; i < 4; i++)
+        {
+    for(int j = 0; j < DATTYPE; j++)
+    {
+#if FRACTIONAL > 0
+        std::cout << fixedToFloat<float, UINT_TYPE, FRACTIONAL>(result_arr[i][j]) << " ";
+#else
+        std::cout << result_arr[i][j] << " ";
+#endif
+    std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+    }
+
+
+
+delete[] c;
+delete[] result_arr;
+
+
+}
+
+
 
     template<typename Share>
 void dot_prod_bench(DATATYPE* res)
@@ -48,7 +195,7 @@ void dot_prod_bench(DATATYPE* res)
 #if FUNCTION_IDENTIFIER == 14
             for(int k = 0; k < NUM_INPUTS; k++)
             {
-                c[i][j] += a[i][k] * b[k][j];
+                c[i][j] = c[i][j] + a[i][k] * b[k][j];
                 /* c[i][j].prepare_dot_add(a[i][k], b[k][j]); */
             }
 #endif

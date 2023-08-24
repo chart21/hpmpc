@@ -47,6 +47,25 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     send_to_live(P2,SUB(p1,p2));
 }
 
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+DATATYPE maskP1 = getRandomVal(P1);
+
+p1 = SUB(p1, maskP1); // ab_2 + e - r0,1
+p2 = getRandomVal(P1); // r0,1_2
+
+send_to_live(P2, p1);
+
+
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+p1 = ADD( TRUNC( SUB(receive_from_live(P2),p1)), p2 ); // (ab + e + r01 + r0,2)^T + r0,1_2
+p2 = SUB(SET_ALL_ZERO(), p2); // - r0,1_2
+}
 
 
 template <typename func_add, typename func_sub, typename func_mul>

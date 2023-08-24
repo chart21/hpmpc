@@ -60,6 +60,12 @@
 #define FUNC_MUL32 _mm512_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm512_mullo_epi64_wrapper
 
+#define RIGHT_SHIFT32 _mm512_srai_epi32_wrapper
+#define LEFT_SHIFT32 _mm512_slli_epi32_wrapper
+#define RIGHT_SHIFT64 _mm512_srai_epi64_wrapper
+#define LEFT_SHIFT64 _mm512_slli_epi64_wrapper
+
+
 // wrapper functions needed for some compilers
 
 inline __m512i _mm512_and_si512_wrapper(__m512i a, __m512i b) {
@@ -97,6 +103,26 @@ inline __m512i _mm512_mullo_epi32_wrapper(__m512i a, __m512i b) {
 inline __m512i _mm512_mullo_epi64_wrapper(__m512i a, __m512i b) {
   return _mm512_mullo_epi64(a,b);
 }
+
+// shift right arithmetic
+inline __m512i _mm512_srai_epi32_wrapper(__m512i a) {
+  return _mm512_srai_epi32(a,FRACTIONAL);
+}
+
+inline __m512i _mm512_srai_epi64_wrapper(__m512i a) {
+  return _mm512_srai_epi64(a,FRACTIONAL);
+}
+
+// shift left arithmetic
+inline __m512i _mm512_slli_epi32_wrapper(__m512i a) {
+  return _mm512_slli_epi32(a,FRACTIONAL);
+}
+
+inline __m512i _mm512_slli_epi64_wrapper(__m512i a) {
+  return _mm512_slli_epi64(a,FRACTIONAL);
+}
+
+
 
 
 
