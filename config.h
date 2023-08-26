@@ -10,7 +10,7 @@
 #define FUNCTION_IDENTIFIER 18
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 128
+#define DATTYPE 64
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
@@ -38,7 +38,7 @@
 // Print additional info?
 #define PRINT 1
 
-#define FRACTIONAL 10 // fractional bits for fixed point numbers
+#define FRACTIONAL 28 // fractional bits for fixed point numbers
 
 // Starting port for required port range of the sockets
 #define BASE_PORT 11000
@@ -74,7 +74,7 @@ int base_port = BASE_PORT; // temporary solution
 #define INPUT 'r'
 
 // Bitlength of integers (currently not used)
-#define BITLENGTH 32
+#define BITLENGTH 64
 
 
 #if PROTOCOL < 7
