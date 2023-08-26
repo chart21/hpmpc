@@ -7,10 +7,10 @@
 #define PARTY 2
 
 //0: Search 1: XORNOTAND, 2: AND 1 comm round 3: AND 1000 comm rounds  4: Debug 5: MULT32 1 comm round 6: MULT64 1 comm round 7: Debug 9: Mult_32 1000 comm rounds 10: Mult64 1000 comm rounds. Currently, Protocols 9-12 support MULT. MULT64 is supported by DATATYPE 64 and 512. MULT32 is supported for DATATYPE 32 and all DATATYPEs >= 128
-#define FUNCTION_IDENTIFIER 18
+#define FUNCTION_IDENTIFIER 19
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 64
+#define DATTYPE 32
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
@@ -36,7 +36,7 @@
 // How many messages should be buffered until a combined hash is performed? 0 means all hashes are calculated at the very end of the protocol.
 #define VERIFY_BUFFER 0
 // Print additional info?
-#define PRINT 1
+#define PRINT 0
 
 #define FRACTIONAL 28 // fractional bits for fixed point numbers
 
@@ -74,7 +74,7 @@ int base_port = BASE_PORT; // temporary solution
 #define INPUT 'r'
 
 // Bitlength of integers (currently not used)
-#define BITLENGTH 64
+#define BITLENGTH 32
 
 
 #if PROTOCOL < 7

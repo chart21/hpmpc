@@ -24,6 +24,8 @@
 /* #include "ppa.hpp" */
 #if FUNCTION_IDENTIFIER == 16 || FUNCTION_IDENTIFIER == 17
 #define FUNCTION RELU_bench
+#elif FUNCTION_IDENTIFIER == 19
+#define FUNCTION AND_bench
 #elif FUNCTION_IDENTIFIER == 18
 #define FUNCTION fixed_test
 #elif FUNCTION_IDENTIFIER == 13
@@ -76,6 +78,34 @@ uint_type floatToFixed(float_type val) {
 }
 
 #endif
+
+template<typename Share>
+void AND_bench(DATATYPE* res)
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    auto a = new S[NUM_INPUTS];
+    auto b = new S[NUM_INPUTS];
+    auto c = new S[NUM_INPUTS];
+    Share::communicate(); // dummy round
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        c[i] = a[i] & b[i];
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        c[i].complete_and();
+    }
+    Share::communicate();
+
+    c[0].prepare_reveal_to_all();
+
+    Share::communicate();
+
+    *res = c[0].complete_reveal_to_all();
+
+}
+
     template<typename Share>
 void fixed_test(DATATYPE* res)
 {
