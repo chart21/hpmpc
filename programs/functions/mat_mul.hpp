@@ -39,6 +39,8 @@
 #define FUNCTION forward_pass
 #elif FUNCTION_IDENTIFIER == 21
 #define FUNCTION backward_pass
+#elif FUNCTION_IDENTIFIER == 22
+#define FUNCTION FC_bench
 #endif
 #define RESULTTYPE DATATYPE
 
@@ -255,33 +257,6 @@ delete[] b;
 delete[] c;
 
 }
-
-    /* template<typename Share> */
-/* void matmul_bench(DATATYPE* res) */
-/* { */
-    /* using M = Matrix_Share<DATATYPE, Share>; */
-    /* Eigen::Matrix<M, NUM_INPUTS, NUM_INPUTS> a, b, c; */
-    /* c = a * b; */
-    
-    /* for(int i = 0; i < NUM_INPUTS; i++) */
-    /* { */
-    /*     for(int j = 0; j < NUM_INPUTS; j++) */ 
-    /*     { */
-    /*         c(i, j).mask_and_send_dot(); */
-    /*     } */
-    /* } */
-
-    /* Share::communicate(); */
-    
-    /* for(int i = 0; i < NUM_INPUTS; i++) */
-    /* { */
-    /*     for(int j = 0; j < NUM_INPUTS; j++) */ 
-    /*     { */
-    /*         c(i, j).complete_mult(); */
-    /*     } */
-    /* } */
-
-/* } */
 
 
 
@@ -926,4 +901,31 @@ d_conv.backward(input,d_conv.output);
     }
 
 }
+
+
+    template<typename Share>
+void FC_bench(DATATYPE* res)
+{
+    using M = Matrix_Share<DATATYPE, Share>;
+    VecX<M> a(NUM_INPUTS);
+    VecX<M> c(NUM_INPUTS);
+    MatX<M> b(NUM_INPUTS, NUM_INPUTS);
+    c = b * a;
+    
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+            c(i).mask_and_send_dot();
+    }
+
+    Share::communicate();
+    
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+            c(i).complete_mult();
+    }
+
+}
+
+
+
 #endif
