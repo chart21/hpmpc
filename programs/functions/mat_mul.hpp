@@ -35,9 +35,9 @@
 /* #define FUNCTION matmul_bench */
 #elif FUNCTION_IDENTIFIER == 15
 #define FUNCTION conv2D
-#elif FUNCTION_IDENTIFIER == 20
+#elif FUNCTION_IDENTIFIER == 20 || FUNCTION_IDENTIFIER == 23 || FUNCTION_IDENTIFIER == 25
 #define FUNCTION forward_pass
-#elif FUNCTION_IDENTIFIER == 21
+#elif FUNCTION_IDENTIFIER == 21 || FUNCTION_IDENTIFIER == 24 || FUNCTION_IDENTIFIER == 26
 #define FUNCTION backward_pass
 #elif FUNCTION_IDENTIFIER == 22
 #define FUNCTION FC_bench
@@ -866,9 +866,19 @@ using D = Matrix_Share<DATATYPE, Share>;
 /* using M = SH<DATATYPE>; */
 /* using D = SH<DATATYPE>; */
 /* Conv2d<M> conv(3,64,3,1); */
-MatX<D> input(10, NUM_INPUTS * NUM_INPUTS * 3);
+#if FUNCTION_IDENTIFIER == 20
 std::vector<int> input_shape = {10, 3, NUM_INPUTS, NUM_INPUTS};
-    Conv2d<D> d_conv(3, 64, 3, 1, "xavier_normal");
+MatX<D> input(10, NUM_INPUTS * NUM_INPUTS * 3);
+Conv2d<D> d_conv(3, 64, 3, 1, "xavier_normal");
+#elif FUNCTION_IDENTIFIER == 23
+Conv2d<D> d_conv(64, 64, 3, 1, "xavier_normal"); // Assuming Conv2d takes in(input_channels, output_channels, kernel_size, stride, initialization_method)
+vector<int> input_shape = {10, 64, NUM_INPUTS, NUM_INPUTS};
+MatX<D> input(10, 64 * NUM_INPUTS * NUM_INPUTS);
+#else
+Conv2d<D> d_conv(64, 128, 3, 1, "xavier_normal"); // Assuming Conv2d takes in(input_channels, output_channels, kernel_size, stride, initialization_method)
+vector<int> input_shape = {10, 64, NUM_INPUTS/2, NUM_INPUTS/2};
+MatX<D> input(10, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
+#endif
     d_conv.set_layer(input_shape);
     for (int j = 0; j < d_conv.output.size(); j++) {
     d_conv.output(j).mask_and_send_dot();
@@ -885,9 +895,19 @@ template<typename Share>
 void backward_pass(DATATYPE* res)
 {
 using D = Matrix_Share<DATATYPE, Share>;
+#if FUNCTION_IDENTIFIER == 21 
 std::vector<int> input_shape = {10, 3, NUM_INPUTS, NUM_INPUTS};
 MatX<D> input(10, NUM_INPUTS * NUM_INPUTS * 3);
 Conv2d<D> d_conv(3, 64, 3, 1, "xavier_normal");
+#elif FUNCTION_IDENTIFIER == 24
+Conv2d<D> d_conv(64, 64, 3, 1, "xavier_normal"); // Assuming Conv2d takes in(input_channels, output_channels, kernel_size, stride, initialization_method)
+vector<int> input_shape = {10, 64, NUM_INPUTS, NUM_INPUTS};
+MatX<D> input(10, 64 * NUM_INPUTS * NUM_INPUTS);
+#else
+Conv2d<D> d_conv(64, 128, 3, 1, "xavier_normal"); // Assuming Conv2d takes in(input_channels, output_channels, kernel_size, stride, initialization_method)
+vector<int> input_shape = {10, 64, NUM_INPUTS/2, NUM_INPUTS/2};
+MatX<D> input(10, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
+#endif
 d_conv.set_layer(input_shape);
 
 /* conv.set_layer(input_shape); */
