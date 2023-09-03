@@ -36,6 +36,13 @@
 #define ZERO _mm_setzero_si128()
 #define ONES _mm_set1_epi32(-1)
 
+#if BITLENGTH == 32
+#define PROMOTE(x) _mm_set1_epi32(x)
+#elif BITLENGTH == 64
+#define PROMOTE(x) _mm_set1_epi64x(x)
+#endif
+
+
 /* Defining macros */
 #define REG_SIZE 128
 #define CHUNK_SIZE 256
@@ -62,6 +69,8 @@
 #define FUNC_SUB64 __mm_sub_epi64_wrapper
 #define FUNC_MUL32 __mm_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm_mullo_epi64_wrapper
+#define FUNC_DIV32 __mm_div_epi32_wrapper
+#define FUNC_DIV64 __mm_div_epi64_wrapper
 #define SHIFT_LEFT32 __mm_sla_epi32_wrapper
 #define SHIFT_LEFT64 __mm_sla_epi64_wrapper
 #define SHIFT_RIGHT32 __mm_sra_epi32_wrapper
@@ -106,6 +115,16 @@ inline __m128i __mm_mullo_epi32_wrapper(__m128i a, __m128i b) {
 
 inline __m128i __mm_mullo_epi64_wrapper(__m128i a, __m128i b) {
   return _mm_mullo_epi64(a,b);
+}
+
+inline __m128i __mm_div_epi32_wrapper(__m128i a, __m128i b) {
+  /* return _mm_div_epi32(a,b); */ // not implemented it seems
+    return a; 
+}
+
+inline __m128i __mm_div_epi64_wrapper(__m128i a, __m128i b) {
+  /* return _mm_div_epi64(a,b); */ // not implemented it seems
+    return a;
 }
 
 //shifting wrapper
@@ -410,8 +429,8 @@ void unorthogonalize_boolean_full(__m128i *in, UINT_TYPE* data) {
   }
 }
 
-void orthogonalize_arithmetic(UINT_TYPE *in, __m128i *out) {
-  for (int i = 0; i < BITLENGTH; i++)
+void orthogonalize_arithmetic(UINT_TYPE *in, __m128i *out, int k) {
+  for (int i = 0; i < k; i++)
 #if BITLENGTH == 64
     out[i] = _mm_set_epi64x (in[i*2+1], in[i*2]);
 #elif BITLENGTH == 32
@@ -422,24 +441,9 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m128i *out) {
 #endif
 }
 
-void unorthogonalize_arithmetic(__m128i *in, UINT_TYPE *out) {
-  for (int i = 0; i < BITLENGTH; i++)
+void unorthogonalize_arithmetic(__m128i *in, UINT_TYPE *out, int k) {
+  for (int i = 0; i < k; i++)
     _mm_store_si128 ((__m128i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
 }
 
-void orthogonalize_arithmetic_full(UINT_TYPE *in, __m128i *out) {
-  for (int i = 0; i < 128; i++)
-#if BITLENGTH == 64
-    out[i] = _mm_set_epi64x (in[i*2+1], in[i*2]);
-#elif BITLENGTH == 32
-    out[i] = _mm_set_epi32 (in[i*4+3], in[i*4+2], in[i*4+1], in[i*4]);
-#elif BITLENGTH == 16
-    out[i] = _mm_set_epi16 (in[i*8+7], in[i*8+6], in[i*8+5], in[i*8+4],
-                            in[i*8+3], in[i*8+2], in[i*8+1], in[i*8]);
-#endif
-}
 
-void unorthogonalize_arithmetic_full(__m128i *in, UINT_TYPE *out) {
-  for (int i = 0; i < 128; i++)
-    _mm_store_si128 ((__m128i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
-}

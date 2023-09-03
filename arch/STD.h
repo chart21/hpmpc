@@ -28,6 +28,8 @@
 #define ZERO 0
 #define ONES -1
 
+#define PROMOTE(x) (x)
+
 /* Defining macros */
 #define REG_SIZE BITS_PER_REG
 #define CHUNK_SIZE 64
@@ -221,3 +223,4 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, DATATYPE* data) {
   for (int i = 0; i < DATTYPE; i++)
     data[i] = in[i];
 }
+

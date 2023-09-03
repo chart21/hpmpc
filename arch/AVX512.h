@@ -33,6 +33,12 @@
 #define ZERO _mm512_setzero_si512()
 #define ONES _mm512_set1_epi32(-1)
 
+#if BITLENGTH == 32
+#define PROMOTE(x) _mm512_set1_epi32(x)
+#elif BITLENGTH == 64
+#define PROMOTE(x) _mm512_set1_epi64(x)
+#endif
+
 /* Defining macros */
 #define REG_SIZE 512
 #define CHUNK_SIZE 4096
@@ -305,8 +311,8 @@ void orthogonalize_boolean_full(UINT_TYPE* data, __m512i* out) {
   real_ortho_512x512(out);
 }
 
-void orthogonalize_arithmetic(UINT_TYPE *in, __m512i *out) {
-  for (int i = 0; i < BITLENGTH; i++)
+void orthogonalize_arithmetic(UINT_TYPE *in, __m512i *out, int k) {
+  for (int i = 0; i < k; i++)
 #if BITLENGTH == 64
     out[i] = _mm512_set_epi64(in[i*8+7], in[i*8+6], in[i*8+5], in[i*8+4],
                               in[i*8+3], in[i*8+2], in[i*8+1], in[i*8]);
@@ -327,27 +333,6 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m512i *out) {
 #endif
 }
 
-void orthogonalize_arithmetic_full(UINT_TYPE *in, __m512i *out) {
-  for (int i = 0; i < 512; i++)
-#if BITLENGTH == 64
-    out[i] = _mm512_set_epi64(in[i*8+7], in[i*8+6], in[i*8+5], in[i*8+4],
-                              in[i*8+3], in[i*8+2], in[i*8+1], in[i*8]);
-#elif BITLENGTH == 32
-    out[i] = _mm512_set_epi32(in[i*16+15], in[i*16+14], in[i*16+13], in[i*16+12],
-                              in[i*16+11], in[i*16+10], in[i*16+9], in[i*16+8],
-                              in[i*16+7], in[i*16+6], in[i*16+5], in[i*16+4],
-                              in[i*16+3], in[i*16+2], in[i*16+1], in[i*16]);
-#elif BITLENGTH == 16
-    out[i] = _mm512_set_epi16(in[i*32+31], in[i*32+30], in[i*32+29], in[i*32+28],
-                              in[i*32+27], in[i*32+26], in[i*32+25], in[i*32+24],
-                              in[i*32+23], in[i*32+22], in[i*32+21], in[i*32+20],
-                              in[i*32+19], in[i*32+18], in[i*32+17], in[i*32+16],
-                              in[i*32+15], in[i*32+14], in[i*32+13], in[i*32+12],
-                              in[i*32+11], in[i*32+10], in[i*32+9], in[i*32+8],
-                              in[i*32+7], in[i*32+6], in[i*32+5], in[i*32+4],
-                              in[i*32+3], in[i*32+2], in[i*32+1], in[i*32]);
-#endif
-}
 
 void unorthogonalize_boolean(__m512i *in, UINT_TYPE* data) {
   for (int i = 0; i < BITLENGTH; i++) {
@@ -372,12 +357,9 @@ void unorthogonalize_boolean_full(__m512i *in, UINT_TYPE* data) {
   }
 }
 
-void unorthogonalize_arithmetic(__m512i *in, UINT_TYPE *out) {
-  for (int i = 0; i < BITLENGTH; i++)
+void unorthogonalize_arithmetic(__m512i *in, UINT_TYPE *out, int k) {
+  for (int i = 0; i < k; i++)
     _mm512_store_si512 ((__m512i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
 }
 
-void unorthogonalize_arithmetic_full(__m512i *in, UINT_TYPE *out) {
-  for (int i = 0; i < 512; i++)
-    _mm512_store_si512 ((__m512i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
-}
+

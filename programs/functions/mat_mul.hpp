@@ -18,7 +18,7 @@
 #include "ppa_msb_unsafe.hpp"
 
 #include <cmath>
-/* #include <eigen/Eigen/Core> */
+#include <eigen3/Eigen/Core>
 
 /* #include "boolean_adder.hpp" */
 /* #include "ppa.hpp" */
@@ -35,6 +35,10 @@
 /* #define FUNCTION matmul_bench */
 #elif FUNCTION_IDENTIFIER == 15
 #define FUNCTION conv2D
+#elif FUNCTION_IDENTIFIER == 20
+#define FUNCTION forward_pass
+#elif FUNCTION_IDENTIFIER == 21
+#define FUNCTION backward_pass
 #endif
 #define RESULTTYPE DATATYPE
 
@@ -56,11 +60,15 @@ uint_type floatToFixed(float_type val) {
     static_assert(fractional <= (sizeof(uint_type) * 8 - 1), "fractional bits are too large for the uint_type");
 
     bool isNegative = (val < 0);
-    if (isNegative) val = -val; // Make it positive for easier handling
-
+    /* if (isNegative) val = -val; // Make it positive for easier handling */
+    /* // Split into integer and fractional parts */
+    /* uint_type intPart = static_cast<uint_type>(val); */
+    /* float_type fracPart = val - intPart; */
+    
     // Split into integer and fractional parts
-    uint_type intPart = static_cast<uint_type>(val);
-    float_type fracPart = val - intPart;
+    uint_type intPart = static_cast<uint_type>(std::abs(val));  // Taking absolute value here
+    float_type fracPart = std::abs(val) - intPart;  // Taking absolute value here too
+
 
     // Convert fractional part
     fracPart *= static_cast<float_type>(1ULL << fractional);
@@ -517,9 +525,405 @@ void RELU_bench(DATATYPE* res)
     {
         result[i].complete_mult();
     }
+    
 
 
 
 }
 
+#if FUNCTION_IDENTIFIER > 19
 
+template<typename T>
+using MatX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+template<typename T>
+using VecX = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+
+
+#include <vector>
+
+using namespace std;
+using namespace Eigen;
+
+	int calc_outsize(int in_size, int kernel_size, int stride, int pad)
+	{
+		return (int)std::floor((in_size + 2 * pad - kernel_size) / stride) + 1;
+	}
+
+    template <typename T>
+    T im2col_get_pixel(const T* im, int height, int width, int channels,
+                        int row, int col, int channel, int pad)
+{
+    row -= pad;
+    col -= pad;
+
+    if (row < 0 || col < 0 || row >= height || col >= width) return T(0); // public value, no rand needed
+    return im[col + width * (row + height * channel)];
+}
+
+template <typename T>
+void col2im_add_pixel(T* im, int height, int width, int channels,
+                    int row, int col, int channel, int pad, T val)
+{
+    row -= pad;
+    col -= pad;
+
+    if (row < 0 || col < 0 || row >= height || col >= width) return;
+    im[col + width * (row + height * channel)] += val;
+}
+
+// This one might be too, can't remember.
+
+template <typename T>
+void col2im(const T* data_col, int channels, int height, int width,
+            int ksize, int stride, int pad, T* data_im)
+{
+    int c, h, w;
+    int height_col = (height + 2 * pad - ksize) / stride + 1;
+    int width_col = (width + 2 * pad - ksize) / stride + 1;
+
+    int channels_col = channels * ksize * ksize;
+    for (c = 0; c < channels_col; ++c) {
+        int w_offset = c % ksize;
+        int h_offset = (c / ksize) % ksize;
+        int c_im = c / ksize / ksize;
+        for (h = 0; h < height_col; ++h) {
+            for (w = 0; w < width_col; ++w) {
+                int im_row = h_offset + h * stride;
+                int im_col = w_offset + w * stride;
+                int col_index = (c * height_col + h) * width_col + w;
+                T val = data_col[col_index];
+                col2im_add_pixel(data_im, height, width, channels,
+                    im_row, im_col, c_im, pad, val);
+            }
+        }
+    }
+}
+
+
+// From Berkeley Vision's Caffe!
+// https://github.com/BVLC/caffe/blob/master/LICENSE
+template <typename T>
+void im2col(const T* data_im, int channels, int height, int width,
+            int ksize, int stride, int pad, T* data_col)
+{
+    int c, h, w;
+    int height_col = (height + 2 * pad - ksize) / stride + 1;
+    int width_col = (width + 2 * pad - ksize) / stride + 1;
+
+    int channels_col = channels * ksize * ksize;
+    for (c = 0; c < channels_col; ++c) {
+        int w_offset = c % ksize;
+        int h_offset = (c / ksize) % ksize;
+        int c_im = c / ksize / ksize;
+        for (h = 0; h < height_col; ++h) {
+            for (w = 0; w < width_col; ++w) {
+                int im_row = h_offset + h * stride;
+                int im_col = w_offset + w * stride;
+                int col_index = (c * height_col + h) * width_col + w;
+                data_col[col_index] = im2col_get_pixel(data_im, height, width, channels,
+                    im_row, im_col, c_im, pad);
+            }
+        }
+    }
+}
+
+
+
+
+enum class LayerType
+	{
+		LINEAR,
+		CONV2D,
+		MAXPOOL2D,
+		AVGPOOL2D,
+		ACTIVATION,
+		BATCHNORM1D,
+		BATCHNORM2D,
+		FLATTEN
+	};
+template<typename T>
+class Layer
+{
+public:
+    LayerType type;
+    bool is_first;
+    bool is_last;
+    MatX<T> output;
+    MatX<T> delta;
+public:
+    Layer(LayerType type) : type(type), is_first(false), is_last(false) {}
+    virtual void set_layer(const vector<int>& input_shape) = 0;
+    virtual void forward(const MatX<T>& prev_out, bool is_training = true) = 0;
+    virtual void backward(const MatX<T>& prev_out, MatX<T>& prev_delta) = 0;
+    /* virtual void update_weight(T lr, T decay) { return; } */
+    /* virtual void zero_grad() { return; } */
+    /* virtual vector<int> output_shape() = 0; */
+};
+
+
+template<typename T> 
+class Conv2d : public Layer<T>
+	{
+	private:
+		int batch;
+		int ic;
+		int oc;
+		int ih;
+		int iw;
+		int ihw;
+		int oh;
+		int ow;
+		int ohw;
+		int kh;
+		int kw;
+		int pad;
+		string option;
+		MatX<T> dkernel;
+		VecX<T> dbias;
+		MatX<T> im_col;
+	public:
+		MatX<T> kernel;
+		VecX<T> bias;
+		Conv2d(int in_channels, int out_channels, int kernel_size, int padding,
+			string option);
+		void set_layer(const vector<int>& input_shape) override;
+		void forward(const MatX<T>& prev_out, bool is_training) override;
+		void backward(const MatX<T>& prev_out, MatX<T>& prev_delta) override;
+		/* void update_weight(T lr, T decay) override; */
+		/* void zero_grad() override; */
+		/* vector<int> output_shape() override; */
+	};
+
+    template<typename T>
+	Conv2d<T>::Conv2d(
+		int in_channels,
+		int out_channels,
+		int kernel_size,
+		int padding,
+		string option
+	) :
+		Layer<T>(LayerType::CONV2D),
+		batch(0),
+		ic(in_channels),
+		oc(out_channels),
+		ih(0),
+		iw(0),
+		ihw(0),
+		oh(0),
+		ow(0),
+		ohw(0),
+		kh(kernel_size),
+		kw(kernel_size),
+		pad(padding),
+		option(option) {}
+
+    template<typename T>
+	void Conv2d<T>::set_layer(const vector<int>& input_shape)
+	{
+		batch = input_shape[0];
+		ic = input_shape[1];
+		ih = input_shape[2];
+		iw = input_shape[3];
+		ihw = ih * iw;
+		oh = calc_outsize(ih, kh, 1, pad);
+		ow = calc_outsize(iw, kw, 1, pad);
+		ohw = oh * ow;
+
+		this->output.resize(batch * oc, ohw);
+		this->delta.resize(batch * oc, ohw);
+		kernel.resize(oc, ic * kh * kw);
+		dkernel.resize(oc, ic * kh * kw);
+		bias.resize(oc);
+		dbias.resize(oc);
+		im_col.resize(ic * kh * kw, ohw);
+
+		int fan_in = kh * kw * ic;
+		int fan_out = kh * kw * oc;
+		/* init_weight(kernel, fan_in, fan_out, option); */
+		/* bias.setZero(); */
+	}
+
+
+    template<typename T>
+	void Conv2d<T>::forward(const MatX<T>& prev_out, bool is_training)
+	{
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			this->output.block(oc * n, 0, oc, ohw).noalias() = kernel * im_col;
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+		}
+	}
+
+    template<typename T>
+	void Conv2d<T>::backward(const MatX<T>& prev_out, MatX<T>& prev_delta)
+	{
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			dkernel += this->delta.block(oc * n, 0, oc, ohw) * im_col.transpose();
+			dbias += this->delta.block(oc * n, 0, oc, ohw).rowwise().sum();
+		}
+
+		if (!this->is_first) {
+			for (int n = 0; n < batch; n++) {
+				T* begin = prev_delta.data() + ic * ihw * n;
+				im_col = kernel.transpose() * this->delta.block(oc * n, 0, oc, ohw);
+				col2im(im_col.data(), ic, ih, iw, kh, 1, pad, begin);
+			}
+		}
+	}
+
+template <typename T>
+class SH{
+DATATYPE s1;
+DATATYPE s2;
+    public:
+
+
+
+static SH get_S(UINT_TYPE val){
+SH s;
+UINT_TYPE s_arr[sizeof(T)/sizeof(UINT_TYPE)] = {val};
+UINT_TYPE r_arr[sizeof(T)/sizeof(UINT_TYPE)];
+for(int i = 0; i < sizeof(T)/sizeof(UINT_TYPE); i++){
+    r_arr[i] = rand();
+}
+orthogonalize_arithmetic(s_arr, &s.s1 , 1);
+orthogonalize_arithmetic(r_arr, &s.s2 , 1);
+s.s1 = OP_SUB(s.s1, s.s2);
+return s;
+}
+
+SH(UINT_TYPE val){
+UINT_TYPE s_arr[sizeof(T)/sizeof(UINT_TYPE)] = {val};
+orthogonalize_arithmetic(s_arr, &s1 , 1);
+s2 = SET_ALL_ZERO();
+}
+
+
+
+SH(T s1, T s2){
+this->s1 = s1;
+this->s2 = s2;
+}
+
+
+SH(){
+this->s1 = SET_ALL_ZERO();
+this->s2 = SET_ALL_ZERO();
+}
+
+
+SH operator+(const SH s) const{
+    return SH(this->s1 + s.s1, this->s2 + s.s2);
+}
+
+SH operator-(const SH s) const{
+    return SH(this->s1 - s.s1, this->s2 - s.s2);
+}
+
+SH operator*(const SH s) const{
+    auto ls1 = OP_ADD( OP_MULT(this->s1, s.s1), OP_MULT(this->s1, s.s2));
+    auto ls2 = OP_ADD( OP_MULT(this->s2, s.s1), OP_MULT(this->s2, s.s2));
+    return SH(ls1, ls2);
+}
+
+SH operator*(const UINT_TYPE s) const{
+    return SH(OP_MULT(s1, PROMOTE(s)), OP_MULT(s2, PROMOTE(s)));
+}
+
+SH operator/(const UINT_TYPE s) const{
+    /* return SH(OP_DIV(s1, PROMOTE(s)), OP_DIV(s2, PROMOTE(s))); */ // not supported for now
+    return SH();
+}
+
+void operator+=(const SH s){
+    this->s1 += s.s1;
+    this->s2 += s.s2;
+}
+
+void operator-=(const SH s){
+    this->s1 -= s.s1;
+    this->s2 -= s.s2;
+}
+
+void operator*= (const SH s){
+    this->s1 = OP_ADD( OP_MULT(this->s1, s.s1), OP_MULT(this->s1, s.s2));
+    this->s2 = OP_ADD( OP_MULT(this->s2, s.s1), OP_MULT(this->s2, s.s2));
+}
+
+
+//needed for Eigen optimization
+bool operator==(const SH& other) const {
+    return false; 
+}
+
+SH trunc_local() const{
+    return SH(OP_TRUNC(s1), OP_TRUNC(s2));
+}
+
+template<typename float_type, int fractional>
+float_type reveal_float() const{
+
+    UINT_TYPE s_arr[sizeof(T)/sizeof(UINT_TYPE)];
+    T temp = OP_ADD(s1, s2);
+    unorthogonalize_arithmetic(&temp, s_arr, 1);
+    float_type result = fixedToFloat<float_type, UINT_TYPE, fractional>(s_arr[0]);
+    return result;
+    }
+
+
+};
+
+template<typename T>
+SH<T> truncate(const SH<T>& val) {
+    return val.trunc_local();
+}
+
+
+
+
+    template<typename Share>
+void forward_pass(DATATYPE* res)
+{
+using D = Matrix_Share<DATATYPE, Share>;
+/* using M = SH<DATATYPE>; */
+/* using D = SH<DATATYPE>; */
+/* Conv2d<M> conv(3,64,3,1); */
+MatX<D> input(10, NUM_INPUTS * NUM_INPUTS * 3);
+std::vector<int> input_shape = {10, 3, NUM_INPUTS, NUM_INPUTS};
+    Conv2d<D> d_conv(3, 64, 3, 1, "xavier_normal");
+    d_conv.set_layer(input_shape);
+    for (int j = 0; j < d_conv.output.size(); j++) {
+    d_conv.output(j).mask_and_send_dot();
+    }
+    Share::communicate();
+    for (int j = 0; j < d_conv.output.size(); j++) {
+    d_conv.output(j).complete_mult();
+    }
+
+}
+
+
+template<typename Share>
+void backward_pass(DATATYPE* res)
+{
+using D = Matrix_Share<DATATYPE, Share>;
+std::vector<int> input_shape = {10, 3, NUM_INPUTS, NUM_INPUTS};
+MatX<D> input(10, NUM_INPUTS * NUM_INPUTS * 3);
+Conv2d<D> d_conv(3, 64, 3, 1, "xavier_normal");
+d_conv.set_layer(input_shape);
+
+/* conv.set_layer(input_shape); */
+d_conv.backward(input,d_conv.output);
+    for (int j = 0; j < d_conv.output.size(); j++) {
+    d_conv.output(j).mask_and_send_dot();
+    }
+    Share::communicate();
+    for (int j = 0; j < d_conv.output.size(); j++) {
+    d_conv.output(j).complete_mult();
+    }
+
+}
+#endif

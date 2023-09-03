@@ -26,6 +26,16 @@ public:
         return Matrix_Share(Share_Type::prepare_dot(b, OP_ADD, OP_SUB, OP_MULT));
     }
 
+    void operator+=(const Matrix_Share<Datatype, Share_Type>& b)
+    {
+        *this = *this + b;
+    }
+
+    bool operator==(const Matrix_Share<Datatype, Share_Type>& b) const
+    {
+        return false; // Needed for Eigen optimizations
+    }
+
     void mask_and_send_dot()
     {
         #if FRACTIONAL > 0

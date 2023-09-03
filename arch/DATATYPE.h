@@ -30,6 +30,26 @@
     exit(1);
 #endif
 
+void orthogonalize_arithmetic(UINT_TYPE *in, DATATYPE *out)
+{
+    orthogonalize_arithmetic(in, out, BITLENGTH);
+}
+
+void unorthogonalize_arithmetic(DATATYPE *in, UINT_TYPE *out)
+{
+    unorthogonalize_arithmetic(in, out, BITLENGTH);
+}
+
+void orthogonalize_arithmetic_full(UINT_TYPE *in, DATATYPE *out)
+{
+    orthogonalize_arithmetic(in, out, DATTYPE);
+}
+
+void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
+{
+    unorthogonalize_arithmetic(in, out, DATTYPE);
+}
+
 #if FUNCTION_IDENTIFIER < 5
 #define OP_ADD FUNC_XOR
 #define OP_SUB FUNC_XOR
