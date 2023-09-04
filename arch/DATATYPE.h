@@ -94,62 +94,62 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 #if num_players == 3
     #define PSELF 2
     #if PARTY == 0
-        #define P0 2
-        #define P1 0
-        #define P2 1
+        #define P_0 2
+        #define P_1 0
+        #define P_2 1
         #define PPREV 1
         #define PNEXT 0
     #elif PARTY == 1
-        #define P0 0
-        #define P1 2
-        #define P2 1
+        #define P_0 0
+        #define P_1 2
+        #define P_2 1
         #define PPREV 0
         #define PNEXT 1
     #elif PARTY == 2
-        #define P0 0
-        #define P1 1
-        #define P2 2
+        #define P_0 0
+        #define P_1 1
+        #define P_2 2
         #define PPREV 1
         #define PNEXT 0
     #endif
 #elif num_players == 4
     #define PSELF 3
-    #define P0123 3
-    #define P012 4
-    #define P013 5
-    #define P023 6
-    #define P123 7
-    #define P123_2 3 // Trick for Protocols 10-12
+    #define P_0123 3
+    #define P_012 4
+    #define P_013 5
+    #define P_023 6
+    #define P_123 7
+    #define P_123_2 3 // Trick for Protocols 10-12
 
     #if PARTY == 0
-        #define P0 3
-        #define P1 0
-        #define P2 1
-        #define P3 2
+        #define P_0 3
+        #define P_1 0
+        #define P_2 1
+        #define P_3 2
         #define PPREV 2
         #define PNEXT 0
         #define PMIDDLE 1
     #elif PARTY == 1
-        #define P0 0
-        #define P1 3
-        #define P2 1
-        #define P3 2
+        #define P_0 0
+        #define P_1 3
+        #define P_2 1
+        #define P_3 2
         #define PPREV 0
         #define PNEXT 1
         #define PMIDDLE 2
     #elif PARTY == 2
-        #define P0 0
-        #define P1 1
-        #define P2 3
-        #define P3 2
+        #define P_0 0
+        #define P_1 1
+        #define P_2 3
+        #define P_3 2
         #define PPREV 1
         #define PNEXT 2
         #define PMIDDLE 0
     #elif PARTY == 3
-        #define P0 0
-        #define P1 1
-        #define P2 2
-        #define P3 3
+        #define P_0 0
+        #define P_1 1
+        #define P_2 2
+        #define P_3 3
         #define PPREV 2
         #define PNEXT 0
         #define PMIDDLE 1

@@ -35,17 +35,17 @@ void search(/*outputs*/ DATATYPE *found)
 
 
 for( int i = 0; i < NUM_INPUTS; i++)
-    dataset[i].template prepare_receive_from<P0>();
+    dataset[i].template prepare_receive_from<P_0>();
 
-element.template prepare_receive_from<P1>();
+element.template prepare_receive_from<P_1>();
 
 
 Protocol::communicate();
 
 for( int i = 0; i < NUM_INPUTS; i++)
-    dataset[i].template complete_receive_from<P0>();
+    dataset[i].template complete_receive_from<P_0>();
 
-element.template complete_receive_from<P1>();
+element.template complete_receive_from<P_1>();
 
 
 for (int i = 0; i < NUM_INPUTS; i++) {
@@ -105,16 +105,16 @@ Protocol::communicate();
 
 
 
-/* P.prepare_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
-/* P.prepare_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB); */
+/* P.prepare_receive_from((S*) dataset,P_0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
+/* P.prepare_receive_from(element,P_1,BITLENGTH, OP_ADD, OP_SUB); */
 
 
 /* P.communicate(); */
 
 
 
-/* P.complete_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
-/* P.complete_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB); */
+/* P.complete_receive_from((S*) dataset,P_0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
+/* P.complete_receive_from(element,P_1,BITLENGTH, OP_ADD, OP_SUB); */
 
 
 /* for (int i = 0; i < NUM_INPUTS; i++) { */

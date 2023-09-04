@@ -71,7 +71,7 @@ template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
 #if PARTY != 2
-    receive_from_(P2);
+    receive_from_(P_2);
 #endif
 return SET_ALL_ZERO();
 }
@@ -83,7 +83,7 @@ void prepare_receive_from(func_add ADD, func_sub SUB)
 {
 if constexpr(id == PSELF && PARTY != 2)
 {
-        send_to_(P2);
+        send_to_(P_2);
 }
 }
 

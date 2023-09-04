@@ -92,53 +92,53 @@ void compare_views_init()
                 //exchange 1 sha256 hash. Do to DATATYPE constraints it may need to be split up to multiple chunks
                 for(int i = 0; i < hash_chunks_to_send; i++)
                 {
-                            if(player_id == 3) //P0123
+                            if(player_id == 3) //P_0123
                             {
-                                if(P0 != PSELF)
-                                    send_to_(P0);
-                                if(P1 != PSELF)
-                                    send_to_(P1);
-                                if(P2 != PSELF)
-                                    send_to_(P2);
-                                if(P3 != PSELF)
-                                    send_to_(P3);
+                                if(P_0 != PSELF)
+                                    send_to_(P_0);
+                                if(P_1 != PSELF)
+                                    send_to_(P_1);
+                                if(P_2 != PSELF)
+                                    send_to_(P_2);
+                                if(P_3 != PSELF)
+                                    send_to_(P_3);
 
                             }
-                            else if(player_id == 4) //P012
+                            else if(player_id == 4) //P_012
                             {
-                                if(P0 != PSELF)
-                                    send_to_(P0);
-                                if(P1 != PSELF)
-                                    send_to_(P1);
-                                if(P2 != PSELF)
-                                    send_to_(P2);
+                                if(P_0 != PSELF)
+                                    send_to_(P_0);
+                                if(P_1 != PSELF)
+                                    send_to_(P_1);
+                                if(P_2 != PSELF)
+                                    send_to_(P_2);
                             }
-                            else if(player_id == 5) //P013
+                            else if(player_id == 5) //P_013
                             {
-                                if(P0 != PSELF)
-                                    send_to_(P0);
-                                if(P1 != PSELF)
-                                    send_to_(P1);
-                                if(P3 != PSELF)
-                                    send_to_(P3);
+                                if(P_0 != PSELF)
+                                    send_to_(P_0);
+                                if(P_1 != PSELF)
+                                    send_to_(P_1);
+                                if(P_3 != PSELF)
+                                    send_to_(P_3);
                             }
-                            else if(player_id == 6) //P023
+                            else if(player_id == 6) //P_023
                             {
-                                if(P0 != PSELF)
-                                    send_to_(P0);
-                                if(P2 != PSELF)
-                                    send_to_(P2);
-                                if(P3 != PSELF)
-                                    send_to_(P3);
+                                if(P_0 != PSELF)
+                                    send_to_(P_0);
+                                if(P_2 != PSELF)
+                                    send_to_(P_2);
+                                if(P_3 != PSELF)
+                                    send_to_(P_3);
                             }
-                            else if(player_id == 7) //P123
+                            else if(player_id == 7) //P_123
                             {
-                                if(P1 != PSELF)
-                                    send_to_(P1);
-                                if(P2 != PSELF)
-                                    send_to_(P2);
-                                if(P3 != PSELF)
-                                    send_to_(P3);
+                                if(P_1 != PSELF)
+                                    send_to_(P_1);
+                                if(P_2 != PSELF)
+                                    send_to_(P_2);
+                                if(P_3 != PSELF)
+                                    send_to_(P_3);
                             }
                             else
                                 send_to_(player_id);
@@ -156,53 +156,53 @@ void compare_views_init()
                 //exchange 1 sha256 hash. Do to DATATYPE constraints it may need to be split up to multiple chunks
                 for(int i = 0; i < hash_chunks_to_send; i++)
                 {
-                            if(player_id == 3) //P0123
+                            if(player_id == 3) //P_0123
                             {
-                                if(P0 != PSELF)
-                                    receive_from_(P0);
-                                if(P1 != PSELF)
-                                    receive_from_(P1);
-                                if(P2 != PSELF)
-                                    receive_from_(P2);
-                                if(P3 != PSELF)
-                                    receive_from_(P3);
+                                if(P_0 != PSELF)
+                                    receive_from_(P_0);
+                                if(P_1 != PSELF)
+                                    receive_from_(P_1);
+                                if(P_2 != PSELF)
+                                    receive_from_(P_2);
+                                if(P_3 != PSELF)
+                                    receive_from_(P_3);
 
                             }
-                            else if(player_id == 4) //P012
+                            else if(player_id == 4) //P_012
                             {
-                                if(P0 != PSELF)
-                                    receive_from_(P0);
-                                if(P1 != PSELF)
-                                    receive_from_(P1);
-                                if(P2 != PSELF)
-                                    receive_from_(P2);
+                                if(P_0 != PSELF)
+                                    receive_from_(P_0);
+                                if(P_1 != PSELF)
+                                    receive_from_(P_1);
+                                if(P_2 != PSELF)
+                                    receive_from_(P_2);
                             }
-                            else if(player_id == 5) //P013
+                            else if(player_id == 5) //P_013
                             {
-                                if(P0 != PSELF)
-                                    receive_from_(P0);
-                                if(P1 != PSELF)
-                                    receive_from_(P1);
-                                if(P3 != PSELF)
-                                    receive_from_(P3);
+                                if(P_0 != PSELF)
+                                    receive_from_(P_0);
+                                if(P_1 != PSELF)
+                                    receive_from_(P_1);
+                                if(P_3 != PSELF)
+                                    receive_from_(P_3);
                             }
-                            else if(player_id == 6) //P023
+                            else if(player_id == 6) //P_023
                             {
-                                if(P0 != PSELF)
-                                    receive_from_(P0);
-                                if(P2 != PSELF)
-                                    receive_from_(P2);
-                                if(P3 != PSELF)
-                                    receive_from_(P3);
+                                if(P_0 != PSELF)
+                                    receive_from_(P_0);
+                                if(P_2 != PSELF)
+                                    receive_from_(P_2);
+                                if(P_3 != PSELF)
+                                    receive_from_(P_3);
                             }
-                            else if(player_id == 7) //P123
+                            else if(player_id == 7) //P_123
                             {
-                                if(P1 != PSELF)
-                                    receive_from_(P1);
-                                if(P2 != PSELF)
-                                    receive_from_(P2);
-                                if(P3 != PSELF)
-                                    receive_from_(P3);
+                                if(P_1 != PSELF)
+                                    receive_from_(P_1);
+                                if(P_2 != PSELF)
+                                    receive_from_(P_2);
+                                if(P_3 != PSELF)
+                                    receive_from_(P_3);
                             }
                             else
                                 receive_from_(player_id);
@@ -237,7 +237,7 @@ for(int t=0;t<(num_players-1);t++) {
     receiving_args[t].connected_to = t+offset;
     receiving_args[t].ip = ips[t];
     receiving_args[t].hostname = (char*)"hostname";
-    receiving_args[t].port = (int) base_port + player_id * (num_players-1) + t; //e.g. P0 receives on base port from P1, P2 on base port + num_players from P0 6000,6002
+    receiving_args[t].port = (int) base_port + player_id * (num_players-1) + t; //e.g. P_0 receives on base port from P_1, P_2 on base port + num_players from P_0 6000,6002
     //init_srng(t, (t+offset) + player_id); 
 }
 for(int t=0;t<(num_players-1);t++) {
@@ -249,7 +249,7 @@ for(int t=0;t<(num_players-1);t++) {
     sending_args[t].player_id = player_id;
     sending_args[t].player_count = num_players;
     sending_args[t].connected_to = t+offset;
-    sending_args[t].port = (int) base_port + (t+offset) * (num_players -1) + player_id - 1 + offset; //e.g. P0 sends on base port + num_players  for P1, P2 on base port + num_players for P0 (6001,6000)
+    sending_args[t].port = (int) base_port + (t+offset) * (num_players -1) + player_id - 1 + offset; //e.g. P_0 sends on base port + num_players  for P_1, P_2 on base port + num_players for P_0 (6001,6000)
     sending_args[t].sent_elements[0] = NEW(DATATYPE[sending_args[t].elements_to_send[0]]); // Allocate memory for first round
    
 }
@@ -295,7 +295,7 @@ for(int t=0;t<(num_players-1);t++) {
     ra[t].connected_to = t+offset;
     ra[t].ip = ips[t];
     ra[t].hostname = (char*)"hostname";
-    ra[t].port =(int) base_port + (t+offset) * (num_players -1) + player_id - 1 + offset; //e.g. P0 sends on base port + num_players  for P1, P2 on base port + num_players for P0 (6001,6000) 
+    ra[t].port =(int) base_port + (t+offset) * (num_players -1) + player_id - 1 + offset; //e.g. P_0 sends on base port + num_players  for P_1, P_2 on base port + num_players for P_0 (6001,6000) 
 }
 for(int t=0;t<(num_players-1);t++) {
     int offset = 0;
@@ -310,7 +310,7 @@ for(int t=0;t<(num_players-1);t++) {
     sa[t].player_id = player_id;
     sa[t].player_count = num_players;
     sa[t].connected_to = t+offset;
-    sa[t].port = (int) base_port + player_id * (num_players-1) + t; //e.g. P0 receives on base port from P1, P2 on base port + num_players from P0 6000,6002
+    sa[t].port = (int) base_port + player_id * (num_players-1) + t; //e.g. P_0 receives on base port from P_1, P_2 on base port + num_players from P_0 6000,6002
     sa[t].sent_elements[0] = NEW(DATATYPE[sa[t].elements_to_send[0]]); // Allocate memory for first round
     share_buffer[t] = 0;  
 

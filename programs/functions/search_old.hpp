@@ -19,16 +19,16 @@ DATATYPE (&element)[BITLENGTH][Pr::VALS_PER_SHARE] = P.alloc_Share(BITLENGTH);
 
 
 
-/* P.prepare_receive_from( (*dataset)[Pr::VALS_PER_SHARE],P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
-P.prepare_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB);
+/* P.prepare_receive_from( (*dataset)[Pr::VALS_PER_SHARE],P_0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
+P.prepare_receive_from(element,P_1,BITLENGTH, OP_ADD, OP_SUB);
 
 
 P.communicate();
 
 
 
-P.complete_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB);
-P.complete_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB);
+P.complete_receive_from((S*) dataset,P_0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB);
+P.complete_receive_from(element,P_1,BITLENGTH, OP_ADD, OP_SUB);
 
 
 for (int i = 0; i < NUM_INPUTS; i++) {
@@ -89,16 +89,16 @@ P.communicate();
 
 
 
-/* P.prepare_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
-/* P.prepare_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB); */
+/* P.prepare_receive_from((S*) dataset,P_0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
+/* P.prepare_receive_from(element,P_1,BITLENGTH, OP_ADD, OP_SUB); */
 
 
 /* P.communicate(); */
 
 
 
-/* P.complete_receive_from((S*) dataset,P0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
-/* P.complete_receive_from(element,P1,BITLENGTH, OP_ADD, OP_SUB); */
+/* P.complete_receive_from((S*) dataset,P_0,(NUM_INPUTS)*BITLENGTH, OP_ADD, OP_SUB); */
+/* P.complete_receive_from(element,P_1,BITLENGTH, OP_ADD, OP_SUB); */
 
 
 /* for (int i = 0; i < NUM_INPUTS; i++) { */

@@ -27,12 +27,12 @@ void prepare_step() {
             int curWire = std::max(lowWire - startPos, 1);
 
             if (curWire != lowWire) {
-                // G1 = G1 ^ P1 & G0
+                // G1 = G1 ^ P_1 & G0
                 b[curWire] = (a[curWire] & b[lowWire]) ^ b[curWire];
 
                 if (!first) {
 
-                    // P1 = P1 & P0
+                    // P_1 = P_1 & P_0
                     a[curWire] = a[lowWire] & a[curWire];
                 }
 
@@ -49,12 +49,12 @@ void complete_Step() {
             int curWire = std::max(lowWire - startPos, 1);
 
             if (curWire != lowWire) {
-                // G1 = G1 ^ P1 & G0
+                // G1 = G1 ^ P_1 & G0
                 b[curWire].complete_and();
 
                 if (!first) {
 
-                    // P1 = P1 & P0
+                    // P_1 = P_1 & P_0
                     a[curWire].complete_and();
                 }
 

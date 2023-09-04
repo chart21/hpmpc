@@ -31,30 +31,30 @@ void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c, Func_add ADD, Func_sub SU
 {
     #if PARTY == 0
 
-send_to_(P2);
-send_to_(P1);
-/* store_compare_view_init(P3); */
+send_to_(P_2);
+send_to_(P_1);
+/* store_compare_view_init(P_3); */
 
 #elif PARTY == 1
 
-send_to_(P3);
-send_to_(P0);
-/* store_compare_view_init(P0); */
+send_to_(P_3);
+send_to_(P_0);
+/* store_compare_view_init(P_0); */
 
 #elif PARTY == 2
 
 // c0 = a0 b0 + (a0 b1 + a1 b0 - r023) + r123 + r123_2
-send_to_(P0);
-/* store_compare_view_init(P1); */
-/* store_compare_view_init(P1); */
+send_to_(P_0);
+/* store_compare_view_init(P_1); */
+/* store_compare_view_init(P_1); */
 
 
 #elif PARTY == 3
 
 //c0 = a0 b0 + (a0 b1 + a1 b0 - r023) + r123 + r123_2
-send_to_(P1);
-/* store_compare_view_init(P2); */
-/* store_compare_view_init(P0); */
+send_to_(P_1);
+/* store_compare_view_init(P_2); */
+/* store_compare_view_init(P_0); */
 
 #endif
 
@@ -66,40 +66,40 @@ void complete_mult(DATATYPE &c, Func_add ADD, Func_sub SUB)
 #if PARTY == 0
 
 //c2 = a2 b2 + a2 b1 + (a2 b3 + a3 b2 - r012) + r013
-receive_from_(P1);
-store_compare_view_init(P3);
-store_compare_view_init(P3);
+receive_from_(P_1);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
 
 
 
 //c3 = a3 b3 + a3 b2 + (a3 b0 + a0 b3 - r123) + (a1b3 + a3b1 - r023) + r012
-receive_from_(P2);
-store_compare_view_init(P1);
+receive_from_(P_2);
+store_compare_view_init(P_1);
 
 
 #elif PARTY == 1
 
 // c0 = a0 b0 + (a0 b1 + a1 b0 - r023) + r123 + r123_2
-receive_from_(P3);
-store_compare_view_init(P0);
-store_compare_view_init(P2);
+receive_from_(P_3);
+store_compare_view_init(P_0);
+store_compare_view_init(P_2);
 
 //c3 = a3 b3 + a3 b2 + (a3 b0 + a0 b3 - r123) + (a1b3 + a3b1 - r023) + r012
-receive_from_(P0);
-store_compare_view_init(P2);
+receive_from_(P_0);
+store_compare_view_init(P_2);
 
-// receive second term from P0
+// receive second term from P_0
 
 
 #elif PARTY == 2
 
 
 //c1 = a1 b1 + a1 b2 + (a1 b2 + a2 b1 - r013) + r023 + r023_2
-receive_from_(P0);
-store_compare_view_init(P1);
-store_compare_view_init(P1);
-store_compare_view_init(P3);
-//receive rest from P0, verify with P3
+receive_from_(P_0);
+store_compare_view_init(P_1);
+store_compare_view_init(P_1);
+store_compare_view_init(P_3);
+//receive rest from P_0, verify with P_3
 
 
 
@@ -107,10 +107,10 @@ store_compare_view_init(P3);
 
 
 //c2 = a2 b2 + a2 b1 + (a2 b3 + a3 b2 - r012) + (a0 b2 + a2 b0 - r123) + r013
-receive_from_(P1);
-store_compare_view_init(P0);
-store_compare_view_init(P0);
-store_compare_view_init(P2);
+receive_from_(P_1);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_2);
 #endif
 }
 
@@ -125,7 +125,7 @@ template <typename Func_add, typename Func_sub>
 DATATYPE complete_Reveal(DATATYPE a, Func_add ADD, Func_sub SUB)
 {
 receive_from_(PPREV);
-store_compare_view_init(P0123);
+store_compare_view_init(P_0123);
 return a;
 }
 
@@ -144,26 +144,26 @@ if(id == PSELF)
 #if PARTY == 0
     for(int i = 0; i < l; i++)
     {
-        send_to_(P1);
-        send_to_(P2);
+        send_to_(P_1);
+        send_to_(P_2);
     }
 #elif PARTY == 1
     for(int i = 0; i < l; i++)
     {
-        send_to_(P0);
-        send_to_(P2);
+        send_to_(P_0);
+        send_to_(P_2);
     }
 #elif PARTY == 2
     for(int i = 0; i < l; i++)
     {
-        send_to_(P0);
-        send_to_(P1);
+        send_to_(P_0);
+        send_to_(P_1);
     }
 #else // PARTY == 3
     for(int i = 0; i < l; i++)
     {
-        send_to_(P0);
-        send_to_(P1);
+        send_to_(P_0);
+        send_to_(P_1);
     }
 #endif
 }
@@ -175,70 +175,70 @@ void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub S
 if(id != PSELF)
 {
 #if PARTY == 0
-    if(id == P1)
+    if(id == P_1)
     {
     for(int i = 0; i < l; i++)
     {
-    receive_from_(P1);
-    store_compare_view_init(P2);
+    receive_from_(P_1);
+    store_compare_view_init(P_2);
     }
     }
-    else if(id == P2)
+    else if(id == P_2)
     {
     for(int i = 0; i < l; i++)
     {
-    receive_from_(P2);
-    store_compare_view_init(P1);
+    receive_from_(P_2);
+    store_compare_view_init(P_1);
     }
     }
-    else // id == P3
+    else // id == P_3
     {
     for(int i = 0; i < l; i++)
     {
-    receive_from_(P3);
-    store_compare_view_init(P1);
+    receive_from_(P_3);
+    store_compare_view_init(P_1);
     }
     }
 #elif PARTY == 1
-    if(id == P0)
+    if(id == P_0)
     {
     for(int i = 0; i < l; i++)
     {
-    receive_from_(P0);
-    store_compare_view_init(P2);
+    receive_from_(P_0);
+    store_compare_view_init(P_2);
     }
     }
-    else if(id == P2)
+    else if(id == P_2)
     {
     for(int i = 0; i < l; i++)
     {
-    receive_from_(P2);
-    store_compare_view_init(P0);
+    receive_from_(P_2);
+    store_compare_view_init(P_0);
     }
     }
-    else // id == P3
+    else // id == P_3
     {
     for(int i = 0; i < l; i++)
     {
-    receive_from_(P3);
-    store_compare_view_init(P0);
+    receive_from_(P_3);
+    store_compare_view_init(P_0);
     }
     }
 #elif PARTY == 2
-    if(id == P0)
+    if(id == P_0)
     {
     for(int i = 0; i < l; i++)
     {
-    receive_from_(P0);
-    store_compare_view_init(P1);
+    receive_from_(P_0);
+    store_compare_view_init(P_1);
     }
     }
-    else if(id == P1)
+    else if(id == P_1)
     {
     for(int i = 0; i < l; i++)
     {
-    receive_from_(P1);
-    store_compare_view_init(P0);
+    receive_from_(P_1);
+    store_compare_view_init(P_0);
     }
     } 
 #endif

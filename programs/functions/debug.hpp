@@ -70,22 +70,22 @@ S (*inputs)[BITLENGTH] = new S[num_players][BITLENGTH];
 /* } */
 for(int i = 0; i < BITLENGTH; i++)
 {
-inputs[0][i].template prepare_receive_from<P0>();
-inputs[1][i].template prepare_receive_from<P1>();
-inputs[2][i].template prepare_receive_from<P2>();
+inputs[0][i].template prepare_receive_from<P_0>();
+inputs[1][i].template prepare_receive_from<P_1>();
+inputs[2][i].template prepare_receive_from<P_2>();
 #if num_players > 3
-inputs[3][i].template prepare_receive_from<P3>();
+inputs[3][i].template prepare_receive_from<P_3>();
 #endif
 }
 Protocol::communicate();
 
 for(int i = 0; i < BITLENGTH; i++)
 {
-inputs[0][i].template complete_receive_from<P0>();
-inputs[1][i].template complete_receive_from<P1>();
-inputs[2][i].template complete_receive_from<P2>();
+inputs[0][i].template complete_receive_from<P_0>();
+inputs[1][i].template complete_receive_from<P_1>();
+inputs[2][i].template complete_receive_from<P_2>();
 #if num_players > 3
-inputs[3][i].template complete_receive_from<P3>();
+inputs[3][i].template complete_receive_from<P_3>();
 #endif
 }
 

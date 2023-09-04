@@ -110,7 +110,7 @@ for(int t=0;t<(num_players-1);t++) {
     receiving_args[t].connected_to = t+offset;
     receiving_args[t].ip = ips[t];
     receiving_args[t].hostname = (char*)"hostname";
-    receiving_args[t].port = (int) base_port + player_id * (num_players-1) + t; //e.g. P0 receives on base port from P1, P2 on base port + num_players from P0 6000,6002
+    receiving_args[t].port = (int) base_port + player_id * (num_players-1) + t; //e.g. P_0 receives on base port from P_1, P_2 on base port + num_players from P_0 6000,6002
     /* std::cout << "In main: creating thread " << t << "\n"; */
     //init_srng(t, (t+offset) + player_id); 
 }
@@ -123,7 +123,7 @@ for(int t=0;t<(num_players-1);t++) {
     sending_args[t].player_id = player_id;
     sending_args[t].player_count = num_players;
     sending_args[t].connected_to = t+offset;
-    sending_args[t].port = (int) base_port + (t+offset) * (num_players -1) + player_id - 1 + offset; //e.g. P0 sends on base port + num_players  for P1, P2 on base port + num_players for P0 (6001,6000)
+    sending_args[t].port = (int) base_port + (t+offset) * (num_players -1) + player_id - 1 + offset; //e.g. P_0 sends on base port + num_players  for P_1, P_2 on base port + num_players for P_0 (6001,6000)
     /* std::cout << "In main: creating thread " << t << "\n"; */
     sending_args[t].sent_elements[0] = NEW(DATATYPE[sending_args[t].elements_to_send[0]]); // Allocate memory for first round
        

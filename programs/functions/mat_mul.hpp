@@ -129,8 +129,8 @@ void fixed_test(DATATYPE* res)
     {
         for(int j = 0; j < NUM_INPUTS; j++)
         {
-            a[i][j]. template prepare_receive_from<P0>();
-            b[i][j]. template prepare_receive_from<P1>();
+            a[i][j]. template prepare_receive_from<P_0>();
+            b[i][j]. template prepare_receive_from<P_1>();
         }
 }
     Share::communicate();
@@ -138,8 +138,8 @@ void fixed_test(DATATYPE* res)
     {
         for(int j = 0; j < NUM_INPUTS; j++)
         {
-            a[i][j]. template complete_receive_from<P0>();
-            b[i][j]. template complete_receive_from<P1>();
+            a[i][j]. template complete_receive_from<P_0>();
+            b[i][j]. template complete_receive_from<P_1>();
         }
     }
 
@@ -274,18 +274,18 @@ delete[] c;
 
     /* //Receive shares */
 
-    /* /1* mat1 << mint().template prepare_receive_from<P0>(), mint().template prepare_receive_from<P0>(), *1/ */
-    /* /1*         mint().template prepare_receive_from<P0>(), mint().template prepare_receive_from<P0>(); *1/ */
+    /* /1* mat1 << mint().template prepare_receive_from<P_0>(), mint().template prepare_receive_from<P_0>(), *1/ */
+    /* /1*         mint().template prepare_receive_from<P_0>(), mint().template prepare_receive_from<P_0>(); *1/ */
     
-    /* /1* mat2 << mint().template prepare_receive_from<P1>(), mint().template prepare_receive_from<P1>(), *1/ */
-    /* /1*         mint().template prepare_receive_from<P1>(), mint().template prepare_receive_from<P1>(); *1/ */
+    /* /1* mat2 << mint().template prepare_receive_from<P_1>(), mint().template prepare_receive_from<P_1>(), *1/ */
+    /* /1*         mint().template prepare_receive_from<P_1>(), mint().template prepare_receive_from<P_1>(); *1/ */
     
     /* for(int i = 0; i < 2; i++) */
     /* { */
     /*     for(int j = 0; j < 2; j++) */ 
     /*     { */
-    /*         mat1(i, j). template prepare_receive_from<P0>(); */
-    /*         mat2(i, j). template prepare_receive_from<P1>(); */
+    /*         mat1(i, j). template prepare_receive_from<P_0>(); */
+    /*         mat2(i, j). template prepare_receive_from<P_1>(); */
     /*     } */
     /* } */
 
@@ -298,8 +298,8 @@ delete[] c;
     /* { */
     /*     for(int j = 0; j < 2; j++) */ 
     /*     { */
-    /*         mat1(i, j). template complete_receive_from<P0>(); */
-    /*         mat2(i, j). template complete_receive_from<P1>(); */
+    /*         mat1(i, j). template complete_receive_from<P_0>(); */
+    /*         mat2(i, j). template complete_receive_from<P_1>(); */
     /*     } */
     /* } */
 

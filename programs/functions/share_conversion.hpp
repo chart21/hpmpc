@@ -30,11 +30,11 @@ void adder(DATATYPE* res)
     
     Bitset x;
     Bitset y;
-    x.template prepare_receive_from<P0>();
-    y.template prepare_receive_from<P0>();
+    x.template prepare_receive_from<P_0>();
+    y.template prepare_receive_from<P_0>();
     Share::communicate();
-    x.template complete_receive_from<P0>();
-    y.template complete_receive_from<P0>();
+    x.template complete_receive_from<P_0>();
+    y.template complete_receive_from<P_0>();
     Share::communicate();
     Bitset z;
     BooleanAdder<S> adder(x, y, z);
@@ -72,12 +72,12 @@ void RELU(DATATYPE* res)
     sint* val = new sint[NUM_INPUTS];
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        val[i].template prepare_receive_from<P0>();
+        val[i].template prepare_receive_from<P_0>();
     }
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        val[i].template complete_receive_from<P0>();
+        val[i].template complete_receive_from<P_0>();
     }
     Share::communicate();
     Bitset *s1 = new Bitset[NUM_INPUTS];
@@ -198,9 +198,9 @@ void bit_injection(DATATYPE* res)
     using sint = sint_t<A>;
 
     Bitset val;
-    val.template prepare_receive_from<P0>();
+    val.template prepare_receive_from<P_0>();
     Share::communicate();
-    val.template complete_receive_from<P0>();
+    val.template complete_receive_from<P_0>();
     Share::communicate();
     S s = val[0];
     
@@ -247,9 +247,9 @@ void convert_share(/*outputs*/ DATATYPE *result)
     Bitset y;
     /* Bitset val; */
     /* sint y; */
-    val.template prepare_receive_from<P0>();
+    val.template prepare_receive_from<P_0>();
     Share::communicate();
-    val.template complete_receive_from<P0>();
+    val.template complete_receive_from<P_0>();
     Share::communicate();
     Bitset s1 = sbitset_t<S>::prepare_A2B_S1( (S*) val.get_share_pointer());
     Bitset s2 = sbitset_t<S>::prepare_A2B_S2( (S*) val.get_share_pointer());

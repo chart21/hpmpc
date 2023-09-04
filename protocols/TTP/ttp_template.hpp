@@ -72,7 +72,7 @@ template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
 #if PARTY != 2
-    Datatype result = receive_from_live(P2);
+    Datatype result = receive_from_live(P_2);
 #else
     Datatype result = p1;
 #endif
@@ -88,7 +88,7 @@ void prepare_receive_from(func_add ADD, func_sub SUB)
 if constexpr(id == PSELF)
 {
             Datatype tmp = get_input_live();
-        send_to_live(P2, tmp);
+        send_to_live(P_2, tmp);
         
 }
 #endif
@@ -99,7 +99,7 @@ template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)
 {
 #if PARTY == 2
-if constexpr(id == P2)
+if constexpr(id == P_2)
 {
         p1 = get_input_live();
 }

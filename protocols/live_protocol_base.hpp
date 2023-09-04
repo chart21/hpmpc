@@ -205,53 +205,53 @@ void compare_views() {
                                         // up index by multiplier
 #endif
               val_to_send[player_id][i] = *((DATATYPE *)addr_to_send);
-              if (player_id == 3) //P0123
+              if (player_id == 3) //P_0123
               {
-                if(P0 != PSELF)
-                    send_to_live(P0, val_to_send[player_id][i]);
-                if(P1 != PSELF)
-                    send_to_live(P1, val_to_send[player_id][i]);
-                if(P2 != PSELF)
-                    send_to_live(P2, val_to_send[player_id][i]);
-                if(P3 != PSELF)
-                    send_to_live(P3, val_to_send[player_id][i]);
+                if(P_0 != PSELF)
+                    send_to_live(P_0, val_to_send[player_id][i]);
+                if(P_1 != PSELF)
+                    send_to_live(P_1, val_to_send[player_id][i]);
+                if(P_2 != PSELF)
+                    send_to_live(P_2, val_to_send[player_id][i]);
+                if(P_3 != PSELF)
+                    send_to_live(P_3, val_to_send[player_id][i]);
 
               }
-              else if(player_id == 4) //P012
+              else if(player_id == 4) //P_012
               {
-                if(P0 != PSELF)
-                    send_to_live(P0, val_to_send[player_id][i]);
-                if(P1 != PSELF)
-                    send_to_live(P1, val_to_send[player_id][i]);
-                if(P2 != PSELF)
-                    send_to_live(P2, val_to_send[player_id][i]);
+                if(P_0 != PSELF)
+                    send_to_live(P_0, val_to_send[player_id][i]);
+                if(P_1 != PSELF)
+                    send_to_live(P_1, val_to_send[player_id][i]);
+                if(P_2 != PSELF)
+                    send_to_live(P_2, val_to_send[player_id][i]);
               }
-              else if(player_id == 5) //P013
+              else if(player_id == 5) //P_013
               {
-                if(P0 != PSELF)
-                    send_to_live(P0, val_to_send[player_id][i]);
-                if(P1 != PSELF)
-                    send_to_live(P1, val_to_send[player_id][i]);
-                if(P3 != PSELF)
-                    send_to_live(P3, val_to_send[player_id][i]);
+                if(P_0 != PSELF)
+                    send_to_live(P_0, val_to_send[player_id][i]);
+                if(P_1 != PSELF)
+                    send_to_live(P_1, val_to_send[player_id][i]);
+                if(P_3 != PSELF)
+                    send_to_live(P_3, val_to_send[player_id][i]);
               }
-              else if(player_id == 6) //P023
+              else if(player_id == 6) //P_023
               {
-                if(P0 != PSELF)
-                    send_to_live(P0, val_to_send[player_id][i]);
-                if(P2 != PSELF)
-                    send_to_live(P2, val_to_send[player_id][i]);
-                if(P3 != PSELF)
-                    send_to_live(P3, val_to_send[player_id][i]);
+                if(P_0 != PSELF)
+                    send_to_live(P_0, val_to_send[player_id][i]);
+                if(P_2 != PSELF)
+                    send_to_live(P_2, val_to_send[player_id][i]);
+                if(P_3 != PSELF)
+                    send_to_live(P_3, val_to_send[player_id][i]);
               }
-              else if(player_id == 7) //P123
+              else if(player_id == 7) //P_123
               {
-                if(P1 != PSELF)
-                    send_to_live(P1, val_to_send[player_id][i]);
-                if(P2 != PSELF)
-                    send_to_live(P2, val_to_send[player_id][i]);
-                if(P3 != PSELF)
-                    send_to_live(P3, val_to_send[player_id][i]);
+                if(P_1 != PSELF)
+                    send_to_live(P_1, val_to_send[player_id][i]);
+                if(P_2 != PSELF)
+                    send_to_live(P_2, val_to_send[player_id][i]);
+                if(P_3 != PSELF)
+                    send_to_live(P_3, val_to_send[player_id][i]);
               }
               else
                 send_to_live(player_id, val_to_send[player_id][i]);
@@ -272,56 +272,56 @@ void compare_views() {
                 int counter = 0;
                 if(player_id > num_players - 2)
                 {
-                if (player_id == 3) //P0123
+                if (player_id == 3) //P_0123
                 {
-                    if(P0 != PSELF)
-                        val_rec[counter++] = receive_from_live(P0);
-                    if(P1 != PSELF)
-                        val_rec[counter++] = receive_from_live(P1);
-                    if(P2 != PSELF)
-                        val_rec[counter++] = receive_from_live(P2);
-                    if(P3 != PSELF)
-                        val_rec[counter++] = receive_from_live(P3);
+                    if(P_0 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_0);
+                    if(P_1 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_1);
+                    if(P_2 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_2);
+                    if(P_3 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_3);
                     val_rec[0] = XOR(XOR(val_rec[0], val_rec[1]),val_rec[2]); //trick to ensure equality of all three values for check later (since comparing vectorized variables is tedious)
                 }
-                else if(player_id == 4) //P012
+                else if(player_id == 4) //P_012
                   {
-                    if(P0 != PSELF)
-                        val_rec[counter++] = receive_from_live(P0);
-                    if(P1 != PSELF)
-                        val_rec[counter++] = receive_from_live(P1);
-                    if(P2 != PSELF)
-                        val_rec[counter++] = receive_from_live(P2);
+                    if(P_0 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_0);
+                    if(P_1 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_1);
+                    if(P_2 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_2);
                     val_rec[0] = AND(val_rec[0], val_rec[1]); //trick to ensure equality of both values with certain probability 
                   }
-                else if(player_id == 5) //P013
+                else if(player_id == 5) //P_013
                   {
-                    if(P0 != PSELF)
-                        val_rec[counter++] = receive_from_live(P0);
-                    if(P1 != PSELF)
-                        val_rec[counter++] = receive_from_live(P1);
-                    if(P3 != PSELF)
-                        val_rec[counter++] = receive_from_live(P3);
+                    if(P_0 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_0);
+                    if(P_1 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_1);
+                    if(P_3 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_3);
                     val_rec[0] = AND(val_rec[0], val_rec[1]); //trick to ensure equality of both values with certain probability 
                   }
-                else if(player_id == 6) //P023
+                else if(player_id == 6) //P_023
                   {
-                    if(P0 != PSELF)
-                        val_rec[counter++] = receive_from_live(P0);
-                    if(P2 != PSELF)
-                        val_rec[counter++] = receive_from_live(P2);
-                    if(P3 != PSELF)
-                        val_rec[counter++] = receive_from_live(P3);
+                    if(P_0 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_0);
+                    if(P_2 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_2);
+                    if(P_3 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_3);
                     val_rec[0] = AND(val_rec[0], val_rec[1]); //trick to ensure equality of both values with certain probability 
                   }
-                else if(player_id == 7) //P123
+                else if(player_id == 7) //P_123
                   {
-                    if(P1 != PSELF)
-                        val_rec[counter++] = receive_from_live(P1);
-                    if(P2 != PSELF)
-                        val_rec[counter++] = receive_from_live(P2);
-                    if(P3 != PSELF)
-                        val_rec[counter++] = receive_from_live(P3);
+                    if(P_1 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_1);
+                    if(P_2 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_2);
+                    if(P_3 != PSELF)
+                        val_rec[counter++] = receive_from_live(P_3);
                     val_rec[0] = AND(val_rec[0], val_rec[1]); //trick to ensure equality of both values with certain probability 
                   }
               val_recieved[player_id][i] = val_rec[0];

@@ -451,10 +451,10 @@ init_srng(pnext,player_id + 5000);
 init_srng(num_players-1, player_id+6000); // used for sharing inputs
 #elif num_players == 4
 //new logic
-/* init_srng(P0, (player_id+1) * 1 + 5000); // */ 
-/* init_srng(P1, (player_id+1) * 2 + 5000); // 1*2 */
-/* init_srng(P2, (player_id+1) * 3 + 5000); // 1*3 */
-/* init_srng(P3, (player_id+1) * 4 + 5000); // 1*4 */
+/* init_srng(P_0, (player_id+1) * 1 + 5000); // */ 
+/* init_srng(P_1, (player_id+1) * 2 + 5000); // 1*2 */
+/* init_srng(P_2, (player_id+1) * 3 + 5000); // 1*3 */
+/* init_srng(P_3, (player_id+1) * 4 + 5000); // 1*4 */
 init_srng(0,0);
 init_srng(1,0);
 init_srng(2,0);

@@ -45,36 +45,36 @@
     #if INIT == 1
         #if PARTY == 0
             #define PROTOCOL_INIT OECL0_init
-            #include "3-PC/ours/oecl-P0_init_template.hpp"
+            #include "3-PC/ours/oecl-P_0_init_template.hpp"
         #endif
         #if PARTY == 1
             #define PROTOCOL_INIT OECL1_init
-            #include "3-PC/ours/oecl-P1_init_template.hpp"
+            #include "3-PC/ours/oecl-P_1_init_template.hpp"
         #endif
         #if PARTY == 2
             #define PROTOCOL_INIT OECL2_init
-            #include "3-PC/ours/oecl-P2_init_template.hpp"
+            #include "3-PC/ours/oecl-P_2_init_template.hpp"
         #endif
     #endif
     #if LIVE == 1 
         #if PARTY == 0
             #define PROTOCOL_LIVE ASTRA0
-            #include "3-PC/astra/astra-P0_template.hpp"
+            #include "3-PC/astra/astra-P_0_template.hpp"
         #endif
         #if PARTY == 1
             #define PROTOCOL_LIVE ASTRA1
-            #include "3-PC/astra/astra-P1_template.hpp"
+            #include "3-PC/astra/astra-P_1_template.hpp"
         #endif
         #if PARTY == 2
             #define PROTOCOL_LIVE ASTRA2
-            #include "3-PC/astra/astra-P2_template.hpp"
+            #include "3-PC/astra/astra-P_2_template.hpp"
         #endif
     #endif
 #elif PROTOCOL == odup
     #if PRE == 1
         #if PARTY == 0
             #define PROTOCOL_PRE OEC0
-            #include "3-PC/oec/oec-P0_template.hpp"
+            #include "3-PC/oec/oec-P_0_template.hpp"
         #endif
         #if PARTY == 1
             #define PROTOCOL_PRE -1
@@ -86,15 +86,15 @@
     #if INIT == 1
         #if PARTY == 0
             #define PROTOCOL_INIT OEC0_init
-            #include "3-PC/oec/oec-P0_init_template.hpp"
+            #include "3-PC/oec/oec-P_0_init_template.hpp"
         #endif
         #if PARTY == 1
             #define PROTOCOL_INIT OEC1_init
-            #include "3-PC/oec/oec-P1_init_template.hpp"
+            #include "3-PC/oec/oec-P_1_init_template.hpp"
         #endif
         #if PARTY == 2
             #define PROTOCOL_INIT OEC2_init
-            #include "3-PC/oec/oec-P2_init_template.hpp"
+            #include "3-PC/oec/oec-P_2_init_template.hpp"
         #endif
     #endif
     #if LIVE == 1 
@@ -102,26 +102,26 @@
             #if PRE == 1
                 #define PROTOCOL_LIVE OEC0_POST
                 /* #define HAS_POST_PROTOCOL 1 */
-                #include "3-PC/oec/oec-P0-post_template.hpp"
+                #include "3-PC/oec/oec-P_0-post_template.hpp"
             #else
                 #define PROTOCOL_LIVE OEC0
-                #include "3-PC/oec/oec-P0_template.hpp"
+                #include "3-PC/oec/oec-P_0_template.hpp"
             #endif
         #endif
         #if PARTY == 1
             #define PROTOCOL_LIVE OEC1
-            #include "3-PC/oec/oec-P1_template.hpp"
+            #include "3-PC/oec/oec-P_1_template.hpp"
         #endif
         #if PARTY == 2 
             #define PROTOCOL_LIVE OEC2
-            #include "3-PC/oec/oec-P2_template.hpp"
+            #include "3-PC/oec/oec-P_2_template.hpp"
         #endif
     #endif
 #elif PROTOCOL == orep 
     #if PRE == 1
         #if PARTY == 0
             #define PROTOCOL_PRE OECL0
-            #include "3-PC/ours/oecl-P0_template.hpp"
+            #include "3-PC/ours/oecl-P_0_template.hpp"
         #endif
         #if PARTY == 1
             #define PROTOCOL_PRE -1
@@ -133,15 +133,15 @@
     #if INIT == 1
         #if PARTY == 0
             #define PROTOCOL_INIT OECL0_init
-            #include "3-PC/ours/oecl-P0_init_template.hpp"
+            #include "3-PC/ours/oecl-P_0_init_template.hpp"
         #endif
         #if PARTY == 1
             #define PROTOCOL_INIT OECL1_init
-            #include "3-PC/ours/oecl-P1_init_template.hpp"
+            #include "3-PC/ours/oecl-P_1_init_template.hpp"
         #endif
         #if PARTY == 2
             #define PROTOCOL_INIT OECL2_init
-            #include "3-PC/ours/oecl-P2_init_template.hpp"
+            #include "3-PC/ours/oecl-P_2_init_template.hpp"
         #endif
     #endif
     #if LIVE == 1 
@@ -149,19 +149,19 @@
             #if PRE == 1
                 #define PROTOCOL_LIVE OECL0_POST
                 /* #define HAS_POST_PROTOCOL 1 */
-                #include "3-PC/ours/oecl-P0-post_template.hpp"
+                #include "3-PC/ours/oecl-P_0-post_template.hpp"
             #else
                 #define PROTOCOL_LIVE OECL0_Share
-                #include "3-PC/ours/oecl-P0_template.hpp"
+                #include "3-PC/ours/oecl-P_0_template.hpp"
             #endif
         #endif
         #if PARTY == 1
             #define PROTOCOL_LIVE OECL1_Share
-            #include "3-PC/ours/oecl-P1_template.hpp"
+            #include "3-PC/ours/oecl-P_1_template.hpp"
         #endif
         #if PARTY == 2
             #define PROTOCOL_LIVE OECL2_Share
-            #include "3-PC/ours/oecl-P2_template.hpp"
+            #include "3-PC/ours/oecl-P_2_template.hpp"
         #endif
     #endif
 #elif PROTOCOL == ttp3 || PROTOCOL == ttp4
@@ -186,53 +186,53 @@
         #endif
         #if PARTY == 3
             #define PROTOCOL_PRE OEC_MAL3
-            #include "4-PC/ours/oec-mal-P3_template.hpp"
+            #include "4-PC/ours/oec-mal-P_3_template.hpp"
         #endif
 #endif
     #if INIT == 1
         #if PARTY == 0
             #define PROTOCOL_INIT OEC_MAL0_init
-            #include "4-PC/ours/oec-mal-P0_init_template.hpp"
+            #include "4-PC/ours/oec-mal-P_0_init_template.hpp"
         #endif
         #if PARTY == 1
             #define PROTOCOL_INIT OEC_MAL1_init
-            #include "4-PC/ours/oec-mal-P1_init_template.hpp"
+            #include "4-PC/ours/oec-mal-P_1_init_template.hpp"
         #endif
         #if PARTY == 2
             #define PROTOCOL_INIT OEC_MAL2_init
-            #include "4-PC/ours/oec-mal-P2_init_template.hpp"
+            #include "4-PC/ours/oec-mal-P_2_init_template.hpp"
         #endif
         #if PARTY == 3
             #define PROTOCOL_INIT OEC_MAL3_init
-            #include "4-PC/ours/oec-mal-P3_init_template.hpp"
+            #include "4-PC/ours/oec-mal-P_3_init_template.hpp"
         #endif
     #endif
     #if LIVE == 1 
         #if PARTY == 0
             /* #if PRE == 1 */
             /*     #define PROTOCOL_LIVE OEC_MAL0_POST */
-            /*     #include "oec-mal-P0-post_template.hpp" */
+            /*     #include "oec-mal-P_0-post_template.hpp" */
             /* #else */
                 #define PROTOCOL_LIVE OEC_MAL0
-                #include "4-PC/ours/oec-mal-P0_template.hpp"
+                #include "4-PC/ours/oec-mal-P_0_template.hpp"
             /* #endif */
         #endif
         #if PARTY == 1
             #define PROTOCOL_LIVE OEC_MAL1
-            #include "4-PC/ours/oec-mal-P1_template.hpp"
+            #include "4-PC/ours/oec-mal-P_1_template.hpp"
         #endif
         #if PARTY == 2
             #define PROTOCOL_LIVE OEC_MAL2
-            #include "4-PC/ours/oec-mal-P2_template.hpp"
+            #include "4-PC/ours/oec-mal-P_2_template.hpp"
         #endif
         #if PARTY == 3
             #if PRE == 1
                 #define PROTOCOL_LIVE OEC_MAL3_POST
                 /* #define HAS_POST_PROTOCOL 1 */
-                #include "4-PC/ours/oec-mal-P3-post_template.hpp"
+                #include "4-PC/ours/oec-mal-P_3-post_template.hpp"
             #else
                 #define PROTOCOL_LIVE OEC_MAL3
-                #include "4-PC/ours/oec-mal-P3_template.hpp"
+                #include "4-PC/ours/oec-mal-P_3_template.hpp"
             #endif
         #endif
     #endif
@@ -240,42 +240,42 @@
     #if INIT == 1
         #if PARTY == 0
             #define PROTOCOL_INIT OEC_MAL0_init
-            #include "4-PC/ours/oec-mal-P0_init_template.hpp"
+            #include "4-PC/ours/oec-mal-P_0_init_template.hpp"
         #endif
         #if PARTY == 1
             #define PROTOCOL_INIT OEC_MAL1_init
-            #include "4-PC/ours/oec-mal-P1_init_template.hpp"
+            #include "4-PC/ours/oec-mal-P_1_init_template.hpp"
         #endif
         #if PARTY == 2
             #define PROTOCOL_INIT OEC_MAL2_init
-            #include "4-PC/ours/oec-mal-P2_init_template.hpp"
+            #include "4-PC/ours/oec-mal-P_2_init_template.hpp"
         #endif
         #if PARTY == 3
             #define PROTOCOL_INIT OEC_MAL3_init
-            #include "4-PC/ours/oec-mal-P3_init_template.hpp"
+            #include "4-PC/ours/oec-mal-P_3_init_template.hpp"
         #endif
     #endif
     #if LIVE == 1 
         #if PARTY == 0
             /* #if PRE == 1 */
             /*     #define PROTOCOL_LIVE OEC_MAL0_POST */
-            /*     #include "oec-mal-P0-post_template.hpp" */
+            /*     #include "oec-mal-P_0-post_template.hpp" */
             /* #else */
                 #define PROTOCOL_LIVE Tetrad0
-                #include "4-PC/tetrad/Tetrad-P0_template.hpp"
+                #include "4-PC/tetrad/Tetrad-P_0_template.hpp"
             /* #endif */
         #endif
         #if PARTY == 1
             #define PROTOCOL_LIVE Tetrad1
-            #include "4-PC/tetrad/Tetrad-P1_template.hpp"
+            #include "4-PC/tetrad/Tetrad-P_1_template.hpp"
         #endif
         #if PARTY == 2
             #define PROTOCOL_LIVE Tetrad2
-            #include "4-PC/tetrad/Tetrad-P2_template.hpp"
+            #include "4-PC/tetrad/Tetrad-P_2_template.hpp"
         #endif
         #if PARTY == 3
                 #define PROTOCOL_LIVE Tetrad3
-                #include "4-PC/tetrad/Tetrad-P3_template.hpp"
+                #include "4-PC/tetrad/Tetrad-P_3_template.hpp"
         #endif
     #endif
     #elif PROTOCOL == FantasticFour

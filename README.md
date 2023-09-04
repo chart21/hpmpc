@@ -64,7 +64,7 @@ Changes can be applied either directly in the file or via running ```scripts/con
    -z RECV_BUFFER: How many receiving messages should be buffered until the main thread is signaled that data is ready? 0 means that all data of a communication round needs to be ready before the main thread is signaled.
 ```
 
-The following configuration compiles an executable for P2, 1024 inputs, sliced 256 times in AVX-2 variables, using Protocol Replicated. All other configuarations are fetched from `config.h`.
+The following configuration compiles an executable for P_2, 1024 inputs, sliced 256 times in AVX-2 variables, using Protocol Replicated. All other configuarations are fetched from `config.h`.
 > ./scripts/config.sh -p 2 -n 1024 -d 256 -s 2 
 
 The following configuration uses the previous configuration but compiles an executable for all players. This is useful when running the parties on the same host.
@@ -86,14 +86,14 @@ The following script compiles 24 executables of a 4-PC protocol for player 0 to 
 
 In a distributed setup, you need to specify the IP addresses for each party and run one executable on each node.
 
-Execute P0 executable.
-> ./run-P0.o IP_P0 IP_P2
+Execute P_0 executable.
+> ./run-P_0.o IP_P_0 IP_P_2
 
-Execute P1 executable.
-> ./run-P1.o IP_P0 IP_P2
+Execute P_1 executable.
+> ./run-P_1.o IP_P_0 IP_P_2
 
-Execute P2 executable.
-> ./run-P2.o IP_P0 IP_P1
+Execute P_2 executable.
+> ./run-P_2.o IP_P_0 IP_P_1
 
 
 Run Split-Roles (3) executables for Player 0.
