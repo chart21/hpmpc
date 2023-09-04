@@ -92,6 +92,11 @@ public:
         }
         return *this;
     }
+    
+    bool operator==(const sint_t& b) const
+    {
+        return false; // Needed for Eigen optimizations
+    }
 
     sint_t& operator*=(const sint_t& other) {
         for(int i = 0; i < BITLENGTH; ++i) {

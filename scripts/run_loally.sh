@@ -32,3 +32,4 @@ do
     ./"$FUNCTION"-P"$i".o &
 done
 
+wait

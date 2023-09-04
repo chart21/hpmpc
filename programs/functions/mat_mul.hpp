@@ -503,7 +503,6 @@ void RELU_bench(DATATYPE* res)
     
 
 
-
 }
 
 #if FUNCTION_IDENTIFIER > 19
@@ -862,22 +861,23 @@ SH<T> truncate(const SH<T>& val) {
     template<typename Share>
 void forward_pass(DATATYPE* res)
 {
-using D = Matrix_Share<DATATYPE, Share>;
+using D = sint_t<Matrix_Share<DATATYPE, Share>>;
+/* using D = Matrix_Share<DATATYPE, Share>; */
 /* using M = SH<DATATYPE>; */
 /* using D = SH<DATATYPE>; */
 /* Conv2d<M> conv(3,64,3,1); */
 #if FUNCTION_IDENTIFIER == 20
-std::vector<int> input_shape = {10, 3, NUM_INPUTS, NUM_INPUTS};
-MatX<D> input(10, NUM_INPUTS * NUM_INPUTS * 3);
+std::vector<int> input_shape = {1, 3, NUM_INPUTS, NUM_INPUTS};
+MatX<D> input(1, NUM_INPUTS * NUM_INPUTS * 3);
 Conv2d<D> d_conv(3, 64, 3, 1, "xavier_normal");
 #elif FUNCTION_IDENTIFIER == 23
 Conv2d<D> d_conv(64, 64, 3, 1, "xavier_normal"); // Assuming Conv2d takes in(input_channels, output_channels, kernel_size, stride, initialization_method)
-vector<int> input_shape = {10, 64, NUM_INPUTS, NUM_INPUTS};
-MatX<D> input(10, 64 * NUM_INPUTS * NUM_INPUTS);
+vector<int> input_shape = {1, 64, NUM_INPUTS, NUM_INPUTS};
+MatX<D> input(1, 64 * NUM_INPUTS * NUM_INPUTS);
 #else
 Conv2d<D> d_conv(64, 128, 3, 1, "xavier_normal"); // Assuming Conv2d takes in(input_channels, output_channels, kernel_size, stride, initialization_method)
-vector<int> input_shape = {10, 64, NUM_INPUTS/2, NUM_INPUTS/2};
-MatX<D> input(10, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
+vector<int> input_shape = {1, 64, NUM_INPUTS/2, NUM_INPUTS/2};
+MatX<D> input(1, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
 #endif
     d_conv.set_layer(input_shape);
     for (int j = 0; j < d_conv.output.size(); j++) {
@@ -894,19 +894,21 @@ MatX<D> input(10, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
 template<typename Share>
 void backward_pass(DATATYPE* res)
 {
-using D = Matrix_Share<DATATYPE, Share>;
+
+using D = sint_t<Matrix_Share<DATATYPE, Share>>;
+/* using D = Matrix_Share<DATATYPE, Share>; */
 #if FUNCTION_IDENTIFIER == 21 
-std::vector<int> input_shape = {10, 3, NUM_INPUTS, NUM_INPUTS};
-MatX<D> input(10, NUM_INPUTS * NUM_INPUTS * 3);
+std::vector<int> input_shape = {1, 3, NUM_INPUTS, NUM_INPUTS};
+MatX<D> input(1, NUM_INPUTS * NUM_INPUTS * 3);
 Conv2d<D> d_conv(3, 64, 3, 1, "xavier_normal");
 #elif FUNCTION_IDENTIFIER == 24
 Conv2d<D> d_conv(64, 64, 3, 1, "xavier_normal"); // Assuming Conv2d takes in(input_channels, output_channels, kernel_size, stride, initialization_method)
-vector<int> input_shape = {10, 64, NUM_INPUTS, NUM_INPUTS};
-MatX<D> input(10, 64 * NUM_INPUTS * NUM_INPUTS);
+vector<int> input_shape = {1, 64, NUM_INPUTS, NUM_INPUTS};
+MatX<D> input(1, 64 * NUM_INPUTS * NUM_INPUTS);
 #else
 Conv2d<D> d_conv(64, 128, 3, 1, "xavier_normal"); // Assuming Conv2d takes in(input_channels, output_channels, kernel_size, stride, initialization_method)
-vector<int> input_shape = {10, 64, NUM_INPUTS/2, NUM_INPUTS/2};
-MatX<D> input(10, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
+vector<int> input_shape = {1, 64, NUM_INPUTS/2, NUM_INPUTS/2};
+MatX<D> input(1, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
 #endif
 d_conv.set_layer(input_shape);
 
@@ -926,10 +928,11 @@ d_conv.backward(input,d_conv.output);
     template<typename Share>
 void FC_bench(DATATYPE* res)
 {
-    using M = Matrix_Share<DATATYPE, Share>;
-    VecX<M> a(NUM_INPUTS);
-    VecX<M> c(NUM_INPUTS);
-    MatX<M> b(NUM_INPUTS, NUM_INPUTS);
+    using S = sint_t<Matrix_Share<DATATYPE, Share>>;
+    /* using M = Matrix_Share<DATATYPE, Share>; */
+    VecX<S> a(NUM_INPUTS);
+    VecX<S> c(NUM_INPUTS);
+    MatX<S> b(NUM_INPUTS, NUM_INPUTS);
     c = b * a;
     
     for(int i = 0; i < NUM_INPUTS; i++)
@@ -943,8 +946,8 @@ void FC_bench(DATATYPE* res)
     {
             c(i).complete_mult();
     }
-
 }
+
 
 
 
