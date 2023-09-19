@@ -165,19 +165,23 @@ if constexpr(id != PSELF)
 #if PARTY == 0
     if constexpr(id == P_1)
     {
+    receive_from_(P_1);
     store_compare_view_init(P_2);
     }
     else if constexpr(id == P_2)
     {
+    receive_from_(P_2);
     store_compare_view_init(P_1);
     }
     else // id == P_3
     {
+    receive_from_(P_3);
     store_compare_view_init(P_1);
     }
 #elif PARTY == 1
     if constexpr(id == P_0)
     {
+    receive_from_(P_0);
     store_compare_view_init(P_2);
     }
     else if constexpr(id == P_2)
