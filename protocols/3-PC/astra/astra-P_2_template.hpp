@@ -66,7 +66,7 @@ void prepare_receive_from(func_add ADD, func_sub SUB)
 {
 if constexpr(id == P_0)
 {
-    #if OPTIMIZED_SHARING == 0
+    #if OPT_SHARE == 0
         lv = getRandomVal(P_0);
     #endif
 }
@@ -83,7 +83,7 @@ void complete_receive_from(func_add ADD, func_sub SUB)
 {
 if constexpr(id == P_0)
 {
-#if OPTIMIZED_SHARING == 1
+#if OPT_SHARE == 1
         mv = SET_ALL_ZERO(); //Check options 
         lv = receive_from_live(P_0);
 #else

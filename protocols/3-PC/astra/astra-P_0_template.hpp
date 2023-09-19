@@ -65,7 +65,7 @@ void prepare_receive_from(func_add ADD, func_sub SUB)
 {
 if constexpr(id == P_0)
 {
-#if OPTIMIZED_SHARING == 1
+#if OPT_SHARE == 1
     v = get_input_live(); 
     DATATYPE lx1 = getRandomVal(P_1);
     send_to_live(P_2, ADD(v,lx1));

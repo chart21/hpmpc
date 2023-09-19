@@ -14,6 +14,11 @@ public:
     {
         return XOR_Share(Share_Type::Not());
     }
+    
+    XOR_Share operator!() const
+    {
+        return XOR_Share(Share_Type::Not());
+    }
 
     XOR_Share operator^(const XOR_Share<Datatype,Share_Type>& b) const
     {
