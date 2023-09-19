@@ -1,11 +1,9 @@
 #pragma once
-#include "oecl_base.hpp"
-#include <cstdint>
+#include "../../generic_share.hpp"
 template <typename Datatype>
 class OECL0_init 
 {
 public:
-static constexpr int VALS_PER_SHARE = 1;
 OECL0_init() {}
 
 

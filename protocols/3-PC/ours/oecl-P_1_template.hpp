@@ -1,5 +1,5 @@
 #pragma once
-#include "oecl_base.hpp"
+#include "../../generic_share.hpp"
 template <typename Datatype>
 class OECL1_Share
 {
@@ -50,7 +50,7 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-DATATYPE maskP_1 = getRandomVal(P_0);
+Datatype maskP_1 = getRandomVal(P_0);
 
 p1 = SUB(p1, maskP_1); // - ab_1 - e_1 - r0,1
 p2 = getRandomVal(P_0); // r0,1_2
@@ -196,7 +196,7 @@ static void complete_A2B_S2(OECL1_Share out[])
 
 void prepare_bit_injection_S1(OECL1_Share out[])
 {
-    DATATYPE temp[BITLENGTH]{0};
+    Datatype temp[BITLENGTH]{0};
     temp[BITLENGTH - 1] = FUNC_XOR(p1,p2);
     unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
     orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);

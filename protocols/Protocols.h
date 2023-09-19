@@ -185,7 +185,7 @@
             #define PROTOCOL_PRE -1
         #endif
         #if PARTY == 3
-            #define PROTOCOL_PRE OEC_MAL3
+            #define PROTOCOL_PRE OEC_MAL3_Share
             #include "4-PC/ours/oec-mal-P_3_template.hpp"
         #endif
 #endif
@@ -213,25 +213,25 @@
             /*     #define PROTOCOL_LIVE OEC_MAL0_POST */
             /*     #include "oec-mal-P_0-post_template.hpp" */
             /* #else */
-                #define PROTOCOL_LIVE OEC_MAL0
+                #define PROTOCOL_LIVE OEC_MAL0_Share
                 #include "4-PC/ours/oec-mal-P_0_template.hpp"
             /* #endif */
         #endif
         #if PARTY == 1
-            #define PROTOCOL_LIVE OEC_MAL1
+            #define PROTOCOL_LIVE OEC_MAL1_Share
             #include "4-PC/ours/oec-mal-P_1_template.hpp"
         #endif
         #if PARTY == 2
-            #define PROTOCOL_LIVE OEC_MAL2
+            #define PROTOCOL_LIVE OEC_MAL2_Share
             #include "4-PC/ours/oec-mal-P_2_template.hpp"
         #endif
         #if PARTY == 3
             #if PRE == 1
-                #define PROTOCOL_LIVE OEC_MAL3_POST
+                #define PROTOCOL_LIVE OEC_MAL3_POST_Share
                 /* #define HAS_POST_PROTOCOL 1 */
                 #include "4-PC/ours/oec-mal-P_3-post_template.hpp"
             #else
-                #define PROTOCOL_LIVE OEC_MAL3
+                #define PROTOCOL_LIVE OEC_MAL3_Share
                 #include "4-PC/ours/oec-mal-P_3_template.hpp"
             #endif
         #endif

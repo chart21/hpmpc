@@ -1,69 +1,73 @@
 #pragma once
-#include "oec-mal_base.hpp"
-class OEC_MAL3_POST
+#include "../../generic_share.hpp"
+template <typename Datatype>
+class OECL_MAL3_POST_Share
 {
-bool optimized_sharing;
+private:
+    Datatype r0;
+    Datatype r1;
 public:
-OEC_MAL3_POST(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
+    
+OECL_MAL3_POST_Share() {}
+OECL_MAL3_POST_Share(Datatype r0, Datatype r1) : r0(r0), r1(r1) {}
+OECL_MAL3_POST_Share(Datatype r0) : r0(r0) {}
 
-Dealer_Share public_val(DATATYPE a)
+
+    
+
+OECL_MAL3_POST_Share public_val(Datatype a)
 {
-    return Dealer_Share(SET_ALL_ZERO(),SET_ALL_ZERO());
+    return OECL_MAL3_POST_Share();
 }
 
-Dealer_Share Not(Dealer_Share a)
+OECL_MAL3_POST_Share Not() const
 {
-   return a;
+    return OECL_MAL3_POST_Share();
 }
-
 
 template <typename func_add>
-Dealer_Share Add(Dealer_Share a, Dealer_Share b, func_add ADD)
+OECL_MAL3_POST_Share Add(OECL_MAL3_POST_Share b, func_add ADD) const
 {
-    return a;
+    return OECL_MAL3_POST_Share();
 }
 
+
+
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(Dealer_Share a, Dealer_Share b, Dealer_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+    OECL_MAL3_POST_Share prepare_mult(OECL_MAL3_POST_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
+    return OECL_MAL3_POST_Share();
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(Dealer_Share &c, func_add ADD, func_sub SUB)
+void complete_mult(func_add ADD, func_sub SUB)
 {
 }
 
-void prepare_reveal_to_all(Dealer_Share a)
+
+void prepare_reveal_to_all()
 {
 }    
 
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(Dealer_Share a, func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
-
-DATATYPE result = SUB(receive_from_live(P_0),retrieve_output_share());
+Datatype result = SUB(receive_from_live(P_0),retrieve_output_share());
 store_compare_view(P_123, retrieve_output_share());
 store_compare_view(P_0123, result);
 return result;
 }
 
 
-Dealer_Share* alloc_Share(int l)
-{
-    return new Dealer_Share[l];
-}
 
+template <int id, typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
+{}
 
-template <typename func_add, typename func_sub>
-void prepare_receive_from(Dealer_Share a[], int id, int l, func_add ADD, func_sub SUB)
-{
-}
-
-template <typename func_add, typename func_sub>
-void complete_receive_from(Dealer_Share a[], int id, int l, func_add ADD, func_sub SUB)
-{
-}
+template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
+{}
 
 
 
@@ -84,3 +88,5 @@ void communicate()
 }
 
 };
+
+

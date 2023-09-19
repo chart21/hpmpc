@@ -1,10 +1,10 @@
 #pragma once
 
-template <typename Datatype>
-class OECL0_Share;
+/* template <typename Datatype> */
+/* class OECL0_Share; */
 
-template <typename Datatype>
-class OECL0_init;
+/* template <typename Datatype> */
+/* class OECL0_init; */
 
 
 

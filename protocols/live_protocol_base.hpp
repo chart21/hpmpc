@@ -178,9 +178,9 @@ void compare_views() {
     #else
         int hash_chunks_to_send = (sizeof(uint32_t) * 8) / sizeof(DATATYPE);
 #endif
-    DATATYPE val_to_send[num_players*multiplier][hash_chunks_to_send];
-    DATATYPE val_recieved[num_players*multiplier][hash_chunks_to_send];
-    for (int player_id = 0; player_id < num_players*multiplier; player_id++) {
+    DATATYPE val_to_send[num_players*player_multiplier][hash_chunks_to_send];
+    DATATYPE val_recieved[num_players*player_multiplier][hash_chunks_to_send];
+    for (int player_id = 0; player_id < num_players*player_multiplier; player_id++) {
         if (elements_to_compare[player_id] > 0) {
             perform_compare_view(player_id);
             // exchange 1 sha256 hash. Do to DATATYPE constraints it may need to be
@@ -262,7 +262,7 @@ void compare_views() {
         }
     }
     communicate_live();
-    for (int player_id = 0; player_id < num_players*multiplier; player_id++) {
+    for (int player_id = 0; player_id < num_players*player_multiplier; player_id++) {
 
         if (elements_to_compare[player_id] > 0) {
             bool verified = true;

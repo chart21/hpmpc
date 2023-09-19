@@ -1,31 +1,38 @@
 #pragma once
 #include "../../generic_share.hpp"
+template <typename Datatype>
 class OEC_MAL2_init
 {
-bool optimized_sharing;
 public:
-OEC_MAL2_init(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
+OEC_MAL2_init() {}
 
 
 
-XOR_Share public_val(DATATYPE a)
+OEC_MAL2_init public_val(Datatype a)
 {
-    return a;
+    return OEC_MAL2_init();
 }
 
-DATATYPE Not(DATATYPE a)
+OEC_MAL2_init Not() const
 {
-   return a;
+    return OEC_MAL2_init();
 }
 
 template <typename func_add>
-DATATYPE Add(DATATYPE a, DATATYPE b, func_add ADD)
+OEC_MAL2_init Add(OEC_MAL2_init b, func_add ADD) const
 {
-    return a;
+   return OEC_MAL2_init();
+}
+    
+template <typename func_add, typename func_sub, typename func_mul>
+OEC_MAL2_init prepare_dot(const OEC_MAL2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    return OEC_MAL2_init();
 }
 
+
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c, func_add ADD, func_sub SUB, func_mul MULT)
+    OEC_MAL2_init prepare_mult(OEC_MAL2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 #if PROTOCOL == 12 || PROTOCOL == 8
 store_compare_view_init(P_0);
@@ -48,10 +55,11 @@ send_to_(P_0);
 #endif
 
 //return u[player_id] * v[player_id];
+return OEC_MAL2_init();
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(DATATYPE &c, func_add ADD, func_sub SUB)
+void complete_mult(func_add ADD, func_sub SUB)
 {
     receive_from_(P_1);
 #if PROTOCOL == 11
@@ -68,13 +76,13 @@ store_compare_view_init(P_012);
 #endif
 }
 
-void prepare_reveal_to_all(DATATYPE a)
+void prepare_reveal_to_all()
 {
 }    
 
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(DATATYPE a, func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
 receive_from_(P_0);
 #if PROTOCOL == 8
@@ -89,48 +97,38 @@ receive_from_(P_0);
     store_compare_view_init(P_123);
     store_compare_view_init(P_0123);
 #endif
-return a;
+Datatype dummy;
+return dummy;
 }
 
 
-XOR_Share* alloc_Share(int l)
-{
-    return new DATATYPE[l];
-}
 
-template <typename func_add, typename func_sub>
-void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == PSELF)
+if constexpr(id == PSELF)
 {
-    for(int i = 0; i < l; i++)
-    {
         send_to_(P_0);
         send_to_(P_1);
-    }
-
 }
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
+    template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-    if(id != PSELF)
+    if constexpr(id != PSELF)
     {
-        for(int i = 0; i < l; i++)
 #if PRE == 1
-            if(id == P_3)
+            if constexpr(id == P_3)
                 pre_receive_from_(P_3);
             else
                 receive_from_(id);
 #else
             receive_from_(id);
 #endif
-        if(id != P_0)
-            for(int i = 0; i < l; i++)
+        if constexpr(id != P_0)
                 store_compare_view_init(P_0);
-        if(id != P_1)
-            for(int i = 0; i < l; i++)
+        if constexpr(id != P_1)
                 store_compare_view_init(P_1);
     }
 }
@@ -139,25 +137,25 @@ void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub S
 
 
 
-void send()
+static void send()
 {
 send_();
 }
-void receive()
+static void receive()
 {
     receive_();
 }
-void communicate()
+static void communicate()
 {
 communicate_();
 }
 
-void finalize(std::string* ips)
+static void finalize(std::string* ips)
 {
     finalize_(ips);
 }
 
-void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
+static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
 {
     finalize_(ips, ra, sa);
 }

@@ -1,8 +1,5 @@
 #pragma once
-#include "../sharemind/sharemind_base.hpp"
-/* #include "../../../datatypes/k_bitset.hpp" */
-/* #include "../../../datatypes/k_sint.hpp" */
-//#include "oecl_base.hpp"
+#include "../../generic_share.hpp"
 template <typename Datatype>
 class OECL2_Share
 {
@@ -205,7 +202,7 @@ static void complete_A2B_S2(OECL2_Share out[])
 
 void prepare_bit_injection_S1(OECL2_Share out[])
 {
-    DATATYPE temp[BITLENGTH]{0};
+    Datatype temp[BITLENGTH]{0};
     temp[BITLENGTH - 1] = FUNC_XOR(p1,p2);
     unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
     orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);

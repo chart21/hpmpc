@@ -1,5 +1,5 @@
 #pragma once
-#include "oecl_base.hpp"
+#include "../../generic_share.hpp"
 #define PRE_SHARE OECL0_Share
 /* #define VALS_PER_SHARE 2 */
 #define SHARE OECL0_Share
@@ -13,7 +13,7 @@ private:
     Datatype p1;
     Datatype p2;
     public:
-    static constexpr int VALS_PER_SHARE = 2;
+    //static constexpr int VALS_PER_SHARE = 2;
 
     OECL0_Share() {}
     OECL0_Share(Datatype p1, Datatype p2) : p1(p1), p2(p2) {}
@@ -61,9 +61,9 @@ return c;
 template <typename func_add, typename func_sub>
 void mask_and_send_dot(func_add ADD, func_sub SUB)
 {
-DATATYPE maskP_1 = getRandomVal(P_1);
-DATATYPE maskP_1_2 = getRandomVal(P_1);
-DATATYPE maskP_2 = getRandomVal(P_2);
+Datatype maskP_1 = getRandomVal(P_1);
+Datatype maskP_1_2 = getRandomVal(P_1);
+Datatype maskP_2 = getRandomVal(P_2);
 #if PRE == 1
 pre_send_to_live(P_2, ADD(p1,maskP_1));
 #else
@@ -80,9 +80,9 @@ void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-DATATYPE maskP_1 = getRandomVal(P_1);
-DATATYPE maskP_1_2 = getRandomVal(P_1);
-DATATYPE maskP_2 = getRandomVal(P_2);
+Datatype maskP_1 = getRandomVal(P_1);
+Datatype maskP_1_2 = getRandomVal(P_1);
+Datatype maskP_2 = getRandomVal(P_2);
 
 p1 = ADD( TRUNC(ADD(ADD(p1,maskP_1),maskP_2)), maskP_1_2); // (e + r0,1 + r0,2)^t + r0,1_2
 p2 = SUB(SET_ALL_ZERO(),maskP_1_2); // - r0,1_2
@@ -257,7 +257,7 @@ void prepare_bit_injection_S1(OECL0_Share out[])
 
 void prepare_bit_injection_S2(OECL0_Share out[])
 {
-    DATATYPE temp[BITLENGTH]{0};
+    Datatype temp[BITLENGTH]{0};
     temp[BITLENGTH - 1] = FUNC_XOR(p1,p2);
     unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
     orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);

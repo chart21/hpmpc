@@ -1,5 +1,5 @@
 #pragma once
-#include "../sharemind/sharemind_base.hpp"
+#include "../../generic_share.hpp"
 template <typename Datatype>
 class OECL1_init
 {

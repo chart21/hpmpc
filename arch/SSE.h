@@ -13,7 +13,7 @@
 #include <wmmintrin.h>
 #include "../config.h"
 #ifndef SSE
-#define SSE
+#define SSE_DAT
 #endif
 
 #ifndef BITS_PER_REG

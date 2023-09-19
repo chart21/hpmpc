@@ -85,7 +85,7 @@ void compare_views_init()
                 #else
         int hash_chunks_to_send = (sizeof(uint32_t) * 8) / sizeof(DATATYPE);
                 #endif
-    for(int player_id = 0; player_id < num_players*multiplier; player_id++)
+    for(int player_id = 0; player_id < num_players*player_multiplier; player_id++)
     {
             if(elements_to_compare[player_id] > 0)
             {
@@ -149,7 +149,7 @@ void compare_views_init()
         
     communicate_(); //TODO: check compatability with Preprocessing
 
-        for(int player_id = 0; player_id < num_players*multiplier; player_id++)
+        for(int player_id = 0; player_id < num_players*player_multiplier; player_id++)
     {
             if(elements_to_compare[player_id] > 0)
             {
@@ -255,7 +255,7 @@ for(int t=0;t<(num_players-1);t++) {
 }
 
 #if MAL == 1
-for(int t=0;t<(num_players*multiplier);t++) {
+for(int t=0;t<(num_players*player_multiplier);t++) {
 #if VERIFY_BUFFER > 0
     verify_buffer[t] = new DATATYPE[VERIFY_BUFFER];
 #else

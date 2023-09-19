@@ -1,45 +1,59 @@
 #pragma once
-#include "oec-mal_base.hpp"
-class OEC_MAL1
+#include "../../generic_share.hpp"
+template <typename Datatype>
+class OEC_MAL1_Share
 {
-bool optimized_sharing;
-public:
-OEC_MAL1(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
 
-OEC_MAL_Share public_val(DATATYPE a)
+private:
+    Datatype v;
+    Datatype r;
+#if PROTOCOL == 11
+    Datatype m;
+#endif
+
+public:
+    
+OEC_MAL1_Share() {}
+OEC_MAL1_Share(Datatype v, Datatype r) : v(v), r(r) {}
+OEC_MAL1_Share(Datatype v) : v(v) {}
+
+
+OEC_MAL1_Share public_val(Datatype a)
 {
-    return OEC_MAL_Share(a,SET_ALL_ZERO());
+    return OEC_MAL1_Share(a,SET_ALL_ZERO());
 }
 
-OEC_MAL_Share Not(OEC_MAL_Share a)
+OEC_MAL1_Share Not() const
 {
-   a.v = NOT(a.v);
-   return a;
+   return OEC_MAL1_Share(NOT(v),r);
 }
 
 template <typename func_add>
-OEC_MAL_Share Add(OEC_MAL_Share a, OEC_MAL_Share b, func_add ADD)
+OEC_MAL1_Share Add(OEC_MAL1_Share b, func_add ADD) const
 {
-    return OEC_MAL_Share(ADD(a.v,b.v),ADD(a.r,b.r));
+   return OEC_MAL1_Share(ADD(v,b.v),ADD(r,b.r));
 }
 
+
+
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(OEC_MAL_Share a, OEC_MAL_Share b , OEC_MAL_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+    OEC_MAL1_Share prepare_mult(OEC_MAL1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-/* DATATYPE cr = XOR(getRandomVal(P_013),getRandomVal(P_123)); */
+/* Datatype cr = XOR(getRandomVal(P_013),getRandomVal(P_123)); */
 /* c.r = SUB(getRandomVal(P_013),getRandomVal(P_123)); */
+OEC_MAL1_Share c;
 c.r = getRandomVal(P_013);
-DATATYPE r124 = getRandomVal(P_013);
-/* DATATYPE r234 = getRandomVal(P_123); //used for veryfying m3' sent by P_3 -> probably not needed -> for verification needed */
-c.v = ADD( ADD(MULT(a.v,b.r), MULT(b.v,a.r))  , r124);  
-/* DATATYPE m_2 = XOR(c.v, c.r); */
+Datatype r124 = getRandomVal(P_013);
+/* Datatype r234 = getRandomVal(P_123); //used for veryfying m3' sent by P_3 -> probably not needed -> for verification needed */
+c.v = ADD( ADD(MULT(v,b.r), MULT(b.v,r))  , r124);  
+/* Datatype m_2 = XOR(c.v, c.r); */
 send_to_live(P_2,c.v);
 
-/* DATATYPE m3_prime = XOR( XOR(r234,cr) , AND( XOR(a.v,a.r) ,XOR(b.v,b.r))); //computationally wise more efficient to verify ab instead of m_3 prime */
+/* Datatype m3_prime = XOR( XOR(r234,cr) , AND( XOR(a.v,a.r) ,XOR(b.v,b.r))); //computationally wise more efficient to verify ab instead of m_3 prime */
 
 /* store_compare_view(P_0,m3_prime); */
 /* c.m = ADD(c.v,getRandomVal(P_123)); */
-DATATYPE a1b1 = MULT(a.v,b.v);
+Datatype a1b1 = MULT(v,b.v);
 #if PROTOCOL == 10 || PROTOCOL == 12
 store_compare_view(P_0,ADD(a1b1,getRandomVal(P_123_2))); // compare a1b1 + r123_2 with P_0
 #endif
@@ -49,137 +63,117 @@ c.m = ADD(c.v,getRandomVal(P_123_2)); // m_2 + r234_2 store to compareview later
 #endif
 
 c.v = SUB( a1b1,c.v);
-
+return c;
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(OEC_MAL_Share &c, func_add ADD, func_sub SUB)
+void complete_mult(func_add ADD, func_sub SUB)
 {
-DATATYPE m_3 = receive_from_live(P_2);
-c.v = SUB(c.v, m_3);
+Datatype m_3 = receive_from_live(P_2);
+v = SUB(v, m_3);
 
 /* c.m = XOR(c.m,m_3); */
-/* DATATYPE cm = XOR(c.m,m_3); */
+/* Datatype cm = XOR(c.m,m_3); */
 
 #if PROTOCOL == 11
-store_compare_view(P_0,ADD(c.m,m_3)); // compare m_2 + m_3 + r234_2
-store_compare_view(P_0,ADD(c.v,getRandomVal(P_123))); //compare ab + c1 + r234_1
+store_compare_view(P_0,ADD(m,m_3)); // compare m_2 + m_3 + r234_2
+store_compare_view(P_0,ADD(v,getRandomVal(P_123))); //compare ab + c1 + r234_1
 #else
-store_compare_view(P_012,ADD(c.v,getRandomVal(P_123))); //compare ab + c1 + r234_1
+store_compare_view(P_012,ADD(v,getRandomVal(P_123))); //compare ab + c1 + r234_1
 #endif
 }
 
 
-void prepare_reveal_to_all(OEC_MAL_Share a)
+void prepare_reveal_to_all()
 {
 return;
 }    
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(OEC_MAL_Share a, func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
-DATATYPE r = receive_from_live(P_0);
-DATATYPE result = SUB(a.v, r);
+Datatype r = receive_from_live(P_0);
+Datatype result = SUB(v, r);
 store_compare_view(P_123, r);
 store_compare_view(P_0123, result);
 return result;
 }
 
 
-OEC_MAL_Share* alloc_Share(int l)
-{
-    return new OEC_MAL_Share[l];
-}
 
-
-template <typename func_add, typename func_sub>
-void prepare_receive_from(OEC_MAL_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == PSELF)
-{
-for(int i = 0; i < l; i++)
+if constexpr(id == PSELF)
 {
     
-    DATATYPE x_0 = getRandomVal(P_013);
-    DATATYPE u = getRandomVal(P_123);
-    a[i].r = x_0; //  = x_1, x_2 = 0
-    a[i].v = ADD(get_input_live(),x_0);
-    send_to_live(P_0,ADD(a[i].v,u));
-    send_to_live(P_2,ADD(a[i].v,u));
+    Datatype x_0 = getRandomVal(P_013);
+    Datatype u = getRandomVal(P_123);
+    r = x_0; //  = x_1, x_2 = 0
+    v = ADD(get_input_live(),x_0);
+    send_to_live(P_0,ADD(v,u));
+    send_to_live(P_2,ADD(v,u));
+
 }
-}
-else if(id == P_0)
+else if constexpr(id == P_0)
 {
-for(int i = 0; i < l; i++)
-{
-    a[i].r = getRandomVal(P_013);
-    a[i].v = SET_ALL_ZERO();
+    r = getRandomVal(P_013);
+    v = SET_ALL_ZERO();
     // u = 0
+
 }
-}
-else if(id == P_2)
+else if constexpr(id == P_2)
 {
-for(int i = 0; i < l; i++)
-{
-    a[i].r = SET_ALL_ZERO();
-    a[i].v = getRandomVal(P_123); //u
+    r = SET_ALL_ZERO();
+    v = getRandomVal(P_123); //u
     
   
+
 }
-}
-else if(id == P_3)
+else if constexpr(id == P_3)
 {
-for(int i = 0; i < l; i++)
-{
-    a[i].r = getRandomVal(P_013); //x1
-    a[i].v = getRandomVal(P_123); //u
+    r = getRandomVal(P_013); //x1
+    v = getRandomVal(P_123); //u
 
     
-}
+
 }
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(OEC_MAL_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-if(id != PSELF)
+if constexpr(id != PSELF)
 {
-    for(int i = 0; i < l; i++)
-    {
             #if PRE == 1
-        DATATYPE val;
+        Datatype val;
         if(id == P_3)
             val = pre_receive_from_live(P_3);
         else
             val = receive_from_live(id);
     #else
-    DATATYPE val = receive_from_live(id);
+    Datatype val = receive_from_live(id);
     #endif
 
-    if(id != P_0)
+    if constexpr(id != P_0)
             store_compare_view(P_0,val);
-    if(id != P_2)
+    if constexpr(id != P_2)
             store_compare_view(P_2,val);
-    a[i].v = SUB(val,a[i].v); // convert locally to a + x_0
-    }
-    
-
-
-
+    v = SUB(val,v); // convert locally to a + x_0
 }
 }
 
-void send()
+static void send()
 {
     send_live();
 }
 
-void receive()
+static void receive()
 {
     receive_live();
 }
 
-void communicate()
+static void communicate()
 {
     communicate_live();
 }
