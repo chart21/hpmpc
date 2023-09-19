@@ -1,128 +1,112 @@
 #pragma once
-#include "astra_base.hpp"
-class ASTRA0
+#include "../../generic_share.hpp"
+template <typename Datatype>
+class ASTRA0_Share
 {
-bool optimized_sharing;
-public:
-ASTRA0(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
+private:
+Datatype v;
 
-Coordinator_Share public_val(DATATYPE a)
+public:
+
+ASTRA0_Share()  {}
+ASTRA0_Share(Datatype a) { v = a; }
+
+ASTRA0_Share public_val(DATATYPE a)
 {
-    return SET_ALL_ZERO();
+    return ASTRA0_Share(a);
 }
 
-Coordinator_Share Not(Coordinator_Share a)
+ASTRA0_Share Not() const
 {
-   return a;
+   return *this;
 }
 
 template <typename func_add>
-Coordinator_Share Add(Coordinator_Share a, Coordinator_Share b, func_add ADD)
+ASTRA0_Share Add( ASTRA0_Share b, func_add ADD) const
 {
-   return ADD(a,b);
+   return ASTRA0_Share(ADD(v,b.v));
 }
 
 
 
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(Coordinator_Share a, Coordinator_Share b, Coordinator_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+    ASTRA0_Share prepare_mult(ASTRA0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-DATATYPE yxy = MULT(a,b);
-c = ADD(getRandomVal(P_1),getRandomVal(P_2)); //yz
+ASTRA0_Share c;
+DATATYPE yxy = MULT(v,b.v);
+c.v = ADD(getRandomVal(P_1),getRandomVal(P_2)); //yz
 DATATYPE yxy2 = SUB(yxy,getRandomVal(P_1)); //yxy,2
 send_to_live(P_2, yxy2);
+return c;
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(Coordinator_Share &c, func_add ADD, func_sub SUB)
-{
-}
+void complete_mult(func_add ADD, func_sub SUB){}
 
-void prepare_reveal_to_all(Coordinator_Share a)
+
+void prepare_reveal_to_all()
 {
-    send_to_live(P_1, a);
-    send_to_live(P_2, a);
+    send_to_live(P_1, v);
+    send_to_live(P_2, v);
 }    
 
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(Coordinator_Share a, func_add ADD, func_sub SUB)
+DATATYPE complete_Reveal(func_add ADD, func_sub SUB)
 {
-return SUB(receive_from_live(P_2),a);
+return SUB(receive_from_live(P_2),v);
 }
 
 
-Coordinator_Share* alloc_Share(int l)
-{
-    return new Coordinator_Share[l];
-}
 
 
-template <typename func_add, typename func_sub>
-void prepare_receive_from(Coordinator_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == P_0)
+if constexpr(id == P_0)
 {
-    if(optimized_sharing == true)
-    {
-    for(int i = 0; i < l; i++)
-    {
-    a[i] = get_input_live(); 
+#if OPTIMIZED_SHARING == 1
+    v = get_input_live(); 
     DATATYPE lx1 = getRandomVal(P_1);
-    send_to_live(P_2, ADD(a[i],lx1));
-    }
+    send_to_live(P_2, ADD(v,lx1));
 
-    }
-    else
-    {
-    for(int i = 0; i < l; i++)
-    {
+#else
     DATATYPE lv1 = getRandomVal(P_1); 
     DATATYPE lv2 = getRandomVal(P_2);
-    a[i] = ADD(lv1,lv2);// lv
-    DATATYPE mv = ADD(a[i],get_input_live());
+    v = ADD(lv1,lv2);// lv
+    DATATYPE mv = ADD(v,get_input_live());
     send_to_live(P_1, mv);
     send_to_live(P_2, mv);
-    }
-
-    }
+#endif
 }
-else if(id == P_1){
-for(int i = 0; i < l; i++)
-    {
-    a[i] = getRandomVal(P_1);
-    
-    }
+else if constexpr(id == P_1){
+    v = getRandomVal(P_1);
 
 
 }
-else if(id == P_2)// id ==2
+else if constexpr(id == P_2)// id ==2
 {
-    for(int i = 0; i < l; i++)
-    {
-        a[i] = getRandomVal(P_2);
-    }
+        v = getRandomVal(P_2);
 
 }
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(Coordinator_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-    return;
 }
 
-void send()
+static void send()
 {
     send_live();
 }
 
-void receive()
+static void receive()
 {
     receive_live();
 }
 
-void communicate()
+static void communicate()
 {
     communicate_live();
 }

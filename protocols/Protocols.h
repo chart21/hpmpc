@@ -24,7 +24,7 @@
 #define OEC_mal_het 11
 #define OEC_mal_OffOn 12
 #if PROTOCOL == rep3 
-    #define PROTOCOL_LIVE Replicated
+    #define PROTOCOL_LIVE Replicated_Share
     #define PROTOCOL_INIT Replicated_init
     #if INIT == 1 
         #include "3-PC/replicated/replicated_init_template.hpp"
@@ -58,15 +58,15 @@
     #endif
     #if LIVE == 1 
         #if PARTY == 0
-            #define PROTOCOL_LIVE ASTRA0
+            #define PROTOCOL_LIVE ASTRA0_Share
             #include "3-PC/astra/astra-P_0_template.hpp"
         #endif
         #if PARTY == 1
-            #define PROTOCOL_LIVE ASTRA1
+            #define PROTOCOL_LIVE ASTRA1_Share
             #include "3-PC/astra/astra-P_1_template.hpp"
         #endif
         #if PARTY == 2
-            #define PROTOCOL_LIVE ASTRA2
+            #define PROTOCOL_LIVE ASTRA2_Share
             #include "3-PC/astra/astra-P_2_template.hpp"
         #endif
     #endif
@@ -261,20 +261,20 @@
             /*     #define PROTOCOL_LIVE OEC_MAL0_POST */
             /*     #include "oec-mal-P_0-post_template.hpp" */
             /* #else */
-                #define PROTOCOL_LIVE Tetrad0
+                #define PROTOCOL_LIVE Tetrad0_Share
                 #include "4-PC/tetrad/Tetrad-P_0_template.hpp"
             /* #endif */
         #endif
         #if PARTY == 1
-            #define PROTOCOL_LIVE Tetrad1
+            #define PROTOCOL_LIVE Tetrad1_Share
             #include "4-PC/tetrad/Tetrad-P_1_template.hpp"
         #endif
         #if PARTY == 2
-            #define PROTOCOL_LIVE Tetrad2
+            #define PROTOCOL_LIVE Tetrad2_Share
             #include "4-PC/tetrad/Tetrad-P_2_template.hpp"
         #endif
         #if PARTY == 3
-                #define PROTOCOL_LIVE Tetrad3
+                #define PROTOCOL_LIVE Tetrad3_Share
                 #include "4-PC/tetrad/Tetrad-P_3_template.hpp"
         #endif
     #endif
@@ -284,7 +284,7 @@
             #include "4-PC/fantastic/Fantastic_init_template.hpp"
     #endif
     #if LIVE == 1
-            #define PROTOCOL_LIVE Fantastic_Four
+            #define PROTOCOL_LIVE Fantastic_Four_Share
             #include "4-PC/fantastic/Fantastic_Four_template.hpp"
     #endif
 

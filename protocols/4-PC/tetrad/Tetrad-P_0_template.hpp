@@ -1,42 +1,52 @@
 #pragma once
-#include "tetrad_base.hpp"
-#define PRE_SHARE Tetrad_Share
-class Tetrad0
+#include "../../generic_share.hpp"
+#define PRE_SHARE Tetrad0_Share
+template <typename Datatype>
+class Tetrad0_Share
 {
-bool optimized_sharing;
+private:
+    DATATYPE mv;
+    DATATYPE l0;
+    DATATYPE l1;
+    DATATYPE storage; // used for storing results needed later
 public:
-Tetrad0(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
 
-Tetrad_Share public_val(DATATYPE a)
+Tetrad0_Share()  {}
+
+Tetrad0_Share(DATATYPE a, DATATYPE b, DATATYPE c) 
 {
-    return Tetrad_Share(a,SET_ALL_ZERO(),SET_ALL_ZERO());
+    mv = a;
+    l0 = b;
+    l1 = c;
 }
 
-Tetrad_Share Not(Tetrad_Share a)
+Tetrad0_Share public_val(DATATYPE a)
 {
-   return Tetrad_Share(NOT(a.mv),a.l0,a.l1);
+    return Tetrad0_Share(a,SET_ALL_ZERO(),SET_ALL_ZERO());
+}
+
+Tetrad0_Share Not() const
+{
+   return Tetrad0_Share(NOT(mv),l0,l1);
 }
 
 template <typename func_add>
-Tetrad_Share Add(Tetrad_Share a, Tetrad_Share b, func_add ADD)
+Tetrad0_Share Add(Tetrad0_Share b, func_add ADD) const
 {
-    a.mv = ADD(a.mv,b.mv);
-    a.l0 = ADD(a.l0,b.l0);
-    a.l1 = ADD(a.l1,b.l1);
-   return a;
+    return Tetrad0_Share(ADD(mv,b.mv),ADD(l0,b.l0),ADD(l1,b.l1));
 }
 
 
 
-//prepare AND -> send real value a&b to other P
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(Tetrad_Share a, Tetrad_Share b, Tetrad_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+    Tetrad0_Share prepare_mult(Tetrad0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-DATATYPE y3ab = ADD( ADD(MULT(a.l0,b.l1),MULT(a.l1,b.l0)), MULT(a.l0,a.l0));
+Tetrad0_Share c;
+DATATYPE y3ab = ADD( ADD(MULT(l0,b.l1),MULT(l1,b.l0)), MULT(l0,l0));
 DATATYPE u1 = getRandomVal(P_013);
 DATATYPE u2 = getRandomVal(P_023);
 DATATYPE r = SUB(y3ab, ADD(u1,u2));
-Tetrad_Share q;
+Tetrad0_Share q;
 
 //q:
 c.mv = SET_ALL_ZERO();
@@ -46,19 +56,21 @@ store_compare_view(P_2, c.l0); // verify if P_2 gets correct value from P_3
 
 DATATYPE v = ADD(u1,u2);
 
-v = SUB( v, ADD( MULT( ADD(a.l0,a.l1), b.mv) , MULT ( ADD(b.l0,b.l1), a.mv)));
+v = SUB( v, ADD( MULT( ADD(l0,l1), b.mv) , MULT ( ADD(b.l0,b.l1), mv)));
 c.mv = v; //Trick, can be set to zero later on
+return c;
 }
 
+
 template <typename func_add, typename func_sub>
-void complete_mult(Tetrad_Share &c, func_add ADD, func_sub SUB)
+void complete_mult(func_add ADD, func_sub SUB)
 {
     DATATYPE w = receive_from_live(P_3);
-    c.mv = ADD(c.mv,w);
-    store_compare_view(P_012,c.mv);
-    c.mv = SET_ALL_ZERO(); //restore actual value of c.mv
+    mv = ADD(mv,w);
+    store_compare_view(P_012,mv);
+    mv = SET_ALL_ZERO(); //restore actual value of c.mv
 
-    Tetrad_Share p; 
+    Tetrad0_Share p; 
     p.l0 = SET_ALL_ZERO(); //lambda1
     p.l1 = SET_ALL_ZERO(); //lambda2
     p.mv = receive_from_live(P_2);
@@ -66,126 +78,94 @@ void complete_mult(Tetrad_Share &c, func_add ADD, func_sub SUB)
     
 
     //o = p + q
-    c.mv = ADD(c.mv,p.mv);
-    c.l0 = ADD(c.l0,p.l0);
-    c.l1 = ADD(c.l1,p.l1);
+    mv = ADD(mv,p.mv);
+    l0 = ADD(l0,p.l0);
+    l1 = ADD(l1,p.l1);
 }
 
 
 
-void prepare_reveal_to_all(Tetrad_Share a)
+void prepare_reveal_to_all()
 {
 #if PRE == 0
-    send_to_live(P_3, a.mv);
+    send_to_live(P_3, mv);
 #endif
 }    
 
 
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(Tetrad_Share a, func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
     DATATYPE l3 = receive_from_live(P_3);
-    DATATYPE result = SUB(a.mv, l3);
-    result = SUB(result, a.l0);
-    result = SUB(result, a.l1);
+    DATATYPE result = SUB(mv, l3);
+    result = SUB(result, l0);
+    result = SUB(result, l1);
     store_compare_view(P_1, l3); //verify own value
 
-    store_compare_view(P_1, a.l1);  // verify others
-    store_compare_view(P_2, a.l0); 
+    store_compare_view(P_1, l1);  // verify others
+    store_compare_view(P_2, l0); 
     return result;
 }
 
-
-
-Tetrad_Share* alloc_Share(int l)
+template <int id, typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-    return new Tetrad_Share[l];
-}
-
-
-
-template <typename func_add, typename func_sub>
-void prepare_receive_from(Tetrad_Share a[], int id, int l, func_add ADD, func_sub SUB)
+if constexpr(id == PSELF)
 {
-if(id == PSELF)
-{
-    for(int i = 0; i < l; i++)
-    {
-    a[i].mv = get_input_live();
-    a[i].l0 = getRandomVal(P_013); //l1
-    a[i].l1 = getRandomVal(P_023);
+    mv = get_input_live();
+    l0 = getRandomVal(P_013); //l1
+    l1 = getRandomVal(P_023);
     DATATYPE l3 = SET_ALL_ZERO();
-    a[i].mv = ADD( ADD(a[i].mv, l3), ADD(a[i].l0,a[i].l1));
-    send_to_live(P_1, a[i].mv);
-    send_to_live(P_2, a[i].mv);
-
-    
-    
-    } 
+    mv = ADD( ADD(mv, l3), ADD(l0,l1));
+    send_to_live(P_1, mv);
+    send_to_live(P_2, mv);
 }
-else if(id == P_1)
+else if constexpr(id == P_1)
 {
-    for(int i = 0; i < l; i++)
-    {
-    a[i].l0 = getRandomVal(P_013);
-    a[i].l1 = SET_ALL_ZERO();
-    }
+    l0 = getRandomVal(P_013);
+    l1 = SET_ALL_ZERO();
 }
-else if(id == P_2)
+else if constexpr(id == P_2)
 {
-    for(int i = 0; i < l; i++)
-    {
-    a[i].l0 = SET_ALL_ZERO();
-    a[i].l1 = getRandomVal(P_023);
-    }
+    l0 = SET_ALL_ZERO();
+    l1 = getRandomVal(P_023);
 }
-else if(id == P_3)
+else if constexpr(id == P_3)
 {
-    for(int i = 0; i < l; i++)
-    {
-    a[i].l0 = getRandomVal(P_013);
-    a[i].l1 = getRandomVal(P_023);
-    }
+    l0 = getRandomVal(P_013);
+    l1 = getRandomVal(P_023);
 }
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(Tetrad_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-if(id != PSELF)
+if constexpr(id != PSELF)
 {
-    for(int i = 0; i < l; i++)
-    {
-    a[i].mv = receive_from_live(id);
-    }
+    mv = receive_from_live(id);
 
         if(id != P_1)
-            for(int i = 0; i < l; i++)
-                store_compare_view(P_1,a[i].mv);
+                store_compare_view(P_1,mv);
         if(id != P_2)
-            for(int i = 0; i < l; i++)
-                store_compare_view(P_2,a[i].mv);
-
-
-    
+                store_compare_view(P_2,mv);
 }
 }
 
 
 
 
-void send()
+static void send()
 {
     send_live();
 }
 
-void receive()
+static void receive()
 {
     receive_live();
 }
 
-void communicate()
+static void communicate()
 {
 /* #if PRE == 0 */
     communicate_live();

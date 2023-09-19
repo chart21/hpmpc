@@ -1,12 +1,18 @@
 #pragma once
-#include "replicated_base.hpp"
-class Replicated{
-bool input_srngs;
+#include "../../generic_share.hpp"
+template <typename Datatype>
+class Replicated_Share{
+private:
+Datatype x;
+Datatype a;
     public:
-Replicated(bool use_srngs) {input_srngs = use_srngs;}
-Share share_SRNG(DATATYPE a)
+Replicated_Share()  {}
+Replicated_Share(Datatype x) { this->x = x; }
+Replicated_Share(Datatype x, Datatype a) { this->x = x; this->a = a; }
+
+Replicated_Share share_SRNG(Datatype a)
 {
-Share s[3];
+Replicated_Share s[3];
 s[pprev].x = getRandomVal(pprev);
 s[pnext].x = getRandomVal(pnext);
 s[2].x =XOR(s[pprev].x,s[pnext].x);
@@ -19,194 +25,109 @@ send_to_live(pprev, s[pprev].a);
 send_to_live(pnext, s[pnext].a);
 
 return s[2];
-
-
 }
 
-void receive_share_SRNG(Share &s, int player)
+
+
+
+
+
+template <int id, typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-s.a = receive_from_live(player);
-}
-
-Share share(DATATYPE a)
-{
-Share s[3];
-s[pprev].x = getRandomVal(pprev);
-s[pnext].x = getRandomVal(pnext);
-s[2].x = XOR(s[pprev].x,s[pnext].x);
-
-s[pprev].a = XOR(s[pnext].x,a); //xi + x(i-1) + a
-s[pnext].a = XOR(s[2].x,a); //xi + x(i-1) + a
-s[2].a = XOR(s[pprev].x,a); //xi + x(i-1) + a
-
-send_to_live(pprev, s[pprev].a);
-send_to_live(pnext, s[pnext].a);
-
-return s[2];
-      }
-
-
-
-
-
-void share(Share a[], int length)
-{
-    for(int l = 0; l < length; l++)
+    if constexpr(id == PSELF)
     {
-    a[l] = share_SRNG(get_input_live());
+        *this = share_SRNG(get_input_live());
     }
-}
-
-
-void receive_from_SRNG(Share a[], int id, int l)
-{
-if(id == PSELF)
-{
-for (int i = 0; i < l; i++) {
-  a[i] = share_SRNG(get_input_live());
-}
-}
-else{
-for (int i = 0; i < l; i++) {
-    receive_share_SRNG(a[i], id);
-}
-}
-}
-
-void receive_from(Share a[], int id, int l)
-{
-if(id == PSELF)
-{
-    return;
-}
-else{
-for (int i = 0; i < l; i++) {
-Share s;
-s.x = getRandomVal(id);
-s.a = receive_from_live(id);
-a[i] = s;
-}
-}
-}
-
-void generate_SRNG(Share a[], int id, int length)
-{
-    for(int l = 0; l < length; l++)
-    {
-        a[l].x = getRandomVal(id);
-    }
-}
-
-template <typename func_add, typename func_sub>
-void prepare_receive_from(Share a[], int id, int l, func_add ADD, func_sub SUB)
-{
-    if(id == PSELF)
-        share(a,l);
     else
-        generate_SRNG(a,id,l);
+        x = getRandomVal(id);
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(Share a[], int id, int l, func_add Add, func_sub Sub)
+template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == PSELF)
-    return;
-for (int i = 0; i < l; i++) {
-    receive_share_SRNG(a[i],id);
-
-}
+if constexpr(id != PSELF)
+    a = receive_from_live(id);
 }
 
 template <typename func_add>
-Share Add(Share a, Share b, func_add ADD)
+Replicated_Share Add( Replicated_Share b, func_add ADD) const
 {
-    Share result;
-    result.x = ADD(a.x,b.x);
-    result.a = ADD(a.a,b.a);
-    return result; 
+    return Replicated_Share(ADD(x,b.x),ADD(a,b.a));
 }
 
 
-Share public_val(DATATYPE a)
+Replicated_Share public_val(Datatype a)
 {
-    Share result;
-    result.x = SET_ALL_ZERO();
-    result.a = a;
-    return result; 
+    return Replicated_Share(SET_ALL_ZERO(),a);
 }
 
-Share Not(Share a)
+Replicated_Share Not() const
 {
-    Share result;
-    result.x = a.x;
-    result.a = NOT(a.a);
-    return result; 
+    return Replicated_Share(x,NOT(a));
 }
 
 
-void reshare(DATATYPE a, DATATYPE u[])
+void reshare(Datatype a, Datatype u[])
 {
 u[pprev] = getRandomVal(pprev);
 u[pnext] = getRandomVal(pnext);
 u[2] = XOR(u[pprev],u[pnext]);
 u[2] = XOR(a,u[2]);
- 
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(Share a, Share b, Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+    Replicated_Share prepare_mult(Replicated_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-DATATYPE corr = XOR( getRandomVal(pprev), getRandomVal(pnext) );
-DATATYPE r =  XOR( XOR(  AND(a.x,b.x), AND(a.a,b.a) ) , corr);  
+Replicated_Share c;
+Datatype corr = XOR( getRandomVal(pprev), getRandomVal(pnext) );
+Datatype r =  XOR( XOR(  AND(x,b.x), AND(a,b.a) ) , corr);  
 c.a = r; //used to access value in complete and 
 send_to_live(pnext, r);
+return c;
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(Share &c, func_add ADD, func_sub SUB)
+void complete_mult(func_add ADD, func_sub SUB)
 {
-c.x = XOR(c.a, receive_from_live(pprev));
+x = XOR(a, receive_from_live(pprev));
 }
 
-void prepare_reveal_to_all(Share a)
+void prepare_reveal_to_all()
 {
-    send_to_live(pnext, a.x);
+    send_to_live(pnext, x);
 }    
 
 
-void prepare_reveal_to(DATATYPE a, int id)
-{
-    if(PSELF != id)
-    {
-        send_to_live(id, a);
-}
-}
+/* void prepare_reveal_to(Datatype a, int id) */
+/* { */
+/*     if(PSELF != id) */
+/*     { */
+/*         send_to_live(id, a); */
+/* } */
+/* } */
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(Share a, func_add Add, func_sub Sub)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
-    DATATYPE result;
-    result = XOR(a.a, receive_from_live(pprev));
+    Datatype result;
+    result = XOR(a, receive_from_live(pprev));
     return result;
 }
 
-Share* alloc_Share(int l)
-{
-    return new Share[l];
-}
 
 
-void send()
+static void send()
 {
     send_live();
 }
 
-void receive()
+static void receive()
 {
     receive_live();
 }
 
-void communicate()
+static void communicate()
 {
     communicate_live();
 }

@@ -1,33 +1,38 @@
 #pragma once
 #include "../../generic_share.hpp"
+template <typename Datatype>
 class Fantastic_Four_init
 {
-bool optimized_sharing;
 public:
-Fantastic_Four_init(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
+Fantastic_Four_init() {}
 
 
-XOR_Share public_val(DATATYPE a)
+
+Fantastic_Four_init public_val(Datatype a)
 {
-    return a;
+    return Fantastic_Four_init();
 }
 
-DATATYPE Not(DATATYPE a)
+Fantastic_Four_init Not() const
 {
-   return a;
+    return Fantastic_Four_init();
+}
+
+template <typename func_add>
+Fantastic_Four_init Add(Fantastic_Four_init b, func_add ADD) const
+{
+   return Fantastic_Four_init();
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+Fantastic_Four_init prepare_dot(const Fantastic_Four_init b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    return Fantastic_Four_init();
 }
 
 
-// Receive sharing of ~XOR(a,b) locally
-template <typename Func_add>
-DATATYPE Add(DATATYPE a, DATATYPE b, Func_add ADD)
-{
-   return a;
-}
-
-
-template <typename Func_add, typename Func_sub, typename Func_mul>
-void prepare_mult(DATATYPE a, DATATYPE b, DATATYPE &c, Func_add ADD, Func_sub SUB, Func_mul MUL)
+template <typename func_add, typename func_sub, typename func_mul>
+    Fantastic_Four_init prepare_mult(Fantastic_Four_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
     #if PARTY == 0
 
@@ -57,11 +62,11 @@ send_to_(P_1);
 /* store_compare_view_init(P_0); */
 
 #endif
-
+return Fantastic_Four_init();
 }
 
-template <typename Func_add, typename Func_sub>
-void complete_mult(DATATYPE &c, Func_add ADD, Func_sub SUB)
+template <typename func_add, typename func_sub>
+void complete_mult(func_add ADD, func_sub SUB)
 {
 #if PARTY == 0
 
@@ -115,156 +120,111 @@ store_compare_view_init(P_2);
 }
 
 
-void prepare_reveal_to_all(DATATYPE a)
+void prepare_reveal_to_all()
 {
     send_to_(PNEXT);
 }    
 
 
-template <typename Func_add, typename Func_sub>
-DATATYPE complete_Reveal(DATATYPE a, Func_add ADD, Func_sub SUB)
+
+template <typename func_add, typename func_sub>
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
 receive_from_(PPREV);
 store_compare_view_init(P_0123);
-return a;
+Datatype dummy;
+return dummy;
 }
 
-
-DATATYPE* alloc_Share(int l)
+template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-    return new DATATYPE[l];
-}
-
-
-template <typename func_add, typename func_sub>
-void prepare_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
-{
-if(id == PSELF)
+if constexpr(id == PSELF)
 {
 #if PARTY == 0
-    for(int i = 0; i < l; i++)
-    {
         send_to_(P_1);
         send_to_(P_2);
-    }
 #elif PARTY == 1
-    for(int i = 0; i < l; i++)
-    {
         send_to_(P_0);
         send_to_(P_2);
-    }
 #elif PARTY == 2
-    for(int i = 0; i < l; i++)
-    {
         send_to_(P_0);
         send_to_(P_1);
-    }
 #else // PARTY == 3
-    for(int i = 0; i < l; i++)
-    {
         send_to_(P_0);
         send_to_(P_1);
-    }
 #endif
 }
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(DATATYPE a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-if(id != PSELF)
+if constexpr(id != PSELF)
 {
 #if PARTY == 0
-    if(id == P_1)
+    if constexpr(id == P_1)
     {
-    for(int i = 0; i < l; i++)
-    {
-    receive_from_(P_1);
     store_compare_view_init(P_2);
     }
-    }
-    else if(id == P_2)
+    else if constexpr(id == P_2)
     {
-    for(int i = 0; i < l; i++)
-    {
-    receive_from_(P_2);
     store_compare_view_init(P_1);
-    }
     }
     else // id == P_3
     {
-    for(int i = 0; i < l; i++)
-    {
-    receive_from_(P_3);
     store_compare_view_init(P_1);
-    }
     }
 #elif PARTY == 1
-    if(id == P_0)
+    if constexpr(id == P_0)
     {
-    for(int i = 0; i < l; i++)
-    {
-    receive_from_(P_0);
     store_compare_view_init(P_2);
     }
-    }
-    else if(id == P_2)
-    {
-    for(int i = 0; i < l; i++)
+    else if constexpr(id == P_2)
     {
     receive_from_(P_2);
     store_compare_view_init(P_0);
     }
-    }
     else // id == P_3
-    {
-    for(int i = 0; i < l; i++)
     {
     receive_from_(P_3);
     store_compare_view_init(P_0);
     }
-    }
 #elif PARTY == 2
-    if(id == P_0)
-    {
-    for(int i = 0; i < l; i++)
+    if constexpr(id == P_0)
     {
     receive_from_(P_0);
     store_compare_view_init(P_1);
     }
-    }
-    else if(id == P_1)
-    {
-    for(int i = 0; i < l; i++)
+    else if constexpr(id == P_1)
     {
     receive_from_(P_1);
     store_compare_view_init(P_0);
-    }
     } 
 #endif
 }
 }
 
 
-void send()
+static void send()
 {
 send_();
 }
-void receive()
+static void receive()
 {
     receive_();
 }
-void communicate()
+static void communicate()
 {
 communicate_();
 }
 
-void finalize(std::string* ips)
+static void finalize(std::string* ips)
 {
     finalize_(ips);
 }
 
-void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
+static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
 {
     finalize_(ips, ra, sa);
 }

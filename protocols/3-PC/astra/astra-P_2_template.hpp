@@ -1,134 +1,115 @@
 #pragma once
-#include "astra_base.hpp"
-class ASTRA2
+#include "../../generic_share.hpp"
+template <typename Datatype>
+class ASTRA2_Share
 {
-bool optimized_sharing;
+Datatype mv;
+Datatype lv;
 public:
-ASTRA2(bool optimized_sharing) {this->optimized_sharing = optimized_sharing;}
+ASTRA2_Share()  {}
+ASTRA2_Share(Datatype a, Datatype b) { mv = a; lv = b; }
 
-Evaluator_Share public_val(DATATYPE a)
+
+
+
+ASTRA2_Share public_val(DATATYPE a)
 {
-    return Evaluator_Share(a,SET_ALL_ZERO());
+    return ASTRA2_Share(a,SET_ALL_ZERO());
 }
 
-Evaluator_Share Not(Evaluator_Share a)
+ASTRA2_Share Not() const
 {
-    a.mv = NOT(a.mv);
-   return a;
+    return ASTRA2_Share(NOT(mv),lv);
 }
 
 template <typename func_add>
-Evaluator_Share Add(Evaluator_Share a, Evaluator_Share b, func_add ADD)
+ASTRA2_Share Add( ASTRA2_Share b, func_add ADD) const
 {
-   return Evaluator_Share(ADD(a.mv,b.mv),ADD(a.lv,b.lv));
+   return ASTRA2_Share(ADD(mv,b.mv),ADD(lv,b.lv));
 }
-
 
 
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_mult(Evaluator_Share a, Evaluator_Share b, Evaluator_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+    ASTRA2_Share prepare_mult(ASTRA2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
+ASTRA2_Share c;
 DATATYPE yz2 = getRandomVal(P_0); //yz1
 DATATYPE yxy2 = receive_from_live(P_0); 
-c.mv = ADD( ADD( SUB( MULT(a.mv,b.mv), ADD( MULT(a.mv,b.lv), MULT(b.mv, a.lv) )) , yz2 ), yxy2); 
+c.mv = ADD( ADD( SUB( MULT(mv,b.mv), ADD( MULT(mv,b.lv), MULT(b.mv, lv) )) , yz2 ), yxy2); 
 send_to_live(P_1,c.mv); 
 c.lv = yz2;
+return c;
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult(Evaluator_Share &c, func_add ADD, func_sub SUB)
+void complete_mult(func_add ADD, func_sub SUB)
 {
-c.mv = ADD(c.mv, receive_from_live(P_1)); 
+mv = ADD(mv, receive_from_live(P_1)); 
 }
 
-void prepare_reveal_to_all(Evaluator_Share a)
+void prepare_reveal_to_all()
 {
-send_to_live(P_0,a.mv);
+send_to_live(P_0,mv);
 }    
 
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(Evaluator_Share a, func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
-return SUB(a.mv, receive_from_live(P_0));
+return SUB(mv, receive_from_live(P_0));
 }
 
 
-Evaluator_Share* alloc_Share(int l)
-{
-return new Evaluator_Share[l];
-}
 
-template <typename func_add, typename func_sub>
-void prepare_receive_from(Evaluator_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == P_0)
+if constexpr(id == P_0)
 {
-    if(optimized_sharing == false)
-    {
-    for(int i = 0; i < l; i++)
-    {
-        a[i].lv = getRandomVal(P_0);
-    }
-
-
-    }
+    #if OPTIMIZED_SHARING == 0
+        lv = getRandomVal(P_0);
+    #endif
 }
-else if(id == P_2) // -> lv = lv1, lv2=0
+else if constexpr(id == P_2) // -> lv = lv1, lv2=0
 {
-for(int i = 0; i < l; i++)
-{
-    a[i].lv = getRandomVal(P_0);
-    a[i].mv = ADD(get_input_live(),a[i].lv);
-    send_to_live(P_1,a[i].mv);
-}
+    lv = getRandomVal(P_0);
+    mv = ADD(get_input_live(),lv);
+    send_to_live(P_1,mv);
 }
 }
 
-template <typename func_add, typename func_sub>
-void complete_receive_from(Evaluator_Share a[], int id, int l, func_add ADD, func_sub SUB)
+template <int id, typename func_add, typename func_sub>
+void complete_receive_from(func_add ADD, func_sub SUB)
 {
-if(id == P_0)
+if constexpr(id == P_0)
 {
-if(optimized_sharing == true) // (0,a+yx1)
-{
-    for(int i = 0; i < l; i++)
-    {
-        a[i].mv = SET_ALL_ZERO(); //Check options 
-        a[i].lv = receive_from_live(P_0);
-    }
+#if OPTIMIZED_SHARING == 1
+        mv = SET_ALL_ZERO(); //Check options 
+        lv = receive_from_live(P_0);
+#else
+        mv = receive_from_live(P_0);
+#endif
 }
-else{
-    for(int i = 0; i < l; i++)
-    {
-        a[i].mv = receive_from_live(P_0);
-    }
-    
-}
-}
-else if(id == P_1)
+else if constexpr(id == P_1)
 {
-for(int i = 0; i < l; i++)
-{
-a[i].mv = receive_from_live(P_1); 
-a[i].lv = SET_ALL_ZERO();
+mv = receive_from_live(P_1); 
+lv = SET_ALL_ZERO();
 }
 }
 
-}
 
 
-void send()
+static void send()
 {
     send_live();
 }
 
-void receive()
+static void receive()
 {
     receive_live();
 }
 
-void communicate()
+static void communicate()
 {
     communicate_live();
 }
