@@ -66,6 +66,36 @@ c.v = SUB( a1b1,c.v);
 return c;
 }
 
+template <typename func_add, typename func_sub, typename func_mul>
+OEC_MAL1_Share prepare_dot(const OEC_MAL1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OEC_MAL1_Share c;
+c.v = ADD(MULT(v,b.r), MULT(b.v,r)); 
+c.r = MULT(v, b.v); // a1b1
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+Datatype cr = getRandomVal(P_013);
+Datatype r124 = getRandomVal(P_013);
+/* Datatype r234 = getRandomVal(P_123); //used for veryfying m3' sent by P_3 -> probably not needed -> for verification needed */
+v = ADD( v  , r124);  
+/* Datatype m_2 = XOR(c.v, c.r); */
+send_to_live(P_2,v);
+
+#if PROTOCOL == 10 || PROTOCOL == 12
+store_compare_view(P_0,ADD(r,getRandomVal(P_123_2))); // compare a1b1 + r123_2 with P_0
+#endif
+#if PROTOCOL == 11
+m = ADD(v,getRandomVal(P_123_2)); // m_2 + r234_2 store to compareview later
+#endif
+
+v = SUB( r,v);
+r = cr;
+
+}
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {

@@ -40,6 +40,23 @@ send_to_live(P_2, yxy2);
 return c;
 }
 
+template <typename func_add, typename func_sub, typename func_mul>
+ASTRA0_Share prepare_dot(const ASTRA0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+ASTRA0_Share c;
+c.v = MULT(v,b.v);
+return c;
+}
+
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot( func_add ADD, func_sub SUB)
+{
+Datatype yxy = v;
+v = ADD(getRandomVal(P_1),getRandomVal(P_2)); //yz
+DATATYPE yxy2 = SUB(yxy,getRandomVal(P_1)); //yxy,2
+send_to_live(P_2, yxy2);
+}
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB){}
 

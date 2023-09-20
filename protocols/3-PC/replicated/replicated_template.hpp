@@ -86,7 +86,23 @@ c.a = r; //used to access value in complete and
 send_to_live(pnext, r);
 return c;
 }
+    
+template <typename func_add, typename func_sub, typename func_mul>
+Replicated_Share prepare_dot(const Replicated_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Replicated_Share c;
+c.a =  ADD(  MULT(x,b.x), MULT(a,b.a) ); 
+return c;
+}
 
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot( func_add ADD, func_sub SUB)
+{
+Datatype corr = ADD( getRandomVal(pprev), getRandomVal(pnext) );
+a = ADD(a, corr);
+send_to_live(pnext, a);
+}
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {

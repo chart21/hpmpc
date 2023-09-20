@@ -47,6 +47,13 @@ Replicated_init prepare_dot(const Replicated_init b, func_add ADD, func_sub SUB,
     return Replicated_init();
 }
 
+template <typename func_add, typename func_sub>
+void mask_and_send_dot( func_add ADD, func_sub SUB)
+{
+send_to_(pnext);
+}
+
+
 
 template <typename func_add, typename func_sub, typename func_mul>
     Replicated_init prepare_mult(Replicated_init b, func_add ADD, func_sub SUB, func_mul MULT) const

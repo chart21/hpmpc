@@ -40,7 +40,7 @@ Tetrad1_Share Add(Tetrad1_Share b, func_add ADD) const
 template <typename func_add, typename func_sub, typename func_mul>
     Tetrad1_Share prepare_mult(Tetrad1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-
+//l0 -> lambda1, l1 -> lambda3
 Tetrad1_Share c;
 DATATYPE y1ab = ADD( ADD(MULT(l0,b.l1),MULT(l1,b.l0)), MULT(l1,l1));
 DATATYPE u1 = getRandomVal(P_013);
@@ -52,18 +52,55 @@ c.l1 = SET_ALL_ZERO();  //lambda3
 
 DATATYPE s = getRandomVal(P_123);
 
-DATATYPE y2 = SUB( ADD(y1ab,u1), ADD(AND(l0,b.mv),AND(mv,b.l0))) ;
+DATATYPE y1 = SUB( ADD(y1ab,u1), ADD(MULT(l0,b.mv),MULT(mv,b.l0))) ;
 DATATYPE y3 = SUB(SET_ALL_ZERO(),ADD(MULT(l1,b.mv),MULT(mv,b.l1)));
-send_to_live(P_2, y2);
-DATATYPE z_r = ADD( ADD(y2, y3), MULT(mv,b.mv));
+send_to_live(P_2, y1);
+DATATYPE z_r = ADD( ADD(y1, y3), MULT(mv,b.mv));
 
 //Trick to store values neede later
 c.storage = c.l0;
-c.l0 = y2;
+c.l0 = y1;
 c.l1 = s;
 c.mv = z_r;
 return c;
 }
+
+template <typename func_add, typename func_sub, typename func_mul>
+Tetrad1_Share prepare_dot(const Tetrad1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Tetrad1_Share c;
+DATATYPE y1ab = ADD( ADD(MULT(l0,b.l1),MULT(l1,b.l0)), MULT(l1,l1));
+DATATYPE y3 = SUB( y1ab, ADD(MULT(l0,b.mv),MULT(mv,b.l0))) ;
+ c.l0 = SUB(SET_ALL_ZERO(),ADD(MULT(l1,b.mv),MULT(mv,b.l1))); //y1
+ c.l1 = ADD( ADD(c.l0, y3), MULT(mv,b.mv)); //z_r
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+Datatype y1 = l0;
+Datatype z_r = l1;
+Tetrad1_Share c;
+DATATYPE u1 = getRandomVal(P_013);
+
+//q:
+Datatype cmv = SET_ALL_ZERO();
+Datatype cl0 = getRandomVal(P_013); //lambda1
+Datatype cl1 = SET_ALL_ZERO();  //lambda3
+
+DATATYPE s = getRandomVal(P_123);
+
+y1 = ADD(u1, y1);
+send_to_live(P_2, y1);
+z_r = ADD(u1, z_r);
+//Trick to store values neede later
+storage = cl0;
+l0 = y1;
+l1 = s;
+mv = z_r;
+}
+
 
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)

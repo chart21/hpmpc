@@ -61,6 +61,37 @@ c.mv = v; //Trick, can be set to zero later on
 return c;
 }
 
+template <typename func_add, typename func_sub, typename func_mul>
+Tetrad0_Share prepare_dot(const Tetrad0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Tetrad0_Share c;
+c.mv = ADD( ADD(MULT(l0,b.l1),MULT(l1,b.l0)), MULT(l0,l0)); //y3ab
+c.l0 = SUB( SET_ALL_ZERO(), ADD( MULT( ADD(l0,l1), b.mv) , MULT ( ADD(b.l0,b.l1), mv)));
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+DATATYPE u1 = getRandomVal(P_013);
+DATATYPE u2 = getRandomVal(P_023);
+DATATYPE u1u2 = ADD(u1,u2);
+DATATYPE r = SUB(mv, u1u2);
+Tetrad0_Share q;
+
+DATATYPE v = SUB(u1u2,l0);
+
+//q:
+mv = SET_ALL_ZERO();
+l1 = getRandomVal(P_013); //lambda2
+l0 = SUB(SET_ALL_ZERO(),ADD(r,l1));  //lambda1
+store_compare_view(P_2, l0); // verify if P_2 gets correct value from P_3
+
+
+mv = v; //Trick, can be set to zero later on
+}
+
+
 
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)

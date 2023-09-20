@@ -41,6 +41,8 @@
 #define FUNCTION backward_pass
 #elif FUNCTION_IDENTIFIER == 22
 #define FUNCTION FC_bench
+#elif FUNCTION_IDENTIFIER == 27
+#define FUNCTION dot_prod_eigen_bench
 #endif
 #define RESULTTYPE DATATYPE
 
@@ -224,32 +226,26 @@ delete[] result_arr;
     template<typename Share>
 void dot_prod_bench(DATATYPE* res)
 {
+    Share::communicate(); // dummy round
     using M = Matrix_Share<DATATYPE, Share>;
-    auto a = new M[NUM_INPUTS][NUM_INPUTS];
+    auto a = new M[NUM_INPUTS];
     auto b = new M[NUM_INPUTS][NUM_INPUTS];
-    auto c = new M[NUM_INPUTS][NUM_INPUTS];
+    auto c = new M[NUM_INPUTS];
     Share::communicate(); // dummy round
     for(int i = 0; i < NUM_INPUTS; i++)
     {
+#if FUNCTION_IDENTIFIER == 14
         for(int j = 0; j < NUM_INPUTS; j++)
         {
-#if FUNCTION_IDENTIFIER == 14
-            for(int k = 0; k < NUM_INPUTS; k++)
-            {
-                c[i][j] = c[i][j] + a[i][k] * b[k][j];
-                /* c[i][j].prepare_dot_add(a[i][k], b[k][j]); */
-            }
-#endif
-                c[i][j].mask_and_send_dot();
+            c[i] += a[i] * b[i][j];
         }
+#endif
+        c[i].mask_and_send_dot();
     }
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        for(int j = 0; j < NUM_INPUTS; j++)
-        {
-            c[i][j].complete_mult();
-        }
+            c[i].complete_mult();
     
 }
 delete[] a;
@@ -257,7 +253,6 @@ delete[] b;
 delete[] c;
 
 }
-
 
 
     /* template<typename Share> */
@@ -861,6 +856,7 @@ SH<T> truncate(const SH<T>& val) {
     template<typename Share>
 void forward_pass(DATATYPE* res)
 {
+Share::communicate(); // Dummy communication round to simulate input sharing
 using D = sint_t<Matrix_Share<DATATYPE, Share>>;
 /* using D = Matrix_Share<DATATYPE, Share>; */
 /* using M = SH<DATATYPE>; */
@@ -895,6 +891,7 @@ template<typename Share>
 void backward_pass(DATATYPE* res)
 {
 
+Share::communicate(); // Dummy communication round to simulate input sharing
 using D = sint_t<Matrix_Share<DATATYPE, Share>>;
 /* using D = Matrix_Share<DATATYPE, Share>; */
 #if FUNCTION_IDENTIFIER == 21 
@@ -928,8 +925,32 @@ d_conv.backward(input,d_conv.output);
     template<typename Share>
 void FC_bench(DATATYPE* res)
 {
+    Share::communicate(); // Dummy communication round to simulate input sharing
     using S = sint_t<Matrix_Share<DATATYPE, Share>>;
     /* using M = Matrix_Share<DATATYPE, Share>; */
+    VecX<S> a(NUM_INPUTS);
+    VecX<S> c(NUM_INPUTS);
+    MatX<S> b(NUM_INPUTS, NUM_INPUTS);
+    c = b * a;
+    
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+            c(i).mask_and_send_dot();
+    }
+
+    Share::communicate();
+    
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+            c(i).complete_mult();
+    }
+}
+
+template<typename Share>
+void dot_prod_eigen_bench(DATATYPE* res)
+{
+    Share::communicate(); // Dummy communication round to simulate input sharing
+    using S = Matrix_Share<DATATYPE, Share>;
     VecX<S> a(NUM_INPUTS);
     VecX<S> c(NUM_INPUTS);
     MatX<S> b(NUM_INPUTS, NUM_INPUTS);

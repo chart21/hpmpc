@@ -79,6 +79,56 @@ c.m = ADD(c.v, r234_2); // store m_2 + m_3 + r_234_2 to send P_0 later
 return c;
 }
 
+template <typename func_add, typename func_sub, typename func_mul>
+OEC_MAL2_Share prepare_dot(const OEC_MAL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OEC_MAL2_Share c;
+c.v = ADD(MULT(v, b.r), MULT(b.v, r));
+c.r = MULT(v, b.v); // a1b1
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+Datatype cr = getRandomVal(P_023);
+   /* c.r = ADD(getRandomVal(P_023), getRandomVal(P_123)); */
+   /* Datatype r234 = getRandomVal(P_123); */
+   /* Datatype r234_1 = */
+   /*     getRandomVal(P_123); // Probably sufficient to only generate with P_3 -> */
+   Datatype r234_2 =
+       getRandomVal(P_123_2); // Probably sufficient to only generate with P_3 ->
+                           // Probably not because of verification
+/* c.r = getRandomVal(P_3); */
+#if PROTOCOL == 12
+#if PRE == 1
+   Datatype o1 = pre_receive_from_live(P_3);
+#else
+   Datatype o1 = receive_from_live(P_3);
+#endif
+   store_compare_view(P_0, o1);
+#else
+   Datatype o1 = receive_from_live(P_0);
+   store_compare_view(P_3, o1);
+#endif
+   v = SUB(v,o1);
+   send_to_live(P_1, v);
+
+
+   /* c.v = AND(XOR(a.v, a.r), XOR(b.v, b.r)); */
+
+#if PROTOCOL == 10 || PROTOCOL == 12
+   send_to_live(P_0, ADD(r,r234_2));
+#endif
+#if PROTOCOL == 11
+m = ADD(v, r234_2); // store m_2 + m_3 + r_234_2 to send P_0 later
+#endif
+   v = SUB(r, v);
+   /* c.m = ADD(c.m, r234); */
+r = cr;
+
+}
+
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {

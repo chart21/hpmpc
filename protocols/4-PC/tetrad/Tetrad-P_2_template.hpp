@@ -53,7 +53,7 @@ c.l1 = SET_ALL_ZERO();  //lambda3
 
 DATATYPE s = getRandomVal(P_123);
 
-DATATYPE y1 = SUB( XOR(y2ab,u2), ADD(MULT(l0,b.mv),MULT(mv,b.l0)) );
+DATATYPE y1 = SUB( ADD(y2ab,u2), ADD(MULT(l0,b.mv),MULT(mv,b.l0)) );
 DATATYPE y3 = SUB(SET_ALL_ZERO(), ADD(MULT(l1,b.mv),MULT(mv,b.l1)));
 send_to_live(P_1, y1);
 DATATYPE z_r = ADD( ADD(y1, y3), MULT(mv,b.mv));
@@ -64,6 +64,49 @@ c.l0 = y1;
 c.l1 = s;
 c.mv = z_r;
 return c;
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+Tetrad2_Share prepare_dot(const Tetrad2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Tetrad2_Share c;
+DATATYPE y2ab = ADD( ADD(MULT(l0,b.l1),MULT(l1,b.l0)), MULT(l0,l0));
+DATATYPE y3 = SUB(SET_ALL_ZERO(), ADD(MULT(l1,b.mv),MULT(mv,b.l1)));
+Datatype y1 = SUB( y2ab, ADD(MULT(l0,b.mv),MULT(mv,b.l0)) );
+Datatype z_r = ADD( ADD(c.l0, y3), MULT(mv,b.mv)); //z_r
+                                                   //
+c.mv = y2ab;
+c.l0 = y1;
+c.l1 = z_r;
+
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+Datatype y2ab = mv;
+Datatype y1 = l0;
+Datatype z_r = l1;
+
+DATATYPE u2 = getRandomVal(P_023);
+
+//q:
+Datatype cmv = SET_ALL_ZERO();
+Datatype cl0 = receive_from_live(P_3);
+store_compare_view(P_0, cl0);
+Datatype cl1 = SET_ALL_ZERO();  //lambda3
+
+DATATYPE s = getRandomVal(P_123);
+y1 = ADD(y2ab,u2);
+send_to_live(P_1, y1);
+z_r = ADD(z_r, u2);
+
+//Trick to store values neede later
+storage = cl0;
+l0 = y1;
+l1 = s;
+mv = z_r;
 }
 
 template <typename func_add, typename func_sub>

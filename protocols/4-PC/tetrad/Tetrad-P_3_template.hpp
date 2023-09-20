@@ -59,7 +59,36 @@ c.l3 = SET_ALL_ZERO(); //lambda3
 send_to_live(P_2, c.l2);
 return c;
 }
+template <typename func_add, typename func_sub, typename func_mul>
+Tetrad3_Share prepare_dot(const Tetrad3_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Tetrad3_Share c;
+DATATYPE y1ab = ADD( ADD(AND(l1,b.l3),AND(l3,b.l1)), AND(l3,l3));
+DATATYPE y2ab = ADD( ADD(AND(l2,b.l3),AND(l3,b.l2)), AND(l2,l2));
+DATATYPE y3ab = ADD( ADD(AND(l1,b.l2),AND(l2,b.l1)), AND(l1,l1));
+ c.l1 = y1ab;
+ c.l2 = y2ab;
+ c.l3 = y3ab;
+return c;
+}
 
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+DATATYPE u1 = getRandomVal(P_013);
+DATATYPE u2 = getRandomVal(P_023);
+DATATYPE r = SUB(l3, ADD(u1,u2));
+Tetrad3_Share q;
+
+DATATYPE s = getRandomVal(P_123);
+DATATYPE w = ADD(s, ADD(l1,l2));
+send_to_live(P_0, w);
+//q:
+l2 = getRandomVal(P_013); //lambda2
+l1 = SUB(SET_ALL_ZERO(), ADD(r,l2));  //lambda1 
+l3 = SET_ALL_ZERO(); //lambda3
+send_to_live(P_2, l2);
+}
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {

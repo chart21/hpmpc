@@ -30,6 +30,40 @@ Fantastic_Four_init prepare_dot(const Fantastic_Four_init b, func_add ADD, func_
     return Fantastic_Four_init();
 }
 
+    template <typename func_add, typename func_sub>
+void mask_and_send_dot( func_add ADD, func_sub SUB)
+{
+    #if PARTY == 0
+
+send_to_(P_2);
+send_to_(P_1);
+/* store_compare_view_init(P_3); */
+
+#elif PARTY == 1
+
+send_to_(P_3);
+send_to_(P_0);
+/* store_compare_view_init(P_0); */
+
+#elif PARTY == 2
+
+// c0 = a0 b0 + (a0 b1 + a1 b0 - r023) + r123 + r123_2
+send_to_(P_0);
+/* store_compare_view_init(P_1); */
+/* store_compare_view_init(P_1); */
+
+
+#elif PARTY == 3
+
+//c0 = a0 b0 + (a0 b1 + a1 b0 - r023) + r123 + r123_2
+send_to_(P_1);
+/* store_compare_view_init(P_2); */
+/* store_compare_view_init(P_0); */
+
+#endif
+}
+
+
 
 template <typename func_add, typename func_sub, typename func_mul>
     Fantastic_Four_init prepare_mult(Fantastic_Four_init b, func_add ADD, func_sub SUB, func_mul MULT) const

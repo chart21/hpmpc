@@ -63,7 +63,38 @@ store_compare_view(P_2,o1);
 return c;
 }
 
+template <typename func_add, typename func_sub, typename func_mul>
+OEC_MAL0_Share prepare_dot(const OEC_MAL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OEC_MAL0_Share c;
+c.r = MULT(r, b.r); 
+c.v = ADD( MULT(v,b.r), MULT(b.v,r));
+return c;
+}
 
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+Datatype cr = ADD(getRandomVal(P_013),getRandomVal(P_023)); // calculate c_1
+/* Datatype r124 = getRandomVal(P_013); */
+/* Datatype o1 = XOR( x1y1, r124); */
+Datatype o1 = ADD(cr,ADD( r, getRandomVal(P_013)));
+
+#if PROTOCOL == 11
+v = SUB(v,cr);
+#endif
+r = cr;
+#if PROTOCOL == 12
+store_compare_view(P_2,o1);
+#else
+    #if PRE == 1
+        pre_send_to_live(P_2, o1);
+    #else
+        send_to_live(P_2, o1);
+    #endif
+#endif
+
+}
 
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)

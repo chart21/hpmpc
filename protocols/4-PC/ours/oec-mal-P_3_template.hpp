@@ -80,6 +80,60 @@ store_compare_view(P_0,o4);
 return c;
 }
 
+template <typename func_add, typename func_sub, typename func_mul>
+OEC_MAL3_Share prepare_dot(const OEC_MAL3_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OEC_MAL3_Share c;
+#if FRACTIONAL > 0
+// not implemented
+#endif
+c.r0 = MULT(r1,b.r1); // store o_1
+c.r1 = SUB(MULT(r1, SUB(b.r1,b.r0)) ,MULT(b.r1,r0)); // store o_4
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+
+Datatype rc0 = getRandomVal(P_123); // r123_1
+Datatype rc1 = ADD(getRandomVal(P_023),getRandomVal(P_013)); // x1 
+
+Datatype o1 = ADD(rc0, ADD(r0, getRandomVal(P_013)));
+#if PROTOCOL == 11
+Datatype o4 = ADD(r1,getRandomVal(P_123_2)); // r123_2
+#else
+Datatype o4 = ADD(r1,SUB(getRandomVal(P_123_2),r0)); // r123_2
+#endif
+
+r0 = rc0;
+r1 = rc1;
+
+#if PROTOCOL == 12
+#if PRE == 1
+pre_send_to_live(P_2, o1);
+#else
+send_to_live(P_2, o1);
+#endif
+#else
+store_compare_view(P_2, o1);
+#endif
+
+
+#if PROTOCOL == 10 || PROTOCOL == 12
+#if PRE == 1
+pre_send_to_live(P_0, o4);
+#else
+send_to_live(P_0, o4);
+#endif
+#elif PROTOCOL == 11
+store_compare_view(P_0,o4);
+#endif
+
+}
+
+
+
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {

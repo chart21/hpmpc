@@ -30,6 +30,14 @@ OEC_MAL1_init prepare_dot(const OEC_MAL1_init b, func_add ADD, func_sub SUB, fun
     return OEC_MAL1_init();
 }
 
+    template <typename func_add, typename func_sub>
+void mask_and_send_dot( func_add ADD, func_sub SUB)
+{
+send_to_(P_2);
+#if PROTOCOL == 10 || PROTOCOL == 12
+store_compare_view_init(P_0); // compare a1b1 + r123_2 with P_0
+#endif
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL1_init prepare_mult(OEC_MAL1_init b, func_add ADD, func_sub SUB, func_mul MULT) const
