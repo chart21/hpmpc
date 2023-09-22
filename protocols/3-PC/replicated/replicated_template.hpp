@@ -123,8 +123,8 @@ return c;
     template <typename func_sub, typename func_mul>
 void mask_and_send_dot( func_sub SUB, func_mul MULT)
 {
-Datatype corr = SUB( getRandomVal(pprev), getRandomVal(pnext) );
-a = ADD(a, corr);
+a = SUB(a, getRandomVal(pprev));
+a = SUB(a, getRandomVal(pnext));
 a = div3(a, MULT);
 send_to_live(pnext, a);
 }
