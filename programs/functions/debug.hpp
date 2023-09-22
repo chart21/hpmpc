@@ -2,7 +2,7 @@
 #include <iostream>
 #include "../../protocols/Protocols.h"
 #include "../../protocols/XOR_Share.hpp"
-/* #include "../../protocols/Arithmetic_Share.hpp" */
+#include "../../protocols/Additive_Share.hpp"
 
 #define FUNCTION debug
 #define RESULTTYPE DATATYPE[num_players][BITLENGTH]
@@ -24,7 +24,7 @@ for(int j = 0; j < BITLENGTH; j++)
 if(var[i][j] > 242)
 {
     num_erros++;
-    /* std::cout << PARTY << " " << var[i][j] << " " << i << " " << j << std::endl; */
+    std::cout << PARTY << " " << var[i][j] << " " << i << " " << j << std::endl;
 }
 #else
 inputs[i][j] = SET_ALL_ONE();
@@ -46,7 +46,11 @@ if(inputs[i][j] != var[i][j])
 template<typename Protocol>
 void debug (/*outputs*/ DATATYPE result[num_players][BITLENGTH])
 {
+#if FUNCTION_IDENTIFIER == 7
+using S = Additive_Share<DATATYPE, Protocol>;
+#else
 using S = XOR_Share<DATATYPE, Protocol>;
+#endif
 // allocate memory for shares
 S (*inputs)[BITLENGTH] = new S[num_players][BITLENGTH];
 
@@ -123,7 +127,11 @@ for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
+#if FUNCTION_IDENTIFIER == 7
+    inputs[j][i] = inputs[j][i] * inputs[j][i];
+#else
     inputs[j][i] = inputs[j][i] & inputs[j][i];
+#endif
 }
 }
 
@@ -133,7 +141,11 @@ for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
+#if FUNCTION_IDENTIFIER == 7
+    inputs[j][i].complete_mult();
+#else
     inputs[j][i].complete_and();
+#endif
 }
 }
 
@@ -163,8 +175,11 @@ compare(result, "and/mult gates");
 for(int j = 0; j < num_players; j++)
 {
 for (int i = 0; i < BITLENGTH; i++) {
-
+#if FUNCTION_IDENTIFIER == 7
+    inputs[j][i] = inputs[j][i] + inputs[j][i];
+#else
     inputs[j][i] = inputs[j][i] ^ inputs[j][i];
+#endif
 #if FUNCTION_IDENTIFIER != 7
     if(i != j)
         inputs[j][i] = !inputs[j][i];

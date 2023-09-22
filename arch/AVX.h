@@ -32,7 +32,9 @@
 #define ZERO _mm256_setzero_si256()
 #define ONES _mm256_set1_epi32(-1)
 
-#if BITLENGTH == 32
+#if BITLENGTH == 16
+#define PROMOTE(x) _mm256_set1_epi16(x)
+#elif BITLENGTH == 32
 #define PROMOTE(x) _mm256_set1_epi32(x)
 #elif BITLENGTH == 64
 #define PROMOTE(x) _mm256_set1_epi64x(x)

@@ -56,6 +56,8 @@
 #define SET_ALL_ONE()  true
 #define SET_ALL_ZERO() false
 
+#define PROMOTE(x) (SET_ALL_ONE())
+
 #define ORTHOGONALIZE(in,out)   orthogonalize(in,out)
 #define UNORTHOGONALIZE(in,out) unorthogonalize(in,out)
 

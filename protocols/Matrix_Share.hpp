@@ -41,7 +41,11 @@ public:
         #if FRACTIONAL > 0
         Share_Type::mask_and_send_dot_with_trunc(OP_ADD, OP_SUB, OP_TRUNC);
         #else
+        #if PROTOCOL == 2
+        Share_Type::mask_and_send_dot(OP_SUB, OP_MULT); // Replicated needs custom overloads because division by 3 is required
+        #else
         Share_Type::mask_and_send_dot(OP_ADD, OP_SUB);
+        #endif
         #endif
     }
 
