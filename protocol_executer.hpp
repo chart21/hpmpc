@@ -10,7 +10,6 @@
 #include <new>
 #include <memory>
 #include "arch/DATATYPE.h"
-#include "arch/STD.h"
 #include "protocols/init_protocol_base.hpp"
 #include "protocols/live_protocol_base.hpp"
 

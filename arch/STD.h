@@ -24,6 +24,26 @@
 #define LOG2_BITS_PER_REG LOG2_DATATYPE
 #endif
 
+#ifndef DATATYPE
+#if DATTYPE == 4
+#define DATATYPE uint8_t // TODO: use something else? do something else?
+                         // (needed for Photon right now)
+#define SDATATYPE int8_t
+#elif DATTYPE == 8
+#define DATATYPE uint8_t
+#define SDATATYPE int8_t
+#elif DATTYPE == 16
+#define DATATYPE uint16_t
+#define SDATATYPE int16_t
+#elif DATTYPE == 32
+#define DATATYPE uint32_t
+#define SDATATYPE int32_t
+#else
+#define DATATYPE uint64_t
+#define SDATATYPE int64_t
+#endif
+#endif
+
 /* Defining 0 and 1 */
 #define ZERO 0
 #define ONES -1
@@ -47,16 +67,16 @@
 #define ADD_SIGNED(a,b,c) a + b
 #define SUB_SIGNED(a,b,c) a - b
 
-#define FUNC_AND  std::bit_and<uint64_t>()
-#define FUNC_OR   std::bit_or<uint64_t>()
-#define FUNC_XOR  std::bit_xor<uint64_t>()
-#define FUNC_NOT  std::bit_not<uint64_t>()
-#define FUNC_ADD32 std::plus<uint64_t>()
-#define FUNC_SUB32 std::minus<uint64_t>()
-#define FUNC_MUL32 std::multiplies<uint64_t>()
-#define FUNC_ADD64 std::plus<uint64_t>()
-#define FUNC_SUB64 std::minus<uint64_t>()
-#define FUNC_MUL64 std::multiplies<uint64_t>()
+#define FUNC_AND  std::bit_and<DATATYPE>()
+#define FUNC_OR   std::bit_or<DATATYPE>()
+#define FUNC_XOR  std::bit_xor<DATATYPE>()
+#define FUNC_NOT  std::bit_not<DATATYPE>()
+#define FUNC_ADD32 std::plus<DATATYPE>()
+#define FUNC_SUB32 std::minus<DATATYPE>()
+#define FUNC_MUL32 std::multiplies<DATATYPE>()
+#define FUNC_ADD64 std::plus<DATATYPE>()
+#define FUNC_SUB64 std::minus<DATATYPE>()
+#define FUNC_MUL64 std::multiplies<DATATYPE>()
 
 #define SHIFT_RIGHT32 arithmetic_right_shift_32
 #define SHIFT_RIGHT64 arithmetic_right_shift_64
@@ -77,6 +97,16 @@ uint64_t arithmetic_right_shift_64(uint64_t value) {
 uint32_t arithmetic_right_shift_32(uint32_t value) {
     if (value & 0x80000000) {
         uint32_t mask = ~((1U << (32 - FRACTIONAL)) - 1);
+        return value >> FRACTIONAL | mask;
+    }
+    return value >> FRACTIONAL;
+}
+
+#elif BITLENGTH == 16
+
+uint16_t arithmetic_right_shift_16(uint16_t value) {
+    if (value & 0x8000) {
+        uint16_t mask = ~((1U << (16 - FRACTIONAL)) - 1);
         return value >> FRACTIONAL | mask;
     }
     return value >> FRACTIONAL;
@@ -108,25 +138,6 @@ uint32_t arithmetic_right_shift_32(uint32_t value) {
 
 #define refresh(x,y) *(y) = x
 
-#ifndef DATATYPE
-#if BITS_PER_REG == 4
-#define DATATYPE uint8_t // TODO: use something else? do something else?
-                         // (needed for Photon right now)
-#define SDATATYPE int8_t
-#elif DATTYPE == 8
-#define DATATYPE uint8_t
-#define SDATATYPE int8_t
-#elif DATTYPE == 16
-#define DATATYPE uint16_t
-#define SDATATYPE int16_t
-#elif DATTYPE == 32
-#define DATATYPE uint32_t
-#define SDATATYPE int32_t
-#else
-#define DATATYPE uint64_t
-#define SDATATYPE int64_t
-#endif
-#endif
 
 #define SET_ALL_ONE()  -1
 #define SET_ALL_ZERO() 0
