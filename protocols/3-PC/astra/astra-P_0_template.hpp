@@ -36,7 +36,11 @@ ASTRA0_Share c;
 DATATYPE yxy = MULT(v,b.v);
 c.v = ADD(getRandomVal(P_1),getRandomVal(P_2)); //yz
 DATATYPE yxy2 = SUB(yxy,getRandomVal(P_1)); //yxy,2
+#if PRE == 0
 send_to_live(P_2, yxy2);
+#else
+pre_send_to_live(P_2, yxy2);
+#endif
 return c;
 }
 
@@ -55,7 +59,11 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
 Datatype yxy = v;
 v = ADD(getRandomVal(P_1),getRandomVal(P_2)); //yz
 DATATYPE yxy2 = SUB(yxy,getRandomVal(P_1)); //yxy,2
+#if PRE == 0
 send_to_live(P_2, yxy2);
+#else
+pre_send_to_live(P_2, yxy2);
+#endif
 }
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB){}
@@ -63,15 +71,25 @@ void complete_mult(func_add ADD, func_sub SUB){}
 
 void prepare_reveal_to_all()
 {
+#if PRE == 0
     send_to_live(P_1, v);
     send_to_live(P_2, v);
+#else
+    pre_send_to_live(P_1, v);
+    pre_send_to_live(P_2, v);
+#endif
 }    
 
 
 template <typename func_add, typename func_sub>
 DATATYPE complete_Reveal(func_add ADD, func_sub SUB)
 {
+#if PRE == 0 
 return SUB(receive_from_live(P_2),v);
+#elif PRE == 1 && HAS_POST_PROTOCOL == 1
+store_output_share(v);
+return SET_ALL_ZERO();
+#endif
 }
 
 
@@ -85,15 +103,24 @@ if constexpr(id == P_0)
 #if OPT_SHARE == 1
     v = get_input_live(); 
     DATATYPE lx1 = getRandomVal(P_1);
+#if PRE == 0
     send_to_live(P_2, ADD(v,lx1));
+#else
+    pre_send_to_live(P_2, ADD(v,lx1));
+#endif
 
 #else
     DATATYPE lv1 = getRandomVal(P_1); 
     DATATYPE lv2 = getRandomVal(P_2);
     v = ADD(lv1,lv2);// lv
     DATATYPE mv = ADD(v,get_input_live());
+#if PRE == 0
     send_to_live(P_1, mv);
     send_to_live(P_2, mv);
+#else
+    pre_send_to_live(P_1, mv);
+    pre_send_to_live(P_2, mv);
+#endif
 #endif
 }
 else if constexpr(id == P_1){
@@ -125,7 +152,9 @@ static void receive()
 
 static void communicate()
 {
+#if PRE == 0
     communicate_live();
+#endif
 }
 
 };

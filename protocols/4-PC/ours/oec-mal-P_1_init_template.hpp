@@ -77,12 +77,13 @@ receive_from_(P_0);
 #if PROTOCOL == 8
     #if PRE == 1 
     pre_receive_from_(P_3);
-#else
+    #else
     receive_from_(P_3);
-#endif
+    #endif
 
     store_compare_view_init(P_0);
     store_compare_view_init(P_3);
+    store_compare_view_init(P_0);
 #else
     store_compare_view_init(P_123);
     store_compare_view_init(P_0123);

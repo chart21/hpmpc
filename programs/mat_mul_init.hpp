@@ -42,7 +42,7 @@ void generateElements()
 #endif
         }
         /* } */
-    #if PRINT == 1
+    #if PRINT == 1 && FUNCTION_IDENTIFIER == 18
         std::cout << PARTY << " input: ";
         for(int i = 0; i < NUM_INPUTS*2; ++i) {
     for(int j = 0; j < DATTYPE; j++)

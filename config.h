@@ -1,20 +1,20 @@
 #pragma once
 
 // 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC)
-#define PROTOCOL 2
+#define PROTOCOL 8
 
 // Party ID (starting from 0)
-#define PARTY 2
+#define PARTY 3
 
 //0: Search 1: XORNOTAND, 2: AND 1 comm round 3: AND 1000 comm rounds  4: Debug 5: MULT32 1 comm round 6: MULT64 1 comm round 7: Debug 9: Mult_32 1000 comm rounds 10: Mult64 1000 comm rounds. Currently, Protocols 9-12 support MULT. MULT64 is supported by DATATYPE 64 and 512. MULT32 is supported for DATATYPE 32 and all DATATYPEs >= 128
 //16,17 RELU, 20,21 Forward (*10), Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards, 25,26 Forward Backwards, 27 Mat Mul Eigen
-#define FUNCTION_IDENTIFIER 14
+#define FUNCTION_IDENTIFIER 0
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 128
+#define DATTYPE 32
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
-#define PRE 0
+#define PRE 1
 
 // Number of inputs (depends on the problem)
 #define NUM_INPUTS 4096
@@ -37,7 +37,7 @@
 // How many messages should be buffered until a combined hash is performed? 0 means all hashes are calculated at the very end of the protocol.
 #define VERIFY_BUFFER 0
 // Print additional info?
-#define PRINT 0
+#define PRINT 1
 
 #define FRACTIONAL 0 // fractional bits for fixed point numbers
 

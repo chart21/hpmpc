@@ -1,7 +1,7 @@
 #pragma once
 #include "../../generic_share.hpp"
 template <typename Datatype>
-class OECL0_Share 
+class OECL0_POST_Share 
 {
 private:
     Datatype p1;
@@ -9,38 +9,38 @@ private:
     public:
     //static constexpr int VALS_PER_SHARE = 2;
 
-    OECL0_Share() {}
-    OECL0_Share(Datatype p1, Datatype p2) : p1(p1), p2(p2) {}
-    OECL0_Share(Datatype p1) : p1(p1) {}
+    OECL0_POST_Share() {}
+    OECL0_POST_Share(Datatype p1, Datatype p2) : p1(p1), p2(p2) {}
+    OECL0_POST_Share(Datatype p1) : p1(p1) {}
 
 
     
 
-OECL0_Share public_val(Datatype a)
+OECL0_POST_Share public_val(Datatype a)
 {
-    return OECL0_Share();
+    return OECL0_POST_Share();
 }
 
-OECL0_Share Not() const
+OECL0_POST_Share Not() const
 {
-    return OECL0_Share();
+    return OECL0_POST_Share();
 }
 
 template <typename func_add>
-OECL0_Share Add(OECL0_Share b, func_add ADD) const
+OECL0_POST_Share Add(OECL0_POST_Share b, func_add ADD) const
 {
-    return OECL0_Share();
+    return OECL0_POST_Share();
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-void prepare_dot_add(OECL0_Share a, OECL0_Share b , OECL0_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+void prepare_dot_add(OECL0_POST_Share a, OECL0_POST_Share b , OECL0_POST_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
 {
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-OECL0_Share prepare_dot(const OECL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+OECL0_POST_Share prepare_dot(const OECL0_POST_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-    return OECL0_Share();
+    return OECL0_POST_Share();
 }
 
 template <typename func_add, typename func_sub>
@@ -59,9 +59,9 @@ void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OECL0_Share prepare_mult(OECL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    OECL0_POST_Share prepare_mult(OECL0_POST_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-    return OECL0_Share();
+    return OECL0_POST_Share();
 }
 
 template <typename func_add, typename func_sub>
@@ -111,43 +111,43 @@ static void receive()
 
 static void communicate()
 {
-#if PRE == 0
+/* #if PRE == 0 */
     communicate_live();
-#endif
+/* #endif */
 }
 
-static void prepare_A2B_S1(OECL0_Share in[], OECL0_Share out[])
+static void prepare_A2B_S1(OECL0_POST_Share in[], OECL0_POST_Share out[])
 {
 }
 
 
-static void prepare_A2B_S2(OECL0_Share in[], OECL0_Share out[])
+static void prepare_A2B_S2(OECL0_POST_Share in[], OECL0_POST_Share out[])
 {
 }
 
-static void complete_A2B_S1(OECL0_Share out[])
+static void complete_A2B_S1(OECL0_POST_Share out[])
 {
 
 }
-static void complete_A2B_S2(OECL0_Share out[])
+static void complete_A2B_S2(OECL0_POST_Share out[])
 {
 
 }
 
-void prepare_bit_injection_S1(OECL0_Share out[])
+void prepare_bit_injection_S1(OECL0_POST_Share out[])
 {
 }
 
-void prepare_bit_injection_S2(OECL0_Share out[])
+void prepare_bit_injection_S2(OECL0_POST_Share out[])
 {
 }
 
-static void complete_bit_injection_S1(OECL0_Share out[])
+static void complete_bit_injection_S1(OECL0_POST_Share out[])
 {
     
 }
 
-static void complete_bit_injection_S2(OECL0_Share out[])
+static void complete_bit_injection_S2(OECL0_POST_Share out[])
 {
 
 

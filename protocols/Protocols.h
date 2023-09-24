@@ -42,6 +42,18 @@
         #include "3-PC/sharemind/sharemind_template.hpp"
     #endif
 #elif PROTOCOL == astra 
+    #if PRE == 1
+        #if PARTY == 0
+            #define PROTOCOL_PRE ASTRA0_Share
+            #include "3-PC/astra/astra-P_0_template.hpp"
+        #endif
+        #if PARTY == 1
+            #define PROTOCOL_PRE -1
+        #endif
+        #if PARTY == 2
+            #define PROTOCOL_PRE -1
+        #endif
+    #endif
     #if INIT == 1
         #if PARTY == 0
             #define PROTOCOL_INIT OECL0_init
@@ -58,8 +70,13 @@
     #endif
     #if LIVE == 1 
         #if PARTY == 0
-            #define PROTOCOL_LIVE ASTRA0_Share
-            #include "3-PC/astra/astra-P_0_template.hpp"
+            #if PRE == 1
+                #define PROTOCOL_LIVE OECL0_POST_Share
+                #include "3-PC/ours/oecl-P_0-post_template.hpp"
+            #else
+                #define PROTOCOL_LIVE ASTRA0_Share
+                #include "3-PC/astra/astra-P_0_template.hpp"
+            #endif
         #endif
         #if PARTY == 1
             #define PROTOCOL_LIVE ASTRA1_Share
@@ -120,7 +137,7 @@
 #elif PROTOCOL == orep 
     #if PRE == 1
         #if PARTY == 0
-            #define PROTOCOL_PRE OECL0
+            #define PROTOCOL_PRE OECL0_Share
             #include "3-PC/ours/oecl-P_0_template.hpp"
         #endif
         #if PARTY == 1
@@ -147,7 +164,7 @@
     #if LIVE == 1 
         #if PARTY == 0
             #if PRE == 1
-                #define PROTOCOL_LIVE OECL0_POST
+                #define PROTOCOL_LIVE OECL0_POST_Share
                 /* #define HAS_POST_PROTOCOL 1 */
                 #include "3-PC/ours/oecl-P_0-post_template.hpp"
             #else
@@ -227,7 +244,7 @@
         #endif
         #if PARTY == 3
             #if PRE == 1
-                #define PROTOCOL_LIVE OEC_MAL3_POST_Share
+                #define PROTOCOL_LIVE OECL_MAL3_POST_Share
                 /* #define HAS_POST_PROTOCOL 1 */
                 #include "4-PC/ours/oec-mal-P_3-post_template.hpp"
             #else
@@ -237,6 +254,21 @@
         #endif
     #endif
     #elif PROTOCOL == Tetrad
+    #if PRE == 1
+        #if PARTY == 0
+            #define PROTOCOL_PRE -1
+        #endif
+        #if PARTY == 1
+            #define PROTOCOL_PRE -1
+        #endif
+        #if PARTY == 2
+            #define PROTOCOL_PRE -1
+        #endif
+        #if PARTY == 3
+            #define PROTOCOL_PRE Tetrad3_Share
+            #include "4-PC/tetrad/Tetrad-P_3_template.hpp"
+        #endif
+#endif
     #if INIT == 1
         #if PARTY == 0
             #define PROTOCOL_INIT OEC_MAL0_init
@@ -274,8 +306,13 @@
             #include "4-PC/tetrad/Tetrad-P_2_template.hpp"
         #endif
         #if PARTY == 3
+            #if PRE == 1
+                #define PROTOCOL_LIVE OECL_MAL3_POST_Share
+                #include "4-PC/ours/oec-mal-P_3-post_template.hpp"
+            #else
                 #define PROTOCOL_LIVE Tetrad3_Share
                 #include "4-PC/tetrad/Tetrad-P_3_template.hpp"
+            #endif
         #endif
     #endif
     #elif PROTOCOL == FantasticFour

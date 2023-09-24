@@ -4,22 +4,22 @@ template <typename Datatype>
 class Tetrad1_Share
 {
 private:
-    DATATYPE mv;
-    DATATYPE l0;
-    DATATYPE l1;
-    DATATYPE storage; // used for storing results needed later
+    Datatype mv;
+    Datatype l0;
+    Datatype l1;
+    Datatype storage; // used for storing results needed later
 public:
 
 Tetrad1_Share()  {}
 
-Tetrad1_Share(DATATYPE a, DATATYPE b, DATATYPE c) 
+Tetrad1_Share(Datatype a, Datatype b, Datatype c) 
 {
     mv = a;
     l0 = b;
     l1 = c;
 }
 
-Tetrad1_Share public_val(DATATYPE a)
+Tetrad1_Share public_val(Datatype a)
 {
     return Tetrad1_Share(a,SET_ALL_ZERO(),SET_ALL_ZERO());
 }
@@ -42,20 +42,21 @@ template <typename func_add, typename func_sub, typename func_mul>
     {
 //l0 -> lambda1, l1 -> lambda3
 Tetrad1_Share c;
-DATATYPE y1ab = ADD( ADD(MULT(l0,b.l1),MULT(l1,b.l0)), MULT(l1,l1));
-DATATYPE u1 = getRandomVal(P_013);
+Datatype y1ab = ADD( ADD(MULT(l0,b.l1),MULT(l1,b.l0)), MULT(l1,l1));
+Datatype u1 = getRandomVal(P_013);
+
+Datatype s = getRandomVal(P_123);
 
 //q:
 c.mv = SET_ALL_ZERO();
 c.l0 = getRandomVal(P_013); //lambda1
 c.l1 = SET_ALL_ZERO();  //lambda3
 
-DATATYPE s = getRandomVal(P_123);
 
-DATATYPE y1 = SUB( ADD(y1ab,u1), ADD(MULT(l0,b.mv),MULT(mv,b.l0))) ;
-DATATYPE y3 = SUB(SET_ALL_ZERO(),ADD(MULT(l1,b.mv),MULT(mv,b.l1)));
+Datatype y1 = SUB( ADD(y1ab,u1), ADD(MULT(l0,b.mv),MULT(mv,b.l0))) ;
+Datatype y3 = SUB(SET_ALL_ZERO(),ADD(MULT(l1,b.mv),MULT(mv,b.l1)));
 send_to_live(P_2, y1);
-DATATYPE z_r = ADD( ADD(y1, y3), MULT(mv,b.mv));
+Datatype z_r = ADD( ADD(y1, y3), MULT(mv,b.mv));
 
 //Trick to store values neede later
 c.storage = c.l0;
@@ -64,13 +65,39 @@ c.l1 = s;
 c.mv = z_r;
 return c;
 }
+template <typename func_add, typename func_sub>
+void complete_mult(func_add ADD, func_sub SUB)
+{
+    Datatype y2 = receive_from_live(P_2);
+    Datatype v = ADD(ADD(l0,l1),y2); // y1 + y2 + s for verification
+    store_compare_view(P_012, v);
+    mv = ADD(mv, y2);
+
+    //p:
+    /* Datatype pl1 = SET_ALL_ZERO(); // known by all */
+    /* Datatype pl2 = SET_ALL_ZERO(); // known by all */
+    Datatype pl3 = getRandomVal(P_123); //hide from P_0
+    Datatype pmv = ADD(mv,pl3);                                   //
+    store_compare_view(P_0, pmv);
+
+
+
+    //o = p + q
+    mv = pmv;
+    l0 = storage; //lambda1
+    l1 = pl3; //lambda3
+    /* std::cout << "mv: " << mv << std::endl; */
+    /* std::cout << "l1: " << l0 << std::endl; */
+    /* std::cout << "l3: " << l1 << std::endl; */
+
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
 Tetrad1_Share prepare_dot(const Tetrad1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Tetrad1_Share c;
-DATATYPE y1ab = ADD( ADD(MULT(l0,b.l1),MULT(l1,b.l0)), MULT(l1,l1));
-DATATYPE y3 = SUB( y1ab, ADD(MULT(l0,b.mv),MULT(mv,b.l0))) ;
+Datatype y1ab = ADD( ADD(MULT(l0,b.l1),MULT(l1,b.l0)), MULT(l1,l1));
+Datatype y3 = SUB( y1ab, ADD(MULT(l0,b.mv),MULT(mv,b.l0))) ;
  c.l0 = SUB(SET_ALL_ZERO(),ADD(MULT(l1,b.mv),MULT(mv,b.l1))); //y1
  c.l1 = ADD( ADD(c.l0, y3), MULT(mv,b.mv)); //z_r
 return c;
@@ -82,14 +109,14 @@ void mask_and_send_dot(func_add ADD, func_sub SUB)
 Datatype y1 = l0;
 Datatype z_r = l1;
 Tetrad1_Share c;
-DATATYPE u1 = getRandomVal(P_013);
+Datatype u1 = getRandomVal(P_013);
 
 //q:
 Datatype cmv = SET_ALL_ZERO();
 Datatype cl0 = getRandomVal(P_013); //lambda1
 Datatype cl1 = SET_ALL_ZERO();  //lambda3
 
-DATATYPE s = getRandomVal(P_123);
+Datatype s = getRandomVal(P_123);
 
 y1 = ADD(u1, y1);
 send_to_live(P_2, y1);
@@ -102,28 +129,6 @@ mv = z_r;
 }
 
 
-template <typename func_add, typename func_sub>
-void complete_mult(func_add ADD, func_sub SUB)
-{
-    DATATYPE y1 = receive_from_live(P_2);
-    DATATYPE v = ADD(ADD(l0,l1),y1); // y1 + y2 + s for verification
-    store_compare_view(P_012, v);
-    mv = ADD(mv, y1);
-
-    //p:
-    /* DATATYPE pl1 = SET_ALL_ZERO(); // known by all */
-    /* DATATYPE pl2 = SET_ALL_ZERO(); // known by all */
-    DATATYPE pl3 = getRandomVal(P_123); //hide from P_0
-    DATATYPE pmv = ADD(mv,pl3);                                   //
-    store_compare_view(P_0, pmv);
-
-
-
-    //o = p + q
-    mv = pmv;
-    l0 = storage; //lambda1
-    l1 = pl3; //lambda3
-}
 
 
 
@@ -136,13 +141,13 @@ template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
 
-//receive lambda3 from P_3
-store_compare_view(P_0, l0); //help P_0 verifying
+//receive lambda2 from P_3
+store_compare_view(P_0, l1); //help P_0 verifying
 store_compare_view(P_3, mv); //help P_3 verifying
                               
-DATATYPE lambda2 = receive_from_live(P_3);
+Datatype lambda2 = receive_from_live(P_3);
 store_compare_view(P_0, lambda2); //get help from P_0 to veriy
-DATATYPE result = SUB(mv, lambda2);
+Datatype result = SUB(mv, lambda2);
 result = SUB(result, l0);
 result = SUB(result, l1);
 return result;
@@ -158,7 +163,7 @@ if constexpr(id == PSELF)
     mv = get_input_live();
     l0 = getRandomVal(P_013); //l1
     l1 = getRandomVal(P_123); //l3
-    DATATYPE l2 = SET_ALL_ZERO();
+    Datatype l2 = SET_ALL_ZERO();
     mv = ADD( ADD(mv, l2), ADD(l0,l1));
     send_to_live(P_0, mv);
     send_to_live(P_2, mv);

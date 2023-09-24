@@ -10,6 +10,7 @@
 #include <new>
 #include <memory>
 #include "arch/DATATYPE.h"
+#include "arch/STD.h"
 #include "protocols/init_protocol_base.hpp"
 #include "protocols/live_protocol_base.hpp"
 
@@ -249,9 +250,9 @@ std::chrono::high_resolution_clock::time_point p =
 #if PROTOCOL_PRE == -1
             // receive only
     #else
-        auto p_pre = PROTOCOL_PRE(OPT_SHARE);
+        /* auto p_pre = PROTOCOL_PRE(); */
         auto garbage_PRE = new RESULTTYPE;
-        FUNCTION<PROTOCOL_PRE,PRE_SHARE>(p_pre,garbage_PRE);
+        FUNCTION<PROTOCOL_PRE<DATATYPE>>(garbage_PRE);
     #endif
     // manual send
 
@@ -313,7 +314,7 @@ receiving_rounds = 0;
          init_from_file();
         finalize(ips);
     #else
-        auto p_init = PROTOCOL_INIT(OPT_SHARE);
+        auto p_init = PROTOCOL_INIT<DATATYPE>();
         p_init.finalize(ips);
         /* p_init.finalize(ips,receiving_args,sending_args); */
     #endif

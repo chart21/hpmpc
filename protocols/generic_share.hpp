@@ -3,6 +3,7 @@
 #include "../networking/sockethelper.h"
 #include "../networking/buffers.h"
 #include "../utils/randomizer.h"
+#include <iostream>
 #if INIT == 1
     #include "init_protocol_base.hpp"
 #endif

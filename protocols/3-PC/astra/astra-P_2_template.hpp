@@ -34,7 +34,13 @@ template <typename func_add, typename func_sub, typename func_mul>
 {
 ASTRA2_Share c;
 DATATYPE yz2 = getRandomVal(P_0); //yz1
+
+#if PRE == 0
 DATATYPE yxy2 = receive_from_live(P_0); 
+#else
+DATATYPE yxy2 = pre_receive_from_live(P_0);
+#endif
+
 c.mv = ADD( ADD( SUB( MULT(mv,b.mv), ADD( MULT(mv,b.lv), MULT(b.mv, lv) )) , yz2 ), yxy2); 
 send_to_live(P_1,c.mv); 
 c.lv = yz2;
@@ -53,7 +59,11 @@ template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
 DATATYPE yz2 = getRandomVal(P_0); //yz1
+#if PRE == 0
 DATATYPE yxy2 = receive_from_live(P_0); 
+#else
+DATATYPE yxy2 = pre_receive_from_live(P_0);
+#endif
 mv = ADD(mv, ADD(yz2,yxy2));
 send_to_live(P_1,mv); 
 lv = yz2;
@@ -75,7 +85,11 @@ send_to_live(P_0,mv);
 template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
+#if PRE == 0
 return SUB(mv, receive_from_live(P_0));
+#else
+return SUB(mv, pre_receive_from_live(P_0));
+#endif
 }
 
 
@@ -104,7 +118,11 @@ if constexpr(id == P_0)
 {
 #if OPT_SHARE == 1
         mv = SET_ALL_ZERO(); //Check options 
+        #if PRE == 0
         lv = receive_from_live(P_0);
+        #else
+        lv = pre_receive_from_live(P_0);
+        #endif
 #else
         mv = receive_from_live(P_0);
 #endif

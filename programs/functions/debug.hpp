@@ -21,7 +21,8 @@ for(int j = 0; j < BITLENGTH; j++)
 #if FUNCTION_IDENTIFIER == 7
 /* inputs[i][j] = 3; */
 /* if(3 != var[i][j] && 9 != var[i][j]) */
-if(var[i][j] > 242)
+std::cout << "P" << PARTY << " " << var[i][j] << std::endl;
+if(var[i][j] < 2 || var[i][j] > 242)
 {
     num_erros++;
     std::cout << PARTY << " " << var[i][j] << " " << i << " " << j << std::endl;
@@ -96,23 +97,24 @@ inputs[3][i].template complete_receive_from<P_3>();
 Protocol::communicate();
 
 for(int j = 0; j < num_players; j++)
-{
-
-for (int i = 0; i < BITLENGTH; i++) {
-
+    for (int i = 0; i < BITLENGTH; i++)
     inputs[j][i].prepare_reveal_to_all();
-}
-}
 Protocol::communicate();
 
 for(int j = 0; j < num_players; j++)
-{
+    for (int i = 0; i < BITLENGTH; i++)
+        result[j][i] = inputs[j][i].complete_reveal_to_all();
 
-for (int i = 0; i < BITLENGTH; i++) {
+Protocol::communicate();
 
-    result[j][i] = inputs[j][i].complete_reveal_to_all();
-}
-}
+for(int j = 0; j < num_players; j++)
+    for (int i = 0; i < BITLENGTH; i++)
+    inputs[j][i].prepare_reveal_to_all();
+Protocol::communicate();
+
+for(int j = 0; j < num_players; j++)
+    for (int i = 0; i < BITLENGTH; i++)
+        result[j][i] = inputs[j][i].complete_reveal_to_all();
 
 Protocol::communicate();
 
@@ -148,7 +150,7 @@ for (int i = 0; i < BITLENGTH; i++) {
 #endif
 }
 }
-
+Protocol::communicate();
 for(int j = 0; j < num_players; j++)
 {
 
@@ -167,7 +169,7 @@ for (int i = 0; i < BITLENGTH; i++) {
     result[j][i] = inputs[j][i].complete_reveal_to_all();
 }
 }
-
+Protocol::communicate();
 std::cout <<"P" << PARTY <<  ": " "Testing and/mult gates: " << std::endl;
 compare(result, "and/mult gates");
 
@@ -179,8 +181,6 @@ for (int i = 0; i < BITLENGTH; i++) {
     inputs[j][i] = inputs[j][i] + inputs[j][i];
 #else
     inputs[j][i] = inputs[j][i] ^ inputs[j][i];
-#endif
-#if FUNCTION_IDENTIFIER != 7
     if(i != j)
         inputs[j][i] = !inputs[j][i];
 #endif

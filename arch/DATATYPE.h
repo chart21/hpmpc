@@ -160,9 +160,9 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 
 
     //temporary solution
-#if (PROTOCOL == 4 || PROTOCOL == 5) && PARTY == 0
+#if (PROTOCOL == 3 || PROTOCOL == 4 || PROTOCOL == 5) && PARTY == 0
 #define HAS_POST_PROTOCOL 1
-#elif PROTOCOL == 12 && PARTY == 3
+#elif (PROTOCOL == 8 || PROTOCOL == 12) && PARTY == 3
 #define HAS_POST_PROTOCOL 1
 #endif
 

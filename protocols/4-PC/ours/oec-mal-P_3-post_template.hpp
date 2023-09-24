@@ -49,13 +49,42 @@ void prepare_reveal_to_all()
 {
 }    
 
+template <typename func_add, typename func_sub, typename func_mul>
+OECL_MAL3_POST_Share prepare_dot(const OECL_MAL3_POST_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    return OECL_MAL3_POST_Share();
+}
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+}
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+}
+
+
 
 template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
+#if PROTOCOL == 8
+Datatype mv = receive_from_live(P_0);
+store_compare_view(P_1, mv); //verify own value
+Datatype result = SUB(mv, retrieve_output_share());
+result = SUB(result, retrieve_output_share());
+result = SUB(result, retrieve_output_share());
+#else
 Datatype result = SUB(receive_from_live(P_0),retrieve_output_share());
 store_compare_view(P_123, retrieve_output_share());
 store_compare_view(P_0123, result);
+#endif
 return result;
 }
 
@@ -72,17 +101,17 @@ void complete_receive_from(func_add ADD, func_sub SUB)
 
 
 
-void send()
+static void send()
 {
     send_live();
 }
 
-void receive()
+static void receive()
 {
     receive_live();
 }
 
-void communicate()
+static void communicate()
 {
     communicate_live();
 }
