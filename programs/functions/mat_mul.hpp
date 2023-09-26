@@ -501,6 +501,14 @@ void RELU_bench(DATATYPE* res)
     {
         result[i].complete_mult();
     }
+
+    // dummy reveal for sync
+    result[NUM_INPUTS-1].prepare_reveal_to_all();
+    Share::communicate();
+    UINT_TYPE dummy[DATTYPE];
+    result[NUM_INPUTS-1].complete_reveal_to_all(dummy);
+
+
     
 
 
@@ -890,6 +898,13 @@ MatX<D> input(1, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
     d_conv.output(j).complete_mult();
     }
 
+    //dummy reveal
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    UINT_TYPE dummy[DATTYPE];
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
+
+
 }
 
 
@@ -924,6 +939,12 @@ d_conv.backward(input,d_conv.output);
     for (int j = 0; j < d_conv.output.size(); j++) {
     d_conv.output(j).complete_mult();
     }
+    
+    //dummy reveal
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    UINT_TYPE dummy[DATTYPE];
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 
 }
 
@@ -950,6 +971,12 @@ void FC_bench(DATATYPE* res)
     {
             c(i).complete_mult();
     }
+    
+    //dummy reveal
+    c(NUM_INPUTS - 1).prepare_reveal_to_all();
+    Share::communicate();
+    UINT_TYPE dummy[DATTYPE];
+    c(NUM_INPUTS - 1).complete_reveal_to_all(dummy);
 }
 
 template<typename Share>
@@ -973,6 +1000,12 @@ void dot_prod_eigen_bench(DATATYPE* res)
     {
             c(i).complete_mult();
     }
+
+    //dummy reveal
+    c(NUM_INPUTS - 1).prepare_reveal_to_all();
+    Share::communicate();
+    UINT_TYPE dummy[DATTYPE];
+    c(NUM_INPUTS - 1).complete_reveal_to_all(dummy);
 }
 
 
