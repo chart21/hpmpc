@@ -248,6 +248,12 @@ void dot_prod_bench(DATATYPE* res)
             c[i].complete_mult();
     
 }
+
+    Share::communicate();
+    c[NUM_INPUTS-1].prepare_reveal_to_all();
+    Share::communicate();
+    *res = c[NUM_INPUTS-1].complete_reveal_to_all();
+
 delete[] a;
 delete[] b;
 delete[] c;
