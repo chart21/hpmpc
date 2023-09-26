@@ -71,11 +71,11 @@ p2 = SUB(SET_ALL_ZERO(), p2); // - r0,1_2
 template <typename func_add, typename func_sub, typename func_mul>
     OECL1_Share prepare_mult(OECL1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-OECL1_Share c;
-c.p1 = ADD(getRandomVal(P_0), ADD(MULT(p1,b.p2), MULT(b.p1,p2))); //remove P_1_mask, then (a+ra)rl + (b+rb)rr 
-c.p2 = getRandomVal(P_0); //generate P_1_2 mask
-send_to_live(P_2,SUB(c.p1,c.p2)); 
-return c;
+/* OECL1_Share c; */
+Datatype cp1 = ADD(getRandomVal(P_0), ADD(MULT(p1,b.p2), MULT(b.p1,p2))); //remove P_1_mask, then (a+ra)rl + (b+rb)rr 
+Datatype cp2 = getRandomVal(P_0); //generate P_1_2 mask
+send_to_live(P_2,SUB(cp1,cp2)); 
+return OECL1_Share(cp1,cp2);
 }
 
 template <typename func_add, typename func_sub>

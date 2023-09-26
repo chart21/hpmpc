@@ -100,15 +100,15 @@ template <typename func_add, typename func_sub, typename func_mul>
     OECL0_Share prepare_mult(OECL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype maskP_1 = getRandomVal(P_1);
-Datatype maskP_1_2 = getRandomVal(P_1);
-Datatype maskP_2 = getRandomVal(P_2);
+/* Datatype maskP_1_2 = getRandomVal(P_1); */
+/* Datatype maskP_2 = getRandomVal(P_2); */
 #if PRE == 1
 pre_send_to_live(P_2, SUB( ADD(MULT(p1,b.p1),maskP_1), MULT( SUB(p1,p2), SUB(b.p1,b.p2)  ))); 
 #else
 send_to_live(P_2, SUB( ADD(MULT(p1,b.p1),maskP_1), MULT( SUB(p1,p2), SUB(b.p1,b.p2)  ))); 
 #endif
 // for arithmetic circuikts this will be more efficient to reduce mult from 3 to 2: p1 b.p1 + (p1 + p2) (b.p1 + b.p2)
-return OECL0_Share(maskP_2,maskP_1_2);
+return OECL0_Share(getRandomVal(P_2),getRandomVal(P_1));
 }
 
 template <typename func_add, typename func_sub>

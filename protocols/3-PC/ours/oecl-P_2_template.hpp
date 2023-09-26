@@ -74,16 +74,16 @@ p1 = SUB(p1, p2); // - [ ( (e + r0,1 + r0,2)^T + r0,1_2 ) ]
 template <typename func_add, typename func_sub, typename func_mul>
     OECL2_Share prepare_mult(OECL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-OECL2_Share c;
-c.p2 = getRandomVal(P_0); // P_2 mask for P_1
+/* OECL2_Share c; */
+Datatype cp2 = getRandomVal(P_0); // P_2 mask for P_1
 #if PRE == 1
-c.p1 = ADD(pre_receive_from_live(P_0), MULT(p1,b.p1)); // P_0_message + (a+rr) (b+rl)
+Datatype cp1 = ADD(pre_receive_from_live(P_0), MULT(p1,b.p1)); // P_0_message + (a+rr) (b+rl)
 #else
-c.p1 = ADD(receive_from_live(P_0), MULT(p1,b.p1)); // P_0_message + (a+rr) (b+rl)
+Datatype cp1 = ADD(receive_from_live(P_0), MULT(p1,b.p1)); // P_0_message + (a+rr) (b+rl)
 #endif
 
-send_to_live(P_1, ADD(c.p1,c.p2)); 
-return c;
+send_to_live(P_1, ADD(cp1,cp2)); 
+return OECL2_Share(cp1,cp2); // (a+rr) (b+rl)
 }
 
 template <typename func_add, typename func_sub>
