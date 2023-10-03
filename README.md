@@ -113,7 +113,7 @@ The throughput in AND gates per second for instance, can then be calculated as:
 
 (NUM_INPUTS * DATTYPE * PROCESS_NUM * Split_Roles_Multiplier) / Total time measured.
 
-When using the Split-Roles, Split_Roles_Multiplier is 6 for three node settings and 24 for four node settings. Otherwise, the multipler is 1.
+When using the Split-Roles, Split_Roles_Multiplier is 6 for three-node settings and 24 for four-node settings. Otherwise, the multiplier is 1.
 
 
 ### Debugging

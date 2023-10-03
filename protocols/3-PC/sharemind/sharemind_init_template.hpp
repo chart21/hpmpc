@@ -1,5 +1,4 @@
 #pragma once
-#include "sharemind_base.hpp"
 template <typename Datatype>
 class Sharemind_init
 {
