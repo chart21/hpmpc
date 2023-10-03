@@ -2,7 +2,9 @@
 
 This project implements multiple MPC protocols in the honest majority setting.
 The following protocols are currently supported:
+
 3-PC: Sharemind, Replicated, OECL (Ours), TTP
+
 4-PC: Fantastic Four, Tetrad, OEC-MAL (Ours), TTP
 
 ## Getting Started
