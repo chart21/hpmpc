@@ -2,8 +2,8 @@
 
 This project implements multiple MPC protocols in the honest majority setting.
 The following protocols are currently supported:
-3-PC: Sharemind, Replicated, OECL, TTP
-4-PC: Fantastic Four, Tetrad, OEC-MAL, TTP
+3-PC: Sharemind, Replicated, OECL (Ours), TTP
+4-PC: Fantastic Four, Tetrad, OEC-MAL (Ours), TTP
 
 ## Getting Started
 
@@ -14,7 +14,7 @@ The following commands are a quick way to compile the current configuration for 
 
 > ./scripts/run_loally.sh -n 3
 
-For a 4-PC protocol you can run.
+For a 4-PC protocol, you can run.
 
 > ./scripts/config.sh -p all4
 
@@ -26,9 +26,9 @@ Most configuration is contained in the file `config.h`. Here is an overview of t
 
 - PROTOCOL: Select the protocol to be used. Options are: 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OECL (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: OEC-MAL - Base (4-PC), 11: OEC-MAL - Het (4-PC), 12: OEC-MAL: Off/On (4-PC). 
 - PARTY: Define the party ID for the current node, starting from 0. 
-- FUNCTION_IDENTIFIER: Select the function for computation. Currently includes running secure search (0), AND/Multiplication gates (1-6). Also includes a debug funtcion for boolean/arithemtic circuit to check if all basic functions of a protocol are working correctly (7-9). Matrix Operators require the Eigen library. Dot Products can be tested with function 14.
+- FUNCTION_IDENTIFIER: Select the function for computation. Currently includes running secure search (0), AND/Multiplication gates (1-6). Also includes a debug function for boolean/arithemtic circuit to check if all basic functions of a protocol are working correctly (7-9). Matrix Operators require the Eigen library. Dot Products can be tested with function 14.
 - DATTYPE: Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported sizes are 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512).
-- PRE: Option to use a preprocessing phase. The following protoocls support a preprocessing phase: 3,5,8,12
+- PRE: Option to use a preprocessing phase. The following protocols support a preprocessing phase: 3,5,8,12
 - NUM_INPUTS: Define the number of inputs.
 - PROCESS_NUM: Number of parallel processes to use.
 - USE_SSL: Use SSL encrypted communication? 
@@ -62,12 +62,11 @@ Changes can be applied either directly in the file or via running ```scripts/con
    -t Total Timeout in seconds for attempting to connect to a player"
    -m VERIFY_BUFFER: How many gates should be buffered until verifying them? 0 means the data of an entire communication round is buffered "
    -k Timeout in milliseconds before attempting to connect again to a socket "
-   -y SEND_BUFFER: How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered
-"
+   -y SEND_BUFFER: How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered"
    -z RECV_BUFFER: How many receiving messages should be buffered until the main thread is signaled that data is ready? 0 means that all data of a communication round needs to be ready before the main thread is signaled.
 ```
 
-The following configuration compiles an executable for P_2, 1024 inputs, sliced 256 times in AVX-2 variables, using Protocol Replicated. All other configuarations are fetched from `config.h`.
+The following configuration compiles an executable for P2, 1024 inputs, sliced 256 times in AVX-2 variables, using Protocol Replicated. All other configuarations are fetched from `config.h`.
 > ./scripts/config.sh -p 2 -n 1024 -d 256 -s 2 
 
 The following configuration uses the previous configuration but compiles an executable for all players. This is useful when running the parties on the same host.
@@ -89,18 +88,18 @@ The following script compiles 24 executables of a 4-PC protocol for player 0 to 
 
 In a distributed setup, you need to specify the IP addresses for each party and run one executable on each node.
 
-Execute P_0 executable.
-> ./run-P_0.o IP_P_0 IP_P_2
+Execute P0 executable.
+> ./run-P0.o IP_P1 IP_P2
 
-Execute P_1 executable.
-> ./run-P_1.o IP_P_0 IP_P_2
+Execute P1 executable.
+> ./run-P1.o IP_P0 IP_P2
 
-Execute P_2 executable.
-> ./run-P_2.o IP_P_0 IP_P_1
+Execute P2 executable.
+> ./run-P2.o IP_P0 IP_P1
 
 
 Run Split-Roles (3) executables for Player 0.
-> ./scripts/split-roles-3-execute.sh -p 0 -a IP_0 -b IP_1 -c IP_2 -d IP_3
+> ./scripts/split-roles-3-execute.sh -p 0 -a IP_P0 -b IP_P1 -c IP_P2 -d IP_P3
 
 To run all players locally on one machine, omit the IP addresses or set them to 127.0.0.1, and use -p all
 > ./scripts/split-roles-3-execute.sh -p all
@@ -112,16 +111,11 @@ To measure the throughput of a specific function such as 64-bit mult, AND, or se
 
 The throughput in AND gates per second for instance, can then be calculated as:
 
-![equation](https://latex.codecogs.com/gif.latex?%5Cfrac%7B%5Ctext%7BNUM%5C_INPUTS%7D%20%5Ctimes%20%5Ctext%7BDATATYPE%7D%20%5Ctimes%20%5Ctext%7BPROCESS%5C_NUM%7D%20%5Ctimes%20%5Ctext%7BSplit%5C_Roles%5C_Multiplier%7D%7D%7B%5Ctext%7BTotal%20time%20measured%7D%7D)
+(NUM_INPUTS * DATTYPE * PROCESS_NUM * Split_Roles_Multiplier) / Total time measured.
 
+When using the Split-Roles, Split_Roles_Multiplier is 6 for three-node settings and 24 for four-node settings. Otherwise, the multiplier is 1.
 
 
 ### Debugging
 
-To check correctness of a protocol, the debug function (function 7) checks the correctness of all basic gates in the boolean domain. Function 8-9 does the same in the arithmetic domain using a ring size of $2^{32}$ or $2^{64}$, respectively. Note that BITLENGTH and DATTYPE specified in `config.h` need to be compatible with the computation domain. DATTYPE = 128 requires support for SSE, DATTYPE = 256 requires support for AVX-2, DATTYPE = 512, requires support for AVX-512.
-
-The following combinations are valid for 32-bit computation: BITLENGTH = 32, DATTYPE = 32/128/256/512
-
-The following combinations are valid for 64-bit computation: BITLENGTH = 64, DATTYPE = 64//256 (requires AVX-512)/512
-
-
+To check the correctness of a protocol, the debug function (function 7) checks the correctness of all basic gates in the boolean domain. Function 8-9 do the same in the arithmetic domain using a ring size of $2^{32}$ or $2^{64}$, respectively. Note that BITLENGTH and DATTYPE specified in `config.h` must be compatible with the computation domain. DATTYPE = 128 requires support for SSE, DATTYPE = 256 for AVX-2, and DATTYPE = 512, for AVX-512. The following combinations are valid for 32-bit computation: BITLENGTH = 32, DATTYPE = 32/128/256/512. The following combinations are valid for 64-bit computation: BITLENGTH = 64, DATTYPE = 64//256 (requires AVX-512)/512.
