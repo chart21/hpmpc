@@ -1,7 +1,7 @@
 # High-Throughput Implementation of Secure Multiparty Computation (MPC) protocols
 
 This project implements multiple MPC protocols in the honest majority setting.
-The following protocols are currently supported:
+The following protocols are currently supported.
 
 3-PC: Sharemind, Replicated, OECL (Ours), TTP
 
