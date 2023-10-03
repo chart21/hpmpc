@@ -113,14 +113,10 @@ The throughput in AND gates per second for instance, can then be calculated as:
 
 (NUM_INPUTS * DATTYPE * PROCESS_NUM * Split_Roles_Multiplier) / Total time measured.
 
-When using the Split-Roles, Split_Roles_Multiplier is 6 for three-node settings and 24 for four-node settings. Otherwise, the multiplier is 1.
+When using the Split-Roles, Split_Roles_Multiplier is 6 for three node settings and 24 for four node settings. Otherwise, the multipler is 1.
 
 
 ### Debugging
 
 To check the correctness of a protocol, the debug function (function 7) checks the correctness of all basic gates in the boolean domain. Function 8-9 do the same in the arithmetic domain using a ring size of $2^{32}$ or $2^{64}$, respectively. Note that BITLENGTH and DATTYPE specified in `config.h` must be compatible with the computation domain. DATTYPE = 128 requires support for SSE, DATTYPE = 256 for AVX-2, and DATTYPE = 512, for AVX-512. The following combinations are valid for 32-bit computation: BITLENGTH = 32, DATTYPE = 32/128/256/512. The following combinations are valid for 64-bit computation: BITLENGTH = 64, DATTYPE = 64//256 (requires AVX-512)/512.
-
-
-
-
 
