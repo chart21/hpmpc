@@ -1,6 +1,9 @@
 # High-Throughput Implementation of Secure Multiparty Computation (MPC) protocols
 
 This project implements multiple MPC protocols in the honest majority setting.
+The following protocols are currently supported:
+3-PC: Sharemind, Replicated, OECL, TTP
+4-PC: Fantastic Four, Tetrad, OEC-MAL, TTP
 
 ## Getting Started
 
@@ -21,11 +24,11 @@ For a 4-PC protocol you can run.
 
 Most configuration is contained in the file `config.h`. Here is an overview of the most important settings.
 
-- PROTOCOL: Select the protocol to be used. Options are: 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC). Protocols 1 and 2 only support boolean circuits currently.
+- PROTOCOL: Select the protocol to be used. Options are: 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OECL (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: OEC-MAL - Base (4-PC), 11: OEC-MAL - Het (4-PC), 12: OEC-MAL: Off/On (4-PC). 
 - PARTY: Define the party ID for the current node, starting from 0. 
-- FUNCTION_IDENTIFIER: Select the function for computation. Currently includes running secure search (0), AND gates (2), and 32-bit/64-bit multiplication gates (5/6). Also includes a debug funtcion for boolean/arithemtic circuit to check if all basic functions of a protocol are working correctly (4/7)
+- FUNCTION_IDENTIFIER: Select the function for computation. Currently includes running secure search (0), AND/Multiplication gates (1-6). Also includes a debug funtcion for boolean/arithemtic circuit to check if all basic functions of a protocol are working correctly (7-9). Matrix Operators require the Eigen library. Dot Products can be tested with function 14.
 - DATTYPE: Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported sizes are 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512).
-- PRE: Option to use a preprocessing phase. Currently supported by Protocols 4,5,12.
+- PRE: Option to use a preprocessing phase. The following protoocls support a preprocessing phase: 3,5,8,12
 - NUM_INPUTS: Define the number of inputs.
 - PROCESS_NUM: Number of parallel processes to use.
 - USE_SSL: Use SSL encrypted communication? 
@@ -41,11 +44,11 @@ Changes can be applied either directly in the file or via running ```scripts/con
   Only arguments you want to change have to be set.
    -n Number of elements"
    -b base_port: Needs to be the same for all players for successful networking (e.g. 6000)"
-   -d Datatype used for slicing: 1(bool),8(uint8), 32(uint32), 64(uint64),128(SSE),256(AVX),512(AVX512)"
+   -d Datatype used for slicing: 1(bool),8(uint8), 16 (uint16), 32(uint32), 64(uint64),128(SSE),256(AVX),512(AVX512)"
    -p Player ID (0/1/2/3). Use all3 or all4 for compiling for all players"
-   -f Function Idenftifier (0: search, 2: AND, ...)"
+   -f Function Idenftifier (0: search, 1: AND, ...)"
    -c Pack Bool in Char before sending? (0/1). Only used with -d 1"
-   -s MPC Protocol (1(Sharemind),2(Replicated),3(Astra),4(OEC DUP),5(OEC REP),6(TTP),...)"
+   -s MPC Protocol (1(Sharemind),2(Replicated),3(Astra),4(OEC DUP),5(OECL),6(TTP),...)"
    -i Initialize circuit separately (0) or at runtime (1)?"
    -l Include the Online Phase in this executable  (0/1)?"
    -e Compile circuit with Preprocessing phase before online phase  (0/1)?"
@@ -115,6 +118,10 @@ The throughput in AND gates per second for instance, can then be calculated as:
 
 ### Debugging
 
-To check correctness of a protocol, the debug function (function 4) checks the correctness of all basic gates in the boolean domain. Function 7 does the same in the arithmetic domain using a ring size of $2^{32}$ for $32 \le DATTYPE \le 64$. Note that our implementation of protocols 1 and 2 do not support arithmetic circuits as of now.  
+To check correctness of a protocol, the debug function (function 7) checks the correctness of all basic gates in the boolean domain. Function 8-9 does the same in the arithmetic domain using a ring size of $2^{32}$ or $2^{64}$, respectively. Note that BITLENGTH and DATTYPE specified in `config.h` need to be compatible with the computation domain. DATTYPE = 128 requires support for SSE, DATTYPE = 256 requires support for AVX-2, DATTYPE = 512, requires support for AVX-512.
 
-You can also run secure search (function 0). The expected result is a string of only zeros and a single 1 at index 7. Make sure PRINT is set to 1 in the config to verify the result.
+The following combinations are valid for 32-bit computation: BITLENGTH = 32, DATTYPE = 32/128/256/512
+
+The following combinations are valid for 64-bit computation: BITLENGTH = 64, DATTYPE = 64//256 (requires AVX-512)/512
+
+

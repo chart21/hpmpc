@@ -6,41 +6,80 @@
 #include <bitset>
 #include <cstring>
 #include "../../protocols/Protocols.h"
+#include "../../protocols/XOR_Share.hpp"
+#include "../../protocols/Additive_Share.hpp"
 #define RESULTTYPE DATATYPE
+#define COMMUNICATION_ROUNDS 1000
 
+#if FUNCTION_IDENTIFIER < 4
+#define FUNCTION MULT_BENCH
+#else
+#define FUNCTION MULT_BENCH_COMMUNICATION_ROUNDS
+#endif
 
-template<typename Pr, typename S>
-void AND_BENCH_1 (Pr P,/*outputs*/ DATATYPE* result)
+template<typename Share>
+void MULT_BENCH(DATATYPE* res)
 {
+    using S = Additive_Share<DATATYPE, Share>;
+    auto a = new S[NUM_INPUTS];
+    auto b = new S[NUM_INPUTS];
+    auto c = new S[NUM_INPUTS];
+    Share::communicate(); // dummy round
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        c[i] = a[i] * b[i];
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        c[i].complete_mult();
+    }
+    Share::communicate();
 
-/* BufferHelper buffer_helper = BufferHelper(); */
+    c[0].prepare_reveal_to_all();
 
-// allocate memory for shares
+    Share::communicate();
 
-auto gates_a = P.alloc_Share(NUM_INPUTS);
-auto gates_b = P.alloc_Share(NUM_INPUTS);
-auto gates_c = P.alloc_Share(NUM_INPUTS);
+    *res = c[0].complete_reveal_to_all();
 
-P.communicate(); // dummy communication round to simulate secret sharing
-
-for (int i = 0; i < NUM_INPUTS; i++) {
-    P.prepare_mult(gates_a[i],gates_b[i], gates_c[i], OP_ADD, OP_SUB, OP_MULT);
 }
 
-P.communicate();
+template<typename Share>
+void MULT_BENCH_COMMUNICATION_ROUNDS (DATATYPE* res)
+{
+int loop_num = NUM_INPUTS/COMMUNICATION_ROUNDS;
+using S = Additive_Share<DATATYPE, Share>;
+auto a = new S[NUM_INPUTS];
+auto b = new S[NUM_INPUTS];
+auto c = new S[NUM_INPUTS];
+Share::communicate(); // dummy communication round to simulate secret sharing
 
-for (int i = 0; i < NUM_INPUTS; i++) {
-    P.complete_mult(gates_c[i],OP_ADD, OP_SUB);
+for(int j = 0; j < COMMUNICATION_ROUNDS; j++) {
+
+for (int s = 0; s < loop_num; s++) {
+    int i = s+j*loop_num;
+    c[i] = a[i] * b[i];
 }
-P.communicate();
 
-P.prepare_reveal_to_all(gates_c[0]);
 
-P.communicate();
 
-    P.complete_Reveal(gates_c[0],OP_ADD,OP_SUB);
+Share::communicate();
 
-P.communicate();
+for (int s = 0; s < loop_num; s++) {
+    int i = s+j*loop_num;
+    c[i].complete_mult();
+}
+Share::communicate();
+
+}
+
+c[0].prepare_reveal_to_all();
+
+Share::communicate();
+
+*res = c[0].complete_reveal_to_all();
+
+Share::communicate();
 
 }
 

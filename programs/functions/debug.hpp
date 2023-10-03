@@ -7,6 +7,8 @@
 #define FUNCTION debug
 #define RESULTTYPE DATATYPE[num_players][BITLENGTH]
 
+
+
 void compare(DATATYPE var[num_players][BITLENGTH], std::string test_func)
 {
 if (current_phase != 1)
@@ -18,10 +20,10 @@ int num_erros = 0;
 for(int j = 0; j < BITLENGTH; j++)
 {
 
-#if FUNCTION_IDENTIFIER == 7
+#if FUNCTION_IDENTIFIER != 7
 /* inputs[i][j] = 3; */
 /* if(3 != var[i][j] && 9 != var[i][j]) */
-std::cout << "P" << PARTY << " " << var[i][j] << std::endl;
+/* std::cout << "P" << PARTY << " " << var[i][j] << std::endl; */
 if(var[i][j] < 2 || var[i][j] > 242)
 {
     num_erros++;
@@ -47,7 +49,7 @@ if(inputs[i][j] != var[i][j])
 template<typename Protocol>
 void debug (/*outputs*/ DATATYPE result[num_players][BITLENGTH])
 {
-#if FUNCTION_IDENTIFIER == 7
+#if FUNCTION_IDENTIFIER != 7
 using S = Additive_Share<DATATYPE, Protocol>;
 #else
 using S = XOR_Share<DATATYPE, Protocol>;
@@ -129,7 +131,7 @@ for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
-#if FUNCTION_IDENTIFIER == 7
+#if FUNCTION_IDENTIFIER != 7
     inputs[j][i] = inputs[j][i] * inputs[j][i];
 #else
     inputs[j][i] = inputs[j][i] & inputs[j][i];
@@ -143,7 +145,7 @@ for(int j = 0; j < num_players; j++)
 {
 
 for (int i = 0; i < BITLENGTH; i++) {
-#if FUNCTION_IDENTIFIER == 7
+#if FUNCTION_IDENTIFIER != 7
     inputs[j][i].complete_mult();
 #else
     inputs[j][i].complete_and();
@@ -177,7 +179,7 @@ compare(result, "and/mult gates");
 for(int j = 0; j < num_players; j++)
 {
 for (int i = 0; i < BITLENGTH; i++) {
-#if FUNCTION_IDENTIFIER == 7
+#if FUNCTION_IDENTIFIER != 7
     inputs[j][i] = inputs[j][i] + inputs[j][i];
 #else
     inputs[j][i] = inputs[j][i] ^ inputs[j][i];

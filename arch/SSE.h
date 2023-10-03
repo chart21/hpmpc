@@ -64,10 +64,15 @@
 #define FUNC_OR __mm_or_si128_wrapper
 #define FUNC_XOR __mm_xor_si128_wrapper
 #define FUNC_ANDN __mm_andnot_si128_wrapper
+#define FUNC_ADD8 __mm_add_epi8_wrapper
+#define FUNC_ADD16 __mm_add_epi16_wrapper
 #define FUNC_ADD32 __mm_add_epi32_wrapper
 #define FUNC_ADD64 __mm_add_epi64_wrapper
+#define FUNC_SUB8 __mm_sub_epi8_wrapper
+#define FUNC_SUB16 __mm_sub_epi16_wrapper
 #define FUNC_SUB32 __mm_sub_epi32_wrapper
 #define FUNC_SUB64 __mm_sub_epi64_wrapper
+#define FUNC_MULT16 __mm_mullo_epi16_wrapper
 #define FUNC_MUL32 __mm_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm_mullo_epi64_wrapper
 #define FUNC_DIV32 __mm_div_epi32_wrapper
@@ -94,6 +99,14 @@ inline __m128i __mm_andnot_si128_wrapper(__m128i a, __m128i b) {
   return _mm_andnot_si128(a,b);
 }
 
+inline __m128i __mm_add_epi8_wrapper(__m128i a, __m128i b) {
+  return _mm_add_epi8(a,b);
+}
+
+inline __m128i __mm_add_epi16_wrapper(__m128i a, __m128i b) {
+  return _mm_add_epi16(a,b);
+}
+
 inline __m128i __mm_add_epi32_wrapper(__m128i a, __m128i b) {
   return _mm_add_epi32(a,b);
 }
@@ -102,12 +115,24 @@ inline __m128i __mm_add_epi64_wrapper(__m128i a, __m128i b) {
   return _mm_add_epi64(a,b);
 }
 
+inline __m128i __mm_sub_epi8_wrapper(__m128i a, __m128i b) {
+  return _mm_sub_epi8(a,b);
+}
+
+inline __m128i __mm_sub_epi16_wrapper(__m128i a, __m128i b) {
+  return _mm_sub_epi16(a,b);
+}
+
 inline __m128i __mm_sub_epi32_wrapper(__m128i a, __m128i b) {
   return _mm_sub_epi32(a,b);
 }
 
 inline __m128i __mm_sub_epi64_wrapper(__m128i a, __m128i b) {
   return _mm_sub_epi64(a,b);
+}
+
+inline __m128i __mm_mullo_epi16_wrapper(__m128i a, __m128i b) {
+  return _mm_mullo_epi16(a,b);
 }
 
 inline __m128i __mm_mullo_epi32_wrapper(__m128i a, __m128i b) {
@@ -392,6 +417,8 @@ void orthogonalize_boolean(UINT_TYPE* data, __m128i* out) {
     out[i] = _mm_set_epi32(data[i], data[32+i], data[64+i], data[96+i]);
 #elif BITLENGTH == 16
     out[i] = _mm_set_epi16(data[i], data[16+i], data[32+i], data[48+i], data[64+i], data[80+i], data[96+i], data[112+i]);
+#elif BITLENGTH == 8
+    out[i] = _mm_set_epi8(data[i], data[8+i], data[16+i], data[24+i], data[32+i], data[40+i], data[48+i], data[56+i], data[64+i], data[72+i], data[80+i], data[88+i], data[96+i], data[104+i], data[112+i], data[120+i]);
 #endif
 }
 
@@ -414,6 +441,8 @@ void orthogonalize_boolean_full(UINT_TYPE* data, __m128i* out) {
     out[i] = _mm_set_epi32(data[i], data[128+i], data[256+i], data[384+i]);
 #elif BITLENGTH == 16
     out[i] = _mm_set_epi16(data[i], data[128+i], data[256+i], data[384+i], data[512+i], data[640+i], data[768+i], data[896+i]);
+#elif BITLENGTH == 8
+    out[i] = _mm_set_epi8(data[i], data[128+i], data[256+i], data[384+i], data[512+i], data[640+i], data[768+i], data[896+i], data[1024+i], data[1152+i], data[1280+i], data[1408+i], data[1536+i], data[1664+i], data[1792+i], data[1920+i]);
 
 #endif
   real_ortho_128x128(out);
@@ -439,6 +468,11 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m128i *out, int k) {
 #elif BITLENGTH == 16
     out[i] = _mm_set_epi16 (in[i*8+7], in[i*8+6], in[i*8+5], in[i*8+4],
                             in[i*8+3], in[i*8+2], in[i*8+1], in[i*8]);
+#elif BITLENGTH == 8
+    out[i] = _mm_set_epi8 (in[i*16+15], in[i*16+14], in[i*16+13], in[i*16+12],
+                           in[i*16+11], in[i*16+10], in[i*16+9], in[i*16+8],
+                           in[i*16+7], in[i*16+6], in[i*16+5], in[i*16+4],
+                           in[i*16+3], in[i*16+2], in[i*16+1], in[i*16]);
 #endif
 }
 

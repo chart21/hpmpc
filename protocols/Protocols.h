@@ -33,7 +33,7 @@
         #include "3-PC/replicated/replicated_template.hpp"
     #endif
 #elif PROTOCOL == sharemind 
-    #define PROTOCOL_LIVE Sharemind
+    #define PROTOCOL_LIVE Sharemind_Share
     #define PROTOCOL_INIT Sharemind_init
     #if INIT == 1 
         #include "3-PC/sharemind/sharemind_init_template.hpp"

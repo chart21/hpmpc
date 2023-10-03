@@ -55,11 +55,15 @@
 #define FUNC_XOR _mm256_xor_si256_wrapper
 #define FUNC_ANDN _mm256_andnot_si256_wrapper
 #define FUNC_NOT _mm256_xor_si256_wrapper
+#define FUNC_ADD8  _mm256_add_epi8_wrapper
+#define FUNC_ADD16  _mm256_add_epi16_wrapper
 #define FUNC_ADD32  _mm256_add_epi32_wrapper
-#define FUNC_SUB32 _mm256_sub_epi32_wrapper
-#define FUNC_MUL32 _mm256_mullo_epi32_wrapper
 #define FUNC_ADD64 _mm256_add_epi64_wrapper
+#define FUNC_SUB8 _mm256_sub_epi8_wrapper
+#define FUNC_SUB16 _mm256_sub_epi16_wrapper
+#define FUNC_SUB32 _mm256_sub_epi32_wrapper
 #define FUNC_SUB64 _mm256_sub_epi64_wrapper
+#define FUNC_MUL32 _mm256_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm256_mullo_epi64_wrapper
 
 #define SHIFT_LEFT32 _mm256_slli_epi32_wrapper
@@ -88,12 +92,32 @@ inline __m256i _mm256_not_wrapper(__m256i a, __m256i b) {
     return _mm256_xor_si256(ONES, a);
 }
 
+inline __m256i _mm256_add_epi8_wrapper(__m256i a, __m256i b) {
+    return _mm256_add_epi8(a, b);
+}
+
+inline __m256i _mm256_add_epi16_wrapper(__m256i a, __m256i b) {
+    return _mm256_add_epi16(a, b);
+}
+
 inline __m256i _mm256_add_epi32_wrapper(__m256i a, __m256i b) {
     return _mm256_add_epi32(a, b);
 }
 
+inline __m256i _mm256_sub_epi8_wrapper(__m256i a, __m256i b) {
+    return _mm256_sub_epi8(a, b);
+}
+
+inline __m256i _mm256_sub_epi16_wrapper(__m256i a, __m256i b) {
+    return _mm256_sub_epi16(a, b);
+}
+
 inline __m256i _mm256_sub_epi32_wrapper(__m256i a, __m256i b) {
     return _mm256_sub_epi32(a, b);
+}
+
+inline __m256i _mm256_mullo_epi16_wrapper(__m256i a, __m256i b) {
+    return _mm256_mullo_epi16(a, b);
 }
 
 inline __m256i _mm256_mullo_epi32_wrapper(__m256i a, __m256i b) {
@@ -289,6 +313,8 @@ void orthogonalize_boolean(UINT_TYPE* data, __m256i* out) {
       out[i] = _mm256_set_epi32(data[i], data[32+i], data[64+i], data[96+i], data[128+i], data[160+i], data[192+i], data[224+i]);
     #elif BITLENGTH == 16
       out[i] = _mm256_set_epi16(data[i], data[16+i], data[32+i], data[48+i], data[64+i], data[80+i], data[96+i], data[112+i], data[128+i], data[144+i], data[160+i], data[176+i], data[192+i], data[208+i], data[224+i], data[240+i]);
+    #elif BITLENGTH == 8
+      out[i] = _mm256_set_epi8(data[i], data[8+i], data[16+i], data[24+i], data[32+i], data[40+i], data[48+i], data[56+i], data[64+i], data[72+i], data[80+i], data[88+i], data[96+i], data[104+i], data[112+i], data[120+i], data[128+i], data[136+i], data[144+i], data[152+i], data[160+i], data[168+i], data[176+i], data[184+i], data[192+i], data[200+i], data[208+i], data[216+i], data[224+i], data[232+i], data[240+i], data[248+i]);
     #endif
   }
 }
@@ -314,6 +340,8 @@ void orthogonalize_boolean_full(UINT_TYPE* data, __m256i* out) {
   out[i] = _mm256_set_epi32(data[i], data[256+i], data[512+i], data[768+i], data[1024+i], data[1280+i], data[1536+i], data[1792+i]);
 #elif BITLENGTH == 16
   out[i] = _mm256_set_epi16(data[i], data[256+i], data[512+i], data[768+i], data[1024+i], data[1280+i], data[1536+i], data[1792+i], data[2048+i], data[2304+i], data[2560+i], data[2816+i], data[3072+i], data[3328+i], data[3584+i], data[3840+i]);
+#elif BITLENGTH == 8
+  out[i] = _mm256_set_epi8(data[i], data[256+i], data[512+i], data[768+i], data[1024+i], data[1280+i], data[1536+i], data[1792+i], data[2048+i], data[2304+i], data[2560+i], data[2816+i], data[3072+i], data[3328+i], data[3584+i], data[3840+i], data[4096+i], data[4352+i], data[4608+i], data[4864+i], data[5120+i], data[5376+i], data[5632+i], data[5888+i], data[6144+i], data[6400+i], data[6656+i], data[6912+i], data[7168+i], data[7424+i], data[7680+i], data[7936+i]);
 #endif
 real_ortho_256x256(out);
 }
@@ -341,6 +369,15 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m256i *out, int k) {
                               in[i*16+11], in[i*16+10], in[i*16+9], in[i*16+8],
                               in[i*16+7], in[i*16+6], in[i*16+5], in[i*16+4],
                               in[i*16+3], in[i*16+2], in[i*16+1], in[i*16]);
+#elif BITLENGTH == 8
+    out[i] = _mm256_set_epi8(in[i*32+31], in[i*32+30], in[i*32+29], in[i*32+28],
+                             in[i*32+27], in[i*32+26], in[i*32+25], in[i*32+24],
+                             in[i*32+23], in[i*32+22], in[i*32+21], in[i*32+20],
+                             in[i*32+19], in[i*32+18], in[i*32+17], in[i*32+16],
+                             in[i*32+15], in[i*32+14], in[i*32+13], in[i*32+12],
+                             in[i*32+11], in[i*32+10], in[i*32+9], in[i*32+8],
+                             in[i*32+7], in[i*32+6], in[i*32+5], in[i*32+4],
+                             in[i*32+3], in[i*32+2], in[i*32+1], in[i*32]);
 #endif
 }
 

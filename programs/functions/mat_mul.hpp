@@ -10,7 +10,7 @@
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
 /* #include "boolean_adder.hpp" */
-#include "boolean_adder_updated.hpp"
+#include "boolean_adder_bandwidth.hpp"
 
 #include "boolean_adder_msb.hpp"
 #include "ppa_msb.hpp"

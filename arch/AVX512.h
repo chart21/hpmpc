@@ -7,6 +7,7 @@
 
 /* Including headers */
 #pragma once
+#include <immintrin.h>
 #include <stdlib.h>
 #include <x86intrin.h>
 #include <stdint.h>
@@ -61,10 +62,15 @@
 #define FUNC_AND _mm512_and_si512_wrapper
 #define FUNC_OR  _mm512_or_si512_wrapper
 #define FUNC_XOR _mm512_xor_si512_wrapper
+#define FUNC_ADD8 _mm512_add_epi8_wrapper
+#define FUNC_ADD16 _mm512_add_epi16_wrapper
 #define FUNC_ADD32 _mm512_add_epi32_wrapper
 #define FUNC_ADD64 _mm512_add_epi64_wrapper
+#define FUNC_SUB8 _mm512_sub_epi8_wrapper
+#define FUNC_SUB16 _mm512_sub_epi16_wrapper
 #define FUNC_SUB32 _mm512_sub_epi32_wrapper
 #define FUNC_SUB64 _mm512_sub_epi64_wrapper
+#define FUNC_MUL16 _mm512_mullo_epi16_wrapper
 #define FUNC_MUL32 _mm512_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm512_mullo_epi64_wrapper
 
@@ -88,6 +94,14 @@ inline __m512i _mm512_xor_si512_wrapper(__m512i a, __m512i b) {
   return _mm512_xor_si512(a,b);
 }
 
+inline __m512i _mm512_add_epi8_wrapper(__m512i a, __m512i b) {
+  return _mm512_add_epi8(a,b);
+}
+
+inline __m512i _mm512_add_epi16_wrapper(__m512i a, __m512i b) {
+  return _mm512_add_epi16(a,b);
+}
+
 inline __m512i _mm512_add_epi32_wrapper(__m512i a, __m512i b) {
   return _mm512_add_epi32(a,b);
 }
@@ -96,12 +110,24 @@ inline __m512i _mm512_add_epi64_wrapper(__m512i a, __m512i b) {
   return _mm512_add_epi64(a,b);
 }
 
+inline __m512i _mm512_sub_epi8_wrapper(__m512i a, __m512i b) {
+  return _mm512_sub_epi8(a,b);
+}
+
+inline __m512i _mm512_sub_epi16_wrapper(__m512i a, __m512i b) {
+  return _mm512_sub_epi16(a,b);
+}
+
 inline __m512i _mm512_sub_epi32_wrapper(__m512i a, __m512i b) {
   return _mm512_sub_epi32(a,b);
 }
 
 inline __m512i _mm512_sub_epi64_wrapper(__m512i a, __m512i b) {
   return _mm512_sub_epi64(a,b);
+}
+
+inline __m512i _mm512_mullo_epi16_wrapper(__m512i a, __m512i b) {
+  return _mm512_mullo_epi16(a,b);
 }
 
 inline __m512i _mm512_mullo_epi32_wrapper(__m512i a, __m512i b) {
@@ -298,7 +324,10 @@ void orthogonalize_boolean(UINT_TYPE* data, __m512i* out) {
     out[i] = _mm512_set_epi32(data[i], data[32+i], data[64+i], data[96+i], data[128+i], data[160+i], data[192+i], data[224+i], data[256+i], data[288+i], data[320+i], data[352+i], data[384+i], data[416+i], data[448+i], data[480+i]);
 #elif BITLENGTH == 16
     out[i] = _mm512_set_epi16(data[i], data[16+i], data[32+i], data[48+i], data[64+i], data[80+i], data[96+i], data[112+i], data[128+i], data[144+i], data[160+i], data[176+i], data[192+i], data[208+i], data[224+i], data[240+i], data[256+i], data[272+i], data[288+i], data[304+i], data[320+i], data[336+i], data[352+i], data[368+i], data[384+i], data[400+i], data[416+i], data[432+i], data[448+i], data[464+i], data[480+i], data[496+i]);
+#elif BITLENGTH == 8
+    out[i] = _mm512_set_epi8(data[i], data[8+i], data[16+i], data[24+i], data[32+i], data[40+i], data[48+i], data[56+i], data[64+i], data[72+i], data[80+i], data[88+i], data[96+i], data[104+i], data[112+i], data[120+i], data[128+i], data[136+i], data[144+i], data[152+i], data[160+i], data[168+i], data[176+i], data[184+i], data[192+i], data[200+i], data[208+i], data[216+i], data[224+i], data[232+i], data[240+i], data[248+i], data[256+i], data[264+i], data[272+i], data[280+i], data[288+i], data[296+i], data[304+i], data[312+i], data[320+i], data[328+i], data[336+i], data[344+i], data[352+i], data[360+i], data[368+i], data[376+i], data[384+i], data[392+i], data[400+i], data[408+i], data[416+i], data[424+i], data[432+i], data[440+i], data[448+i], data[456+i], data[464+i], data[472+i], data[480+i], data[488+i], data[496+i], data[504+i]);
 #endif
+
 }
 
 void orthogonalize_boolean_full(UINT_TYPE* data, __m512i* out) {
@@ -309,6 +338,8 @@ void orthogonalize_boolean_full(UINT_TYPE* data, __m512i* out) {
     out[i] = _mm512_set_epi32(data[i], data[512+i], data[1024+i], data[1536+i], data[2048+i], data[2560+i], data[3072+i], data[3584+i], data[4096+i], data[4608+i], data[5120+i], data[5632+i], data[6144+i], data[6656+i], data[7168+i], data[7680+i]);
 #elif BITLENGTH == 16
     out[i] = _mm512_set_epi16(data[i], data[512+i], data[1024+i], data[1536+i], data[2048+i], data[2560+i], data[3072+i], data[3584+i], data[4096+i], data[4608+i], data[5120+i], data[5632+i], data[6144+i], data[6656+i], data[7168+i], data[7680+i], data[8192+i], data[8704+i], data[9216+i], data[9728+i], data[10240+i], data[10752+i], data[11264+i], data[11776+i], data[12288+i], data[12800+i], data[13312+i], data[13824+i], data[14336+i], data[14848+i], data[15360+i], data[15872+i]);
+#elif BITLENGTH == 8
+    out[i] = _mm512_set_epi8(data[i], data[512+i], data[1024+i], data[1536+i], data[2048+i], data[2560+i], data[3072+i], data[3584+i], data[4096+i], data[4608+i], data[5120+i], data[5632+i], data[6144+i], data[6656+i], data[7168+i], data[7680+i], data[8192+i], data[8704+i], data[9216+i], data[9728+i], data[10240+i], data[10752+i], data[11264+i], data[11776+i], data[12288+i], data[12800+i], data[13312+i], data[13824+i], data[14336+i], data[14848+i], data[15360+i], data[15872+i], data[16384+i], data[16896+i], data[17408+i], data[17920+i], data[18432+i], data[18944+i], data[19456+i], data[19968+i], data[20480+i], data[20992+i], data[21504+i], data[22016+i], data[22528+i], data[23040+i], data[23552+i], data[24064+i], data[24576+i], data[25088+i], data[25600+i], data[26112+i], data[26624+i], data[27136+i], data[27648+i], data[28160+i], data[28672+i], data[29184+i], data[29696+i], data[30208+i], data[30720+i], data[31232+i], data[31744+i], data[32256+i]);
 #endif
   real_ortho_512x512(out);
 }
@@ -332,6 +363,23 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m512i *out, int k) {
                               in[i*32+11], in[i*32+10], in[i*32+9], in[i*32+8],
                               in[i*32+7], in[i*32+6], in[i*32+5], in[i*32+4],
                               in[i*32+3], in[i*32+2], in[i*32+1], in[i*32]);
+#elif BITLENGTH == 8
+    out[i] = _mm512_set_epi8(in[i*64+63], in[i*64+62], in[i*64+61], in[i*64+60],
+                             in[i*64+59], in[i*64+58], in[i*64+57], in[i*64+56],
+                             in[i*64+55], in[i*64+54], in[i*64+53], in[i*64+52],
+                             in[i*64+51], in[i*64+50], in[i*64+49], in[i*64+48],
+                             in[i*64+47], in[i*64+46], in[i*64+45], in[i*64+44],
+                             in[i*64+43], in[i*64+42], in[i*64+41], in[i*64+40],
+                             in[i*64+39], in[i*64+38], in[i*64+37], in[i*64+36],
+                             in[i*64+35], in[i*64+34], in[i*64+33], in[i*64+32],
+                             in[i*64+31], in[i*64+30], in[i*64+29], in[i*64+28],
+                             in[i*64+27], in[i*64+26], in[i*64+25], in[i*64+24],
+                             in[i*64+23], in[i*64+22], in[i*64+21], in[i*64+20],
+                             in[i*64+19], in[i*64+18], in[i*64+17], in[i*64+16],
+                             in[i*64+15], in[i*64+14], in[i*64+13], in[i*64+12],
+                             in[i*64+11], in[i*64+10], in[i*64+9], in[i*64+8],
+                             in[i*64+7], in[i*64+6], in[i*64+5], in[i*64+4],
+                             in[i*64+3], in[i*64+2], in[i*64+1], in[i*64]);
 #endif
 }
 

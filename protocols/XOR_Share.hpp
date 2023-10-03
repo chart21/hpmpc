@@ -32,7 +32,11 @@ public:
 
     void complete_and()
     {
+#if PROTOCOL == 1 // Sharemind needs custom overload
+        Share_Type::complete_mult(std::bit_xor<Datatype>(), std::bit_xor<Datatype>(),std::bit_and<Datatype>());
+#else
         Share_Type::complete_mult(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
+#endif
     }
 
     template <int id>

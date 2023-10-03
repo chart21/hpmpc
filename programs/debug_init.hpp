@@ -99,7 +99,7 @@ for (int k = BITLENGTH >> 1; k > 0; k = k >> 1)
 
 
 }
-#if FUNCTION_IDENTIFIER == 7
+#if FUNCTION_IDENTIFIER != 7
 void generateElements()
 {
 auto inputs = new DATATYPE[num_players][BITLENGTH];

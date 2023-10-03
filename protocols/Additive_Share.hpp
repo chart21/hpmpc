@@ -28,7 +28,11 @@ public:
 
     void complete_mult()
     {
+    #if PROTOCOL == 1 // Sharemind needs custom overload
+        Share_Type::complete_mult(OP_ADD, OP_SUB, OP_MULT);
+    #else
         Share_Type::complete_mult(OP_ADD, OP_SUB);
+    #endif
     }
 
     template <int id>
