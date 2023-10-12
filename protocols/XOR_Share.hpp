@@ -10,6 +10,12 @@ public:
 
     XOR_Share(const Share_Type& s) : Share_Type(s) {}
 
+#if FUNCTION_IDENTIFIER == 28
+    XOR_Share(const Datatype& d)
+    {
+        Share_Type::public_val(d);
+    }
+#endif
     XOR_Share operator~() const
     {
         return XOR_Share(Share_Type::Not());
