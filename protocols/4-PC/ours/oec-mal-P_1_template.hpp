@@ -70,9 +70,31 @@ template <typename func_add, typename func_sub, typename func_mul>
 OEC_MAL1_Share prepare_dot(const OEC_MAL1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 OEC_MAL1_Share c;
-c.v = ADD(MULT(v,b.r), MULT(b.v,r)); 
-c.r = MULT(v, b.v); // a1b1
+c.r = ADD(MULT(v,b.r), MULT(b.v,r)); // a_0 y_1 + b_0 x_1
+c.v = MULT(v, b.v); // a0b0
 return c;
+}
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+m = SUB(r, getRandomVal(P_013));// a_0 y_1 + b_0 x_1 - r_0,1,3   
+r = getRandomVal(P_013); // z_1
+send_to_live(P_2, m); 
+
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+m = ADD(m, receive_from_live(P_2)); // v^1,2 = m^1 + m^2
+v = TRUNC(SUB(v, m)) // [a_0 b_0 - v^1,2]^t
+#if PROTOCOL == 11
+store_compare_view(P_0, ADD(m,getRandomVal(P_123)); // compare m1 + m2 + r123 with P_0
+#else
+store_compare_view(P_012,ADD(m, getRandomVal(P_123))); // v^1,2 + r_1,2,3
+#endif
+store_compare_view(P_0,ADD(v, getRandomVal(P_123))); // c_0 + w
 }
 
 template <typename func_add, typename func_sub>
@@ -208,4 +230,75 @@ static void communicate()
     communicate_live();
 }
 
+static void prepare_A2B_S1(OEC_MAL1_Share in[], OEC_MAL1_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].r = SET_ALL_ZERO(); // set share to 0
+        Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            out[j].v = in[j].v; //a0 
+        }
+    }
+    unorthogonalize_arithmetic(out, (UINT_TYPE*) out);
+    orthogonalize_boolean((UINT_TYPE*) out, out);
+    for (int j = 0; j < BITLENGTH; j++)
+    {
+        store_compare_view(P_0, FUNC_XOR(out[j].v), getRandomVal(P_123)); 
+    }
+
+}
+
+
+static void prepare_A2B_S2(OEC_MAL1_Share in[], OEC_MAL1_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].r = getRandomVal(P_013);
+        out[i].v = SET_ALL_ZERO();
+    }
+}
+
+static void complete_A2B_S1(OEC_MAL1_Share out[])
+{
+}
+
+static void complete_A2B_S2(OEC_MAL1_Share out[])
+{
+
+}
+
+void prepare_bit_injection_S1(OEC_MAL1_Share out[])
+{
+    Datatype temp[BITLENGTH]{0};
+    temp[BITLENGTH - 1] = v;
+    unorthogonalize_boolean(temp, (UINT_TYPE*) temp);
+    orthogonalize_arithmetic((UINT_TYPE*) temp, out);
+    for (int j = 0; j < BITLENGTH; j++)
+    {
+        out[i].r = SET_ALL_ZERO(); // set share to 0
+        store_compare_view(P_0, OP_ADD(out[j].v), getRandomVal(P_123)); 
+    }
+}
+
+void prepare_bit_injection_S2(OEC_MAL1_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].r = getRandomVal(P_013);
+        out[i].v = SET_ALL_ZERO();
+    }
+}
+
+static void complete_bit_injection_S1(OEC_MAL1_Share out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OEC_MAL1_Share out[])
+{
+}
+
 };
+

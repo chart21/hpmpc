@@ -51,26 +51,44 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     p2 = getRandomVal(P_0);
     send_to_live(P_1,ADD(p1,p2));
 }
-    
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
 
-p1 = ADD(p1, getRandomVal(P_0)); // ab_2 + e_2 + r0,2
-send_to_live(P_1, p1); // ab_2 + e_2 + r0,2
+p1 = ADD(p1, getRandomVal(P_0)); // a1b1 + r_0,2
+send_to_live(P_1, p1); 
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>
 void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
 #if PRE == 1
-p2 = pre_receive_from_live(P_0); // (e + r0,1 + r0,2)^T + r0,1_2
+p2 = pre_receive_from_live(P_0); // (e + r0,1 + r0,2)^T - r_0,1
 #else
-p2 = receive_from_live(P_0); // (e + r0,1 + r0,2)^T + r0,1_2
+p2 = receive_from_live(P_0); // (e + r0,1 + r0,2)^T - r_0,1
 #endif
-p1 = TRUNC( SUB(p1,receive_from_live(P_1))); // (ab + e + r0,1 + r0,2)^T 
-p1 = SUB(p1, p2); // - [ ( (e + r0,1 + r0,2)^T + r0,1_2 ) ]
+p1 = SUB(TRUNC( SUB(p1,receive_from_live(P_1))),p2); // [m2 -m1]^t - m^0
 }
+    
+    /* template <typename func_add, typename func_sub, typename func_trunc> */
+/* void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
+/* { */
+
+/* p1 = ADD(p1, getRandomVal(P_0)); // ab_2 + e_2 + r0,2 */
+/* send_to_live(P_1, p1); // ab_2 + e_2 + r0,2 */
+/* } */
+
+    /* template <typename func_add, typename func_sub, typename func_trunc> */
+/* void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
+/* { */
+/* #if PRE == 1 */
+/* p2 = pre_receive_from_live(P_0); // (e + r0,1 + r0,2)^T + r0,1_2 */
+/* #else */
+/* p2 = receive_from_live(P_0); // (e + r0,1 + r0,2)^T + r0,1_2 */
+/* #endif */
+/* p1 = TRUNC( SUB(p1,receive_from_live(P_1))); // (ab + e + r0,1 + r0,2)^T */ 
+/* p1 = SUB(p1, p2); // - [ ( (e + r0,1 + r0,2)^T + r0,1_2 ) ] */
+/* } */
 template <typename func_add, typename func_sub, typename func_mul>
     OECL2_Share prepare_mult(OECL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {

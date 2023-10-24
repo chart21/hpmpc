@@ -6,6 +6,10 @@ class TTP_init
 public:
 TTP_init() {}
 
+Datatype get_p1()
+{
+    return SET_ALL_ZERO();
+}
 
 
 

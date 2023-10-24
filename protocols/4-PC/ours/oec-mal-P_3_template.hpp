@@ -84,12 +84,29 @@ template <typename func_add, typename func_sub, typename func_mul>
 OEC_MAL3_Share prepare_dot(const OEC_MAL3_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 OEC_MAL3_Share c;
-#if FRACTIONAL > 0
-// not implemented
-#endif
-c.r0 = MULT(r1,b.r1); // store o_1
-c.r1 = SUB(MULT(r1, SUB(b.r1,b.r0)) ,MULT(b.r1,r0)); // store o_4
+c.r1 = MULT(r1,b.r1); // store o_1
+c.r0 = SUB(MULT(r1, SUB(b.r1,b.r0)) ,MULT(b.r1,r0)); // store o_4
 return c;
+}
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+r1 = TRUNC(SUB(ADD(getRandomVal(P_013), getRandomVal(P_023)), r1)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
+#if PROTOCOL == 11
+store_compare_view(P_0, ADD(SUB(r0, ADD(getRandomVal(P_012), getRandomVal(P_023))), getRandomVal(P_123));  // v^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
+#else
+#if PRE == 1
+pre_send_to_live(P_0, ADD(SUB(r0, ADD(getRandomVal(P_012), getRandomVal(P_023))), getRandomVal(P_123));  // m^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
+#else
+send_to_live(P_0, ADD(SUB(r0, ADD(getRandomVal(P_012), getRandomVal(P_023))), getRandomVal(P_123));  // m^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
+#endif
+#endif
+store_compare_view(P_2, r1); // compare m^0
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
 }
 
 template <typename func_add, typename func_sub>
@@ -97,13 +114,13 @@ void mask_and_send_dot(func_add ADD, func_sub SUB)
 {
 
 Datatype rc0 = getRandomVal(P_123); // r123_1
-Datatype rc1 = ADD(getRandomVal(P_023),getRandomVal(P_013)); // x1 
+Datatype rc1 = ADD(getRandomVal(P_023),getRandomVal(P_013)); // x0 
 
-Datatype o1 = ADD(rc0, ADD(r0, getRandomVal(P_013)));
+Datatype o1 = ADD(rc0, ADD(r1, getRandomVal(P_013)));
 #if PROTOCOL == 11
-Datatype o4 = ADD(r1,getRandomVal(P_123_2)); // r123_2
+Datatype o4 = ADD(r0,getRandomVal(P_123_2)); // r123_2
 #else
-Datatype o4 = ADD(r1,SUB(getRandomVal(P_123_2),r0)); // r123_2
+Datatype o4 = ADD(r0,SUB(getRandomVal(P_123_2),r0)); // r123_2
 #endif
 
 r0 = rc0;
@@ -239,5 +256,78 @@ static void communicate()
     communicate_live();
 #endif
 }
+
+static void prepare_A2B_S1(OEC_MAL3_Share in[], OEC_MAL3_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].r0 = getRandomVal(P_123); // r123
+        out[i].r1 = SET_ALL_ZERO(); // set share to 0
+    }
+}
+
+
+static void prepare_A2B_S2(OEC_MAL3_Share in[], OEC_MAL3_Share out[])
+{
+    //convert share x0 to boolean
+    Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            temp[j] = OP_SUB(SET_ALL_ZERO(), in[j].r1); // set share to -x0
+        }
+    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
+    orthogonalize_boolean((UINT_TYPE*) temp, temp);
+
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+            out[i].r0 = SET_ALL_ZERO(); 
+            out[i].r1 = temp[i]; 
+            store_compare_view(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // compare -x0 xor r0,1 with $P_2
+    } 
+}
+
+static void complete_A2B_S1(OEC_MAL3_Share out[])
+{
+}
+
+static void complete_A2B_S2(OEC_MAL3_Share out[])
+{
+
+}
+
+void prepare_bit_injection_S1(OEC_MAL3_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].r0 = getRandomVal(P_123); // r123
+        out[i].r1 = SET_ALL_ZERO(); // set share to 0
+    }
+}
+
+void prepare_bit_injection_S2(OEC_MAL3_Share out[])
+{
+    Datatype temp[BITLENGTH]{0};
+    temp[BITLENGTH - 1] = r1;
+    unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
+    orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].v = temp[i]; //c_w = x_0
+        out[i].r = OP_SUB(SET_ALL_ZERO(), temp[i]) ; // z_0 = - x_0
+        store_compare_view(P_2, OP_ADD(temp[i],getRandomVal(P_013)); //  x_0 + r013
+        
+    }
+}
+
+static void complete_bit_injection_S1(OEC_MAL3_Share out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OEC_MAL3_Share out[])
+{
+}
+
+};
 
 };

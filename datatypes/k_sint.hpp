@@ -172,6 +172,11 @@ public:
             Share::complete_bit_injection_S2(shares);
         }
 
+        UINT_TYPE get_p1()
+        {
+            return shares[0].get_p1();
+        }
+
 };
 
 

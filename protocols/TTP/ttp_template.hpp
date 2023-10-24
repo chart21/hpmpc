@@ -15,6 +15,11 @@ void public_val(Datatype a)
     p1 = a;
 }
 
+Datatype get_p1()
+{
+    return p1;
+}
+
 TTP_Share Not() const
 {
    return TTP_Share(NOT(p1));

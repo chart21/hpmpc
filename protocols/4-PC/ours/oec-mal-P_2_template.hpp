@@ -6,7 +6,7 @@ class OEC_MAL2_Share
     private:
     Datatype v;
     Datatype r;
-#if PROTOCOL == 11
+#if PROTOCOL == 11 || FRACTIONAL > 0
     Datatype m;
 #endif
 
@@ -83,9 +83,34 @@ template <typename func_add, typename func_sub, typename func_mul>
 OEC_MAL2_Share prepare_dot(const OEC_MAL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 OEC_MAL2_Share c;
-c.v = ADD(MULT(v, b.r), MULT(b.v, r));
-c.r = MULT(v, b.v); // a1b1
+c.v = ADD(MULT(v, b.r), MULT(b.v, r)); // a0 y_2 + b_0 x_2
+c.r = MULT(v, b.v); // a0b0
 return c;
+}
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+r = SUB(r, getRandomVal(P_013));// a_0 y_1 + b_0 x_1 - r_0,1,3   
+send_to_live(P_2, r); 
+
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+r = ADD(r, receive_from_live(P_2)); // v^1,2 = m^1 + m^2
+v = TRUNC(SUB(v, r)) // [a_0 b_0 - v^1,2]^t
+send_to_live(P_0,ADD(v, getRandomVal(P_123))); // c_0 + w
+#if PROTOCOL == 11
+send_to_live(P_0, ADD(r,getRandomVal(P_123)); // send m1 + m2 + r123 to P_0
+#else
+store_compare_view(P_012,ADD(r, getRandomVal(P_123))); // v^1,2 + r_1,2,3
+#endif
+#if PRE == 1
+r = receive_from_pre(P_0); // z_2 = m0
+#else
+r = receive_from_live(P_0); // z_2 = m0 
+#endif
 }
 
 template <typename func_add, typename func_sub>
@@ -235,5 +260,94 @@ static void communicate()
 {
     communicate_live();
 }
+
+static void prepare_A2B_S1(OEC_MAL2_Share in[], OEC_MAL2_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].r = SET_ALL_ZERO(); // set share to 0
+        Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            out[j].v = in[j].v; //a0 
+        }
+    }
+    unorthogonalize_arithmetic(out, (UINT_TYPE*) out);
+    orthogonalize_boolean((UINT_TYPE*) out, out);
+    for (int j = 0; j < BITLENGTH; j++)
+    {
+        send_to_live(P_0, FUNC_XOR(out[j].v), getRandomVal(P_123)); 
+    }
+
+}
+
+
+static void prepare_A2B_S2(OEC_MAL2_Share in[], OEC_MAL2_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].v = SET_ALL_ZERO();
+    }
+}
+
+static void complete_A2B_S1(OEC_MAL2_Share out[])
+{
+}
+
+static void complete_A2B_S2(OEC_MAL2_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        #if PRE == 0
+        Datatype m0 = receive_from_live(P_0);
+        #else
+        Datatype m0 = pre_receive_from_live(P_0);
+        #endif
+        out[i].r = m0;
+        store_compare_view(P_3, m0);
+    }
+
+}
+
+void prepare_bit_injection_S1(OEC_MAL2_Share out[])
+{
+    Datatype temp[BITLENGTH]{0};
+    temp[BITLENGTH - 1] = v;
+    unorthogonalize_boolean(temp, (UINT_TYPE*) temp);
+    orthogonalize_arithmetic((UINT_TYPE*) temp, out);
+    for (int j = 0; j < BITLENGTH; j++)
+    {
+        out[i].r = SET_ALL_ZERO(); // set share to 0
+        send_to_live(P_0, OP_ADD(out[j].v), getRandomVal(P_123)); 
+    }
+}
+
+void prepare_bit_injection_S2(OEC_MAL2_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].v = SET_ALL_ZERO();
+    }
+}
+
+static void complete_bit_injection_S1(OEC_MAL2_Share out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OEC_MAL2_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        #if PRE == 0
+        Datatype m0 = receive_from_live(P_0);
+        #else
+        Datatype m0 = pre_receive_from_live(P_0);
+        #endif
+        out[i].r = OP_SUB(SET_ALL_ZERO(), m0);
+        store_compare_view(P_3, m0);
+    }
+}
+
 
 };

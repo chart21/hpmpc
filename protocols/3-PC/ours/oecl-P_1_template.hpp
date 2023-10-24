@@ -46,14 +46,14 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     p2 = getRandomVal(P_0);
     send_to_live(P_2,SUB(p1,p2));
 }
-
+    
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
 Datatype maskP_1 = getRandomVal(P_0);
 
-p1 = SUB(p1, maskP_1); // - ab_1 - e_1 - r0,1
-p2 = getRandomVal(P_0); // r0,1_2
+p1 = SUB(p1, maskP_1); // a2y1 + b2x1 - r0,1
+p2 = getRandomVal(P_0); // z_1
 
 send_to_live(P_2, p1);
 
@@ -63,9 +63,30 @@ send_to_live(P_2, p1);
     template <typename func_add, typename func_sub, typename func_trunc>
 void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-p1 = ADD( TRUNC( SUB(receive_from_live(P_2),p1)), p2 ); // (ab + e + r01 + r0,2)^T + r0,1_2
-p2 = SUB(SET_ALL_ZERO(), p2); // - r0,1_2
+p1 = SUB( TRUNC( SUB(receive_from_live(P_2),p1)), p2 ); // (ab + e + r01 + r0,2)^T + r0,1_2
+/* p2 = p2; // z_1 */
 }
+
+
+    /* template <typename func_add, typename func_sub, typename func_trunc> */
+/* void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
+/* { */
+/* Datatype maskP_1 = getRandomVal(P_0); */
+
+/* p1 = SUB(p1, maskP_1); // - ab_1 - e_1 - r0,1 */
+/* p2 = getRandomVal(P_0); // r0,1_2 */
+
+/* send_to_live(P_2, p1); */
+
+
+/* } */
+
+    /* template <typename func_add, typename func_sub, typename func_trunc> */
+/* void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
+/* { */
+/* p1 = ADD( TRUNC( SUB(receive_from_live(P_2),p1)), p2 ); // (ab + e + r01 + r0,2)^T + r0,1_2 */
+/* p2 = SUB(SET_ALL_ZERO(), p2); // - r0,1_2 */
+/* } */
 
 
 template <typename func_add, typename func_sub, typename func_mul>
@@ -226,6 +247,63 @@ static void complete_bit_injection_S2(OECL1_Share out[])
 
 
 }
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL1_Share prepare_mult3(OECL1_Share b, OECL1_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype rxy = getRandomVal(P_0);
+Datatype rxz = getRandomVal(P_0);
+Datatype ryz = getRandomVal(P_0);
+Datatype rxyz = getRandomVal(P_0);
+
+Datatype a0 = ADD(p1,p2);
+Datatype b0 = ADD(b.p1,b.p2);
+Datatype c0 = ADD(c.p1,c.p2);
+
+OECL1_Share d;
+d.p1 = SUB(ADD(
+        ADD( MULT(a0,MULT(b0,SUB(ryz,c.p2)))
+        ,(MULT(b0,SUB(rxz, MULT(c0,p2)))))
+        ,MULT(c0,SUB(rxy, MULT(a0,b.p2)))), rxyz); // a0(b0(ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
+d.p2 = getRandomVal(P_0);
+send_to_live(P_2, ADD(d.p1,d.p2));
+return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+p1 = ADD(p1, receive_from_live(P_2));
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL1_Share prepare_mult4(OECL1_Share b, OECL1_Share c, OECL1_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype rxy = getRandomVal(P_0);
+Datatype rxz = getRandomVal(P_0);
+Datatype rxw = getRandomVal(P_0);
+Datatype ryz = getRandomVal(P_0);
+Datatype ryw = getRandomVal(P_0);
+Datatype rzw = getRandomVal(P_0);
+Datatype rxyz = getRandomVal(P_0);
+Datatype rxyw = getRandomVal(P_0);
+Datatype rxzw = getRandomVal(P_0);
+Datatype ryzw = getRandomVal(P_0);
+Datatype rxyzw = getRandomVal(P_0);
+
+Datatype a0 = ADD(p1,p2);
+Datatype b0 = ADD(b.p1,b.p2);
+Datatype c0 = ADD(c.p1,c.p2);
+Datatype d0 = ADD(d.p1,d.p2);
+
+
+
+OECL1_Share e;
+
+return OECL1_Share(getRandomVal(P_2),getRandomVal(P_1));
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){}
 
 
 };

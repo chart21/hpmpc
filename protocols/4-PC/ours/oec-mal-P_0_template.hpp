@@ -67,9 +67,41 @@ template <typename func_add, typename func_sub, typename func_mul>
 OEC_MAL0_Share prepare_dot(const OEC_MAL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 OEC_MAL0_Share c;
+#if FRACTIONAL == 0
 c.r = MULT(r, b.r); 
 c.v = ADD( MULT(v,b.r), MULT(b.v,r));
+#else
+c.r = MULT(r, b.r); 
+c.v = ADD(MULT(v b.r), MULT(b.v,r)), MULT(r,b.r); //v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 --> later + m^3 
+#endif
 return c;
+}
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+r = TRUNC(SUB(ADD(getRandomVal(P_013), getRandomVal(P_023)), r)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
+send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PROTOCOL == 11
+Datatype m1m2 = receive_from_live(P_2); // m1 + m2 + r123
+store_compare_view(P_1,m1m2); 
+store_compare_view(P_3,SUB(m1m2,v)); // m2,2 - cw' 
+#else
+#if PRE == 1
+Datatype m3 = pre_receive_from_live(P_3); // (e + r0,1 + r0,2)^T - r_0,1
+#else
+Datatype m3 = receive_from_live(P_3); // (e + r0,1 + r0,2)^T - r_0,1
+#endif
+store_compare_view(P_012,ADD(v,m3)); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
+#endif
+Datatype c0w = receive_from_live(P_2);
+store_compare_view(P_2,c0w); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
+v = SUB(c0w,r); // c_0,w - z_0
 }
 
 template <typename func_add, typename func_sub>
@@ -228,6 +260,96 @@ static void communicate()
 /* #if PRE == 0 */
     communicate_live();
 /* #endif */
+}
+
+static void prepare_A2B_S1(OEC_MAL0_Share in[], OEC_MAL0_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].r = SET_ALL_ZERO(); // set share to 0
+    }
+}
+
+
+static void prepare_A2B_S2(OEC_MAL0_Share in[], OEC_MAL0_Share out[])
+{
+    //convert share x0 to boolean
+    Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            temp[j] = OP_SUB(SET_ALL_ZERO(), in[j].r); // set share to -x0
+        }
+    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
+    orthogonalize_boolean((UINT_TYPE*) temp, temp);
+
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+            out[i].r = temp[i]; 
+            out[i].v = temp[i];  // set both shares to -x0
+            #if PRE == 1
+                pre_send_to_live(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // -x0 xor r0,1 to P_2
+            #else
+                send_to_live(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // -x0 xor r0,1 to P_2
+            #endif
+    } 
+            /* out[0].p1 = FUNC_NOT(out[0].p1);// change sign bit -> -x0 xor r0,1 to x0 xor r0,1 */
+}
+
+static void complete_A2B_S1(OEC_MAL0_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].v = receive_from_live(P_2);  // receive a_0 xor r123
+        store_compare_view(P_1, out[i].v);
+    }
+}
+
+static void complete_A2B_S2(OEC_MAL0_Share out[])
+{
+
+}
+
+void prepare_bit_injection_S1(OEC_MAL0_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].r = SET_ALL_ZERO(); // set share to 0
+    }
+}
+
+void prepare_bit_injection_S2(OEC_MAL0_Share out[])
+{
+    Datatype temp[BITLENGTH]{0};
+    temp[BITLENGTH - 1] = r;
+    unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
+    orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].v = temp[i]; //c_w = x_0
+        out[i].r = OP_SUB(SET_ALL_ZERO(), temp[i]) ; // z_0 = - x_0
+        #if PRE == 1
+            pre_send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013)); //  x_0 + r013
+        #else
+            send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013)); //  x_0 + r013
+        #endif
+        
+    }
+}
+
+static void complete_bit_injection_S1(OEC_MAL0_Share out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OEC_MAL0_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].v = receive_from_live(P_2);  // receive a_0 + r123
+        store_compare_view(P_1, out[i].v);
+    }
+
+
 }
 
 };
