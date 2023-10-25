@@ -20,15 +20,22 @@ void generateElements()
         srand(time(0));
         //set a random element in range 0,NUM_INPUTS to be the max
         UINT_TYPE max_index = rand() % NUM_INPUTS;
+        UINT_TYPE min_index = rand() % NUM_INPUTS;
+        while(max_index == min_index)
+            min_index = rand() % NUM_INPUTS;
             std::cout << "Maxindex P" << PARTY << ": " << max_index << std::endl;
+            std::cout << "Minindex P" << PARTY << ": " << min_index << std::endl;
             for(int j = 0; j < DATTYPE; ++j) 
+            {
                 input[max_index][j] = 10000000;
+                input[min_index][j] = -10000000;
+            }
         #endif
         for(int i = 0; i < NUM_INPUTS; ++i) {
             orthogonalize_arithmetic(input[i], player_input + BITLENGTH*i);
-#if PARTY == 0
-                std::cout << "Player Inputs " << player_input[i*BITLENGTH] << std::endl;
-#endif
+/* #if PARTY == 0 */
+/*                 std::cout << "Player Inputs " << player_input[i*BITLENGTH] << std::endl; */
+/* #endif */
         }
 #endif
 

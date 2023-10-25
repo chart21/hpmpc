@@ -777,12 +777,37 @@ using sint = sint_t<A>;
 }
     
     template<typename Datatype, typename Share>
-Share max_min(sint_t<Additive_Share<Datatype, Share>>* begin, sint_t<Additive_Share<Datatype, Share>>* end, bool want_max)
+sint_t<Additive_Share<Datatype, Share>> max_min(sint_t<Additive_Share<Datatype, Share>>* begin, sint_t<Additive_Share<Datatype, Share>>* end, bool want_max)
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
 using Bitset = sbitset_t<S>;
 using sint = sint_t<A>;
+   int m = end - begin;
+   int og_len = m;
+
+   sint* val = new sint[m];
+    std::copy(begin, end, val);
+   if(m == 1)
+   {
+       return val[0];
+   }
+
+   int log2m = std::ceil(std::log2(m)); 
+   for(int i = 0; i < log2m; i++)
+   {
+       int counter = m/2; // 
+        int offset = m % 2; // if m is odd, offset is 1
+        S* msb = new S[m];
+        if(want_max)
+            max_min_msb_range(val,msb,m,true); //get msb and max of 0 -> counter
+        else
+            max_min_msb_range(val,msb,m,false); //get msb and max of 0 -> counter
+
+        delete[] msb;
+        m = counter + offset;
+    }
+   return val[0];
 }
 
 
@@ -871,7 +896,8 @@ using A = Additive_Share<DATATYPE, Share>;
 using Bitset = sbitset_t<S>;
 using sint = sint_t<A>;
 auto a = new sint[NUM_INPUTS];
-auto output = new S[NUM_INPUTS];
+auto max_output = new S[NUM_INPUTS];
+auto min_output = new S[NUM_INPUTS];
 for(int i = 0; i < NUM_INPUTS; i++)
         a[i]. template prepare_receive_from<P_0>();
 Share::communicate();
@@ -882,19 +908,40 @@ Share::communicate();
         /* for(int i = 0; i < NUM_INPUTS; i++) */
             /* std::cout << "a: " << a[i].get_p1() << std::endl; */
         /* #endif */ 
-argmax_argmin(a, a+NUM_INPUTS, output,true);
-for(int i = 0; i < NUM_INPUTS; i++)
-        output[i].prepare_reveal_to_all();
-Share::communicate();
-auto result_arr = new DATATYPE[NUM_INPUTS];
+argmax_argmin(a, a+NUM_INPUTS, max_output,true);
+argmax_argmin(a, a+NUM_INPUTS, min_output,false);
+auto max_val = max_min(a, a+NUM_INPUTS, true);
+auto min_val = max_min(a, a+NUM_INPUTS, false);
 for(int i = 0; i < NUM_INPUTS; i++)
 {
-        result_arr[i] = output[i].complete_reveal_to_all();
+        max_output[i].prepare_reveal_to_all();
+        min_output[i].prepare_reveal_to_all();
 }
+        max_val.prepare_reveal_to_all();
+        min_val.prepare_reveal_to_all();
+Share::communicate();
+auto result_arr = new DATATYPE[2][NUM_INPUTS];
 for(int i = 0; i < NUM_INPUTS; i++)
-        std::cout << "Result P" << PARTY << ": " << i << " " << result_arr[i] << std::endl;
+{
+        result_arr[0][i] = max_output[i].complete_reveal_to_all();
+        result_arr[1][i] = min_output[i].complete_reveal_to_all();
+}
+auto max_int = new UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)];
+auto min_int = new UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)];
+max_val.complete_reveal_to_all(max_int);
+min_val.complete_reveal_to_all(min_int);
+if(current_phase == 1)
+{
+for(int i = 0; i < NUM_INPUTS; i++)
+    std::cout << "arg_max: " << "Index: " << i << " Value: " << result_arr[0][i] << std::endl;
+for(int i = 0; i < NUM_INPUTS; i++)
+    std::cout << "arg_min: " << "Index: " << i << " Value: "<< result_arr[1][i] << std::endl;
+std::cout << "max: " << max_int[0] << std::endl;
+std::cout << "min: " << int(min_int[0]) << std::endl;
+}
 delete[] a;
-delete[] output;
+delete[] max_output;
+delete[] min_output;
 delete[] result_arr;
 }
 
