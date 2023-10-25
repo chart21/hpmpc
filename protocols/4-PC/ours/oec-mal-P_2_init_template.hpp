@@ -183,5 +183,185 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
+static void prepare_A2B_S1(OEC_MAL2_init in[], OEC_MAL2_init out[])
+{
+    for (int j = 0; j < BITLENGTH; j++)
+    {
+            send_to_(P_0);
+    }
+
+}
+
+
+static void prepare_A2B_S2(OEC_MAL2_init in[], OEC_MAL2_init out[])
+{
+}
+
+static void complete_A2B_S1(OEC_MAL2_init out[])
+{
+}
+
+static void complete_A2B_S2(OEC_MAL2_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        #if PRE == 0
+        receive_from_(P_0);
+        #else
+        pre_receive_from_(P_0);
+        #endif
+        store_compare_view_init(P_3);
+    }
+
+}
+
+void prepare_bit_injection_S1(OEC_MAL2_init out[])
+{
+    for (int j = 0; j < BITLENGTH; j++)
+    {
+            send_to_(P_0);
+    }
+}
+
+void prepare_bit_injection_S2(OEC_MAL2_init out[])
+{
+}
+
+static void complete_bit_injection_S1(OEC_MAL2_init out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OEC_MAL2_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        #if PRE == 0
+        receive_from_(P_0);
+        #else
+        pre_receive_from_(P_0);
+        #endif
+        store_compare_view_init(P_3);
+    }
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL2_init prepare_mult3(OEC_MAL2_init b, OEC_MAL2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PROTOCOL == 12
+#if PRE == 1
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+#else
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+#endif
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+#else
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+#endif
+OEC_MAL2_init d;
+send_to_(P_0);
+send_to_(P_1);
+return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+Datatype m21 = receive_from_(P_1);
+store_compare_view_init(P_012);
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL2_init prepare_mult4(OEC_MAL2_init b, OEC_MAL2_init c, OEC_MAL2_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PROTOCOL == 12
+#if PRE == 1
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+#else
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+#endif
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+#else
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+#endif
+OEC_MAL2_init e;
+send_to_(P_0);
+send_to_(P_1);
+return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
+receive_from_(P_1);
+store_compare_view_init(P_012);
+}
+
+
 
 };

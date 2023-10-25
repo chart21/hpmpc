@@ -709,7 +709,7 @@ Bitset *s2 = new Bitset[len];
 }
 
 template<typename Datatype, typename Share>
-void max_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int m)
+void max_min_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int m, bool want_max)
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
@@ -721,26 +721,27 @@ using sint = sint_t<A>;
        int counter = 0;
        for(int j = 1; j < m; j+=2)
        {
+           if(want_max)
         max_val[counter] = val[j] - val[j-1];
+           else
+        max_val[counter] = val[j-1] - val[j];
             counter++;
        }
-            #if PARTY == 2
-        for(int i = 0; i < counter; i++)
-            std::cout << "val: " << val[i].get_p1() << std::endl;
-        #endif 
-       if(offset == 1)
-        val[counter] = val[m-1]; // last uneven element is always pairwise max
+            /* #if PARTY == 2 */
+        /* for(int i = 0; i < counter; i++) */
+            /* std::cout << "val: " << val[i].get_p1() << std::endl; */
+        /* #endif */ 
 
-            #if PARTY == 2
-        for(int i = 0; i < counter; i++)
-            std::cout << "max val: " << max_val[i].get_p1() << std::endl;
-        #endif 
+            /* #if PARTY == 2 */
+        /* for(int i = 0; i < counter; i++) */
+            /* std::cout << "max val: " << max_val[i].get_p1() << std::endl; */
+        /* #endif */ 
 
     get_msb_range(max_val, msb, counter);
-            #if PARTY == 2
-        for(int i = 0; i < counter; i++)
-            std::cout << "msb: " << msb[i].get_p1() << std::endl;
-        #endif 
+            /* #if PARTY == 2 */
+        /* for(int i = 0; i < counter; i++) */
+            /* std::cout << "msb: " << msb[i].get_p1() << std::endl; */
+        /* #endif */ 
 
     delete[] max_val;
 
@@ -750,9 +751,9 @@ using sint = sint_t<A>;
 
     for(int i = 0; i < counter; i++)
     {
-#if PARTY ==2
-            std::cout << "max idx: " << max_idx[i].get_p1() << std::endl;
-#endif
+/* #if PARTY ==2 */
+/*             std::cout << "max idx: " << max_idx[i].get_p1() << std::endl; */
+/* #endif */
         max_idx[i] = max_idx[i] * (val[2*i] - val[2*i+1]);
     }
     Share::communicate();
@@ -761,18 +762,32 @@ using sint = sint_t<A>;
         max_idx[i].complete_mult();
         max_idx[i] = max_idx[i] + val[2*i+1];
         val[i] = max_idx[i];
-            #if PARTY == 2
-            std::cout << "updated val: " << val[i].get_p1() << std::endl;
-#endif
+            /* #if PARTY == 2 */
+            /* std::cout << "updated val: " << val[i].get_p1() << std::endl; */
+/* #endif */
 
     }
+       if(offset == 1)
+       {
+        val[counter] = val[m-1]; // last uneven element is always pairwise max
+        msb[counter] = SET_ALL_ONE();
+       }
     delete[] max_idx;
 
+}
+    
+    template<typename Datatype, typename Share>
+Share max_min(sint_t<Additive_Share<Datatype, Share>>* begin, sint_t<Additive_Share<Datatype, Share>>* end, bool want_max)
+{
+using S = XOR_Share<Datatype, Share>;
+using A = Additive_Share<Datatype, Share>;
+using Bitset = sbitset_t<S>;
+using sint = sint_t<A>;
 }
 
 
     template<typename Datatype, typename Share>
-void argmax(sint_t<Additive_Share<Datatype, Share>>* begin, sint_t<Additive_Share<Datatype, Share>>* end, XOR_Share<Datatype, Share>* output)
+void argmax_argmin(sint_t<Additive_Share<Datatype, Share>>* begin, sint_t<Additive_Share<Datatype, Share>>* end, XOR_Share<Datatype, Share>* output, bool want_max)
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
@@ -788,10 +803,10 @@ using sint = sint_t<A>;
 
    sint* val = new sint[m];
     std::copy(begin, end, val);
-                #if PARTY == 2
-        for(int i = 0; i < m; i++)
-            std::cout << "val: " << val[i].get_p1() << std::endl;
-        #endif 
+                /* #if PARTY == 2 */
+        /* for(int i = 0; i < m; i++) */
+            /* std::cout << "val: " << val[i].get_p1() << std::endl; */
+        /* #endif */ 
 
    int log2m = std::ceil(std::log2(m)); 
    for(int i = 0; i < log2m; i++)
@@ -799,7 +814,10 @@ using sint = sint_t<A>;
        int counter = m/2; // 
         int offset = m % 2; // if m is odd, offset is 1
         S* msb = new S[m];
-        max_msb_range(val,msb,m); //get msb and max of 0 -> counter
+        if(want_max)
+            max_min_msb_range(val,msb,m,true); //get msb and max of 0 -> counter
+        else
+            max_min_msb_range(val,msb,m,false); //get msb and max of 0 -> counter
 
         //update args
        if (i == 0) // first round
@@ -831,11 +849,12 @@ using sint = sint_t<A>;
                     }
                 }
             }
+            Share::communicate();
             for(int j = 0; j < counter; j++)
             {
-                for(int k = 0; k < jump; k++)
+                for(int k = 0; k < jump && j*jump+k < og_len ; k++)
                 {
-                    output[j*k].complete_and();
+                        output[j*jump+k].complete_and();
                 }
             }
        }
@@ -859,11 +878,11 @@ Share::communicate();
 for(int i = 0; i < NUM_INPUTS; i++)
         a[i]. template complete_receive_from<P_0>();
 Share::communicate();
-                #if PARTY == 2
-        for(int i = 0; i < NUM_INPUTS; i++)
-            std::cout << "a: " << a[i].get_p1() << std::endl;
-        #endif 
-argmax(a, a+NUM_INPUTS, output);
+                /* #if PARTY == 2 */
+        /* for(int i = 0; i < NUM_INPUTS; i++) */
+            /* std::cout << "a: " << a[i].get_p1() << std::endl; */
+        /* #endif */ 
+argmax_argmin(a, a+NUM_INPUTS, output,true);
 for(int i = 0; i < NUM_INPUTS; i++)
         output[i].prepare_reveal_to_all();
 Share::communicate();

@@ -10,9 +10,9 @@ public:
 TTP_Share() {}
 TTP_Share(Datatype a) {p1 = a;}
 
-void public_val(Datatype a)
+TTP_Share public_val(Datatype a)
 {
-    p1 = a;
+    return TTP_Share(a);
 }
 
 Datatype get_p1()
@@ -220,6 +220,24 @@ static void complete_bit_injection_S2(TTP_Share out[])
 
 }
 
+
+template <typename func_add, typename func_sub, typename func_mul>
+    TTP_Share prepare_mult3(TTP_Share b, TTP_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+return TTP_Share(MULT(MULT(p1,b.p1),c.p1));
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    TTP_Share prepare_mult4(TTP_Share b, TTP_Share c, TTP_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+return TTP_Share(MULT(MULT(MULT(p1,b.p1),c.p1),d.p1));
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){}
 
 
 

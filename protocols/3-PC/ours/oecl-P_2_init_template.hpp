@@ -10,7 +10,7 @@ OECL2_init() {}
 
 OECL2_init public_val(Datatype a)
 {
-    return a;
+    return OECL2_init();
 }
 
 OECL2_init Not() const
@@ -213,6 +213,70 @@ static void complete_bit_injection_S2(OECL2_init out[])
         #endif
     }
 
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL2_init prepare_mult3(OECL2_init b, OECL2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PRE == 1
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+#else
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+#endif
+
+send_to_(P_2);
+OECL2_init d;
+return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+    receive_from_(P_2);
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL2_init prepare_mult4(OECL2_init b, OECL2_init c, OECL2_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PRE == 1
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+#else
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+#endif
+
+send_to_(P_2);
+OECL2_init e;
+return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
+    receive_from_(P_2);
 }
 
 

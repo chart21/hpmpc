@@ -173,5 +173,32 @@ static void complete_bit_injection_S2(OECL1_init out[])
 
 }
 
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL1_init prepare_mult3(OECL1_init b, OECL1_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    send_to_(P_2);
+OECL1_init e;
+return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+receive_from_(P_2);
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL1_init prepare_mult4(OECL1_init b, OECL1_init c, OECL1_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+send_to_(P_2);
+OECL1_init e;
+return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
+    receive_from_(P_2);
+}
+
+
 
 };

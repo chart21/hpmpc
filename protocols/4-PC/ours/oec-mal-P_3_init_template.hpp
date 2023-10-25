@@ -180,5 +180,175 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
+static void prepare_A2B_S1(OEC_MAL3_init in[], OEC_MAL3_init out[])
+{
+}
+
+
+static void prepare_A2B_S2(OEC_MAL3_init in[], OEC_MAL3_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+            store_compare_view_init(P_2);
+    } 
+}
+
+static void complete_A2B_S1(OEC_MAL3_init out[])
+{
+}
+
+static void complete_A2B_S2(OEC_MAL3_init out[])
+{
+
+}
+
+void prepare_bit_injection_S1(OEC_MAL3_init out[])
+{
+}
+
+void prepare_bit_injection_S2(OEC_MAL3_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        store_compare_view_init(P_2);
+    }
+}
+
+static void complete_bit_injection_S1(OEC_MAL3_init out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OEC_MAL3_init out[])
+{
+}
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL3_init prepare_mult3(OEC_MAL3_init b, OEC_MAL3_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PROTOCOL == 12
+#if PRE == 1
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+#else
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+#endif
+#else
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+#endif
+OEC_MAL3_init d;
+return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL3_init prepare_mult4(OEC_MAL3_init b, OEC_MAL3_init c, OEC_MAL3_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PROTOCOL == 12
+#if PRE == 1
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_0);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+#else
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+#endif
+#else
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+send_to_(P_0);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+#endif
+OEC_MAL3_init e;
+return e;
+
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
+}
+
+
+
+
 
 };

@@ -174,7 +174,8 @@ public:
 
         UINT_TYPE get_p1()
         {
-            return shares[0].get_p1();
+            /* return shares[0].get_p1(); */
+            return 0;
         }
 
 };

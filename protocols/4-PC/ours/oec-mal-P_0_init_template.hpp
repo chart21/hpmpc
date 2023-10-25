@@ -176,5 +176,184 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
+static void prepare_A2B_S1(OEC_MAL0_init in[], OEC_MAL0_init out[])
+{
+}
+
+
+static void prepare_A2B_S2(OEC_MAL0_init in[], OEC_MAL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+            #if PRE == 1
+                pre_send_to_(P_2);
+            #else
+                send_to_(P_2);
+            #endif
+    } 
+}
+
+static void complete_A2B_S1(OEC_MAL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        receive_from_(P_2);
+        store_compare_view_init(P_1);
+    }
+}
+
+static void complete_A2B_S2(OEC_MAL0_init out[])
+{
+
+}
+
+void prepare_bit_injection_S1(OEC_MAL0_init out[])
+{
+}
+
+void prepare_bit_injection_S2(OEC_MAL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        #if PRE == 1
+            pre_send_to_(P_2);
+        #else
+            send_to_(P_2);
+        #endif
+    }
+}
+
+static void complete_bit_injection_S1(OEC_MAL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        receive_from_(P_2);
+        store_compare_view_init(P_1);
+    }
+    
+}
+
+static void complete_bit_injection_S2(OEC_MAL0_init out[])
+{
+
+
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL0_init prepare_mult3(OEC_MAL0_init b, OEC_MAL0_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PRE == 1 && PROTOCOL == 12
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+#else
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+/* pre_send_to_live(P_2, mxy); */
+/* pre_send_to_live(P_2, mxz); */
+/* pre_send_to_live(P_2, myz); */
+/* pre_send_to_live(P_2, mxyz); */
+#endif
+#if PROTOCOL == 12
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+#else
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+#endif
+OEC_MAL0_init d;
+return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+receive_from_(P_2);
+store_compare_view_init(P_1);
+store_compare_view_init(P_012);
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL0_init prepare_mult4(OEC_MAL0_init b, OEC_MAL0_init c, OEC_MAL0_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+
+#if PRE == 1 && PROTOCOL == 12
+/* pre_send_to_live(P_2, mxy); */
+/* pre_send_to_live(P_2, mxz); */
+/* pre_send_to_live(P_2, mxw); */
+/* pre_send_to_live(P_2, myz); */
+/* pre_send_to_live(P_2, myw); */
+/* pre_send_to_live(P_2, mzw); */
+/* pre_send_to_live(P_2, mxyz); */
+/* pre_send_to_live(P_2, mxyw); */
+/* pre_send_to_live(P_2, mxzw); */
+/* pre_send_to_live(P_2, myzw); */
+/* pre_send_to_live(P_2, mxyzw); */
+Datatype rxy = pre_receive_from_(P_3);
+Datatype rxz = pre_receive_from_(P_3);
+Datatype rxw = pre_receive_from_(P_3);
+Datatype ryz = pre_receive_from_(P_3);
+Datatype ryw = pre_receive_from_(P_3);
+Datatype rzw = pre_receive_from_(P_3);
+Datatype rxyz = pre_receive_from_(P_3);
+Datatype rxyw = pre_receive_from_(P_3);
+Datatype rxzw = pre_receive_from_(P_3);
+Datatype ryzw = pre_receive_from_(P_3);
+Datatype rxyzw = pre_receive_from_(P_3);
+#else
+Datatype rxy = receive_from_(P_3);
+Datatype rxz = receive_from_(P_3);
+Datatype rxw = receive_from_(P_3);
+Datatype ryz = receive_from_(P_3);
+Datatype ryw = receive_from_(P_3);
+Datatype rzw = receive_from_(P_3);
+Datatype rxyz = receive_from_(P_3);
+Datatype rxyw = receive_from_(P_3);
+Datatype rxzw = receive_from_(P_3);
+Datatype ryzw = receive_from_(P_3);
+Datatype rxyzw = receive_from_(P_3);
+#endif
+#if PROTOCOL == 12
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+#else
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+#endif
+OEC_MAL0_init e;
+return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
+receive_from_(P_2);
+store_compare_view_init(P_1);
+store_compare_view_init(P_012);
+}
+
 
 };

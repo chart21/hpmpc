@@ -6,11 +6,13 @@
 void generateElements()
 {
 #if FUNCTION_IDENTIFIER == 28 //argmax
+        /* UINT_TYPE fixed_init[] = {289383,634022,660336,120709,999999,908235,385644,229320,873269}; */
         auto input = NEW(UINT_TYPE[NUM_INPUTS][DATTYPE]);
         player_input = NEW(DATATYPE[NUM_INPUTS*BITLENGTH]);
         for(int i = 0; i < NUM_INPUTS; ++i) {
             for(int j = 0; j < DATTYPE; ++j) {
                 
+                /* input[i][j] = fixed_init[i]; */
                 input[i][j] = rand() % 1000000;
             }
         }

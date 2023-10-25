@@ -13,7 +13,7 @@ public:
 #if FUNCTION_IDENTIFIER == 28
     XOR_Share(const Datatype& d)
     {
-        Share_Type::public_val(d);
+        *this = Share_Type::public_val(d);
     }
 #endif
     XOR_Share operator~() const
@@ -66,5 +66,12 @@ public:
     {
         return Share_Type::complete_Reveal(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
     }
+
+            int get_p1()
+        {
+            /* return shares[0].get_p1(); */
+            return 0;
+        }
+
 };
 

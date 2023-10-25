@@ -298,12 +298,32 @@ Datatype d0 = ADD(d.p1,d.p2);
 
 
 OECL1_Share e;
+e.p1 = ADD(
+            ADD(
+                ADD(
+                    ADD(
+                        MULT(a0, SUB( MULT(d0, SUB(ryz, MULT(b0,c.p2))), ryzw)),
+                        ADD(
+                            MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.p2))), 
+                            SUB( MULT(c0, rxy), rxzw))),
+                            MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.p2))), rxyw))),
+                            ADD(
+                                MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,p2))),
+                                SUB( MULT(c0, rxy), rxyz))),
+                                rxyzw)
+                )
+            )
+        )); // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+e.p2 = getRandomVal(P_0);
+send_to_live(P_2, ADD(e.p1,e.p2));
 
-return OECL1_Share(getRandomVal(P_2),getRandomVal(P_1));
+return e;
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult4(func_add ADD, func_sub SUB){}
+void complete_mult4(func_add ADD, func_sub SUB){
+p1 = ADD(p1, receive_from_live(P_2));
+}
 
 
 };

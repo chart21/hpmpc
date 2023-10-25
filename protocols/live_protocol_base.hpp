@@ -90,11 +90,11 @@ return receiving_args[player_id].received_elements[rounds-1][share_buffer[player
 /* return receiving_args[player_id].received_elements[receiving_args[player_id].rec_rounds-1][share_buffer[player_id] -1]; */
 }
 
-void send_to_live(int player_id1, int player_id2, DATATYPE a)
-{
-    send_to_live(player_id1, a);
-    send_to_live(player_id2, a);
-}
+/* void send_to_live(int player_id1, int player_id2, DATATYPE a) */
+/* { */
+/*     send_to_live(player_id1, a); */
+/*     send_to_live(player_id2, a); */
+/* } */
 
 
 

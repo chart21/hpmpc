@@ -149,5 +149,80 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
+static void prepare_A2B_S1(OEC_MAL1_init in[], OEC_MAL1_init out[])
+{
+    for (int j = 0; j < BITLENGTH; j++)
+    {
+    store_compare_view_init(P_0);
+    }
+
+}
+
+
+static void prepare_A2B_S2(OEC_MAL1_init in[], OEC_MAL1_init out[])
+{
+}
+
+static void complete_A2B_S1(OEC_MAL1_init out[])
+{
+}
+
+static void complete_A2B_S2(OEC_MAL1_init out[])
+{
+
+}
+
+void prepare_bit_injection_S1(OEC_MAL1_init out[])
+{
+    for (int j = 0; j < BITLENGTH; j++)
+    {
+    store_compare_view_init(P_0);
+    }
+}
+
+void prepare_bit_injection_S2(OEC_MAL1_init out[])
+{
+}
+
+static void complete_bit_injection_S1(OEC_MAL1_init out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OEC_MAL1_init out[])
+{
+}
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL1_init prepare_mult3(OEC_MAL1_init b, OEC_MAL1_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+store_compare_view_init(P_0);
+send_to_(P_2);
+OEC_MAL1_init d;
+return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+receive_from_(P_2);
+store_compare_view_init(P_012); //compare d_0 s
+}
+
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL1_init prepare_mult4(OEC_MAL1_init b, OEC_MAL1_init c, OEC_MAL1_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+store_compare_view_init(P_0);
+send_to_(P_2);
+OEC_MAL1_init e;
+return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
+receive_from_(P_2);
+store_compare_view_init(P_012); 
+}
+
+
 
 };

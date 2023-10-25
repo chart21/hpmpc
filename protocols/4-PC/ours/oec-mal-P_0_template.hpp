@@ -273,7 +273,7 @@ static void prepare_A2B_S1(OEC_MAL0_Share in[], OEC_MAL0_Share out[])
 
 static void prepare_A2B_S2(OEC_MAL0_Share in[], OEC_MAL0_Share out[])
 {
-    //convert share x0 to boolean
+    //convert share  (- x0) to boolean
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
@@ -328,9 +328,9 @@ void prepare_bit_injection_S2(OEC_MAL0_Share out[])
         out[i].v = temp[i]; //c_w = x_0
         out[i].r = OP_SUB(SET_ALL_ZERO(), temp[i]) ; // z_0 = - x_0
         #if PRE == 1
-            pre_send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013)); //  x_0 + r013
+            pre_send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013)); //  - x_0 + r013
         #else
-            send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013)); //  x_0 + r013
+            send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013))); //  - x_0 + r013
         #endif
         
     }
@@ -338,18 +338,181 @@ void prepare_bit_injection_S2(OEC_MAL0_Share out[])
 
 static void complete_bit_injection_S1(OEC_MAL0_Share out[])
 {
-    
-}
-
-static void complete_bit_injection_S2(OEC_MAL0_Share out[])
-{
     for(int i = 0; i < BITLENGTH; i++)
     {
         out[i].v = receive_from_live(P_2);  // receive a_0 + r123
         store_compare_view(P_1, out[i].v);
     }
-
-
+    
 }
+
+static void complete_bit_injection_S2(OEC_MAL0_Share out[])
+{
+}
+
+#if MULTI_INPUT == 1
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL0_Share prepare_mult3(OEC_MAL0_Share b, OEC_MAL0_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype mxy = SUB(MULT(r,b.r),getRandomVal(P_013));
+Datatype mxz = SUB(MULT(r,c.r),getRandomVal(P_013));
+Datatype myz = SUB(MULT(b.r,c.r),getRandomVal(P_013));
+Datatype mxyz = SUB(MULT(MULT(r,b.r),c.r),getRandomVal(P_013));
+#if PRE == 1 && PROTOCOL == 12
+Datatype rxy = pre_receive_from_live(P_3);
+Datatype rxz = pre_receive_from_live(P_3);
+Datatype ryz = pre_receive_from_live(P_3);
+Datatype rxyz = pre_receive_from_live(P_3);
+#else
+Datatype rxy = receive_from_live(P_3);
+Datatype rxz = receive_from_live(P_3);
+Datatype ryz = receive_from_live(P_3);
+Datatype rxyz = receive_from_live(P_3);
+/* pre_send_to_live(P_2, mxy); */
+/* pre_send_to_live(P_2, mxz); */
+/* pre_send_to_live(P_2, myz); */
+/* pre_send_to_live(P_2, mxyz); */
+#endif
+#if PROTOCOL == 12
+store_compare_view(P_2, mxy);
+store_compare_view(P_2, mxz);
+store_compare_view(P_2, myz);
+store_compare_view(P_2, mxyz);
+#else
+send_to_live(P_2, mxy);
+send_to_live(P_2, mxz);
+send_to_live(P_2, myz);
+send_to_live(P_2, mxyz);
+#endif
+Datatype a0u = ADD(r,v);
+Datatype b0v = ADD(b.r,b.v);
+Datatype c0w = ADD(c.r,c.v);
+OEC_MAL0_Share d;
+d.v = SUB(ADD(
+        ADD( MULT(a0u,MULT(b0v,ADD(c0w,SUB(ryz,c.r))))
+        ,(MULT(b0v,SUB(rxz, MULT(c0w,r)))))
+        ,MULT(c0w,SUB(rxy, MULT(a0u,b.r)))), rxyz); // a0(b0(c0 + ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
+d.r = ADD(getRandomVal(P_013),getRandomVal(P_023));
+return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+Datatype m20 = receive_from_live(P_2);
+store_compare_view(P_1, m20);
+v = ADD(v,m20);
+store_compare_view(P_012, ADD(v,r));
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL0_Share prepare_mult4(OEC_MAL0_Share b, OEC_MAL0_Share c, OEC_MAL0_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype mxy = SUB(MULT(r,b.r),getRandomVal(P_013));
+Datatype mxz = SUB(MULT(r,c.r),getRandomVal(P_013));
+Datatype mxw = SUB(MULT(r,d.r),getRandomVal(P_013));
+Datatype myz = SUB(MULT(b.r,c.r),getRandomVal(P_013));
+Datatype myw = SUB(MULT(b.r,d.r),getRandomVal(P_013));
+Datatype mzw = SUB(MULT(c.r,d.r),getRandomVal(P_013));
+Datatype mxyz = SUB(MULT(mxy,c.r),getRandomVal(P_013));
+Datatype mxyw = SUB(MULT(mxy,d.r),getRandomVal(P_013));
+Datatype mxzw = SUB(MULT(mxz,d.r),getRandomVal(P_013));
+Datatype myzw = SUB(MULT(myz,d.r),getRandomVal(P_013));
+Datatype mxyzw = SUB(MULT(mxyz,d.r),getRandomVal(P_013));
+#if PRE == 1 && PROTOCOL == 12
+/* pre_send_to_live(P_2, mxy); */
+/* pre_send_to_live(P_2, mxz); */
+/* pre_send_to_live(P_2, mxw); */
+/* pre_send_to_live(P_2, myz); */
+/* pre_send_to_live(P_2, myw); */
+/* pre_send_to_live(P_2, mzw); */
+/* pre_send_to_live(P_2, mxyz); */
+/* pre_send_to_live(P_2, mxyw); */
+/* pre_send_to_live(P_2, mxzw); */
+/* pre_send_to_live(P_2, myzw); */
+/* pre_send_to_live(P_2, mxyzw); */
+Datatype rxy = pre_receive_from_live(P_3);
+Datatype rxz = pre_receive_from_live(P_3);
+Datatype rxw = pre_receive_from_live(P_3);
+Datatype ryz = pre_receive_from_live(P_3);
+Datatype ryw = pre_receive_from_live(P_3);
+Datatype rzw = pre_receive_from_live(P_3);
+Datatype rxyz = pre_receive_from_live(P_3);
+Datatype rxyw = pre_receive_from_live(P_3);
+Datatype rxzw = pre_receive_from_live(P_3);
+Datatype ryzw = pre_receive_from_live(P_3);
+Datatype rxyzw = pre_receive_from_live(P_3);
+#else
+Datatype rxy = receive_from_live(P_3);
+Datatype rxz = receive_from_live(P_3);
+Datatype rxw = receive_from_live(P_3);
+Datatype ryz = receive_from_live(P_3);
+Datatype ryw = receive_from_live(P_3);
+Datatype rzw = receive_from_live(P_3);
+Datatype rxyz = receive_from_live(P_3);
+Datatype rxyw = receive_from_live(P_3);
+Datatype rxzw = receive_from_live(P_3);
+Datatype ryzw = receive_from_live(P_3);
+Datatype rxyzw = receive_from_live(P_3);
+#endif
+#if PROTOCOL == 12
+store_compare_view(P_2, mxy);
+store_compare_view(P_2, mxz);
+store_compare_view(P_2, mxw);
+store_compare_view(P_2, myz);
+store_compare_view(P_2, myw);
+store_compare_view(P_2, mzw);
+store_compare_view(P_2, mxyz);
+store_compare_view(P_2, mxyw);
+store_compare_view(P_2, mxzw);
+store_compare_view(P_2, myzw);
+store_compare_view(P_2, mxyzw);
+#else
+send_to_live(P_2, mxy);
+send_to_live(P_2, mxz);
+send_to_live(P_2, mxw);
+send_to_live(P_2, myz);
+send_to_live(P_2, myw);
+send_to_live(P_2, mzw);
+send_to_live(P_2, mxyz);
+send_to_live(P_2, mxyw);
+send_to_live(P_2, mxzw);
+send_to_live(P_2, myzw);
+send_to_live(P_2, mxyzw);
+#endif
+Datatype a0 = ADD(r,v);
+Datatype b0 = ADD(b.r,b.v);
+Datatype c0 = ADD(c.r,c.v);
+Datatype d0 = ADD(d.r,d.v);
+OEC_MAL0_Share e;
+e.v = ADD(
+            ADD(
+                ADD(
+                    ADD(
+                        MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,c.r)),ryz )), ryzw)),
+                        ADD(
+                            MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.r))), 
+                            SUB( MULT(c0, rxy), rxzw))),
+                            MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.r))), rxyw))),
+                            ADD(
+                                MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,r))),
+                                SUB( MULT(c0, rxy), rxyz))),
+                                rxyzw)
+                )
+            )
+        )); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+e.r = ADD(getRandomVal(P_013),getRandomVal(P_023));
+return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
+Datatype m20 = receive_from_live(P_2);
+store_compare_view(P_1, m20);
+v = ADD(v,m20);
+store_compare_view(P_012, ADD(v,r));
+}
+
+#endif
 
 };

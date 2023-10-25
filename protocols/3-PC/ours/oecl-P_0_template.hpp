@@ -333,12 +333,12 @@ template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){}
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OECL0_Share prepare_mult4(OECL0_Share b, OECL0_Share c, OECL0_Share w, func_add ADD, func_sub SUB, func_mul MULT) const
+    OECL0_Share prepare_mult4(OECL0_Share b, OECL0_Share c, OECL0_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype x0 = ADD(p1,p2);
 Datatype y0 = ADD(b.p1,b.p2);
 Datatype z0 = ADD(c.p1,c.p2);
-Datatype w0 = ADD(w.p1,w.p2);
+Datatype w0 = ADD(d.p1,d.p2);
 Datatype xy = MULT(x0,y0);
 Datatype xz = MULT(x0,z0);
 Datatype xw = MULT(x0,w0);

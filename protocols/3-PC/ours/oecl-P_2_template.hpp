@@ -13,7 +13,7 @@ OECL2_Share(Datatype p1, Datatype p2) : p1(p1), p2(p2) {}
 
 OECL2_Share public_val(Datatype a)
 {
-    return a;
+    return OECL2_Share(a,SET_ALL_ZERO());
 }
 
 OECL2_Share Not() const
@@ -254,6 +254,105 @@ static void complete_bit_injection_S2(OECL2_Share out[])
 
 
 }
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL2_Share prepare_mult3(OECL2_Share b, OECL2_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PRE == 1
+Datatype rxy = pre_receive_from_live(P_0);
+Datatype rxz = pre_receive_from_live(P_0);
+Datatype ryz = pre_receive_from_live(P_0);
+Datatype rxyz = pre_receive_from_live(P_0);
+#else
+Datatype rxy = receive_from_live(P_0);
+Datatype rxz = receive_from_live(P_0);
+Datatype ryz = receive_from_live(P_0);
+Datatype rxyz = receive_from_live(P_0);
+#endif
+
+Datatype a0 = ADD(p1,p2);
+Datatype b0 = ADD(b.p1,b.p2);
+Datatype c0 = ADD(c.p1,c.p2);
+
+OECL2_Share d;
+d.p1 = SUB(ADD(
+        ADD( MULT(a0,MULT(b0,ADD(c0,SUB(ryz,c.p2))))
+        ,(MULT(b0,SUB(rxz, MULT(c0,p2)))))
+        ,MULT(c0,SUB(rxy, MULT(a0,b.p2)))), rxyz); // a0(b0(c0 + ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
+d.p2 = getRandomVal(P_0);
+send_to_live(P_2, ADD(d.p1,d.p2));
+return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+p1 = ADD(p1, receive_from_live(P_2));
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL2_Share prepare_mult4(OECL2_Share b, OECL2_Share c, OECL2_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PRE == 1
+Datatype rxy = pre_receive_from_live(P_0);
+Datatype rxz = pre_receive_from_live(P_0);
+Datatype rxw = pre_receive_from_live(P_0);
+Datatype ryz = pre_receive_from_live(P_0);
+Datatype ryw = pre_receive_from_live(P_0);
+Datatype rzw = pre_receive_from_live(P_0);
+Datatype rxyz = pre_receive_from_live(P_0);
+Datatype rxyw = pre_receive_from_live(P_0);
+Datatype rxzw = pre_receive_from_live(P_0);
+Datatype ryzw = pre_receive_from_live(P_0);
+Datatype rxyzw = pre_receive_from_live(P_0);
+#else
+Datatype rxy = receive_from_live(P_0);
+Datatype rxz = receive_from_live(P_0);
+Datatype rxw = receive_from_live(P_0);
+Datatype ryz = receive_from_live(P_0);
+Datatype ryw = receive_from_live(P_0);
+Datatype rzw = receive_from_live(P_0);
+Datatype rxyz = receive_from_live(P_0);
+Datatype rxyw = receive_from_live(P_0);
+Datatype rxzw = receive_from_live(P_0);
+Datatype ryzw = receive_from_live(P_0);
+Datatype rxyzw = receive_from_live(P_0);
+#endif
+
+Datatype a0 = ADD(p1,p2);
+Datatype b0 = ADD(b.p1,b.p2);
+Datatype c0 = ADD(c.p1,c.p2);
+Datatype d0 = ADD(d.p1,d.p2);
+
+
+
+OECL2_Share e;
+e.p1 = ADD(
+            ADD(
+                ADD(
+                    ADD(
+                        MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,c.p2)),ryz )), ryzw)),
+                        ADD(
+                            MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.p2))), 
+                            SUB( MULT(c0, rxy), rxzw))),
+                            MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.p2))), rxyw))),
+                            ADD(
+                                MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,p2))),
+                                SUB( MULT(c0, rxy), rxyz))),
+                                rxyzw)
+                )
+            )
+        )); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+e.p2 = getRandomVal(P_0);
+send_to_live(P_2, ADD(e.p1,e.p2));
+
+return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
+p1 = ADD(p1, receive_from_live(P_2));
+}
+
 
 };
 
