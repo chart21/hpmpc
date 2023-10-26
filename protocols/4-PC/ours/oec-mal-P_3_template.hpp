@@ -331,15 +331,15 @@ static void complete_bit_injection_S2(OEC_MAL3_Share out[])
 #if MULTI_INPUT == 1
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OEC_MAL3_Share prepare_mult3(OEC_MAL3_Share b, OEC_MAL3_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+    OEC_MAL3_Share prepare_mult3(const OEC_MAL3_Share b, const OEC_MAL3_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype mxy = SUB(MULT(r1,b.r1),getRandomVal(P_013));
 Datatype mxz = SUB(MULT(r1,c.r1),getRandomVal(P_013));
 Datatype myz = SUB(MULT(b.r1,c.r1),getRandomVal(P_013));
-Datatype mxyz = SUB(MULT(mxy,c.r1),getRandomVal(P_013));
-Datatype ax = ADD(c.r0,c.r1);
+Datatype mxyz = SUB(MULT(MULT(r1,b.r1),c.r1),getRandomVal(P_013));
+Datatype ax = ADD(r0,r1);
 Datatype by = ADD(b.r0,b.r1);
-Datatype cz = ADD(r0,r1);
+Datatype cz = ADD(c.r0,c.r1);
 Datatype m3xy = SUB(MULT(ax,by),getRandomVal(P_123));
 Datatype m3xz = SUB(MULT(ax,cz),getRandomVal(P_123));
 Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123));
@@ -385,7 +385,7 @@ void complete_mult3(func_add ADD, func_sub SUB){
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OEC_MAL3_Share prepare_mult4(OEC_MAL3_Share b, OEC_MAL3_Share c, OEC_MAL3_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+    OEC_MAL3_Share prepare_mult4(const OEC_MAL3_Share b, const OEC_MAL3_Share c, const OEC_MAL3_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype mxy = SUB(MULT(r1,b.r1),getRandomVal(P_013));
 Datatype mxz = SUB(MULT(r1,c.r1),getRandomVal(P_013));
@@ -393,11 +393,11 @@ Datatype mxw = SUB(MULT(r1,d.r1),getRandomVal(P_013));
 Datatype myz = SUB(MULT(b.r1,c.r1),getRandomVal(P_013));
 Datatype myw = SUB(MULT(b.r1,d.r1),getRandomVal(P_013));
 Datatype mzw = SUB(MULT(c.r1,d.r1),getRandomVal(P_013));
-Datatype mxyz = SUB(MULT(mxy,c.r1),getRandomVal(P_013));
-Datatype mxzw = SUB(MULT(mxz,d.r1),getRandomVal(P_013));
-Datatype myzw = SUB(MULT(myz,d.r1),getRandomVal(P_013));
-Datatype mxyw = SUB(MULT(mxy,d.r1),getRandomVal(P_013));
-Datatype mxyzw = SUB(MULT(mxy,mzw),getRandomVal(P_013));
+Datatype mxyz = SUB(MULT(MULT(r1,b.r1),c.r1),getRandomVal(P_013));
+Datatype mxyw = SUB(MULT(MULT(r1,b.r1),d.r1),getRandomVal(P_013));
+Datatype mxzw = SUB(MULT(MULT(r1,c.r1),d.r1),getRandomVal(P_013));
+Datatype myzw = SUB(MULT(MULT(b.r1,c.r1),d.r1),getRandomVal(P_013));
+Datatype mxyzw = SUB(MULT(MULT(r1,b.r1),MULT(c.r1,d.r1)),getRandomVal(P_013));
 Datatype ax = ADD(r0,r1);
 Datatype by = ADD(b.r0,b.r1);
 Datatype cz = ADD(c.r0,c.r1);
@@ -408,11 +408,11 @@ Datatype m3xw = SUB(MULT(ax,dw),getRandomVal(P_123));
 Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123));
 Datatype m3yw = SUB(MULT(by,dw),getRandomVal(P_123));
 Datatype m3zw = SUB(MULT(cz,dw),getRandomVal(P_123));
-Datatype m3xyz = SUB(MULT(m3xy,cz),getRandomVal(P_123));
-Datatype m3xyw = SUB(MULT(m3xy,dw),getRandomVal(P_123));
-Datatype m3xzw = SUB(MULT(m3xz,dw),getRandomVal(P_123));
-Datatype m3yzw = SUB(MULT(m3yz,dw),getRandomVal(P_123));
-Datatype m3xyzw = SUB(MULT(m3xy,m3zw),getRandomVal(P_123));
+Datatype m3xyz = SUB(MULT(MULT(ax,by),cz),getRandomVal(P_123));
+Datatype m3xyw = SUB(MULT(MULT(ax,by),dw),getRandomVal(P_123));
+Datatype m3xzw = SUB(MULT(MULT(ax,cz),dw),getRandomVal(P_123));
+Datatype m3yzw = SUB(MULT(MULT(by,cz),dw),getRandomVal(P_123));
+Datatype m3xyzw = SUB(MULT(MULT(ax,by),MULT(cz,dw)),getRandomVal(P_123));
 #if PROTOCOL == 12
 #if PRE == 1
 pre_send_to_live(P_0, m3xy);

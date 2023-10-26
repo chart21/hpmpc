@@ -230,14 +230,14 @@ receive_from_(P_0);
 receive_from_(P_0);
 #endif
 
-send_to_(P_2);
+send_to_(P_1);
 OECL2_init d;
 return d;
 }
 
 template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){
-    receive_from_(P_2);
+    receive_from_(P_1);
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
@@ -269,14 +269,14 @@ receive_from_(P_0);
 receive_from_(P_0);
 #endif
 
-send_to_(P_2);
+send_to_(P_1);
 OECL2_init e;
 return e;
 }
 
 template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){
-    receive_from_(P_2);
+    receive_from_(P_1);
 }
 
 

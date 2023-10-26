@@ -47,6 +47,8 @@
 #define FUNCTION dot_prod_eigen_bench
 #elif FUNCTION_IDENTIFIER == 28
 #define FUNCTION argmax_test
+#elif FUNCTION_IDENTIFIER == 29 || FUNCTION_IDENTIFIER == 30
+#define FUNCTION mult34_test
 #endif
 #define RESULTTYPE DATATYPE
 
@@ -1449,3 +1451,63 @@ void dot_prod_eigen_bench(DATATYPE* res)
 
 
 #endif
+
+#if FUNCTION_IDENTIFIER == 29 || FUNCTION_IDENTIFIER == 30
+template<typename Share>
+void mult34_test(DATATYPE* res)
+{
+using A = Additive_Share<DATATYPE, Share>;
+A* inputs = new A[NUM_INPUTS];
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            inputs[j]. template prepare_receive_from<P_0>();
+        }
+    Share::communicate();
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            inputs[j]. template complete_receive_from<P_0>();
+        }
+#if FUNCTION_IDENTIFIER == 29 //mult3 
+A result = inputs[0].prepare_mult3(inputs[1], inputs[2]);
+A ver_result = inputs[0] * inputs[1];
+Share::communicate();
+result.complete_mult3();
+ver_result.complete_mult();
+ver_result = ver_result * inputs[2];
+Share::communicate();
+ver_result.complete_mult();
+result.prepare_reveal_to_all();
+ver_result.prepare_reveal_to_all();
+Share::communicate();
+DATATYPE* result_arr = new DATATYPE[2];
+result_arr[0] = result.complete_reveal_to_all();
+result_arr[1]= ver_result.complete_reveal_to_all();
+#elif FUNCTION_IDENTIFIER == 30 // mult4 
+A result = inputs[0].prepare_mult4(inputs[1], inputs[2], inputs[3]);
+A ver_result = inputs[0] * inputs[1];
+Share::communicate();
+result.complete_mult4();
+ver_result.complete_mult();
+ver_result = ver_result * inputs[2];
+Share::communicate();
+ver_result.complete_mult();
+ver_result = ver_result * inputs[3];
+Share::communicate();
+ver_result.complete_mult();
+result.prepare_reveal_to_all();
+ver_result.prepare_reveal_to_all();
+Share::communicate();
+DATATYPE* result_arr = new DATATYPE[2];
+result_arr[0] = result.complete_reveal_to_all();
+result_arr[1]= ver_result.complete_reveal_to_all();
+#endif
+if(current_phase == 1)
+    std::cout << "result: " << result_arr[0] << " ver_result: " << result_arr[1] << std::endl;
+
+
+
+}
+
+
+#endif
+

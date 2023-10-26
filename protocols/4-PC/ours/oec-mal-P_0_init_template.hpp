@@ -295,29 +295,29 @@ template <typename func_add, typename func_sub, typename func_mul>
 /* pre_send_to_live(P_2, mxzw); */
 /* pre_send_to_live(P_2, myzw); */
 /* pre_send_to_live(P_2, mxyzw); */
-Datatype rxy = pre_receive_from_(P_3);
-Datatype rxz = pre_receive_from_(P_3);
-Datatype rxw = pre_receive_from_(P_3);
-Datatype ryz = pre_receive_from_(P_3);
-Datatype ryw = pre_receive_from_(P_3);
-Datatype rzw = pre_receive_from_(P_3);
-Datatype rxyz = pre_receive_from_(P_3);
-Datatype rxyw = pre_receive_from_(P_3);
-Datatype rxzw = pre_receive_from_(P_3);
-Datatype ryzw = pre_receive_from_(P_3);
-Datatype rxyzw = pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
 #else
-Datatype rxy = receive_from_(P_3);
-Datatype rxz = receive_from_(P_3);
-Datatype rxw = receive_from_(P_3);
-Datatype ryz = receive_from_(P_3);
-Datatype ryw = receive_from_(P_3);
-Datatype rzw = receive_from_(P_3);
-Datatype rxyz = receive_from_(P_3);
-Datatype rxyw = receive_from_(P_3);
-Datatype rxzw = receive_from_(P_3);
-Datatype ryzw = receive_from_(P_3);
-Datatype rxyzw = receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
 #endif
 #if PROTOCOL == 12
 store_compare_view_init(P_2);

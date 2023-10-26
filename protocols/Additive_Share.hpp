@@ -56,6 +56,28 @@ public:
     {
         return Share_Type::complete_Reveal(OP_ADD, OP_SUB);
     }
+
+    Additive_Share prepare_mult3(const Additive_Share<Datatype, Share_Type>& b, const Additive_Share<Datatype, Share_Type>& c) const
+    {
+        return Additive_Share(Share_Type::prepare_mult3(b, c, OP_ADD, OP_SUB, OP_MULT));
+    }
+    
+    void complete_mult3()
+    {
+        Share_Type::complete_mult3(OP_ADD, OP_SUB);
+    }
+    
+    Additive_Share prepare_mult4(const Additive_Share<Datatype, Share_Type>& b, const Additive_Share<Datatype, Share_Type>& c, const Additive_Share<Datatype, Share_Type>& d) const
+    {
+        return Additive_Share(Share_Type::prepare_mult4(b, c, d, OP_ADD, OP_SUB, OP_MULT));
+    }
+    
+    void complete_mult4()
+    {
+        Share_Type::complete_mult4(OP_ADD, OP_SUB);
+    }
+
+
 };
 
 

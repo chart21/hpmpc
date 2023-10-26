@@ -282,7 +282,7 @@ return d;
 
 template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){
-Datatype m21 = receive_from_(P_1);
+receive_from_(P_1);
 store_compare_view_init(P_012);
 }
 

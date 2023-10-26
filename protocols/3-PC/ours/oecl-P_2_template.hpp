@@ -280,13 +280,13 @@ d.p1 = SUB(ADD(
         ,(MULT(b0,SUB(rxz, MULT(c0,p2)))))
         ,MULT(c0,SUB(rxy, MULT(a0,b.p2)))), rxyz); // a0(b0(c0 + ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
 d.p2 = getRandomVal(P_0);
-send_to_live(P_2, ADD(d.p1,d.p2));
+send_to_live(P_1, ADD(d.p1,d.p2));
 return d;
 }
 
 template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){
-p1 = ADD(p1, receive_from_live(P_2));
+p1 = ADD(p1, receive_from_live(P_1));
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
@@ -326,31 +326,33 @@ Datatype d0 = ADD(d.p1,d.p2);
 
 
 OECL2_Share e;
-e.p1 = ADD(
-            ADD(
+e.p1 = 
+          
                 ADD(
                     ADD(
-                        MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,c.p2)),ryz )), ryzw)),
-                        ADD(
+                        MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,c.p2)),ryz )), ryzw))
+                            ,
                             MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.p2))), 
-                            SUB( MULT(c0, rxy), rxzw))),
-                            MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.p2))), rxyw))),
-                            ADD(
-                                MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,p2))),
-                                SUB( MULT(c0, rxy), rxyz))),
-                                rxyzw)
-                )
-            )
-        )); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+                            SUB( MULT(c0, rxy), rxzw)))
+                        )
+                    ,
+                    ADD(
+                            ADD(MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.p2))), rxyw)), rxyzw)
+                            ,
+                            MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,p2))),
+                            SUB( MULT(c0, rxy), rxyz)))
+                        )
+                               
+                ); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
 e.p2 = getRandomVal(P_0);
-send_to_live(P_2, ADD(e.p1,e.p2));
+send_to_live(P_1, ADD(e.p1,e.p2));
 
 return e;
 }
 
 template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){
-p1 = ADD(p1, receive_from_live(P_2));
+p1 = ADD(p1, receive_from_live(P_1));
 }
 
 

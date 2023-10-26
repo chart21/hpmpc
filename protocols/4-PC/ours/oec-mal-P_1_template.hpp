@@ -362,16 +362,16 @@ static void complete_bit_injection_S2(OEC_MAL1_Share out[])
 #if MULTI_INPUT == 1
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OEC_MAL1_Share prepare_mult3(OEC_MAL1_Share b, OEC_MAL1_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+    OEC_MAL1_Share prepare_mult3(const OEC_MAL1_Share b, const OEC_MAL1_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype mxy = getRandomVal(P_013);
 Datatype mxz = getRandomVal(P_013);
 Datatype myz = getRandomVal(P_013);
 Datatype mxyz = getRandomVal(P_013);
-Datatype sxy = ADD(mxy, ADD(ADD(MULT(m,b.m),MULT(r,b.m),MULT(m,b.r))));
-Datatype sxz = ADD(mxz, ADD(ADD(MULT(m,c.m),MULT(r,c.m),MULT(m,c.r))));
-Datatype syz = ADD(myz, ADD(ADD(MULT(b.m,c.m),MULT(b.r,c.m),MULT(b.m,c.r))));
-Datatype sxyz = ADD(ADD(mxyz,ADD(mxy,ADD(MULT(MULT(m,b.m),c.r),ADD(MULT(MULT(m,b.m),c.m))))));
+Datatype sxy = ADD(mxy, ADD(ADD(MULT(m,b.m),MULT(r,b.m)),MULT(m,b.r)));
+Datatype sxz = ADD(mxz, ADD(ADD(MULT(m,c.m),MULT(r,c.m)),MULT(m,c.r)));
+Datatype syz = ADD(myz, ADD(ADD(MULT(b.m,c.m),MULT(b.r,c.m)),MULT(b.m,c.r)));
+Datatype sxyz = ADD(ADD(mxyz,ADD(MULT(mxy,c.m),MULT(MULT(m,b.m),c.r))),MULT(MULT(m,b.m),c.m));
 Datatype a0 = ADD(v,m);
 Datatype b0 = ADD(b.v,b.m);
 Datatype c0 = ADD(c.v,c.m);
@@ -384,11 +384,11 @@ Datatype br = ADD(b.r,b.m);
 Datatype cr = ADD(c.r,c.m);
 OEC_MAL1_Share d;
 d.v = SUB(ADD(
-        ADD( MULT(a0,MULT(b0,ADD(c0,SUB(syz,cr))))
+        ADD( MULT(a0,SUB(syz, MULT(b0,cr)))
         ,(MULT(b0,SUB(sxz, MULT(c0,ar)))))
         ,MULT(c0,SUB(sxy, MULT(a0,br)))), sxyz); // a0(b0(c0 + ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
 Datatype m20 = SUB(ADD(
-        ADD( MULT(a0,MULT(b0,SUB(ryz,c.m)))
+        ADD( MULT(a0,SUB(ryz,MULT(b0,c.m)))
         ,(MULT(b0,SUB(rxz, MULT(c0,m)))))
         ,MULT(c0,SUB(rxy, MULT(a0,b.m)))), rxyz); // a0(b0(ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
 d.m = getRandomVal(P_123);
@@ -408,7 +408,7 @@ store_compare_view(P_012, ADD(v,m)); //compare d_0 s
 
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OEC_MAL1_Share prepare_mult4(OEC_MAL1_Share b, OEC_MAL1_Share c, OEC_MAL1_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+    OEC_MAL1_Share prepare_mult4(const OEC_MAL1_Share b,const  OEC_MAL1_Share c, const OEC_MAL1_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype mxy = getRandomVal(P_013);
 Datatype mxz = getRandomVal(P_013);
@@ -422,17 +422,17 @@ Datatype myzw = getRandomVal(P_013);
 Datatype mxyw = getRandomVal(P_013);
 Datatype mxyzw = getRandomVal(P_013);
 
-Datatype sxy = ADD(mxy, ADD(ADD(MULT(m,b.m),MULT(r,b.m),MULT(m,b.r))));
-Datatype sxz = ADD(mxz, ADD(ADD(MULT(m,c.m),MULT(r,c.m),MULT(m,c.r))));
-Datatype sxw = ADD(mxw, ADD(ADD(MULT(m,d.m),MULT(r,d.m),MULT(m,d.r))));
-Datatype syz = ADD(myz, ADD(ADD(MULT(b.m,c.m),MULT(b.r,c.m),MULT(b.m,c.r))));
-Datatype syw = ADD(myw, ADD(ADD(MULT(b.m,d.m),MULT(b.r,d.m),MULT(b.m,d.r))));
-Datatype szw = ADD(mzw, ADD(ADD(MULT(c.m,d.m),MULT(c.r,d.m),MULT(c.m,d.r))));
-Datatype sxyz = ADD(ADD(mxyz,ADD(mxy,ADD(MULT(MULT(m,b.m),c.r),ADD(MULT(MULT(m,b.m),c.m))))));
-Datatype sxzw = ADD(ADD(mxzw,ADD(mxz,ADD(MULT(MULT(m,c.m),d.r),ADD(MULT(MULT(m,c.m),d.m))))));
-Datatype syzw = ADD(ADD(myzw,ADD(myz,ADD(MULT(MULT(b.m,c.m),d.r),ADD(MULT(MULT(b.m,c.m),d.m))))));
-Datatype sxyw = ADD(ADD(mxyw,ADD(mxy,ADD(MULT(MULT(m,b.m),d.r),ADD(MULT(MULT(m,b.m),d.m))))));
-Datatype sxyzw = ADD(ADD(mxyzw,ADD(mxyz,ADD(mxy,ADD(MULT(MULT(m,b.m),MULT(c.m,d.r),ADD(MULT(MULT(m,b.m),MULT(c.m,d.m)))))))));
+Datatype sxy = ADD(mxy, ADD(ADD(MULT(m,b.m),MULT(r,b.m)),MULT(m,b.r)));
+Datatype sxz = ADD(mxz, ADD(ADD(MULT(m,c.m),MULT(r,c.m)),MULT(m,c.r)));
+Datatype sxw = ADD(mxw, ADD(ADD(MULT(m,d.m),MULT(r,d.m)),MULT(m,d.r)));
+Datatype syz = ADD(myz, ADD(ADD(MULT(b.m,c.m),MULT(b.r,c.m)),MULT(b.m,c.r)));
+Datatype syw = ADD(myw, ADD(ADD(MULT(b.m,d.m),MULT(b.r,d.m)),MULT(b.m,d.r)));
+Datatype szw = ADD(mzw, ADD(ADD(MULT(c.m,d.m),MULT(c.r,d.m)),MULT(c.m,d.r)));
+Datatype sxyz = ADD(mxyz,ADD(mxy,ADD(MULT(MULT(m,b.m),c.r),MULT(MULT(m,b.m),c.m))));
+Datatype sxzw = ADD(mxzw,ADD(mxz,ADD(MULT(MULT(m,c.m),d.r),MULT(MULT(m,c.m),d.m))));
+Datatype syzw = ADD(myzw,ADD(myz,ADD(MULT(MULT(b.m,c.m),d.r),MULT(MULT(b.m,c.m),d.m))));
+Datatype sxyw = ADD(mxyw,ADD(mxy,ADD(MULT(MULT(m,b.m),d.r),MULT(MULT(m,b.m),d.m))));
+Datatype sxyzw = ADD(mxyzw,ADD(mxyz,ADD(mxy,ADD(MULT(MULT(m,b.m),MULT(c.m,d.r)),MULT(MULT(m,b.m),MULT(c.m,d.m))))));
 
 
 Datatype a0 = ADD(v,m);
@@ -455,38 +455,40 @@ Datatype br = ADD(b.r,b.m);
 Datatype cr = ADD(c.r,c.m);
 Datatype dr = ADD(d.r,d.m);
 OEC_MAL1_Share e;
-e.v = ADD(
-            ADD(
+e.v = 
+            
                 ADD(
                     ADD(
-                        MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,cr)),syz )), syzw)),
-                        ADD(
-                            MULT(b0, ADD( MULT(a0, SUB(szw, MULT(c0,dr))), 
-                            SUB( MULT(c0, sxy), sxzw))),
-                            MULT(c0, SUB( MULT(a0, SUB(syw, MULT(d0,br))), sxyw))),
-                            ADD(
-                                MULT(d0, ADD( MULT(b0, SUB(sxz, MULT(c0,ar))),
-                                SUB( MULT(c0, rxy), sxyz))),
-                                sxyzw)
-                )
-            )
-        )); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
-Datatype m20 = ADD(
-            ADD(
+                        MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,cr)),syz )), syzw))
+                        ,
+                        MULT(b0, ADD( MULT(a0, SUB(szw, MULT(c0,dr))), 
+                            SUB( MULT(c0, sxy), sxzw)))
+                       
+                        )
+                    ,
+                    ADD(
+                        ADD(sxyzw, MULT(c0, SUB( MULT(a0, SUB(syw, MULT(d0,br))), sxyw)))
+                        ,
+                        MULT(d0, ADD( MULT(b0, SUB(sxz, MULT(c0,ar))),
+                            SUB( MULT(c0, sxy), sxyz)))
+                        )
+                    ); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+Datatype m20 = 
+            
                 ADD(
                     ADD(
-                        MULT(a0, SUB( MULT(d0, SUB(ryz, MULT(b0,c.m))), ryzw)),
-                        ADD(
-                            MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.m))), 
-                            SUB( MULT(c0, rxy), rxzw))),
-                            MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.m))), rxyw))),
-                            ADD(
-                                MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,m))),
-                                SUB( MULT(c0, rxy), rxyz))),
-                                rxyzw)
-                )
-            )
-        )); // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+                        MULT(a0, SUB( MULT(d0, SUB(ryz, MULT(b0,c.m))), ryzw))
+                        ,
+                        MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.m))), 
+                            SUB( MULT(c0, rxy), rxzw)))
+                       )
+                    ,
+                    ADD(
+                            ADD(rxyzw, MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.m))), rxyw))),
+                            MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,m))),
+                                SUB( MULT(c0, rxy), rxyz)))
+                        )
+        ); // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
 e.m = getRandomVal(P_123);
 e.r = getRandomVal(P_013);
 e.v = ADD(d.v,d.r);

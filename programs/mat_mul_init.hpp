@@ -102,9 +102,21 @@ void generateElements()
         orthogonalize_arithmetic(input[i], player_input + BITLENGTH*i);
     }
 #endif
+
+#if FUNCTION_IDENTIFIER == 29 || FUNCTION_IDENTIFIER == 30 // Multi input AND gates
+        player_input = NEW(DATATYPE[NUM_INPUTS]);
+        UINT_TYPE inputs[] = {2,3,4,5};
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {   
+            player_input[j] = PROMOTE(inputs[j]);
+        }
+#endif
+
+
 }
 
 void print_result(DATATYPE* var) 
 {
+
 }
 

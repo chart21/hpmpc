@@ -353,7 +353,7 @@ static void complete_bit_injection_S2(OEC_MAL0_Share out[])
 #if MULTI_INPUT == 1
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OEC_MAL0_Share prepare_mult3(OEC_MAL0_Share b, OEC_MAL0_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+    OEC_MAL0_Share prepare_mult3(const OEC_MAL0_Share b, const OEC_MAL0_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype mxy = SUB(MULT(r,b.r),getRandomVal(P_013));
 Datatype mxz = SUB(MULT(r,c.r),getRandomVal(P_013));
@@ -390,8 +390,8 @@ Datatype b0v = ADD(b.r,b.v);
 Datatype c0w = ADD(c.r,c.v);
 OEC_MAL0_Share d;
 d.v = SUB(ADD(
-        ADD( MULT(a0u,MULT(b0v,ADD(c0w,SUB(ryz,c.r))))
-        ,(MULT(b0v,SUB(rxz, MULT(c0w,r)))))
+        ADD( MULT(a0u,ADD(MULT(b0v,SUB(c0w,c.r)),ryz))
+            ,(MULT(b0v,SUB(rxz, MULT(c0w,r)))))
         ,MULT(c0w,SUB(rxy, MULT(a0u,b.r)))), rxyz); // a0(b0(c0 + ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
 d.r = ADD(getRandomVal(P_013),getRandomVal(P_023));
 return d;
@@ -406,7 +406,7 @@ store_compare_view(P_012, ADD(v,r));
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OEC_MAL0_Share prepare_mult4(OEC_MAL0_Share b, OEC_MAL0_Share c, OEC_MAL0_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+    OEC_MAL0_Share prepare_mult4(const OEC_MAL0_Share b, const OEC_MAL0_Share c, const OEC_MAL0_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype mxy = SUB(MULT(r,b.r),getRandomVal(P_013));
 Datatype mxz = SUB(MULT(r,c.r),getRandomVal(P_013));
@@ -414,11 +414,11 @@ Datatype mxw = SUB(MULT(r,d.r),getRandomVal(P_013));
 Datatype myz = SUB(MULT(b.r,c.r),getRandomVal(P_013));
 Datatype myw = SUB(MULT(b.r,d.r),getRandomVal(P_013));
 Datatype mzw = SUB(MULT(c.r,d.r),getRandomVal(P_013));
-Datatype mxyz = SUB(MULT(mxy,c.r),getRandomVal(P_013));
-Datatype mxyw = SUB(MULT(mxy,d.r),getRandomVal(P_013));
-Datatype mxzw = SUB(MULT(mxz,d.r),getRandomVal(P_013));
-Datatype myzw = SUB(MULT(myz,d.r),getRandomVal(P_013));
-Datatype mxyzw = SUB(MULT(mxyz,d.r),getRandomVal(P_013));
+Datatype mxyz = SUB(MULT(MULT(r,b.r),c.r),getRandomVal(P_013));
+Datatype mxyw = SUB(MULT(MULT(r,b.r),d.r),getRandomVal(P_013));
+Datatype mxzw = SUB(MULT(MULT(r,c.r),d.r),getRandomVal(P_013));
+Datatype myzw = SUB(MULT(MULT(b.r,c.r),d.r),getRandomVal(P_013));
+Datatype mxyzw = SUB(MULT(MULT(r,b.r),MULT(c.r,d.r)),getRandomVal(P_013));
 #if PRE == 1 && PROTOCOL == 12
 /* pre_send_to_live(P_2, mxy); */
 /* pre_send_to_live(P_2, mxz); */
@@ -485,22 +485,22 @@ Datatype b0 = ADD(b.r,b.v);
 Datatype c0 = ADD(c.r,c.v);
 Datatype d0 = ADD(d.r,d.v);
 OEC_MAL0_Share e;
-e.v = ADD(
-            ADD(
+e.v =       
                 ADD(
                     ADD(
-                        MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,c.r)),ryz )), ryzw)),
-                        ADD(
-                            MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.r))), 
-                            SUB( MULT(c0, rxy), rxzw))),
-                            MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.r))), rxyw))),
-                            ADD(
-                                MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,r))),
-                                SUB( MULT(c0, rxy), rxyz))),
-                                rxyzw)
-                )
-            )
-        )); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+                        MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,c.r)),ryz )), ryzw))
+                        ,
+                        MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.r))), 
+                            SUB( MULT(c0, rxy), rxzw)))
+                        )
+                    ,
+                    ADD(
+                        ADD(rxyzw, MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.r))), rxyw)))
+                        ,
+                        MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,r))),
+                            SUB( MULT(c0, rxy), rxyz)))
+                    )
+        ); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
 e.r = ADD(getRandomVal(P_013),getRandomVal(P_023));
 return e;
 }
