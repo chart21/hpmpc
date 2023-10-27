@@ -491,7 +491,7 @@ e.v =
                         MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,c.r)),ryz )), ryzw))
                         ,
                         MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.r))), 
-                            SUB( MULT(c0, rxy), rxzw)))
+                            SUB( MULT(c0, rxw), rxzw)))
                         )
                     ,
                     ADD(

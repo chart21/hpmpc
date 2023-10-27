@@ -448,7 +448,27 @@ store_compare_view(P_3, mxyz);
 Datatype sxy = ADD(mxy,ADD(MULT(r,b.m),MULT(m,b.r)));
 Datatype sxz = ADD(mxz,ADD(MULT(r,c.m),MULT(m,c.r)));
 Datatype syz = ADD(myz,ADD(MULT(b.r,c.m),MULT(b.m,c.r)));
-Datatype sxyz = ADD(ADD(mxyz,MULT(mxy,c.m)), MULT(MULT(m,b.m),c.r));
+/* Datatype sxyz = ADD(ADD(ADD(ADD(mxyz, MULT(mxy,c.m)),MULT(mxz,b.m)),MULT(myz,m)), MULT(MULT(m,b.m),c.r)); */
+/* Datatype sxyz = ADD(ADD(ADD(ADD(mxyz, */ 
+/*                     MULT(mxy,c.m)),MULT(mxz,b.m)),MULT(myz,m)), */ 
+/*         ADD( MULT(MULT(m,b.m),c.r), ADD(MULT(MULT(m,c.m),b.r),MULT(MULT(m,b.m),c.r)))); */
+/* Datatype sxyz = */
+/* ADD(mxyz, */
+/* ADD( */
+/*     ADD(ADD(MULT(mxy,c.m),MULT(mxz,b.m)),MULT(myz,m)), */
+/*     ADD(ADD(MULT(MULT(m,b.m),c.r),MULT(MULT(m,c.m),b.r)),MULT(MULT(b.m,c.m),r)) */
+/*     )); */
+Datatype sxyz =
+ADD(
+    ADD(
+        MULT(m,(ADD(myz,MULT(b.r,c.m)))),
+        MULT(b.m,(ADD(mxz,MULT(c.r,m))))
+        ),
+    ADD(
+        MULT(c.m,(ADD(mxy,MULT(r,b.m)))),
+        mxyz 
+        )
+    );
 Datatype a0 = ADD(v,m);
 Datatype b0 = ADD(b.v,b.m);
 Datatype c0 = ADD(c.v,c.m);
@@ -550,11 +570,71 @@ Datatype sxw = ADD(mxw,ADD(MULT(r,d.m),MULT(m,d.r)));
 Datatype syz = ADD(myz,ADD(MULT(b.r,c.m),MULT(b.m,c.r)));
 Datatype syw = ADD(myw,ADD(MULT(b.r,d.m),MULT(b.m,d.r)));
 Datatype szw = ADD(mzw,ADD(MULT(c.r,d.m),MULT(c.m,d.r)));
-Datatype sxyz = ADD(ADD(mxyz,MULT(mxy,c.m)), MULT(MULT(m,b.m),c.r));
-Datatype sxyw = ADD(ADD(mxyw,MULT(mxy,d.m)), MULT(MULT(m,b.m),d.r));
-Datatype sxzw = ADD(ADD(mxzw,MULT(mxz,d.m)), MULT(MULT(m,c.m),d.r));
-Datatype syzw = ADD(ADD(myzw,MULT(myz,d.m)), MULT(MULT(m,b.m),d.r));
-Datatype sxyzw = ADD(  ADD(  ADD(mxyzw,MULT(mxyz,d.m))  , MULT(mxy,c.r)), ADD(MULT(MULT(m,b.m),c.m),d.r));
+Datatype sxyz =
+ADD(
+    ADD(
+        MULT(m,(ADD(myz,MULT(b.r,c.m)))),
+        MULT(b.m,(ADD(mxz,MULT(c.r,m))))
+        ),
+    ADD(
+        MULT(c.m,(ADD(mxy,MULT(r,b.m)))),
+        mxyz 
+        )
+    );
+Datatype sxyw =
+ADD(
+    ADD(
+        MULT(m,(ADD(myw,MULT(b.r,d.m)))),
+        MULT(b.m,(ADD(mxw,MULT(d.r,m))))
+        ),
+    ADD(
+        MULT(d.m,(ADD(mxy,MULT(r,b.m)))),
+        mxyw 
+        )
+    );
+Datatype sxzw =
+ADD(
+    ADD(
+        MULT(m,(ADD(mzw,MULT(c.r,d.m)))),
+        MULT(c.m,(ADD(mxw,MULT(d.r,m))))
+        ),
+    ADD(
+        MULT(d.m,(ADD(mxz,MULT(r,c.m)))),
+        mxzw 
+        )
+    );
+Datatype syzw =
+ADD(
+    ADD(
+        MULT(b.m,(ADD(mzw,MULT(c.r,d.m)))),
+        MULT(c.m,(ADD(myw,MULT(d.r,b.m))))
+        ),
+    ADD(
+        MULT(d.m,(ADD(myz,MULT(b.r,c.m)))),
+        myzw 
+        )
+    );
+Datatype sxyzw =
+                ADD(
+                    ADD(
+                        MULT(m, ADD( MULT(d.m, ADD(MULT(b.m,ADD(c.m,c.r)),myz )), myzw))
+                        ,
+                        MULT(b.m, ADD( MULT(m, ADD(mzw, MULT(c.m,d.r))), 
+                            ADD( MULT(c.m, mxw), mxzw))))
+                    ,
+                    ADD(
+                        ADD( mxyzw, MULT(c.m, ADD( MULT(m, ADD(myw, MULT(d.m,b.r))), mxyw)))
+                        ,
+                        MULT(d.m, ADD( MULT(b.m, ADD(mxz, MULT(c.m,r))),
+                            ADD( MULT(c.m, mxy), mxyz)))
+                    )
+        ); 
+
+/* Datatype sxyz = ADD(ADD(mxyz,MULT(mxy,c.m)), MULT(MULT(m,b.m),c.r)); */
+/* Datatype sxyw = ADD(ADD(mxyw,MULT(mxy,d.m)), MULT(MULT(m,b.m),d.r)); */
+/* Datatype sxzw = ADD(ADD(mxzw,MULT(mxz,d.m)), MULT(MULT(m,c.m),d.r)); */
+/* Datatype syzw = ADD(ADD(myzw,MULT(myz,d.m)), MULT(MULT(m,b.m),d.r)); */
+/* Datatype sxyzw = ADD(  ADD(  ADD(mxyzw,MULT(mxyz,d.m))  , MULT(mxy,c.r)), ADD(MULT(MULT(m,b.m),c.m),d.r)); */
 
 Datatype a0 = ADD(v,m);
 Datatype b0 = ADD(b.v,b.m);
@@ -579,7 +659,7 @@ e.v =
                         MULT(a0, SUB( MULT(d0, ADD(MULT(b0,SUB(c0,c.r)),syz )), syzw))
                         ,
                         MULT(b0, ADD( MULT(a0, SUB(szw, MULT(c0,d.r))), 
-                            SUB( MULT(c0, sxy), sxzw))))
+                            SUB( MULT(c0, sxw), sxzw))))
                     ,
                     ADD(
                         ADD( sxyzw, MULT(c0, SUB( MULT(a0, SUB(syw, MULT(d0,b.r))), sxyw)))
@@ -595,7 +675,7 @@ Datatype m20 =
                         MULT(a0, SUB( MULT(d0, SUB(ryz, MULT(b0,c.m))), ryzw))
                         ,
                         MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.m))), 
-                            SUB( MULT(c0, rxy), rxzw))))
+                            SUB( MULT(c0, rxw), rxzw))))
                     ,
                     ADD(
                         ADD(rxyzw, MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.m))), rxyw))),
@@ -606,9 +686,9 @@ Datatype m20 =
                 ); // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
 e.m = getRandomVal(P_123);
 e.r = getRandomVal(P_023);
-e.v = ADD(d.v,d.r);
+e.v = ADD(e.v,e.r);
 send_to_live(P_0, ADD(m20, e.m)); // + s
-send_to_live(P_1,d.v);
+send_to_live(P_1,e.v);
 return e;
 }
 

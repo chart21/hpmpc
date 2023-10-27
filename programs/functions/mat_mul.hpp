@@ -1468,42 +1468,82 @@ A* inputs = new A[NUM_INPUTS];
             inputs[j]. template complete_receive_from<P_0>();
         }
 #if FUNCTION_IDENTIFIER == 29 //mult3 
-A result = inputs[0].prepare_mult3(inputs[1], inputs[2]);
+A result1 = inputs[0].prepare_mult3(inputs[1], inputs[2]);
+A result2 = inputs[0].prepare_mult3(inputs[1], inputs[2]);
+A result3 = inputs[0].prepare_mult3(inputs[1], inputs[2]);
 A ver_result = inputs[0] * inputs[1];
 Share::communicate();
-result.complete_mult3();
+result1.complete_mult3();
+result2.complete_mult3();
+result3.complete_mult3();
 ver_result.complete_mult();
+
+A result_tot = result1.prepare_mult3(result2, result3);
 ver_result = ver_result * inputs[2];
 Share::communicate();
+result_tot.complete_mult3();
 ver_result.complete_mult();
-result.prepare_reveal_to_all();
+A ver_result_tot = ver_result * ver_result;
+Share::communicate();
+ver_result_tot.complete_mult();
+ver_result_tot = ver_result_tot * ver_result;
+Share::communicate();
+ver_result_tot.complete_mult();
+result1.prepare_reveal_to_all();
 ver_result.prepare_reveal_to_all();
+result_tot.prepare_reveal_to_all();
+ver_result_tot.prepare_reveal_to_all();
 Share::communicate();
-DATATYPE* result_arr = new DATATYPE[2];
-result_arr[0] = result.complete_reveal_to_all();
+DATATYPE* result_arr = new DATATYPE[4];
+result_arr[0] = result1.complete_reveal_to_all();
 result_arr[1]= ver_result.complete_reveal_to_all();
+result_arr[2] = result_tot.complete_reveal_to_all();
+result_arr[3]= ver_result_tot.complete_reveal_to_all();
 #elif FUNCTION_IDENTIFIER == 30 // mult4 
-A result = inputs[0].prepare_mult4(inputs[1], inputs[2], inputs[3]);
+A result1 = inputs[0].prepare_mult4(inputs[1], inputs[2], inputs[3]);
+A result2 = inputs[0].prepare_mult4(inputs[1], inputs[2], inputs[3]);
+A result3 = inputs[0].prepare_mult4(inputs[1], inputs[2], inputs[3]);
+A result4 = inputs[0].prepare_mult4(inputs[1], inputs[2], inputs[3]);
 A ver_result = inputs[0] * inputs[1];
 Share::communicate();
-result.complete_mult4();
+result1.complete_mult4();
+result2.complete_mult4();
+result3.complete_mult4();
+result4.complete_mult4();
 ver_result.complete_mult();
+A result_tot = result1.prepare_mult4(result2, result3, result4);
 ver_result = ver_result * inputs[2];
 Share::communicate();
+result_tot.complete_mult4();
 ver_result.complete_mult();
 ver_result = ver_result * inputs[3];
 Share::communicate();
 ver_result.complete_mult();
-result.prepare_reveal_to_all();
-ver_result.prepare_reveal_to_all();
+A ver_result_tot = ver_result * ver_result;
 Share::communicate();
-DATATYPE* result_arr = new DATATYPE[2];
-result_arr[0] = result.complete_reveal_to_all();
+ver_result_tot.complete_mult();
+ver_result_tot = ver_result_tot * ver_result;
+Share::communicate();
+ver_result_tot.complete_mult();
+ver_result_tot = ver_result_tot * ver_result;
+Share::communicate();
+ver_result_tot.complete_mult();
+result1.prepare_reveal_to_all();
+ver_result.prepare_reveal_to_all();
+result_tot.prepare_reveal_to_all();
+ver_result_tot.prepare_reveal_to_all();
+Share::communicate();
+DATATYPE* result_arr = new DATATYPE[4];
+result_arr[0] = result1.complete_reveal_to_all();
 result_arr[1]= ver_result.complete_reveal_to_all();
+result_arr[2] = result_tot.complete_reveal_to_all();
+result_arr[3]= ver_result_tot.complete_reveal_to_all();
 #endif
 if(current_phase == 1)
-    std::cout << "result: " << result_arr[0] << " ver_result: " << result_arr[1] << std::endl;
-
+{
+    std::cout << "P" << PARTY << " result: " << result_arr[0] << " ver_result: " << result_arr[1] << std::endl;
+    std::cout << "P" << PARTY <<  " result2: " << result_arr[2] << " ver_result2: " << result_arr[3] << std::endl;
+}
 
 
 }

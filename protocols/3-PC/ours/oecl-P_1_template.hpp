@@ -262,7 +262,7 @@ Datatype c0 = ADD(c.p1,c.p2);
 
 OECL1_Share d;
 d.p1 = SUB(ADD(
-        ADD( MULT(a0,MULT(b0,SUB(ryz,c.p2)))
+        ADD( MULT(a0,SUB(ryz,MULT(b0,c.p2)))
         ,(MULT(b0,SUB(rxz, MULT(c0,p2)))))
         ,MULT(c0,SUB(rxy, MULT(a0,b.p2)))), rxyz); // a0(b0(ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
 d.p2 = getRandomVal(P_0);
@@ -304,7 +304,7 @@ e.p1 =
                         MULT(a0, SUB( MULT(d0, SUB(ryz, MULT(b0,c.p2))), ryzw))
                         ,
                             MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.p2))), 
-                            SUB( MULT(c0, rxy), rxzw)))
+                            SUB( MULT(c0, rxw), rxzw)))
                     ),
                     ADD(
                             
