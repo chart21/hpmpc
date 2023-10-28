@@ -121,9 +121,9 @@ v = TRUNC(SUB(v, r)); // [a_0 b_0 - v^1,2]^t
 
 #if MULTI_INPUT == 1
 m = getRandomVal(P_123); // w
-send_to_live(P_0,ADD(v, m)); // c_0 + w
+send_to_live(P_012,ADD(v, m)); // c_0 + w
 #else
-send_to_live(P_0,ADD(v, getRandomVal(P_123))); // c_0 + w
+send_to_live(P_012,ADD(v, getRandomVal(P_123))); // c_0 + w
 #endif
 
 
@@ -193,9 +193,9 @@ v = SUB(v, m2);
 send_to_live(P_0, ADD(m, m2)); // let P_0 verify m_2 XOR m_3, obtain m_2 + m_3 + r_234_2
 #if MULTI_INPUT == 1
 m = getRandomVal(P_123);
-send_to_live(P_0, ADD(v, m)); // send c_0 + w to P_0
+send_to_live(P_012, ADD(v, m)); // send c_0 + w to P_0
 #else
-send_to_live(P_0, ADD(v,getRandomVal(P_123))); // let P_0 obtain ab + c0 + w
+send_to_live(P_012, ADD(v,getRandomVal(P_123))); // let P_0 obtain ab + c0 + w
 #endif
 #endif
 
@@ -472,10 +472,10 @@ ADD(
 Datatype a0 = ADD(v,m);
 Datatype b0 = ADD(b.v,b.m);
 Datatype c0 = ADD(c.v,c.m);
-Datatype rxy = getRandomVal(P_123);
-Datatype rxz = getRandomVal(P_123);
-Datatype ryz = getRandomVal(P_123);
-Datatype rxyz = getRandomVal(P_123);
+Datatype rxy = getRandomVal(P_123_2);
+Datatype rxz = getRandomVal(P_123_2);
+Datatype ryz = getRandomVal(P_123_2);
+Datatype rxyz = getRandomVal(P_123_2);
 OEC_MAL2_Share d;
 d.v = SUB(ADD(
         ADD( MULT(a0, ADD(syz, MULT(b0,SUB(c0,c.r))))
@@ -485,7 +485,7 @@ Datatype m20 = SUB(ADD(
         ADD( MULT(a0,SUB(ryz,MULT(b0,c.m)))
         ,(MULT(b0,SUB(rxz, MULT(c0,m)))))
         ,MULT(c0,SUB(rxy, MULT(a0,b.m)))), rxyz); // a0(b0(ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
-d.m = getRandomVal(P_123);
+d.m = getRandomVal(P_123_2);
 d.r = getRandomVal(P_023);
 d.v = ADD(d.v,d.r);
 send_to_live(P_0, ADD(m20,d.m)); // + s
@@ -640,17 +640,17 @@ Datatype a0 = ADD(v,m);
 Datatype b0 = ADD(b.v,b.m);
 Datatype c0 = ADD(c.v,c.m);
 Datatype d0 = ADD(d.v,d.m);
-Datatype rxy = getRandomVal(P_123);
-Datatype rxz = getRandomVal(P_123);
-Datatype rxw = getRandomVal(P_123);
-Datatype ryz = getRandomVal(P_123);
-Datatype ryw = getRandomVal(P_123);
-Datatype rzw = getRandomVal(P_123);
-Datatype rxyz = getRandomVal(P_123);
-Datatype rxyw = getRandomVal(P_123);
-Datatype rxzw = getRandomVal(P_123);
-Datatype ryzw = getRandomVal(P_123);
-Datatype rxyzw = getRandomVal(P_123);
+Datatype rxy = getRandomVal(P_123_2);
+Datatype rxz = getRandomVal(P_123_2);
+Datatype rxw = getRandomVal(P_123_2);
+Datatype ryz = getRandomVal(P_123_2);
+Datatype ryw = getRandomVal(P_123_2);
+Datatype rzw = getRandomVal(P_123_2);
+Datatype rxyz = getRandomVal(P_123_2);
+Datatype rxyw = getRandomVal(P_123_2);
+Datatype rxzw = getRandomVal(P_123_2);
+Datatype ryzw = getRandomVal(P_123_2);
+Datatype rxyzw = getRandomVal(P_123_2);
 OEC_MAL2_Share e;
 e.v = 
      
@@ -684,7 +684,7 @@ Datatype m20 =
                     )
             
                 ); // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
-e.m = getRandomVal(P_123);
+e.m = getRandomVal(P_123_2);
 e.r = getRandomVal(P_023);
 e.v = ADD(e.v,e.r);
 send_to_live(P_0, ADD(m20, e.m)); // + s

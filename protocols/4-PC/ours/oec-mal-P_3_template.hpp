@@ -340,10 +340,10 @@ Datatype mxyz = SUB(MULT(MULT(r1,b.r1),c.r1),getRandomVal(P_013));
 Datatype ax = ADD(r0,r1);
 Datatype by = ADD(b.r0,b.r1);
 Datatype cz = ADD(c.r0,c.r1);
-Datatype m3xy = SUB(MULT(ax,by),getRandomVal(P_123));
-Datatype m3xz = SUB(MULT(ax,cz),getRandomVal(P_123));
-Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123));
-Datatype m3xyz = SUB(MULT(MULT(ax,by),cz),getRandomVal(P_123));
+Datatype m3xy = SUB(MULT(ax,by),getRandomVal(P_123_2));
+Datatype m3xz = SUB(MULT(ax,cz),getRandomVal(P_123_2));
+Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123_2));
+Datatype m3xyz = SUB(MULT(MULT(ax,by),cz),getRandomVal(P_123_2));
 #if PROTOCOL == 12
 #if PRE == 1
 pre_send_to_live(P_0, m3xy);
@@ -375,7 +375,7 @@ store_compare_view(P_2, myz);
 store_compare_view(P_2, mxyz);
 #endif
 OEC_MAL3_Share d;
-d.r0 = getRandomVal(P_123);
+d.r0 = getRandomVal(P_123_2);
 d.r1 = ADD(getRandomVal(P_013),getRandomVal(P_023));
 return d;
 }
@@ -402,17 +402,17 @@ Datatype ax = ADD(r0,r1);
 Datatype by = ADD(b.r0,b.r1);
 Datatype cz = ADD(c.r0,c.r1);
 Datatype dw = ADD(d.r0,d.r1);
-Datatype m3xy = SUB(MULT(ax,by),getRandomVal(P_123));
-Datatype m3xz = SUB(MULT(ax,cz),getRandomVal(P_123));
-Datatype m3xw = SUB(MULT(ax,dw),getRandomVal(P_123));
-Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123));
-Datatype m3yw = SUB(MULT(by,dw),getRandomVal(P_123));
-Datatype m3zw = SUB(MULT(cz,dw),getRandomVal(P_123));
-Datatype m3xyz = SUB(MULT(MULT(ax,by),cz),getRandomVal(P_123));
-Datatype m3xyw = SUB(MULT(MULT(ax,by),dw),getRandomVal(P_123));
-Datatype m3xzw = SUB(MULT(MULT(ax,cz),dw),getRandomVal(P_123));
-Datatype m3yzw = SUB(MULT(MULT(by,cz),dw),getRandomVal(P_123));
-Datatype m3xyzw = SUB(MULT(MULT(ax,by),MULT(cz,dw)),getRandomVal(P_123));
+Datatype m3xy = SUB(MULT(ax,by),getRandomVal(P_123_2));
+Datatype m3xz = SUB(MULT(ax,cz),getRandomVal(P_123_2));
+Datatype m3xw = SUB(MULT(ax,dw),getRandomVal(P_123_2));
+Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123_2));
+Datatype m3yw = SUB(MULT(by,dw),getRandomVal(P_123_2));
+Datatype m3zw = SUB(MULT(cz,dw),getRandomVal(P_123_2));
+Datatype m3xyz = SUB(MULT(MULT(ax,by),cz),getRandomVal(P_123_2));
+Datatype m3xyw = SUB(MULT(MULT(ax,by),dw),getRandomVal(P_123_2));
+Datatype m3xzw = SUB(MULT(MULT(ax,cz),dw),getRandomVal(P_123_2));
+Datatype m3yzw = SUB(MULT(MULT(by,cz),dw),getRandomVal(P_123_2));
+Datatype m3xyzw = SUB(MULT(MULT(ax,by),MULT(cz,dw)),getRandomVal(P_123_2));
 #if PROTOCOL == 12
 #if PRE == 1
 pre_send_to_live(P_0, m3xy);
@@ -486,7 +486,7 @@ store_compare_view(P_2, myzw);
 store_compare_view(P_2, mxyzw);
 #endif
 OEC_MAL3_Share e;
-e.r0 = getRandomVal(P_123);
+e.r0 = getRandomVal(P_123_2);
 e.r1 = ADD(getRandomVal(P_013),getRandomVal(P_023));
 return e;
 
