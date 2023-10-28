@@ -64,7 +64,15 @@ pre_send_to_(P_0);
 send_to_(P_0);
 #endif
 #endif
+#if PROTOCOL == 12
+#if PRE == 1
+pre_send_to_(P_2);
+#else
+send_to_(P_2);
+#endif
+#else
 store_compare_view_init(P_2);
+#endif
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>
@@ -209,7 +217,15 @@ static void prepare_A2B_S2(OEC_MAL3_init in[], OEC_MAL3_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
+        #if PROTOCOL != 12
             store_compare_view_init(P_2);
+        #else
+            #if PRE == 1
+                pre_send_to_(P_2);
+            #else
+                send_to_(P_2);
+            #endif
+        #endif
     } 
 }
 
@@ -230,7 +246,15 @@ void prepare_bit_injection_S2(OEC_MAL3_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-        store_compare_view_init(P_2);
+        #if PROTOCOL != 12
+            store_compare_view_init(P_2);
+        #else
+            #if PRE == 1
+                pre_send_to_(P_2);
+            #else
+                send_to_(P_2);
+            #endif
+        #endif
     }
 }
 

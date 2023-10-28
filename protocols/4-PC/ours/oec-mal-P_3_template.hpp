@@ -97,12 +97,21 @@ r1 = TRUNC(SUB(r0123, r1)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
 store_compare_view(P_0, ADD(SUB(r0, r0123), getRandomVal(P_123)));  // v^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
 #else
 #if PRE == 1
-pre_send_to_live(P_0, ADD(SUB(r0, r0123), getRandomVal(P_123));  // m^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
+pre_send_to_live(P_0, ADD(SUB(r0, r0123), getRandomVal(P_123)));  // m^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
 #else
 send_to_live(P_0, ADD(SUB(r0, r0123), getRandomVal(P_123)));  // m^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
 #endif
 #endif
+
+#if PROTOCOL == 12
+#if PRE == 1
+pre_send_to_live(P_2, SUB(r1,getRandomVal(P_013))); // compare m^0 - z_1
+#else
+send_to_live(P_2, SUB(r1,getRandomVal(P_013))); // compare m^0 - z_1
+#endif
+#else
 store_compare_view(P_2, SUB(r1,getRandomVal(P_013))); // compare m^0 - z_1
+#endif
 r0 = getRandomVal(P_123); // w
 }
 
@@ -284,7 +293,15 @@ static void prepare_A2B_S2(OEC_MAL3_Share in[], OEC_MAL3_Share out[])
     {
             out[i].r0 = SET_ALL_ZERO(); 
             out[i].r1 = temp[i]; 
+            #if PROTOCOL != 12
             store_compare_view(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // compare -x0 xor r0,1 with $P_2
+            #else
+            #if PRE == 1
+                pre_send_to_live(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // -x0 xor r0,1 to P_2
+            #else
+                send_to_live(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // -x0 xor r0,1 to P_2
+            #endif
+            #endif
     } 
 }
 
@@ -316,7 +333,15 @@ void prepare_bit_injection_S2(OEC_MAL3_Share out[])
     {
         out[i].r0 = SET_ALL_ZERO(); //w = 0
         out[i].r1 = OP_SUB(SET_ALL_ZERO(), temp[i]) ; // z_0 = - x_0
-        store_compare_view(P_2, OP_ADD(temp[i],getRandomVal(P_013))); //  x_0 + r013
+            #if PROTOCOL != 12
+            store_compare_view(P_2, OP_ADD(temp[i], getRandomVal(P_013))); // compare -x0 xor r0,1 with $P_2
+            #else
+            #if PRE == 1
+                pre_send_to_live(P_2, OP_ADD(temp[i], getRandomVal(P_013))); // -x0 xor r0,1 to P_2
+            #else
+                send_to_live(P_2, OP_ADD(temp[i], getRandomVal(P_013))); // -x0 xor r0,1 to P_2
+            #endif
+            #endif
         
     }
 }

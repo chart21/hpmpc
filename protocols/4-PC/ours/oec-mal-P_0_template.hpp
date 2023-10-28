@@ -72,7 +72,7 @@ c.r = MULT(r, b.r); //x0y0
 c.v = ADD( MULT(v,b.r), MULT(b.v,r)); // au y_0 + bv x_0
 #else
 c.r = MULT(r, b.r); //x0y0
-c.v = ADD(ADD(MULT(v, b.r), MULT(b.v,r)), c.r; //v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 --> later + m^3 
+c.v = ADD(ADD(MULT(v, b.r), MULT(b.v,r)), c.r); //v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 --> later + m^3 
 #endif
 return c;
 }
@@ -81,10 +81,15 @@ return c;
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
 r = TRUNC(SUB(ADD(getRandomVal(P_013), getRandomVal(P_023)), r)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
+#if PROTOCOL == 12
+store_compare_view(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
+#else
 #if PRE == 1
 pre_send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
 #else
 send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
+#endif
+
 #endif
 }
 template <typename func_add, typename func_sub>
@@ -290,11 +295,15 @@ static void prepare_A2B_S2(OEC_MAL0_Share in[], OEC_MAL0_Share out[])
     {
             out[i].r = temp[i]; 
             out[i].v = temp[i];  // set both shares to -x0
+        #if PROTOCOL == 12
+            store_compare_view(P_2, FUNC_XOR(temp[i],getRandomVal(P_013))); //  - x_0 + r013
+        #else
             #if PRE == 1
                 pre_send_to_live(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // -x0 xor r0,1 to P_2
             #else
                 send_to_live(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // -x0 xor r0,1 to P_2
             #endif
+        #endif
     } 
             /* out[0].p1 = FUNC_NOT(out[0].p1);// change sign bit -> -x0 xor r0,1 to x0 xor r0,1 */
 }
@@ -331,10 +340,14 @@ void prepare_bit_injection_S2(OEC_MAL0_Share out[])
     {
         out[i].v = temp[i]; //c_w = x_0
         out[i].r = OP_SUB(SET_ALL_ZERO(), temp[i]) ; // z_0 = - x_0
+        #if PROTOCOL == 12
+            store_compare_view(P_2, OP_ADD(temp[i],getRandomVal(P_013))); //  - x_0 + r013
+        #else
         #if PRE == 1
             pre_send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013)); //  - x_0 + r013
         #else
             send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013))); //  - x_0 + r013
+        #endif
         #endif
         
     }

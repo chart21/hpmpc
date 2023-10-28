@@ -135,13 +135,22 @@ send_to_live(P_0,ADD(v, m)); // c_0 + w
 send_to_live(P_0,ADD(v, getRandomVal(P_123))); // c_0 + w
 #endif
 
-
+#if PROTOCOL == 12
 #if PRE == 1
-r = receive_from_pre(P_0); // z_2 = m0
+r = pre_receive_from_live(P_3); // z_2 = m0
+#else
+r = receive_from_live(P_3); // z_2 = m0 
+#endif
+store_compare_view(P_0, r); // compare view of m0
+#else
+#if PRE == 1
+r = pre_receive_from_live(P_0); // z_2 = m0
 #else
 r = receive_from_live(P_0); // z_2 = m0 
 #endif
 store_compare_view(P_3, r); // compare view of m0
+#endif
+
 }
 
 #endif
@@ -359,13 +368,23 @@ static void complete_A2B_S2(OEC_MAL2_Share out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
+    #if PROTOCOL != 12
         #if PRE == 0
         Datatype m0 = receive_from_live(P_0);
         #else
         Datatype m0 = pre_receive_from_live(P_0);
         #endif
-        out[i].r = m0;
         store_compare_view(P_3, m0);
+    #else
+        #if PRE == 0
+        Datatype m0 = receive_from_live(P_3);
+        #else
+        Datatype m0 = pre_receive_from_live(P_3);
+        #endif
+        store_compare_view(P_0, m0);
+    #endif
+
+        out[i].r = m0;
     }
 
 }
@@ -409,13 +428,22 @@ static void complete_bit_injection_S2(OEC_MAL2_Share out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
+        #if PROTOCOL != 12
         #if PRE == 0
         Datatype m0 = receive_from_live(P_0);
         #else
         Datatype m0 = pre_receive_from_live(P_0);
         #endif
-        out[i].r = OP_SUB(SET_ALL_ZERO(), m0);
         store_compare_view(P_3, m0);
+#else
+        #if PRE == 0
+        Datatype m0 = receive_from_live(P_3);
+        #else
+        Datatype m0 = pre_receive_from_live(P_3);
+        #endif
+        store_compare_view(P_0, m0);
+#endif
+        out[i].r = OP_SUB(SET_ALL_ZERO(), m0);
     }
 }
 

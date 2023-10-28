@@ -115,6 +115,60 @@ static void communicate()
 {
     communicate_live();
 }
+static void prepare_A2B_S1(OECL_MAL3_POST_Share in[], OECL_MAL3_POST_Share out[])
+{
+}
+
+
+static void prepare_A2B_S2(OECL_MAL3_POST_Share in[], OECL_MAL3_POST_Share out[])
+{
+}
+
+static void complete_A2B_S1(OECL_MAL3_POST_Share out[])
+{
+
+}
+static void complete_A2B_S2(OECL_MAL3_POST_Share out[])
+{
+
+}
+
+void prepare_bit_injection_S1(OECL_MAL3_POST_Share out[])
+{
+}
+
+void prepare_bit_injection_S2(OECL_MAL3_POST_Share out[])
+{
+}
+
+static void complete_bit_injection_S1(OECL_MAL3_POST_Share out[])
+{
+    
+}
+
+static void complete_bit_injection_S2(OECL_MAL3_POST_Share out[])
+{
+
+
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL_MAL3_POST_Share prepare_mult3(const OECL_MAL3_POST_Share b, const OECL_MAL3_POST_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    return OECL_MAL3_POST_Share();
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL_MAL3_POST_Share prepare_mult4(const OECL_MAL3_POST_Share b, const OECL_MAL3_POST_Share c, const OECL_MAL3_POST_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    return OECL_MAL3_POST_Share();
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){}
 
 };
 

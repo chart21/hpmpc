@@ -74,12 +74,21 @@ send_to_(P_0);
 #else
 store_compare_view_init(P_012);
 #endif
+#if PROTOCOL == 12
 #if PRE == 1
-receive_from_pre_(P_0); // z_2 = m0
+pre_receive_from_(P_3); // z_2 = m0
+#else
+receive_from_(P_3); // z_2 = m0 
+#endif
+store_compare_view_init(P_0); // compare view of m0
+#else
+#if PRE == 1
+pre_receive_from_(P_0); // z_2 = m0
 #else
 receive_from_(P_0); // z_2 = m0 
 #endif
 store_compare_view_init(P_3); // compare view of m0
+#endif
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
@@ -233,12 +242,21 @@ static void complete_A2B_S2(OEC_MAL2_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
+#if PROTOCOL != 12
         #if PRE == 0
         receive_from_(P_0);
         #else
         pre_receive_from_(P_0);
         #endif
         store_compare_view_init(P_3);
+#else
+        #if PRE == 0
+        receive_from_(P_3);
+        #else
+        pre_receive_from_(P_3);
+        #endif
+        store_compare_view_init(P_0);
+#endif
     }
 
 }
@@ -264,12 +282,21 @@ static void complete_bit_injection_S2(OEC_MAL2_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
+#if PROTOCOL != 12
         #if PRE == 0
         receive_from_(P_0);
         #else
         pre_receive_from_(P_0);
         #endif
         store_compare_view_init(P_3);
+#else
+        #if PRE == 0
+        receive_from_(P_3);
+        #else
+        pre_receive_from_(P_3);
+        #endif
+        store_compare_view_init(P_0);
+#endif
     }
 }
 

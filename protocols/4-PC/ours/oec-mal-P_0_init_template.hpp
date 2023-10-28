@@ -48,10 +48,14 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
+#if PROTOCOL == 12 || PROTOCOL == 8
+store_compare_view_init(P_2);
+#else
 #if PRE == 1
-send_to_(P_2);
+pre_send_to_(P_2);
 #else
 send_to_(P_2);
+#endif
 #endif
 }
     
@@ -215,11 +219,15 @@ static void prepare_A2B_S2(OEC_MAL0_init in[], OEC_MAL0_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
+        #if PROTOCOL == 12
+            store_compare_view_init(P_2);
+        #else
             #if PRE == 1
                 pre_send_to_(P_2);
             #else
                 send_to_(P_2);
             #endif
+        #endif
     } 
 }
 
@@ -245,10 +253,14 @@ void prepare_bit_injection_S2(OEC_MAL0_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
+        #if PROTOCOL == 12
+            store_compare_view_init(P_2);
+        #else
         #if PRE == 1
             pre_send_to_(P_2);
         #else
             send_to_(P_2);
+        #endif
         #endif
     }
 }
