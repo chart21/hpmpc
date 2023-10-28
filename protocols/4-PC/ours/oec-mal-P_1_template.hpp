@@ -127,18 +127,18 @@ void mask_and_send_dot(func_add ADD, func_sub SUB)
 Datatype cr = getRandomVal(P_013);
 Datatype r124 = getRandomVal(P_013);
 /* Datatype r234 = getRandomVal(P_123); //used for veryfying m3' sent by P_3 -> probably not needed -> for verification needed */
-v = ADD( v  , r124);  
+r = ADD( r  , r124); // a_0 y_1 + b_0 x_1
 /* Datatype m_2 = XOR(c.v, c.r); */
-send_to_live(P_2,v);
+send_to_live(P_2,r);
 
 #if PROTOCOL == 10 || PROTOCOL == 12
-store_compare_view(P_0,ADD(r,getRandomVal(P_123_2))); // compare a0b0 + r123_2 with P_0
+store_compare_view(P_0,ADD(v,getRandomVal(P_123_2))); // compare a0b0 + r123_2 with P_0
 #endif
 #if PROTOCOL == 11
-m = ADD(v,getRandomVal(P_123_2)); // m_2 + r234_2 store to compareview later
+m = ADD(r,getRandomVal(P_123_2)); // m_2 + r234_2 store to compareview later
 #endif
 
-v = SUB( r,v);
+v = SUB( v,r);
 r = cr;
 
 }

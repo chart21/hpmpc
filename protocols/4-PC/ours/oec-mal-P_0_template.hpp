@@ -68,11 +68,11 @@ OEC_MAL0_Share prepare_dot(const OEC_MAL0_Share b, func_add ADD, func_sub SUB, f
 {
 OEC_MAL0_Share c;
 #if FRACTIONAL == 0
-c.r = MULT(r, b.r); 
-c.v = ADD( MULT(v,b.r), MULT(b.v,r));
+c.r = MULT(r, b.r); //x0y0
+c.v = ADD( MULT(v,b.r), MULT(b.v,r)); // au y_0 + bv x_0
 #else
 c.r = MULT(r, b.r); //x0y0
-c.v = ADD(ADD(MULT(v, b.r), MULT(b.v,r)), MULT(r,b.r)); //v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 --> later + m^3 
+c.v = ADD(ADD(MULT(v, b.r), MULT(b.v,r)), c.r; //v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 --> later + m^3 
 #endif
 return c;
 }
@@ -86,6 +86,29 @@ pre_send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
 #else
 send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
 #endif
+}
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+Datatype cr = ADD(getRandomVal(P_013),getRandomVal(P_023)); // z_0 = r_0,1,3 + r_0,2,3
+/* Datatype r124 = getRandomVal(P_013); */
+/* Datatype o1 = XOR( x1y1, r124); */
+Datatype o1 = ADD(cr,ADD( r, getRandomVal(P_013))); // x0 y0 + z_0 + r_0,1,3_2
+
+#if PROTOCOL == 11
+v = SUB(v,cr); // au y_0 + bv x_0 - z_0
+#endif
+r = cr; //zo
+#if PROTOCOL == 12
+store_compare_view(P_2,o1);
+#else
+    #if PRE == 1
+        pre_send_to_live(P_2, o1);
+    #else
+        send_to_live(P_2, o1);
+    #endif
+#endif
+
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>
@@ -108,29 +131,6 @@ store_compare_view(P_1,c0w); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3
 v = SUB(c0w,r); // c_0,w - z_0
 }
 
-template <typename func_add, typename func_sub>
-void mask_and_send_dot(func_add ADD, func_sub SUB)
-{
-Datatype cr = ADD(getRandomVal(P_013),getRandomVal(P_023)); // calculate c_1
-/* Datatype r124 = getRandomVal(P_013); */
-/* Datatype o1 = XOR( x1y1, r124); */
-Datatype o1 = ADD(cr,ADD( r, getRandomVal(P_013)));
-
-#if PROTOCOL == 11
-v = SUB(v,cr);
-#endif
-r = cr;
-#if PROTOCOL == 12
-store_compare_view(P_2,o1);
-#else
-    #if PRE == 1
-        pre_send_to_live(P_2, o1);
-    #else
-        send_to_live(P_2, o1);
-    #endif
-#endif
-
-}
 
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
@@ -145,7 +145,7 @@ Datatype o_4 = receive_from_live(P_3);
 Datatype m_2XORm_3 = receive_from_live(P_2);
 store_compare_view(P_1, m_2XORm_3); // Verify if P_2 sent correct message m_2 XOR m_3
 store_compare_view(P_3, SUB(m_2XORm_3,v)); // x1 y1 - x1 y3 - x 3 y1 - r234 should remain
-v = receive_from_live(P_2); // receive ab + c1 + r_234_1 from P_2 (P_3 in paper), need to convert to ab+ r234_1 (maybe not? and only for verify?)
+v = receive_from_live(P_2); // receive ab + c1 + r_234_1 from P_2 , need to convert to ab+ r234_1 (maybe not? and only for verify?)
 store_compare_view(P_1, v); // Verify if P_2 sent correct message of ab
 v = SUB(v,r); // convert to ab + r234_1 (maybe not needed)
 #endif

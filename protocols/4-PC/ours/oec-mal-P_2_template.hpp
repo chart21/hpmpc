@@ -169,19 +169,19 @@ Datatype cr = getRandomVal(P_023);
    Datatype o1 = receive_from_live(P_0);
    store_compare_view(P_3, o1);
 #endif
-   v = SUB(v,o1);
-   send_to_live(P_1, v);
+   r = SUB(r,o1);
+   send_to_live(P_1, r);
 
 
    /* c.v = AND(XOR(a.v, a.r), XOR(b.v, b.r)); */
 
 #if PROTOCOL == 10 || PROTOCOL == 12
-   send_to_live(P_0, ADD(r,r234_2));
+   send_to_live(P_0, ADD(v,r234_2));
 #endif
 #if PROTOCOL == 11
-m = ADD(v, r234_2); // store m_2 + m_3 + r_234_2 to send P_0 later
+m = ADD(r, r234_2); // store m_2 + m_3 + r_234_2 to send P_0 later
 #endif
-   v = SUB(r, v);
+   v = SUB(v, r);
    /* c.m = ADD(c.m, r234); */
 r = cr;
 
@@ -198,9 +198,9 @@ v = SUB(v, m2);
 send_to_live(P_0, ADD(m, m2)); // let P_0 verify m_2 XOR m_3, obtain m_2 + m_3 + r_234_2
 #if MULTI_INPUT == 1
 m = getRandomVal(P_123);
-send_to_live(P_012, ADD(v, m)); // send c_0 + w to P_0
+send_to_live(P_0, ADD(v, m)); // send c_0 + w to P_0
 #else
-send_to_live(P_012, ADD(v,getRandomVal(P_123))); // let P_0 obtain ab + c0 + w
+send_to_live(P_0, ADD(v,getRandomVal(P_123))); // let P_0 obtain ab + c0 + w
 #endif
 #endif
 

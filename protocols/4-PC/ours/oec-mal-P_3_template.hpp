@@ -115,14 +115,14 @@ template <typename func_add, typename func_sub>
 void mask_and_send_dot(func_add ADD, func_sub SUB)
 {
 
-Datatype rc0 = getRandomVal(P_123); // r123_1
+Datatype rc0 = getRandomVal(P_123); // w
 Datatype rc1 = ADD(getRandomVal(P_023),getRandomVal(P_013)); // x0 
 
-Datatype o1 = ADD(rc0, ADD(r1, getRandomVal(P_013)));
+Datatype o1 = ADD(rc1, ADD(r1, getRandomVal(P_013)));
 #if PROTOCOL == 11
 Datatype o4 = ADD(r0,getRandomVal(P_123_2)); // r123_2
 #else
-Datatype o4 = ADD(r0,SUB(getRandomVal(P_123_2),r0)); // r123_2
+Datatype o4 = ADD(r0,SUB(getRandomVal(P_123_2),rc0)); // - w + r123
 #endif
 
 r0 = rc0;
