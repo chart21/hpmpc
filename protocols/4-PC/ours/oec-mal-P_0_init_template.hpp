@@ -44,6 +44,36 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
 #endif
 }
 
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PRE == 1
+send_to_(P_2);
+#else
+send_to_(P_2);
+#endif
+}
+    
+template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PROTOCOL == 11
+receive_from_(P_2); // m1 + m2 + r123
+store_compare_view_init(P_1);
+store_compare_view_init(P_3);
+#else
+#if PRE == 1
+pre_receive_from_(P_3); // (e + r0,1 + r0,2)^T - r_0,1
+#else
+receive_from_(P_3); // (e + r0,1 + r0,2)^T - r_0,1
+#endif
+store_compare_view_init(P_012);
+#endif
+receive_from_(P_2);
+store_compare_view_init(P_1); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
+}
+
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL0_init prepare_mult(OEC_MAL0_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {

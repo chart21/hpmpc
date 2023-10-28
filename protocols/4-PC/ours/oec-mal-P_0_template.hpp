@@ -71,8 +71,8 @@ OEC_MAL0_Share c;
 c.r = MULT(r, b.r); 
 c.v = ADD( MULT(v,b.r), MULT(b.v,r));
 #else
-c.r = MULT(r, b.r); 
-c.v = ADD(MULT(v b.r), MULT(b.v,r)), MULT(r,b.r); //v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 --> later + m^3 
+c.r = MULT(r, b.r); //x0y0
+c.v = ADD(ADD(MULT(v, b.r), MULT(b.v,r)), MULT(r,b.r)); //v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 --> later + m^3 
 #endif
 return c;
 }
@@ -81,7 +81,11 @@ return c;
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
 r = TRUNC(SUB(ADD(getRandomVal(P_013), getRandomVal(P_023)), r)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
+#if PRE == 1
+pre_send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
+#else
 send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
+#endif
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>
@@ -100,7 +104,7 @@ Datatype m3 = receive_from_live(P_3); // (e + r0,1 + r0,2)^T - r_0,1
 store_compare_view(P_012,ADD(v,m3)); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
 #endif
 Datatype c0w = receive_from_live(P_2);
-store_compare_view(P_2,c0w); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
+store_compare_view(P_1,c0w); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
 v = SUB(c0w,r); // c_0,w - z_0
 }
 

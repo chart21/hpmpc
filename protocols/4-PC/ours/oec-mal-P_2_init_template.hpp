@@ -53,6 +53,34 @@ send_to_(P_1);
 send_to_(P_0);
 #endif
 }
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+send_to_(P_1); 
+
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+receive_from_(P_1); // v^1,2 = m^1 + m^2
+
+send_to_(P_0);
+
+
+#if PROTOCOL == 11
+send_to_(P_0);
+#else
+store_compare_view_init(P_012);
+#endif
+#if PRE == 1
+receive_from_pre_(P_0); // z_2 = m0
+#else
+receive_from_(P_0); // z_2 = m0 
+#endif
+store_compare_view_init(P_3); // compare view of m0
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_init prepare_mult(OEC_MAL2_init b, func_add ADD, func_sub SUB, func_mul MULT) const

@@ -91,17 +91,19 @@ return c;
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-r1 = TRUNC(SUB(ADD(getRandomVal(P_013), getRandomVal(P_023)), r1)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
+Datatype r0123 = ADD(getRandomVal(P_013),getRandomVal(P_023));
+r1 = TRUNC(SUB(r0123, r1)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
 #if PROTOCOL == 11
-store_compare_view(P_0, ADD(SUB(r0, ADD(getRandomVal(P_012), getRandomVal(P_023))), getRandomVal(P_123)));  // v^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
+store_compare_view(P_0, ADD(SUB(r0, r0123), getRandomVal(P_123)));  // v^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
 #else
 #if PRE == 1
-pre_send_to_live(P_0, ADD(SUB(r0, ADD(getRandomVal(P_012), getRandomVal(P_023))), getRandomVal(P_123));  // m^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
+pre_send_to_live(P_0, ADD(SUB(r0, r0123), getRandomVal(P_123));  // m^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
 #else
-send_to_live(P_0, ADD(SUB(r0, ADD(getRandomVal(P_013), getRandomVal(P_023))), getRandomVal(P_123)));  // m^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
+send_to_live(P_0, ADD(SUB(r0, r0123), getRandomVal(P_123)));  // m^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3
 #endif
 #endif
-store_compare_view(P_2, r1); // compare m^0
+store_compare_view(P_2, SUB(r1,getRandomVal(P_013))); // compare m^0 - z_1
+r0 = getRandomVal(P_123); // w
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>

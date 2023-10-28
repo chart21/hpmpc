@@ -98,8 +98,8 @@ template <typename func_add, typename func_sub, typename func_mul>
 OEC_MAL2_Share prepare_dot(const OEC_MAL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 OEC_MAL2_Share c;
-c.v = ADD(MULT(v, b.r), MULT(b.v, r)); // a0 y_2 + b_0 x_2
-c.r = MULT(v, b.v); // a0b0
+c.r = ADD(MULT(v, b.r), MULT(b.v, r)); // a0 y_2 + b_0 x_2
+c.v = MULT(v, b.v); // a0b0
 return c;
 }
 
@@ -108,35 +108,40 @@ return c;
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-r = SUB(r, getRandomVal(P_013));// a_0 y_1 + b_0 x_1 - r_0,1,3   
-send_to_live(P_2, r); 
+r = SUB(r, getRandomVal(P_023));// a_0 y_2 + b_0 x_2 - r_0,2,3   
+send_to_live(P_1, r); 
 
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>
 void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-r = ADD(r, receive_from_live(P_2)); // v^1,2 = m^1 + m^2
+r = ADD(r, receive_from_live(P_1)); // v^1,2 = m^1 + m^2
 v = TRUNC(SUB(v, r)); // [a_0 b_0 - v^1,2]^t
 
-#if MULTI_INPUT == 1
-m = getRandomVal(P_123); // w
-send_to_live(P_012,ADD(v, m)); // c_0 + w
-#else
-send_to_live(P_012,ADD(v, getRandomVal(P_123))); // c_0 + w
-#endif
 
 
 #if PROTOCOL == 11
-send_to_live(P_0, ADD(r,getRandomVal(P_123)); // send m1 + m2 + r123 to P_0
+send_to_live(P_0, ADD(r,getRandomVal(P_123))); // send m1 + m2 + r123 to P_0
 #else
 store_compare_view(P_012,ADD(r, getRandomVal(P_123))); // v^1,2 + r_1,2,3
 #endif
+
+
+#if MULTI_INPUT == 1
+m = getRandomVal(P_123); // w
+send_to_live(P_0,ADD(v, m)); // c_0 + w
+#else
+send_to_live(P_0,ADD(v, getRandomVal(P_123))); // c_0 + w
+#endif
+
+
 #if PRE == 1
 r = receive_from_pre(P_0); // z_2 = m0
 #else
 r = receive_from_live(P_0); // z_2 = m0 
 #endif
+store_compare_view(P_3, r); // compare view of m0
 }
 
 #endif

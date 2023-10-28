@@ -107,15 +107,15 @@ void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 m = ADD(m, receive_from_live(P_2)); // v^1,2 = m^1 + m^2
 v = TRUNC(SUB(v, m)); // [a_0 b_0 - v^1,2]^t
 #if PROTOCOL == 11
-store_compare_view(P_0, ADD(m,getRandomVal(P_123)); // compare m1 + m2 + r123 with P_0
+store_compare_view(P_0, ADD(m,getRandomVal(P_123))); // compare m1 + m2 + r123 with P_0
 #else
 store_compare_view(P_012,ADD(m, getRandomVal(P_123))); // v^1,2 + r_1,2,3
 #endif
 #if MULTI_INPUT == 1
 m = getRandomVal(P_123); // w
-store_compare_view(P_012,m); // w
+store_compare_view(P_0,ADD(v,m)); // compare c0w with P_0
 #else
-store_compare_view(P_012,ADD(v, getRandomVal(P_123))); // c_0 + w
+store_compare_view(P_0,ADD(v, getRandomVal(P_123))); // c_0 + w
 #endif
 }
 
