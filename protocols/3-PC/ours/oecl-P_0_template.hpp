@@ -61,16 +61,16 @@ return c;
 template <typename func_add, typename func_sub>
 void mask_and_send_dot(func_add ADD, func_sub SUB)
 {
-Datatype maskP_1 = getRandomVal(P_1);
-Datatype maskP_1_2 = getRandomVal(P_1);
-Datatype maskP_2 = getRandomVal(P_2);
+Datatype r01 = getRandomVal(P_1);
+Datatype z1 = getRandomVal(P_1);
+Datatype z2 = getRandomVal(P_2);
 #if PRE == 1
-pre_send_to_live(P_2, ADD(p1,maskP_1));
+pre_send_to_live(P_2, SUB(r01,p1));
 #else
-send_to_live(P_2, ADD(p1,maskP_1));
+send_to_live(P_2, SUB(r01,p1));
 #endif
-    p1 = maskP_2;
-    p2 = maskP_1_2;
+    p1 = z2;
+    p2 = z1;
 }
     template <typename func_add, typename func_sub, typename func_trunc>
 void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
