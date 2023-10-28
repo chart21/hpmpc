@@ -480,9 +480,9 @@ store_compare_view(P_2, myz);
 store_compare_view(P_2, myw);
 store_compare_view(P_2, mzw);
 store_compare_view(P_2, mxyz);
+store_compare_view(P_2, mxyw);
 store_compare_view(P_2, mxzw);
 store_compare_view(P_2, myzw);
-store_compare_view(P_2, mxyw);
 store_compare_view(P_2, mxyzw);
 #endif
 OEC_MAL3_Share e;

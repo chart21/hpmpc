@@ -438,9 +438,9 @@ Datatype myz = getRandomVal(P_013);
 Datatype myw = getRandomVal(P_013);
 Datatype mzw = getRandomVal(P_013);
 Datatype mxyz = getRandomVal(P_013);
+Datatype mxyw = getRandomVal(P_013);
 Datatype mxzw = getRandomVal(P_013);
 Datatype myzw = getRandomVal(P_013);
-Datatype mxyw = getRandomVal(P_013);
 Datatype mxyzw = getRandomVal(P_013);
 
 Datatype sxy = ADD(mxy, ADD(ADD(MULT(m,b.m),MULT(r,b.m)),MULT(m,b.r)));
