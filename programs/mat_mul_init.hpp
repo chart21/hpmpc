@@ -1,10 +1,15 @@
 #pragma once
 #include "functions/mat_mul.hpp"
+#include "../utils/print.hpp"
 #include <cstdlib>
 #include <ctime>
 
 void generateElements()
 {
+    /* for(int i = 0; i < 1000; ++i) { */
+    /*     auto a = getRandomVal(0); */
+    /*     print_result(&a); */
+    /* } */
 #if FUNCTION_IDENTIFIER == 28 //argmax
         /* UINT_TYPE fixed_init[] = {289383,634022,660336,120709,999999,908235,385644,229320,873269}; */
         auto input = NEW(UINT_TYPE[NUM_INPUTS][DATTYPE]);
@@ -13,7 +18,7 @@ void generateElements()
             for(int j = 0; j < DATTYPE; ++j) {
                 
                 /* input[i][j] = fixed_init[i]; */
-                input[i][j] = rand() % 1000000;
+                input[i][j] = rand() % 100;
             }
         }
         #if PARTY == 0
@@ -23,12 +28,12 @@ void generateElements()
         UINT_TYPE min_index = rand() % NUM_INPUTS;
         while(max_index == min_index)
             min_index = rand() % NUM_INPUTS;
-            std::cout << "Maxindex P" << PARTY << ": " << max_index << std::endl;
-            std::cout << "Minindex P" << PARTY << ": " << min_index << std::endl;
+            std::cout << "Maxindex P" << PARTY << ": " << std::to_string(max_index) << std::endl;
+            std::cout << "Minindex P" << PARTY << ": " << std::to_string(min_index) << std::endl;
             for(int j = 0; j < DATTYPE; ++j) 
             {
-                input[max_index][j] = 10000000;
-                input[min_index][j] = -10000000;
+                input[max_index][j] = 101;
+                input[min_index][j] = -101;
             }
         #endif
         for(int i = 0; i < NUM_INPUTS; ++i) {

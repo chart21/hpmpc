@@ -16,6 +16,7 @@
 #include "ppa_msb.hpp"
 #include "ppa.hpp"
 #include "ppa_msb_unsafe.hpp"
+#include "ppa_msb_4_way.hpp"
 
 #include "../../utils/print.hpp"
 
@@ -686,7 +687,9 @@ Bitset *s2 = new Bitset[len];
     }
     /* Bitset* y = new Bitset[NUM_INPUTS]; */
 
-    std::vector<BooleanAdder_MSB<S>> adders;
+    /* std::vector<BooleanAdder_MSB<S>> adders; */
+    /* std::vector<PPA_MSB_Unsafe<S>> adders; */
+    std::vector<PPA_MSB_4Way<BITLENGTH, S> > adders;
     
     adders.reserve(len);
     for(int i = 0; i < len; i++)
@@ -935,11 +938,11 @@ min_val.complete_reveal_to_all(min_int);
 if(current_phase == 1)
 {
 for(int i = 0; i < NUM_INPUTS; i++)
-    std::cout << "arg_max: " << "Index: " << i << " Value: " << result_arr[0][i] << std::endl;
+    std::cout << "arg_max: " << "Index: " << i << " Value: " << std::to_string(result_arr[0][i]) << std::endl;
 for(int i = 0; i < NUM_INPUTS; i++)
-    std::cout << "arg_min: " << "Index: " << i << " Value: "<< result_arr[1][i] << std::endl;
-std::cout << "max: " << max_int[0] << std::endl;
-std::cout << "min: " << int(min_int[0]) << std::endl;
+    std::cout << "arg_min: " << "Index: " << i << " Value: "<< std::to_string(result_arr[1][i]) << std::endl;
+std::cout << "max: " << std::to_string(max_int[0]) << std::endl;
+std::cout << "min: " << std::to_string(min_int[0]) << std::endl;
 }
 delete[] a;
 delete[] max_output;

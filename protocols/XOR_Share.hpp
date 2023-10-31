@@ -72,21 +72,21 @@ public:
             /* return shares[0].get_p1(); */
             return 0;
         }
-    XOR_Share prepare_mult3(const XOR_Share<Datatype, Share_Type>& b, const XOR_Share<Datatype, Share_Type>& c) const
+    XOR_Share prepare_and3(const XOR_Share<Datatype, Share_Type>& b, const XOR_Share<Datatype, Share_Type>& c) const
     {
         return XOR_Share(Share_Type::prepare_mult3(b, c, std::bit_xor<Datatype>(),std::bit_xor<Datatype>(),std::bit_and<Datatype>() ));
     }
     
-    void complete_mult3()
+    void complete_and3()
     {
         Share_Type::complete_mult3(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
     }
     
-    XOR_Share prepare_mult4(const XOR_Share<Datatype, Share_Type>& b, const XOR_Share<Datatype, Share_Type>& c, const XOR_Share<Datatype, Share_Type>& d) const
+    XOR_Share prepare_and4(const XOR_Share<Datatype, Share_Type>& b, const XOR_Share<Datatype, Share_Type>& c, const XOR_Share<Datatype, Share_Type>& d) const
     {
         return XOR_Share(Share_Type::prepare_mult4(b, c, d, std::bit_xor<Datatype>(),std::bit_xor<Datatype>(),std::bit_and<Datatype>() ));
     }
-    void complete_mult4()
+    void complete_and4()
     {
         Share_Type::complete_mult3(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
     }

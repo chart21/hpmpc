@@ -71,6 +71,12 @@
 #define FUNC_OR   std::bit_or<DATATYPE>()
 #define FUNC_XOR  std::bit_xor<DATATYPE>()
 #define FUNC_NOT  std::bit_not<DATATYPE>()
+#define FUNC_ADD8 std::plus<DATATYPE>()
+#define FUNC_SUB8 std::minus<DATATYPE>()
+#define FUNC_MUL8 std::multiplies<DATATYPE>()
+#define FUNC_ADD16 std::plus<DATATYPE>()
+#define FUNC_SUB16 std::minus<DATATYPE>()
+#define FUNC_MUL16 std::multiplies<DATATYPE>()
 #define FUNC_ADD32 std::plus<DATATYPE>()
 #define FUNC_SUB32 std::minus<DATATYPE>()
 #define FUNC_MUL32 std::multiplies<DATATYPE>()
@@ -78,6 +84,8 @@
 #define FUNC_SUB64 std::minus<DATATYPE>()
 #define FUNC_MUL64 std::multiplies<DATATYPE>()
 
+#define SHIFT_RIGHT8 arithmetic_right_shift_8
+#define SHIFT_RIGHT16 arithmetic_right_shift_16
 #define SHIFT_RIGHT32 arithmetic_right_shift_32
 #define SHIFT_RIGHT64 arithmetic_right_shift_64
 #define SHIFT_LEFT32(a) ((a) << FRACTIONAL)
@@ -111,6 +119,17 @@ uint16_t arithmetic_right_shift_16(uint16_t value) {
     }
     return value >> FRACTIONAL;
 }
+
+#elif BITLENGTH == 8
+uint8_t arithmetic_right_shift_8(uint8_t value) {
+    if (value & 0x80) {
+        uint8_t mask = ~((1U << (8 - FRACTIONAL)) - 1);
+        return value >> FRACTIONAL | mask;
+    }
+    return value >> FRACTIONAL;
+}
+
+
 #endif
 
 #define ROTATE_MASK(x) (x == 64 ? -1ULL : x == 32 ? -1 : x == 16 ? 0xFFFF : \

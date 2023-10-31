@@ -82,10 +82,16 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 
 
 #if FUNCTION_IDENTIFIER > 10
-#if BITLENGTH == 16
+#if BITLENGTH == 8
+#define OP_ADD FUNC_ADD8
+#define OP_SUB FUNC_SUB8
+#define OP_MULT FUNC_MUL8
+#define OP_TRUNC SHIFT_RIGHT8
+#elif BITLENGTH == 16
 #define OP_ADD FUNC_ADD16
 #define OP_SUB FUNC_SUB16
 #define OP_MULT FUNC_MUL16
+#define OP_TRUNC SHIFT_RIGHT16
 #elif BITLENGTH == 32
 #define OP_ADD FUNC_ADD32
 #define OP_SUB FUNC_SUB32

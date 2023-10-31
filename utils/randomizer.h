@@ -1,15 +1,17 @@
 #pragma once
-
+/* #define BUF DATTYPE */
+/* #define BUFFER_SIZE BUF/DATTYPE */
 #if RANDOM_ALGORITHM == 0
 #include "../utils/xorshift.h"
 #elif RANDOM_ALGORITHM == 1
-#include "../arch/AES_BS_SHORT.h"
+#include "../crypto/aes/AES_BS_SHORT.h"
 #endif
 #include "../networking/buffers.h"
 #include <stdint.h>
 
 #if RANDOM_ALGORITHM == 2
 #if defined(__VAES__) || defined(__SSE2__)
+/* #if false */
 #include "../crypto/aes/AES.h"
 #include <x86intrin.h>
 #include <immintrin.h>
@@ -59,7 +61,11 @@ DATATYPE cipher[num_players*player_multiplier][128]{0};
 DATATYPE key[num_players*player_multiplier][11][128]{0};
 #elif RANDOM_ALGORITHM == 2
 #if DATTYPE == BUF
+uint64_t counter[num_players*player_multiplier][2] = {0};
+#if USE_SSL_AES == 1
+#else
 DATATYPE counter[num_players*player_multiplier]{0};
+#endif
 /* DATATYPE key[num_players*multiplier][11]{0}; */
 #else
 #define BUFFER_SIZE BUF/DATTYPE 
