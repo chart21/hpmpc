@@ -1544,8 +1544,8 @@ result_arr[3]= ver_result_tot.complete_reveal_to_all();
 #endif
 if(current_phase == 1)
 {
-    std::cout << "P" << PARTY << " result: " << result_arr[0] << " ver_result: " << result_arr[1] << std::endl;
-    std::cout << "P" << PARTY <<  " result2: " << result_arr[2] << " ver_result2: " << result_arr[3] << std::endl;
+    std::cout << "P" << PARTY << " result: " << std::to_string(result_arr[0]) << " ver_result: " << std::to_string(result_arr[1]) << std::endl;
+    std::cout << "P" << PARTY <<  " result2: " << std::to_string(result_arr[2]) << " ver_result2: " << std::to_string(result_arr[3]) << std::endl;
 }
 
 

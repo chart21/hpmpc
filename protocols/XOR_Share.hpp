@@ -72,6 +72,16 @@ public:
             /* return shares[0].get_p1(); */
             return 0;
         }
+    
+    XOR_Share prepare_dot(const XOR_Share<Datatype, Share_Type>& b) const
+    {
+        return XOR_Share(Share_Type::prepare_dot(b, std::bit_xor<Datatype>(),std::bit_xor<Datatype>(),std::bit_and<Datatype>() ));
+    }
+    
+    XOR_Share prepare_dot3(const XOR_Share<Datatype, Share_Type>& b, const XOR_Share<Datatype, Share_Type>& c) const
+    {
+        return XOR_Share(Share_Type::prepare_dot3(b, c, std::bit_xor<Datatype>(),std::bit_xor<Datatype>(),std::bit_and<Datatype>() ));
+    }
     XOR_Share prepare_and3(const XOR_Share<Datatype, Share_Type>& b, const XOR_Share<Datatype, Share_Type>& c) const
     {
         return XOR_Share(Share_Type::prepare_mult3(b, c, std::bit_xor<Datatype>(),std::bit_xor<Datatype>(),std::bit_and<Datatype>() ));
@@ -81,6 +91,10 @@ public:
     {
         Share_Type::complete_mult3(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
     }
+    XOR_Share prepare_dot4(const XOR_Share<Datatype, Share_Type>& b, const XOR_Share<Datatype, Share_Type>& c, const XOR_Share<Datatype, Share_Type>& d) const
+    {
+        return XOR_Share(Share_Type::prepare_dot4(b, c, d, std::bit_xor<Datatype>(),std::bit_xor<Datatype>(),std::bit_and<Datatype>() ));
+    }
     
     XOR_Share prepare_and4(const XOR_Share<Datatype, Share_Type>& b, const XOR_Share<Datatype, Share_Type>& c, const XOR_Share<Datatype, Share_Type>& d) const
     {
@@ -88,9 +102,17 @@ public:
     }
     void complete_and4()
     {
-        Share_Type::complete_mult3(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
+        Share_Type::complete_mult4(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
     }
     
+    void mask_and_send_dot()
+    {
+        #if PROTOCOL == 2
+        Share_Type::mask_and_send_dot(std::bit_xor<Datatype>(), std::bit_and<Datatype>()); // Replicated needs custom overloads because division by 3 is required
+        #else
+        Share_Type::mask_and_send_dot(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
+        #endif
+    }
 
 };
 

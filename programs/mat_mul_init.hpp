@@ -18,7 +18,7 @@ void generateElements()
             for(int j = 0; j < DATTYPE; ++j) {
                 
                 /* input[i][j] = fixed_init[i]; */
-                input[i][j] = rand() % 100;
+                input[i][j] = rand() % 50;
             }
         }
         #if PARTY == 0
@@ -32,8 +32,8 @@ void generateElements()
             std::cout << "Minindex P" << PARTY << ": " << std::to_string(min_index) << std::endl;
             for(int j = 0; j < DATTYPE; ++j) 
             {
-                input[max_index][j] = 101;
-                input[min_index][j] = -101;
+                input[max_index][j] = 51;
+                input[min_index][j] = -51;
             }
         #endif
         for(int i = 0; i < NUM_INPUTS; ++i) {
@@ -110,7 +110,7 @@ void generateElements()
 
 #if FUNCTION_IDENTIFIER == 29 || FUNCTION_IDENTIFIER == 30 // Multi input AND gates
         player_input = NEW(DATATYPE[NUM_INPUTS]);
-        UINT_TYPE inputs[] = {2,3,4,5};
+        UINT_TYPE inputs[] = {1,2,3,5};
         for(int j = 0; j < NUM_INPUTS; j++)
         {   
             player_input[j] = PROMOTE(inputs[j]);

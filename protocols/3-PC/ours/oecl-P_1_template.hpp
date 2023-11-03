@@ -249,6 +249,27 @@ static void complete_bit_injection_S2(OECL1_Share out[])
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
+    OECL1_Share prepare_dot3(OECL1_Share b, OECL1_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype rxy = getRandomVal(P_0);
+Datatype rxz = getRandomVal(P_0);
+Datatype ryz = getRandomVal(P_0);
+/* Datatype rxyz = getRandomVal(P_0); */
+
+Datatype a0 = ADD(p1,p2);
+Datatype b0 = ADD(b.p1,b.p2);
+Datatype c0 = ADD(c.p1,c.p2);
+
+OECL1_Share d;
+d.p1 = ADD(
+        ADD( MULT(a0,SUB(ryz,MULT(b0,c.p2)))
+        ,(MULT(b0,SUB(rxz, MULT(c0,p2)))))
+        ,MULT(c0,SUB(rxy, MULT(a0,b.p2)))); // a0(b0(ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
+d.p2 = SET_ALL_ZERO();
+return d;
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
     OECL1_Share prepare_mult3(OECL1_Share b, OECL1_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype rxy = getRandomVal(P_0);
@@ -273,6 +294,51 @@ return d;
 template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){
 p1 = ADD(p1, receive_from_live(P_2));
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL1_Share prepare_dot4(OECL1_Share b, OECL1_Share c, OECL1_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype rxy = getRandomVal(P_0);
+Datatype rxz = getRandomVal(P_0);
+Datatype rxw = getRandomVal(P_0);
+Datatype ryz = getRandomVal(P_0);
+Datatype ryw = getRandomVal(P_0);
+Datatype rzw = getRandomVal(P_0);
+Datatype rxyz = getRandomVal(P_0);
+Datatype rxyw = getRandomVal(P_0);
+Datatype rxzw = getRandomVal(P_0);
+Datatype ryzw = getRandomVal(P_0);
+
+Datatype a0 = ADD(p1,p2);
+Datatype b0 = ADD(b.p1,b.p2);
+Datatype c0 = ADD(c.p1,c.p2);
+Datatype d0 = ADD(d.p1,d.p2);
+
+
+
+OECL1_Share e;
+e.p1 =        
+                ADD(
+                    ADD(
+                        MULT(a0, SUB( MULT(d0, SUB(ryz, MULT(b0,c.p2))), ryzw))
+                        ,
+                            MULT(b0, ADD( MULT(a0, SUB(rzw, MULT(c0,d.p2))), 
+                            SUB( MULT(c0, rxw), rxzw)))
+                    ),
+                    ADD(
+                            
+                            MULT(c0, SUB( MULT(a0, SUB(ryw, MULT(d0,b.p2))), rxyw))
+                            ,
+                    
+                        
+                            MULT(d0, ADD( MULT(b0, SUB(rxz, MULT(c0,p2))),
+                            SUB( MULT(c0, rxy), rxyz)))
+                )
+            );
+         // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+e.p2 = SET_ALL_ZERO();
+return e;
 }
 
 template <typename func_add, typename func_sub, typename func_mul>

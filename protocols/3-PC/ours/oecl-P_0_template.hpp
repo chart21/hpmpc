@@ -305,6 +305,81 @@ static void complete_bit_injection_S2(OECL0_Share out[])
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
+    OECL0_Share prepare_dot3(OECL0_Share b, OECL0_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype x0 = ADD(p1,p2);
+Datatype y0 = ADD(b.p1,b.p2);
+Datatype z0 = ADD(c.p1,c.p2);
+Datatype mxy = SUB(MULT(x0,y0),getRandomVal(P_1));
+Datatype mxz = SUB(MULT(x0,z0),getRandomVal(P_1));
+Datatype myz = SUB(MULT(y0,z0),getRandomVal(P_1));
+Datatype mxyz = MULT(MULT(x0,y0),z0);
+#if PRE == 1
+pre_send_to_live(P_2, mxy);
+pre_send_to_live(P_2, mxz);
+pre_send_to_live(P_2, myz);
+#else
+send_to_live(P_2, mxy);
+send_to_live(P_2, mxz);
+send_to_live(P_2, myz);
+#endif
+// for arithmetic circuikts this will be more efficient to reduce mult from 3 to 2: p1 b.p1 + (p1 + p2) (b.p1 + b.p2)
+return OECL0_Share(mxyz,SET_ALL_ZERO());
+}
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL0_Share prepare_dot4(OECL0_Share b, OECL0_Share c, OECL0_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype x0 = ADD(p1,p2);
+Datatype y0 = ADD(b.p1,b.p2);
+Datatype z0 = ADD(c.p1,c.p2);
+Datatype w0 = ADD(d.p1,d.p2);
+Datatype xy = MULT(x0,y0);
+Datatype xz = MULT(x0,z0);
+Datatype xw = MULT(x0,w0);
+Datatype yz = MULT(y0,z0);
+Datatype yw = MULT(y0,w0);
+Datatype zw = MULT(z0,w0);
+Datatype mxy = SUB(xy,getRandomVal(P_1));
+Datatype mxz = SUB(xz,getRandomVal(P_1));
+Datatype mxw = SUB(xw,getRandomVal(P_1));
+Datatype myz = SUB(yz,getRandomVal(P_1));
+Datatype myw = SUB(yw,getRandomVal(P_1));
+Datatype mzw = SUB(zw,getRandomVal(P_1));
+Datatype mxyz = SUB(MULT(xy,z0),getRandomVal(P_1));
+Datatype mxyw = SUB(MULT(xy,w0),getRandomVal(P_1));
+Datatype mxzw = SUB(MULT(xz,w0),getRandomVal(P_1));
+Datatype myzw = SUB(MULT(yz,w0),getRandomVal(P_1));
+Datatype mxyzw = MULT(xy,zw);
+#if PRE == 1
+pre_send_to_live(P_2, mxy);
+pre_send_to_live(P_2, mxz);
+pre_send_to_live(P_2, mxw);
+pre_send_to_live(P_2, myz);
+pre_send_to_live(P_2, myw);
+pre_send_to_live(P_2, mzw);
+pre_send_to_live(P_2, mxyz);
+pre_send_to_live(P_2, mxyw);
+pre_send_to_live(P_2, mxzw);
+pre_send_to_live(P_2, myzw);
+/* pre_send_to_live(P_2, mxyzw); */
+#else
+send_to_live(P_2, mxy);
+send_to_live(P_2, mxz);
+send_to_live(P_2, mxw);
+send_to_live(P_2, myz);
+send_to_live(P_2, myw);
+send_to_live(P_2, mzw);
+send_to_live(P_2, mxyz);
+send_to_live(P_2, mxyw);
+send_to_live(P_2, mxzw);
+send_to_live(P_2, myzw);
+/* send_to_live(P_2, mxyzw); */
+#endif
+// for arithmetic circuikts this will be more efficient to reduce mult from 3 to 2: p1 b.p1 + (p1 + p2) (b.p1 + b.p2)
+return OECL0_Share(mxyzw,SET_ALL_ZERO());
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
     OECL0_Share prepare_mult3(OECL0_Share b, OECL0_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype x0 = ADD(p1,p2);

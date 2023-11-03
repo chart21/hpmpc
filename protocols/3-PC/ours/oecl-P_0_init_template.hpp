@@ -223,6 +223,21 @@ static void complete_bit_injection_S2(OECL0_init out[])
 
 
 }
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL0_init prepare_dot3(OECL0_init b, OECL0_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PRE == 1
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+#else
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+#endif
+OECL0_init d;
+return d;
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
     OECL0_init prepare_mult3(OECL0_init b, OECL0_init c, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -244,6 +259,37 @@ return d;
 
 template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL0_init prepare_dot4(OECL0_init b, OECL0_init c, OECL0_init w, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PRE == 1
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+pre_send_to_(P_2);
+#else
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+#endif
+// for arithmetic circuikts this will be more efficient to reduce mult from 3 to 2: p1 b.p1 + (p1 + p2) (b.p1 + b.p2)
+OECL0_init e;
+return e;
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
     OECL0_init prepare_mult4(OECL0_init b, OECL0_init c, OECL0_init w, func_add ADD, func_sub SUB, func_mul MULT) const

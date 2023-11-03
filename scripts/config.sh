@@ -77,9 +77,9 @@ fi
 
 if [ "$ssl" = "1" ]
 then
-    flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+    flags="-march=native -g -std=c++2a -pthread -lssl -lcrypto"
 else
-    flags="-march=native -Ofast -std=c++2a -pthread"
+    flags="-march=native -g -std=c++2a -pthread"
 fi
 
 if [ ! -z "$GNU_OPTIONS" ]

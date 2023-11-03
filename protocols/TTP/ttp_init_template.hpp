@@ -159,6 +159,12 @@ static void complete_bit_injection_S2(TTP_init out[])
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
+    TTP_init prepare_dot3(TTP_init b, TTP_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+return TTP_init();
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
     TTP_init prepare_mult3(TTP_init b, TTP_init c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 return TTP_init();
@@ -166,6 +172,12 @@ return TTP_init();
 
 template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    TTP_init prepare_dot4(TTP_init b, TTP_init c, TTP_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+return TTP_init();
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
     TTP_init prepare_mult4(TTP_init b, TTP_init c, TTP_init d, func_add ADD, func_sub SUB, func_mul MULT) const

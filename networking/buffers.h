@@ -33,7 +33,11 @@ DATATYPE* player_input;
 DATATYPE* verify_buffer[num_players*player_multiplier]; // Verify buffer for each player
 uint64_t verify_buffer_index[num_players*player_multiplier] = {0};
 
+#if DATTTYPE > 32
 alignas(sizeof(DATATYPE)) uint32_t hash_val[num_players*player_multiplier][8]; // Hash value for each player
+#else
+uint32_t hash_val[num_players*player_multiplier][8]; // Hash value for each player
+#endif
 uint64_t elements_to_compare[num_players*player_multiplier] = {0};
 #endif
 //DATATYPE srng[num_players -1] = {0};
