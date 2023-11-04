@@ -282,6 +282,35 @@ static void complete_bit_injection_S2(OEC_MAL0_init out[])
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL0_init prepare_dot3(OEC_MAL0_init b, OEC_MAL0_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PRE == 1 && PROTOCOL == 12
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+#else
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+/* pre_send_to_live(P_2, mxy); */
+/* pre_send_to_live(P_2, mxz); */
+/* pre_send_to_live(P_2, myz); */
+/* pre_send_to_live(P_2, mxyz); */
+#endif
+#if PROTOCOL == 12
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+#else
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+#endif
+OEC_MAL0_init d;
+return d;
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL0_init prepare_mult3(OEC_MAL0_init b, OEC_MAL0_init c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 #if PRE == 1 && PROTOCOL == 12
@@ -319,6 +348,71 @@ void complete_mult3(func_add ADD, func_sub SUB){
 receive_from_(P_2);
 store_compare_view_init(P_1);
 store_compare_view_init(P_012);
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+        OEC_MAL0_init prepare_dot4(OEC_MAL0_init b, OEC_MAL0_init c, OEC_MAL0_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+
+#if PRE == 1 && PROTOCOL == 12
+/* pre_send_to_live(P_2, mxy); */
+/* pre_send_to_live(P_2, mxz); */
+/* pre_send_to_live(P_2, mxw); */
+/* pre_send_to_live(P_2, myz); */
+/* pre_send_to_live(P_2, myw); */
+/* pre_send_to_live(P_2, mzw); */
+/* pre_send_to_live(P_2, mxyz); */
+/* pre_send_to_live(P_2, mxyw); */
+/* pre_send_to_live(P_2, mxzw); */
+/* pre_send_to_live(P_2, myzw); */
+/* pre_send_to_live(P_2, mxyzw); */
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+ pre_receive_from_(P_3);
+#else
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+ receive_from_(P_3);
+#endif
+#if PROTOCOL == 12
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+store_compare_view_init(P_2);
+#else
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+send_to_(P_2);
+#endif
+OEC_MAL0_init e;
+return e;
 }
 
 template <typename func_add, typename func_sub, typename func_mul>

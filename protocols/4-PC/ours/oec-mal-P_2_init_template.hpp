@@ -301,6 +301,34 @@ static void complete_bit_injection_S2(OEC_MAL2_init out[])
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL2_init prepare_dot3(OEC_MAL2_init b, OEC_MAL2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PROTOCOL == 12
+#if PRE == 1
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+#else
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+#endif
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+#else
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+#endif
+OEC_MAL2_init d;
+return d;
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_init prepare_mult3(OEC_MAL2_init b, OEC_MAL2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 #if PROTOCOL == 12
@@ -339,6 +367,69 @@ template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){
 receive_from_(P_1);
 store_compare_view_init(P_012);
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL2_init prepare_dot4(OEC_MAL2_init b, OEC_MAL2_init c, OEC_MAL2_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+#if PROTOCOL == 12
+#if PRE == 1
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+#else
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+receive_from_(P_3);
+#endif
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+#else
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+receive_from_(P_0);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
+#endif
+OEC_MAL2_init e;
+return e;
 }
 
 template <typename func_add, typename func_sub, typename func_mul>

@@ -210,6 +210,12 @@ static void complete_bit_injection_S2(OEC_MAL1_init out[])
 {
 }
 template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL1_init prepare_dot3(OEC_MAL1_init b, OEC_MAL1_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OEC_MAL1_init d;
+return d;
+}
+template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL1_init prepare_mult3(OEC_MAL1_init b, OEC_MAL1_init c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 store_compare_view_init(P_0);
@@ -224,6 +230,13 @@ receive_from_(P_2);
 store_compare_view_init(P_012); //compare d_0 s
 }
 
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL1_init prepare_dot4(OEC_MAL1_init b, OEC_MAL1_init c, OEC_MAL1_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OEC_MAL1_init e;
+return e;
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL1_init prepare_mult4(OEC_MAL1_init b, OEC_MAL1_init c, OEC_MAL1_init d, func_add ADD, func_sub SUB, func_mul MULT) const

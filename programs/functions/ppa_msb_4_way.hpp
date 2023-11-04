@@ -443,6 +443,50 @@ break;
 break;
 }
 }
+
+template<int m = k, typename std::enable_if<(m == 32), int>::type = 0>
+void complete_Step() {
+switch(level) {
+    case 1:
+        complete_B3L1_G(v[0]);
+        complete_B3L1_P(v[1]);
+        complete_B3L1_G(v[2]);
+        complete_B3L1_P(v[3]);
+        complete_B3L1_G(v[4]);
+        complete_B3L1_P(v[5]);
+        complete_B3L1_G(v[6]);
+        complete_B3L1_P(v[7]);
+        complete_B3L1_G(v[8]);
+        complete_B3L1_P(v[9]);
+        complete_B3L1_G(v[10]);
+        complete_B3L1_P(v[11]);
+        complete_B3L1_G(v[12]);
+        complete_B3L1_P(v[13]);
+        complete_B3L1_G(v[14]);
+        complete_B3L1_P(v[15]);
+        complete_B3L1_G(v[16]);
+        complete_B3L1_P(v[17]);
+        complete_W3L1(v[18]);
+break;
+    case 2:
+        complete_B3_G(v[19]);
+        complete_B3_P(v[20]);
+        complete_B4_G(v[21]);
+        complete_B4_P(v[22]);
+        complete_W4(v[23]);
+break;
+    case 3:
+        complete_W3(msb);
+        msb = msb ^ a[0] ^ b[0];
+break;
+
+default:
+break;
+}
+}
+
+
+
 template<int m = k, typename std::enable_if<(m == 64), int>::type = 0>
 void prepare_step() {
 switch(level) {
@@ -761,13 +805,13 @@ PPA_MSB_4Way(Bitset &x0, Bitset &x1, Share &y0) : a(x0), b(x1), msb(y0)
     {
         level = 0;
         if constexpr(k == 8)
-            v.reserve(4);
+            v.reserve(3); // 4 * online phase
         else if constexpr(k == 16)
-            v.reserve(11);
+            v.reserve(11); // 12 * online phase
         else if constexpr(k == 32)
-            v.reserve(25);
+            v.reserve(24); // 25 * online phase
         else if constexpr(k == 64)
-            v.reserve(47);
+            v.reserve(48); // 49 * online phase
     }
 
 

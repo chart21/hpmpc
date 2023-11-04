@@ -358,6 +358,50 @@ static void complete_bit_injection_S2(OEC_MAL3_Share out[])
 #if MULTI_INPUT == 1
 
 template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL3_Share prepare_dot3(const OEC_MAL3_Share b, const OEC_MAL3_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype mxy = SUB(MULT(r1,b.r1),getRandomVal(P_013));
+Datatype mxz = SUB(MULT(r1,c.r1),getRandomVal(P_013));
+Datatype myz = SUB(MULT(b.r1,c.r1),getRandomVal(P_013));
+Datatype mxyz = MULT(MULT(r1,b.r1),c.r1);
+Datatype ax = ADD(r0,r1);
+Datatype by = ADD(b.r0,b.r1);
+Datatype cz = ADD(c.r0,c.r1);
+Datatype m3xy = SUB(MULT(ax,by),getRandomVal(P_123_2));
+Datatype m3xz = SUB(MULT(ax,cz),getRandomVal(P_123_2));
+Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123_2));
+Datatype m3xyz = MULT(MULT(ax,by),cz);
+#if PROTOCOL == 12
+#if PRE == 1
+pre_send_to_live(P_0, m3xy);
+pre_send_to_live(P_0, m3xz);
+pre_send_to_live(P_0, m3yz);
+pre_send_to_live(P_2, mxy);
+pre_send_to_live(P_2, mxz);
+pre_send_to_live(P_2, myz);
+#else
+send_to_live(P_0, m3xy);
+send_to_live(P_0, m3xz);
+send_to_live(P_0, m3yz);
+send_to_live(P_2, mxy);
+send_to_live(P_2, mxz);
+send_to_live(P_2, myz);
+#endif
+#else
+send_to_live(P_0, m3xy);
+send_to_live(P_0, m3xz);
+send_to_live(P_0, m3yz);
+store_compare_view(P_2, mxy);
+store_compare_view(P_2, mxz);
+store_compare_view(P_2, myz);
+#endif
+OEC_MAL3_Share d;
+d.r0 = m3xyz;
+d.r1 = mxyz;
+return d;
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL3_Share prepare_mult3(const OEC_MAL3_Share b, const OEC_MAL3_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype mxy = SUB(MULT(r1,b.r1),getRandomVal(P_013));
@@ -409,6 +453,108 @@ return d;
 
 template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OEC_MAL3_Share prepare_dot4(const OEC_MAL3_Share b, const OEC_MAL3_Share c, const OEC_MAL3_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype mxy = SUB(MULT(r1,b.r1),getRandomVal(P_013));
+Datatype mxz = SUB(MULT(r1,c.r1),getRandomVal(P_013));
+Datatype mxw = SUB(MULT(r1,d.r1),getRandomVal(P_013));
+Datatype myz = SUB(MULT(b.r1,c.r1),getRandomVal(P_013));
+Datatype myw = SUB(MULT(b.r1,d.r1),getRandomVal(P_013));
+Datatype mzw = SUB(MULT(c.r1,d.r1),getRandomVal(P_013));
+Datatype mxyz = SUB(MULT(MULT(r1,b.r1),c.r1),getRandomVal(P_013));
+Datatype mxyw = SUB(MULT(MULT(r1,b.r1),d.r1),getRandomVal(P_013));
+Datatype mxzw = SUB(MULT(MULT(r1,c.r1),d.r1),getRandomVal(P_013));
+Datatype myzw = SUB(MULT(MULT(b.r1,c.r1),d.r1),getRandomVal(P_013));
+Datatype mxyzw = MULT(MULT(r1,b.r1),MULT(c.r1,d.r1));
+Datatype ax = ADD(r0,r1);
+Datatype by = ADD(b.r0,b.r1);
+Datatype cz = ADD(c.r0,c.r1);
+Datatype dw = ADD(d.r0,d.r1);
+Datatype m3xy = SUB(MULT(ax,by),getRandomVal(P_123_2));
+Datatype m3xz = SUB(MULT(ax,cz),getRandomVal(P_123_2));
+Datatype m3xw = SUB(MULT(ax,dw),getRandomVal(P_123_2));
+Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123_2));
+Datatype m3yw = SUB(MULT(by,dw),getRandomVal(P_123_2));
+Datatype m3zw = SUB(MULT(cz,dw),getRandomVal(P_123_2));
+Datatype m3xyz = SUB(MULT(MULT(ax,by),cz),getRandomVal(P_123_2));
+Datatype m3xyw = SUB(MULT(MULT(ax,by),dw),getRandomVal(P_123_2));
+Datatype m3xzw = SUB(MULT(MULT(ax,cz),dw),getRandomVal(P_123_2));
+Datatype m3yzw = SUB(MULT(MULT(by,cz),dw),getRandomVal(P_123_2));
+Datatype m3xyzw = MULT(MULT(ax,by),MULT(cz,dw));
+#if PROTOCOL == 12
+#if PRE == 1
+pre_send_to_live(P_0, m3xy);
+pre_send_to_live(P_0, m3xz);
+pre_send_to_live(P_0, m3xw);
+pre_send_to_live(P_0, m3yz);
+pre_send_to_live(P_0, m3yw);
+pre_send_to_live(P_0, m3zw);
+pre_send_to_live(P_0, m3xyz);
+pre_send_to_live(P_0, m3xyw);
+pre_send_to_live(P_0, m3xzw);
+pre_send_to_live(P_0, m3yzw);
+pre_send_to_live(P_2, mxy);
+pre_send_to_live(P_2, mxz);
+pre_send_to_live(P_2, mxw);
+pre_send_to_live(P_2, myz);
+pre_send_to_live(P_2, myw);
+pre_send_to_live(P_2, mzw);
+pre_send_to_live(P_2, mxyz);
+pre_send_to_live(P_2, mxyw);
+pre_send_to_live(P_2, mxzw);
+pre_send_to_live(P_2, myzw);
+#else
+send_to_live(P_0, m3xy);
+send_to_live(P_0, m3xz);
+send_to_live(P_0, m3xw);
+send_to_live(P_0, m3yz);
+send_to_live(P_0, m3yw);
+send_to_live(P_0, m3zw);
+send_to_live(P_0, m3xyz);
+send_to_live(P_0, m3xyw);
+send_to_live(P_0, m3xzw);
+send_to_live(P_0, m3yzw);
+send_to_live(P_2, mxy);
+send_to_live(P_2, mxz);
+send_to_live(P_2, mxw);
+send_to_live(P_2, myz);
+send_to_live(P_2, myw);
+send_to_live(P_2, mzw);
+send_to_live(P_2, mxyz);
+send_to_live(P_2, mxyw);
+send_to_live(P_2, mxzw);
+send_to_live(P_2, myzw);
+#endif
+#else
+send_to_live(P_0, m3xy);
+send_to_live(P_0, m3xz);
+send_to_live(P_0, m3xw);
+send_to_live(P_0, m3yz);
+send_to_live(P_0, m3yw);
+send_to_live(P_0, m3zw);
+send_to_live(P_0, m3xyz);
+send_to_live(P_0, m3xyw);
+send_to_live(P_0, m3xzw);
+send_to_live(P_0, m3yzw);
+store_compare_view(P_2, mxy);
+store_compare_view(P_2, mxz);
+store_compare_view(P_2, mxw);
+store_compare_view(P_2, myz);
+store_compare_view(P_2, myw);
+store_compare_view(P_2, mzw);
+store_compare_view(P_2, mxyz);
+store_compare_view(P_2, mxyw);
+store_compare_view(P_2, mxzw);
+store_compare_view(P_2, myzw);
+#endif
+OEC_MAL3_Share e;
+e.r0 = m3xyzw;
+e.r1 = mxyzw;
+return e;
+
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
