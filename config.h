@@ -1,10 +1,10 @@
 #pragma once
 
 // 1: Sharemind (no support for dot products), 2: Replicated, 3: Astra, 4: ODUP (depricated), 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC)
-#define PROTOCOL 12
+#define PROTOCOL 5
 
 // Party ID (starting from 0)
-#define PARTY 3
+#define PARTY 2
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds

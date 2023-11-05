@@ -154,6 +154,12 @@ static void complete_bit_injection_S2(OECL0_POST_Share out[])
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
+    OECL0_POST_Share prepare_dot3(const OECL0_POST_Share b, const OECL0_POST_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    return OECL0_POST_Share();
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
     OECL0_POST_Share prepare_mult3(const OECL0_POST_Share b, const OECL0_POST_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
     return OECL0_POST_Share();
@@ -161,6 +167,12 @@ template <typename func_add, typename func_sub, typename func_mul>
 
 template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    OECL0_POST_Share prepare_dot4(const OECL0_POST_Share b, const OECL0_POST_Share c, const OECL0_POST_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    return OECL0_POST_Share();
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
     OECL0_POST_Share prepare_mult4(const OECL0_POST_Share b, const OECL0_POST_Share c, const OECL0_POST_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
