@@ -70,11 +70,11 @@ send_to_live(P_2,c.v);
 /* c.m = ADD(c.v,getRandomVal(P_123)); */
 Datatype a1b1 = MULT(v,b.v);
 #if PROTOCOL == 10 || PROTOCOL == 12
-store_compare_view(P_0,ADD(a1b1,getRandomVal(P_123_2))); // compare a1b1 + r123_2 with P_0
+store_compare_view(P_0,ADD(a1b1,getRandomVal(P_123))); // compare a1b1 + r123_2 with P_0
 #endif
 /* c.v = XOR( AND(      XOR(v,r) , XOR(b.v,b.r) ) , c.v); */
 #if PROTOCOL == 11
-c.m = ADD(c.v,getRandomVal(P_123_2)); // m_2 + r234_2 store to compareview later
+c.m = ADD(c.v,getRandomVal(P_123)); // m_2 + r234_2 store to compareview later
 #endif
 
 c.v = SUB( a1b1,c.v);
@@ -132,10 +132,10 @@ r = ADD( r  , r124); // a_0 y_1 + b_0 x_1
 send_to_live(P_2,r);
 
 #if PROTOCOL == 10 || PROTOCOL == 12
-store_compare_view(P_0,ADD(v,getRandomVal(P_123_2))); // compare a0b0 + r123_2 with P_0
+store_compare_view(P_0,ADD(v,getRandomVal(P_123))); // compare a0b0 + r123_2 with P_0
 #endif
 #if PROTOCOL == 11
-m = ADD(r,getRandomVal(P_123_2)); // m_2 + r234_2 store to compareview later
+m = ADD(r,getRandomVal(P_123)); // m_2 + r234_2 store to compareview later
 #endif
 
 v = SUB( v,r);
@@ -392,9 +392,9 @@ ADD(
 Datatype a0 = ADD(v,m);
 Datatype b0 = ADD(b.v,b.m);
 Datatype c0 = ADD(c.v,c.m);
-Datatype rxy = getRandomVal(P_123_2);
-Datatype rxz = getRandomVal(P_123_2);
-Datatype ryz = getRandomVal(P_123_2);
+Datatype rxy = getRandomVal(P_123);
+Datatype rxz = getRandomVal(P_123);
+Datatype ryz = getRandomVal(P_123);
 Datatype ar = ADD(r,m);
 Datatype br = ADD(b.r,b.m);
 Datatype cr = ADD(c.r,c.m);
@@ -447,10 +447,10 @@ ADD(
 Datatype a0 = ADD(v,m);
 Datatype b0 = ADD(b.v,b.m);
 Datatype c0 = ADD(c.v,c.m);
-Datatype rxy = getRandomVal(P_123_2);
-Datatype rxz = getRandomVal(P_123_2);
-Datatype ryz = getRandomVal(P_123_2);
-Datatype rxyz = getRandomVal(P_123_2);
+Datatype rxy = getRandomVal(P_123);
+Datatype rxz = getRandomVal(P_123);
+Datatype ryz = getRandomVal(P_123);
+Datatype rxyz = getRandomVal(P_123);
 Datatype ar = ADD(r,m);
 Datatype br = ADD(b.r,b.m);
 Datatype cr = ADD(c.r,c.m);
@@ -463,7 +463,7 @@ Datatype m20 = SUB(ADD(
         ADD( MULT(a0,SUB(ryz,MULT(b0,c.m)))
         ,(MULT(b0,SUB(rxz, MULT(c0,m)))))
         ,MULT(c0,SUB(rxy, MULT(a0,b.m)))), rxyz); // a0(b0(ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
-d.m = getRandomVal(P_123_2);
+d.m = getRandomVal(P_123);
 d.r = getRandomVal(P_013);
 d.v = ADD(d.v,d.r);
 store_compare_view(P_0, ADD(m20, d.m));
@@ -569,16 +569,16 @@ Datatype a0 = ADD(v,m);
 Datatype b0 = ADD(b.v,b.m);
 Datatype c0 = ADD(c.v,c.m);
 Datatype d0 = ADD(d.v,d.m);
-Datatype rxy = getRandomVal(P_123_2);
-Datatype rxz = getRandomVal(P_123_2);
-Datatype rxw = getRandomVal(P_123_2);
-Datatype ryz = getRandomVal(P_123_2);
-Datatype ryw = getRandomVal(P_123_2);
-Datatype rzw = getRandomVal(P_123_2);
-Datatype rxyz = getRandomVal(P_123_2);
-Datatype rxyw = getRandomVal(P_123_2);
-Datatype rxzw = getRandomVal(P_123_2);
-Datatype ryzw = getRandomVal(P_123_2);
+Datatype rxy = getRandomVal(P_123);
+Datatype rxz = getRandomVal(P_123);
+Datatype rxw = getRandomVal(P_123);
+Datatype ryz = getRandomVal(P_123);
+Datatype ryw = getRandomVal(P_123);
+Datatype rzw = getRandomVal(P_123);
+Datatype rxyz = getRandomVal(P_123);
+Datatype rxyw = getRandomVal(P_123);
+Datatype rxzw = getRandomVal(P_123);
+Datatype ryzw = getRandomVal(P_123);
 Datatype ar = ADD(r,m);
 Datatype br = ADD(b.r,b.m);
 Datatype cr = ADD(c.r,c.m);
@@ -728,17 +728,17 @@ Datatype a0 = ADD(v,m);
 Datatype b0 = ADD(b.v,b.m);
 Datatype c0 = ADD(c.v,c.m);
 Datatype d0 = ADD(d.v,d.m);
-Datatype rxy = getRandomVal(P_123_2);
-Datatype rxz = getRandomVal(P_123_2);
-Datatype rxw = getRandomVal(P_123_2);
-Datatype ryz = getRandomVal(P_123_2);
-Datatype ryw = getRandomVal(P_123_2);
-Datatype rzw = getRandomVal(P_123_2);
-Datatype rxyz = getRandomVal(P_123_2);
-Datatype rxyw = getRandomVal(P_123_2);
-Datatype rxzw = getRandomVal(P_123_2);
-Datatype ryzw = getRandomVal(P_123_2);
-Datatype rxyzw = getRandomVal(P_123_2);
+Datatype rxy = getRandomVal(P_123);
+Datatype rxz = getRandomVal(P_123);
+Datatype rxw = getRandomVal(P_123);
+Datatype ryz = getRandomVal(P_123);
+Datatype ryw = getRandomVal(P_123);
+Datatype rzw = getRandomVal(P_123);
+Datatype rxyz = getRandomVal(P_123);
+Datatype rxyw = getRandomVal(P_123);
+Datatype rxzw = getRandomVal(P_123);
+Datatype ryzw = getRandomVal(P_123);
+Datatype rxyzw = getRandomVal(P_123);
 Datatype ar = ADD(r,m);
 Datatype br = ADD(b.r,b.m);
 Datatype cr = ADD(c.r,c.m);
@@ -791,7 +791,7 @@ Datatype m20 =
                                 SUB( MULT(c0, rxy), rxyz)))
                         )
         ); // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
-e.m = getRandomVal(P_123_2);
+e.m = getRandomVal(P_123);
 e.r = getRandomVal(P_013);
 e.v = ADD(e.v,e.r);
 store_compare_view(P_0, ADD(m20, e.m)); // + s

@@ -322,7 +322,7 @@ break;
 
 /* break; */
 /*     case 1: */
-/*         msb = (a[0] ^ b[0]) ^ prepare_W4_3(v[0], v[1], v[2], v[3], v[4], v[5], v[6]);   // g1, p1, g2, g3, p3, g4, p12 */
+/*         msb = prepare_W4_3(v[0], v[1], v[2], v[3], v[4], v[5], v[6]);   // g1, p1, g2, g3, p3, g4, p12 */
 /* break; */
 /*     default: */
 /* break; */
@@ -342,6 +342,7 @@ break;
 /* break; */
 /*     case 2: */
 /*         complete_W4_3(msb); */
+/*         msb = (a[0] ^ b[0]) ^ msb; */
 /* break; */
 /* default: */
 /* break; */

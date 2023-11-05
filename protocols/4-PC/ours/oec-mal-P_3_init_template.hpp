@@ -42,28 +42,10 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
 #else
 store_compare_view_init(P_2);
 #endif
-#if PROTOCOL == 10 || PROTOCOL == 12 || PROTOCOL == 8
-#if PRE == 1
-    pre_send_to_(P_0);
-#else
-    send_to_(P_0);
-#endif
-#elif PROTOCOL == 11
-store_compare_view_init(P_0);
-#endif
 }
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-#if PROTOCOL == 11
-store_compare_view_init(P_0);
-#else
-#if PRE == 1
-pre_send_to_(P_0);
-#else
-send_to_(P_0);
-#endif
-#endif
 #if PROTOCOL == 12
 #if PRE == 1
 pre_send_to_(P_2);
@@ -78,12 +60,30 @@ store_compare_view_init(P_2);
     template <typename func_add, typename func_sub, typename func_trunc>
 void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
+#if PROTOCOL == 11
+store_compare_view_init(P_0);
+#else
+#if PRE == 1
+pre_send_to_(P_0);
+#else
+send_to_(P_0);
+#endif
+#endif
 }
 
 
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL3_init prepare_mult(OEC_MAL3_init b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
+
+#if PROTOCOL == 8
+#if PRE == 1
+    pre_send_to_(P_0);
+#else
+    send_to_(P_0);
+#endif
+#endif
+
 #if PROTOCOL == 12 || PROTOCOL == 8
 #if PRE == 1
     pre_send_to_(P_2);
@@ -93,7 +93,13 @@ template <typename func_add, typename func_sub, typename func_mul>
 #else
 store_compare_view_init(P_2);
 #endif
-#if PROTOCOL == 10 || PROTOCOL == 12 || PROTOCOL == 8
+return OEC_MAL3_init();
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult(func_add ADD, func_sub SUB)
+{
+#if PROTOCOL == 10 || PROTOCOL == 12 
 #if PRE == 1
     pre_send_to_(P_0);
 #else
@@ -102,12 +108,6 @@ store_compare_view_init(P_2);
 #elif PROTOCOL == 11
 store_compare_view_init(P_0);
 #endif
-return OEC_MAL3_init();
-}
-
-template <typename func_add, typename func_sub>
-void complete_mult(func_add ADD, func_sub SUB)
-{
 }
 
 
