@@ -83,7 +83,7 @@ void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
 Datatype r0123 = ADD(getRandomVal(P_013),getRandomVal(P_023));
 r1 = TRUNC(SUB(r0123, r1)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
-r0 = ADD(SUB(r0, r0123), getRandomVal(P_123));
+r0 = SUB(r0, r0123);
 
 #if PROTOCOL == 12
 #if PRE == 1
@@ -99,6 +99,7 @@ store_compare_view(P_2, SUB(r1,getRandomVal(P_013))); // compare m^0 - z_1
     template <typename func_add, typename func_sub, typename func_trunc>
 void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
+r0 = ADD(r0, getRandomVal(P_123));  //mask v^3
 #if PROTOCOL == 11
 store_compare_view(P_0, r0);  // v^3 = .. - r_0,1,2 - r_0,2,3 + r_1,2,3 TODO: Recent change: Verify
 #else
@@ -264,9 +265,9 @@ static void communicate()
 #endif
 }
 
-static void prepare_A2B_S1(OEC_MAL3_Share in[], OEC_MAL3_Share out[])
+static void prepare_A2B_S1(int k, OEC_MAL3_Share in[], OEC_MAL3_Share out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         out[i].r0 = getRandomVal(P_123); // r123
         out[i].r1 = SET_ALL_ZERO(); // set share to 0
@@ -274,7 +275,7 @@ static void prepare_A2B_S1(OEC_MAL3_Share in[], OEC_MAL3_Share out[])
 }
 
 
-static void prepare_A2B_S2(OEC_MAL3_Share in[], OEC_MAL3_Share out[])
+static void prepare_A2B_S2(int k ,OEC_MAL3_Share in[], OEC_MAL3_Share out[])
 {
     //convert share x0 to boolean
     Datatype temp[BITLENGTH];
@@ -285,7 +286,7 @@ static void prepare_A2B_S2(OEC_MAL3_Share in[], OEC_MAL3_Share out[])
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
 
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
             out[i].r0 = SET_ALL_ZERO(); 
             out[i].r1 = temp[i]; 
@@ -301,11 +302,11 @@ static void prepare_A2B_S2(OEC_MAL3_Share in[], OEC_MAL3_Share out[])
     } 
 }
 
-static void complete_A2B_S1(OEC_MAL3_Share out[])
+static void complete_A2B_S1(int k, OEC_MAL3_Share out[])
 {
 }
 
-static void complete_A2B_S2(OEC_MAL3_Share out[])
+static void complete_A2B_S2(int k, OEC_MAL3_Share out[])
 {
 
 }

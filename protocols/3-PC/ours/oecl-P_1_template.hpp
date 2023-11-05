@@ -179,7 +179,7 @@ static void communicate()
 }
 
 
-static void prepare_A2B_S1(OECL1_Share in[], OECL1_Share out[])
+static void prepare_A2B_S1(int k, OECL1_Share in[], OECL1_Share out[])
 {
     Datatype temp_p1[BITLENGTH];
     for(int i = 0; i < BITLENGTH; i++)
@@ -189,7 +189,7 @@ static void prepare_A2B_S1(OECL1_Share in[], OECL1_Share out[])
     unorthogonalize_arithmetic(temp_p1, (UINT_TYPE*) temp_p1);
     orthogonalize_boolean((UINT_TYPE*) temp_p1, temp_p1);
     
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         out[i].p1 = temp_p1[i];
         out[i].p2 = SET_ALL_ZERO(); // set other share to 0
@@ -197,21 +197,21 @@ static void prepare_A2B_S1(OECL1_Share in[], OECL1_Share out[])
 
 }
 
-static void complete_A2B_S1(OECL1_Share out[])
+static void complete_A2B_S1(int k, OECL1_Share out[])
 {
 }
 
-static void prepare_A2B_S2(const OECL1_Share in[], OECL1_Share out[])
+static void prepare_A2B_S2(int k, const OECL1_Share in[], OECL1_Share out[])
 {
 
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         out[i].p1 = getRandomVal(P_0); 
         out[i].p2 = out[i].p1; // set both shares to r0,1
     } 
 }
 
-static void complete_A2B_S2(OECL1_Share out[])
+static void complete_A2B_S2(int k, OECL1_Share out[])
 {
 }
 

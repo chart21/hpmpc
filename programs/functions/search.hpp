@@ -23,7 +23,7 @@ void print_result(DATATYPE* var)
 void search(/*outputs*/ DATATYPE *found)
 {
     using S = XOR_Share<DATATYPE, Protocol>;
-    using Bitset = sbitset_t<S>;
+    using Bitset = sbitset_t<BITLENGTH,S>;
 
     /* S (*dataset)[BITLENGTH] = new S [NUM_INPUTS][BITLENGTH]; */
     /* S *element = new S[BITLENGTH]; */

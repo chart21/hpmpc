@@ -220,9 +220,9 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void prepare_A2B_S1(OEC_MAL2_init in[], OEC_MAL2_init out[])
+static void prepare_A2B_S1(int k, OEC_MAL2_init in[], OEC_MAL2_init out[])
 {
-    for (int j = 0; j < BITLENGTH; j++)
+    for (int j = 0; j < k; j++)
     {
             send_to_(P_0);
     }
@@ -230,17 +230,17 @@ static void prepare_A2B_S1(OEC_MAL2_init in[], OEC_MAL2_init out[])
 }
 
 
-static void prepare_A2B_S2(OEC_MAL2_init in[], OEC_MAL2_init out[])
+static void prepare_A2B_S2(int k, OEC_MAL2_init in[], OEC_MAL2_init out[])
 {
 }
 
-static void complete_A2B_S1(OEC_MAL2_init out[])
+static void complete_A2B_S1(int k, OEC_MAL2_init out[])
 {
 }
 
-static void complete_A2B_S2(OEC_MAL2_init out[])
+static void complete_A2B_S2(int k, OEC_MAL2_init out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
 #if PROTOCOL != 12
         #if PRE == 0

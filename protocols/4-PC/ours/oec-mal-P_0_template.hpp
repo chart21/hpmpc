@@ -271,16 +271,16 @@ static void communicate()
 /* #endif */
 }
 
-static void prepare_A2B_S1(OEC_MAL0_Share in[], OEC_MAL0_Share out[])
+static void prepare_A2B_S1(int k, OEC_MAL0_Share in[], OEC_MAL0_Share out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         out[i].r = SET_ALL_ZERO(); // set share to 0
     }
 }
 
 
-static void prepare_A2B_S2(OEC_MAL0_Share in[], OEC_MAL0_Share out[])
+static void prepare_A2B_S2(int k, OEC_MAL0_Share in[], OEC_MAL0_Share out[])
 {
     //convert share  (- x0) to boolean
     Datatype temp[BITLENGTH];
@@ -291,7 +291,7 @@ static void prepare_A2B_S2(OEC_MAL0_Share in[], OEC_MAL0_Share out[])
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
 
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
             out[i].r = temp[i]; 
             out[i].v = temp[i];  // set both shares to -x0
@@ -308,16 +308,16 @@ static void prepare_A2B_S2(OEC_MAL0_Share in[], OEC_MAL0_Share out[])
             /* out[0].p1 = FUNC_NOT(out[0].p1);// change sign bit -> -x0 xor r0,1 to x0 xor r0,1 */
 }
 
-static void complete_A2B_S1(OEC_MAL0_Share out[])
+static void complete_A2B_S1(int k, OEC_MAL0_Share out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         out[i].v = receive_from_live(P_2);  // receive a_0 xor r123
         store_compare_view(P_1, out[i].v);
     }
 }
 
-static void complete_A2B_S2(OEC_MAL0_Share out[])
+static void complete_A2B_S2(int k, OEC_MAL0_Share out[])
 {
 
 }

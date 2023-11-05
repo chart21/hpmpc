@@ -210,14 +210,14 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void prepare_A2B_S1(OEC_MAL0_init in[], OEC_MAL0_init out[])
+static void prepare_A2B_S1(int k,OEC_MAL0_init in[], OEC_MAL0_init out[])
 {
 }
 
 
-static void prepare_A2B_S2(OEC_MAL0_init in[], OEC_MAL0_init out[])
+static void prepare_A2B_S2(int k, OEC_MAL0_init in[], OEC_MAL0_init out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         #if PROTOCOL == 12
             store_compare_view_init(P_2);
@@ -231,16 +231,16 @@ static void prepare_A2B_S2(OEC_MAL0_init in[], OEC_MAL0_init out[])
     } 
 }
 
-static void complete_A2B_S1(OEC_MAL0_init out[])
+static void complete_A2B_S1(int k,OEC_MAL0_init out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         receive_from_(P_2);
         store_compare_view_init(P_1);
     }
 }
 
-static void complete_A2B_S2(OEC_MAL0_init out[])
+static void complete_A2B_S2(int k, OEC_MAL0_init out[])
 {
 
 }

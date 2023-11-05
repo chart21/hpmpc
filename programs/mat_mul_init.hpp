@@ -126,6 +126,27 @@ void generateElements()
         }
 #endif
 
+#if FUNCTION_IDENTIFIER == 35
+        auto input = NEW(UINT_TYPE[NUM_INPUTS][DATTYPE]);
+        player_input = NEW(DATATYPE[NUM_INPUTS*BITLENGTH]);
+        srand(time(0));
+        for(int i = 0; i < NUM_INPUTS; ++i) {
+            for(int j = 0; j < DATTYPE; ++j) {
+                
+                /* input[i][j] = fixed_init[i]; */
+                input[i][j] = rand() % 200 - 100;
+            }
+#if PARTY == 0
+            std::cout << "Input " << i << ": " << input[i][0] << std::endl;
+#endif
+        }
+        
+        for(int i = 0; i < NUM_INPUTS; ++i) {
+            orthogonalize_arithmetic(input[i], player_input + BITLENGTH*i);
+        }
+
+#endif
+
 
 }
 

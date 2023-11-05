@@ -1,13 +1,14 @@
 #pragma once
 #include "../../protocols/Protocols.h"
 #include "../../datatypes/k_bitset.hpp"
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <vector>
 #include <algorithm>
 template<int k, typename Share>
 class PPA_MSB_4Way{
-    using Bitset = sbitset_t<Share>;
+    using Bitset = sbitset_t<k, Share>;
 private:
     Bitset &a;
     Bitset &b;
@@ -823,11 +824,22 @@ int get_rounds() {
 }
 
 int get_total_rounds() {
-    return LOG4_BITLENGTH;
+    switch(k) {
+        case 8:
+            return 2;
+        case 16:
+            return 2;
+        case 32:
+            return 3;
+        case 64:
+            return 3;
+        default:
+            return 0;
+    }
 }
 
 bool is_done() {
-    return level == (LOG4_BITLENGTH+1);
+    return level == get_total_rounds() + 1;
 }
 
 };

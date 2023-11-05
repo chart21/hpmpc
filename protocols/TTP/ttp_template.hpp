@@ -140,14 +140,14 @@ static void communicate()
     communicate_live();
 }
 
-static void prepare_A2B_S1(TTP_Share in[], TTP_Share out[])
+static void prepare_A2B_S1(int k, TTP_Share in[], TTP_Share out[])
 {
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
             /* temp[j] = in[j].p1; */
-            temp[j] = getRandomVal(PNEXT);
-            in[j].p1 = FUNC_SUB32(in[j].p1,temp[j]);
+            temp[j] = in[j].p1;
+            /* in[j].p1 = FUNC_SUB32(in[j].p1,temp[j]); */
         }
     /* unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp); */
     /* orthogonalize_boolean((UINT_TYPE*) temp, temp); */
@@ -155,14 +155,14 @@ static void prepare_A2B_S1(TTP_Share in[], TTP_Share out[])
     unorthogonalize_arithmetic(temp, temp2);
     orthogonalize_boolean(temp2, temp);
 
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         out[i].p1 = temp[i];
     } 
 }
 
 
-static void prepare_A2B_S2(TTP_Share in[], TTP_Share out[])
+static void prepare_A2B_S2(int k, TTP_Share in[], TTP_Share out[])
 {
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
@@ -174,17 +174,17 @@ static void prepare_A2B_S2(TTP_Share in[], TTP_Share out[])
     unorthogonalize_arithmetic(temp, temp2);
     orthogonalize_boolean(temp2, temp);
 
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         out[i].p1 = temp[i];
     } 
 }
 
-static void complete_A2B_S1(TTP_Share out[])
+static void complete_A2B_S1(int k, TTP_Share out[])
 {
 
 }
-static void complete_A2B_S2(TTP_Share out[])
+static void complete_A2B_S2(int k, TTP_Share out[])
 {
 
 }

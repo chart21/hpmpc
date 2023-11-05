@@ -3,10 +3,11 @@
 #include "../../datatypes/k_bitset.hpp"
 #include <cstring>
 #include <iostream>
+#include <cmath>
 
-template<typename Share>
+template<int k, typename Share>
 class PPA_MSB {
-    using Bitset = sbitset_t<Share>;
+    using Bitset = sbitset_t<k,Share>;
 private:
     Bitset &a;
     Bitset &b;
@@ -24,8 +25,8 @@ void prepare_step() {
     startPos = 1 << level;
     step_length = 1 << (level + 1);
     bool first = true;
-      for (int i = startPos; i < BITLENGTH; i += step_length){
-            int lowWire = BITLENGTH - i;
+      for (int i = startPos; i < k; i += step_length){
+            int lowWire = k - i;
             int curWire = std::max(lowWire - startPos, 1);
 
             if (curWire != lowWire) {
@@ -46,8 +47,8 @@ void prepare_step() {
 
 void complete_Step() {
     bool first = true;
-      for (int i = startPos; i < BITLENGTH; i += step_length){
-            int lowWire = BITLENGTH - i;
+      for (int i = startPos; i < k; i += step_length){
+            int lowWire = k - i;
             int curWire = std::max(lowWire - startPos, 1);
 
             if (curWire != lowWire) {
@@ -68,10 +69,11 @@ void complete_Step() {
 }
 
 void step() {
+    const int log2k = std::ceil(std::log2(k));
     switch(level) {
         case -2:
             P[0] = a[0] ^ b[0];
-           for (int i = 1; i < BITLENGTH; ++i) {
+           for (int i = 1; i < k; ++i) {
                 P[i] = a[i] ^ b[i];
                 /* G[i - 1] = a[i - 1] & b[i - 1]; */
                 G[i] = a[i] & b[i]; // possibly wrong and above is correct
@@ -79,7 +81,7 @@ void step() {
             level++;
             break;
         case -1:
-           for (int i = 1; i < BITLENGTH; ++i) 
+           for (int i = 1; i < k; ++i) 
                // G[i - 1].complete_and();
                 G[i].complete_and(); // possibly wrong and above is correct
 
@@ -90,7 +92,7 @@ void step() {
             complete_Step();
             prepare_step();
         break;
-    case LOG2_BITLENGTH-1:
+    case log2k-1:
             complete_Step();
             msb = a[0] ^ b[0] ^ G[1];
             level = -3;
@@ -113,7 +115,7 @@ int get_rounds() {
 }
 
 int get_total_rounds() {
-    return LOG2_BITLENGTH + 1;
+    return std::ceil(std::log2(k)) + 1;
 }
 
 bool is_done() {

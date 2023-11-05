@@ -52,6 +52,8 @@
 #define FUNCTION mult34_test
 #elif FUNCTION_IDENTIFIER == 31 || FUNCTION_IDENTIFIER == 32 || FUNCTION_IDENTIFIER == 33 || FUNCTION_IDENTIFIER == 34
 #define FUNCTION dot234_test
+#elif FUNCTION_IDENTIFIER == 35
+#define FUNCTION RELU_range_test
 #endif
 #define RESULTTYPE DATATYPE
 
@@ -276,7 +278,7 @@ delete[] c;
     /* using S = XOR_Share<DATATYPE, Share>; */
     /* using A = Additive_Share<DATATYPE, Share>; */
     /* using M = Matrix_Share<DATATYPE, Share>; */
-    /* using Bitset = sbitset_t<S>; */
+    /* using Bitset = sbitset_t<BITLENGTH,S>; */
     /* using sint = sint_t<A>; */
     /* using mint = sint_t<M>; */
 
@@ -425,7 +427,7 @@ void RELU_bench(DATATYPE* res)
 {
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<S>;
+    using Bitset = sbitset_t<BITLENGTH, S>;
     using sint = sint_t<A>;
     
     sint* val = new sint[NUM_INPUTS];
@@ -433,8 +435,8 @@ void RELU_bench(DATATYPE* res)
     Bitset *s2 = new Bitset[NUM_INPUTS];
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        s1[i] = sbitset_t<S>::prepare_A2B_S1( (S*) val[i].get_share_pointer());
-        s2[i] = sbitset_t<S>::prepare_A2B_S2( (S*) val[i].get_share_pointer());
+        s1[i] = Bitset::prepare_A2B_S1( (S*) val[i].get_share_pointer());
+        s2[i] = Bitset::prepare_A2B_S2( (S*) val[i].get_share_pointer());
     }
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
@@ -446,9 +448,9 @@ void RELU_bench(DATATYPE* res)
     S *y = new S[NUM_INPUTS];
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
     #if FUNCTION_IDENTIFIER == 16
-    std::vector<PPA_MSB_Unsafe<S>> adders;
+    std::vector<PPA_MSB_Unsafe<BITLENGTH,S>> adders;
     #else
-    std::vector<BooleanAdder_MSB<S>> adders;
+    std::vector<BooleanAdder_MSB<BITLENGTH,S>> adders;
     #endif
     adders.reserve(NUM_INPUTS);
     for(int i = 0; i < NUM_INPUTS; i++)
@@ -530,15 +532,15 @@ void RELU_bench(DATATYPE* res)
 /* { */
 /* using S = XOR_Share<Datatype, Share>; */
 /* using A = Additive_Share<Datatype, Share>; */
-/* using Bitset = sbitset_t<S>; */
+/* using Bitset = sbitset_t<BITLENGTH,S>; */
 /* using sint = sint_t<A>; */
     /* sint* val = new sint; */
     /* Bitset *s1 = new Bitset; */
     /* Bitset *s2 = new Bitset; */
     /* for(int i = 0; i < NUM_INPUTS; i++) */
     /* { */
-    /*     s1[i] = sbitset_t<S>::prepare_A2B_S1( (S*) val[i].get_share_pointer()); */
-    /*     s2[i] = sbitset_t<S>::prepare_A2B_S2( (S*) val[i].get_share_pointer()); */
+    /*     s1[i] = sbitset_t<BITLENGTH,S>::prepare_A2B_S1( (S*) val[i].get_share_pointer()); */
+    /*     s2[i] = sbitset_t<BITLENGTH,S>::prepare_A2B_S2( (S*) val[i].get_share_pointer()); */
     /* } */
     /* Share::communicate(); */
     /* for(int i = 0; i < NUM_INPUTS; i++) */
@@ -637,7 +639,7 @@ void bitinj_range(XOR_Share<Datatype, Share>* bit_val, int len, sint_t<Additive_
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
-using Bitset = sbitset_t<S>;
+using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
 sint* t1 = new sint[len];
 sint* t2 = new sint[len];
@@ -667,19 +669,19 @@ delete[] t2;
 }
 
 // compute msbs of a range of arithemtic shares
-template<typename Datatype, typename Share>
+template<int k, typename Datatype, typename Share>
 void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int len)
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
-using Bitset = sbitset_t<S>;
+using Bitset = sbitset_t<k,S>;
 using sint = sint_t<A>;
     Bitset *s1 = new Bitset[len];
 Bitset *s2 = new Bitset[len];
     for(int i = 0; i < len; i++)
     {
-        s1[i] = sbitset_t<S>::prepare_A2B_S1( (S*) val[i].get_share_pointer());
-        s2[i] = sbitset_t<S>::prepare_A2B_S2( (S*) val[i].get_share_pointer());
+        s1[i] = Bitset::prepare_A2B_S1( (S*) val[i].get_share_pointer());
+        s2[i] = Bitset::prepare_A2B_S2( (S*) val[i].get_share_pointer());
     }
     Share::communicate();
     for(int i = 0; i < len; i++)
@@ -691,7 +693,8 @@ Bitset *s2 = new Bitset[len];
 
     /* std::vector<BooleanAdder_MSB<S>> adders; */
     /* std::vector<PPA_MSB_Unsafe<S>> adders; */
-    std::vector<PPA_MSB_4Way<BITLENGTH, S> > adders;
+    /* std::vector<PPA_MSB_4Way<Bitset::get_bitlength(), S> > adders; */
+    std::vector<BooleanAdder_MSB<Bitset::get_bitlength(), S> > adders;
     
     adders.reserve(len);
     for(int i = 0; i < len; i++)
@@ -715,12 +718,12 @@ Bitset *s2 = new Bitset[len];
 
 }
 
-template<typename Datatype, typename Share>
+template<int k, typename Datatype, typename Share>
 void max_min_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int m, bool want_max)
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
-using Bitset = sbitset_t<S>;
+using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
 
        sint* max_val = new sint[(m+1)/2];
@@ -744,7 +747,7 @@ using sint = sint_t<A>;
             /* std::cout << "max val: " << max_val[i].get_p1() << std::endl; */
         /* #endif */ 
 
-    get_msb_range(max_val, msb, counter);
+    get_msb_range<k>(max_val, msb, counter);
             /* #if PARTY == 2 */
         /* for(int i = 0; i < counter; i++) */
             /* std::cout << "msb: " << msb[i].get_p1() << std::endl; */
@@ -783,12 +786,12 @@ using sint = sint_t<A>;
 
 }
     
-    template<typename Datatype, typename Share>
+    template<int k, typename Datatype, typename Share>
 sint_t<Additive_Share<Datatype, Share>> max_min(sint_t<Additive_Share<Datatype, Share>>* begin, sint_t<Additive_Share<Datatype, Share>>* end, bool want_max)
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
-using Bitset = sbitset_t<S>;
+using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
    int m = end - begin;
    int og_len = m;
@@ -807,9 +810,9 @@ using sint = sint_t<A>;
         int offset = m % 2; // if m is odd, offset is 1
         S* msb = new S[m];
         if(want_max)
-            max_min_msb_range(val,msb,m,true); //get msb and max of 0 -> counter
+            max_min_msb_range<k>(val,msb,m,true); //get msb and max of 0 -> counter
         else
-            max_min_msb_range(val,msb,m,false); //get msb and max of 0 -> counter
+            max_min_msb_range<k>(val,msb,m,false); //get msb and max of 0 -> counter
 
         delete[] msb;
         m = counter + offset;
@@ -818,12 +821,12 @@ using sint = sint_t<A>;
 }
 
 
-    template<typename Datatype, typename Share>
+    template<int c, typename Datatype, typename Share>
 void argmax_argmin(sint_t<Additive_Share<Datatype, Share>>* begin, sint_t<Additive_Share<Datatype, Share>>* end, XOR_Share<Datatype, Share>* output, bool want_max)
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
-using Bitset = sbitset_t<S>;
+using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
    int m = end - begin;
    int og_len = m;
@@ -847,9 +850,9 @@ using sint = sint_t<A>;
         int offset = m % 2; // if m is odd, offset is 1
         S* msb = new S[m];
         if(want_max)
-            max_min_msb_range(val,msb,m,true); //get msb and max of 0 -> counter
+            max_min_msb_range<c>(val,msb,m,true); //get msb and max of 0 -> counter
         else
-            max_min_msb_range(val,msb,m,false); //get msb and max of 0 -> counter
+            max_min_msb_range<c>(val,msb,m,false); //get msb and max of 0 -> counter
 
         //update args
        if (i == 0) // first round
@@ -900,8 +903,9 @@ void argmax_test(DATATYPE* res)
 {
 using S = XOR_Share<DATATYPE, Share>;
 using A = Additive_Share<DATATYPE, Share>;
-using Bitset = sbitset_t<S>;
+using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
+const int k = REDUCED_BITLENGTH;
 auto a = new sint[NUM_INPUTS];
 auto max_output = new S[NUM_INPUTS];
 auto min_output = new S[NUM_INPUTS];
@@ -915,10 +919,10 @@ Share::communicate();
         /* for(int i = 0; i < NUM_INPUTS; i++) */
             /* std::cout << "a: " << a[i].get_p1() << std::endl; */
         /* #endif */ 
-argmax_argmin(a, a+NUM_INPUTS, max_output,true);
-argmax_argmin(a, a+NUM_INPUTS, min_output,false);
-auto max_val = max_min(a, a+NUM_INPUTS, true);
-auto min_val = max_min(a, a+NUM_INPUTS, false);
+argmax_argmin<k>(a, a+NUM_INPUTS, max_output,true);
+argmax_argmin<k>(a, a+NUM_INPUTS, min_output,false);
+auto max_val = max_min<k>(a, a+NUM_INPUTS, true);
+auto min_val = max_min<k>(a, a+NUM_INPUTS, false);
 for(int i = 0; i < NUM_INPUTS; i++)
 {
         max_output[i].prepare_reveal_to_all();
@@ -1704,4 +1708,118 @@ if(current_phase == 1)
 
 #endif
 
+#if FUNCTION_IDENTIFIER == 35
 
+template<int k,typename Share, typename Datatype>
+void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<k, S>;
+    using sint = sint_t<A>;
+    
+    Bitset *s1 = new Bitset[NUM_INPUTS];
+    Bitset *s2 = new Bitset[NUM_INPUTS];
+    for(int i = 0; i < len; i++)
+    {
+        s1[i] = Bitset::prepare_A2B_S1( (S*) val[i].get_share_pointer());
+        s2[i] = Bitset::prepare_A2B_S2( (S*) val[i].get_share_pointer());
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        s1[i].complete_A2B_S1();
+        s2[i].complete_A2B_S2();
+    }
+    /* Bitset* y = new Bitset[NUM_INPUTS]; */
+    S *y = new S[len];
+    /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
+    /* std::vector<BooleanAdder_MSB<k,S>> adders; */
+    std::vector<PPA_MSB_4Way<k,S>> adders;
+    adders.reserve(len);
+    for(int i = 0; i < len; i++)
+    {
+        /* adder[i].set_values(s1[i], s2[i], y[i]); */
+        adders.emplace_back(s1[i], s2[i], y[i]);
+    }
+    while(!adders[0].is_done())
+    {
+        for(int i = 0; i < len; i++)
+        {
+            adders[i].step();
+        }
+        Share::communicate();
+    }
+    delete[] s1;
+    delete[] s2;
+    adders.clear();
+    adders.shrink_to_fit();
+    
+    for(int i = 0; i < len; i++)
+    {
+        y[i] = ~ y[i];
+    }
+    sint* t1 = new sint[len];
+    sint* t2 = new sint[len];
+    for(int i = 0; i < len; i++)
+    {
+        y[i].prepare_bit_injection_S1(t1[i].get_share_pointer());
+        y[i].prepare_bit_injection_S2(t2[i].get_share_pointer());
+    }
+    delete[] y;
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        t1[i].complete_bit_injection_S1();
+        t2[i].complete_bit_injection_S2();
+    }
+    sint* result = new sint[len];
+    for(int i = 0; i < len; i++)
+    {
+        result[i].prepare_XOR(t1[i],t2[i]);
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        result[i].complete_XOR(t1[i],t2[i]);
+    }
+    delete[] t1;
+    delete[] t2;
+
+    for(int i = 0; i < len; i++)
+    {
+        val[i] = result[i] * val[i];
+    }
+    delete[] result;
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        val[i].complete_mult();
+    }
+}
+    
+    template<typename Share>
+void RELU_range_test(DATATYPE* res)
+{
+using A = Additive_Share<DATATYPE, Share>;
+using sint = sint_t<A>;
+auto a = new sint[NUM_INPUTS];
+for(int i = 0; i < NUM_INPUTS; i++)
+        a[i].template prepare_receive_from<P_0>();
+Share::communicate();
+for(int i = 0; i < NUM_INPUTS; i++)
+        a[i].template complete_receive_from<P_0>();
+Share::communicate();
+RELU_range_in_place<REDUCED_BITLENGTH,Share>(a,NUM_INPUTS);
+auto result_arr = new UINT_TYPE[NUM_INPUTS][DATTYPE];
+for(int i = 0; i < NUM_INPUTS; i++)
+    a[i].prepare_reveal_to_all();
+Share::communicate();
+for(int i = 0; i < NUM_INPUTS; i++)
+    a[i].complete_reveal_to_all(result_arr[i]);
+for(int i = 0; i < NUM_INPUTS; i++)
+    if(current_phase == 1)
+    std::cout << "P" << PARTY << ": Result " << i << ": "<< result_arr[i][0] << std::endl;
+}
+
+#endif

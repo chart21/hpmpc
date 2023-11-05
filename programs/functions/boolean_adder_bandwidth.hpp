@@ -4,9 +4,9 @@
 #include <cstring>
 #include <iostream>
 
-template<typename Share>
+template<int k,typename Share>
 class BooleanAdder {
-    using Bitset = sbitset_t<Share>;
+    using Bitset = sbitset_t<k, Share>;
 private:
     int r;
     Bitset &x;
@@ -20,12 +20,12 @@ public:
 
 BooleanAdder()
     {
-        r = BITLENGTH;
+        r = k;
     }
 
 BooleanAdder(Bitset &x0, Bitset &x1, Bitset &y0) : x(x0), y(x1), z(y0) 
     {
-        r = BITLENGTH;
+        r = k;
     }
 
 void set_values(Bitset &x0, Bitset &x1, Bitset &y0) 
@@ -40,7 +40,7 @@ int get_rounds() {
 }
 
 int get_total_rounds() {
-    return BITLENGTH;
+    return k;
 }
 
 bool is_done() {
@@ -52,11 +52,11 @@ void step()
 r-=1;
 switch(r)
 {
-    case BITLENGTH-1: //special case for lsbs
-        z[BITLENGTH-1] = x[BITLENGTH-1] ^ y[BITLENGTH-1];
-        carry_last = x[BITLENGTH-1] & y[BITLENGTH-1];
+    case k-1: //special case for lsbs
+        z[k-1] = x[k-1] ^ y[k-1];
+        carry_last = x[k-1] & y[k-1];
         break;
-case BITLENGTH-2:
+case k-2:
         carry_last.complete_and(); // get carry from lsb
         update_z(); 
         prepare_carry();

@@ -221,9 +221,9 @@ static void communicate()
 #endif
 }
 
-static void prepare_A2B_S1(OECL0_Share in[], OECL0_Share out[])
+static void prepare_A2B_S1(int k, OECL0_Share in[], OECL0_Share out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         /* out[i].p1 = getRandomVal(P_2); // set share to r0,2 */ 
         out[i].p1 = SET_ALL_ZERO(); // set share to 0
@@ -232,7 +232,7 @@ static void prepare_A2B_S1(OECL0_Share in[], OECL0_Share out[])
 }
 
 
-static void prepare_A2B_S2(OECL0_Share in[], OECL0_Share out[])
+static void prepare_A2B_S2(int k, OECL0_Share in[], OECL0_Share out[])
 {
     //convert share x0 to boolean
     Datatype temp[BITLENGTH];
@@ -243,7 +243,7 @@ static void prepare_A2B_S2(OECL0_Share in[], OECL0_Share out[])
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
 
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
             out[i].p2 = getRandomVal(P_1); // set second share to r0,1
             out[i].p1 = FUNC_XOR(temp[i],out[i].p2); // set first share to -x0 xor r0,1
@@ -256,11 +256,11 @@ static void prepare_A2B_S2(OECL0_Share in[], OECL0_Share out[])
             /* out[0].p1 = FUNC_NOT(out[0].p1);// change sign bit -> -x0 xor r0,1 to x0 xor r0,1 */
 }
 
-static void complete_A2B_S1(OECL0_Share out[])
+static void complete_A2B_S1(int k, OECL0_Share out[])
 {
 
 }
-static void complete_A2B_S2(OECL0_Share out[])
+static void complete_A2B_S2(int k, OECL0_Share out[])
 {
 
 }

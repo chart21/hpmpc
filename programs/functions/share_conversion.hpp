@@ -25,7 +25,7 @@ void adder(DATATYPE* res)
 {
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<S>;
+    using Bitset = sbitset_t<BITLENGTH,S>;
     using sint = sint_t<A>;
     
     Bitset x;
@@ -37,7 +37,7 @@ void adder(DATATYPE* res)
     y.template complete_receive_from<P_0>();
     Share::communicate();
     Bitset z;
-    BooleanAdder<S> adder(x, y, z);
+    BooleanAdder<BITLENGTH,S> adder(x, y, z);
     while(!adder.is_done())
     {
         adder.step();
@@ -66,7 +66,7 @@ void RELU(DATATYPE* res)
 {
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<S>;
+    using Bitset = sbitset_t<BITLENGTH,S>;
     using sint = sint_t<A>;
     
     sint* val = new sint[NUM_INPUTS];
@@ -84,8 +84,8 @@ void RELU(DATATYPE* res)
     Bitset *s2 = new Bitset[NUM_INPUTS];
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        s1[i] = sbitset_t<S>::prepare_A2B_S1( (S*) val[i].get_share_pointer());
-        s2[i] = sbitset_t<S>::prepare_A2B_S2( (S*) val[i].get_share_pointer());
+        s1[i] = sbitset_t<BITLENGTH, S>::prepare_A2B_S1((S*) val[i].get_share_pointer());
+        s2[i] = sbitset_t<BITLENGTH, S>::prepare_A2B_S2((S*) val[i].get_share_pointer());
     }
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
@@ -95,7 +95,7 @@ void RELU(DATATYPE* res)
     }
     Bitset* y = new Bitset[NUM_INPUTS];
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
-    std::vector<PPA_MSB_Unsafe<S>> adders;
+    std::vector<PPA_MSB_Unsafe<BITLENGTH,S>> adders;
     adders.reserve(NUM_INPUTS);
     for(int i = 0; i < NUM_INPUTS; i++)
     {
@@ -194,7 +194,7 @@ void bit_injection(DATATYPE* res)
 {
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<S>;
+    using Bitset = sbitset_t<BITLENGTH,S>;
     using sint = sint_t<A>;
 
     Bitset val;
@@ -240,7 +240,7 @@ void convert_share(/*outputs*/ DATATYPE *result)
 {
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<S>;
+    using Bitset = sbitset_t<BITLENGTH,S>;
     using sint = sint_t<A>;
 
     sint val;
@@ -251,12 +251,12 @@ void convert_share(/*outputs*/ DATATYPE *result)
     Share::communicate();
     val.template complete_receive_from<P_0>();
     Share::communicate();
-    Bitset s1 = sbitset_t<S>::prepare_A2B_S1( (S*) val.get_share_pointer());
-    Bitset s2 = sbitset_t<S>::prepare_A2B_S2( (S*) val.get_share_pointer());
+    Bitset s1 = Bitset::prepare_A2B_S1( (S*) val.get_share_pointer());
+    Bitset s2 = Bitset::prepare_A2B_S2( (S*) val.get_share_pointer());
     Share::communicate();
     s1.complete_A2B_S1();
     s2.complete_A2B_S2();
-    BooleanAdder<S> adder(s1, s2,y);
+    BooleanAdder<BITLENGTH,S> adder(s1, s2,y);
     while(!adder.is_done())
     {
         adder.step();

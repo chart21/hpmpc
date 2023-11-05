@@ -166,9 +166,9 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void prepare_A2B_S1(OEC_MAL1_init in[], OEC_MAL1_init out[])
+static void prepare_A2B_S1(int k,OEC_MAL1_init in[], OEC_MAL1_init out[])
 {
-    for (int j = 0; j < BITLENGTH; j++)
+    for (int j = 0; j < k; j++)
     {
     store_compare_view_init(P_0);
     }
@@ -176,15 +176,15 @@ static void prepare_A2B_S1(OEC_MAL1_init in[], OEC_MAL1_init out[])
 }
 
 
-static void prepare_A2B_S2(OEC_MAL1_init in[], OEC_MAL1_init out[])
+static void prepare_A2B_S2(int k, OEC_MAL1_init in[], OEC_MAL1_init out[])
 {
 }
 
-static void complete_A2B_S1(OEC_MAL1_init out[])
+static void complete_A2B_S1(int k, OEC_MAL1_init out[])
 {
 }
 
-static void complete_A2B_S2(OEC_MAL1_init out[])
+static void complete_A2B_S2(int k, OEC_MAL1_init out[])
 {
 
 }

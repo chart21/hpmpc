@@ -325,7 +325,7 @@ static void communicate()
     communicate_live();
 }
 
-static void prepare_A2B_S1(OEC_MAL2_Share in[], OEC_MAL2_Share out[])
+static void prepare_A2B_S1(int k, OEC_MAL2_Share in[], OEC_MAL2_Share out[])
 {
         Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
@@ -334,7 +334,7 @@ static void prepare_A2B_S1(OEC_MAL2_Share in[], OEC_MAL2_Share out[])
         }
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
-    for (int j = 0; j < BITLENGTH; j++)
+    for (int j = 0; j < k; j++)
     {
             out[j].v = temp[j];
             out[j].r = SET_ALL_ZERO(); // set share to 0
@@ -349,9 +349,9 @@ static void prepare_A2B_S1(OEC_MAL2_Share in[], OEC_MAL2_Share out[])
 }
 
 
-static void prepare_A2B_S2(OEC_MAL2_Share in[], OEC_MAL2_Share out[])
+static void prepare_A2B_S2(int k, OEC_MAL2_Share in[], OEC_MAL2_Share out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         out[i].v = SET_ALL_ZERO();
         #if MULTI_INPUT == 1
@@ -360,13 +360,13 @@ static void prepare_A2B_S2(OEC_MAL2_Share in[], OEC_MAL2_Share out[])
     }
 }
 
-static void complete_A2B_S1(OEC_MAL2_Share out[])
+static void complete_A2B_S1(int k, OEC_MAL2_Share out[])
 {
 }
 
-static void complete_A2B_S2(OEC_MAL2_Share out[])
+static void complete_A2B_S2(int k, OEC_MAL2_Share out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
     #if PROTOCOL != 12
         #if PRE == 0

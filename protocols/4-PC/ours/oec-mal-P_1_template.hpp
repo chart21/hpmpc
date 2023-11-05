@@ -274,7 +274,7 @@ static void communicate()
     communicate_live();
 }
 
-static void prepare_A2B_S1(OEC_MAL1_Share in[], OEC_MAL1_Share out[])
+static void prepare_A2B_S1(int k, OEC_MAL1_Share in[], OEC_MAL1_Share out[])
 {
         Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
@@ -283,7 +283,7 @@ static void prepare_A2B_S1(OEC_MAL1_Share in[], OEC_MAL1_Share out[])
         }
     unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
     orthogonalize_boolean((UINT_TYPE*) temp, temp);
-    for (int j = 0; j < BITLENGTH; j++)
+    for (int j = 0; j < k; j++)
     {
         out[j].r = SET_ALL_ZERO(); // set share to 0
         out[j].v = temp[j];
@@ -298,9 +298,9 @@ static void prepare_A2B_S1(OEC_MAL1_Share in[], OEC_MAL1_Share out[])
 }
 
 
-static void prepare_A2B_S2(OEC_MAL1_Share in[], OEC_MAL1_Share out[])
+static void prepare_A2B_S2(int k, OEC_MAL1_Share in[], OEC_MAL1_Share out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
+    for(int i = 0; i < k; i++)
     {
         out[i].r = getRandomVal(P_013);
         out[i].v = SET_ALL_ZERO();
@@ -310,11 +310,11 @@ static void prepare_A2B_S2(OEC_MAL1_Share in[], OEC_MAL1_Share out[])
     }
 }
 
-static void complete_A2B_S1(OEC_MAL1_Share out[])
+static void complete_A2B_S1(int k, OEC_MAL1_Share out[])
 {
 }
 
-static void complete_A2B_S2(OEC_MAL1_Share out[])
+static void complete_A2B_S2(int k, OEC_MAL1_Share out[])
 {
 
 }
