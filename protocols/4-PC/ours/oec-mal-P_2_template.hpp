@@ -179,7 +179,7 @@ Datatype cr = getRandomVal(P_023);
    store_compare_view(P_3, o1);
 #endif
    r = SUB(r,o1);
-   send_to_live(P_1, r);
+   send_to_live(P_1, r); // if one party xored with v (m20) here for multi input and gates it should cancel out 
 
 
    /* c.v = AND(XOR(a.v, a.r), XOR(b.v, b.r)); */
@@ -190,7 +190,7 @@ Datatype cr = getRandomVal(P_023);
 #if PROTOCOL == 11
 m = ADD(r, r234_2); // store m_2 + m_3 + r_234_2 to send P_0 later
 #endif
-   v = SUB(v, r);
+   v = SUB(v, r); // For multi input AND gates, we should not add those two -> possible hack: both parties Add v to r -> v cancels out
    /* c.m = ADD(c.m, r234); */
 r = cr;
 
@@ -509,6 +509,9 @@ d.v = ADD(
         ADD( MULT(a0,SUB(ryz,MULT(b0,c.m)))
         ,(MULT(b0,SUB(rxz, MULT(c0,m)))))
         ,MULT(c0,SUB(rxy, MULT(a0,b.m)))); // a0(b0(ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
+/* d.r = ADD(d.r, d.v); // hack for mask_and_send_dot */
+d.r = SUB(SET_ALL_ZERO(), d.r); // hack for mask_and_send_dot
+
 return d;
 }
 
@@ -774,6 +777,8 @@ e.v =
                     )
             
                 ); // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+/* e.r = ADD(e.r, e.v); // hack for mask_and_send_dot */
+e.r = SUB(SET_ALL_ZERO(), e.r); // hack for mask_and_send_dot
 return e;
 }
 

@@ -376,6 +376,7 @@ Datatype mxy = SUB(MULT(r,b.r),getRandomVal(P_013));
 Datatype mxz = SUB(MULT(r,c.r),getRandomVal(P_013));
 Datatype myz = SUB(MULT(b.r,c.r),getRandomVal(P_013));
 Datatype mxyz = MULT(MULT(r,b.r),c.r);
+mxyz = SUB( SET_ALL_ZERO(), mxyz); // trick to be compatible with dot2
 #if PRE == 1 && PROTOCOL == 12
 Datatype rxy = pre_receive_from_live(P_3);
 Datatype rxz = pre_receive_from_live(P_3);
@@ -407,6 +408,7 @@ d.v = ADD(
             ,(MULT(b0v,SUB(rxz, MULT(c0w,r)))))
         ,MULT(c0w,SUB(rxy, MULT(a0u,b.r)))); // a0(b0(c0 + ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
 d.r = mxyz;
+d.v = SUB(SET_ALL_ZERO(), d.v); // trick to be compatible with dot2
 return d;
 }
 
@@ -556,6 +558,7 @@ e.v =
                     )
         ); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
 e.r = mxyzw;
+e.v = SUB(SET_ALL_ZERO(), e.v); // trick to be compatible with dot2
 return e;
 }
 

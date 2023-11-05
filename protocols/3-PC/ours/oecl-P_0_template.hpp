@@ -350,6 +350,7 @@ Datatype mxyw = SUB(MULT(xy,w0),getRandomVal(P_1));
 Datatype mxzw = SUB(MULT(xz,w0),getRandomVal(P_1));
 Datatype myzw = SUB(MULT(yz,w0),getRandomVal(P_1));
 Datatype mxyzw = MULT(xy,zw);
+mxyzw = SUB(SET_ALL_ZERO(),mxyzw); // trick do be comptatible with 2PC dot product
 #if PRE == 1
 pre_send_to_live(P_2, mxy);
 pre_send_to_live(P_2, mxz);

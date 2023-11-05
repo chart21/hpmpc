@@ -408,6 +408,7 @@ d.v = ADD(
         ,(MULT(b0,SUB(rxz, MULT(c0,m)))))
         ,MULT(c0,SUB(rxy, MULT(a0,b.m)))); // a0(b0(ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
 
+d.r = SUB(d.v, d.r); // hack for mask_and_send_dot
 return d;
 }
 
@@ -630,6 +631,7 @@ e.v =
                                 SUB( MULT(c0, rxy), rxyz)))
                         )
         ); // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+e.r = SUB(e.v, e.r); // hack for mask_and_send_dot
 return e;
 }
 

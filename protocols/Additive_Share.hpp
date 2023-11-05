@@ -26,15 +26,6 @@ public:
         return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT));
     }
 
-    void complete_mult()
-    {
-    #if PROTOCOL == 1 // Sharemind needs custom overload
-        Share_Type::complete_mult(OP_ADD, OP_SUB, OP_MULT);
-    #else
-        Share_Type::complete_mult(OP_ADD, OP_SUB);
-    #endif
-    }
-
     template <int id>
     void prepare_receive_from()
     {
@@ -75,6 +66,47 @@ public:
     void complete_mult4()
     {
         Share_Type::complete_mult4(OP_ADD, OP_SUB);
+    }
+    
+    Additive_Share prepare_dot(const Additive_Share<Datatype, Share_Type>& b) const
+    {
+        return Additive_Share(Share_Type::prepare_dot(b, OP_ADD, OP_SUB, OP_MULT));
+    }
+
+    Additive_Share prepare_dot3(const Additive_Share<Datatype, Share_Type>& b, const Additive_Share<Datatype, Share_Type>& c) const
+    {
+        return Additive_Share(Share_Type::prepare_dot3(b, c, OP_ADD, OP_SUB, OP_MULT));
+    }
+
+    Additive_Share prepare_dot4(const Additive_Share<Datatype, Share_Type>& b, const Additive_Share<Datatype, Share_Type>& c, const Additive_Share<Datatype, Share_Type>& d) const
+    {
+        return Additive_Share(Share_Type::prepare_dot4(b, c, d, OP_ADD, OP_SUB, OP_MULT));
+    }
+    
+    void mask_and_send_dot()
+    {
+        #if FRACTIONAL > 0
+        Share_Type::mask_and_send_dot_with_trunc(OP_ADD, OP_SUB, OP_TRUNC);
+        #else
+        #if PROTOCOL == 2
+        Share_Type::mask_and_send_dot(OP_SUB, OP_MULT); // Replicated needs custom overloads because division by 3 is required
+        #else
+        Share_Type::mask_and_send_dot(OP_ADD, OP_SUB);
+        #endif
+        #endif
+    }
+    
+    void complete_mult()
+    {
+    #if PROTOCOL == 1 // Sharemind needs custom overload
+        Share_Type::complete_mult(OP_ADD, OP_SUB, OP_MULT);
+    #else
+        #if FRACTIONAL > 0
+        Share_Type::complete_mult_with_trunc(OP_ADD, OP_SUB, OP_TRUNC);
+        #else
+        Share_Type::complete_mult(OP_ADD, OP_SUB);
+        #endif
+    #endif
     }
 
 

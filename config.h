@@ -1,7 +1,7 @@
 #pragma once
 
 // 1: Sharemind (no support for dot products), 2: Replicated, 3: Astra, 4: ODUP (depricated), 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC)
-#define PROTOCOL 5
+#define PROTOCOL 12
 
 // Party ID (starting from 0)
 #define PARTY 3
@@ -11,7 +11,7 @@
 //7-9: Debug: 7: 1-bit, 8: 32-bit, 9: 64-bit
 //13,14: Dot product, 16,17 RELU, 20,21 Conv Forward (*10), Conv Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards (Different Sizes), 25,26 Forward Backwards (Different Sizes), 27 Mat Mul Eigen, 28 max/min/argmax/argmin, 29 mult3, 30 mult 4
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
-#define FUNCTION_IDENTIFIER 28
+#define FUNCTION_IDENTIFIER 34
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
 #define DATTYPE 64

@@ -116,6 +116,15 @@ void generateElements()
             player_input[j] = PROMOTE(inputs[j]);
         }
 #endif
+#if FUNCTION_IDENTIFIER == 31 || FUNCTION_IDENTIFIER == 32 || FUNCTION_IDENTIFIER == 33 || FUNCTION_IDENTIFIER == 34 // Dot Product 234 test
+        player_input = NEW(DATATYPE[NUM_INPUTS]);
+        /* UINT_TYPE inputs[] = {1,2,3,5}; */
+        UINT_TYPE input = 3;
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {   
+            player_input[j] = PROMOTE(input);
+        }
+#endif
 
 
 }

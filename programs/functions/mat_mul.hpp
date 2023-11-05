@@ -50,6 +50,8 @@
 #define FUNCTION argmax_test
 #elif FUNCTION_IDENTIFIER == 29 || FUNCTION_IDENTIFIER == 30
 #define FUNCTION mult34_test
+#elif FUNCTION_IDENTIFIER == 31 || FUNCTION_IDENTIFIER == 32 || FUNCTION_IDENTIFIER == 33 || FUNCTION_IDENTIFIER == 34
+#define FUNCTION dot234_test
 #endif
 #define RESULTTYPE DATATYPE
 
@@ -1553,4 +1555,68 @@ if(current_phase == 1)
 
 
 #endif
+
+#if FUNCTION_IDENTIFIER == 31 || FUNCTION_IDENTIFIER == 32 || FUNCTION_IDENTIFIER == 33 || FUNCTION_IDENTIFIER == 34
+template<typename Share>
+void dot234_test(DATATYPE* res)
+{
+using A = Additive_Share<DATATYPE, Share>;
+A* inputs = new A[NUM_INPUTS];
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            inputs[j]. template prepare_receive_from<P_0>();
+        }
+    Share::communicate();
+        for(int j = 0; j < NUM_INPUTS; j++)
+        {
+            inputs[j]. template complete_receive_from<P_0>();
+        }
+#if FUNCTION_IDENTIFIER == 31 //dot2
+A result1 = inputs[0].prepare_dot(inputs[1]) + inputs[2].prepare_dot(inputs[3]) + inputs[4].prepare_dot(inputs[5]) + inputs[6].prepare_dot(inputs[7]);
+result1.mask_and_send_dot();
+Share::communicate();
+result1.complete_mult();
+result1.prepare_reveal_to_all();
+Share::communicate();
+DATATYPE* result_arr = new DATATYPE;
+result_arr[0] = result1.complete_reveal_to_all();
+#elif FUNCTION_IDENTIFIER == 32 // dot3
+A result1 = inputs[0].prepare_dot3(inputs[1],inputs[2]) + inputs[3].prepare_dot3(inputs[4],inputs[5]) + inputs[6].prepare_dot3(inputs[7],inputs[8]) + inputs[9].prepare_dot3(inputs[10],inputs[11]);
+result1.mask_and_send_dot();
+Share::communicate();
+result1.complete_mult();
+result1.prepare_reveal_to_all();
+Share::communicate();
+DATATYPE* result_arr = new DATATYPE;
+result_arr[0] = result1.complete_reveal_to_all();
+#elif FUNCTION_IDENTIFIER == 33 // dot4
+A result1 = inputs[0].prepare_dot4(inputs[1],inputs[2],inputs[3]) + inputs[4].prepare_dot4(inputs[5],inputs[6],inputs[7]) + inputs[8].prepare_dot4(inputs[9],inputs[10],inputs[11]) + inputs[12].prepare_dot4(inputs[13],inputs[14],inputs[15]);
+result1.mask_and_send_dot();
+Share::communicate();
+result1.complete_mult();
+result1.prepare_reveal_to_all();
+Share::communicate();
+DATATYPE* result_arr = new DATATYPE;
+result_arr[0] = result1.complete_reveal_to_all();
+#elif FUNCTION_IDENTIFIER == 34 // dot234 mixed
+A result1 = inputs[0].prepare_dot(inputs[1]) + inputs[2].prepare_dot3(inputs[3],inputs[4]) + inputs[5].prepare_dot4(inputs[6],inputs[7],inputs[8]);
+result1.mask_and_send_dot();
+Share::communicate();
+result1.complete_mult();
+result1.prepare_reveal_to_all();
+Share::communicate();
+DATATYPE* result_arr = new DATATYPE;
+result_arr[0] = result1.complete_reveal_to_all();
+#endif
+if(current_phase == 1)
+{
+    std::cout << "P" << PARTY << " result: " << std::to_string(result_arr[0]) << std::endl;
+}
+
+
+}
+
+
+#endif
+
 

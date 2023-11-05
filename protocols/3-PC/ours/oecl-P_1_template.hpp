@@ -266,6 +266,7 @@ d.p1 = ADD(
         ,(MULT(b0,SUB(rxz, MULT(c0,p2)))))
         ,MULT(c0,SUB(rxy, MULT(a0,b.p2)))); // a0(b0(ryz-z1) + b0(rxz- c0 x1) + c0(rxy- a0 y1)) - rxyz
 d.p2 = SET_ALL_ZERO();
+d.p1 = SUB(d.p2, d.p1);
 return d;
 }
 
@@ -338,6 +339,7 @@ e.p1 =
             );
          // a0(d0(ryz-b0z1) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
 e.p2 = SET_ALL_ZERO();
+e.p1 = SUB(e.p2, e.p1);
 return e;
 }
 
