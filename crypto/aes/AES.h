@@ -134,7 +134,7 @@ static void aes128_load_key_enc_only_512(uint8_t *enc_key, __m512i *key_schedule
 #elif defined(__AVX2__) && defined(__VAES__)
 // generate 2 round keys with aes128_load_key_enc_only and pack them into 256-bit vector
 static void aes128_load_key_enc_only_256(uint8_t *enc_key, __m256i *key_schedule){
-    alginas(AES_DATTYPE/8) __m128i key_schedule_128[2][11];
+    alignas(AES_DATTYPE/8) __m128i key_schedule_128[2][11];
     for(int i = 0; i < 2; i++)
     {
         aes128_load_key_enc_only(enc_key+i*16, key_schedule_128[i]);
