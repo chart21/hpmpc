@@ -150,7 +150,7 @@ static void aes128_load_key_enc_only_256(uint8_t *enc_key, __m256i *key_schedule
     }
     for(int i = 0; i < 11; i++)
     {
-        key_schedule[i] = _mm256_set_epi64x(key_schedule_64[0][i][0], key_schedule_64[0][i][1], key_schedule_64[1][i][0], key_schedule_64[1][i][1]);
+        key_schedule[i] = _mm256_set_epi64x(key_schedule_64[1][i][1], key_schedule_64[1][i][0], key_schedule_64[0][i][1], key_schedule_64[0][i][0]);
     }
 }
 #endif

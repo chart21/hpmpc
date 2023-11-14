@@ -81,7 +81,7 @@ DATATYPE getRandomVal(int link_id)
     #else
     /* DO_ENC_BLOCK(aes_counter[link_id], key_schedule[link_id]); */
     AES_enc(aes_counter[link_id], key_schedule[link_id]);
-    return aes_counter[link_id];
+    return ((DATATYPE*) aes_counter)[link_id];
     #endif
 
 #endif

@@ -15,7 +15,7 @@
     }while(0)
 #endif
 
-void Aes_enc(uint8_t m[], EVP_CIPHER_CTX* ctx)
+void AES_enc(uint8_t m[], EVP_CIPHER_CTX* ctx)
 {
     int out_len;
     EVP_EncryptUpdate(ctx, m, &out_len, m, 64);
