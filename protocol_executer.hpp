@@ -94,8 +94,8 @@ alignas(AES_DATTYPE/8) uint64_t counter[AES_DATTYPE/64];
 #endif
 
 
-alignas(AES_DATTYPE/8) uint8_t seed[128/8];
-        for(int i = 0; i < 128/8; i++)
+alignas(AES_DATTYPE/8) uint8_t seed[AES_DATTYPE/8];
+        for(int i = 0; i < AES_DATTYPE/8; i++)
             {
                 /* seed[link_id][i] = rand() % 256; */
                 seed[i] = rand() % 256; //
