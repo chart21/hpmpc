@@ -9,7 +9,7 @@
 #if USE_SSL_AES == 1
     #include "../crypto/aes/AES_SSL.h"
 EVP_CIPHER_CTX* key_schedule[num_players*player_multiplier];
-unsigned char aes_counter[num_players*player_multiplier][64];
+alignas(DATTYPE/8) unsigned char aes_counter[num_players*player_multiplier][64];
 #else
     #include "../crypto/aes/AES.h"
 AES_TYPE key_schedule[num_players*player_multiplier][11];

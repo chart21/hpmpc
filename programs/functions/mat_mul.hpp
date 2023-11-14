@@ -908,10 +908,10 @@ auto a = new sint[NUM_INPUTS];
 auto max_output = new S[NUM_INPUTS];
 auto min_output = new S[NUM_INPUTS];
 for(int i = 0; i < NUM_INPUTS; i++)
-        a[i]. template prepare_receive_from<P_0>();
+        a[i]. template prepare_receive_from<P_2>();
 Share::communicate();
 for(int i = 0; i < NUM_INPUTS; i++)
-        a[i]. template complete_receive_from<P_0>();
+        a[i]. template complete_receive_from<P_2>();
 Share::communicate();
                 /* #if PARTY == 2 */
         /* for(int i = 0; i < NUM_INPUTS; i++) */
@@ -935,8 +935,8 @@ for(int i = 0; i < NUM_INPUTS; i++)
         result_arr[0][i] = max_output[i].complete_reveal_to_all();
         result_arr[1][i] = min_output[i].complete_reveal_to_all();
 }
-auto max_int = new UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)];
-auto min_int = new UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)];
+auto max_int = NEW( UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)]);
+auto min_int = NEW( UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)]);
 max_val.complete_reveal_to_all(max_int);
 min_val.complete_reveal_to_all(min_int);
 if(current_phase == 1)

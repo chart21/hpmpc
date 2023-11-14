@@ -428,9 +428,12 @@ clock_gettime(CLOCK_REALTIME, &i1);
 player_id = PARTY;
 
 #if num_players == 3
-init_srng(0,0);
-init_srng(1,0);
-init_srng(2,0);
+/* init_srng(0,0); */
+/* init_srng(1,0); */
+/* init_srng(2,0); */
+init_srng(PPREV, modulo((player_id - 1),  num_players)*101011 + 5000);
+init_srng(PNEXT,player_id*101011 + 5000);
+init_srng(num_players-1, player_id * 291932 +6000); // used for sharing inputs
 #elif num_players == 4
 init_srng(0,0);
 init_srng(1,0);

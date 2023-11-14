@@ -9,8 +9,10 @@ void generateElements()
     /* for(int i = 0; i < 1000; ++i) { */
     /*     auto a = getRandomVal(PPREV); */
     /*     auto b = getRandomVal(PNEXT); */
+/* #if PARTY == 0 */
     /*     print_result(&a); */
     /*     print_result(&b); */
+/* #endif */
     /* } */
 #if FUNCTION_IDENTIFIER == 28 //argmax
         /* UINT_TYPE fixed_init[] = {289383,634022,660336,120709,999999,908235,385644,229320,873269}; */
@@ -20,22 +22,22 @@ void generateElements()
             for(int j = 0; j < DATTYPE; ++j) {
                 
                 /* input[i][j] = fixed_init[i]; */
-                input[i][j] = rand() % 50;
+                input[i][j] = rand() % 200 - 100;
             }
         }
-        #if PARTY == 0
+        #if PARTY == 2
         srand(time(0));
         //set a random element in range 0,NUM_INPUTS to be the max
         UINT_TYPE max_index = rand() % NUM_INPUTS;
         UINT_TYPE min_index = rand() % NUM_INPUTS;
         while(max_index == min_index)
             min_index = rand() % NUM_INPUTS;
-            std::cout << "Maxindex P" << PARTY << ": " << std::to_string(max_index) << std::endl;
-            std::cout << "Minindex P" << PARTY << ": " << std::to_string(min_index) << std::endl;
+        std::cout << "Maxindex P" << PARTY << ": " << std::to_string(max_index) << std::endl;
+        std::cout << "Minindex P" << PARTY << ": " << std::to_string(min_index) << std::endl;
             for(int j = 0; j < DATTYPE; ++j) 
             {
-                input[max_index][j] = 51;
-                input[min_index][j] = -51;
+                input[max_index][j] = 200;
+                input[min_index][j] = -200;
             }
         #endif
         for(int i = 0; i < NUM_INPUTS; ++i) {
