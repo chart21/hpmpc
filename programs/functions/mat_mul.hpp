@@ -21,7 +21,6 @@
 #include "../../utils/print.hpp"
 
 #include <cmath>
-#include <eigen3/Eigen/Core>
 
 /* #include "boolean_adder.hpp" */
 /* #include "ppa.hpp" */
@@ -40,12 +39,16 @@
 #define FUNCTION conv2D
 #elif FUNCTION_IDENTIFIER == 20 || FUNCTION_IDENTIFIER == 23 || FUNCTION_IDENTIFIER == 25
 #define FUNCTION forward_pass
+#define USE_EIGEN 1
 #elif FUNCTION_IDENTIFIER == 21 || FUNCTION_IDENTIFIER == 24 || FUNCTION_IDENTIFIER == 26
 #define FUNCTION backward_pass
+#define USE_EIGEN 1
 #elif FUNCTION_IDENTIFIER == 22
 #define FUNCTION FC_bench
+#define USE_EIGEN 1
 #elif FUNCTION_IDENTIFIER == 27
 #define FUNCTION dot_prod_eigen_bench
+#define USE_EIGEN 1
 #elif FUNCTION_IDENTIFIER == 28
 #define FUNCTION argmax_test
 #elif FUNCTION_IDENTIFIER == 29 || FUNCTION_IDENTIFIER == 30
@@ -959,8 +962,8 @@ delete[] result_arr;
 
 
 
-#if FUNCTION_IDENTIFIER > 19
-
+#if FUNCTION_IDENTIFIER > 19 && USE_EIGEN == 1
+#include <eigen3/Eigen/Core>
 template<typename T>
 using MatX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 template<typename T>
