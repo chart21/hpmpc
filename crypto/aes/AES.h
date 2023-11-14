@@ -160,7 +160,7 @@ static void aes128_load_key_enc_only_256(uint8_t *enc_key, __m256i *key_schedule
 static void aes_load_enc(uint8_t *enc_key, __m512i *key_schedule){
     aes128_load_key_enc_only_512(enc_key, key_schedule);
 }
-}
+
 #elif defined(__AVX2__) && defined(__VAES__)
 //public api
 static void aes_load_enc(uint8_t *enc_key, __m256i *key_schedule){
