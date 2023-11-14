@@ -149,9 +149,11 @@ static void aes128_load_key_enc_only_256(uint8_t *enc_key, __m256i *key_schedule
     }
     for(int i = 0; i < 2; i++)
     {
-        key_schedule[i] = _mm256_set_epi64x(key_schedule_64[i][3][1], key_schedule_64[i][3][0], key_schedule_64[i][2][1], key_schedule_64[i][2][0], key_schedule_64[i][1][1], key_schedule_64[i][1][0], key_schedule_64[i][0][1], key_schedule_64[i][0][0]);
-        key_schedule[i+2] = _mm256_set_epi64x(key_schedule_64[i][7][1], key_schedule_64[i][7][0], key_schedule_64[i][6][1], key_schedule_64[i][6][0], key_schedule_64[i][5][1], key_schedule_64[i][5][0], key_schedule_64[i][4][1], key_schedule_64[i][4][0]);
-        key_schedule[i+4] = _mm256_set_epi64x(key_schedule_64[i][11][1], key_schedule_64[i][11][0], key_schedule_64[i][10][1], key_schedule_64[i][10][0], key_schedule_64[i][9][1], key_schedule_64[i][9][0], key_schedule_64[i][8][1], key_schedule_64[i][8][0]);
+        key_schedule[i] = _mm256_set_epi64x(key_schedule[i][2][1], key_schedule[i][2][0], key_schedule[i][1][1], key_schedule[i][1][0], key_schedule[i][0][1], key_schedule[i][0][0]);
+        key_schedule[i+2] = _mm256_set_epi64x(key_schedule[i][4][1], key_schedule[i][4][0], key_schedule[i][3][1], key_schedule[i][3][0]);
+        key_schedule[i+4] = _mm256_set_epi64x(key_schedule[i][6][1], key_schedule[i][6][0], key_schedule[i][5][1], key_schedule[i][5][0]);
+        key_schedule[i+6] = _mm256_set_epi64x(key_schedule[i][8][1], key_schedule[i][8][0], key_schedule[i][7][1], key_schedule[i][7][0]);
+        key_schedule[i+8] = _mm256_set_epi64x(key_schedule[i][10][1], key_schedule[i][10][0], key_schedule[i][9][1], key_schedule[i][9][0]);
     }
 }
 #endif
