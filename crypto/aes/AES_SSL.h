@@ -15,6 +15,12 @@
     }while(0)
 #endif
 
+void Aes_enc(uint8_t m[], EVP_CIPHER_CTX* ctx)
+{
+    int out_len;
+    EVP_EncryptUpdate(ctx, m, &out_len, m, 64);
+}
+
 // Function to handle errors
 void handleErrors() {
     ERR_print_errors_fp(stderr);
