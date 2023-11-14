@@ -2,12 +2,13 @@
 #define __AES_NI_H__
 #include <stdint.h>     //for int8_t
 #include <string.h>     //for memcmp
-#include <wmmintrin.h>  //for intrinsics for AES-NI
 //compile using gcc and following arguments: -g;-O0;-Wall;-msse2;-msse;-march=native;-maes
 #include "../../arch/DATATYPE.h"
 //internal stuff
 
 #if defined(__AVX512F__ ) && defined(__VAES__)
+#include <wmmintrin.h>  //for intrinsics for AES-NI
+#include <x86intrin.h>
 #define AES_DATTYPE 512
 #define AES_TYPE __m512i
 #define MM_XOR(a,b) _mm512_xor_si512(a,b)
@@ -15,6 +16,8 @@
 #define MM_AES_ENC_LAST(a,b) _mm512_aesenclast_epi128(a,b)
 #define MM_AES_STORE(a,b) _mm512_store_si512(a,b)
 #elif defined(__AVX2__) && defined(__VAES__)
+#include <wmmintrin.h>  //for intrinsics for AES-NI
+#include <x86intrin.h>
 #define AES_DATTYPE 256
 #define AES_TYPE __m256i
 #define MM_XOR(a,b) _mm256_xor_si256(a,b)
@@ -22,6 +25,8 @@
 #define MM_AES_ENC_LAST(a,b) _mm256_aesenclast_epi128(a,b)
 #define MM_AES_STORE(a,b) _mm256_store_si256(a,b)
 #elif defined(__AES__)
+#include <wmmintrin.h>  //for intrinsics for AES-NI
+#include <x86intrin.h>
 #define AES_DATTYPE 128
 #define AES_TYPE __m128i
 #define MM_XOR(a,b) _mm_xor_si128(a,b)
