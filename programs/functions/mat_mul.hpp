@@ -1811,7 +1811,7 @@ for(int i = 0; i < NUM_INPUTS; i++)
         a[i].template complete_receive_from<P_0>();
 Share::communicate();
 RELU_range_in_place<REDUCED_BITLENGTH,Share>(a,NUM_INPUTS);
-auto result_arr = new UINT_TYPE[NUM_INPUTS][DATTYPE];
+auto result_arr = NEW(UINT_TYPE[NUM_INPUTS][DATTYPE]);
 for(int i = 0; i < NUM_INPUTS; i++)
     a[i].prepare_reveal_to_all();
 Share::communicate();
