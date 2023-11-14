@@ -75,12 +75,15 @@ orthogonalize_boolean(gen_seeds, srng[link_id]);
             }
     
 #elif RANDOM_ALGORITHM == 2
-
-uint64_t counter[AES_DATTYPE/64]{10};
+srand(link_seed);
+uint64_t counter[AES_DATTYPE/64];
 #if USE_SSL_AES == 1
     for (int j = 0; j < 64; j++)
-        aes_counter[link_id][j] = j;
+        aes_counter[link_id][j] = rand() % 256 | rand() % 256; //generate random 8-bit number, to stay consistent with other approaches, 2 times rand is used
 #else
+    for (int j = 0; j < AES_DATTYPE/64; j++)
+        counter[j] = ((uint64_t) rand() << 32) | rand(); //generate random 64-bit number
+        
 #if defined(__AVX512F__ ) && defined(__VAES__)
     aes_counter[link_id] = _mm512_set_epi64(counter[7], counter[6], counter[5], counter[4], counter[3], counter[2], counter[1], counter[0]);
 #elif defined(__AVX2__) && defined(__VAES__)
@@ -91,12 +94,11 @@ uint64_t counter[AES_DATTYPE/64]{10};
 #endif
 
 
-uint8_t seed[num_players*player_multiplier][128/8];
-srand(link_seed);
+uint8_t seed[128/8];
         for(int i = 0; i < 128/8; i++)
             {
                 /* seed[link_id][i] = rand() % 256; */
-                seed[link_id][i] = 7;
+                seed[i] = rand() % 256; //
                 /* seed[j][i] = 10; */
             }
 #if USE_SSL_AES == 1
@@ -104,7 +106,7 @@ srand(link_seed);
     if (!key_schedule[link_id])
         handleErrors();
 #endif
-    aes_load_enc(seed[link_id], key_schedule[link_id]);
+    aes_load_enc(seed, key_schedule[link_id]);
 
 
 #endif

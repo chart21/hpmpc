@@ -639,7 +639,6 @@ void bitinj_range(XOR_Share<Datatype, Share>* bit_val, int len, sint_t<Additive_
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
-using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
 sint* t1 = new sint[len];
 sint* t2 = new sint[len];
@@ -723,7 +722,6 @@ void max_min_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<D
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
-using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
 
        sint* max_val = new sint[(m+1)/2];
@@ -791,7 +789,6 @@ sint_t<Additive_Share<Datatype, Share>> max_min(sint_t<Additive_Share<Datatype, 
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
-using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
    int m = end - begin;
    int og_len = m;
@@ -826,7 +823,6 @@ void argmax_argmin(sint_t<Additive_Share<Datatype, Share>>* begin, sint_t<Additi
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
-using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
    int m = end - begin;
    int og_len = m;
@@ -903,7 +899,6 @@ void argmax_test(DATATYPE* res)
 {
 using S = XOR_Share<DATATYPE, Share>;
 using A = Additive_Share<DATATYPE, Share>;
-using Bitset = sbitset_t<BITLENGTH,S>;
 using sint = sint_t<A>;
 const int k = REDUCED_BITLENGTH;
 auto a = new sint[NUM_INPUTS];
@@ -943,12 +938,14 @@ max_val.complete_reveal_to_all(max_int);
 min_val.complete_reveal_to_all(min_int);
 if(current_phase == 1)
 {
+#if DATTYPE <= 64
 for(int i = 0; i < NUM_INPUTS; i++)
-    std::cout << "arg_max: " << "Index: " << i << " Value: " << std::to_string(result_arr[0][i]) << std::endl;
+    std::cout << "arg_max: " << "Index: " << i << " Value: " << result_arr[0][i] << std::endl;
 for(int i = 0; i < NUM_INPUTS; i++)
-    std::cout << "arg_min: " << "Index: " << i << " Value: "<< std::to_string(result_arr[1][i]) << std::endl;
-std::cout << "max: " << std::to_string(max_int[0]) << std::endl;
-std::cout << "min: " << std::to_string(min_int[0]) << std::endl;
+    std::cout << "arg_min: " << "Index: " << i << " Value: "<< result_arr[1][i] << std::endl;
+#endif
+std::cout << "max: " << max_int[0] << std::endl;
+std::cout << "min: " << min_int[0] << std::endl;
 }
 delete[] a;
 delete[] max_output;
