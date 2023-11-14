@@ -402,8 +402,6 @@ void unorthogonalize_boolean(__m512i *in, UINT_TYPE* data) {
 }
 
 
-  for (int i = 0; i < DATTYPE; i += BITLENGTH)
-    real_ortho(&(data[i]));
 
 
 void unorthogonalize_boolean_full(__m512i *in, UINT_TYPE* data) {
