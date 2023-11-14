@@ -52,7 +52,7 @@
     }while(0)
 
 template <typename Datatype>
-void AES_enc(Datatype& m, Datatype* k){
+void AES_enc(Datatype& m, const Datatype* k){
     m = MM_XOR       (m, k[ 0]);
     m = MM_AES_ENC    (m, k[ 1]);
     m = MM_AES_ENC    (m, k[ 2]);

@@ -67,7 +67,8 @@ DATATYPE getRandomVal(int link_id)
     #if BUFFER_SIZE > 1
     if(num_generated[link_id] >= BUFFER_SIZE)
     {
-        DO_ENC_BLOCK(aes_counter[link_id], key_schedule[link_id]);
+        AES_encrypt(aes_counter[link_id], key_schedule[link_id]);
+        /* DO_ENC_BLOCK(aes_counter[link_id], key_schedule[link_id]); */
         num_generated[link_id] = 0;
     }
         #if USE_SSL_AES == 1
@@ -78,7 +79,8 @@ DATATYPE getRandomVal(int link_id)
             return ret[num_generated[link_id]++];
         #endif
     #else
-    DO_ENC_BLOCK(aes_counter[link_id], key_schedule[link_id]);
+    /* DO_ENC_BLOCK(aes_counter[link_id], key_schedule[link_id]); */
+    AES_encrypt(aes_counter[link_id], key_schedule[link_id]);
     return aes_counter[link_id];
     #endif
 
