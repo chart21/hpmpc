@@ -81,7 +81,7 @@ int base_port = BASE_PORT; // temporary solution
 // Bitlength of integers (currently not used)
 #define BITLENGTH 32
 // Reduced Bitlength that might be used for RELU, etc
-#define REDUCED_BITLENGTH 16
+#define REDUCED_BITLENGTH 32
 
 #define MULTI_INPUT 1 // activate multi input Multiplication gates?
 
