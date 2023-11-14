@@ -13,8 +13,8 @@ void prepare_receive_from(func_add ADD, func_sub SUB)
 {
     if constexpr(id == PSELF)
     {
-        send_to_(pnext);
-        send_to_(pprev);
+        send_to_(PNEXT);
+        send_to_(PPREV);
     }
 }
     
@@ -50,7 +50,7 @@ Replicated_init prepare_dot(const Replicated_init b, func_add ADD, func_sub SUB,
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
-send_to_(pnext);
+send_to_(PNEXT);
 }
 
 
@@ -58,27 +58,27 @@ send_to_(pnext);
 template <typename func_add, typename func_sub, typename func_mul>
     Replicated_init prepare_mult(Replicated_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-send_to_(pnext);
+send_to_(PNEXT);
 return Replicated_init();
 }
 
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {
-receive_from_(pprev);
+receive_from_(PPREV);
 }
 
 
 void prepare_reveal_to_all()
 {
-    send_to_(pnext);
+    send_to_(PNEXT);
 }    
 
 
 template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
-receive_from_(pprev);
+receive_from_(PPREV);
 Datatype result;
 return result;
 }

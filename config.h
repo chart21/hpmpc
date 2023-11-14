@@ -14,7 +14,7 @@
 #define FUNCTION_IDENTIFIER 35
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 64
+#define DATTYPE 32
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
@@ -27,6 +27,7 @@
 
 // 0 = xorshift, 1 = AES_BS, 2 = VAES/AES-NI. 0 is not secure.
 #define RANDOM_ALGORITHM 2
+#define USE_SSL_AES 0
 
 // Use SSL encrypted communication?
 #define USE_SSL 0
@@ -78,9 +79,9 @@ int base_port = BASE_PORT; // temporary solution
 #define INPUT 'r'
 
 // Bitlength of integers (currently not used)
-#define BITLENGTH 64
+#define BITLENGTH 32
 // Reduced Bitlength that might be used for RELU, etc
-#define REDUCED_BITLENGTH 64
+#define REDUCED_BITLENGTH 4
 
 #define MULTI_INPUT 1 // activate multi input Multiplication gates?
 

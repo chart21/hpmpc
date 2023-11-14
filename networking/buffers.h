@@ -46,10 +46,7 @@ uint64_t elements_to_compare[num_players*player_multiplier] = {0};
 DATATYPE* preprocessed_outputs;
 uint64_t preprocessed_outputs_index = 0;
 #endif
-int num_generated[num_players*player_multiplier] = {0};
-int pnext;
-int pprev;
-int pmiddle;
+uint64_t num_generated[num_players*player_multiplier] = {0};
 
 int use_srng_for_inputs = 1;
 

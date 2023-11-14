@@ -15,16 +15,16 @@ template <typename func_add, typename func_sub>
 Replicated_Share share_SRNG(Datatype a, func_add ADD, func_sub SUB)
 {
 Replicated_Share s[3];
-s[pprev].x = getRandomVal(pprev);
-s[pnext].x = getRandomVal(pnext);
-s[2].x = SUB(SET_ALL_ZERO(), ADD(s[pprev].x,s[pnext].x));  // r_{i-1} - r_{i+1}
+s[PPREV].x = getRandomVal(PPREV);
+s[PNEXT].x = getRandomVal(PNEXT);
+s[2].x = SUB(SET_ALL_ZERO(), ADD(s[PPREV].x,s[PNEXT].x));  // r_{i-1} - r_{i+1}
 
-s[pprev].a = SUB(s[pnext].x,a); // x_{i+1} - a
-s[pnext].a = SUB(s[2].x,a); // x_i - a
-s[2].a = SUB(s[pprev].x,a); // x_{i-1} - a
+s[PPREV].a = SUB(s[PNEXT].x,a); // x_{i+1} - a
+s[PNEXT].a = SUB(s[2].x,a); // x_i - a
+s[2].a = SUB(s[PPREV].x,a); // x_{i-1} - a
 
-send_to_live(pprev, s[pprev].a);
-send_to_live(pnext, s[pnext].a);
+send_to_live(PPREV, s[PPREV].a);
+send_to_live(PNEXT, s[PNEXT].a);
 
 return s[2];
 }
@@ -71,9 +71,9 @@ Replicated_Share Not() const
 
 /* void reshare(Datatype a, Datatype u[]) */
 /* { */
-/* u[pprev] = getRandomVal(pprev); */
-/* u[pnext] = getRandomVal(pnext); */
-/* u[2] = SUB(u[pprev],u[pnext]); */
+/* u[PPREV] = getRandomVal(PPREV); */
+/* u[PNEXT] = getRandomVal(PNEXT); */
+/* u[2] = SUB(u[PPREV],u[PNEXT]); */
 /* u[2] = SUB(u[2],a); */
 /* } */
 
@@ -103,11 +103,11 @@ template <typename func_add, typename func_sub, typename func_mul>
     Replicated_Share prepare_mult(Replicated_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Replicated_Share c;
-Datatype corr = SUB( getRandomVal(pprev), getRandomVal(pnext) );
+Datatype corr = SUB( getRandomVal(PPREV), getRandomVal(PNEXT) );
 Datatype r =  ADD( SUB(  MULT(a,b.a), MULT(x,b.x) ) , corr);  // a_i b_i - x_1 y_1 + corr
 r = div3(r, MULT);
 c.a = r; //used to access value in complete mult
-send_to_live(pnext, r);
+send_to_live(PNEXT, r);
 return c;
 }
 
@@ -123,16 +123,16 @@ return c;
     template <typename func_sub, typename func_mul>
 void mask_and_send_dot( func_sub SUB, func_mul MULT)
 {
-a = SUB(a, getRandomVal(pprev));
-a = SUB(a, getRandomVal(pnext));
+a = SUB(a, getRandomVal(PPREV));
+a = SUB(a, getRandomVal(PNEXT));
 a = div3(a, MULT);
-send_to_live(pnext, a);
+send_to_live(PNEXT, a);
 }
 
     template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {
-auto r_prev = receive_from_live(pprev);
+auto r_prev = receive_from_live(PPREV);
 x = SUB(r_prev,a); // z_i = r_{i-1} - r_i
 a = SUB(SET_ALL_ZERO() ,ADD(ADD(r_prev, r_prev),  a)); // c_i = -2 r_{i-1} - r_i */
 }
@@ -142,7 +142,7 @@ a = SUB(SET_ALL_ZERO() ,ADD(ADD(r_prev, r_prev),  a)); // c_i = -2 r_{i-1} - r_i
 
 void prepare_reveal_to_all()
 {
-    send_to_live(pnext, x);
+    send_to_live(PNEXT, x);
 }    
 
 
@@ -158,7 +158,7 @@ template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
     Datatype result;
-    result = SUB(SET_ALL_ZERO(), SUB(a, receive_from_live(pprev)));
+    result = SUB(SET_ALL_ZERO(), SUB(a, receive_from_live(PPREV)));
     return result;
 }
 

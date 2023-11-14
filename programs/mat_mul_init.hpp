@@ -7,8 +7,10 @@
 void generateElements()
 {
     /* for(int i = 0; i < 1000; ++i) { */
-    /*     auto a = getRandomVal(0); */
+    /*     auto a = getRandomVal(PPREV); */
+    /*     auto b = getRandomVal(PNEXT); */
     /*     print_result(&a); */
+    /*     print_result(&b); */
     /* } */
 #if FUNCTION_IDENTIFIER == 28 //argmax
         /* UINT_TYPE fixed_init[] = {289383,634022,660336,120709,999999,908235,385644,229320,873269}; */

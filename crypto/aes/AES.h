@@ -7,6 +7,29 @@
 #include "../../arch/DATATYPE.h"
 //internal stuff
 
+#if defined(__AVX512F__ ) && defined(__VAES__)
+#define AES_DATTYPE 512
+#define AES_TYPE __m512i
+#define MM_XOR(a,b) _mm512_xor_si512(a,b)
+#define MM_AES_ENC(a,b) _mm512_aesenc_epi128(a,b)
+#define MM_AES_ENC_LAST(a,b) _mm512_aesenclast_epi128(a,b)
+#define MM_AES_STORE(a,b) _mm512_store_si512(a,b)
+#elif defined(__AVX2__) && defined(__VAES__)
+#define AES_DATTYPE 256
+#define AES_TYPE __m256i
+#define MM_XOR(a,b) _mm256_xor_si256(a,b)
+#define MM_AES_ENC(a,b) _mm256_aesenc_epi128(a,b)
+#define MM_AES_ENC_LAST(a,b) _mm256_aesenclast_epi128(a,b)
+#define MM_AES_STORE(a,b) _mm256_store_si256(a,b)
+#elif defined(__AES__)
+#define AES_DATTYPE 128
+#define AES_TYPE __m128i
+#define MM_XOR(a,b) _mm_xor_si128(a,b)
+#define MM_AES_ENC(a,b) _mm_aesenc_si128(a,b)
+#define MM_AES_ENC_LAST(a,b) _mm_aesenclast_si128(a,b)
+#define MM_AES_STORE(a,b) _mm_store_si128(a,b)
+#endif
+
 //macros
 #define DO_ENC_BLOCK(m,k) \
 	do{\
@@ -23,6 +46,21 @@
         m = MM_AES_ENC_LAST (m, k[10]);\
     }while(0)
 
+template <typename Datatype>
+void AES_enc(Datatype& m, Datatype* k){
+    m = MM_XOR       (m, k[ 0]);
+    m = MM_AES_ENC    (m, k[ 1]);
+    m = MM_AES_ENC    (m, k[ 2]);
+    m = MM_AES_ENC    (m, k[ 3]);
+    m = MM_AES_ENC    (m, k[ 4]);
+    m = MM_AES_ENC    (m, k[ 5]);
+    m = MM_AES_ENC    (m, k[ 6]);
+    m = MM_AES_ENC    (m, k[ 7]);
+    m = MM_AES_ENC    (m, k[ 8]);
+    m = MM_AES_ENC    (m, k[ 9]);
+    m = MM_AES_ENC_LAST (m, k[10]);
+}
+
 #define DO_DEC_BLOCK(m,k) \
 	do{\
         m = MM_XOR       (m, k[10+0]); \
@@ -38,6 +76,7 @@
         m = MM_AES_DEC_LAST (m, k[0]);\
     }while(0)
 
+#if defined(__AES__)
 #define AES_128_key_exp(k, rcon) aes_128_key_expansion(k, _mm_aeskeygenassist_si128(k, rcon))
 
 static __m128i aes_128_key_expansion(__m128i key, __m128i keygened){
@@ -48,7 +87,6 @@ static __m128i aes_128_key_expansion(__m128i key, __m128i keygened){
     return _mm_xor_si128(key, keygened);
 }
 
-//public API
 static void aes128_load_key_enc_only(uint8_t *enc_key, __m128i *key_schedule){
     key_schedule[0] = _mm_loadu_si128((const __m128i*) enc_key);
     key_schedule[1]  = AES_128_key_exp(key_schedule[0], 0x01);
@@ -63,59 +101,76 @@ static void aes128_load_key_enc_only(uint8_t *enc_key, __m128i *key_schedule){
     key_schedule[10] = AES_128_key_exp(key_schedule[9], 0x36);
 }
 
-static void aes128_load_key(uint8_t *enc_key, __m128i *key_schedule){
+#endif
+
+#if defined(__AVX512F__ ) && defined(__VAES__)
+// generate 4 round keys with aes128_load_key_enc_only and pack them into 512-bit vector
+static void aes128_load_key_enc_only_512(uint8_t *enc_key, __m512i *key_schedule){
+    __m128i key_schedule_128[4][11];
+    for(int i = 0; i < 4; i++)
+    {
+        aes128_load_key_enc_only(enc_key, key_schedule_128[i]);
+        enc_key += 16;
+    }
+    uint64_t key_schedule_64[4][11][2];
+    for(int i = 0; i < 4; i++)
+    {
+        for(int j = 0; j < 11; j++)
+        {
+            key_schedule_64[i][j][0] = _mm_extract_epi64(key_schedule_128[i][j], 0);
+            key_schedule_64[i][j][1] = _mm_extract_epi64(key_schedule_128[i][j], 1);
+        }
+    }
+    for(int i = 0; i < 4; i++)
+    {
+        key_schedule[i] = _mm512_set_epi64(key_schedule_64[i][3][1], key_schedule_64[i][3][0], key_schedule_64[i][2][1], key_schedule_64[i][2][0], key_schedule_64[i][1][1], key_schedule_64[i][1][0], key_schedule_64[i][0][1], key_schedule_64[i][0][0]);
+        key_schedule[i+4] = _mm512_set_epi64(key_schedule_64[i][7][1], key_schedule_64[i][7][0], key_schedule_64[i][6][1], key_schedule_64[i][6][0], key_schedule_64[i][5][1], key_schedule_64[i][5][0], key_schedule_64[i][4][1], key_schedule_64[i][4][0]);
+        key_schedule[i+8] = _mm512_set_epi64(key_schedule_64[i][11][1], key_schedule_64[i][11][0], key_schedule_64[i][10][1], key_schedule_64[i][10][0], key_schedule_64[i][9][1], key_schedule_64[i][9][0], key_schedule_64[i][8][1], key_schedule_64[i][8][0]);
+    }
+}
+
+#elif defined(__AVX2__) && defined(__VAES__)
+// generate 2 round keys with aes128_load_key_enc_only and pack them into 256-bit vector
+static void aes128_load_key_enc_only_256(uint8_t *enc_key, __m256i *key_schedule){
+    __m128i key_schedule_128[2][11];
+    for(int i = 0; i < 2; i++)
+    {
+        aes128_load_key_enc_only(enc_key, key_schedule_128[i]);
+        enc_key += 16;
+    }
+    uint64_t key_schedule_64[2][11][2];
+    for(int i = 0; i < 2; i++)
+    {
+        for(int j = 0; j < 11; j++)
+        {
+            key_schedule_64[i][j][0] = _mm_extract_epi64(key_schedule_128[i][j], 0);
+            key_schedule_64[i][j][1] = _mm_extract_epi64(key_schedule_128[i][j], 1);
+        }
+    }
+    for(int i = 0; i < 2; i++)
+    {
+        key_schedule[i] = _mm256_set_epi64x(key_schedule_64[i][3][1], key_schedule_64[i][3][0], key_schedule_64[i][2][1], key_schedule_64[i][2][0], key_schedule_64[i][1][1], key_schedule_64[i][1][0], key_schedule_64[i][0][1], key_schedule_64[i][0][0]);
+        key_schedule[i+2] = _mm256_set_epi64x(key_schedule_64[i][7][1], key_schedule_64[i][7][0], key_schedule_64[i][6][1], key_schedule_64[i][6][0], key_schedule_64[i][5][1], key_schedule_64[i][5][0], key_schedule_64[i][4][1], key_schedule_64[i][4][0]);
+        key_schedule[i+4] = _mm256_set_epi64x(key_schedule_64[i][11][1], key_schedule_64[i][11][0], key_schedule_64[i][10][1], key_schedule_64[i][10][0], key_schedule_64[i][9][1], key_schedule_64[i][9][0], key_schedule_64[i][8][1], key_schedule_64[i][8][0]);
+    }
+}
+#endif
+
+#if defined(__AVX512F__ ) && defined(__VAES__)
+//public api
+static void aes_load_enc(uint8_t *enc_key, __m512i *key_schedule){
+    aes128_load_key_enc_only_512(enc_key, key_schedule);
+}
+}
+#elif defined(__AVX2__) && defined(__VAES__)
+//public api
+static void aes_load_enc(uint8_t *enc_key, __m256i *key_schedule){
+    aes128_load_key_enc_only_256(enc_key, key_schedule);
+}
+#elif defined(__AES__)
+//public api
+static void aes_load_enc(uint8_t *enc_key, __m128i *key_schedule){
     aes128_load_key_enc_only(enc_key, key_schedule);
-
-    // generate decryption keys in reverse order.
-    // k[10] is shared by last encryption and first decryption rounds
-    // k[0] is shared by first encryption round and last decryption round (and is the original user key)
-    // For some implementation reasons, decryption key schedule is NOT the encryption key schedule in reverse order
-    key_schedule[11] = _mm_aesimc_si128(key_schedule[9]);
-    key_schedule[12] = _mm_aesimc_si128(key_schedule[8]);
-    key_schedule[13] = _mm_aesimc_si128(key_schedule[7]);
-    key_schedule[14] = _mm_aesimc_si128(key_schedule[6]);
-    key_schedule[15] = _mm_aesimc_si128(key_schedule[5]);
-    key_schedule[16] = _mm_aesimc_si128(key_schedule[4]);
-    key_schedule[17] = _mm_aesimc_si128(key_schedule[3]);
-    key_schedule[18] = _mm_aesimc_si128(key_schedule[2]);
-    key_schedule[19] = _mm_aesimc_si128(key_schedule[1]);
-}
-
-#if DATATYPE == 128
-static void aes128_enc(__m128i *key_schedule, uint8_t *plainText,uint8_t *cipherText){
-    __m128i m = _mm_loadu_si128((__m128i *) plainText);
-
-    DO_ENC_BLOCK(m,key_schedule);
-
-    _mm_storeu_si128((__m128i *) cipherText, m);
-}
-
-static void aes128_dec(__m128i *key_schedule, uint8_t *cipherText,uint8_t *plainText){
-    __m128i m = _mm_loadu_si128((__m128i *) cipherText);
-
-    DO_DEC_BLOCK(m,key_schedule);
-
-    _mm_storeu_si128((__m128i *) plainText, m);
-}
-
-//return 0 if no error
-//1 if encryption failed
-//2 if decryption failed
-//3 if both failed
-static int aes128_self_test(void){
-    uint8_t plain[]      = {0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34};
-    uint8_t enc_key[]    = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
-    uint8_t cipher[]     = {0x39, 0x25, 0x84, 0x1d, 0x02, 0xdc, 0x09, 0xfb, 0xdc, 0x11, 0x85, 0x97, 0x19, 0x6a, 0x0b, 0x32};
-    uint8_t computed_cipher[16];
-    uint8_t computed_plain[16];
-    int out=0;
-    __m128i key_schedule[20];
-    aes128_load_key(enc_key,key_schedule);
-    aes128_enc(key_schedule,plain,computed_cipher);
-    aes128_dec(key_schedule,cipher,computed_plain);
-    if(memcmp(cipher,computed_cipher,sizeof(cipher))) out=1;
-    if(memcmp(plain,computed_plain,sizeof(plain))) out|=2;
-    return out;
 }
 #endif
 #endif

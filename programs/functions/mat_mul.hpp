@@ -1734,8 +1734,8 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     /* Bitset* y = new Bitset[NUM_INPUTS]; */
     S *y = new S[len];
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
-    /* std::vector<BooleanAdder_MSB<k,S>> adders; */
-    std::vector<PPA_MSB_4Way<k,S>> adders;
+    std::vector<BooleanAdder_MSB<k,S>> adders;
+    /* std::vector<PPA_MSB_4Way<k,S>> adders; */
     adders.reserve(len);
     for(int i = 0; i < len; i++)
     {

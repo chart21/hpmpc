@@ -76,45 +76,39 @@ orthogonalize_boolean(gen_seeds, srng[link_id]);
     
 #elif RANDOM_ALGORITHM == 2
 
-
-
-
-#if DATTYPE >= 128
-    int incr = (DATTYPE -1) / 64 + 1;
-#else 
-int incr = (sizeof(COUNT_TYPE)*8 - 1) /64 +1;
-#endif
-    uint64_t gen_keys[11][incr];
-    for (int i = 0; i < 11; i++) {
-        for (int j = 0; j < incr; j++) {
-            gen_keys[i][j] = link_seed * ((i+1)*j); // replace with independant seeds in the future
-        }
-    }
-#if USE_SSL_AES
-    for (int i = 0; i < 11; i++) {
-    key[link_id] = EVP_CIPHER_CTX_new();
-    EVP_EncryptInit_ex(key[link_id], EVP_aes_128_cbc(), NULL, (unsigned char*) gen_keys[i], (unsigned char*) gen_keys[i]);
-    }
+uint64_t counter[AES_DATTYPE/64]{10};
+#if USE_SSL_AES == 1
+    for (int j = 0; j < 64; j++)
+        aes_counter[link_id][j] = j;
 #else
-    for (int i = 0; i < 11; i++) {
-    memcpy(&key[link_id][i], gen_keys[i], incr*sizeof(uint64_t));
-    }
-
-    /* for (int j = 0; j < DATTYPE*2; j++) { */
-        /*     gen_keys[j] = link_seed * (j+1); // replace with independant seeds in the future */
-        
-    /* } */
-        /*     orthogonalize(gen_keys, key[link_id]); */
-        /*     orthogonalize(gen_keys+64, key[link_id]+1); */
-
-
+#if defined(__AVX512F__ ) && defined(__VAES__)
+    aes_counter[link_id] = _mm512_set_epi64(counter[7], counter[6], counter[5], counter[4], counter[3], counter[2], counter[1], counter[0]);
+#elif defined(__AVX2__) && defined(__VAES__)
+    aes_counter[link_id] = _mm256_set_epi64x(counter[3], counter[2], counter[1], counter[0]);
+#elif defined(__AES__)
+    aes_counter[link_id] = _mm_set_epi64x(counter[1], counter[0]);
 #endif
 #endif
 
-    for (int i = 0; i < 11; i++) {
-        init_buffers(link_id);;
-    }
 
+uint8_t seed[num_players*player_multiplier][128/8];
+srand(link_seed);
+        for(int i = 0; i < 128/8; i++)
+            {
+                /* seed[link_id][i] = rand() % 256; */
+                seed[link_id][i] = 7;
+                /* seed[j][i] = 10; */
+            }
+#if USE_SSL_AES == 1
+    key_schedule[link_id] = EVP_CIPHER_CTX_new();
+    if (!key_schedule[link_id])
+        handleErrors();
+#endif
+    aes_load_enc(seed[link_id], key_schedule[link_id]);
+
+
+#endif
+        init_buffers(link_id);
 #if MAL == 1
 
     // Ensure all players have the same initial state
@@ -431,29 +425,11 @@ clock_gettime(CLOCK_REALTIME, &i1);
 
 player_id = PARTY;
 
-//TODO: Replace with macros
 #if num_players == 3
-pnext = (player_id == 1);
-pprev = (player_id != 1);
+init_srng(0,0);
+init_srng(1,0);
+init_srng(2,0);
 #elif num_players == 4
-pnext = (player_id + 1) % 4;
-pprev = (player_id + 3) % 4;
-pmiddle = (player_id + 2) % 4;
-#endif
-
-#if num_players == 3
-/* init_srng(PARTY, PARTY + 5000); */
-/* init_srng( (PARTY + 1) % 3 , 6000); */
-/* init_srng( (PARTY + 2) % 3 , 6000); */
-init_srng(pprev, modulo((player_id - 1),  num_players) + 5000);
-init_srng(pnext,player_id + 5000);
-init_srng(num_players-1, player_id+6000); // used for sharing inputs
-#elif num_players == 4
-//new logic
-/* init_srng(P_0, (player_id+1) * 1 + 5000); // */ 
-/* init_srng(P_1, (player_id+1) * 2 + 5000); // 1*2 */
-/* init_srng(P_2, (player_id+1) * 3 + 5000); // 1*3 */
-/* init_srng(P_3, (player_id+1) * 4 + 5000); // 1*4 */
 init_srng(0,0);
 init_srng(1,0);
 init_srng(2,0);
