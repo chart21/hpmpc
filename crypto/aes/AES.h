@@ -121,11 +121,9 @@ static void aes128_load_key_enc_only_512(uint8_t *enc_key, __m512i *key_schedule
             key_schedule_64[i][j][1] = _mm_extract_epi64(key_schedule_128[i][j], 1);
         }
     }
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < 11; i++)
     {
-        key_schedule[i] = _mm512_set_epi64(key_schedule_64[i][3][1], key_schedule_64[i][3][0], key_schedule_64[i][2][1], key_schedule_64[i][2][0], key_schedule_64[i][1][1], key_schedule_64[i][1][0], key_schedule_64[i][0][1], key_schedule_64[i][0][0]);
-        key_schedule[i+4] = _mm512_set_epi64(key_schedule_64[i][7][1], key_schedule_64[i][7][0], key_schedule_64[i][6][1], key_schedule_64[i][6][0], key_schedule_64[i][5][1], key_schedule_64[i][5][0], key_schedule_64[i][4][1], key_schedule_64[i][4][0]);
-        key_schedule[i+8] = _mm512_set_epi64(key_schedule_64[i][11][1], key_schedule_64[i][11][0], key_schedule_64[i][10][1], key_schedule_64[i][10][0], key_schedule_64[i][9][1], key_schedule_64[i][9][0], key_schedule_64[i][8][1], key_schedule_64[i][8][0]);
+        key_schedule[i] = _mm512_set_epi64(key_schedule_64[3][i][1], key_schedule_64[3][i][0], key_schedule_64[2][i][1], key_schedule_64[2][i][0], key_schedule_64[1][i][1], key_schedule_64[1][i][0], key_schedule_64[0][i][1], key_schedule_64[0][i][0]);
     }
 }
 
@@ -147,13 +145,9 @@ static void aes128_load_key_enc_only_256(uint8_t *enc_key, __m256i *key_schedule
             key_schedule_64[i][j][1] = _mm_extract_epi64(key_schedule_128[i][j], 1);
         }
     }
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < 11; i++)
     {
-        key_schedule[i] = _mm256_set_epi64x(key_schedule_64[i][2][1], key_schedule_64[i][2][0], key_schedule_64[i][1][1], key_schedule_64[i][1][0], key_schedule_64[i][0][1], key_schedule_64[i][0][0]);
-        key_schedule[i+2] = _mm256_set_epi64x(key_schedule_64[i][4][1], key_schedule_64[i][4][0], key_schedule_64[i][3][1], key_schedule_64[i][3][0]);
-        key_schedule[i+4] = _mm256_set_epi64x(key_schedule_64[i][6][1], key_schedule_64[i][6][0], key_schedule_64[i][5][1], key_schedule_64[i][5][0]);
-        key_schedule[i+6] = _mm256_set_epi64x(key_schedule_64[i][8][1], key_schedule_64[i][8][0], key_schedule_64[i][7][1], key_schedule_64[i][7][0]);
-        key_schedule[i+8] = _mm256_set_epi64x(key_schedule_64[i][10][1], key_schedule_64[i][10][0], key_schedule_64[i][9][1], key_schedule_64[i][9][0]);
+        key_schedule[i] = _mm256_set_epi64x(key_schedule_64[0][i][0], key_schedule_64[0][i][1], key_schedule_64[1][i][0], key_schedule_64[1][i][1]);
     }
 }
 #endif
