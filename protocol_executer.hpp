@@ -76,7 +76,7 @@ orthogonalize_boolean(gen_seeds, srng[link_id]);
     
 #elif RANDOM_ALGORITHM == 2
 srand(link_seed);
-uint64_t counter[AES_DATTYPE/64];
+alignas(AES_DATTYPE/8) uint64_t counter[AES_DATTYPE/64];
 #if USE_SSL_AES == 1
     for (int j = 0; j < 64; j++)
         aes_counter[link_id][j] = rand() % 256 | rand() % 256; //generate random 8-bit number, to stay consistent with other approaches, 2 times rand is used
@@ -94,7 +94,7 @@ uint64_t counter[AES_DATTYPE/64];
 #endif
 
 
-uint8_t seed[128/8];
+alignas(AES_DATTYPE/8) uint8_t seed[128/8];
         for(int i = 0; i < 128/8; i++)
             {
                 /* seed[link_id][i] = rand() % 256; */
