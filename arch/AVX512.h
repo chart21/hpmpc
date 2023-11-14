@@ -347,6 +347,36 @@ void orthogonalize_boolean_full(UINT_TYPE* data, __m512i* out) {
   real_ortho_512x512(out);
 }
 
+void unorthogonalize_boolean(__m512i *in, UINT_TYPE* data) {
+  for (int i = 0; i < BITLENGTH; i++) {
+    alignas(64) UINT_TYPE tmp[DATTYPE/BITLENGTH];
+    _mm512_store_si512 ((__m512i*)tmp, in[i]);
+    for (int j = 0; j < DATTYPE/BITLENGTH; j++)
+      /* data[i+j*BITLENGTH] = tmp[j]; */
+      data[i+j*BITLENGTH] = tmp[DATTYPE/BITLENGTH-j-1];
+  }
+
+  for (int i = 0; i < DATTYPE; i += BITLENGTH)
+    real_ortho(&(data[i]));
+}
+
+
+
+
+
+
+void unorthogonalize_boolean_full(__m512i *in, UINT_TYPE* data) {
+  real_ortho_512x512(in);
+  for (int i = 0; i < 512; i++) {
+    alignas(64) UINT_TYPE tmp[DATTYPE/BITLENGTH];
+    _mm512_store_si512 ((__m512i*)tmp, in[i]);
+    for (int j = 0; j < DATTYPE/BITLENGTH; j++)
+      /* data[j*512+i] = tmp[j]; */
+      data[j*512+i] = tmp[DATTYPE/BITLENGTH-j-1];
+  }
+}
+
+
 void orthogonalize_arithmetic(UINT_TYPE *in, __m512i *out, int k) {
   for (int i = 0; i < k; i++)
 #if BITLENGTH == 64
@@ -359,13 +389,13 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m512i *out, int k) {
                               in[i*16+3], in[i*16+2], in[i*16+1], in[i*16]);
 #elif BITLENGTH == 16
     out[i] = _mm512_set_epi16(in[i*32+31], in[i*32+30], in[i*32+29], in[i*32+28],
-                              in[i*32+27], in[i*32+26], in[i*32+25], in[i*32+24],
-                              in[i*32+23], in[i*32+22], in[i*32+21], in[i*32+20],
-                              in[i*32+19], in[i*32+18], in[i*32+17], in[i*32+16],
-                              in[i*32+15], in[i*32+14], in[i*32+13], in[i*32+12],
-                              in[i*32+11], in[i*32+10], in[i*32+9], in[i*32+8],
-                              in[i*32+7], in[i*32+6], in[i*32+5], in[i*32+4],
-                              in[i*32+3], in[i*32+2], in[i*32+1], in[i*32]);
+                             in[i*32+27], in[i*32+26], in[i*32+25], in[i*32+24],
+                             in[i*32+23], in[i*32+22], in[i*32+21], in[i*32+20],
+                             in[i*32+19], in[i*32+18], in[i*32+17], in[i*32+16],
+                             in[i*32+15], in[i*32+14], in[i*32+13], in[i*32+12],
+                             in[i*32+11], in[i*32+10], in[i*32+9], in[i*32+8],
+                             in[i*32+7], in[i*32+6], in[i*32+5], in[i*32+4],
+                             in[i*32+3], in[i*32+2], in[i*32+1], in[i*32]);
 #elif BITLENGTH == 8
     out[i] = _mm512_set_epi8(in[i*64+63], in[i*64+62], in[i*64+61], in[i*64+60],
                              in[i*64+59], in[i*64+58], in[i*64+57], in[i*64+56],
@@ -387,38 +417,11 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m512i *out, int k) {
 }
 
 
-void unorthogonalize_boolean(__m512i *in, UINT_TYPE* data) {
-  for (int i = 0; i < BITLENGTH; i++) {
-    alignas(64) uint64_t tmp[DATTYPE/BITLENGTH];
-    _mm512_store_si512 ((__m512i*)tmp, in[i]);
-    for (int j = 0; j < DATTYPE/BITLENGTH; j++)
-      /* data[j*BITLENGTH+i] = tmp[j]; */
-      data[i+j*BITLENGTH] = tmp[DATTYPE/BITLENGTH-j-1];
-  }
-  /* for (int i = 0; i < DATTYPE/BITLENGTH; i++) */
-  /*     real_ortho(&(data[i*BITLENGTH])); */
-  for (int i = 0; i < DATTYPE; i += BITLENGTH)
-    real_ortho(&(data[i]));
-}
 
 
-
-
-void unorthogonalize_boolean_full(__m512i *in, UINT_TYPE* data) {
-  real_ortho_512x512(in);
-  for (int i = 0; i < 512; i++) {
-    alignas(64) UINT_TYPE tmp[DATTYPE/BITLENGTH];
-    _mm512_store_si512 ((__m512i*)tmp, in[i]);
-    for (int j = 0; j < DATTYPE/BITLENGTH; j++)
-      /* data[j*512+i] = tmp[j]; */
-      data[j*512+i] = tmp[DATTYPE/BITLENGTH-j-1];
-  }
-}
-
-void unorthogonalize_arithmetic(__m512i *in, UINT_TYPE *out, int k) {
+    void unorthogonalize_arithmetic(__m512i *in, UINT_TYPE *out, int k) {
   for (int i = 0; i < k; i++)
-    _mm512_store_si512 ((__m512i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
+    _mm512_store_si512 ((__m512i*)&(out[i*(DATTYPE/BITLENGTH)]), in[i]);
 }
-
 
 
