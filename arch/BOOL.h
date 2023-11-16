@@ -72,9 +72,9 @@ void orthogonalize_boolean(UINT_TYPE* num, bool* out) {
   }
 }
 
-//convert bool array to uint64 number
-void unorthogonalize_boolean(bool *arr, uint64_t *num) {
-   uint64_t tmp;
+//convert bool array to uint number
+void unorthogonalize_boolean(bool *arr, UINT_TYPE *num) {
+   UINT_TYPE tmp;
     for (int i = 0; i < BITLENGTH; i++)
     {
     tmp = arr[i];

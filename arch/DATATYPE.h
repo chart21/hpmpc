@@ -30,7 +30,6 @@
     exit(1);
 #endif
 
-#if DATTYPE != BITLENGTH
 void orthogonalize_arithmetic(UINT_TYPE *in, DATATYPE *out)
 {
     orthogonalize_arithmetic(in, out, BITLENGTH);
@@ -50,7 +49,6 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 {
     unorthogonalize_arithmetic(in, out, DATTYPE);
 }
-#endif
 
 #if FUNCTION_IDENTIFIER == 1 || FUNCTION_IDENTIFIER == 4
 #define OP_ADD FUNC_XOR

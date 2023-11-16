@@ -32,6 +32,7 @@ using namespace std;
 using namespace simple_nn;
 using namespace Eigen;
 
+
 void generateElements()
 {
 
@@ -148,6 +149,7 @@ void inference(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<BITLENGTH, S>;
     using sint = sint_t<A>;
+    using modeltype = A;
 
     /* using Sharetype = Wrapper<DATATYPE>; */
     /* using F = FloatFixedConverter<FLOATTYPE, UINTTYPE, ANOTHER_FRACTIONAL_VALUE> ; */
@@ -178,15 +180,15 @@ void inference(DATATYPE* res)
 
 	VecXi train_Y, test_Y;
 
-	DataLoader<A> train_loader, test_loader;
+	DataLoader<modeltype> train_loader, test_loader;
 
 	if (cfg.mode == "train") {
 		train_X = read_mnist(cfg.data_dir, "train-images.idx3-ubyte", n_train);
 		train_Y = read_mnist_label(cfg.data_dir, "train-labels.idx1-ubyte", n_train);
-        MatX<A> train_XX = train_X.unaryExpr([](float val) { 
-                A tmp;
+        MatX<modeltype> train_XX = train_X.unaryExpr([](float val) { 
+                modeltype tmp;
                 tmp.template prepare_receive_and_replicate<P_0>(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val));
-                A::communicate();
+                modeltype::communicate();
                 tmp.template complete_receive_from<P_0>();
                 return tmp;
     /* return sint(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); */
@@ -199,10 +201,10 @@ void inference(DATATYPE* res)
 	test_X = read_mnist(cfg.data_dir, "t10k-images.idx3-ubyte", n_test);
 	test_Y = read_mnist_label(cfg.data_dir, "t10k-labels.idx1-ubyte", n_test);
     
-    MatX<A> test_XX = test_X.unaryExpr([](float val) { 
-                A tmp;
+    MatX<modeltype> test_XX = test_X.unaryExpr([](float val) { 
+                modeltype tmp;
                 tmp.template prepare_receive_and_replicate<P_0>(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val));
-                A::communicate();
+                modeltype::communicate();
                 tmp.template complete_receive_from<P_0>();
                 return tmp;
 
@@ -212,7 +214,7 @@ void inference(DATATYPE* res)
 
     std::cout << "Dataset loaded." << std::endl;
 
-    SimpleNN<A> model;
+    SimpleNN<modeltype> model;
 	load_model(cfg, model);
 	/* model.add(new Conv2d<SHARETYPE>(1, 6, 5, 2, cfg.init)); */
     /* model.add(new ReLU<SHARETYPE>); */

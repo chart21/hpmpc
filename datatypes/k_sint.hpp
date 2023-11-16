@@ -13,6 +13,8 @@ public:
         }
     
     sint_t(UINT_TYPE value) {
+        for (int i = 0; i < BITLENGTH; i++) 
+          shares[i] = Share::public_val(PROMOTE(value));
         }
 
     template<int id>
@@ -110,7 +112,7 @@ public:
     
         void operator+=(const sint_t& other) {
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i] = shares[i] - other[i];
+            shares[i] = shares[i] + other[i];
         }
     }
 
@@ -128,7 +130,7 @@ public:
 
     void operator*=(const sint_t& other) {
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i] = shares[i] - other[i];
+            shares[i] = shares[i] * other[i];
         }
     }
 
@@ -231,17 +233,13 @@ public:
             return result;
         }
 
-        static void RELU(const sint_t* begin, const sint_t* end, sint_t* out)
-        {
-            //loop with iterators from pointer begin to pointer end
-            for (auto it = begin; it != end; ++it)
-            {
-                //compute the relu of the current element
-                *out = it->relu();
-                //increment the output pointer
-                ++out;
-            }
-        }
+static void RELU(const sint_t* begin, const sint_t* end,  sint_t* output){
+    int i = 0;
+    for (const sint_t* iter = begin; iter != end; ++iter) {
+            output[i++] = iter->relu();
+    }
+}
+
 
 };
 

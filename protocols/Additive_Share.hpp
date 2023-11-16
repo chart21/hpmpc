@@ -11,7 +11,9 @@ public:
 
     Additive_Share(const Share_Type& s) : Share_Type(s) {}
 
-    Additive_Share(Datatype a) : Share_Type(a) {}
+    Additive_Share(Datatype a) : Share_Type() {
+        *this = Share_Type::public_val(PROMOTE(a));
+    }
 
     Additive_Share operator+(const Additive_Share<Datatype,Share_Type>& b) const
     {
@@ -71,7 +73,7 @@ public:
         if constexpr (id == PSELF || PROTOCOL == 13) {
           if (current_phase == 1) {
             /* prepare_receive_from<id>(PROMOTE(value)); */
-            prepare_receive_from<id>(value); // TODO: promote
+            prepare_receive_from<id>(PROMOTE(value)); 
           }
         }
         else {
@@ -97,7 +99,10 @@ public:
     }
         
     UINT_TYPE complete_reveal_to_all_single() const {
-        return Share_Type::complete_Reveal(OP_ADD, OP_SUB); //TODO: extract single element
+        auto res = Share_Type::complete_Reveal(OP_ADD, OP_SUB); //TODO: Use extract method from Intrinsics
+        alignas(DATATYPE) UINT_TYPE ret[DATTYPE/BITLENGTH];
+        unorthogonalize_arithmetic(&res, ret,1);
+        return ret[0];
         }
 
     Additive_Share prepare_mult3(const Additive_Share<Datatype, Share_Type>& b, const Additive_Share<Datatype, Share_Type>& c) const

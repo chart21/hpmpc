@@ -20,7 +20,7 @@ TTP_init mult_public_fixed(const DATATYPE b, func_mul MULT, func_trunc TRUNC) co
 
 
 
-TTP_init public_val(Datatype a)
+static TTP_init public_val(Datatype a)
 {
     return TTP_init();
 }

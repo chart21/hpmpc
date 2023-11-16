@@ -10,7 +10,7 @@ public:
 TTP_Share() {}
 TTP_Share(Datatype a) {p1 = a;}
 
-TTP_Share public_val(Datatype a)
+static TTP_Share public_val(Datatype a)
 {
     return TTP_Share(a);
 }
