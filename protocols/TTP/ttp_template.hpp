@@ -66,7 +66,7 @@ void complete_mult(func_add ADD, func_sub SUB){}
 
 void prepare_reveal_to_all()
 {
-#if PARTY == 2
+#if PARTY == 2 && PROTOCOL != 13
     for(int t = 0; t < num_players-1; t++) 
         send_to_live(t, p1);
 #endif
@@ -76,7 +76,7 @@ void prepare_reveal_to_all()
 template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
-#if PARTY != 2
+#if PARTY != 2 && PROTOCOL != 13
     Datatype result = receive_from_live(P_2);
 #else
     Datatype result = p1;
@@ -89,7 +89,7 @@ return result;
 template <int id,typename func_add, typename func_sub>
 void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-#if PARTY != 2
+#if PARTY != 2 && PROTOCOL != 13
 if constexpr(id == PSELF)
 {
             Datatype tmp = get_input_live();
@@ -103,7 +103,7 @@ if constexpr(id == PSELF)
 template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)
 {
-#if PARTY == 2
+#if PARTY == 2 || PROTOCOL == 13
 if constexpr(id == P_2)
 {
         p1 = get_input_live();
@@ -127,17 +127,23 @@ static void finalize()
 
 static void send()
 {
+#if PROTOCOL != 13
     send_live();
+#endif
 }
 
 static void receive()
 {
+#if PROTOCOL != 13
     receive_live();
+#endif
 }
 
 static void communicate()
 {
+#if PROTOCOL != 13
     communicate_live();
+#endif
 }
 
 static void prepare_A2B_S1(int k, TTP_Share in[], TTP_Share out[])

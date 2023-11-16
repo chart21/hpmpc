@@ -25,7 +25,7 @@ void generateElements()
                 input[i][j] = rand() % 200 - 100;
             }
         }
-        #if PARTY == 2
+        #if PARTY == 2 || PROTOCOL == 13
         srand(time(0));
         //set a random element in range 0,NUM_INPUTS to be the max
         UINT_TYPE max_index = rand() % NUM_INPUTS;

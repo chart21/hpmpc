@@ -23,6 +23,7 @@
 #define OEC_mal 10
 #define OEC_mal_het 11
 #define OEC_mal_OffOn 12
+#define Simulate 13
 #if PROTOCOL == rep3 
     #define PROTOCOL_LIVE Replicated_Share
     #define PROTOCOL_INIT Replicated_init
@@ -181,7 +182,7 @@
             #include "3-PC/ours/oecl-P_2_template.hpp"
         #endif
     #endif
-#elif PROTOCOL == ttp3 || PROTOCOL == ttp4
+#elif PROTOCOL == ttp3 || PROTOCOL == ttp4 || PROTOCOL == Simulate
         #define PROTOCOL_LIVE TTP_Share
         #define PROTOCOL_INIT TTP_init
         #if INIT == 1 

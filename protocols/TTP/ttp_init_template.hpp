@@ -63,7 +63,7 @@ void complete_mult(func_add ADD, func_sub SUB){}
 
 void prepare_reveal_to_all()
 {
-#if PARTY == 2
+#if PARTY == 2 && PROTOCOL != 13
         for(int t = 0; t < num_players-1; t++) 
         {
             send_to_(t);
@@ -74,7 +74,7 @@ void prepare_reveal_to_all()
 template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB)
 {
-#if PARTY != 2
+#if PARTY != 2 && PROTOCOL != 13
     receive_from_(P_2);
 #endif
 return SET_ALL_ZERO();
@@ -85,10 +85,12 @@ return SET_ALL_ZERO();
 template <int id,typename func_add, typename func_sub>
 void prepare_receive_from(func_add ADD, func_sub SUB)
 {
+#if PROTOCOL != 13
 if constexpr(id == PSELF && PARTY != 2)
 {
         send_to_(P_2);
 }
+#endif
 }
 
     template <int id, typename func_add, typename func_sub>
@@ -98,27 +100,35 @@ void complete_receive_from(func_add ADD, func_sub SUB)
 {
     return;
 }
-#if PARTY == 2
+#if PARTY == 2 && PROTOCOL != 13
 receive_from_(id);
 #endif
 }
 
 static void send()
 {
+#if PROTOCOL != 13
 send_();
+#endif
 }
 static void receive()
 {
+#if PROTOCOL != 13
     receive_();
+#endif
 }
 static void communicate()
 {
+#if PROTOCOL != 13
 communicate_();
+#endif
 }
 
 static void finalize(std::string* ips)
 {
+#if PROTOCOL != 13
     finalize_(ips);
+#endif
 }
 
 static void prepare_A2B_S1(int k, TTP_init in[], TTP_init out[])

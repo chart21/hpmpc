@@ -421,6 +421,7 @@ int ret;
 }
 #endif
 
+#if PROTOCOL != 13
 void executeProgram(int argc, char *argv[], int process_id, int process_num)
 {
 clock_gettime(CLOCK_REALTIME, &i1);
@@ -444,6 +445,7 @@ init_srng(5,0);
 init_srng(6,0);
 init_srng(7,0);
 #endif
+
 
 /// Connecting to other Players
 std::string ips[num_players-1];
@@ -486,3 +488,40 @@ double dummy_time = 0.00;
 }
 
 
+#else
+void simulate_live()
+{
+    clock_t time_function_start = clock ();
+    clock_gettime(CLOCK_REALTIME, &l1);
+    std::chrono::high_resolution_clock::time_point c1 =
+            std::chrono::high_resolution_clock::now();
+    
+    auto result = new RESULTTYPE;
+    FUNCTION<PROTOCOL_LIVE<DATATYPE>>(result);
+
+    double time = std::chrono::duration_cast<std::chrono::microseconds>(
+                         std::chrono::high_resolution_clock::now() - c1)
+                         .count();
+    /* searchComm__<Sharemind,DATATYPE>(protocol,*found); */
+    clock_gettime(CLOCK_REALTIME, &l2);
+    double accum = ( l2.tv_sec - l1.tv_sec )
+    + (double)( l2.tv_nsec - l1.tv_nsec ) / (double) 1000000000L;
+    #if PRINT == 1
+    print_result(result); //different for other functions
+    #endif
+    clock_t time_function_finished = clock ();
+
+    print("Time measured to perform computation clock: %fs \n", double((time_function_finished - time_function_start)) / CLOCKS_PER_SEC);
+    print("Time measured to perform computation getTime: %fs \n", accum);
+    print("Time measured to perform computation chrono: %fs \n", time / 1000000);
+    // Join threads to ensure closing of sockets
+
+}
+
+void executeProgram(int argc, char *argv[], int process_id, int process_num)
+{
+    current_phase = 1;
+    generateElements();
+    simulate_live();
+}
+#endif
