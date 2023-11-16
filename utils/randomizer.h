@@ -11,7 +11,7 @@
 EVP_CIPHER_CTX* key_schedule[num_players*player_multiplier];
 alignas(DATTYPE/8) unsigned char aes_counter[num_players*player_multiplier][64];
 #else
-    #include "../crypto/aes/AES.h"
+#include "../crypto/aes/AES.h"
 AES_TYPE key_schedule[num_players*player_multiplier][11];
 AES_TYPE aes_counter[num_players*player_multiplier];
 #endif

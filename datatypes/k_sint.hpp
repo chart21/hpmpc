@@ -17,9 +17,10 @@ public:
 
     template<int id>
     sint_t(UINT_TYPE value) {
-        UINT_TYPE temp_u[DATTYPE] = {value};
+        alignas(sizeof(DATATYPE)) UINT_TYPE temp_u[DATTYPE] = {value};
         init(temp_u);
         }
+
 
     template<int id>
     sint_t(UINT_TYPE value[DATTYPE]) {
@@ -30,6 +31,26 @@ public:
     void prepare_receive_from() {
         for (int i = 0; i < BITLENGTH; i++) 
           shares[i].template prepare_receive_from<id>();
+    }
+    
+    template<int id>
+    void prepare_receive_from(DATATYPE values[BITLENGTH]) {
+        for (int i = 0; i < BITLENGTH; i++) 
+          shares[i].template prepare_receive_from<id>(values[i]);
+    }
+
+    template<int id>
+    void prepare_receive_and_replicate(UINT_TYPE value) {
+        if constexpr (id == PSELF) {
+          if (current_phase == 1) {
+            alignas(sizeof(DATATYPE)) UINT_TYPE temp_u[DATTYPE] = {value};
+            orthogonalize_arithmetic(temp_u, (DATATYPE*) temp_u);
+            prepare_receive_from<id>((DATATYPE*) temp_u);
+          }
+        }
+        else {
+            prepare_receive_from<id>();
+        }
     }
 
     template<int id>
@@ -45,9 +66,10 @@ public:
             DATATYPE temp_d[BITLENGTH];
             orthogonalize_arithmetic(value, temp_d);
             for (int i = 0; i < BITLENGTH; i++) 
-              shares[i] = Share(temp_d[i]);
+              shares[i].template prepare_receive_from<id>(temp_d[i]);
           }
         }
+
         for (int i = 0; i < BITLENGTH; i++) {
           shares[i].template prepare_receive_from<id>();
         }
@@ -92,6 +114,13 @@ public:
         }
         return *this;
     }
+
+        void operator*=(const UINT_TYPE other) {
+        for(int i = 0; i < BITLENGTH; ++i) {
+            shares[i] *= PROMOTE(other);
+        }
+        }
+
     
     bool operator==(const sint_t& b) const
     {
@@ -118,18 +147,30 @@ public:
         }
         }
 
-        void prepare_reveal_to_all() {
+        void prepare_reveal_to_all() const {
             for(int i = 0; i < BITLENGTH; ++i) {
                 shares[i].prepare_reveal_to_all();
             }
         }
-
-        void complete_reveal_to_all(UINT_TYPE result[DATTYPE]) {
+        
+        void prepare_reveal_to_all_single() const {
+                shares[0].prepare_reveal_to_all();
+        }
+        
+        void complete_reveal_to_all(UINT_TYPE result[DATTYPE]) const {
             DATATYPE temp[BITLENGTH];
             for(int i = 0; i < BITLENGTH; ++i) {
                temp[i] = shares[i].complete_reveal_to_all();
             }
             unorthogonalize_arithmetic(temp, result);
+        }
+
+        UINT_TYPE complete_reveal_to_all_single() const {
+            DATATYPE temp[BITLENGTH];
+            alignas(sizeof(DATATYPE)) UINT_TYPE result[DATTYPE];
+               temp[0] = shares[0].complete_reveal_to_all();
+            unorthogonalize_arithmetic(temp, result);
+            return result[0];
         }
        
 
@@ -176,6 +217,32 @@ public:
         {
             /* return shares[0].get_p1(); */
             return 0;
+        }
+
+        static void communicate()
+        {
+            Share::communicate();
+        }
+
+       
+        sint_t relu() const
+        {
+            sint_t result;
+            for(int i = 0; i < BITLENGTH; ++i) 
+                result.shares[i] = shares[i].relu();
+            return result;
+        }
+
+        static void RELU(const sint_t* begin, const sint_t* end, sint_t* out)
+        {
+            //loop with iterators from pointer begin to pointer end
+            for (auto it = begin; it != end; ++it)
+            {
+                //compute the relu of the current element
+                *out = it->relu();
+                //increment the output pointer
+                ++out;
+            }
         }
 
 };

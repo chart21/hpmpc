@@ -26,11 +26,23 @@ public:
         return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT));
     }
 
+    void operator*=(const DATATYPE b)
+    {
+        *this = Share_Type::mult_public(b, OP_MULT);
+    }
+
     template <int id>
     void prepare_receive_from()
     {
         Share_Type::template prepare_receive_from<id>(OP_ADD, OP_SUB);
     }
+    
+    template <int id>
+    void prepare_receive_from(DATATYPE val)
+    {
+        Share_Type::template prepare_receive_from<id>(val, OP_ADD, OP_SUB);
+    }
+
 
     template <int id>
     void complete_receive_from()
@@ -38,12 +50,12 @@ public:
         Share_Type::template complete_receive_from<id>(OP_ADD, OP_SUB);
     }
     
-    void prepare_reveal_to_all()
+    void prepare_reveal_to_all() const
     {
         Share_Type::prepare_reveal_to_all();
     }
 
-    Datatype complete_reveal_to_all()
+    Datatype complete_reveal_to_all() const
     {
         return Share_Type::complete_Reveal(OP_ADD, OP_SUB);
     }

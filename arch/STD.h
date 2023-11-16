@@ -155,7 +155,7 @@ uint8_t arithmetic_right_shift_8(uint8_t value) {
 #define PACK_32x2_to_64(a,b) ((((uint64_t)(a)) << 32) | ((uint64_t) (b)))
 
 
-#define refresh(x,y) *(y) = x
+/* #define refresh(x,y) *(y) = x */
 
 
 #define SET_ALL_ONE()  -1

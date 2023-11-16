@@ -25,6 +25,13 @@ TTP_Share Not() const
    return TTP_Share(NOT(p1));
 }
 
+    template <typename func_mul>
+TTP_Share mult_public(const DATATYPE b, func_mul MULT) const
+{
+   return TTP_Share(MULT(p1, b));
+}
+
+
 template <typename func_add>
 TTP_Share Add(TTP_Share b, func_add ADD) const
 {
@@ -64,7 +71,7 @@ template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB){}
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 #if PARTY == 2 && PROTOCOL != 13
     for(int t = 0; t < num_players-1; t++) 
@@ -74,7 +81,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PARTY != 2 && PROTOCOL != 13
     Datatype result = receive_from_live(P_2);
@@ -85,33 +92,33 @@ return result;
 }
 
 
-
 template <int id,typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(DATATYPE value, func_add ADD, func_sub SUB)
 {
 #if PARTY != 2 && PROTOCOL != 13
 if constexpr(id == PSELF)
 {
-            Datatype tmp = get_input_live();
-        send_to_live(P_2, tmp);
+        send_to_live(P_2, value);
         
 }
+#else
+    p1 = value;
 #endif
+}
+
+
+template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
+{
+    prepare_receive_from<id>(get_input_live(), ADD, SUB);
 }
 
 
 template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)
 {
-#if PARTY == 2 || PROTOCOL == 13
-if constexpr(id == P_2)
-{
-        p1 = get_input_live();
-}
-else
-{
+#if PARTY == 2 && PROTOCOL != 13
     p1 = receive_from_live(id);
-}
 #endif
 }
 
@@ -257,8 +264,14 @@ return TTP_Share(MULT(MULT(MULT(p1,b.p1),c.p1),d.p1));
 template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){}
 
-
-
+TTP_Share relu() const
+{
+    bool isNegative = (this->p1 & (1 << (sizeof(DATATYPE)*8 - 1))) != 0;
+    if (!isNegative)
+        return TTP_Share(this->p1);
+    else
+        return TTP_Share(0);
+    }
 
 };
 

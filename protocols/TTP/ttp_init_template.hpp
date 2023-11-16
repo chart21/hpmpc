@@ -11,6 +11,12 @@ Datatype get_p1()
     return SET_ALL_ZERO();
 }
 
+    template <typename func_mul>
+TTP_init mult_public(const DATATYPE b, func_mul MULT) const
+{
+   return TTP_init();
+}
+
 
 
 TTP_init public_val(Datatype a)
@@ -61,7 +67,7 @@ template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB){}
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 #if PARTY == 2 && PROTOCOL != 13
         for(int t = 0; t < num_players-1; t++) 
@@ -72,7 +78,7 @@ void prepare_reveal_to_all()
 }    
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PARTY != 2 && PROTOCOL != 13
     receive_from_(P_2);
@@ -80,27 +86,31 @@ Datatype complete_Reveal(func_add ADD, func_sub SUB)
 return SET_ALL_ZERO();
 }
 
-
-
 template <int id,typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(DATATYPE val, func_add ADD, func_sub SUB)
 {
-#if PROTOCOL != 13
-if constexpr(id == PSELF && PARTY != 2)
+#if PROTOCOL != 13 && PARTY != 2
+if constexpr(id == PSELF)
 {
         send_to_(P_2);
 }
 #endif
 }
 
+
+
+template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
+{
+    prepare_receive_from<id>(SET_ALL_ZERO(), ADD, SUB);
+}
+
     template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)
 {
-    if constexpr(id == PSELF)
-{
-    return;
-}
 #if PARTY == 2 && PROTOCOL != 13
+if constexpr(id == PSELF)
+    return;
 receive_from_(id);
 #endif
 }
@@ -195,8 +205,14 @@ template <typename func_add, typename func_sub, typename func_mul>
 return TTP_init();
 }
 
+
 template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){}
 
+
+TTP_init relu() const
+{
+    return TTP_init();
+}
 
 };
