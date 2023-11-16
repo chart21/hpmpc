@@ -33,16 +33,16 @@ public:
         return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT));
     }
         
-
-        void operator*=(const DATATYPE other) 
-        {
-        *this = Share_Type::mult_public_fixed(other, OP_MULT, OP_TRUNC);
-        }
-
         Additive_Share operator*(const DATATYPE other) const
         {
         return Additive_Share(Share_Type::mult_public_fixed(other, OP_MULT, OP_TRUNC));
         }
+
+        void operator*=(const DATATYPE other) 
+        {
+        *this = *this * other;
+        }
+
 
     void mult_public_fixed(const DATATYPE b)
     {
@@ -71,7 +71,7 @@ public:
         if constexpr (id == PSELF || PROTOCOL == 13) {
           if (current_phase == 1) {
             /* prepare_receive_from<id>(PROMOTE(value)); */
-            prepare_receive_from<id>(value);
+            prepare_receive_from<id>(value); // TODO: promote
           }
         }
         else {
@@ -97,7 +97,7 @@ public:
     }
         
     UINT_TYPE complete_reveal_to_all_single() const {
-        return Share_Type::complete_Reveal(OP_ADD, OP_SUB);
+        return Share_Type::complete_Reveal(OP_ADD, OP_SUB); //TODO: extract single element
         }
 
     Additive_Share prepare_mult3(const Additive_Share<Datatype, Share_Type>& b, const Additive_Share<Datatype, Share_Type>& c) const
