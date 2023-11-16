@@ -5,14 +5,15 @@ class TTP_init
 {
 public:
 TTP_init() {}
+TTP_init(Datatype a) {}
 
 Datatype get_p1()
 {
     return SET_ALL_ZERO();
 }
 
-    template <typename func_mul>
-TTP_init mult_public(const DATATYPE b, func_mul MULT) const
+    template <typename func_mul, typename func_trunc>
+TTP_init mult_public_fixed(const DATATYPE b, func_mul MULT, func_trunc TRUNC) const
 {
    return TTP_init();
 }

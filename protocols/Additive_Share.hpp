@@ -2,7 +2,7 @@
 /* #include "Share.hpp" */
 #include <functional>
 #include "../arch/DATATYPE.h"
-
+#include "../protocols/Protocols.h"
 template <typename Datatype, typename Share_Type>
 class Additive_Share : public Share_Type
 {
@@ -11,9 +11,16 @@ public:
 
     Additive_Share(const Share_Type& s) : Share_Type(s) {}
 
+    Additive_Share(Datatype a) : Share_Type(a) {}
+
     Additive_Share operator+(const Additive_Share<Datatype,Share_Type>& b) const
     {
         return Additive_Share(Share_Type::Add(b, OP_ADD));
+    }
+
+    void operator+=(const Additive_Share<Datatype,Share_Type>& b)
+    {
+        *this = *this + b;
     }
     
     Additive_Share operator-(const Additive_Share<Datatype,Share_Type>& b) const
@@ -25,10 +32,26 @@ public:
     {
         return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT));
     }
+        
 
-    void operator*=(const DATATYPE b)
+        void operator*=(const DATATYPE other) 
+        {
+        *this = Share_Type::mult_public_fixed(other, OP_MULT, OP_TRUNC);
+        }
+
+        Additive_Share operator*(const DATATYPE other) const
+        {
+        return Additive_Share(Share_Type::mult_public_fixed(other, OP_MULT, OP_TRUNC));
+        }
+
+    void mult_public_fixed(const DATATYPE b)
     {
-        *this = Share_Type::mult_public(b, OP_MULT);
+        *this = Share_Type::mult_public_fixed(b, OP_MULT, OP_TRUNC);
+    }
+    
+    bool operator==(const Additive_Share& b) const
+    {
+        return false; // Needed for Eigen optimizations
     }
 
     template <int id>
@@ -41,6 +64,19 @@ public:
     void prepare_receive_from(DATATYPE val)
     {
         Share_Type::template prepare_receive_from<id>(val, OP_ADD, OP_SUB);
+    }
+
+    template<int id>
+    void prepare_receive_and_replicate(UINT_TYPE value) {
+        if constexpr (id == PSELF || PROTOCOL == 13) {
+          if (current_phase == 1) {
+            /* prepare_receive_from<id>(PROMOTE(value)); */
+            prepare_receive_from<id>(value);
+          }
+        }
+        else {
+            prepare_receive_from<id>();
+        }
     }
 
 
@@ -59,6 +95,10 @@ public:
     {
         return Share_Type::complete_Reveal(OP_ADD, OP_SUB);
     }
+        
+    UINT_TYPE complete_reveal_to_all_single() const {
+        return Share_Type::complete_Reveal(OP_ADD, OP_SUB);
+        }
 
     Additive_Share prepare_mult3(const Additive_Share<Datatype, Share_Type>& b, const Additive_Share<Datatype, Share_Type>& c) const
     {
@@ -121,6 +161,12 @@ public:
     #endif
     }
 
+static void RELU(const Additive_Share* begin, const Additive_Share* end,  Additive_Share* output){
+    int i = 0;
+    for (const Additive_Share* iter = begin; iter != end; ++iter) {
+            output[i++] = iter->relu();
+    }
+}
 
 };
 

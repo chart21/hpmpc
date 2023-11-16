@@ -25,10 +25,10 @@ TTP_Share Not() const
    return TTP_Share(NOT(p1));
 }
 
-    template <typename func_mul>
-TTP_Share mult_public(const DATATYPE b, func_mul MULT) const
+    template <typename func_mul, typename func_trunc>
+TTP_Share mult_public_fixed(const DATATYPE b, func_mul MULT, func_trunc TRUNC) const
 {
-   return TTP_Share(MULT(p1, b));
+   return TTP_Share(TRUNC(MULT(p1, b)));
 }
 
 
@@ -52,8 +52,9 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-DATATYPE dummy = getRandomVal(0);
-p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy));
+/* DATATYPE dummy = getRandomVal(0); */
+/* p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy)); */
+p1 = TRUNC(p1);
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>
@@ -266,7 +267,7 @@ void complete_mult4(func_add ADD, func_sub SUB){}
 
 TTP_Share relu() const
 {
-    bool isNegative = (this->p1 & (1 << (sizeof(DATATYPE)*8 - 1))) != 0;
+    bool isNegative = (this->p1 & (DATATYPE(1) << (sizeof(DATATYPE)*8 - 1))) != 0;
     if (!isNegative)
         return TTP_Share(this->p1);
     else

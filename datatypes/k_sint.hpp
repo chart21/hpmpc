@@ -41,7 +41,7 @@ public:
 
     template<int id>
     void prepare_receive_and_replicate(UINT_TYPE value) {
-        if constexpr (id == PSELF) {
+        if constexpr (id == PSELF || PROTOCOL == 13) {
           if (current_phase == 1) {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp_u[DATTYPE] = {value};
             orthogonalize_arithmetic(temp_u, (DATATYPE*) temp_u);
@@ -108,16 +108,15 @@ public:
         return result;
     }
     
-        sint_t& operator+=(const sint_t& other) {
+        void operator+=(const sint_t& other) {
         for(int i = 0; i < BITLENGTH; ++i) {
             shares[i] = shares[i] - other[i];
         }
-        return *this;
     }
 
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i] *= PROMOTE(other);
+            shares[i].mult_public_fixed(PROMOTE(other));
         }
         }
 
@@ -127,11 +126,10 @@ public:
         return false; // Needed for Eigen optimizations
     }
 
-    sint_t& operator*=(const sint_t& other) {
+    void operator*=(const sint_t& other) {
         for(int i = 0; i < BITLENGTH; ++i) {
             shares[i] = shares[i] - other[i];
         }
-        return *this;
     }
 
 
@@ -141,7 +139,8 @@ public:
         }
         }
 
-        void complete_receive_from(int id) {
+        void complete_receive_from(int id) 
+        {
         for(int i = 0; i < BITLENGTH; ++i) {
             shares[i].template complete_receive_from<id>();
         }
@@ -153,9 +152,6 @@ public:
             }
         }
         
-        void prepare_reveal_to_all_single() const {
-                shares[0].prepare_reveal_to_all();
-        }
         
         void complete_reveal_to_all(UINT_TYPE result[DATTYPE]) const {
             DATATYPE temp[BITLENGTH];
@@ -168,7 +164,9 @@ public:
         UINT_TYPE complete_reveal_to_all_single() const {
             DATATYPE temp[BITLENGTH];
             alignas(sizeof(DATATYPE)) UINT_TYPE result[DATTYPE];
-               temp[0] = shares[0].complete_reveal_to_all();
+            for(int i = 0; i < BITLENGTH; ++i) {
+               temp[i] = shares[i].complete_reveal_to_all();
+            }
             unorthogonalize_arithmetic(temp, result);
             return result[0];
         }

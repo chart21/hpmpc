@@ -113,11 +113,14 @@ uint32_t arithmetic_right_shift_32(uint32_t value) {
 #elif BITLENGTH == 16
 
 uint16_t arithmetic_right_shift_16(uint16_t value) {
-    if (value & 0x8000) {
-        uint16_t mask = ~((1U << (16 - FRACTIONAL)) - 1);
-        return value >> FRACTIONAL | mask;
-    }
-    return value >> FRACTIONAL;
+    /* if (value & 0x8000) { */
+    /*     uint16_t mask = ~((1U << (16 - FRACTIONAL)) - 1); */
+    /*     return value >> FRACTIONAL | mask; */
+    /* } */
+    /* return value >> FRACTIONAL; */
+    int16_t temp = static_cast<int16_t>(value);
+    temp >>= FRACTIONAL;
+    return static_cast<uint16_t>(temp);
 }
 
 #elif BITLENGTH == 8
