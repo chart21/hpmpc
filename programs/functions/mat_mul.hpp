@@ -1821,5 +1821,4 @@ for(int i = 0; i < NUM_INPUTS; i++)
     if(current_phase == 1)
     std::cout << "P" << PARTY << ": Result " << i << ": "<< result_arr[i][0] << std::endl;
 }
-
 #endif

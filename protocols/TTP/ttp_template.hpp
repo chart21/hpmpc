@@ -52,9 +52,12 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-/* DATATYPE dummy = getRandomVal(0); */
-/* p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy)); */
+#if SIMULATE_MPC_FUNCTIONS == 1
+DATATYPE dummy = getRandomVal(0);
+p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy));
+#else
 p1 = TRUNC(p1);
+#endif
 }
 
     template <typename func_add, typename func_sub, typename func_trunc>
@@ -160,8 +163,12 @@ static void prepare_A2B_S1(int k, TTP_Share in[], TTP_Share out[])
         for (int j = 0; j < BITLENGTH; j++)
         {
             /* temp[j] = in[j].p1; */
-            temp[j] = in[j].p1;
-            /* in[j].p1 = FUNC_SUB32(in[j].p1,temp[j]); */
+            #if SIMULATE_MPC_FUNCTIONS == 1
+            temp[j] = getRandomVal(0);
+            in[j].p1 = OP_SUB(in[j].p1,temp[j]);
+            #else
+            temp[j] = SET_ALL_ZERO();
+            #endif
         }
     /* unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp); */
     /* orthogonalize_boolean((UINT_TYPE*) temp, temp); */
@@ -265,14 +272,10 @@ return TTP_Share(MULT(MULT(MULT(p1,b.p1),c.p1),d.p1));
 template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){}
 
+
 TTP_Share relu() const
 {
-    bool isNegative = (this->p1 & (DATATYPE(1) << (sizeof(DATATYPE)*8 - 1))) != 0;
-    if (!isNegative)
-        return TTP_Share(this->p1);
-    else
-        return TTP_Share(0);
-    }
-
+    return TTP_Share(relu_epi(p1));
+}    
 };
 

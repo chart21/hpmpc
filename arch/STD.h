@@ -93,21 +93,27 @@
 
 #if BITLENGTH == 64
 uint64_t arithmetic_right_shift_64(uint64_t value) {
-    if (value & 0x8000000000000000) {
-        uint64_t mask = ~((1ULL << (64 - FRACTIONAL)) - 1);
-        return value >> FRACTIONAL | mask;
-    }
-    return value >> FRACTIONAL;
+    /* if (value & 0x8000000000000000) { */
+    /*     uint64_t mask = ~((1ULL << (64 - FRACTIONAL)) - 1); */
+    /*     return value >> FRACTIONAL | mask; */
+    /* } */
+    /* return value >> FRACTIONAL; */
+int64_t temp = static_cast<int64_t>(value);
+    temp >>= FRACTIONAL;
+    return static_cast<uint64_t>(temp);
 }
 
 #elif BITLENGTH == 32
 
 uint32_t arithmetic_right_shift_32(uint32_t value) {
-    if (value & 0x80000000) {
-        uint32_t mask = ~((1U << (32 - FRACTIONAL)) - 1);
-        return value >> FRACTIONAL | mask;
-    }
-    return value >> FRACTIONAL;
+    /* if (value & 0x80000000) { */
+    /*     uint32_t mask = ~((1U << (32 - FRACTIONAL)) - 1); */
+    /*     return value >> FRACTIONAL | mask; */
+    /* } */
+    /* return value >> FRACTIONAL; */
+int32_t temp = static_cast<int32_t>(value);
+    temp >>= FRACTIONAL;
+    return static_cast<uint32_t>(temp);
 }
 
 #elif BITLENGTH == 16
@@ -125,13 +131,16 @@ uint16_t arithmetic_right_shift_16(uint16_t value) {
 
 #elif BITLENGTH == 8
 uint8_t arithmetic_right_shift_8(uint8_t value) {
-    if (value & 0x80) {
-        uint8_t mask = ~((1U << (8 - FRACTIONAL)) - 1);
-        return value >> FRACTIONAL | mask;
-    }
-    return value >> FRACTIONAL;
+    /* if (value & 0x80) { */
+    /*     uint8_t mask = ~((1U << (8 - FRACTIONAL)) - 1); */
+    /*     return value >> FRACTIONAL | mask; */
+    /* } */
+    /* return value >> FRACTIONAL; */
+/* } */
+int8_t temp = static_cast<int8_t>(value);
+    temp >>= FRACTIONAL;
+    return static_cast<uint8_t>(temp);
 }
-
 
 #endif
 
@@ -245,5 +254,12 @@ void unorthogonalize_boolean_full(DATATYPE *in, UINT_TYPE* data) {
   for (int i = 0; i < DATTYPE; i++)
     data[i] = in[i];
   real_ortho(data);
+}
+
+UINT_TYPE relu_epi(UINT_TYPE v) {
+    if (static_cast<INT_TYPE>(v) < 0) 
+        return 0;
+    else
+        return v;
 }
 

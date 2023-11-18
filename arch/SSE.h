@@ -7,6 +7,7 @@
 
 /* Including headers */
 #pragma once
+#include <cstdint>
 #include <stdlib.h>
 #include <x86intrin.h>
 #include <stdint.h>
@@ -72,16 +73,18 @@
 #define FUNC_SUB16 __mm_sub_epi16_wrapper
 #define FUNC_SUB32 __mm_sub_epi32_wrapper
 #define FUNC_SUB64 __mm_sub_epi64_wrapper
-#define FUNC_MULT16 __mm_mullo_epi16_wrapper
+#define FUNC_MUL16 __mm_mullo_epi16_wrapper
 #define FUNC_MUL32 __mm_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm_mullo_epi64_wrapper
 #define FUNC_DIV32 __mm_div_epi32_wrapper
 #define FUNC_DIV64 __mm_div_epi64_wrapper
+#define SHIFT_LEFT16 __mm_sla_epi16_wrapper
 #define SHIFT_LEFT32 __mm_sla_epi32_wrapper
 #define SHIFT_LEFT64 __mm_sla_epi64_wrapper
+#define SHIFT_RIGHT16 __mm_sra_epi16_wrapper
 #define SHIFT_RIGHT32 __mm_sra_epi32_wrapper
 #define SHIFT_RIGHT64 __mm_sra_epi64_wrapper
-// wrapper functions needed for some compilers
+
 
 inline __m128i __mm_and_si128_wrapper(__m128i a, __m128i b) {
   return _mm_and_si128(a,b);
@@ -151,6 +154,14 @@ inline __m128i __mm_div_epi32_wrapper(__m128i a, __m128i b) {
 inline __m128i __mm_div_epi64_wrapper(__m128i a, __m128i b) {
   /* return _mm_div_epi64(a,b); */ // not implemented it seems
     return a;
+}
+
+inline __m128i __mm_sra_epi16_wrapper(__m128i a) {
+    return _mm_srai_epi16(a,FRACTIONAL);
+}
+
+inline __m128i __mm_sla_epi16_wrapper(__m128i a) {
+    return _mm_slli_epi16(a,FRACTIONAL);
 }
 
 //shifting wrapper
@@ -481,4 +492,37 @@ void unorthogonalize_arithmetic(__m128i *in, UINT_TYPE *out, int k) {
     _mm_store_si128 ((__m128i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
 }
 
+#if BITLENGTH == 8
 
+// ReLU for 8-bit integers
+__m128i relu_epi(__m128i v) {
+    __m128i zero = _mm_setzero_si128();
+    return _mm_max_epi8(v, zero);
+}
+
+#elif BITLENGTH == 16
+
+// ReLU for 16-bit integers
+__m128i relu_epi(__m128i v) {
+    __m128i zero = _mm_setzero_si128();
+    return _mm_max_epi16(v, zero);
+}
+
+#elif BITLENGTH == 32
+
+// ReLU for 32-bit integers
+__m128i relu_epi(__m128i v) {
+    __m128i zero = _mm_setzero_si128();
+    return _mm_max_epi32(v, zero);
+}
+
+#elif BITLENGTH == 64
+
+// ReLU for 64-bit integers (special handling)
+__m128i relu_epi(__m128i v) {
+    __m128i zero = _mm_setzero_si128();
+    __m128i mask = _mm_cmpgt_epi32(v, zero); // This will compare only the lower 32 bits of each 64-bit element
+    return _mm_and_si128(v, mask);
+}
+
+#endif

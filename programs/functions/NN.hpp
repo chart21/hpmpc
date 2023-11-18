@@ -26,6 +26,7 @@
 #include "headers/simple_nn.h"
 #include "headers/config.h"
 
+#include "Relu.hpp"
 #define FUNCTION inference
 #define RESULTTYPE DATATYPE
 using namespace std;
@@ -38,9 +39,6 @@ void generateElements()
 
 }
 
-template<typename Datatype, typename Share>
-void RELU(const sint_t<Additive_Share<Datatype, Share>>* begin, sint_t<Additive_Share<Datatype, Share>>* end, const sint_t<Additive_Share<Datatype, Share>>* out)
-{}
 
     template<typename T>
 void load_model(const Config& cfg, SimpleNN<T>& model)
@@ -149,7 +147,7 @@ void inference(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<BITLENGTH, S>;
     using sint = sint_t<A>;
-    using modeltype = A;
+    using modeltype = sint;
 
     /* using Sharetype = Wrapper<DATATYPE>; */
     /* using F = FloatFixedConverter<FLOATTYPE, UINTTYPE, ANOTHER_FRACTIONAL_VALUE> ; */

@@ -74,6 +74,8 @@
 #define FUNC_MUL32 _mm512_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm512_mullo_epi64_wrapper
 
+#define SHIFT_RIGHT16 _mm512_srai_epi16_wrapper
+#define SHIFT_LEFT16 _mm512_slli_epi16_wrapper
 #define SHIFT_RIGHT32 _mm512_srai_epi32_wrapper
 #define SHIFT_LEFT32 _mm512_slli_epi32_wrapper
 #define SHIFT_RIGHT64 _mm512_srai_epi64_wrapper
@@ -139,6 +141,10 @@ inline __m512i _mm512_mullo_epi64_wrapper(__m512i a, __m512i b) {
 }
 
 // shift right arithmetic
+inline __m512i _mm512_srai_epi16_wrapper(__m512i a) {
+  return _mm512_srai_epi16(a,FRACTIONAL);
+}
+
 inline __m512i _mm512_srai_epi32_wrapper(__m512i a) {
   return _mm512_srai_epi32(a,FRACTIONAL);
 }
@@ -148,6 +154,10 @@ inline __m512i _mm512_srai_epi64_wrapper(__m512i a) {
 }
 
 // shift left arithmetic
+inline __m512i _mm512_slli_epi16_wrapper(__m512i a) {
+  return _mm512_slli_epi16(a,FRACTIONAL);
+}
+
 inline __m512i _mm512_slli_epi32_wrapper(__m512i a) {
   return _mm512_slli_epi32(a,FRACTIONAL);
 }
@@ -425,3 +435,36 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m512i *out, int k) {
 }
 
 
+#if BITLENGTH == 8
+
+// ReLU for 8-bit integers
+__m256i relu_epi(__m256i v) {
+    __m256i zero = _mm256_setzero_si256();
+    return _mm256_max_epi8(v, zero);
+}
+
+#elif BITLENGTH == 16
+
+// ReLU for 16-bit integers
+__m256i relu_epi(__m256i v) {
+    __m256i zero = _mm256_setzero_si256();
+    return _mm256_max_epi16(v, zero);
+}
+
+#elif BITLENGTH == 32
+
+// ReLU for 32-bit integers
+__m256i relu_epi(__m256i v) {
+    __m256i zero = _mm256_setzero_si256();
+    return _mm256_max_epi32(v, zero);
+}
+
+#elif BITLENGTH == 64
+
+// ReLU for 64-bit integers
+__m256i relu_epi(__m256i v) {
+    __m256i zero = _mm256_setzero_si256();
+    return _mm256_max_epi64(v, zero);
+}
+
+#endif

@@ -65,9 +65,10 @@
 #define FUNC_SUB64 _mm256_sub_epi64_wrapper
 #define FUNC_MUL32 _mm256_mullo_epi32_wrapper
 #define FUNC_MUL64 _mm256_mullo_epi64_wrapper
-
+#define SHIFT_LEFT16 _mm256_slli_epi16_wrapper
 #define SHIFT_LEFT32 _mm256_slli_epi32_wrapper
 #define SHIFT_LEFT64 _mm256_slli_epi64_wrapper
+#define SHIFT_RIGHT16 _mm256_sra_epi16_wrapper
 #define SHIFT_RIGHT32 _mm256_sra_epi32_wrapper
 #define SHIFT_RIGHT64 _mm256_sra_epi64_wrapper
 // wrapper functions needed for some compilers
@@ -137,6 +138,12 @@ inline __m256i _mm256_mullo_epi64_wrapper(__m256i a, __m256i b) {
 }
 
 // shift left arithmetic
+
+
+inline __m256i _mm256_slli_epi16_wrapper(__m256i a) {
+    return _mm256_slli_epi16(a, FRACTIONAL);
+}
+
 inline __m256i _mm256_slli_epi32_wrapper(__m256i a) {
     return _mm256_slli_epi32(a, FRACTIONAL);
 }
@@ -146,6 +153,10 @@ inline __m256i _mm256_slli_epi64_wrapper(__m256i a) {
 }
 
 // shift right arithemtic
+
+inline __m256i _mm256_sra_epi16_wrapper(__m256i a) {
+    return _mm256_srai_epi16(a, FRACTIONAL);
+}
 
 inline __m256i _mm256_sra_epi32_wrapper(__m256i a) {
     return _mm256_srai_epi32(a, FRACTIONAL);
@@ -389,5 +400,36 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m256i *out, int k) {
     _mm256_store_si256 ((__m256i*)&(out[i*(DATTYPE/BITLENGTH)]), in[i]);
 }
 
+#if BITLENGTH == 8
 
+// ReLU for 8-bit integers
+__m256i relu_epi(__m256i v) {
+    __m256i zero = _mm256_setzero_si256();
+    return _mm256_max_epi8(v, zero);
+}
 
+#elif BITLENGTH == 16
+
+// ReLU for 16-bit integers
+__m256i relu_epi(__m256i v) {
+    __m256i zero = _mm256_setzero_si256();
+    return _mm256_max_epi16(v, zero);
+}
+
+#elif BITLENGTH == 32
+// ReLU for 32-bit integers
+__m256i relu_epi(__m256i v) {
+    __m256i zero = _mm256_setzero_si256();
+    return _mm256_max_epi32(v, zero);
+}
+
+#elif BITLENGTH == 64
+
+// ReLU for 64-bit integers (special handling)
+__m256i relu_epi(__m256i v) {
+    __m256i zero = _mm256_setzero_si256();
+    __m256i mask = _mm256_cmpgt_epi32(v, zero); // Similar to SSE2, comparing lower 32 bits
+    return _mm256_and_si256(v, mask);
+}
+
+#endif

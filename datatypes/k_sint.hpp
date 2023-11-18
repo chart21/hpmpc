@@ -234,9 +234,14 @@ public:
         }
 
 static void RELU(const sint_t* begin, const sint_t* end,  sint_t* output){
-    int i = 0;
-    for (const sint_t* iter = begin; iter != end; ++iter) {
-            output[i++] = iter->relu();
+    /* int i = 0; */
+    /* for (const sint_t* iter = begin; iter != end; ++iter) { */
+    /*         output[i++] = iter->relu(); */
+    /* } */
+    int len = end - begin;
+    std::copy(begin, end, output);
+    for(int i = 0; i < len; ++i) {
+        output[i] = output[i].relu();
     }
 }
 

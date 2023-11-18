@@ -4,7 +4,7 @@
 #define PROTOCOL 13
 
 // Party ID (starting from 0)
-#define PARTY 0
+#define PARTY 2
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
@@ -14,13 +14,13 @@
 #define FUNCTION_IDENTIFIER 36
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 16
+#define DATTYPE 128
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 10
+#define NUM_INPUTS 2000000
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -94,7 +94,7 @@ int base_port = BASE_PORT; // temporary solution
 #define MAL 1
 #endif
 
-
+#define SIMULATE_MPC_FUNCTIONS 0
 
 #if BITLENGTH == 64
     #define INT_TYPE int64_t
