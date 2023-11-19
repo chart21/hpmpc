@@ -64,7 +64,7 @@ TTP_Share Add(TTP_Share b, func_add ADD) const
 TTP_Share prepare_dot(const TTP_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 #if SIMULATE_MPC_FUNCTIONS == 1
-    auto result = SUB( SUB(MULT(p1, b.p1), MULT(p1,b.p2)), ADD(MULT(p2,b.p1), MULT(p2,b.p2))); // (a + x)(b + y) = ab + ay + bx + xy
+    auto result = MULT(SUB(p1,p2),SUB(b.p1,b.p2)); // (a + x - x)(b + y - y) = ab
     return TTP_Share(result, SET_ALL_ZERO());
 #else
 return TTP_Share(MULT(p1,b.p1));
@@ -113,15 +113,17 @@ template <typename func_add, typename func_sub, typename func_mul>
     TTP_Share prepare_mult(TTP_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 #if SIMULATE_MPC_FUNCTIONS == 1
-    auto result = SUB( SUB(MULT(p1, b.p1), MULT(p1,b.p2)), ADD(MULT(p2,b.p1), MULT(p2,b.p2))); // (a + x)(b + y) = ab + ay + bx + xy
-    auto randVal = getRandomVal(0);
-    return TTP_Share(ADD(result, randVal), randVal) ;
+    auto result = MULT(SUB(p1,p2),SUB(b.p1,b.p2));
+    auto randomVal = getRandomVal(0);
+    return TTP_Share(ADD(result, randomVal), randomVal);
 #else
 return TTP_Share(MULT(p1,b.p1));
 #endif
 }
 template <typename func_add, typename func_sub>
-void complete_mult(func_add ADD, func_sub SUB){}
+void complete_mult(func_add ADD, func_sub SUB){
+
+}
 
 
 void prepare_reveal_to_all() const
@@ -176,7 +178,7 @@ if constexpr(id == PSELF)
 template <int id,typename func_add, typename func_sub>
 void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-    prepare_receive_from<id>(get_input_live(), ADD, SUB);
+    prepare_receive_from<id>(get_input_live(), ADD, SUB); //TODO: change such that input is only fetched if Party is PSELF
 }
 
 
@@ -192,6 +194,7 @@ void complete_receive_from(func_add ADD, func_sub SUB)
 #else
     #if SIMULATE_MPC_FUNCTIONS == 1
     p2 = getRandomVal(0);
+    p1 = ADD(p1, p2);
     #endif
 #endif
 }
@@ -237,7 +240,11 @@ static void prepare_A2B_S1(int k, TTP_Share in[], TTP_Share out[])
             /*     temp[j] = getRandomVal(0); */
             /*     in[j].p1 = OP_SUB(in[j].p1,temp[j]); */
             /* #else */
+            #if SIMULATE_MPC_FUNCTIONS == 1
+                temp[j] = OP_SUB( SET_ALL_ZERO(), in[j].p2);
+            #else
                 temp[j] = SET_ALL_ZERO();
+            #endif
             /* #endif */
         }
     /* unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp); */
@@ -302,7 +309,11 @@ void prepare_bit_injection_S1(TTP_Share out[])
 void prepare_bit_injection_S2(TTP_Share out[])
 {
     Datatype temp[BITLENGTH]{0};
+#if SIMULATE_MPC_FUNCTIONS == 1
+    temp[BITLENGTH - 1] = FUNC_XOR(p1,p2);
+#else
     temp[BITLENGTH - 1] = p1;
+#endif
     unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
     orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);
     for(int i = 0; i < BITLENGTH; i++)
@@ -339,33 +350,64 @@ static void complete_bit_injection_S2(TTP_Share out[])
 template <typename func_add, typename func_sub, typename func_mul>
     TTP_Share prepare_dot3(TTP_Share b, TTP_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
+#if SIMULATE_MPC_FUNCTIONS == 1
+    auto result = MULT( MULT(SUB(p1,p2),SUB(b.p1,b.p2)),SUB(c.p1,c.p2));
+    return TTP_Share(result,SET_ALL_ZERO());
+#else
 return TTP_Share(MULT(MULT(p1,b.p1),c.p1));
+#endif
 }
 
 
 template <typename func_add, typename func_sub, typename func_mul>
     TTP_Share prepare_mult3(TTP_Share b, TTP_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
+#if SIMULATE_MPC_FUNCTIONS == 1
+    auto result = MULT( MULT(SUB(p1,p2),SUB(b.p1,b.p2)),SUB(c.p1,c.p2));
+    return TTP_Share(result,SET_ALL_ZERO());
+#else
 return TTP_Share(MULT(MULT(p1,b.p1),c.p1));
+#endif
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult3(func_add ADD, func_sub SUB){}
+void complete_mult3(func_add ADD, func_sub SUB){
+#if SIMULATE_MPC_FUNCTIONS == 1
+    p2 = getRandomVal(0);
+    p1 = ADD(p1,p2);
+#endif
+
+}
 
 template <typename func_add, typename func_sub, typename func_mul>
     TTP_Share prepare_dot4(TTP_Share b, TTP_Share c, TTP_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
+#if SIMULATE_MPC_FUNCTIONS == 1
+    auto result = MULT( MULT(MULT(SUB(p1,p2),SUB(b.p1,b.p2)),SUB(c.p1,c.p2)),SUB(d.p1,d.p2));
+    return TTP_Share(result,SET_ALL_ZERO());
+#else
 return TTP_Share(MULT(MULT(MULT(p1,b.p1),c.p1),d.p1));
+#endif
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
     TTP_Share prepare_mult4(TTP_Share b, TTP_Share c, TTP_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
+#if SIMULATE_MPC_FUNCTIONS == 1
+    auto result = MULT( MULT(MULT(SUB(p1,p2),SUB(b.p1,b.p2)),SUB(c.p1,c.p2)),SUB(d.p1,d.p2));
+    return TTP_Share(result,SET_ALL_ZERO());
+#else
 return TTP_Share(MULT(MULT(MULT(p1,b.p1),c.p1),d.p1));
+#endif
 }
 
 template <typename func_add, typename func_sub>
-void complete_mult4(func_add ADD, func_sub SUB){}
+void complete_mult4(func_add ADD, func_sub SUB){
+#if SIMULATE_MPC_FUNCTIONS == 1
+    p2 = getRandomVal(0);
+    p1 = ADD(p1,p2);
+#endif
+}
 
 
 TTP_Share relu() const

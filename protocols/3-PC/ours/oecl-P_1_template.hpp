@@ -105,13 +105,13 @@ void complete_mult(func_add ADD, func_sub SUB)
 p1 = SUB(receive_from_live(P_2),p1);
 }
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 }    
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PRE == 1 && (OPT_SHARE == 0 || SHARE_PREP == 1) // OPT_SHARE is input dependent, can only be sent in prepocessing phase if allowed
 return SUB(p1, pre_receive_from_live(P_0));

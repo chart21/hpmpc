@@ -133,7 +133,7 @@ return OECL0_Share(getRandomVal(P_2),getRandomVal(P_1));
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB){}
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
         #if PRE == 1 && (OPT_SHARE == 0 || SHARE_PREP == 1)
     pre_send_to_live(P_1, p1);
@@ -147,7 +147,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PRE == 1 && HAS_POST_PROTOCOL == 1
 store_output_share(p2);

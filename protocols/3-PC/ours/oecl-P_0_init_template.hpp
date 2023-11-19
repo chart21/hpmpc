@@ -78,7 +78,7 @@ void complete_mult(func_add ADD, func_sub SUB){}
 
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
     {
     for(int t = 0; t < 2; t++) 
     {
@@ -93,7 +93,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
     {
 /* for(int t = 0; t < num_players-1; t++) */ 
 /*     receiving_args[t].elements_to_rec[rounds-1]+=1; */
