@@ -1,6 +1,6 @@
 #pragma once
 
-// 1: Sharemind (no support for dot products), 2: Replicated, 3: Astra, 4: ODUP (depricated), 5: OURS (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: Ours: Base (4-PC), 11: Ours: Het (4-PC), 12: Ours: Off/On (4-PC), 13: Simulator
+
 #define PROTOCOL 13
 
 // Party ID (starting from 0)
@@ -11,16 +11,16 @@
 //7-9: Debug: 7: 1-bit, 8: 32-bit, 9: 64-bit
 //13,14: Dot product, 16,17 RELU, 20,21 Conv Forward (*10), Conv Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards (Different Sizes), 25,26 Forward Backwards (Different Sizes), 27 Mat Mul Eigen, 28 max/min/argmax/argmin, 29 mult3, 30 mult 4, 31-34 dot2/dot3/dot4/dotmixed, 
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
-#define FUNCTION_IDENTIFIER 35
+#define FUNCTION_IDENTIFIER 36
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 32
+#define DATTYPE 64
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 20
+#define NUM_INPUTS 2
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -43,7 +43,7 @@
 // Print additional info?
 #define PRINT 0
 
-#define FRACTIONAL 0 // fractional bits for fixed point numbers
+#define FRACTIONAL 12 // fractional bits for fixed point numbers
 
 // Starting port for required port range of the sockets
 #define BASE_PORT 11000
@@ -79,9 +79,9 @@ int base_port = BASE_PORT; // temporary solution
 #define INPUT 'r'
 
 // Bitlength of integers (currently not used)
-#define BITLENGTH 32
+#define BITLENGTH 64
 // Reduced Bitlength that might be used for RELU, etc
-#define REDUCED_BITLENGTH 32
+#define REDUCED_BITLENGTH 64
 
 #define MULTI_INPUT 1 // activate multi input Multiplication gates?
 

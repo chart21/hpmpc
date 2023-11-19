@@ -73,12 +73,12 @@ public:
         Share_Type::template complete_receive_from<id>(OP_ADD, OP_SUB);
     }
     
-    void prepare_reveal_to_all()
+    void prepare_reveal_to_all() const
     {
         Share_Type::prepare_reveal_to_all();
     }
 
-    Datatype complete_reveal_to_all()
+    Datatype complete_reveal_to_all() const
     {
         return Share_Type::complete_Reveal(OP_ADD, OP_SUB);
     }

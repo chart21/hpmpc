@@ -12,8 +12,8 @@ Datatype get_p1()
     return SET_ALL_ZERO();
 }
 
-    template <typename func_mul, typename func_trunc>
-TTP_init mult_public_fixed(const DATATYPE b, func_mul MULT, func_trunc TRUNC) const
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+TTP_init mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
    return TTP_init();
 }
@@ -112,7 +112,8 @@ void complete_receive_from(func_add ADD, func_sub SUB)
 #if PARTY == 2 && PROTOCOL != 13
 if constexpr(id == PSELF)
     return;
-receive_from_(id);
+else
+    receive_from_(id);
 #endif
 }
 

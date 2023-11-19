@@ -37,7 +37,7 @@ public:
         
         Additive_Share operator*(const DATATYPE other) const
         {
-        return Additive_Share(Share_Type::mult_public_fixed(other, OP_MULT, OP_TRUNC));
+        return Additive_Share(Share_Type::mult_public_fixed(other, OP_MULT, OP_ADD, OP_SUB, OP_TRUNC));
         }
 
         void operator*=(const DATATYPE other) 
@@ -48,7 +48,7 @@ public:
 
     void mult_public_fixed(const DATATYPE b)
     {
-        *this = Share_Type::mult_public_fixed(b, OP_MULT, OP_TRUNC);
+        *this = Share_Type::mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, OP_TRUNC);
     }
     
     bool operator==(const Additive_Share& b) const

@@ -39,11 +39,14 @@ TTP_Share Not() const
 #endif
 }
 
-    template <typename func_mul, typename func_trunc>
-TTP_Share mult_public_fixed(const Datatype b, func_mul MULT, func_trunc TRUNC) const
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+TTP_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
 #if SIMULATE_MPC_FUNCTIONS == 1
-    return TTP_Share(TRUNC(MULT(p1, b)), TRUNC(MULT(p2, b)));
+    /* return TTP_Share(TRUNC(MULT(p1, b)), TRUNC(MULT(p2, b))); */
+    auto randomVal = getRandomVal(0);
+    auto val = TRUNC(MULT(SUB(p1,p2), b));
+    return TTP_Share(ADD(val, randomVal), randomVal);
 #else
    return TTP_Share(TRUNC(MULT(p1, b)));
 #endif
@@ -91,13 +94,13 @@ void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 /* std::cout << "dummy: " << dummy << std::endl; */
 /* std::cout << "p1 (before): " << p1 << std::endl; */
 /* p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy)); */
-p1 = ADD(p1,PROMOTE(1)); // to avoid negative values
+/* p1 = ADD(p1,PROMOTE(1)); // to avoid negative values */
 /* std::cout << "p1 (after): " << p1 << std::endl; */
 #else
 /* std::cout << "p1 (before): " << p1 << std::endl; */
-p1 = TRUNC(p1);
-/* Datatype dummy = getRandomVal(0); */
-/* p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy)); */
+/* p1 = TRUNC(p1); */
+Datatype dummy = getRandomVal(0);
+p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy));
 /* p1 = ADD(p1,PROMOTE(1)); // to avoid negative values */
 /* std::cout << "p1 (after): " << p1 << std::endl; */
 #endif
@@ -178,7 +181,10 @@ if constexpr(id == PSELF)
 template <int id,typename func_add, typename func_sub>
 void prepare_receive_from(func_add ADD, func_sub SUB)
 {
-    prepare_receive_from<id>(get_input_live(), ADD, SUB); //TODO: change such that input is only fetched if Party is PSELF
+if constexpr(id == PSELF || PROTOCOL == 13)
+    prepare_receive_from<id>(get_input_live(), ADD, SUB); //Careful: Simulator is always fetching inputs
+else
+    prepare_receive_from<id>(SET_ALL_ZERO(), ADD, SUB);
 }
 
 
@@ -186,7 +192,9 @@ template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)
 {
 #if PARTY == 2 && PROTOCOL != 13
+if constexpr(id != PSELF)
     p1 = receive_from_live(id);
+
     #if SIMULATE_MPC_FUNCTIONS == 1
     p2 = getRandomVal(0);
     p1 = ADD(p1, p2);
@@ -412,7 +420,13 @@ void complete_mult4(func_add ADD, func_sub SUB){
 
 TTP_Share relu() const
 {
+#if SIMULATE_MPC_FUNCTIONS == 1
+    auto result = relu_epi(OP_SUB(p1,p2));
+    auto randVal = getRandomVal(0);
+    return TTP_Share(OP_ADD(result,randVal),randVal);
+#else
     return TTP_Share(relu_epi(p1));
+#endif
 }    
 };
 

@@ -140,6 +140,14 @@ public:
             shares[i].complete_mult();
         }
         }
+       
+        sint_t prepare_dot(const sint_t& other) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i].prepare_dot(other[i]);
+        }
+        return result;
+        }
 
         void complete_receive_from(int id) 
         {

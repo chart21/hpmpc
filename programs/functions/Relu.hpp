@@ -58,8 +58,8 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     using Bitset = sbitset_t<k, S>;
     using sint = sint_t<A>;
     
-    Bitset *s1 = new Bitset[NUM_INPUTS];
-    Bitset *s2 = new Bitset[NUM_INPUTS];
+    Bitset *s1 = new Bitset[len];
+    Bitset *s2 = new Bitset[len];
     for(int i = 0; i < len; i++)
     {
         s1[i] = Bitset::prepare_A2B_S1( (S*) val[i].get_share_pointer());
