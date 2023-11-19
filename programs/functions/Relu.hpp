@@ -30,6 +30,24 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
         val[i] = val[i].relu();
 }
 
+template<typename Share, typename Datatype>
+static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_Share<Datatype, Share>* end, Additive_Share<Datatype, Share>*  output){
+    std::copy(begin, end, output);
+    int len = end - begin;
+    /* for (const sint_t* iter = begin; iter != end; ++iter) { */
+            /* output[i++] = iter->relu(); */
+    RELU_range_in_place<BITLENGTH,Share>(output, len);
+    /* } */
+}
+
+template<int k,typename Share, typename Datatype>
+void RELU_range_in_place(Additive_Share<Datatype, Share>* val, int len)
+{
+    for(int i = 0; i < len; i++)
+        val[i] = val[i].relu();
+}
+
+
 #else
 
 template<int k,typename Share, typename Datatype>
