@@ -12,16 +12,6 @@
 #include "ppa.hpp"
 #include "ppa_msb_unsafe.hpp"
 #include "ppa_msb_4_way.hpp"
-template<typename Share, typename Datatype>
-static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const sint_t<Additive_Share<Datatype, Share>>* end, sint_t<Additive_Share<Datatype, Share>>*  output){
-    std::copy(begin, end, output);
-    int len = end - begin;
-    /* for (const sint_t* iter = begin; iter != end; ++iter) { */
-            /* output[i++] = iter->relu(); */
-    RELU_range_in_place<REDUCED_BITLENGTH,Share>(output, len);
-    /* } */
-}
-
 #if PROTOCOL_LIVE == TTP_Share && SIMULATE_MPC_FUNCTIONS == 0
 template<int k,typename Share, typename Datatype>
 void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
@@ -140,3 +130,15 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 }
     
 #endif
+
+template<typename Share, typename Datatype>
+static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const sint_t<Additive_Share<Datatype, Share>>* end, sint_t<Additive_Share<Datatype, Share>>*  output){
+    std::copy(begin, end, output);
+    int len = end - begin;
+    /* for (const sint_t* iter = begin; iter != end; ++iter) { */
+            /* output[i++] = iter->relu(); */
+    RELU_range_in_place<REDUCED_BITLENGTH,Share>(output, len);
+    /* } */
+}
+
+
