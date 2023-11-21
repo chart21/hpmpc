@@ -18,7 +18,7 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const si
     int len = end - begin;
     /* for (const sint_t* iter = begin; iter != end; ++iter) { */
             /* output[i++] = iter->relu(); */
-    RELU_range_in_place<BITLENGTH,Share>(output, len);
+    RELU_range_in_place<REDUCED_BITLENGTH,Share>(output, len);
     /* } */
 }
 
@@ -135,6 +135,7 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     for(int i = 0; i < len; i++)
     {
         val[i].complete_mult();
+        /* val[i] -= sint(1); // To counter the +1 in TRUNC */
     }
 }
     

@@ -8,7 +8,7 @@ OECL2_init() {}
 
 
 
-OECL2_init public_val(Datatype a)
+static OECL2_init public_val(Datatype a)
 {
     return OECL2_init();
 }
@@ -33,6 +33,16 @@ OECL2_init prepare_dot(const OECL2_init b, func_add ADD, func_sub SUB, func_mul 
     return OECL2_init();
 }
 
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL2_init mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if PRE == 1
+    pre_receive_from_(P_0);
+#else
+    receive_from_(P_0);
+#endif
+    return OECL2_init();
+}
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
@@ -113,6 +123,12 @@ if constexpr(id == P_2)
 
 }
 }
+
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
+    {
+        prepare_receive_from<id>(ADD, SUB);
+    }
 
 
     template <int id, typename func_add, typename func_sub>

@@ -6,7 +6,7 @@ class OECL1_init
 public:
 OECL1_init() {}
 
-OECL1_init public_val(Datatype a)
+static OECL1_init public_val(Datatype a)
 {
     return OECL1_init();
 }
@@ -21,6 +21,12 @@ OECL1_init Add(OECL1_init b, func_add ADD) const
 {
    return OECL1_init();
 }
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL1_init mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    return OECL1_init();
+} 
 
     template <typename func_add, typename func_sub, typename func_mul>
 OECL1_init prepare_dot(const OECL1_init b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -93,6 +99,12 @@ if constexpr(id == P_1)
 
 }
 }
+    
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
+    {
+        prepare_receive_from<id>(ADD, SUB);
+    }
 
 
     template <int id, typename func_add, typename func_sub>

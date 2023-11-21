@@ -19,13 +19,27 @@ private:
     OECL0_Share(Datatype p1, Datatype p2) : p1(p1), p2(p2) {}
     OECL0_Share(Datatype p1) : p1(p1) {}
 
-
-    
-
-OECL0_Share public_val(Datatype a)
+    static OECL0_Share public_val(Datatype a)
 {
     return OECL0_Share(SET_ALL_ZERO(),SET_ALL_ZERO());
 }
+
+
+
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL0_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = MULT(ADD(p1,p2),b);
+    OECL0_Share res;
+    res.p1 = TRUNC(SUB(result,p1));
+    res.p2 = getRandomVal(P_1);
+#if PRE == 1
+    pre_send_to_live(P_2, res.p1);
+#else
+    send_to_live(P_2, res.p1);
+#endif
+    return res;
+} 
 
 OECL0_Share Not() const
 {
@@ -161,13 +175,13 @@ return SUB(receive_from_live(P_2),p2);
 }
 
 template <int id,typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == P_0)
 {
 #if OPT_SHARE == 1
     p2 = getRandomVal(P_1); // r0,1
-    p1 = SUB(SET_ALL_ZERO(), ADD(get_input_live(),p2)); // share -(a + r0,1)
+    p1 = SUB(SET_ALL_ZERO(), ADD(val,p2)); // share -(a + r0,1)
     #if PRE == 1 && SHARE_PREP == 1
         pre_send_to_live(P_2, p1); // share -(a + r0,1) to P_2
     #else
@@ -176,7 +190,7 @@ if constexpr(id == P_0)
 #else
     p1 = getRandomVal(P_2); // P_1 does not need to the share -> thus not srng but 2 -> with updated share conversion it needs it
     p2 = getRandomVal(P_1);
-    Datatype input = get_input_live();
+    Datatype input = val;
     #if PRE == 1
     pre_send_to_live(P_1, ADD(p1,input));
     pre_send_to_live(P_2, ADD(p2,input));
@@ -195,6 +209,15 @@ else if constexpr(id == P_2)// id ==2
     p1 = getRandomVal(P_2);
     p2 = SET_ALL_ZERO();
 }
+}
+    
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
+{
+    if constexpr(id == PSELF)
+        prepare_receive_from<id>(get_input_live(), ADD, SUB);
+    else
+        prepare_receive_from<id>(SET_ALL_ZERO(), ADD, SUB);
 }
 
 template <int id, typename func_add, typename func_sub>

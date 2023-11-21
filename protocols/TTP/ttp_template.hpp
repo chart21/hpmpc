@@ -98,9 +98,9 @@ void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 /* std::cout << "p1 (after): " << p1 << std::endl; */
 #else
 /* std::cout << "p1 (before): " << p1 << std::endl; */
-/* p1 = TRUNC(p1); */
-Datatype dummy = getRandomVal(0);
-p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy));
+p1 = TRUNC(p1);
+/* Datatype dummy = getRandomVal(0); */
+/* p1 = ADD(TRUNC(SUB(p1,dummy)), TRUNC(dummy)); */
 /* p1 = ADD(p1,PROMOTE(1)); // to avoid negative values */
 /* std::cout << "p1 (after): " << p1 << std::endl; */
 #endif

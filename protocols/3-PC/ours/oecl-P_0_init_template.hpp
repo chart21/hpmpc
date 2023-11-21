@@ -8,7 +8,7 @@ OECL0_init() {}
 
 
 
-OECL0_init public_val(Datatype a)
+static OECL0_init public_val(Datatype a)
 {
     return OECL0_init();
 }
@@ -29,6 +29,17 @@ OECL0_init prepare_dot(const OECL0_init b, func_add ADD, func_sub SUB, func_mul 
 {
     return OECL0_init();
 }
+    
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL0_init mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if PRE == 1
+    pre_send_to_(P_2);
+#else
+    send_to_(P_2);
+#endif
+    return OECL0_init();
+} 
 
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
@@ -109,9 +120,6 @@ template <int id,typename func_add, typename func_sub>
 void prepare_receive_from(func_add ADD, func_sub SUB)
     {
 
-/* return; */
-/* old: */
-
 if constexpr(id == P_0)
 {
 #if OPT_SHARE == 1
@@ -132,9 +140,13 @@ if constexpr(id == P_0)
 
 #endif
 }
-else
-{}
 } 
+
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
+    {
+        prepare_receive_from<id>(ADD, SUB);
+    }
 
     template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)

@@ -74,12 +74,11 @@ public:
           if (current_phase == 1) {
             /* prepare_receive_from<id>(PROMOTE(value)); */
             prepare_receive_from<id>(PROMOTE(value)); 
+            return;
           }
         }
-        else {
             prepare_receive_from<id>();
         }
-    }
 
 
     template <int id>

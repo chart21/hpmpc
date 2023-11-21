@@ -48,11 +48,10 @@ public:
             alignas(sizeof(DATATYPE)) UINT_TYPE temp_u[DATTYPE] = {value};
             orthogonalize_arithmetic(temp_u, (DATATYPE*) temp_u);
             prepare_receive_from<id>((DATATYPE*) temp_u);
-          }
+            return;
+            }
         }
-        else {
             prepare_receive_from<id>();
-        }
     }
 
     template<int id>

@@ -77,9 +77,12 @@ fi
 
 if [ "$ssl" = "1" ]
 then
-    flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+#g++\ -march=native\ -O3\ -std=c++20\ -pthread\ -lssl\ -lcrypto\ main.cpp\ -I\ SimpleNN\ -o\ nn.o
+    flags="-march=native -O3 -std=c++2a -pthread -lssl -lcrypto -I SimpleNN"
+    #flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
 else
-    flags="-march=native -Ofast -std=c++2a -pthread"
+    flags="-march=native -O3 -std=c++2a -pthread -I SimpleNN"
+    #flags="-march=native -Ofast -std=c++2a -pthread"
 fi
 
 if [ ! -z "$GNU_OPTIONS" ]

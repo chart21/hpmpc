@@ -11,7 +11,7 @@ OECL2_Share() {}
 OECL2_Share(Datatype p1) : p1(p1) {}
 OECL2_Share(Datatype p1, Datatype p2) : p1(p1), p2(p2) {}
 
-OECL2_Share public_val(Datatype a)
+static OECL2_Share public_val(Datatype a)
 {
     return OECL2_Share(a,SET_ALL_ZERO());
 }
@@ -26,6 +26,16 @@ OECL2_Share Add(OECL2_Share b, func_add ADD) const
 {
     return OECL2_Share(ADD(p1,b.p1),ADD(p2,b.p2));
 }
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL2_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = MULT(ADD(p1,p2),b);
+    OECL2_Share res;
+    res.p2 = receive_from_live(P_0);
+    res.p1 = SUB(TRUNC(result),res.p2);
+    return res;
+} 
 
     template <typename func_add, typename func_sub, typename func_mul>
 void prepare_dot_add(OECL2_Share a, OECL2_Share b , OECL2_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
@@ -128,11 +138,11 @@ return SUB(p1, receive_from_live(P_0));
 
 
     template <int id,typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == P_2)
 {
-    p1 = get_input_live();     
+    p1 = val;
     p2 = getRandomVal(P_0);
     /* p1 = getRandomVal(0); *1/ */
     send_to_live(P_1, ADD(p1,p2));
@@ -158,6 +168,16 @@ p2 = SET_ALL_ZERO();
 }
 
 }
+    
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
+{
+    if constexpr(id == PSELF)
+        prepare_receive_from<id>(get_input_live(), ADD, SUB);
+    else
+        prepare_receive_from<id>(SET_ALL_ZERO(), ADD, SUB);
+}
+
 
 
 static void send()
