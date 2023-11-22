@@ -175,7 +175,7 @@ void inference(DATATYPE* res)
 	cfg.parse(argc, argv);
 	cfg.print_config();
 
-	int n_train = 60000, n_test = 10000, ch = 1, h = 28, w = 28;
+	int n_train = 60000, n_test = 32, ch = 1, h = 28, w = 28;
 
 	MatX<float> train_X, test_X;
 

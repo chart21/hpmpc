@@ -31,8 +31,8 @@ OECL0_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, fun
 {
     auto result = MULT(ADD(p1,p2),b);
     OECL0_Share res;
-    res.p1 = TRUNC(SUB(result,p1));
     res.p2 = getRandomVal(P_1);
+    res.p1 = SUB(TRUNC(result),res.p2);
 #if PRE == 1
     pre_send_to_live(P_2, res.p1);
 #else
