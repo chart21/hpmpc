@@ -152,6 +152,15 @@ public:
         #endif
     }
     
+    void mask_and_send_dot_without_trunc()
+    {
+        #if PROTOCOL == 2
+        Share_Type::mask_and_send_dot(OP_SUB, OP_MULT); // Replicated needs custom overloads because division by 3 is required
+        #else
+        Share_Type::mask_and_send_dot(OP_ADD, OP_SUB);
+        #endif
+    }
+    
     void complete_mult()
     {
     #if PROTOCOL == 1 // Sharemind needs custom overload

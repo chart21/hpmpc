@@ -222,6 +222,12 @@ public:
             for(int i = 0; i < BITLENGTH; ++i) 
                 shares[i].mask_and_send_dot();
         }
+        
+        void mask_and_send_dot_without_trunc()
+        {
+            for(int i = 0; i < BITLENGTH; ++i) 
+                shares[i].mask_and_send_dot_without_trunc();
+        }
 
         void complete_bit_injection_S2() {
             Share::complete_bit_injection_S2(shares);

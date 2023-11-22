@@ -134,13 +134,14 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 
     for(int i = 0; i < len; i++)
     {
-        val[i] = result[i] * val[i];
+        val[i] = result[i].prepare_dot(val[i]);
+        val[i].mask_and_send_dot();
     }
     delete[] result;
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        val[i].complete_mult_without_trunc();
+        val[i].complete_mult();
         /* val[i] -= sint(1); // To counter the +1 in TRUNC */
     }
     Share::communicate();
