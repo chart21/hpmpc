@@ -189,11 +189,14 @@ void inference(DATATYPE* res)
         MatX<modeltype> train_XX = train_X.unaryExpr([](float val) { 
                 modeltype tmp;
                 tmp.template prepare_receive_and_replicate<P_0>(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val));
-                modeltype::communicate();
-                tmp.template complete_receive_from<P_0>();
                 return tmp;
     /* return sint(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); */
 });
+
+                modeltype::communicate();
+            for (int i = 0; i < train_XX.size(); i++) {
+                train_XX(i).template complete_receive_from<P_0>();
+            }
 
 		train_loader.load(train_XX, train_Y, cfg.batch, ch, h, w, cfg.shuffle_train);
 	}
