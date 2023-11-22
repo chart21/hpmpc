@@ -33,10 +33,10 @@
 #define USE_SSL 0
 
 // How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered
-#define SEND_BUFFER 1000
+#define SEND_BUFFER 0
 
 // How many reciving messages should be buffered until the main thread is signaled that data is ready? 0 means that all data of a communication round needs to be ready before the main thread is signaled.
-#define RECV_BUFFER 1000
+#define RECV_BUFFER 0
 
 // How many messages should be buffered until a combined hash is performed? 0 means all hashes are calculated at the very end of the protocol.
 #define VERIFY_BUFFER 0
@@ -50,7 +50,7 @@
 int base_port = BASE_PORT; // temporary solution
 
 // Timeout in seconds when connecting to a socket
-#define CONNECTION_TIMEOUT 30 
+#define CONNECTION_TIMEOUT 500
 
 // Timeout in millisecond before attempting to connect again to a socket
 #define CONNECTION_RETRY 5

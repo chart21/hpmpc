@@ -139,6 +139,13 @@ public:
             shares[i].complete_mult();
         }
         }
+
+        void complete_mult_without_trunc(){
+        for(int i = 0; i < BITLENGTH; ++i) {
+            shares[i].complete_mult_without_trunc();
+        }
+
+        }
        
         sint_t prepare_dot(const sint_t& other) const {
         sint_t result;
@@ -201,7 +208,7 @@ public:
 
         void complete_XOR(const sint_t<Share> &a, const sint_t<Share> &b) {
             for(int i = 0; i < BITLENGTH; ++i) {
-                shares[i].complete_mult();
+                shares[i].complete_mult_without_trunc();
                 shares[i] = a[i] + b[i] - shares[i] - shares[i];
             }
         }

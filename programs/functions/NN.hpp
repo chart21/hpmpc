@@ -9,6 +9,7 @@
 #include "../../protocols/Matrix_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
+#include "../../datatypes/k_clear.hpp"
 /* #include "boolean_adder.hpp" */
 #include "boolean_adder_bandwidth.hpp"
 
@@ -147,7 +148,9 @@ void inference(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<BITLENGTH, S>;
     using sint = sint_t<A>;
-    using modeltype = sint;
+    using modeltype = sint_t<A>;
+    /* const int parallel_factor = 1; */
+    /* using cleartype = k_clear<A>; */
 
     /* using Sharetype = Wrapper<DATATYPE>; */
     /* using F = FloatFixedConverter<FLOATTYPE, UINTTYPE, ANOTHER_FRACTIONAL_VALUE> ; */
@@ -206,8 +209,32 @@ void inference(DATATYPE* res)
                 tmp.template complete_receive_from<P_0>();
                 return tmp;
 
-    /* return sint(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); */
+    /* /1* return sint(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); *1/ */
     });
+
+    /* MatX<modeltype> test_XX(test_X.rows()/DATTYPE, test_X.cols()); */
+    /* for (int j = 0; j < test_X.cols(); j++) { */
+    /*     for (int i = 0; i < test_X.rows(); i+=DATTYPE) { */
+    /*         if(i+DATTYPE > test_X.rows()) { */
+    /*             break; // do not process leftovers */
+    /*         } */
+    /*     alignas(sizeof(DATATYPE)) UINT_TYPE tmp[DATTYPE]; */
+    /*     alignas(sizeof(DATATYPE)) DATATYPE tmp2[BITLENGTH]; */
+    /*     for (int k = 0; k < DATTYPE; ++k) { */
+    /*         tmp[k] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(test_X(i+k, j)); */
+    /*     } */
+    /*     orthogonalize_arithmetic(tmp, tmp2); */
+    /*     test_XX(i / DATTYPE, j).template prepare_receive_from<P_0>(tmp2); */
+    /*     } */
+    /* } */
+    /* modeltype::communicate(); */
+    /* for (int j = 0; j < test_XX.cols(); ++j) { */
+    /*     for (int i = 0; i < test_XX.rows(); ++i) { */
+    /*         test_XX(i, j).template complete_receive_from<P_0>(); */
+    /*     } */
+    /* } */
+    
+
 	test_loader.load(test_XX, test_Y, cfg.batch, ch, h, w, cfg.shuffle_test);
 
     std::cout << "Dataset loaded." << std::endl;

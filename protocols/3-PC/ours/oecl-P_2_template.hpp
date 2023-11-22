@@ -32,7 +32,11 @@ OECL2_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, fun
 {
     auto result = MULT(ADD(p1,p2),b);
     OECL2_Share res;
+#if PRE == 1
+    res.p2 = pre_receive_from_live(P_0);
+#else
     res.p2 = receive_from_live(P_0);
+#endif
     res.p1 = SUB(TRUNC(result),res.p2);
     return res;
 } 

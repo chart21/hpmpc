@@ -20,15 +20,6 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
         val[i] = val[i].relu();
 }
 
-template<typename Share, typename Datatype>
-static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_Share<Datatype, Share>* end, Additive_Share<Datatype, Share>*  output){
-    std::copy(begin, end, output);
-    int len = end - begin;
-    /* for (const sint_t* iter = begin; iter != end; ++iter) { */
-            /* output[i++] = iter->relu(); */
-    RELU_range_in_place<BITLENGTH,Share>(output, len);
-    /* } */
-}
 
 template<int k,typename Share, typename Datatype>
 void RELU_range_in_place(Additive_Share<Datatype, Share>* val, int len)
@@ -47,7 +38,11 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<k, S>;
     using sint = sint_t<A>;
+   
+    /* if(current_phase == 1) */
+    /* std::cout << "RELU ..." << std::endl; */
     
+    Share::communicate();
     Bitset *s1 = new Bitset[len];
     Bitset *s2 = new Bitset[len];
     for(int i = 0; i < len; i++)
@@ -61,6 +56,13 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
         s1[i].complete_A2B_S1();
         s2[i].complete_A2B_S2();
     }
+    /* if(current_phase == 1) */
+    /* std::cout << "A2B completed ..." << std::endl; */
+    
+    Share::communicate();
+    /* if(current_phase == 1) */
+    /* std::cout << "Adder ..." << std::endl; */
+
     /* Bitset* y = new Bitset[NUM_INPUTS]; */
     S *y = new S[len];
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
@@ -78,7 +80,8 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
         {
             adders[i].step();
         }
-        Share::communicate();
+        /* std::cout << "Adder step ..." << std::endl; */
+        /* Share::communicate(); */
     }
     delete[] s1;
     delete[] s2;
@@ -89,6 +92,9 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     {
         y[i] = ~ y[i];
     }
+    /* if(current_phase == 1) */
+    /*     std::cout << "Bit inj ..." << std::endl; */
+    
     sint* t1 = new sint[len];
     sint* t2 = new sint[len];
     for(int i = 0; i < len; i++)
@@ -104,6 +110,10 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
         t2[i].complete_bit_injection_S2();
     }
     sint* result = new sint[len];
+    
+    Share::communicate();
+    /* if(current_phase == 1) */
+    /*     std::cout << "XOR ..." << std::endl; */
     for(int i = 0; i < len; i++)
     {
         result[i].prepare_XOR(t1[i],t2[i]);
@@ -116,6 +126,12 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     delete[] t1;
     delete[] t2;
 
+    Share::communicate();
+    
+    /* if(current_phase == 1) */
+    /*     std::cout << "MULT ..." << std::endl; */
+    
+
     for(int i = 0; i < len; i++)
     {
         val[i] = result[i] * val[i];
@@ -124,9 +140,12 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        val[i].complete_mult();
+        val[i].complete_mult_without_trunc();
         /* val[i] -= sint(1); // To counter the +1 in TRUNC */
     }
+    Share::communicate();
+    /* if(current_phase == 1) */
+    /*     std::cout << "RELU DONE ..." << std::endl; */
 }
     
 #endif
@@ -141,4 +160,13 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const si
     /* } */
 }
 
+template<typename Share, typename Datatype>
+static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_Share<Datatype, Share>* end, Additive_Share<Datatype, Share>*  output){
+    std::copy(begin, end, output);
+    int len = end - begin;
+    /* for (const sint_t* iter = begin; iter != end; ++iter) { */
+            /* output[i++] = iter->relu(); */
+    RELU_range_in_place<BITLENGTH,Share>(output, len);
+    /* } */
+}
 

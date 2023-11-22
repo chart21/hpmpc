@@ -165,6 +165,16 @@ public:
     #endif
     }
 
+        void complete_mult_without_trunc()
+    {
+    #if PROTOCOL == 1 // Sharemind needs custom overload
+        Share_Type::complete_mult(OP_ADD, OP_SUB, OP_MULT);
+    #else
+        Share_Type::complete_mult(OP_ADD, OP_SUB);
+        #endif
+    }
+
+
 static void RELU(const Additive_Share* begin, const Additive_Share* end,  Additive_Share* output){
     int i = 0;
     for (const Additive_Share* iter = begin; iter != end; ++iter) {
