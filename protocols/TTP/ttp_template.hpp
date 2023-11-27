@@ -421,15 +421,15 @@ void complete_mult4(func_add ADD, func_sub SUB){
 }
 
 
-/* TTP_Share relu() const */
-/* { */
-/* #if SIMULATE_MPC_FUNCTIONS == 1 */
-/*     auto result = relu_epi(OP_SUB(p1,p2)); */
-/*     auto randVal = getRandomVal(0); */
-/*     return TTP_Share(OP_ADD(result,randVal),randVal); */
-/* #else */
-/*     return TTP_Share(relu_epi(p1)); */
-/* #endif */
-/* } */    
+TTP_Share relu() const
+{
+#if SIMULATE_MPC_FUNCTIONS == 1
+    auto result = relu_epi(OP_SUB(p1,p2));
+    auto randVal = getRandomVal(0);
+    return TTP_Share(OP_ADD(result,randVal),randVal);
+#else
+    return TTP_Share(FUNC_TRUNC(relu_epi(p1)));
+#endif
+}    
 };
 

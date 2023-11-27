@@ -332,8 +332,11 @@ static void prepare_A2B_S1(int k, OEC_MAL2_Share in[], OEC_MAL2_Share out[])
         {
             temp[j] = in[j].v; //a0 
         }
-    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
-    orthogonalize_boolean((UINT_TYPE*) temp, temp);
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_arithmetic(temp, temp2);
+    orthogonalize_boolean(temp2, temp);
+    /* unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp); */
+    /* orthogonalize_boolean((UINT_TYPE*) temp, temp); */
     for (int j = 0; j < k; j++)
     {
             out[j].v = temp[j];

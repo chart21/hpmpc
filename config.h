@@ -14,7 +14,7 @@
 #define FUNCTION_IDENTIFIER 36
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 128
+#define DATTYPE 32
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0

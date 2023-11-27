@@ -37,7 +37,7 @@ public:
         
         Additive_Share operator*(const DATATYPE other) const
         {
-        return Additive_Share(Share_Type::mult_public_fixed(other, OP_MULT, OP_ADD, OP_SUB, OP_TRUNC));
+        return Additive_Share(Share_Type::mult_public_fixed(other, OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC));
         }
 
         void operator*=(const DATATYPE other) 
@@ -48,7 +48,7 @@ public:
 
     void mult_public_fixed(const DATATYPE b)
     {
-        *this = Share_Type::mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, OP_TRUNC);
+        *this = Share_Type::mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
     }
     
     bool operator==(const Additive_Share& b) const
@@ -142,7 +142,7 @@ public:
     void mask_and_send_dot()
     {
         #if FRACTIONAL > 0
-        Share_Type::mask_and_send_dot_with_trunc(OP_ADD, OP_SUB, OP_TRUNC);
+        Share_Type::mask_and_send_dot_with_trunc(OP_ADD, OP_SUB, FUNC_TRUNC);
         #else
         #if PROTOCOL == 2
         Share_Type::mask_and_send_dot(OP_SUB, OP_MULT); // Replicated needs custom overloads because division by 3 is required
@@ -167,7 +167,7 @@ public:
         Share_Type::complete_mult(OP_ADD, OP_SUB, OP_MULT);
     #else
         #if FRACTIONAL > 0
-        Share_Type::complete_mult_with_trunc(OP_ADD, OP_SUB, OP_TRUNC);
+        Share_Type::complete_mult_with_trunc(OP_ADD, OP_SUB, FUNC_TRUNC);
         #else
         Share_Type::complete_mult(OP_ADD, OP_SUB);
         #endif

@@ -49,7 +49,6 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 {
     unorthogonalize_arithmetic(in, out, DATTYPE);
 }
-
 #if FUNCTION_IDENTIFIER == 1 || FUNCTION_IDENTIFIER == 4
 #define OP_ADD FUNC_XOR
 #define OP_SUB FUNC_XOR
@@ -102,6 +101,37 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 #define OP_TRUNC SHIFT_RIGHT64
 #endif
 #endif
+
+DATATYPE TRUNC2(DATATYPE x) {
+    // Create a mask with lower k bits set to 1
+    
+    x = OP_TRUNC(x);
+    UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL)) - 1; 
+    DATATYPE mask = PROMOTE(maskValue); // Set all elements to maskValue
+    // Apply the mask using bitwise AND
+    return FUNC_AND(x, mask);
+}
+
+DATATYPE TRUNC3(DATATYPE x) {
+    // Create a mask with lower k bits set to 1
+
+    return OP_SUB(SET_ALL_ZERO(), TRUNC2(OP_SUB(SET_ALL_ZERO(), x)));
+}
+
+
+
+
+#define FUNC_TRUNC TRUNC3
+
+/* DATATYPE mod_power_of_2(DATATYPE x, int k) { */
+/*     // Create a mask with lower k bits set to 1 */
+    
+/*     x = OP_TRUNC(x, k); */
+/*     UINT_TYPE maskValue = (1 << k) - 1; */ 
+/*     DATATYPE mask = PROMOTE(maskValue); // Set all elements to maskValue */
+/*     // Apply the mask using bitwise AND */
+/*     return FUNC_AND(x, mask); */
+/* } */
 
 #if DATTYPE == 1
     #if COMPRESS == 1
