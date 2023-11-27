@@ -78,10 +78,10 @@ fi
 if [ "$ssl" = "1" ]
 then
 #g++\ -march=native\ -O3\ -std=c++20\ -pthread\ -lssl\ -lcrypto\ main.cpp\ -I\ SimpleNN\ -o\ nn.o
-    flags="-march=native -O3 -g -std=c++2a -pthread -lssl -lcrypto -I SimpleNN -lstdc++fs"
+    flags="-march=native -O3 -std=c++2a -pthread -lssl -lcrypto -I SimpleNN -lstdc++fs"
     #flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
 else
-    flags="-march=native -O3 -g -std=c++2a -pthread -I SimpleNN -lstdc++fs"
+    flags="-march=native -O3 -std=c++2a -pthread -I SimpleNN -lstdc++fs"
     #flags="-march=native -Ofast -std=c++2a -pthread"
 fi
 

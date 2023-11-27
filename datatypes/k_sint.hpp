@@ -45,9 +45,12 @@ public:
     void prepare_receive_and_replicate(UINT_TYPE value) {
         if constexpr (id == PSELF || PROTOCOL == 13) {
           if (current_phase == 1) {
-            alignas(sizeof(DATATYPE)) UINT_TYPE temp_u[DATTYPE] = {value};
-            orthogonalize_arithmetic(temp_u, (DATATYPE*) temp_u);
-            prepare_receive_from<id>((DATATYPE*) temp_u);
+            /* alignas(sizeof(DATATYPE)) UINT_TYPE temp_u[DATTYPE] = {value}; */
+            /* orthogonalize_arithmetic(temp_u, (DATATYPE*) temp_u); */
+            /* prepare_receive_from<id>((DATATYPE*) temp_u); */
+            DATATYPE temp_u[BITLENGTH];
+            for (int i = 0; i < BITLENGTH; i++)
+                shares[i].template prepare_receive_from<id>(PROMOTE(value));
             return;
             }
         }

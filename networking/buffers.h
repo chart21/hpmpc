@@ -10,6 +10,9 @@ sender_args sending_args_pre[num_players];
 receiver_args receiving_args_pre[num_players];
 #endif
 
+uint64_t total_send[num_players-1] = {0};
+uint64_t total_recv[num_players-1] = {0};
+
 int rounds;
 int rb;
 int sb;

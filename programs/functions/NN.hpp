@@ -148,7 +148,7 @@ void inference(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<BITLENGTH, S>;
     using sint = sint_t<A>;
-    using modeltype = sint_t<A>;
+    using modeltype = sint;
     /* const int parallel_factor = 1; */
     /* using cleartype = k_clear<A>; */
 
@@ -175,7 +175,7 @@ void inference(DATATYPE* res)
 	cfg.parse(argc, argv);
 	cfg.print_config();
 
-	int n_train = 60000, n_test = 320, ch = 1, h = 28, w = 28;
+	int n_train = 60000, n_test = 32, ch = 1, h = 28, w = 28;
 
 	MatX<float> train_X, test_X;
 

@@ -211,8 +211,11 @@ static void prepare_A2B_S1(int k, OECL2_Share in[], OECL2_Share out[])
     {
         temp[i] = OP_ADD(in[i].p1,in[i].p2); // set share to a + x_0
     }
-    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
-    orthogonalize_boolean((UINT_TYPE*) temp, temp);
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_arithmetic(temp, temp2);
+    orthogonalize_boolean(temp2, temp);
+    /* unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp); */
+    /* orthogonalize_boolean((UINT_TYPE*) temp, temp); */
     for(int i = 0; i < k; i++)
     {
         out[i].p1 = temp[i];

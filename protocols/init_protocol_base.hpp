@@ -1,5 +1,28 @@
 #pragma once
 #include "../networking/buffers.h"
+#include <inttypes.h>
+#include "../utils/print.hpp"
+
+void print_communication()
+{
+/* #if num_players == 3 */ 
+/*     printf("Sending to other players:" PRIu64 "MB, " PRIu64 "MB ", total_send[PPREV]*(DATTYPE/(8000*1000*DATTYPE)), total_send[PNEXT]* sizeof(DATTYPE)); */
+/*     printf("Receiving from other players:" PRIu64 "MB, " PRIu64 "MB ", total_recv[PPREV]* sizeof(DATTYPE), total_recv[PNEXT]* sizeof(DATTYPE)); */
+/* #elif num_players == 4 */
+/*     printf("Sending to other players:" PRIu64 "MB, " PRIu64 "MB, " PRIu64 "MB ", total_send[PPREV]* sizeof(DATTYPE), total_send[PMIDDLE]* sizeof(DATTYPE), total_send[PNEXT]* sizeof(DATTYPE)); */
+/*     printf("Receiving from other players:" PRIu64 "MB, " PRIu64 "MB, " PRIu64 "MB ", total_recv[PPREV]* sizeof(DATTYPE), total_recv[PMIDDLE]* sizeof(DATTYPE), total_recv[PNEXT]* sizeof(DATTYPE)); */
+/* #endif //change to std::cout */
+#if num_players == 3
+    std::cout << "P" << PARTY << ": " << "Sending to other players:" << total_send[PPREV]*(DATTYPE/(8000*1000)) << "MB, " << total_send[PNEXT]*(DATTYPE/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ": " << "Receiving from other players:" << total_recv[PPREV]*(DATTYPE/(8000*1000)) << "MB, " << total_recv[PNEXT]*(DATTYPE/(8000*1000)) << "MB ";
+#elif num_players == 4
+    std::cout << "P" << PARTY << ": " << "Sending to other players:" << total_send[PPREV]*(DATTYPE/(8000*1000)) << "MB, " << total_send[PMIDDLE]*(DATTYPE/(8000*1000)) << "MB, " << total_send[PNEXT]*(DATTYPE/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ": " << "Receiving from other players:" << total_recv[PPREV]*(DATTYPE/(8000*1000)) << "MB, " << total_recv[PMIDDLE]*(DATTYPE/(8000*1000)) << "MB, " << total_recv[PNEXT]*(DATTYPE/(8000*1000)) << "MB ";
+#endif
+
+
+}
+
 
 void send_()
 {
@@ -33,6 +56,7 @@ sockets_received.push_back(0);
 void pre_send_to_(int player_index)
 {
 sending_args_pre[player_index].elements_to_send[0] += 1;
+total_send[player_index] += 1;
 /* sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] += 1; */
 }
 
@@ -40,6 +64,7 @@ void pre_receive_from_(int player_index)
 {
 /* receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1; */
 receiving_args_pre[player_index].elements_to_rec[0] += 1;
+total_recv[player_index] += 1;
 }
 #endif
 
@@ -52,6 +77,7 @@ if(sending_args[player_index].elements_to_send[sending_args[player_index].send_r
 }
 #endif
 sending_args[player_index].elements_to_send[sending_args[player_index].send_rounds] += 1;
+total_send[player_index] += 1;
 }
 
 void receive_from_(int player_index)
@@ -63,6 +89,7 @@ if(receiving_args[player_index].elements_to_rec[receiving_args[player_index].rec
 }
 #endif
 receiving_args[player_index].elements_to_rec[receiving_args[player_index].rec_rounds -1] += 1;
+total_recv[player_index] += 1;
 }
 
 void communicate_()
@@ -251,7 +278,6 @@ for(int t=0;t<(num_players-1);t++) {
     sending_args[t].connected_to = t+offset;
     sending_args[t].port = (int) base_port + (t+offset) * (num_players -1) + player_id - 1 + offset; //e.g. P_0 sends on base port + num_players  for P_1, P_2 on base port + num_players for P_0 (6001,6000)
     sending_args[t].sent_elements[0] = NEW(DATATYPE[sending_args[t].elements_to_send[0]]); // Allocate memory for first round
-   
 }
 
 #if MAL == 1
@@ -272,6 +298,7 @@ sending_rounds = 0;
 rb = 0;
 sb = 0;
 current_phase = 1;
+print_communication();  
 }
 
 void init(){
@@ -324,8 +351,8 @@ rounds = 0;
 sending_rounds = 0;
 rb = 0;
 sb = 0;
+print_communication();  
 }
-
 
 
 
