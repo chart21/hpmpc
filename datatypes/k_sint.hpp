@@ -124,6 +124,13 @@ public:
         }
         }
 
+        sint_t mult_public(const UINT_TYPE other) {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i].mult_public(PROMOTE(other));
+        }
+        return result;
+        }
     
     bool operator==(const sint_t& b) const
     {
@@ -211,6 +218,7 @@ public:
 
         void complete_XOR(const sint_t<Share> &a, const sint_t<Share> &b) {
             for(int i = 0; i < BITLENGTH; ++i) {
+                /* shares[i].complete_XOR(a[i], b[i]); */
                 shares[i].complete_mult_without_trunc();
                 shares[i] = a[i] + b[i] - shares[i] - shares[i];
             }
@@ -254,6 +262,18 @@ public:
             for(int i = 0; i < BITLENGTH; ++i) 
                 result.shares[i] = shares[i].relu();
             return result;
+        }
+
+        void prepare_trunc_2k_inputs(sint_t& rmk2, sint_t& rmsb, sint_t& c, sint_t& c_prime)
+        {
+            for(int i = 0; i < BITLENGTH; ++i) 
+                shares[i].prepare_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i]);
+        }
+
+        void complete_trunc_2k_inputs(sint_t& rmk2, sint_t& rmsb, sint_t& c, sint_t& c_prime)
+        {
+            for(int i = 0; i < BITLENGTH; ++i) 
+                shares[i].complete_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i]);
         }
 
 static void RELU(const sint_t* begin, const sint_t* end,  sint_t* output){

@@ -13,6 +13,12 @@ static OECL0_init public_val(Datatype a)
     return OECL0_init();
 }
 
+    template <typename func_mul>
+OECL0_init mult_public(Datatype b, func_mul MULT)
+{
+    return OECL0_init();
+}
+
 OECL0_init Not() const
 {
     return OECL0_init();
@@ -40,6 +46,7 @@ OECL0_init mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func
 #endif
     return OECL0_init();
 } 
+
 
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
@@ -339,6 +346,18 @@ return e;
 template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){}
 
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL0_init& r_mk2, OECL0_init& r_msb, OECL0_init& c, OECL0_init& c_prime){
+    prepare_receive_from<PSELF>(ADD, SUB);
+    prepare_receive_from<PSELF>(ADD, SUB);
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL0_init& r_mk2, OECL0_init& r_msb, OECL0_init& c, OECL0_init& c_prime){
+    complete_receive_from<PSELF>(ADD, SUB);
+    complete_receive_from<PSELF>(ADD, SUB);
+}
 
 
 

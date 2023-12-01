@@ -225,6 +225,12 @@ void complete_receive_from(func_add ADD, func_sub SUB)
 {
 }
 
+template <typename func_mul>
+OECL0_Share mult_public(Datatype b, func_mul MULT)
+{
+    return OECL0_Share(MULT(p1,b),MULT(p2,b));
+}
+
 
 
 static void send()
@@ -489,6 +495,22 @@ return OECL0_Share(getRandomVal(P_2),getRandomVal(P_1));
 
 template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL0_Share& r_mk2, OECL0_Share& r_msb, OECL0_Share& c, OECL0_Share& c_prime) const{
+    Datatype rmk2 = (ADD(p1,p2) << 1) >> FRACTIONAL;
+    Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1);
+    r_mk2.prepare_receive_from<PSELF>(rmk2, ADD, SUB);
+    r_msb.prepare_receive_from<PSELF>(rmsb, ADD, SUB);
+    c = SET_ALL_ZERO();
+    c_prime = SET_ALL_ZERO();
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL0_Share& r_mk2, OECL0_Share& r_msb, OECL0_Share& c, OECL0_Share& c_prime) const{
+    r_mk2.complete_receive_from<PSELF>(ADD, SUB);
+    r_msb.complete_receive_from<PSELF>(ADD, SUB);
+}
 
 
 

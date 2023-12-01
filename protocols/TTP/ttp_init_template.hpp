@@ -12,13 +12,39 @@ Datatype get_p1()
     return SET_ALL_ZERO();
 }
 
+    template <typename func_mul>
+TTP_init mult_public(Datatype b, func_mul MULT)
+{
+    return TTP_init();
+}
+
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_init& r_mk2, TTP_init& r_msb, TTP_init& c, TTP_init& c_prime) {
+     
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_init& r_mk2, TTP_init& r_msb, TTP_init& c, TTP_init& c_prime) {
+}
+
+
+
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 TTP_init mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
    return TTP_init();
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+TTP_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const
+{
+    return TTP_init();
+}
 
+template <typename func_add, typename func_sub>
+void complete_trunc_2k(func_add ADD, func_sub SUB){
+}
 
 static TTP_init public_val(Datatype a)
 {

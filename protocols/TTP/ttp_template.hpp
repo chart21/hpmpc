@@ -52,6 +52,52 @@ TTP_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_
 #endif
 }
 
+template <typename func_mul>
+TTP_Share mult_public(Datatype b, func_mul MULT)
+{
+    return TTP_Share(MULT(p1,b),MULT(p2,b));
+}
+
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_Share& r_mk2, TTP_Share& r_msb, TTP_Share& c, TTP_Share& c_prime) {
+    Datatype rmk2 = (p2 << 1) >> (FRACTIONAL + 1);
+    Datatype rmsb = p2 >> (BITLENGTH - 1);
+    Datatype c_dat_prime = trunc(p1);
+    UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1;
+    Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
+    // Apply the mask using bitwise AND
+    c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1
+    Datatype c_dat = p1 >> (BITLENGTH - 1);
+    Datatype tmp = getRandomVal(0);
+    r_mk2 = TTP_Share(ADD(rmk2,tmp),tmp);
+    tmp = getRandomVal(0);
+    r_msb = TTP_Share(ADD(rmsb,tmp),tmp);
+    tmp = getRandomVal(0);
+    c = TTP_Share(ADD(c_dat,tmp),tmp);
+    tmp = getRandomVal(0);
+    c_prime = TTP_Share(ADD(c_dat_prime,tmp),tmp);
+}
+    /* Datatype r = getRandomVal(0); */
+    /* Datatype c = ADD(SUB(p1,p2),r); //open c = x + r */
+    /* Datatype c_prime = trunc(c); */
+    /* UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1; */ 
+    /* Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue */
+    /* // Apply the mask using bitwise AND */
+    /* c_prime = AND(c_prime, mask); //mod 2^k-m-1 */
+    /* c_prime = c_prime % (1 << (BITLENGTH-FRACTIONAL-1)); */
+    /* Datatype b = XOR(r >> (BITLENGTH-1), c >> (BITLENGTH-1)); // xor msbs */
+    /* c_prime = ADD(SUB(c_prime, (r << (1)) >> (FRACTIONAL+1)), b << (BITLENGTH-FRACTIONAL-1)); */ 
+    /* Datatype f_mask = getRandomVal(0); */
+    /* c_prime = ADD(c_prime,PROMOTE(1)); // avoid 0 underflow */
+    /* return TTP_Share(ADD(c_prime,f_mask),f_mask); */
+    
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_Share& r_mk2, TTP_Share& r_msb, TTP_Share& c, TTP_Share& c_prime) {
+}
+
+
 
 template <typename func_add>
 TTP_Share Add(TTP_Share b, func_add ADD) const
@@ -420,6 +466,31 @@ void complete_mult4(func_add ADD, func_sub SUB){
 #endif
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+TTP_Share prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const{
+#if SIMULATE_MPC_FUNCTIONS == 1
+    Datatype r = getRandomVal(0);
+    Datatype c = ADD(SUB(p1,p2),r); //open c = x + r
+    Datatype c_prime = trunc(c);
+    UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1; 
+    Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
+    // Apply the mask using bitwise AND
+    c_prime = AND(c_prime, mask); //mod 2^k-m-1
+    c_prime = c_prime % (1 << (BITLENGTH-FRACTIONAL-1));
+    Datatype b = XOR(r >> (BITLENGTH-1), c >> (BITLENGTH-1)); // xor msbs
+    c_prime = ADD(SUB(c_prime, (r << (1)) >> (FRACTIONAL+1)), b << (BITLENGTH-FRACTIONAL-1)); 
+    Datatype f_mask = getRandomVal(0);
+    c_prime = ADD(c_prime,PROMOTE(1)); // avoid 0 underflow
+    return TTP_Share(ADD(c_prime,f_mask),f_mask);
+    /* return TTP_Share(ADD(trunc(SUB(p1,p2)),f_mask),f_mask); */
+#else
+    return TTP_Share(trunc(p1));
+#endif
+}
+
+template <typename func_add, typename func_sub>
+void complete_trunc_2k(func_add ADD, func_sub SUB){
+}
 
 TTP_Share relu() const
 {

@@ -115,13 +115,19 @@ DATATYPE TRUNC2(DATATYPE x) {
 DATATYPE TRUNC3(DATATYPE x) {
     // Create a mask with lower k bits set to 1
 
-    return OP_SUB(SET_ALL_ZERO(), TRUNC2(OP_SUB(SET_ALL_ZERO(), x)));
+    /* return OP_SUB(SET_ALL_ZERO(), TRUNC2(OP_SUB(SET_ALL_ZERO(), x))); */
+    /* x = OP_SUB(SET_ALL_ZERO(),OP_TRUNC(OP_SUB(SET_ALL_ZERO(),x))); */
+    x = OP_SUB(SET_ALL_ZERO(),OP_TRUNC(x));
+    UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL)) - 1; 
+    DATATYPE mask = PROMOTE(maskValue); // Set all elements to maskValue
+    // Apply the mask using bitwise AND
+    return OP_SUB(SET_ALL_ZERO(), FUNC_AND(x, mask));
 }
 
 
 
 
-#define FUNC_TRUNC TRUNC3
+#define FUNC_TRUNC OP_TRUNC
 
 /* DATATYPE mod_power_of_2(DATATYPE x, int k) { */
 /*     // Create a mask with lower k bits set to 1 */

@@ -11,7 +11,7 @@ public:
 
     Additive_Share(const Share_Type& s) : Share_Type(s) {}
 
-    Additive_Share(Datatype a) : Share_Type() {
+    Additive_Share(UINT_TYPE a) : Share_Type() {
         *this = Share_Type::public_val(PROMOTE(a));
     }
 
@@ -45,6 +45,10 @@ public:
         *this = *this * other;
         }
 
+    Additive_Share mult_public(const DATATYPE b)
+    {
+        return Additive_Share(Share_Type::mult_public(b, OP_MULT));
+    }
 
     void mult_public_fixed(const DATATYPE b)
     {
@@ -91,6 +95,25 @@ public:
     {
         Share_Type::prepare_reveal_to_all();
     }
+    void prepare_trunc_2k_inputs(Share_Type& rmk2, Share_Type& rmsb, Share_Type& c, Share_Type& c_prime)
+    {
+       Share_Type::prepare_trunc_2k_inputs(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, FUNC_TRUNC, rmk2, rmsb, c, c_prime);
+    }
+
+    void complete_trunc_2k_inputs(Share_Type& rmk2, Share_Type& rmsb, Share_Type& c, Share_Type& c_prime)
+    {
+        Share_Type::complete_trunc_2k_inputs(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, FUNC_TRUNC, rmk2, rmsb, c, c_prime);
+    }
+
+    /* Additive_Share prepare_trunc_2k() const */
+    /* { */
+    /*     return Additive_Share(Share_Type::prepare_trunc_2k(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, FUNC_TRUNC)); */
+    /* } */
+
+    /* void complete_trunc_2k() */
+    /* { */
+    /*     return Share_Type::complete_trunc_2k(OP_ADD, OP_SUB); */
+    /* } */
 
     Datatype complete_reveal_to_all() const
     {
@@ -108,6 +131,17 @@ public:
     {
         return Additive_Share(Share_Type::prepare_mult3(b, c, OP_ADD, OP_SUB, OP_MULT));
     }
+        
+    void prepare_XOR(const Additive_Share &a, const Additive_Share &b) {
+                *this = a * b;
+        }
+
+    void complete_XOR(const Additive_Share &a, const Additive_Share &b) {
+                this->complete_mult_without_trunc();
+                *this = a + b - *this - *this;
+                /* shares[i].complete_mult_without_trunc(); */
+                /* shares[i] = a[i] + b[i] - shares[i] - shares[i]; */
+            }
     
     void complete_mult3()
     {
@@ -190,6 +224,10 @@ static void RELU(const Additive_Share* begin, const Additive_Share* end,  Additi
             output[i++] = iter->relu();
     }
 }
+
+    
+
+
 
 };
 

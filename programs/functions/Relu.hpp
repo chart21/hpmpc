@@ -135,21 +135,74 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     for(int i = 0; i < len; i++)
     {
         val[i] = result[i].prepare_dot(val[i]);
-        val[i].mask_and_send_dot();
+        val[i].mask_and_send_dot_without_trunc();
     }
     delete[] result;
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        val[i].complete_mult();
+        /* val[i].complete_mult(); */
+        val[i].complete_mult_without_trunc();
         /* val[i] -= sint(1); // To counter the +1 in TRUNC */
     }
     Share::communicate();
-    /* if(current_phase == 1) */
-    /*     std::cout << "RELU DONE ..." << std::endl; */
+    /* for(int i = 0; i < len; i++) */
+    /* { */
+    /*     val[i] = val[i].prepare_trunc_2k(); */
+    /* } */
+    /* Share::communicate(); */
+         /* for(int i = 0; i < len; i++) */
+    /* { */
+        /* val[i].complete_trunc_2k(); */
+    trunc_2k_in_place(val, len);
+    /* } */
+
+
 }
     
 #endif
+
+template<typename Share, typename Datatype>
+static void trunc_2k_in_place(sint_t<Additive_Share<Datatype, Share>>*  val, const int len){
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+    
+    sint* r_msb = new sint[len];
+    sint* r_mk2 = new sint[len];
+    sint* c = new sint[len];
+    sint* c_prime = new sint[len];
+    for(int i = 0; i < len; i++)
+    {
+        val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i]);
+    }
+    Share::communicate();
+    sint* b = new sint[len];
+    for(int i = 0; i < len; i++)
+    {
+        val[i].complete_trunc_2k_inputs(r_mk2[i], r_msb[i],c[i], c_prime[i]);
+        b[i].prepare_XOR(r_msb[i],c[i]);
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        b[i].complete_XOR(r_msb[i],c[i]);
+        b[i] = b[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL - 1));
+    }
+    delete[] c;
+    
+    for(int i = 0; i < len; i++)
+    {
+        val[i] = c_prime[i] + b[i] - r_mk2[i];
+    }
+    delete[] r_mk2;
+    delete[] r_msb;
+    delete[] c_prime;
+    delete[] b;
+}
+
+
+
 
 template<typename Share, typename Datatype>
 static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const sint_t<Additive_Share<Datatype, Share>>* end, sint_t<Additive_Share<Datatype, Share>>*  output){

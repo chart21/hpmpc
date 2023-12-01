@@ -15,6 +15,8 @@ static OECL2_Share public_val(Datatype a)
 {
     return OECL2_Share(a,SET_ALL_ZERO());
 }
+    
+
 
 OECL2_Share Not() const
 {
@@ -40,6 +42,13 @@ OECL2_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, fun
     res.p1 = SUB(TRUNC(result),res.p2);
     return res;
 } 
+    
+    template <typename func_mul>
+OECL2_Share mult_public(Datatype b, func_mul MULT)
+{
+    return OECL2_Share(MULT(p1,b),MULT(p2,b));
+}
+
 
     template <typename func_add, typename func_sub, typename func_mul>
 void prepare_dot_add(OECL2_Share a, OECL2_Share b , OECL2_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
@@ -464,6 +473,27 @@ template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){
 p1 = ADD(p1, receive_from_live(P_1));
 }
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_Share& r_mk2, OECL2_Share& r_msb, OECL2_Share& c, OECL2_Share& c_prime) const{
+    r_mk2.prepare_receive_from<P_0>(ADD, SUB);
+    r_msb.prepare_receive_from<P_0>(ADD, SUB);
+    c.p1 = ADD(p1,p2); //open c = x + r
+    c.p2 = SET_ALL_ZERO();
+    c_prime.p1 = trunc(c.p1);
+    c_prime.p2 = SET_ALL_ZERO();
+    UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1;
+    Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
+    // Apply the mask using bitwise AND
+    c_prime.p1 = AND(c_prime.p1, mask); //mod 2^k-m-1
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_Share& r_mk2, OECL2_Share& r_msb, OECL2_Share& c, OECL2_Share& c_prime) const{
+    r_mk2.complete_receive_from<P_0>(ADD, SUB);
+    r_msb.complete_receive_from<P_0>(ADD, SUB);
+}
+
 
 
 };

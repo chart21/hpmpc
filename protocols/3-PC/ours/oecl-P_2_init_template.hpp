@@ -12,11 +12,18 @@ static OECL2_init public_val(Datatype a)
 {
     return OECL2_init();
 }
+    
+    template <typename func_mul>
+OECL2_init mult_public(Datatype b, func_mul MULT)
+{
+    return OECL2_init();
+}
 
 OECL2_init Not() const
 {
     return OECL2_init();
 }
+
 
 template <typename func_add>
 OECL2_init Add(OECL2_init b, func_add ADD) const
@@ -43,6 +50,23 @@ OECL2_init mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func
 #endif
     return OECL2_init();
 }
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+OECL2_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const{
+#if PRE == 0
+    receive_from_(P_0); //send share of bit decomposition of x_0 to P_2
+#else
+    pre_receive_from_(P_0);
+#endif
+    send_to_(P_1);
+    return OECL2_init();
+}
+
+template <typename func_add, typename func_sub>
+void complete_trunc_2k(func_add ADD, func_sub SUB){
+    receive_from_(P_1);
+}
+
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
@@ -339,6 +363,19 @@ return e;
 template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){
     receive_from_(P_1);
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_init& r_mk2, OECL2_init& r_msb, OECL2_init& c, OECL2_init& c_prime) {
+    prepare_receive_from<P_0>(ADD, SUB);
+    prepare_receive_from<P_0>(ADD, SUB);
+
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_init& r_mk2, OECL2_init& r_msb, OECL2_init& c, OECL2_init& c_prime) {
+    complete_receive_from<P_0>(ADD, SUB);
+    complete_receive_from<P_0>(ADD, SUB);
 }
 
 
