@@ -43,7 +43,7 @@
 // Print additional info?
 #define PRINT 0
 
-#define FRACTIONAL 4 // fractional bits for fixed point numbers
+#define FRACTIONAL 5 // fractional bits for fixed point numbers
 
 // Starting port for required port range of the sockets
 #define BASE_PORT 11000
@@ -119,4 +119,5 @@ int base_port = BASE_PORT; // temporary solution
 #endif
 
 
-#define TRUNC_THEN_MULT 0
+#define TRUNC_THEN_MULT 1 // 0 = mult then trunc, 1 = trunc then mult
+#define TRUNC_APPROACH 1 // 0: cut, 1: interactive
