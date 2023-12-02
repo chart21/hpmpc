@@ -449,23 +449,68 @@ p1 = ADD(p1, receive_from_live(P_2));
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL1_Share& r_mk2, OECL1_Share& r_msb, OECL1_Share& c, OECL1_Share& c_prime) const{
-    r_mk2.prepare_receive_from<P_0>(ADD, SUB);
-    r_msb.prepare_receive_from<P_0>(ADD, SUB);
-    c.p1 = ADD(p1,p2); //open c = x + r
-    c.p2 = SET_ALL_ZERO();
-    c_prime.p1 = trunc(c.p1);
-    c_prime.p2 = SET_ALL_ZERO();
+    r_mk2.template prepare_receive_from<P_0>(ADD, SUB);
+    r_msb.template prepare_receive_from<P_0>(ADD, SUB);
+    
+    Datatype c_dat_prime = trunc(ADD(p1,p2));
     UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
-    c_prime.p1 = AND(c_prime.p1, mask); //mod 2^k-m-1
+    c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1
+    Datatype c_dat = ADD(p1,p2) >> (BITLENGTH - 1);
+    c = OECL1_Share(c_dat, SET_ALL_ZERO());
+    c_prime = OECL1_Share(c_dat_prime, SET_ALL_ZERO());
+    
+    /* c_prime.p1 = trunc(ADD(p1,p2)); */
+    /* c_prime.p2 = SET_ALL_ZERO(); */
+    /* UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1; */
+    /* Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue */
+    /* // Apply the mask using bitwise AND */
+    /* c_prime.p1 = AND(c_prime.p1, mask); //mod 2^k-m-1 */
+    
+    /* c.p1 = ADD(p1,p2) >> (BITLENGTH - 1); //open c = x + r */
+    /* c.p2 = SET_ALL_ZERO(); */
 }
+
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL1_Share& r_mk2, OECL1_Share& r_msb, OECL1_Share& c, OECL1_Share& c_prime) const{
-    r_mk2.complete_receive_from<P_0>(ADD, SUB);
-    r_msb.complete_receive_from<P_0>(ADD, SUB);
+    r_mk2.template complete_receive_from<P_0>(ADD, SUB);
+    r_msb.template complete_receive_from<P_0>(ADD, SUB);
 }
+
+
+
+/* template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc> */
+/* void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL1_Share& r_mk2, OECL1_Share& r_msb, OECL1_Share& c, OECL1_Share& c_prime) const{ */
+/*     r_mk2.prepare_receive_from<P_0>(ADD, SUB); */
+/*     r_msb.prepare_receive_from<P_0>(ADD, SUB); */
+    
+/*     Datatype c_dat_prime = trunc(ADD(p1,p2)); */
+/*     UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1; */
+/*     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue */
+/*     // Apply the mask using bitwise AND */
+/*     c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1 */
+/*     Datatype c_dat = ADD(p1,p2) >> (BITLENGTH - 1); */
+/*     c = OECL1_Share(c_dat, SET_ALL_ZERO()); */
+/*     c_prime = OECL1_Share(c_dat_prime, SET_ALL_ZERO()); */
+    
+/*     /1* c_prime.p1 = trunc(ADD(p1,p2)); *1/ */
+/*     /1* c_prime.p2 = SET_ALL_ZERO(); *1/ */
+/*     /1* UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1; *1/ */
+/*     /1* Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue *1/ */
+/*     /1* // Apply the mask using bitwise AND *1/ */
+/*     /1* c_prime.p1 = AND(c_prime.p1, mask); //mod 2^k-m-1 *1/ */
+    
+/*     /1* c.p1 = ADD(p1,p2) >> (BITLENGTH -1) ; //open c = x + r *1/ */
+/*     /1* c.p2 = SET_ALL_ZERO(); *1/ */
+/* } */
+
+/* template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc> */
+/* void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL1_Share& r_mk2, OECL1_Share& r_msb, OECL1_Share& c, OECL1_Share& c_prime) const{ */
+/*     r_mk2.complete_receive_from<P_0>(ADD, SUB); */
+/*     r_msb.complete_receive_from<P_0>(ADD, SUB); */
+/* } */
 
 
 

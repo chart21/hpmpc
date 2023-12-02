@@ -61,8 +61,6 @@ TTP_Share mult_public(Datatype b, func_mul MULT)
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_Share& r_mk2, TTP_Share& r_msb, TTP_Share& c, TTP_Share& c_prime) {
-    Datatype rmk2 = (p2 << 1) >> (FRACTIONAL + 1);
-    Datatype rmsb = p2 >> (BITLENGTH - 1);
     Datatype c_dat_prime = trunc(p1);
     UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
@@ -70,10 +68,6 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1
     Datatype c_dat = p1 >> (BITLENGTH - 1);
     Datatype tmp = getRandomVal(0);
-    r_mk2 = TTP_Share(ADD(rmk2,tmp),tmp);
-    tmp = getRandomVal(0);
-    r_msb = TTP_Share(ADD(rmsb,tmp),tmp);
-    tmp = getRandomVal(0);
     c = TTP_Share(ADD(c_dat,tmp),tmp);
     tmp = getRandomVal(0);
     c_prime = TTP_Share(ADD(c_dat_prime,tmp),tmp);
@@ -95,6 +89,12 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_Share& r_mk2, TTP_Share& r_msb, TTP_Share& c, TTP_Share& c_prime) {
+    Datatype rmk2 = (p2 << 1) >> (FRACTIONAL + 1);
+    Datatype rmsb = p2 >> (BITLENGTH - 1);
+    Datatype tmp = getRandomVal(0);
+    r_mk2 = TTP_Share(ADD(rmk2,tmp),tmp);
+    tmp = getRandomVal(0);
+    r_msb = TTP_Share(ADD(rmsb,tmp),tmp);
 }
 
 

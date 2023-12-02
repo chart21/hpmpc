@@ -367,15 +367,15 @@ void complete_mult4(func_add ADD, func_sub SUB){
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_init& r_mk2, OECL2_init& r_msb, OECL2_init& c, OECL2_init& c_prime) {
-    prepare_receive_from<P_0>(ADD, SUB);
-    prepare_receive_from<P_0>(ADD, SUB);
+    this->template prepare_receive_from<P_0>(ADD, SUB);
+    this->template prepare_receive_from<P_0>(ADD, SUB);
 
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_init& r_mk2, OECL2_init& r_msb, OECL2_init& c, OECL2_init& c_prime) {
-    complete_receive_from<P_0>(ADD, SUB);
-    complete_receive_from<P_0>(ADD, SUB);
+    this->template complete_receive_from<P_0>(ADD, SUB);
+    this->template complete_receive_from<P_0>(ADD, SUB);
 }
 
 

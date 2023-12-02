@@ -132,21 +132,149 @@ void AND_bench(DATATYPE* res)
 
 }
 
+template<typename Share, typename Datatype>
+static void trunc_2k_in_place(sint_t<Additive_Share<Datatype, Share>>*  val, const int len){
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+    for(int i = 0; i < len; i++)
+        val[i].prepare_reveal_to_all();
+    Share::communicate();
+    UINT_TYPE dummy[DATTYPE];
+    for(int i = 0; i < len; i++)
+    {
+        val[i].complete_reveal_to_all(dummy);
+        std::cout << "val: " << dummy[0] << std::endl;
+    }
+    
+    sint* r_msb = new sint[len];
+    sint* r_mk2 = new sint[len];
+    sint* c = new sint[len];
+    sint* c_prime = new sint[len];
+    sint* b = new sint[len];
+    for(int i = 0; i < len; i++)
+    {
+        val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i]);
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        val[i].complete_trunc_2k_inputs(r_mk2[i], r_msb[i],c[i], c_prime[i]);
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        b[i].prepare_XOR(r_msb[i],c[i]);
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        b[i].complete_XOR(r_msb[i],c[i]);
+    } 
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        b[i] = b[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL - 1));
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        val[i] = c_prime[i] + b[i] - r_mk2[i];
+    }
+    for(int i = 0; i < len; i++)
+        c_prime[i].prepare_reveal_to_all();
+    for(int i = 0; i < len; i++)
+        b[i].prepare_reveal_to_all();
+    for(int i = 0; i < len; i++)
+        r_mk2[i].prepare_reveal_to_all();
+    for(int i = 0; i < len; i++)
+        c[i].prepare_reveal_to_all();
+    for(int i = 0; i < len; i++)
+        r_msb[i].prepare_reveal_to_all();
+   
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        c_prime[i].complete_reveal_to_all(dummy);
+        std::cout << "c_prime: " << dummy[0] << std::endl;
+    }
+    for(int i = 0; i < len; i++)
+    {
+        b[i].complete_reveal_to_all(dummy);
+        std::cout << "b: " << dummy[0] << std::endl;
+    }
+    for(int i = 0; i < len; i++)
+    {
+        r_mk2[i].complete_reveal_to_all(dummy);
+        std::cout << "r_mk2: " << dummy[0] << std::endl;
+    }
+    for(int i = 0; i < len; i++)
+    {
+        c[i].complete_reveal_to_all(dummy);
+        std::cout << "c: " << dummy[0] << std::endl;
+    }
+    for(int i = 0; i < len; i++)
+    {
+        r_msb[i].complete_reveal_to_all(dummy);
+        std::cout << "r_msb: " << dummy[0] << std::endl;
+    }
+    delete[] r_mk2;
+    delete[] r_msb;
+    delete[] c_prime;
+    delete[] c;
+    delete[] b;
+}
+
+template<typename Share, typename Datatype>
+void testo(sint_t<Additive_Share<Datatype, Share>>*  test, const int len)
+{
+    /* using M = Matrix_Share<DATATYPE, Share>; */
+    using M = Additive_Share<DATATYPE, Share>;
+    /* using M = sint_t<Additive_Share<DATATYPE, Share>>; */
+    using sint = sint_t<M>;
+    for(int i = 0; i < len; i++)
+    {
+        test[i].template prepare_receive_and_replicate<P_0>(400);
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        test[i].template complete_receive_from<P_0>();
+        test[i].prepare_reveal_to_all();
+    }
+    Share::communicate();
+    UINT_TYPE dummy[DATTYPE];
+    for(int i = 0; i < len; i++)
+    {
+        test[i].complete_reveal_to_all(dummy);
+        std::cout << "test: " << dummy[0] << std::endl;
+    }
+
+}
+
     template<typename Share>
 void fixed_test(DATATYPE* res)
 {
-    using M = Matrix_Share<DATATYPE, Share>;
+    /* using M = Matrix_Share<DATATYPE, Share>; */
+    using M = Additive_Share<DATATYPE, Share>;
+    /* using M = sint_t<Additive_Share<DATATYPE, Share>>; */
     using sint = sint_t<M>;
+
+
+    auto test = new sint[NUM_INPUTS][NUM_INPUTS];
+    testo( (sint*) test ,NUM_INPUTS*NUM_INPUTS);
+
+
     auto a = new sint[NUM_INPUTS][NUM_INPUTS];
     auto b = new sint[NUM_INPUTS][NUM_INPUTS];
     auto c = new sint[NUM_INPUTS][NUM_INPUTS];
-    std::memset(c, 0, sizeof(M) * NUM_INPUTS * NUM_INPUTS);
+    /* std::memset(c, 0, sizeof(M) * NUM_INPUTS * NUM_INPUTS); */
     for(int i = 0; i < NUM_INPUTS; i++)
     {
         for(int j = 0; j < NUM_INPUTS; j++)
         {
             a[i][j]. template prepare_receive_from<P_0>();
-            b[i][j]. template prepare_receive_from<P_1>();
+            b[i][j]. template prepare_receive_from<P_2>();
         }
 }
     Share::communicate();
@@ -155,35 +283,47 @@ void fixed_test(DATATYPE* res)
         for(int j = 0; j < NUM_INPUTS; j++)
         {
             a[i][j]. template complete_receive_from<P_0>();
-            b[i][j]. template complete_receive_from<P_1>();
+            b[i][j]. template complete_receive_from<P_2>();
         }
     }
 
 
     Share::communicate(); // dummy round
+    /* for(int i = 0; i < NUM_INPUTS; i++) */
+    /* { */
+    /*     for(int j = 0; j < NUM_INPUTS; j++) */
+    /*     { */
+    /*         for(int k = 0; k < NUM_INPUTS; k++) */
+    /*         { */
+    /*             /1* c[i][j] = c[i][j] + a[i][k] * b[k][j]; *1/ */
+    /*             c[i][j] = c[i][j] + a[i][k].prepare_dot(b[k][j]); */
+    /*             /1* c[i][j].prepare_dot_add(a[i][k], b[k][j]); *1/ */
+    /*         } */
+    /*             c[i][j].mask_and_send_dot_without_trunc(); */
+    /*             /1* c[i][j].mask_and_send_dot(); *1/ */
+    /*     } */
+    /* } */
+    /* Share::communicate(); */
+    /* for(int i = 0; i < NUM_INPUTS; i++) */
+    /* { */
+    /*     for(int j = 0; j < NUM_INPUTS; j++) */
+    /*     { */
+    /*         c[i][j].complete_mult_without_trunc(); */
+    /*         /1* c[i][j].complete_mult(); *1/ */
+    /*     } */
+/* } */
+    /* Share::communicate(); */
+/* delete[] a; */
+/* delete[] b; */
     for(int i = 0; i < NUM_INPUTS; i++)
     {
         for(int j = 0; j < NUM_INPUTS; j++)
         {
-            for(int k = 0; k < NUM_INPUTS; k++)
-            {
-                c[i][j] = c[i][j] + a[i][k] * b[k][j];
-                /* c[i][j].prepare_dot_add(a[i][k], b[k][j]); */
-            }
-                c[i][j].mask_and_send_dot();
-        }
+        c[i][j] = a[i][j] + b[i][j];
+        }   
     }
-    Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        for(int j = 0; j < NUM_INPUTS; j++)
-        {
-            c[i][j].complete_mult();
-        }
-}
-    Share::communicate();
-delete[] a;
-delete[] b;
+    trunc_2k_in_place( (sint*) c,NUM_INPUTS*NUM_INPUTS);
+
 
     for(int i = 0; i < NUM_INPUTS; i++)
     {
@@ -192,13 +332,13 @@ delete[] b;
             c[i][j].prepare_reveal_to_all();
         }
     }
-    auto result_arr = new UINT_TYPE[NUM_INPUTS*2][DATTYPE];
+    auto result_arr = new UINT_TYPE[NUM_INPUTS*NUM_INPUTS][DATTYPE];
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
         for(int j = 0; j < NUM_INPUTS; j++)
         {
-            c[i][j].complete_reveal_to_all(result_arr[2*i+j]);
+            c[i][j].complete_reveal_to_all(result_arr[NUM_INPUTS*i+j]);
             /* if(current_phase == 1) */
             /* { */
             /* #if FRACTIONAL > 0 */
@@ -211,7 +351,7 @@ delete[] b;
             if(current_phase == 1)
     {
         std::cout << "P" << PARTY << ": Result: ";
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < NUM_INPUTS*NUM_INPUTS; i++)
         {
     for(int j = 0; j < DATTYPE; j++)
     {

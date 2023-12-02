@@ -1,10 +1,10 @@
 #pragma once
 
 
-#define PROTOCOL 13
+#define PROTOCOL 5
 
 // Party ID (starting from 0)
-#define PARTY 1
+#define PARTY 2
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
@@ -20,7 +20,7 @@
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 2
+#define NUM_INPUTS 3
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1

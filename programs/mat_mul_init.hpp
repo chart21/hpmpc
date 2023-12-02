@@ -49,29 +49,51 @@ void generateElements()
 #endif
 
 #if FUNCTION_IDENTIFIER < 12 || FUNCTION_IDENTIFIER == 18
-        auto input = NEW(UINT_TYPE[NUM_INPUTS*2][DATTYPE]);
-        player_input = NEW(DATATYPE[NUM_INPUTS*2*BITLENGTH]);
+        auto input = NEW(UINT_TYPE[NUM_INPUTS*NUM_INPUTS][DATTYPE]);
+        player_input = NEW(DATATYPE[NUM_INPUTS*NUM_INPUTS*BITLENGTH]);
         /* for(int i = 0; i < NUM_INPUTS; ++i) { */
         for(int j = 0; j < DATTYPE; ++j) {
             #if FRACTIONAL > 0
             if(PARTY == 0) {
-                double a = 1.6;
-                double b = -2.2;
-                double c = 3.3;
-                double d = 4.11;
+                double a = 1000.6;
+                /* double b = -2.2; */
+                double b = 2000.01;
+                double c = 3000.3;
+                double d = 4000.11;
+                double e = 5000.11;
+                double f = 6000.11;
+                double g = 7000.11;
+                double h = 8000.11;
+                double i = 9000.11;
                 input[0][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(a);
                 input[1][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(b);
                 input[2][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(c);
                 input[3][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(d);
+                input[4][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(e);
+                input[5][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(f);
+                input[6][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(g);
+                input[7][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(h);
+                input[8][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(i);
             } else {
                 double a = 2.6;
                 double b = 0.01;
                 double c = 1.2;
                 double d = 0.11;
+                double e = 0.11;
+                double f = 0.11;
+                double g = 0.11;
+                double h = 0.11;
+                double i = 0.11;
                 input[0][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(a);
                 input[1][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(b);
                 input[2][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(c);
                 input[3][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(d);
+                input[4][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(e);
+                input[5][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(f);
+                input[6][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(g);
+                input[7][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(h);
+                input[8][j] = floatToFixed<double, UINT_TYPE, FRACTIONAL>(i);
+
             }
             #else
             if(PARTY == 0) {
@@ -90,7 +112,7 @@ void generateElements()
         /* } */
     #if PRINT == 1 && FUNCTION_IDENTIFIER == 18
         std::cout << PARTY << " input: ";
-        for(int i = 0; i < NUM_INPUTS*2; ++i) {
+        for(int i = 0; i < NUM_INPUTS*NUM_INPUTS; ++i) {
     for(int j = 0; j < DATTYPE; j++)
     {    
         #if FRACTIONAL > 0
@@ -106,7 +128,7 @@ void generateElements()
     #endif
         
     /* orthogonalize_boolean(input, player_input); */
-    for(int i = 0; i < NUM_INPUTS*2; ++i) {
+    for(int i = 0; i < NUM_INPUTS*NUM_INPUTS; ++i) {
     /* orthogonalize_boolean(input[i], player_input + BITLENGTH*i); */
         orthogonalize_arithmetic(input[i], player_input + BITLENGTH*i);
     }

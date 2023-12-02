@@ -172,6 +172,7 @@ static void trunc_2k_in_place(sint_t<Additive_Share<Datatype, Share>>*  val, con
     sint* r_mk2 = new sint[len];
     sint* c = new sint[len];
     sint* c_prime = new sint[len];
+    Share::communicate();
     for(int i = 0; i < len; i++)
     {
         val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i]);
@@ -181,14 +182,17 @@ static void trunc_2k_in_place(sint_t<Additive_Share<Datatype, Share>>*  val, con
     for(int i = 0; i < len; i++)
     {
         val[i].complete_trunc_2k_inputs(r_mk2[i], r_msb[i],c[i], c_prime[i]);
-        b[i].prepare_XOR(r_msb[i],c[i]);
     }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+        b[i].prepare_XOR(r_msb[i],c[i]);
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
         b[i].complete_XOR(r_msb[i],c[i]);
         b[i] = b[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL - 1));
     }
+    Share::communicate();
     delete[] c;
     
     for(int i = 0; i < len; i++)
