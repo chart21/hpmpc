@@ -13,7 +13,7 @@ Datatype get_p1()
 }
 
     template <typename func_mul>
-TTP_init mult_public(Datatype b, func_mul MULT)
+TTP_init mult_public(const Datatype b, func_mul MULT) const
 {
     return TTP_init();
 }

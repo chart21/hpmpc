@@ -127,7 +127,7 @@ DATATYPE TRUNC3(DATATYPE x) {
 
 
 
-#define FUNC_TRUNC TRUNC2
+#define FUNC_TRUNC OP_TRUNC
 
 /* DATATYPE mod_power_of_2(DATATYPE x, int k) { */
 /*     // Create a mask with lower k bits set to 1 */

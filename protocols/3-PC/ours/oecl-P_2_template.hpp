@@ -32,14 +32,22 @@ OECL2_Share Add(OECL2_Share b, func_add ADD) const
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OECL2_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
+#if TRUNC_THEN_MULT == 1
+    auto result = MULT(TRUNC(ADD(p1,p2)),b);
+#else
     auto result = MULT(ADD(p1,p2),b);
+#endif
     OECL2_Share res;
 #if PRE == 1
     res.p2 = pre_receive_from_live(P_0);
 #else
     res.p2 = receive_from_live(P_0);
 #endif
+#if TRUNC_THEN_MULT == 1
+    res.p1 = SUB(result,res.p2);
+#else
     res.p1 = SUB(TRUNC(result),res.p2);
+#endif
     return res;
 } 
     

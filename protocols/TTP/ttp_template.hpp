@@ -39,6 +39,13 @@ TTP_Share Not() const
 #endif
 }
 
+template <typename func_mul>
+TTP_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return TTP_Share(MULT(p1,b),MULT(p2,b));
+}
+
+
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 TTP_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
