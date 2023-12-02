@@ -124,7 +124,7 @@ public:
         }
         }
 
-        sint_t mult_public(const UINT_TYPE other) {
+        sint_t mult_public(const UINT_TYPE other) const {
         sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
             result[i] = shares[i].mult_public(PROMOTE(other));

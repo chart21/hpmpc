@@ -226,7 +226,7 @@ void complete_receive_from(func_add ADD, func_sub SUB)
 }
 
 template <typename func_mul>
-OECL0_Share mult_public(Datatype b, func_mul MULT)
+OECL0_Share mult_public(const Datatype b, func_mul MULT) const
 {
     return OECL0_Share(MULT(p1,b),MULT(p2,b));
 }

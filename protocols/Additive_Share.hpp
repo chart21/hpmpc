@@ -45,7 +45,7 @@ public:
         *this = *this * other;
         }
 
-    Additive_Share mult_public(const DATATYPE b)
+    Additive_Share mult_public(const DATATYPE b) const
     {
         return Additive_Share(Share_Type::mult_public(b, OP_MULT));
     }

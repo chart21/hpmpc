@@ -14,7 +14,7 @@ static OECL2_init public_val(Datatype a)
 }
     
     template <typename func_mul>
-OECL2_init mult_public(Datatype b, func_mul MULT)
+OECL2_init mult_public(const Datatype b, func_mul MULT) const
 {
     return OECL2_init();
 }

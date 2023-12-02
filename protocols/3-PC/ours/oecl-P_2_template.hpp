@@ -44,7 +44,7 @@ OECL2_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, fun
 } 
     
     template <typename func_mul>
-OECL2_Share mult_public(Datatype b, func_mul MULT)
+OECL2_Share mult_public(const Datatype b, func_mul MULT) const
 {
     return OECL2_Share(MULT(p1,b),MULT(p2,b));
 }
