@@ -5,13 +5,16 @@
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
 
-#include "boolean_adder_bandwidth.hpp"
+/* #include "boolean_adder_bandwidth.hpp" */
 
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
 #include "boolean_adder_msb.hpp"
-#include "ppa_msb.hpp"
-#include "ppa.hpp"
-#include "ppa_msb_unsafe.hpp"
+#else
 #include "ppa_msb_4_way.hpp"
+#endif
+/* #include "ppa_msb.hpp" */
+/* #include "ppa.hpp" */
+/* #include "ppa_msb_unsafe.hpp" */
 #if PROTOCOL_LIVE == TTP_Share && SIMULATE_MPC_FUNCTIONS == 0
 template<int k,typename Share, typename Datatype>
 void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
@@ -66,7 +69,11 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     /* Bitset* y = new Bitset[NUM_INPUTS]; */
     S *y = new S[len];
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     std::vector<BooleanAdder_MSB<k-m,S>> adders;
+#else
+    std::vector<PPA_MSB_4Way<k-m,S>> adders;
+#endif
     /* std::vector<PPA_MSB_4Way<k,S>> adders; */
     adders.reserve(len);
     for(int i = 0; i < len; i++)
@@ -109,11 +116,16 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
         t1[i].complete_bit_injection_S1();
         t2[i].complete_bit_injection_S2();
     }
-    sint* result = new sint[len];
     
     Share::communicate();
     /* if(current_phase == 1) */
     /*     std::cout << "XOR ..." << std::endl; */
+
+
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+    
+    sint* result = new sint[len];
+
     for(int i = 0; i < len; i++)
     {
         result[i].prepare_XOR(t1[i],t2[i]);
@@ -153,6 +165,36 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
         /* val[i] -= sint(1); // To counter the +1 in TRUNC */
     }
     Share::communicate();
+
+#else // MULTI_INPUT AND gate approach, TODO: Make compatible with non-interactive probabilistic truncation
+
+    for(int i = 0; i < len; i++)
+    {
+        sint tmp(0);
+        tmp = val[i].prepare_dot( t1[i] + t2[i]); // (a + b) v
+        tmp -= (val[i] + val[i]).prepare_dot3(t1[i],t2[i]); // - 2abv
+#if TRUNC_APPROACH == 0
+        tmp.mask_and_send_dot();
+#else
+        tmp.mask_and_send_dot_without_trunc();
+#endif 
+        val[i] = tmp;
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+#if TRUNC_APPROACH == 0
+        val[i].complete_mult();
+#else
+        val[i].complete_mult_without_trunc();
+#endif
+    }
+
+
+#endif
+
+
+
     /* for(int i = 0; i < len; i++) */
     /* { */
     /*     val[i] = val[i].prepare_trunc_2k(); */

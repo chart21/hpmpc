@@ -81,12 +81,12 @@ int base_port = BASE_PORT; // temporary solution
 // Bitlength of integers (currently not used)
 #define BITLENGTH 32
 // Reduced Bitlength that might be used for RELU, etc
-#define REDUCED_BITLENGTH_k 21
+#define REDUCED_BITLENGTH_k 24
 #define REDUCED_BITLENGTH_m 16
 
 #define MULTI_INPUT 1 // activate multi input Multiplication gates?
 
-#define BANDWIDTH_OPTIMIZED 1 // 1 if bandwidth optimized (e.g. Ripple Carry Adder), 0 if Latency optimized (e.g. Multi-input AND gates, Parallel Prefix Adder)
+#define BANDWIDTH_OPTIMIZED 0 // 1 if bandwidth optimized (e.g. Ripple Carry Adder), 0 if Latency optimized (e.g. Multi-input AND gates, Parallel Prefix Adder)
 #define ONLINE_OPTIMIZED 1 // 1 if online optimized (e.g. MULTI_INPUT AND gates), 0 if optimized for total communication (e.g. no MULTI_INPUT AND gates)
 
 #if PROTOCOL < 7

@@ -104,6 +104,8 @@ public:
         return result;
     }
 
+
+
         sint_t operator*(const sint_t & other) const {
         sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
@@ -115,6 +117,12 @@ public:
         void operator+=(const sint_t& other) {
         for(int i = 0; i < BITLENGTH; ++i) {
             shares[i] = shares[i] + other[i];
+        }
+    }
+    
+        void operator-= (const sint_t& other) {
+        for(int i = 0; i < BITLENGTH; ++i) {
+            shares[i] = shares[i] - other[i];
         }
     }
 
@@ -164,7 +172,23 @@ public:
         }
         return result;
         }
+#if MULTI_INPUT == 1 
+        sint_t prepare_dot3(const sint_t& other, const sint_t& other2) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i].prepare_dot3(other[i], other2[i]);
+        }
+        return result;
+        }
 
+        sint_t prepare_dot4(const sint_t& other, const sint_t& other2, const sint_t& other3) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i].prepare_dot4(other[i], other2[i], other3[i]);
+        }
+        return result;
+        }
+#endif
         void complete_receive_from(int id) 
         {
         for(int i = 0; i < BITLENGTH; ++i) {
