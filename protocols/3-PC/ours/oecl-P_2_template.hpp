@@ -220,7 +220,7 @@ static void communicate()
 //higher level functions
 
 
-static void prepare_A2B_S1(int k, OECL2_Share in[], OECL2_Share out[])
+static void prepare_A2B_S1(int m, int k, OECL2_Share in[], OECL2_Share out[])
 {
     //convert share a + x1 to boolean
     Datatype temp[BITLENGTH];
@@ -233,14 +233,14 @@ static void prepare_A2B_S1(int k, OECL2_Share in[], OECL2_Share out[])
     orthogonalize_boolean(temp2, temp);
     /* unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp); */
     /* orthogonalize_boolean((UINT_TYPE*) temp, temp); */
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
-        out[i].p1 = temp[i];
-        out[i].p2 = SET_ALL_ZERO();
+        out[i-m].p1 = temp[i];
+        out[i-m].p2 = SET_ALL_ZERO();
     }
 }
 
-static void prepare_A2B_S2(int k, OECL2_Share in[], OECL2_Share out[])
+static void prepare_A2B_S2(int m, int k, OECL2_Share in[], OECL2_Share out[])
 {
 }
 

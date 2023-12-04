@@ -188,14 +188,14 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void prepare_A2B_S1(int k, OECL0_init in[], OECL0_init out[])
+static void prepare_A2B_S1(int m, int k, OECL0_init in[], OECL0_init out[])
 {
 }
 
 
-static void prepare_A2B_S2(int k, OECL0_init in[], OECL0_init out[])
+static void prepare_A2B_S2(int m, int k, OECL0_init in[], OECL0_init out[])
 {
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
 #if PRE == 1
     pre_send_to_(P_2);
@@ -206,11 +206,11 @@ static void prepare_A2B_S2(int k, OECL0_init in[], OECL0_init out[])
     
 }
 
-static void complete_A2B_S1(int k, OECL0_init out[])
+static void complete_A2B_S1( int k, OECL0_init out[])
 {
 
 }
-static void complete_A2B_S2(int k, OECL0_init out[])
+static void complete_A2B_S2( int k, OECL0_init out[])
 {
 
 }

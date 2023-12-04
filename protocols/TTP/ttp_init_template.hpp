@@ -169,12 +169,12 @@ static void finalize(std::string* ips)
 #endif
 }
 
-static void prepare_A2B_S1(int k, TTP_init in[], TTP_init out[])
+static void prepare_A2B_S1(int m, int k, TTP_init in[], TTP_init out[])
 {
 }
 
 
-static void prepare_A2B_S2(int k, TTP_init in[], TTP_init out[])
+static void prepare_A2B_S2(int m, int k, TTP_init in[], TTP_init out[])
 {
 }
 

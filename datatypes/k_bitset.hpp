@@ -123,19 +123,40 @@ public:
             return result;
         }
 
-        static sbitset_t prepare_A2B_S1(Share s[k])
+        static sbitset_t prepare_A2B_S1(int m, Share s[k])
         {
             sbitset_t<k, Share> result;
-            Share::prepare_A2B_S1(k, s,result.get_share_pointer());
+            Share::prepare_A2B_S1(m,k+m, s,result.get_share_pointer());
             return result;
+        }
+
+        static sbitset_t prepare_A2B_S2(int m, Share s[k])
+        {
+            sbitset_t<k, Share> result;
+            Share::prepare_A2B_S2(m, k+m, s,result.get_share_pointer());
+            return result;
+        }
+        
+        static sbitset_t prepare_A2B_S1(Share s[k])
+        {
+            return prepare_A2B_S1(0, s);
         }
 
         static sbitset_t prepare_A2B_S2(Share s[k])
         {
-            sbitset_t<k, Share> result;
-            Share::prepare_A2B_S2(k, s,result.get_share_pointer());
-            return result;
+            return prepare_A2B_S2(0, s); 
         }
+        
+        void complete_A2B_S1(int m)
+        {
+            Share::complete_A2B_S1(k+m, shares);
+        }
+
+        void complete_A2B_S2(int m)
+        {
+            Share::complete_A2B_S2(k+m, shares);
+        }
+
         
         void complete_A2B_S1()
         {

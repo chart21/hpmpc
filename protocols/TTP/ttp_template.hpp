@@ -303,7 +303,7 @@ static void communicate()
 #endif
 }
 
-static void prepare_A2B_S1(int k, TTP_Share in[], TTP_Share out[])
+static void prepare_A2B_S1(int m, int k, TTP_Share in[], TTP_Share out[])
 {
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
@@ -326,19 +326,19 @@ static void prepare_A2B_S1(int k, TTP_Share in[], TTP_Share out[])
     unorthogonalize_arithmetic(temp, temp2);
     orthogonalize_boolean(temp2, temp);
 
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
 #if SIMULATE_MPC_FUNCTIONS == 1
-        out[i].p2 = getRandomVal(0);
-        out[i].p1 = FUNC_XOR(out[i].p2,temp[i]);
+        out[i-m].p2 = getRandomVal(0);
+        out[i-m].p1 = FUNC_XOR(out[i-m].p2,temp[i]);
 #else 
-        out[i].p1 = temp[i];
+        out[i-m].p1 = temp[i];
 #endif
     } 
 }
 
 
-static void prepare_A2B_S2(int k, TTP_Share in[], TTP_Share out[])
+static void prepare_A2B_S2(int m, int k, TTP_Share in[], TTP_Share out[])
 {
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
@@ -351,22 +351,22 @@ static void prepare_A2B_S2(int k, TTP_Share in[], TTP_Share out[])
     unorthogonalize_arithmetic(temp, temp2);
     orthogonalize_boolean(temp2, temp);
 
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
 #if SIMULATE_MPC_FUNCTIONS == 1
-        out[i].p2 = getRandomVal(0);
-        out[i].p1 = FUNC_XOR(out[i].p2,temp[i]);
+        out[i-m].p2 = getRandomVal(0);
+        out[i-m].p1 = FUNC_XOR(out[i-m].p2,temp[i]);
 #else
-        out[i].p1 = temp[i];
+        out[i-m].p1 = temp[i];
 #endif
     } 
 }
 
-static void complete_A2B_S1(int k, TTP_Share out[])
+static void complete_A2B_S1( int k, TTP_Share out[])
 {
 
 }
-static void complete_A2B_S2(int k, TTP_Share out[])
+static void complete_A2B_S2( int k, TTP_Share out[])
 {
 
 }

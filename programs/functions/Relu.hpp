@@ -31,12 +31,12 @@ void RELU_range_in_place(Additive_Share<Datatype, Share>* val, int len)
 
 #else
 
-template<int k,typename Share, typename Datatype>
+template<int m, int k,typename Share, typename Datatype>
 void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 {
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<k, S>;
+    using Bitset = sbitset_t<k-m, S>;
     using sint = sint_t<A>;
    
     /* if(current_phase == 1) */
@@ -47,8 +47,8 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     Bitset *s2 = new Bitset[len];
     for(int i = 0; i < len; i++)
     {
-        s1[i] = Bitset::prepare_A2B_S1( (S*) val[i].get_share_pointer());
-        s2[i] = Bitset::prepare_A2B_S2( (S*) val[i].get_share_pointer());
+        s1[i] = Bitset::prepare_A2B_S1(m, (S*) val[i].get_share_pointer());
+        s2[i] = Bitset::prepare_A2B_S2(m, (S*) val[i].get_share_pointer());
     }
     Share::communicate();
     for(int i = 0; i < len; i++)
@@ -66,7 +66,7 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     /* Bitset* y = new Bitset[NUM_INPUTS]; */
     S *y = new S[len];
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
-    std::vector<BooleanAdder_MSB<k,S>> adders;
+    std::vector<BooleanAdder_MSB<k-m,S>> adders;
     /* std::vector<PPA_MSB_4Way<k,S>> adders; */
     adders.reserve(len);
     for(int i = 0; i < len; i++)
@@ -207,6 +207,7 @@ static void trunc_2k_in_place(sint_t<Additive_Share<Datatype, Share>>*  val, con
     for(int i = 0; i < len; i++)
     {
         val[i] = c_prime[i] + b[i] - r_mk2[i];
+        /* val[i] = val[i] + sint(1); */
     }
     delete[] r_mk2;
     delete[] r_msb;
@@ -223,7 +224,7 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const si
     int len = end - begin;
     /* for (const sint_t* iter = begin; iter != end; ++iter) { */
             /* output[i++] = iter->relu(); */
-    RELU_range_in_place<REDUCED_BITLENGTH,Share>(output, len);
+    RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k,Share>(output, len);
     /* } */
 }
 
