@@ -309,7 +309,7 @@ static void complete_bit_injection_S2(OECL1_Share out[])
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OECL1_Share prepare_dot3(OECL1_Share b, OECL1_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+    OECL1_Share prepare_dot3(const OECL1_Share b, const OECL1_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype rxy = getRandomVal(P_0);
 Datatype rxz = getRandomVal(P_0);

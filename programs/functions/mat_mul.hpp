@@ -1744,20 +1744,22 @@ A result3 = inputs[0].prepare_dot3(inputs[1],inputs[2]) + inputs[3].prepare_dot3
 A result4 = inputs[0].prepare_dot3(inputs[1],inputs[2]) + inputs[3].prepare_dot3(inputs[4],inputs[5]) + inputs[6].prepare_dot3(inputs[7],inputs[8]) + inputs[9].prepare_dot3(inputs[10],inputs[11]);
 A result5 = inputs[0].prepare_dot3(inputs[1],inputs[2]) + inputs[3].prepare_dot3(inputs[4],inputs[5]) + inputs[6].prepare_dot3(inputs[7],inputs[8]) + inputs[9].prepare_dot3(inputs[10],inputs[11]);
 A result6 = inputs[0].prepare_dot3(inputs[1],inputs[2]) + inputs[3].prepare_dot3(inputs[4],inputs[5]) + inputs[6].prepare_dot3(inputs[7],inputs[8]) + inputs[9].prepare_dot3(inputs[10],inputs[11]);
-result1.mask_and_send_dot();
-result2.mask_and_send_dot();
-result3.mask_and_send_dot();
-result4.mask_and_send_dot();
-result5.mask_and_send_dot();
-result6.mask_and_send_dot();
+result1.mask_and_send_dot_without_trunc();
+result2.mask_and_send_dot_without_trunc();
+result3.mask_and_send_dot_without_trunc();
+result4.mask_and_send_dot_without_trunc();
+result5.mask_and_send_dot_without_trunc();
+result6.mask_and_send_dot_without_trunc();
 Share::communicate();
-result1.complete_mult();
-result2.complete_mult();
-result3.complete_mult();
-result4.complete_mult();
-result5.complete_mult();
-result6.complete_mult();
-result1 = result1.prepare_dot3(result2,result3) + result4.prepare_dot3(result5,result6);
+result1.complete_mult_without_trunc();
+result2.complete_mult_without_trunc();
+result3.complete_mult_without_trunc();
+result4.complete_mult_without_trunc();
+result5.complete_mult_without_trunc();
+result6.complete_mult_without_trunc();
+/* result1 = result1.prepare_dot3(result2,result3) + result4.prepare_dot3(result5,result6); */
+result1 = result1.prepare_dot(result2 + result3) - (inputs[0] + inputs[3]).prepare_dot3(inputs[1],inputs[2]);
+        //val[i] = val[i].prepare_dot( t1[i] + t2[i]) - (val[i] + val[i]).prepare_dot3(t1[i],t2[i]); // (a+b) v - 2abv
 result1.mask_and_send_dot();
 Share::communicate();
 result1.complete_mult();

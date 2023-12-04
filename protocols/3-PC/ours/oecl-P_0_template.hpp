@@ -346,7 +346,7 @@ static void complete_bit_injection_S2(OECL0_Share out[])
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OECL0_Share prepare_dot3(OECL0_Share b, OECL0_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+    OECL0_Share prepare_dot3(const OECL0_Share b, const OECL0_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype x0 = ADD(p1,p2);
 Datatype y0 = ADD(b.p1,b.p2);

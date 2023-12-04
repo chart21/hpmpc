@@ -300,7 +300,7 @@ static void complete_bit_injection_S2(OECL2_Share out[])
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-    OECL2_Share prepare_dot3(OECL2_Share b, OECL2_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+    OECL2_Share prepare_dot3(const OECL2_Share b, const OECL2_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 #if PRE == 1
 Datatype rxy = pre_receive_from_live(P_0);

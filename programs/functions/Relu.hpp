@@ -169,40 +169,36 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 #else // MULTI_INPUT AND gate approach, TODO: Make compatible with non-interactive probabilistic truncation
 
     for(int i = 0; i < len; i++)
-    {
-        sint tmp(0);
-        tmp = val[i].prepare_dot( t1[i] + t2[i]); // (a + b) v
-        tmp -= (val[i] + val[i]).prepare_dot3(t1[i],t2[i]); // - 2abv
+        val[i] = val[i].prepare_dot( t1[i] + t2[i]) - (val[i] + val[i]).prepare_dot3(t1[i],t2[i]); // (a+b) v - 2abv
+
 #if TRUNC_APPROACH == 0
-        tmp.mask_and_send_dot();
+    for(int i = 0; i < len; i++)
+        val[i].mask_and_send_dot(); // important: do not mix with prepare_dot in same loop because of send recv order
 #else
-        tmp.mask_and_send_dot_without_trunc();
+    for(int i = 0; i < len; i++)
+        val[i].mask_and_send_dot_without_trunc();
 #endif 
-        val[i] = tmp;
-    }
+    
+    delete[] t1;
+    delete[] t2;
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
 #if TRUNC_APPROACH == 0
+        /* t1[i].complete_mult(); */
+        /* t2[i].complete_mult(); */
+        /* val[i] = t1[i] - t2[i]; */
         val[i].complete_mult();
 #else
         val[i].complete_mult_without_trunc();
 #endif
     }
-
-
+    
 #endif
 
+    Share::communicate();
 
 
-    /* for(int i = 0; i < len; i++) */
-    /* { */
-    /*     val[i] = val[i].prepare_trunc_2k(); */
-    /* } */
-    /* Share::communicate(); */
-         /* for(int i = 0; i < len; i++) */
-    /* { */
-        /* val[i].complete_trunc_2k(); */
 #if TRUNC_APPROACH == 1
     trunc_2k_in_place(val, len);
 #endif
