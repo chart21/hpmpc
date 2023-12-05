@@ -225,12 +225,22 @@ public:
         Share* get_share_pointer() {
             return shares;
         }
-
-        static sint_t<Share> load_shares(Share shares[BITLENGTH]) {
+        
+        static sint_t<Share> load_shares(int l, const Share shares[BITLENGTH]) {
             sint_t<Share> result;
-            for(int i = 0; i < BITLENGTH; ++i) {
+            for(int i = 0; i < l; ++i) {
                 result[i] = shares[i];
             }
+            return result;
+        }
+
+        static sint_t<Share> load_shares(const Share shares[BITLENGTH]) {
+            return load_shares(BITLENGTH, shares);
+        }
+        
+        static sint_t<Share> move_shares(Share* shares) {
+            sint_t<Share> result;
+            std::move(shares, shares + BITLENGTH, result.shares);
             return result;
         }
 

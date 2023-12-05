@@ -148,7 +148,7 @@ void inference(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<BITLENGTH, S>;
     using sint = sint_t<A>;
-    using modeltype = sint;
+    using modeltype = A;
     /* const int parallel_factor = 1; */
     /* using cleartype = k_clear<A>; */
 

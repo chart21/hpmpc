@@ -42,7 +42,11 @@ TTP_Share Not() const
 template <typename func_mul>
 TTP_Share mult_public(const Datatype b, func_mul MULT) const
 {
+#if SIMULATE_MPC_FUNCTIONS == 1
     return TTP_Share(MULT(p1,b),MULT(p2,b));
+#else
+    return TTP_Share(MULT(p1,b));
+#endif
 }
 
 
@@ -71,12 +75,17 @@ TTP_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_
 template <typename func_mul>
 TTP_Share mult_public(Datatype b, func_mul MULT)
 {
+#if SIMULATE_MPC_FUNCTIONS == 1
     return TTP_Share(MULT(p1,b),MULT(p2,b));
+#else
+    return TTP_Share(MULT(p1,b));
+#endif
 }
 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_Share& r_mk2, TTP_Share& r_msb, TTP_Share& c, TTP_Share& c_prime) {
+#if SIMULATE_MPC_FUNCTIONS == 1
     Datatype c_dat_prime = trunc(p1);
     UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
@@ -87,6 +96,10 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     c = TTP_Share(ADD(c_dat,tmp),tmp);
     tmp = getRandomVal(0);
     c_prime = TTP_Share(ADD(c_dat_prime,tmp),tmp);
+#else
+    c = TTP_Share(p1);
+    c_prime = TTP_Share(TRUNC(p1));
+#endif
 }
     /* Datatype r = getRandomVal(0); */
     /* Datatype c = ADD(SUB(p1,p2),r); //open c = x + r */
@@ -105,12 +118,17 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_Share& r_mk2, TTP_Share& r_msb, TTP_Share& c, TTP_Share& c_prime) {
+#if SIMULATE_MPC_FUNCTIONS == 1
     Datatype rmk2 = (p2 << 1) >> (FRACTIONAL + 1);
     Datatype rmsb = p2 >> (BITLENGTH - 1);
     Datatype tmp = getRandomVal(0);
     r_mk2 = TTP_Share(ADD(rmk2,tmp),tmp);
     tmp = getRandomVal(0);
     r_msb = TTP_Share(ADD(rmsb,tmp),tmp);
+#else
+    r_mk2 = TTP_Share(0);
+    r_msb = TTP_Share(0);
+#endif
 }
 
 

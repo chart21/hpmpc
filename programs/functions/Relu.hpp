@@ -16,7 +16,7 @@
 /* #include "ppa.hpp" */
 /* #include "ppa_msb_unsafe.hpp" */
 #if PROTOCOL_LIVE == TTP_Share && SIMULATE_MPC_FUNCTIONS == 0
-template<int k,typename Share, typename Datatype>
+template<int m, int k,typename Share, typename Datatype>
 void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 {
     for(int i = 0; i < len; i++)
@@ -24,7 +24,7 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 }
 
 
-template<int k,typename Share, typename Datatype>
+template<int m, int k,typename Share, typename Datatype>
 void RELU_range_in_place(Additive_Share<Datatype, Share>* val, int len)
 {
     for(int i = 0; i < len; i++)
@@ -253,6 +253,48 @@ static void trunc_2k_in_place(sint_t<Additive_Share<Datatype, Share>>*  val, con
     delete[] b;
 }
 
+
+/* template<typename T> */
+/* static void RELU(const T*  begin, const T* end, T*  output){ */
+/*     std::copy(begin, end, output); */
+/*     int len = end - begin; */
+/*     /1* for (const sint_t* iter = begin; iter != end; ++iter) { *1/ */
+/*             /1* output[i++] = iter->relu(); *1/ */
+/*     RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k>(output, len); */
+/*     /1* } *1/ */
+/* } */
+
+
+template<typename Share, typename Datatype>
+static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_Share<Datatype, Share>* end, Additive_Share<Datatype, Share>*  output){
+    using sint = sint_t<Additive_Share<Datatype, Share>>;
+    /* std::copy(begin, end, output); */
+    int m = end - begin;
+    int sint_len = ((m-1)/BITLENGTH)+1;
+    sint* tmp = new sint[sint_len];
+    for(int i = 0; i < sint_len-1; i++)
+    {
+        tmp[i] = sint::load_shares(begin+i*BITLENGTH);
+    }
+    tmp[sint_len-1] = sint::load_shares( m-((sint_len-1)*BITLENGTH), begin+(sint_len-1)*BITLENGTH); //leftover shares
+    /* for (const sint_t* iter = begin; iter != end; ++iter) { */
+            /* output[i++] = iter->relu(); */
+    RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k,Share>(tmp, sint_len);
+    for(int i = 0; i < sint_len-1; i++)
+    {
+        for(int j = 0; j < BITLENGTH; j++)
+        {
+            output[i*BITLENGTH+j] = tmp[i].get_share_pointer()[j];
+        }
+    }
+    
+    for(int i = 0; i < m-((sint_len-1)*BITLENGTH); i++)
+    {
+        output[(sint_len-1)*BITLENGTH+i] = tmp[sint_len-1].get_share_pointer()[i];
+    }
+    delete[] tmp;
+    /* } */
+}
 
 
 
