@@ -27,7 +27,7 @@ static TTP_Share public_val(Datatype a)
 
 Datatype get_p1()
 {
-    return p1;
+    return OP_ADD(p1,p2);
 }
 
 TTP_Share Not() const
@@ -85,21 +85,23 @@ TTP_Share mult_public(Datatype b, func_mul MULT)
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_Share& r_mk2, TTP_Share& r_msb, TTP_Share& c, TTP_Share& c_prime) {
-#if SIMULATE_MPC_FUNCTIONS == 1
     Datatype c_dat_prime = trunc(p1);
     UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
     c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1
-    Datatype c_dat = p1 >> (BITLENGTH - 1);
+    Datatype c_dat = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(p1);
+#if SIMULATE_MPC_FUNCTIONS == 1
     Datatype tmp = getRandomVal(0);
     c = TTP_Share(ADD(c_dat,tmp),tmp);
     tmp = getRandomVal(0);
     c_prime = TTP_Share(ADD(c_dat_prime,tmp),tmp);
 #else
-    c = TTP_Share(p1);
-    c_prime = TTP_Share(TRUNC(p1));
+    c = TTP_Share(c_dat);
+    c_prime = TTP_Share(c_dat_prime);
 #endif
+    /* c = TTP_Share(p1); */
+    /* c_prime = TTP_Share(trunc(p1)); */
 }
     /* Datatype r = getRandomVal(0); */
     /* Datatype c = ADD(SUB(p1,p2),r); //open c = x + r */
@@ -119,15 +121,15 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_Share& r_mk2, TTP_Share& r_msb, TTP_Share& c, TTP_Share& c_prime) {
 #if SIMULATE_MPC_FUNCTIONS == 1
-    Datatype rmk2 = (p2 << 1) >> (FRACTIONAL + 1);
-    Datatype rmsb = p2 >> (BITLENGTH - 1);
+    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(p2)); 
+    Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH -1>(p2);
     Datatype tmp = getRandomVal(0);
     r_mk2 = TTP_Share(ADD(rmk2,tmp),tmp);
     tmp = getRandomVal(0);
     r_msb = TTP_Share(ADD(rmsb,tmp),tmp);
 #else
-    r_mk2 = TTP_Share(0);
-    r_msb = TTP_Share(0);
+    r_mk2 = TTP_Share(PROMOTE(0));
+    r_msb = TTP_Share(PROMOTE(0));
 #endif
 }
 
@@ -405,8 +407,11 @@ void prepare_bit_injection_S2(TTP_Share out[])
 #else
     temp[BITLENGTH - 1] = p1;
 #endif
-    unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
-    orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);
+    /* unorthogonalize_boolean(temp,(UINT_TYPE*)temp); */
+    /* orthogonalize_arithmetic((UINT_TYPE*) temp,  temp); */
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
     for(int i = 0; i < BITLENGTH; i++)
     {
         out[i].p1 = temp[i]; // set second summand to the msb
@@ -529,7 +534,7 @@ void complete_trunc_2k(func_add ADD, func_sub SUB){
 TTP_Share relu() const
 {
 #if SIMULATE_MPC_FUNCTIONS == 1
-    auto result = relu_epi(OP_SUB(p1,p2));
+    auto result = FUNC_TRUNC(relu_epi(OP_SUB(p1,p2)));
     auto randVal = getRandomVal(0);
     return TTP_Share(OP_ADD(result,randVal),randVal);
 #else

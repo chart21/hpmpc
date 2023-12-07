@@ -319,8 +319,11 @@ void prepare_bit_injection_S2(OECL0_Share out[])
 {
     Datatype temp[BITLENGTH]{0};
     temp[BITLENGTH - 1] = FUNC_XOR(p1,p2);
-    unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
-    orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);
+    /* unorthogonalize_boolean(temp,(UINT_TYPE*)temp); */
+    /* orthogonalize_arithmetic((UINT_TYPE*) temp,  temp); */
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
     for(int i = 0; i < BITLENGTH; i++)
     {
         out[i].p2 = getRandomVal(P_1); // set second share to r0,1 
@@ -507,8 +510,10 @@ void complete_mult4(func_add ADD, func_sub SUB){}
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL0_Share& r_mk2, OECL0_Share& r_msb, OECL0_Share& c, OECL0_Share& c_prime) const{
-    Datatype rmk2 = (ADD(p1,p2) << 1) >> (FRACTIONAL + 1);
-    Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1);
+    /* Datatype rmk2 = (ADD(p1,p2) << 1) >> (FRACTIONAL + 1); */
+    /* Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1); */
+    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(ADD(p1,p2)) );
+    Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(ADD(p1,p2));
     /* Datatype rmk2 = ADD(p1,p2); */    
     /* Datatype rmsb = ADD(p1,p2); */
 

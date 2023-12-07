@@ -88,10 +88,20 @@
 #define SHIFT_RIGHT16 arithmetic_right_shift_16
 #define SHIFT_RIGHT32 arithmetic_right_shift_32
 #define SHIFT_RIGHT64 arithmetic_right_shift_64
-#define SHIFT_LEFT32(a) ((a) << FRACTIONAL)
-#define SHIFT_LEFT64(a) ((a) << FRACTIONAL)
+#define SHIFT_LOG_RIGHT8 logical_right_shift_8
+#define SHIFT_LOG_RIGHT16 logical_right_shift_16
+#define SHIFT_LOG_RIGHT32 logical_right_shift_32
+#define SHIFT_LOG_RIGHT64 logical_right_shift_64
+#define SHIFT_LEFT8 logical_left_shift_8
+#define SHIFT_LEFT16 logical_left_shift_16
+#define SHIFT_LEFT32 logical_left_shift_32
+#define SHIFT_LEFT64 logical_left_shift_64
+
+
+
 
 #if BITLENGTH == 64
+template <int n>
 uint64_t arithmetic_right_shift_64(uint64_t value) {
     /* if (value & 0x8000000000000000) { */
     /*     uint64_t mask = ~((1ULL << (64 - FRACTIONAL)) - 1); */
@@ -99,12 +109,24 @@ uint64_t arithmetic_right_shift_64(uint64_t value) {
     /* } */
     /* return value >> FRACTIONAL; */
 int64_t temp = static_cast<int64_t>(value);
-    temp >>= FRACTIONAL;
+    temp >>= n;
     return static_cast<uint64_t>(temp);
 }
 
+template <int n>
+uint64_t logical_right_shift_64(uint64_t value) {
+    return value >> n;
+}
+
+template <int n>
+uint64_t logical_left_shift_64(uint64_t value) {
+    return value << n;
+}
+
+
 #elif BITLENGTH == 32
 
+template <int n>
 uint32_t arithmetic_right_shift_32(uint32_t value) {
     /* if (value & 0x80000000) { */
     /*     uint32_t mask = ~((1U << (32 - FRACTIONAL)) - 1); */
@@ -112,12 +134,23 @@ uint32_t arithmetic_right_shift_32(uint32_t value) {
     /* } */
     /* return value >> FRACTIONAL; */
 int32_t temp = static_cast<int32_t>(value);
-    temp >>= FRACTIONAL;
+    temp >>= n;
     return static_cast<uint32_t>(temp);
+}
+
+template <int n>
+uint32_t logical_right_shift_32(uint32_t value) {
+    return value >> n;
+}
+
+template <int n>
+uint32_t logical_left_shift_32(uint32_t value) {
+    return value << n;
 }
 
 #elif BITLENGTH == 16
 
+template <int n>
 uint16_t arithmetic_right_shift_16(uint16_t value) {
 /*     if (value & 0x8000) { */
 /*         uint16_t mask = ~((1U << (16 - FRACTIONAL)) - 1); */
@@ -125,11 +158,22 @@ uint16_t arithmetic_right_shift_16(uint16_t value) {
 /*     } */
 /*     return value >> FRACTIONAL; */
     int16_t temp = static_cast<int16_t>(value);
-    temp >>= FRACTIONAL;
+    temp >>= n;
     return static_cast<uint16_t>(temp);
 }
 
+template <int n>
+uint16_t logical_right_shift_16(uint16_t value) {
+    return value >> n;
+}
+
+template <int n>
+uint16_t logical_left_shift_16(uint16_t value) {
+    return value << n;
+}
+
 #elif BITLENGTH == 8
+template <int n>
 uint8_t arithmetic_right_shift_8(uint8_t value) {
     /* if (value & 0x80) { */
     /*     uint8_t mask = ~((1U << (8 - FRACTIONAL)) - 1); */
@@ -138,8 +182,18 @@ uint8_t arithmetic_right_shift_8(uint8_t value) {
     /* return value >> FRACTIONAL; */
 /* } */
 int8_t temp = static_cast<int8_t>(value);
-    temp >>= FRACTIONAL;
+    temp >>= n;
     return static_cast<uint8_t>(temp);
+}
+
+template <int n>
+uint8_t logical_right_shift_8(uint8_t value) {
+    return value >> n;
+}
+
+template <int n>
+uint8_t logical_left_shift_8(uint8_t value) {
+    return value << n;
 }
 
 #endif

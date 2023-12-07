@@ -128,14 +128,14 @@ public:
 
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i].mult_public_fixed(PROMOTE(other));
+            shares[i].mult_public_fixed(other);
         }
         }
 
         sint_t mult_public(const UINT_TYPE other) const {
         sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
-            result[i] = shares[i].mult_public(PROMOTE(other));
+            result[i] = shares[i].mult_public(other);
         }
         return result;
         }
@@ -225,12 +225,19 @@ public:
         Share* get_share_pointer() {
             return shares;
         }
+
+        Share get_share(int idx) const {
+            return shares[idx];
+        }
         
         static sint_t<Share> load_shares(int l, const Share shares[BITLENGTH]) {
             sint_t<Share> result;
             for(int i = 0; i < l; ++i) {
                 result[i] = shares[i];
             }
+            /* for(int i = l; i < BITLENGTH; ++i) { */
+            /*     result[i] = Share::public_val(PROMOTE(0)); */
+            /* } */
             return result;
         }
 
@@ -278,11 +285,10 @@ public:
             Share::complete_bit_injection_S2(shares);
         }
 
-        UINT_TYPE get_p1()
-        {
-            /* return shares[0].get_p1(); */
-            return 0;
-        }
+        /* UINT_TYPE get_p1() */
+        /* { */
+        /*     return shares[0].get_p1(); */
+        /* } */
 
         static void communicate()
         {
@@ -310,6 +316,7 @@ public:
                 shares[i].complete_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i]);
         }
 
+#if SIMULATE_MPC_FUNCTIONS == 0
 static void RELU(const sint_t* begin, const sint_t* end,  sint_t* output){
     /* int i = 0; */
     /* for (const sint_t* iter = begin; iter != end; ++iter) { */
@@ -321,7 +328,7 @@ static void RELU(const sint_t* begin, const sint_t* end,  sint_t* output){
         output[i] = output[i].relu();
     }
 }
-
+#endif
 
 };
 

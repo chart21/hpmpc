@@ -35,7 +35,7 @@ void RELU_range_in_place(Additive_Share<Datatype, Share>* val, int len)
 #else
 
 template<int m, int k,typename Share, typename Datatype>
-void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
+void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
 {
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
@@ -120,7 +120,6 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     Share::communicate();
     /* if(current_phase == 1) */
     /*     std::cout << "XOR ..." << std::endl; */
-
 
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     
@@ -209,43 +208,40 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
     
 #endif
 
-template<typename Share, typename Datatype>
-static void trunc_2k_in_place(sint_t<Additive_Share<Datatype, Share>>*  val, const int len){
-    using S = XOR_Share<DATATYPE, Share>;
-    using A = Additive_Share<DATATYPE, Share>;
-    using sint = sint_t<A>;
+template<typename T>
+static void trunc_2k_in_place(T*  val, const int len){
     
-    sint* r_msb = new sint[len];
-    sint* r_mk2 = new sint[len];
-    sint* c = new sint[len];
-    sint* c_prime = new sint[len];
-    Share::communicate();
+    T* r_msb = new T[len];
+    T* r_mk2 = new T[len];
+    T* c = new T[len];
+    T* c_prime = new T[len];
+    T::communicate();
     for(int i = 0; i < len; i++)
     {
         val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i]);
     }
-    Share::communicate();
-    sint* b = new sint[len];
+    T::communicate();
+    T* b = new T[len];
     for(int i = 0; i < len; i++)
     {
         val[i].complete_trunc_2k_inputs(r_mk2[i], r_msb[i],c[i], c_prime[i]);
     }
-    Share::communicate();
+    T::communicate();
     for(int i = 0; i < len; i++)
         b[i].prepare_XOR(r_msb[i],c[i]);
-    Share::communicate();
+    T::communicate();
     for(int i = 0; i < len; i++)
     {
         b[i].complete_XOR(r_msb[i],c[i]);
         b[i] = b[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL - 1));
     }
-    Share::communicate();
+    T::communicate();
     delete[] c;
     
     for(int i = 0; i < len; i++)
     {
         val[i] = c_prime[i] + b[i] - r_mk2[i];
-        /* val[i] = val[i] + sint(1); */
+        /* val[i] = val[i] + T(1); */
     }
     delete[] r_mk2;
     delete[] r_msb;
@@ -269,31 +265,66 @@ template<typename Share, typename Datatype>
 static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_Share<Datatype, Share>* end, Additive_Share<Datatype, Share>*  output){
     using sint = sint_t<Additive_Share<Datatype, Share>>;
     /* std::copy(begin, end, output); */
+    /* int m = end - begin; */
+    /* int sint_len = ((m-1)/BITLENGTH)+1; */
+    /* sint* tmp = new sint[sint_len]; */
+    /* for(int i = 0; i < sint_len-1; i++) */
+    /* { */
+    /*     tmp[i] = sint::load_shares(begin+i*BITLENGTH); */
+    /* } */
+    /* tmp[sint_len-1] = sint::load_shares( m-((sint_len-1)*BITLENGTH), begin+(sint_len-1)*BITLENGTH); //leftover shares */
+    /* /1* for (const sint_t* iter = begin; iter != end; ++iter) { *1/ */
+    /*         /1* output[i++] = iter->relu(); *1/ */
+    /* RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k,Share>(tmp, sint_len); */
+    /* for(int i = 0; i < sint_len-1; i++) */
+    /* { */
+    /*     for(int j = 0; j < BITLENGTH; j++) */
+    /*     { */
+    /*         output[i*BITLENGTH+j] = tmp[i].get_share_pointer()[j]; */
+    /*     } */
+    /* } */
+    
+    /* for(int i = 0; i < m-((sint_len-1)*BITLENGTH); i++) */
+    /* { */
+    /*     output[(sint_len-1)*BITLENGTH+i] = tmp[sint_len-1].get_share_pointer()[i]; */
+    /* } */
+    /* delete[] tmp; */
+    /* } */
     int m = end - begin;
-    int sint_len = ((m-1)/BITLENGTH)+1;
-    sint* tmp = new sint[sint_len];
-    for(int i = 0; i < sint_len-1; i++)
+    sint* tmp = new sint[(m-1)/BITLENGTH+1];
+    int counter = 0;
+    while(m > 31)
     {
-        tmp[i] = sint::load_shares(begin+i*BITLENGTH);
+       tmp[counter++] = sint::load_shares(begin+counter*BITLENGTH);
+       m -= BITLENGTH;
     }
-    tmp[sint_len-1] = sint::load_shares( m-((sint_len-1)*BITLENGTH), begin+(sint_len-1)*BITLENGTH); //leftover shares
-    /* for (const sint_t* iter = begin; iter != end; ++iter) { */
-            /* output[i++] = iter->relu(); */
-    RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k,Share>(tmp, sint_len);
-    for(int i = 0; i < sint_len-1; i++)
+    /* if(m > 0) */
+    /*     tmp[counter++] = sint::load_shares(m, begin+counter*BITLENGTH); */
+    RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k,Share>(tmp, counter);
+    /* for(int i = 0; i < counter; i++) */
+    /* { */
+        /* std::cout << tmp[i].get_p1() << std::endl; */
+    /* } */
+    counter = 0;
+    m = end - begin;
+    while(m > 31)
     {
         for(int j = 0; j < BITLENGTH; j++)
         {
-            output[i*BITLENGTH+j] = tmp[i].get_share_pointer()[j];
+            /* output[counter*BITLENGTH+j] = tmp[counter].get_share_pointer()[j]; */
+            output[counter*BITLENGTH+j] = tmp[counter].get_share(j);
         }
+        counter++;
+        m -= BITLENGTH;
     }
-    
-    for(int i = 0; i < m-((sint_len-1)*BITLENGTH); i++)
-    {
-        output[(sint_len-1)*BITLENGTH+i] = tmp[sint_len-1].get_share_pointer()[i];
-    }
-    delete[] tmp;
+    /* if(m > 0) */
+    /* { */
+    /*     for(int j = 0; j < m; j++) */
+    /*     { */
+    /*         output[counter*BITLENGTH+j] = tmp[counter].get_share_pointer()[j]; */
+    /*     } */
     /* } */
+    delete[] tmp;
 }
 
 

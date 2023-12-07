@@ -35,24 +35,29 @@ public:
         return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT));
     }
         
-        Additive_Share operator*(const DATATYPE other) const
+        Additive_Share operator*(const UINT_TYPE other) const
         {
-        return Additive_Share(Share_Type::mult_public_fixed(other, OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC));
+        return Additive_Share(Share_Type::mult_public_fixed(PROMOTE(other), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC));
         }
 
-        void operator*=(const DATATYPE other) 
+        void operator*=(const UINT_TYPE other) 
+        {
+        mult_public_fixed(other);
+        }
+
+        void operator*=(const Additive_Share<Datatype, Share_Type>& other) 
         {
         *this = *this * other;
         }
 
-    Additive_Share mult_public(const DATATYPE b) const
+    Additive_Share mult_public(const UINT_TYPE b) const
     {
-        return Additive_Share(Share_Type::mult_public(b, OP_MULT));
+        return Additive_Share(Share_Type::mult_public(PROMOTE(b), OP_MULT));
     }
 
-    void mult_public_fixed(const DATATYPE b)
+    void mult_public_fixed(const UINT_TYPE b)
     {
-        *this = Share_Type::mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
+        *this = Share_Type::mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
     }
     
     bool operator==(const Additive_Share& b) const
@@ -217,14 +222,14 @@ public:
         #endif
     }
 
-
+#if SIMULATE_MPC_FUNCTIONS == 0
 static void RELU(const Additive_Share* begin, const Additive_Share* end,  Additive_Share* output){
     int i = 0;
     for (const Additive_Share* iter = begin; iter != end; ++iter) {
             output[i++] = iter->relu();
     }
 }
-
+#endif
     
 
 

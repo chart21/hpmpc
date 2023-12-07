@@ -326,8 +326,11 @@ void prepare_bit_injection_S1(OEC_MAL1_Share out[])
 {
     Datatype temp[BITLENGTH]{0};
     temp[BITLENGTH - 1] = v;
-    unorthogonalize_boolean(temp, (UINT_TYPE*) temp);
-    orthogonalize_arithmetic((UINT_TYPE*) temp, temp);
+    /* unorthogonalize_boolean(temp, (UINT_TYPE*) temp); */
+    /* orthogonalize_arithmetic((UINT_TYPE*) temp, temp); */
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogoalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
     for (int j = 0; j < BITLENGTH; j++)
     {
         out[j].v = temp[j]; 

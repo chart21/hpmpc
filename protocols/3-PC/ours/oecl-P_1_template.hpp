@@ -279,8 +279,11 @@ void prepare_bit_injection_S1(OECL1_Share out[])
 {
     Datatype temp[BITLENGTH]{0};
     temp[BITLENGTH - 1] = FUNC_XOR(p1,p2);
-    unorthogonalize_boolean(temp,(UINT_TYPE*)temp);
-    orthogonalize_arithmetic((UINT_TYPE*) temp,  temp);
+    /* unorthogonalize_boolean(temp,(UINT_TYPE*)temp); */
+    /* orthogonalize_arithmetic((UINT_TYPE*) temp,  temp); */
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
     for(int i = 0; i < BITLENGTH; i++)
     {
         out[i].p1 = temp[i];// set share to b xor x_0
@@ -466,7 +469,8 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
     c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1
-    Datatype c_dat = ADD(p1,p2) >> (BITLENGTH - 1);
+    /* Datatype c_dat = ADD(p1,p2) >> (BITLENGTH - 1); */
+    Datatype c_dat = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(ADD(p1,p2));
     c = OECL1_Share(c_dat, SET_ALL_ZERO());
     c_prime = OECL1_Share(c_dat_prime, SET_ALL_ZERO());
     
