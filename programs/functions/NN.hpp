@@ -179,7 +179,7 @@ void inference(DATATYPE* res)
 	cfg.parse(argc, argv);
 	cfg.print_config();
 
-	int n_train = 60000, n_test = BASE_DIV, ch = 1, h = 28, w = 28;
+	int n_train = 60000, n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28;
 
 	MatX<float> train_X, test_X;
 
@@ -194,10 +194,14 @@ void inference(DATATYPE* res)
 	if (cfg.mode == "train") {
 		train_X = read_mnist(cfg.data_dir, "train-images.idx3-ubyte", n_train);
 		train_Y = read_mnist_label(cfg.data_dir, "train-labels.idx1-ubyte", n_train);
-        MatX<modeltype> train_XX = train_X.unaryExpr([](float val) { 
-                modeltype tmp;
+        MatX<A> train_XX = train_X.unaryExpr([](float val) { 
+                A tmp;
                 tmp.template prepare_receive_and_replicate<P_0>(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val));
                 return tmp;
+        /* MatX<modeltype> train_XX = train_X.unaryExpr([](float val) { */ 
+        /*         modeltype tmp; */
+        /*         tmp.template prepare_receive_and_replicate<P_0>(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); */
+        /*         return tmp; */
     /* return sint(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); */
 });
 

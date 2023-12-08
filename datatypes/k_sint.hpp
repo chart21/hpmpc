@@ -95,6 +95,15 @@ public:
         }
         return result;
     }
+    
+    sint_t operator+(const Share& other) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i] + other;
+        }
+        return result;
+    }
+
 
     sint_t operator-(const sint_t& other) const {
         sint_t result;
@@ -104,12 +113,28 @@ public:
         return result;
     }
 
+    sint_t operator-(const Share& other) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i] - other;
+        }
+        return result;
+    }
 
 
-        sint_t operator*(const sint_t & other) const {
+
+        sint_t operator*(const sint_t& other) const {
         sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
             result[i] = shares[i] * other[i];
+        }
+        return result;
+    }
+
+        sint_t operator*(const Share& other) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i] * other;
         }
         return result;
     }
@@ -119,6 +144,12 @@ public:
             shares[i] = shares[i] + other[i];
         }
     }
+
+        void operator+=(const Share other) {
+        for(int i = 0; i < BITLENGTH; ++i) {
+            shares[i] = shares[i] + other;
+        }
+    } 
     
         void operator-= (const sint_t& other) {
         for(int i = 0; i < BITLENGTH; ++i) {
@@ -126,12 +157,18 @@ public:
         }
     }
 
+        void operator-= (const Share other) {
+        for(int i = 0; i < BITLENGTH; ++i) {
+            shares[i] = shares[i] - other;
+        }
+        }
+
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {
             shares[i].mult_public_fixed(other);
         }
         }
-
+        
         sint_t mult_public(const UINT_TYPE other) const {
         sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {

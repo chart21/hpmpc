@@ -80,7 +80,7 @@ printf("P%i: Sent %li bytes to player %i in round %i out of %i \n", PARTY, eleme
 #endif
             }
                 //Delete sent data
-           //free(((thargs_p*) threadParameters)->sent_elements[rounds]);
+           free(((sender_args*) threadParameters)->sent_elements[rounds]);
 
             rounds += 1;
             /* printf("Next sending round \n"); */

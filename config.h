@@ -1,7 +1,7 @@
 #pragma once
 
 
-#define PROTOCOL 13
+#define PROTOCOL 5
 
 // Party ID (starting from 0)
 #define PARTY 2
@@ -20,7 +20,7 @@
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 30
+#define NUM_INPUTS 2496
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -123,10 +123,10 @@ int base_port = BASE_PORT; // temporary solution
 #endif
 
 
-#define TRUNC_THEN_MULT 0 // 0 = mult then trunc, 1 = trunc then mult
+#define TRUNC_THEN_MULT 1 // 0 = mult then trunc, 1 = trunc then mult
 #define TRUNC_APPROACH 0 // 0: cut, 1: interactive
                          
-#define JIT_VEC 0 // 0: vectorize and share inputs from the beginning, 1: vectorize and share inputs just in time, load a batch of images, then vectorize
+#define JIT_VEC 1 // 0: vectorize and share inputs from the beginning, 1: vectorize and share inputs just in time, load a batch of images, then vectorize
 #define BASETYPE 0 // 0: Additive_Share, 1: sint
 
 #if JIT_VEC == 0
