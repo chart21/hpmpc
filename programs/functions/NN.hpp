@@ -148,7 +148,11 @@ void inference(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<BITLENGTH, S>;
     using sint = sint_t<A>;
+#if BASETYPE == 0
     using modeltype = A;
+#else
+    using modeltype = sint;
+#endif
     /* const int parallel_factor = 1; */
     /* using cleartype = k_clear<A>; */
 
@@ -175,13 +179,17 @@ void inference(DATATYPE* res)
 	cfg.parse(argc, argv);
 	cfg.print_config();
 
-	int n_train = 60000, n_test = 32, ch = 1, h = 28, w = 28;
+	int n_train = 60000, n_test = BASE_DIV, ch = 1, h = 28, w = 28;
 
 	MatX<float> train_X, test_X;
 
 	VecXi train_Y, test_Y;
 
+#if JIT_VEC == 0
 	DataLoader<modeltype> train_loader, test_loader;
+#else
+	DataLoader<float> train_loader, test_loader;
+#endif
 
 	if (cfg.mode == "train") {
 		train_X = read_mnist(cfg.data_dir, "train-images.idx3-ubyte", n_train);
@@ -198,22 +206,47 @@ void inference(DATATYPE* res)
                 train_XX(i).template complete_receive_from<P_0>();
             }
 
-		train_loader.load(train_XX, train_Y, cfg.batch, ch, h, w, cfg.shuffle_train);
+		/* train_loader.load(train_XX, train_Y, cfg.batch, ch, h, w, cfg.shuffle_train); */
 	}
 
     std::cout << "Reading MNIST test data..." << std::endl;
 	test_X = read_mnist(cfg.data_dir, "t10k-images.idx3-ubyte", n_test);
 	test_Y = read_mnist_label(cfg.data_dir, "t10k-labels.idx1-ubyte", n_test);
-    
-    MatX<modeltype> test_XX = test_X.unaryExpr([](float val) { 
-                modeltype tmp;
-                tmp.template prepare_receive_and_replicate<P_0>(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val));
-                modeltype::communicate();
-                tmp.template complete_receive_from<P_0>();
-                return tmp;
+    /* std::cout << "rows: " << test_X.rows() << std::endl; */
+    /* std::cout << "cols: " << test_X.cols() << std::endl; */
+    /* MatX<modeltype> test_XX(test_X.rows()/DATTYPE, test_X.cols()); */
+    /* for (int j = 0; j < test_X.cols(); j++) { */
+    /*     for (int i = 0; i < test_X.rows(); i+=DATTYPE) { */
+    /*         if(i+DATTYPE > test_X.rows()) { */
+    /*             break; // do not process leftovers */
+    /*         } */
+    /*     alignas(sizeof(DATATYPE)) UINT_TYPE tmp[DATTYPE]; */
+    /*     alignas(sizeof(DATATYPE)) DATATYPE tmp2[BITLENGTH]; */
+    /*     for (int k = 0; k < DATTYPE; ++k) { */
+    /*         tmp[k] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(test_X(i+k, j)); */
+    /*     } */
+    /*     orthogonalize_arithmetic(tmp, tmp2); */
+    /*     test_XX(i / DATTYPE, j).template prepare_receive_from<P_0>(tmp2); */
+    /*     } */
+    /* } */
+    /* modeltype::communicate(); */
+    /* for (int j = 0; j < test_XX.cols(); ++j) { */
+    /*     for (int i = 0; i < test_XX.rows(); ++i) { */
+    /*         test_XX(i, j).template complete_receive_from<P_0>(); */
+    /*     } */
+    /* } */
+    /* std::cout << "rows: " << test_XX.rows() << std::endl; */
+    /* std::cout << "cols: " << test_XX.cols() << std::endl; */
+
+    /* MatX<modeltype> test_XX = test_X.unaryExpr([](float val) { */ 
+    /*             modeltype tmp; */
+    /*             tmp.template prepare_receive_and_replicate<P_0>(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); */
+    /*             modeltype::communicate(); */
+    /*             tmp.template complete_receive_from<P_0>(); */
+    /*             return tmp; */
 
     /* /1* return sint(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); *1/ */
-    });
+    /* }); */
 
     /* MatX<modeltype> test_XX(test_X.rows()/DATTYPE, test_X.cols()); */
     /* for (int j = 0; j < test_X.cols(); j++) { */
@@ -236,9 +269,32 @@ void inference(DATATYPE* res)
     /*         test_XX(i, j).template complete_receive_from<P_0>(); */
     /*     } */
     /* } */
-    
+#if JIT_VEC == 0 
+        MatX<modeltype> test_XX = test_X.unaryExpr([](float val) { 
+                modeltype tmp;
+                tmp.template prepare_receive_and_replicate<P_0>(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val));
+                return tmp;
+    /* return sint(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); */
+});
 
+                modeltype::communicate();
+            for (int i = 0; i < test_XX.size(); i++) {
+                test_XX(i).template complete_receive_from<P_0>();
+            }
+    /* MatX<modeltype> test_XX = test_X.unaryExpr([](float val) { */ 
+    /*             modeltype tmp; */
+    /*             tmp.template prepare_receive_and_replicate<P_0>(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val)); */
+    /*             modeltype::communicate(); */
+    /*             tmp.template complete_receive_from<P_0>(); */
+    /*             return tmp; */
+    /* }); */
+#endif
+	/* test_loader.load(test_XX, test_Y, cfg.batch, ch, h, w, cfg.shuffle_test); */
+#if JIT_VEC == 0 
 	test_loader.load(test_XX, test_Y, cfg.batch, ch, h, w, cfg.shuffle_test);
+#else
+	test_loader.load(test_X, test_Y, cfg.batch, ch, h, w, cfg.shuffle_test);
+#endif
 
     std::cout << "Dataset loaded." << std::endl;
 
@@ -268,7 +324,7 @@ void inference(DATATYPE* res)
     /* } */
     
     /* else { */
-        model.compile({ cfg.batch, ch, h, w });
+        model.compile({ cfg.batch/(BASE_DIV), ch, h, w });
         std::cout << "Loading Model Parameters..." << std::endl;
         model.template load<P_0>(cfg.save_dir, cfg.pretrained);
         model.evaluate(test_loader);

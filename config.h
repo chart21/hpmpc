@@ -1,7 +1,7 @@
 #pragma once
 
 
-#define PROTOCOL 5
+#define PROTOCOL 13
 
 // Party ID (starting from 0)
 #define PARTY 2
@@ -125,3 +125,16 @@ int base_port = BASE_PORT; // temporary solution
 
 #define TRUNC_THEN_MULT 0 // 0 = mult then trunc, 1 = trunc then mult
 #define TRUNC_APPROACH 0 // 0: cut, 1: interactive
+                         
+#define JIT_VEC 0 // 0: vectorize and share inputs from the beginning, 1: vectorize and share inputs just in time, load a batch of images, then vectorize
+#define BASETYPE 0 // 0: Additive_Share, 1: sint
+
+#if JIT_VEC == 0
+    #define BASE_DIV 1
+#else
+    #if BASETYPE == 0
+        #define BASE_DIV DATTYPE/BITLENGTH
+    #else
+        #define BASE_DIV DATTYPE
+    #endif
+#endif

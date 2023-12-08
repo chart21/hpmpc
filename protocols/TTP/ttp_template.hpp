@@ -27,7 +27,8 @@ static TTP_Share public_val(Datatype a)
 
 Datatype get_p1()
 {
-    return OP_ADD(p1,p2);
+    /* return OP_ADD(p1,p2); */
+    return p1;
 }
 
 TTP_Share Not() const

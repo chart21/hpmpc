@@ -124,6 +124,13 @@ public:
     {
         return Share_Type::complete_Reveal(OP_ADD, OP_SUB);
     }
+
+    void complete_reveal_to_all(UINT_TYPE output[]) const
+    {
+        auto res = Share_Type::complete_Reveal(OP_ADD, OP_SUB); 
+        unorthogonalize_arithmetic(&res, output,1);
+    }
+    
         
     UINT_TYPE complete_reveal_to_all_single() const {
         auto res = Share_Type::complete_Reveal(OP_ADD, OP_SUB); //TODO: Use extract method from Intrinsics

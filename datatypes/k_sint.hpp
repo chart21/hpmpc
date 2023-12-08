@@ -235,9 +235,9 @@ public:
             for(int i = 0; i < l; ++i) {
                 result[i] = shares[i];
             }
-            /* for(int i = l; i < BITLENGTH; ++i) { */
-            /*     result[i] = Share::public_val(PROMOTE(0)); */
-            /* } */
+            for(int i = l; i < BITLENGTH; ++i) {
+                result[i] = Share::public_val(PROMOTE(0));
+            }
             return result;
         }
 

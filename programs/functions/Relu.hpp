@@ -298,8 +298,8 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
        tmp[counter++] = sint::load_shares(begin+counter*BITLENGTH);
        m -= BITLENGTH;
     }
-    /* if(m > 0) */
-    /*     tmp[counter++] = sint::load_shares(m, begin+counter*BITLENGTH); */
+    if(m > 0)
+        tmp[counter++] = sint::load_shares(m, begin+counter*BITLENGTH);
     RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k,Share>(tmp, counter);
     /* for(int i = 0; i < counter; i++) */
     /* { */
@@ -317,13 +317,13 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
         counter++;
         m -= BITLENGTH;
     }
-    /* if(m > 0) */
-    /* { */
-    /*     for(int j = 0; j < m; j++) */
-    /*     { */
-    /*         output[counter*BITLENGTH+j] = tmp[counter].get_share_pointer()[j]; */
-    /*     } */
-    /* } */
+    if(m > 0)
+    {
+        for(int j = 0; j < m; j++)
+        {
+            output[counter*BITLENGTH+j] = tmp[counter].get_share_pointer()[j];
+        }
+    }
     delete[] tmp;
 }
 
