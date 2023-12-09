@@ -8,10 +8,29 @@ OEC_MAL3_init() {}
 
 
 
-OEC_MAL3_init public_val(Datatype a)
+static OEC_MAL3_init public_val(Datatype a)
 {
     return OEC_MAL3_init();
 }
+
+template <typename func_mul>
+OEC_MAL3_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return OEC_MAL3_init();
+}
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    store_compare_view_init(P_2);
+    return OEC_MAL3_init();
+} 
+
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+}
+
 
 OEC_MAL3_init Not() const
 {
@@ -111,7 +130,7 @@ store_compare_view_init(P_0);
 }
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
     #if PROTOCOL == 8
     for(int t = 0; t < 3; t++) 
@@ -134,7 +153,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 receive_from_(P_0);
 #if PROTOCOL == 8
@@ -172,6 +191,12 @@ if constexpr(id == PSELF)
         #endif
 }
 }
+    
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
+{
+    prepare_receive_from<id>(ADD, SUB);
+}
 
     template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)
@@ -208,14 +233,14 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void prepare_A2B_S1(int k, OEC_MAL3_init in[], OEC_MAL3_init out[])
+static void prepare_A2B_S1(int m, int k, OEC_MAL3_init in[], OEC_MAL3_init out[])
 {
 }
 
 
-static void prepare_A2B_S2(int k, OEC_MAL3_init in[], OEC_MAL3_init out[])
+static void prepare_A2B_S2(int m, int k, OEC_MAL3_init in[], OEC_MAL3_init out[])
 {
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
         #if PROTOCOL != 12
             store_compare_view_init(P_2);

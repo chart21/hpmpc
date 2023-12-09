@@ -42,7 +42,7 @@ public:
 
         void operator*=(const UINT_TYPE other) 
         {
-        mult_public_fixed(other);
+        prepare_mult_public_fixed(other);
         }
 
         void operator*=(const Additive_Share<Datatype, Share_Type>& other) 
@@ -55,10 +55,16 @@ public:
         return Additive_Share(Share_Type::mult_public(PROMOTE(b), OP_MULT));
     }
 
-    void mult_public_fixed(const UINT_TYPE b)
+    void prepare_mult_public_fixed(const UINT_TYPE b)
     {
-        *this = Share_Type::mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
+        *this = Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
     }
+
+    void complete_public_mult_fixed()
+    {
+        Share_Type::complete_public_mult_fixed(OP_ADD, OP_SUB);
+    }
+    
     
     bool operator==(const Additive_Share& b) const
     {

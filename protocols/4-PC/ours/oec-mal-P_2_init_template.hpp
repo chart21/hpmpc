@@ -8,10 +8,37 @@ OEC_MAL2_init() {}
 
 
 
-OEC_MAL2_init public_val(Datatype a)
+static OEC_MAL2_init public_val(Datatype a)
 {
     return OEC_MAL2_init();
 }
+
+template <typename func_mul>
+OEC_MAL2_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return OEC_MAL2_init();
+}
+
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    send_to_(P_0);
+    return OEC_MAL2_init();
+} 
+
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+#if PRE == 1
+    pre_receive_from_(P_0);
+#else
+    receive_from_(P_0);
+#endif
+    store_compare_view_init(P_3);
+}
+
+
 
 OEC_MAL2_init Not() const
 {
@@ -136,13 +163,13 @@ store_compare_view_init(P_012);
 #endif
 }
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 }    
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 receive_from_(P_0);
 #if PROTOCOL == 8
@@ -171,6 +198,11 @@ if constexpr(id == PSELF)
         send_to_(P_0);
         send_to_(P_1);
 }
+}
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
+{
+    prepare_receive_from<id>(ADD, SUB);
 }
 
     template <int id, typename func_add, typename func_sub>
@@ -220,9 +252,9 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void prepare_A2B_S1(int k, OEC_MAL2_init in[], OEC_MAL2_init out[])
+static void prepare_A2B_S1(int m, int k, OEC_MAL2_init in[], OEC_MAL2_init out[])
 {
-    for (int j = 0; j < k; j++)
+    for (int j = m; j < k; j++)
     {
             send_to_(P_0);
     }
@@ -230,7 +262,7 @@ static void prepare_A2B_S1(int k, OEC_MAL2_init in[], OEC_MAL2_init out[])
 }
 
 
-static void prepare_A2B_S2(int k, OEC_MAL2_init in[], OEC_MAL2_init out[])
+static void prepare_A2B_S2(int m, int k, OEC_MAL2_init in[], OEC_MAL2_init out[])
 {
 }
 

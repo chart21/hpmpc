@@ -52,7 +52,7 @@ TTP_Share mult_public(const Datatype b, func_mul MULT) const
 
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-TTP_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+TTP_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
 #if SIMULATE_MPC_FUNCTIONS == 1
     /* return TTP_Share(TRUNC(MULT(p1, b)), TRUNC(MULT(p2, b))); */
@@ -71,6 +71,11 @@ TTP_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_
 #else
    return TTP_Share(TRUNC(MULT(p1, b)));
 #endif
+}
+    
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed(func_add ADD, func_sub SUB)
+{
 }
 
 template <typename func_mul>

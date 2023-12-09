@@ -165,7 +165,13 @@ public:
 
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i].mult_public_fixed(other);
+            shares[i].prepare_mult_public_fixed(other);
+        }
+        }
+
+        void complete_mult_public_fixed() {
+        for(int i = 0; i < BITLENGTH; ++i) {
+            shares[i].complete_mult_public_fixed();
         }
         }
         

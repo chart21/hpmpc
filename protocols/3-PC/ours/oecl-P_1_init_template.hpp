@@ -31,10 +31,14 @@ OECL1_init Add(OECL1_init b, func_add ADD) const
 }
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL1_init mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
     return OECL1_init();
 } 
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+}
 
     template <typename func_add, typename func_sub, typename func_mul>
 OECL1_init prepare_dot(const OECL1_init b, func_add ADD, func_sub SUB, func_mul MULT) const

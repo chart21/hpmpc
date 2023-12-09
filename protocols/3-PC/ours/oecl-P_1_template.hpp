@@ -27,23 +27,25 @@ OECL1_Share Add(OECL1_Share b, func_add ADD) const
 }
     
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL1_Share mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL1_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
 #if TRUNC_THEN_MULT == 1
     auto result = MULT(TRUNC(ADD(p1,p2)),b);
 #else
-    auto result = MULT(ADD(p1,p2),b);
+    auto result = TRUNC(MULT(ADD(p1,p2),b));
 #endif
 
     OECL1_Share res;
     res.p2 = getRandomVal(P_0);
-#if TRUNC_THEN_MULT == 1
     res.p1 = SUB(result,res.p2);
-#else
-    res.p1 = SUB(TRUNC(result),res.p2);
-#endif
     return res;
 } 
+    
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed(func_add ADD, func_sub SUB)
+{
+}
+
 
 /* template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc> */
 /* OECL1_Share prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const{ */

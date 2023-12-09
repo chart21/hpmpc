@@ -8,10 +8,35 @@ OEC_MAL0_init() {}
 
 
 
-OEC_MAL0_init public_val(Datatype a)
+static OEC_MAL0_init public_val(Datatype a)
 {
     return OEC_MAL0_init();
 }
+    
+template <typename func_mul>
+OEC_MAL0_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return OEC_MAL0_init();
+}
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL0_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if PRE == 1
+    pre_send_to_(P_2);
+#else
+    send_to_(P_2);
+#endif
+    return OEC_MAL0_init();
+} 
+
+template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+    receive_from_(P_2);
+    store_compare_view_init(P_1);
+}
+
 
 OEC_MAL0_init Not() const
 {
@@ -117,7 +142,7 @@ store_compare_view_init(P_3);
 #endif
 }
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 send_to_(P_1);
 send_to_(P_2);
@@ -127,7 +152,7 @@ send_to_(P_3);
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PRE == 1
     pre_receive_from_(P_3);
@@ -159,6 +184,11 @@ if constexpr(id == PSELF)
 }
 }
 
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
+{
+    prepare_receive_from<id>(ADD, SUB);
+}
     template <int id, typename func_add, typename func_sub>
 void complete_receive_from(func_add ADD, func_sub SUB)
 {
@@ -210,14 +240,14 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void prepare_A2B_S1(int k,OEC_MAL0_init in[], OEC_MAL0_init out[])
+static void prepare_A2B_S1(int m, int k,OEC_MAL0_init in[], OEC_MAL0_init out[])
 {
 }
 
 
-static void prepare_A2B_S2(int k, OEC_MAL0_init in[], OEC_MAL0_init out[])
+static void prepare_A2B_S2(int m, int k, OEC_MAL0_init in[], OEC_MAL0_init out[])
 {
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
         #if PROTOCOL == 12
             store_compare_view_init(P_2);

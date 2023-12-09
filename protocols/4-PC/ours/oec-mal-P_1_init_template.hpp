@@ -8,10 +8,30 @@ OEC_MAL1_init() {}
 
 
 
-OEC_MAL1_init public_val(Datatype a)
+static OEC_MAL1_init public_val(Datatype a)
 {
     return OEC_MAL1_init();
 }
+
+template <typename func_mul>
+OEC_MAL1_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return OEC_MAL1_init();
+}
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    store_compare_view_init(P_0);
+    return OEC_MAL1_init();
+} 
+
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+}
+
+
 
 OEC_MAL1_init Not() const
 {
@@ -82,13 +102,13 @@ store_compare_view_init(P_0);
 #endif
 }
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 }    
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 receive_from_(P_0);
 #if PROTOCOL == 8
@@ -120,6 +140,11 @@ if constexpr(id == PSELF)
         send_to_(P_2);
 
 }
+}
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
+{
+    prepare_receive_from<id>(ADD, SUB);
 }
 
     template <int id, typename func_add, typename func_sub>
@@ -166,9 +191,9 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void prepare_A2B_S1(int k,OEC_MAL1_init in[], OEC_MAL1_init out[])
+static void prepare_A2B_S1(int m, int k,OEC_MAL1_init in[], OEC_MAL1_init out[])
 {
-    for (int j = 0; j < k; j++)
+    for (int j = m; j < k; j++)
     {
     store_compare_view_init(P_0);
     }
@@ -176,7 +201,7 @@ static void prepare_A2B_S1(int k,OEC_MAL1_init in[], OEC_MAL1_init out[])
 }
 
 
-static void prepare_A2B_S2(int k, OEC_MAL1_init in[], OEC_MAL1_init out[])
+static void prepare_A2B_S2(int m, int k, OEC_MAL1_init in[], OEC_MAL1_init out[])
 {
 }
 

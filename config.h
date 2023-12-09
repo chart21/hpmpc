@@ -1,7 +1,7 @@
 #pragma once
 
 
-#define PROTOCOL 5
+#define PROTOCOL 10
 
 // Party ID (starting from 0)
 #define PARTY 2
@@ -20,7 +20,7 @@
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 2496
+#define NUM_INPUTS 100
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1

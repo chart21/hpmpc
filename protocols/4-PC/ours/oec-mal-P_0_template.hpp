@@ -14,11 +14,49 @@ OEC_MAL0_Share(Datatype v, Datatype r) : v(v), r(r) {}
 OEC_MAL0_Share(Datatype v) : v(v) {}
 
 
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if TRUNC_THEN_MULT == 1
+    auto result = MULT(TRUNC(r),b);
+#else
+    auto result = MULT(r,b);
+#endif
+    auto rand_val = getRandomVal(P_013);
+#if TRUNC_THEN_MULT == 1
+    auto val = SUB(result,rand_val);
+#else
+    auto val = SUB(TRUNC(result),rand_val);
+#endif
+
+#if PRE == 1
+    pre_send_to_live(P_2, val);
+#else
+    send_to_live(P_2, val);
+#endif
+    return OEC_MAL0_Share(SET_ALL_ZERO(),result);
+} 
+    
+template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+    v = receive_from_live(P_2);
+    store_compare_view(P_1, v);
+    /* v = ADD(v,val); */
+}
+
+
     
 
-OEC_MAL0_Share public_val(Datatype a)
+static OEC_MAL0_Share public_val(Datatype a)
 {
     return OEC_MAL0_Share(a,SET_ALL_ZERO());
+}
+
+template <typename func_mul>
+OEC_MAL0_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return OEC_MAL0_Share(MULT(v,b),MULT(r,b));
 }
 
 OEC_MAL0_Share Not() const
@@ -168,7 +206,7 @@ store_compare_view(P_1, m3_prime); // compare m_3 prime with P_2
 }
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 send_to_live(P_1, r);
 send_to_live(P_2, r);
@@ -177,7 +215,7 @@ send_to_live(P_3, v);
 }    
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PRE == 1
 Datatype result = SUB(v, pre_receive_from_live(P_3));
@@ -196,11 +234,11 @@ return result;
 
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == PSELF)
 {
-    v = get_input_live();
+    v = val;
     Datatype x_1 = getRandomVal(P_013);
     Datatype x_2 = getRandomVal(P_023);
     r = ADD(x_1, x_2);
@@ -223,6 +261,15 @@ else if constexpr(id == P_3)
     Datatype x_2 = getRandomVal(P_023);
     r = ADD(x_1, x_2);
 }
+}
+
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
+{
+    if constexpr(id == PSELF)
+        prepare_receive_from<id>(get_input_live(), ADD, SUB);
+    else
+        prepare_receive_from<id>(SET_ALL_ZERO(), ADD, SUB);
 }
 
 template <int id, typename func_add, typename func_sub>
@@ -271,16 +318,16 @@ static void communicate()
 /* #endif */
 }
 
-static void prepare_A2B_S1(int k, OEC_MAL0_Share in[], OEC_MAL0_Share out[])
+static void prepare_A2B_S1(int m, int k, OEC_MAL0_Share in[], OEC_MAL0_Share out[])
 {
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
-        out[i].r = SET_ALL_ZERO(); // set share to 0
+        out[i-m].r = SET_ALL_ZERO(); // set share to 0
     }
 }
 
 
-static void prepare_A2B_S2(int k, OEC_MAL0_Share in[], OEC_MAL0_Share out[])
+static void prepare_A2B_S2(int m, int k, OEC_MAL0_Share in[], OEC_MAL0_Share out[])
 {
     //convert share  (- x0) to boolean
     Datatype temp[BITLENGTH];
@@ -294,10 +341,10 @@ static void prepare_A2B_S2(int k, OEC_MAL0_Share in[], OEC_MAL0_Share out[])
     /* unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp); */
     /* orthogonalize_boolean((UINT_TYPE*) temp, temp); */
 
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
-            out[i].r = temp[i]; 
-            out[i].v = temp[i];  // set both shares to -x0
+            out[i-m].r = temp[i]; 
+            out[i-m].v = temp[i];  // set both shares to -x0
         #if PROTOCOL == 12
             store_compare_view(P_2, FUNC_XOR(temp[i],getRandomVal(P_013))); //  - x_0 + r013
         #else

@@ -41,14 +41,18 @@ OECL2_init prepare_dot(const OECL2_init b, func_add ADD, func_sub SUB, func_mul 
 }
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL2_init mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    return OECL2_init();
+}
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
 #if PRE == 1
     pre_receive_from_(P_0);
 #else
     receive_from_(P_0);
 #endif
-    return OECL2_init();
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>

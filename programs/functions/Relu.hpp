@@ -4,6 +4,7 @@
 #include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
+#include <chrono>
 
 /* #include "boolean_adder_bandwidth.hpp" */
 
@@ -61,7 +62,7 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int
         s2[i].complete_A2B_S2();
     }
     std::chrono::high_resolution_clock::time_point r2 = std::chrono::high_resolution_clock::now();
-    std::cout << "PARTY " << PARTY <<  ": Time A2B (in RELU): " << std::chrono::duration_cast<std::chrono::seconds>( r2 - r1 ).count() << std::endl;
+    std::cout << "PARTY " << PARTY <<  ": Time A2B (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
     /* if(current_phase == 1) */
     /* std::cout << "A2B completed ..." << std::endl; */
     
@@ -96,7 +97,7 @@ r1 = std::chrono::high_resolution_clock::now();
         Share::communicate();
     }
 r2 = std::chrono::high_resolution_clock::now();
-    std::cout << "PARTY " << PARTY <<  ": Time Adder (in RELU): " << std::chrono::duration_cast<std::chrono::seconds>( r2 - r1 ).count() << std::endl;
+std::cout << "PARTY " << PARTY <<  ": Time Adder (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
     delete[] s1;
     delete[] s2;
     adders.clear();
@@ -125,7 +126,7 @@ r2 = std::chrono::high_resolution_clock::now();
         t2[i].complete_bit_injection_S2();
     }
     r2 = std::chrono::high_resolution_clock::now();
-    std::cout << "PARTY " << PARTY <<  ": Time Bit inj (in RELU): " << std::chrono::duration_cast<std::chrono::seconds>( r2 - r1 ).count() << std::endl;
+    std::cout << "PARTY " << PARTY <<  ": Time Bit inj (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
     
     Share::communicate();
     /* if(current_phase == 1) */
@@ -148,7 +149,7 @@ r2 = std::chrono::high_resolution_clock::now();
     delete[] t2;
 
     r2 = std::chrono::high_resolution_clock::now(); 
-    std::cout << "PARTY " << PARTY <<  ": Time XOR (in RELU): " << std::chrono::duration_cast<std::chrono::seconds>( r2 - r1 ).count() << std::endl;
+    std::cout << "PARTY " << PARTY <<  ": Time XOR (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
     r1 = std::chrono::high_resolution_clock::now();
     Share::communicate();
     /* if(current_phase == 1) */
@@ -200,12 +201,14 @@ r1 = std::chrono::high_resolution_clock::now();
         /* t2[i].complete_mult(); */
         /* val[i] = t1[i] - t2[i]; */
         val[i].complete_mult();
+    r2 = std::chrono::high_resolution_clock::now();
+    std::cout << "PARTY " << PARTY <<  ": Time MULT + Trunc (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
 #else
         val[i].complete_mult_without_trunc();
+    r2 = std::chrono::high_resolution_clock::now();
+    std::cout << "PARTY " << PARTY <<  ": Time MULT (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
 #endif
     }
-    r2 = std::chrono::high_resolution_clock::now();
-    std::cout << "PARTY " << PARTY <<  ": Time XOR+Mult (in RELU): " << std::chrono::duration_cast<std::chrono::seconds>( r2 - r1 ).count() << std::endl;
     
 #endif
 
@@ -213,11 +216,13 @@ r1 = std::chrono::high_resolution_clock::now();
 
 
 #if TRUNC_APPROACH == 1
+    r1 = std::chrono::high_resolution_clock::now();
     trunc_2k_in_place(val, len);
+r2 = std::chrono::high_resolution_clock::now();
+    std::cout << "PARTY " << PARTY <<  ": Time Trunc (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
 #endif
     /* } */
-r2 = std::chrono::high_resolution_clock::now();
-std::cout << "PARTY " << PARTY <<  ": MULT+Trunc in RELU: " << std::chrono::duration_cast<std::chrono::seconds>( r2 - r1 ).count() << std::endl;
+
 
 }
     
@@ -317,7 +322,7 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
     if(m > 0)
         tmp[counter++] = sint::load_shares(m, begin+counter*BITLENGTH);
     std::chrono::high_resolution_clock::time_point r2 = std::chrono::high_resolution_clock::now();
-    std::cout << "PARTY " << PARTY <<  ": Time convert sint (in RELU): " << std::chrono::duration_cast<std::chrono::seconds>( r2 - r1 ).count() << std::endl;
+    std::cout << "PARTY " << PARTY <<  ": Time convert sint (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
     RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k,Share>(tmp, counter);
     r1 = std::chrono::high_resolution_clock::now();
     /* for(int i = 0; i < counter; i++) */
@@ -345,7 +350,7 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
     }
     delete[] tmp;
     r2 = std::chrono::high_resolution_clock::now();
-    std::cout << "PARTY " << PARTY <<  ": Time convert back (in RELU): " << std::chrono::duration_cast<std::chrono::seconds>( r2 - r1 ).count() << std::endl;
+    std::cout << "PARTY " << PARTY <<  ": Time convert back (in RELU): " << double(std::chrono::duration_cast<std::chrono::seconds>( r2 - r1 ).count())/1000000 << std::endl;
 }
 
 
