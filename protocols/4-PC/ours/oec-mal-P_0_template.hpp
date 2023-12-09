@@ -473,11 +473,11 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     r_msb.v = rmsb;
     r_msb.r = SUB(SET_ALL_ZERO(), rmsb);
 #if PRE == 0
-    send_to_live(P_2, ADD(rmk2, getRandomVal(P_013)));
-    send_to_live(P_2, ADD(rmsb, getRandomVal(P_013)));
+    send_to_live(P_2, SUB(rmk2, getRandomVal(P_013)));
+    send_to_live(P_2, SUB(rmsb, getRandomVal(P_013)));
 #else
-    pre_send_to_live(P_2, ADD(rmk2, getRandomVal(P_013)));
-    pre_send_to_live(P_2, ADD(rmsb, getRandomVal(P_013)));
+    pre_send_to_live(P_2, SUB(rmk2, getRandomVal(P_013)));
+    pre_send_to_live(P_2, SUB(rmsb, getRandomVal(P_013)));
 #endif
 
     c.r = SET_ALL_ZERO();
