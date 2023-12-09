@@ -67,35 +67,36 @@ void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_Share& r_mk2, OEC_MAL1_Share& r_msb, OEC_MAL1_Share& c, OEC_MAL1_Share& c_prime) const{
-    r_mk2.template prepare_receive_from<P_0>(ADD, SUB);
-    r_msb.template prepare_receive_from<P_0>(ADD, SUB);
-    
     Datatype c_dat_prime = trunc(v);
     UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
-    // Apply the mask using bitwise AND
     c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1
-    /* Datatype c_dat = ADD(p1,p2) >> (BITLENGTH - 1); */
     Datatype c_dat = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(v);
     c = OEC_MAL1_Share(c_dat, SET_ALL_ZERO());
     c_prime = OEC_MAL1_Share(c_dat_prime, SET_ALL_ZERO());
-    
-    /* c_prime.p1 = trunc(ADD(p1,p2)); */
-    /* c_prime.p2 = SET_ALL_ZERO(); */
-    /* UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1; */
-    /* Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue */
-    /* // Apply the mask using bitwise AND */
-    /* c_prime.p1 = AND(c_prime.p1, mask); //mod 2^k-m-1 */
-    
-    /* c.p1 = ADD(p1,p2) >> (BITLENGTH - 1); //open c = x + r */
-    /* c.p2 = SET_ALL_ZERO(); */
+   
+#if MULTI_INPUT == 1
+    r_mk2.m = SET_ALL_ZERO();
+    r_msb.m = SET_ALL_ZERO();
+    c.m = getRandomVal(P_123);
+    c_prime.m = getRandomVal(P_123);
+    store_compare_view(P_0, ADD(c_dat,c.m));
+    store_compare_view(P_0, ADD(c_dat_prime,c_prime.m));
+#else
+    store_compare_view(P_0, ADD(c_dat,getRandomVal(P_123)));
+    store_compare_view(P_0, ADD(c_dat_prime,getRandomVal(P_123)));
+#endif
+
+    r_mk2.v = SET_ALL_ZERO();
+    r_mk2.r = getRandomVal(P_013);
+    r_msb.v = SET_ALL_ZERO(); 
+    r_msb.r = getRandomVal(P_013);
 }
 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_Share& r_mk2, OEC_MAL1_Share& r_msb, OEC_MAL1_Share& c, OEC_MAL1_Share& c_prime) const{
-    r_mk2.template complete_receive_from<P_0>(ADD, SUB);
-    r_msb.template complete_receive_from<P_0>(ADD, SUB);
+
 }
 
 

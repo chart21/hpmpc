@@ -194,29 +194,24 @@ r0 = rc0;
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_Share& r_mk2, OEC_MAL3_Share& r_msb, OEC_MAL3_Share& c, OEC_MAL3_Share& c_prime) const{
-    /* Datatype rmk2 = (ADD(p1,p2) << 1) >> (FRACTIONAL + 1); */
-    /* Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1); */
     Datatype rmk2 = OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(r1) );
     Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(r1);
-    /* Datatype rmk2 = ADD(p1,p2); */    
-    /* Datatype rmsb = ADD(p1,p2); */
+    
+    r_mk2.r0 = SET_ALL_ZERO();
+    r_mk2.r1 = SUB(SET_ALL_ZERO(), rmk2);
+    r_msb.r0 = SET_ALL_ZERO();
+    r_msb.r1 = SUB(SET_ALL_ZERO(), rmsb);
+    store_compare_view(P_2, ADD(rmk2, getRandomVal(P_013)));
+    store_compare_view(P_2, ADD(rmsb, getRandomVal(P_013)));
 
-    /* Datatype rmk2 = (ADD(p1,p2) << 1) >> (FRACTIONAL + 1); */
-    /* Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1); */
-    r_mk2.prepare_receive_from<P_0>(ADD, SUB); //TODO: Joint Share instead to properly verify
-    r_msb.prepare_receive_from<P_0>(ADD, SUB);
-    /* r_mk2.template prepare_receive_from<PSELF>(400, ADD, SUB); */
-    /* r_msb.template prepare_receive_from<PSELF>(600, ADD, SUB); */
-    c.r0 = SET_ALL_ZERO();
+    c.r0 = getRandomVal(P_123);
     c.r1 = SET_ALL_ZERO();
-    c_prime.r0 = SET_ALL_ZERO();
+    c_prime.r0 = getRandomVal(P_123);
     c_prime.r1 = SET_ALL_ZERO();
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_Share& r_mk2, OEC_MAL3_Share& r_msb, OEC_MAL3_Share& c, OEC_MAL3_Share& c_prime) const{
-    r_mk2.template complete_receive_from<P_0>(ADD, SUB);
-    r_msb.template complete_receive_from<P_0>(ADD, SUB);
 }
 
 

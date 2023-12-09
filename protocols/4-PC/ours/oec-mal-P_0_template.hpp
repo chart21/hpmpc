@@ -465,29 +465,31 @@ return d;
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime) const{
-    /* Datatype rmk2 = (ADD(p1,p2) << 1) >> (FRACTIONAL + 1); */
-    /* Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1); */
     Datatype rmk2 = OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(r) );
     Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(r);
-    /* Datatype rmk2 = ADD(p1,p2); */    
-    /* Datatype rmsb = ADD(p1,p2); */
 
-    /* Datatype rmk2 = (ADD(p1,p2) << 1) >> (FRACTIONAL + 1); */
-    /* Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1); */
-    r_mk2.prepare_receive_from<PSELF>(rmk2, ADD, SUB);
-    r_msb.prepare_receive_from<PSELF>(rmsb, ADD, SUB);
-    /* r_mk2.template prepare_receive_from<PSELF>(400, ADD, SUB); */
-    /* r_msb.template prepare_receive_from<PSELF>(600, ADD, SUB); */
-    c.v = SET_ALL_ZERO();
+    r_mk2.v = rmk2;
+    r_mk2.r = SUB(SET_ALL_ZERO(), rmk2);
+    r_msb.v = rmsb;
+    r_msb.r = SUB(SET_ALL_ZERO(), rmsb);
+#if PRE == 0
+    send_to_live(P_2, ADD(rmk2, getRandomVal(P_013)));
+    send_to_live(P_2, ADD(rmsb, getRandomVal(P_013)));
+#else
+    pre_send_to_live(P_2, ADD(rmk2, getRandomVal(P_013)));
+    pre_send_to_live(P_2, ADD(rmsb, getRandomVal(P_013)));
+#endif
+
     c.r = SET_ALL_ZERO();
-    c_prime.v = SET_ALL_ZERO();
     c_prime.r = SET_ALL_ZERO();
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime) const{
-    r_mk2.template complete_receive_from<PSELF>(ADD, SUB);
-    r_msb.template complete_receive_from<PSELF>(ADD, SUB);
+    c.v = receive_from_live(P_2);
+    c_prime.v = receive_from_live(P_2);
+    store_compare_view(P_1, c.v);
+    store_compare_view(P_1, c_prime.v);
 }
 
 template <typename func_add, typename func_sub, typename func_mul>

@@ -201,14 +201,12 @@ r1 = std::chrono::high_resolution_clock::now();
         /* t2[i].complete_mult(); */
         /* val[i] = t1[i] - t2[i]; */
         val[i].complete_mult();
-    r2 = std::chrono::high_resolution_clock::now();
-    std::cout << "PARTY " << PARTY <<  ": Time MULT + Trunc (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
 #else
         val[i].complete_mult_without_trunc();
-    r2 = std::chrono::high_resolution_clock::now();
-    std::cout << "PARTY " << PARTY <<  ": Time MULT (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
 #endif
     }
+    r2 = std::chrono::high_resolution_clock::now();
+    std::cout << "PARTY " << PARTY <<  ": Time MULT (in RELU): " << double(std::chrono::duration_cast<std::chrono::microseconds>( r2 - r1 ).count())/1000000 << std::endl;
     
 #endif
 
@@ -241,12 +239,12 @@ static void trunc_2k_in_place(T*  val, const int len){
         val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i]);
     }
     T::communicate();
-    T* b = new T[len];
     for(int i = 0; i < len; i++)
     {
         val[i].complete_trunc_2k_inputs(r_mk2[i], r_msb[i],c[i], c_prime[i]);
     }
     T::communicate();
+    T* b = new T[len];
     for(int i = 0; i < len; i++)
         b[i].prepare_XOR(r_msb[i],c[i]);
     T::communicate();

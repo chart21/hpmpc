@@ -40,14 +40,21 @@ void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL2_init& r_mk2, OEC_MAL2_init& r_msb, OEC_MAL2_init& c, OEC_MAL2_init& c_prime){
-    this->template prepare_receive_from<P_0>(ADD, SUB);
-    this->template prepare_receive_from<P_0>(ADD, SUB);
+send_to_(P_0);
+send_to_(P_0);
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL2_init& r_mk2, OEC_MAL2_init& r_msb, OEC_MAL2_init& c, OEC_MAL2_init& c_prime){
-    this->template complete_receive_from<P_0>(ADD, SUB);
-    this->template complete_receive_from<P_0>(ADD, SUB);
+#if PRE == 0
+receive_from_(P_0);
+receive_from_(P_0);
+#else
+pre_receive_from_(P_0);
+pre_receive_from_(P_0);
+#endif
+store_compare_view_init(P_3);
+store_compare_view_init(P_3);
 }
 
 

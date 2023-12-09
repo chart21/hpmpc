@@ -21,14 +21,12 @@ OEC_MAL3_init mult_public(const Datatype b, func_mul MULT) const
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime){
-    this->template prepare_receive_from<P_0>(ADD, SUB);
-    this->template prepare_receive_from<P_0>(ADD, SUB);
+    store_compare_view_init(P_2);
+    store_compare_view_init(P_2);
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime){
-    this->template complete_receive_from<P_0>(ADD, SUB);
-    this->template complete_receive_from<P_0>(ADD, SUB);
 }
 
 
