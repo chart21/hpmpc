@@ -33,17 +33,13 @@ OEC_MAL3_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 #if TRUNC_THEN_MULT == 1
     auto result = MULT(TRUNC(r1),b);
 #else
-    auto result = MULT(r1,b);
+    auto result = TRUNC(MULT(r1,b));
 #endif
     auto rand_val = getRandomVal(P_013);
-#if TRUNC_THEN_MULT == 1
     auto val = SUB(result,rand_val);
-#else
-    auto val = SUB(TRUNC(result),rand_val);
-#endif
-store_compare_view(P_2, val);
+    store_compare_view(P_2, val);
     
-    return OEC_MAL3_Share(getRandomVal(P_123),rand_val);
+    return OEC_MAL3_Share(getRandomVal(P_123),result);
 } 
     
 template <typename func_add, typename func_sub>

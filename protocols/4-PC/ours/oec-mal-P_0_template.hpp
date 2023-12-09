@@ -20,14 +20,10 @@ OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 #if TRUNC_THEN_MULT == 1
     auto result = MULT(TRUNC(r),b);
 #else
-    auto result = MULT(r,b);
+    auto result = TRUNC(MULT(r,b));
 #endif
     auto rand_val = getRandomVal(P_013);
-#if TRUNC_THEN_MULT == 1
     auto val = SUB(result,rand_val);
-#else
-    auto val = SUB(TRUNC(result),rand_val);
-#endif
 
 #if PRE == 1
     pre_send_to_live(P_2, val);
@@ -42,6 +38,7 @@ void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
     v = receive_from_live(P_2);
     store_compare_view(P_1, v);
+    v = SUB(v,r);
     /* v = ADD(v,val); */
 }
 
@@ -105,19 +102,20 @@ template <typename func_add, typename func_sub, typename func_mul>
 OEC_MAL0_Share prepare_dot(const OEC_MAL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 OEC_MAL0_Share c;
-#if FRACTIONAL == 0
+/* #if FRACTIONAL == 0 */
 c.r = MULT(r, b.r); //x0y0
 c.v = ADD( MULT(v,b.r), MULT(b.v,r)); // au y_0 + bv x_0
-#else
-c.r = MULT(r, b.r); //x0y0
-c.v = ADD(ADD(MULT(v, b.r), MULT(b.v,r)), c.r); //v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 --> later + m^3 
-#endif
+/* #else */
+/* c.r = MULT(r, b.r); //x0y0 */
+/* c.v = ADD(ADD(MULT(v, b.r), MULT(b.v,r)), c.r); //v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 --> later + m^3 */ 
+/* #endif */
 return c;
 }
     
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
+v = ADD(v,r);
 r = TRUNC(SUB(ADD(getRandomVal(P_013), getRandomVal(P_023)), r)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
 #if PROTOCOL == 12
 store_compare_view(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
