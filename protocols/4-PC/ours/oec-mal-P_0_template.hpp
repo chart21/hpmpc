@@ -463,6 +463,33 @@ d.v = SUB(SET_ALL_ZERO(), d.v); // trick to be compatible with dot2
 return d;
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime) const{
+    /* Datatype rmk2 = (ADD(p1,p2) << 1) >> (FRACTIONAL + 1); */
+    /* Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1); */
+    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(r) );
+    Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(r);
+    /* Datatype rmk2 = ADD(p1,p2); */    
+    /* Datatype rmsb = ADD(p1,p2); */
+
+    /* Datatype rmk2 = (ADD(p1,p2) << 1) >> (FRACTIONAL + 1); */
+    /* Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1); */
+    r_mk2.prepare_receive_from<PSELF>(rmk2, ADD, SUB);
+    r_msb.prepare_receive_from<PSELF>(rmsb, ADD, SUB);
+    /* r_mk2.template prepare_receive_from<PSELF>(400, ADD, SUB); */
+    /* r_msb.template prepare_receive_from<PSELF>(600, ADD, SUB); */
+    c.v = SET_ALL_ZERO();
+    c.r = SET_ALL_ZERO();
+    c_prime.v = SET_ALL_ZERO();
+    c_prime.r = SET_ALL_ZERO();
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime) const{
+    r_mk2.template complete_receive_from<PSELF>(ADD, SUB);
+    r_msb.template complete_receive_from<PSELF>(ADD, SUB);
+}
+
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL0_Share prepare_mult3(const OEC_MAL0_Share b, const OEC_MAL0_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {

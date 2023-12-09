@@ -39,7 +39,7 @@
 #define RECV_BUFFER 10000
 
 // How many messages should be buffered until a combined hash is performed? 0 means all hashes are calculated at the very end of the protocol.
-#define VERIFY_BUFFER 0
+#define VERIFY_BUFFER 16
 // Print additional info?
 #define PRINT 0
 
@@ -123,8 +123,8 @@ int base_port = BASE_PORT; // temporary solution
 #endif
 
 
-#define TRUNC_THEN_MULT 1 // 0 = mult then trunc, 1 = trunc then mult
-#define TRUNC_APPROACH 0 // 0: cut, 1: interactive
+#define TRUNC_THEN_MULT 0 // 0 = mult then trunc, 1 = trunc then mult
+#define TRUNC_APPROACH 1 // 0: cut, 1: interactive
                          
 #define JIT_VEC 1 // 0: vectorize and share inputs from the beginning, 1: vectorize and share inputs just in time, load a batch of images, then vectorize
 #define BASETYPE 0 // 0: Additive_Share, 1: sint
