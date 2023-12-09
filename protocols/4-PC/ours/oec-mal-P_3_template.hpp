@@ -201,8 +201,8 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     r_mk2.r1 = SUB(SET_ALL_ZERO(), rmk2);
     r_msb.r0 = SET_ALL_ZERO();
     r_msb.r1 = SUB(SET_ALL_ZERO(), rmsb);
-    store_compare_view(P_2, SUB(rmk2, getRandomVal(P_013)));
-    store_compare_view(P_2, SUB(rmsb, getRandomVal(P_013)));
+    store_compare_view(P_2, SUB(r_mk2.r1, getRandomVal(P_013)));
+    store_compare_view(P_2, SUB(r_msb.r1, getRandomVal(P_013)));
 
     c.r0 = getRandomVal(P_123);
     c.r1 = SET_ALL_ZERO();
