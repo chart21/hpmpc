@@ -71,9 +71,9 @@
 #define SHIFT_RIGHT16 _mm256_sra_epi16_wrapper
 #define SHIFT_RIGHT32 _mm256_sra_epi32_wrapper
 #define SHIFT_RIGHT64 _mm256_sra_epi64_wrapper
-#define SHIFT_LOG_RIGHT16 __mm_srl_epi16_wrapper
-#define SHIFT_LOG_RIGHT32 __mm_srl_epi32_wrapper
-#define SHIFT_LOG_RIGHT64 __mm_srl_epi64_wrapper
+#define SHIFT_LOG_RIGHT16 __mm256_srl_epi16_wrapper
+#define SHIFT_LOG_RIGHT32 __mm256_srl_epi32_wrapper
+#define SHIFT_LOG_RIGHT64 __mm256_srl_epi64_wrapper
 // wrapper functions needed for some compilers
 
 inline __m256i _mm256_and_si256_wrapper(__m256i a, __m256i b) {
@@ -142,31 +142,53 @@ inline __m256i _mm256_mullo_epi64_wrapper(__m256i a, __m256i b) {
 
 // shift left arithmetic
 
-
+template <int n>
 inline __m256i _mm256_slli_epi16_wrapper(__m256i a) {
-    return _mm256_slli_epi16(a, FRACTIONAL);
+    return _mm256_slli_epi16(a, n);
 }
 
+template <int n>
 inline __m256i _mm256_slli_epi32_wrapper(__m256i a) {
-    return _mm256_slli_epi32(a, FRACTIONAL);
+    return _mm256_slli_epi32(a, n);
 }
 
+template <int n>
 inline __m256i _mm256_slli_epi64_wrapper(__m256i a) {
-    return _mm256_slli_epi64(a, FRACTIONAL);
+    return _mm256_slli_epi64(a, n);
 }
 
 // shift right arithemtic
 
+template <int n>
 inline __m256i _mm256_sra_epi16_wrapper(__m256i a) {
-    return _mm256_srai_epi16(a, FRACTIONAL);
+    return _mm256_srai_epi16(a, n);
 }
 
+template <int n>
 inline __m256i _mm256_sra_epi32_wrapper(__m256i a) {
-    return _mm256_srai_epi32(a, FRACTIONAL);
+    return _mm256_srai_epi32(a, n);
 }
 
+template <int n>
 inline __m256i _mm256_sra_epi64_wrapper(__m256i a) {
-    return _mm256_srai_epi64(a, FRACTIONAL);
+    return _mm256_srai_epi64(a, n);
+}
+
+//shift right logical
+
+template <int n>
+inline __m256i _mm256_srl_epi16_wrapper(__m256i a) {
+    return _mm256_srli_epi16(a, n);
+}
+
+template <int n>
+inline __m256i _mm256_srl_epi32_wrapper(__m256i a) {
+    return _mm256_srli_epi32(a, n);
+}
+
+template <int n>
+inline __m256i _mm256_srl_epi64_wrapper(__m256i a) {
+    return _mm256_srli_epi64(a, n);
 }
 
 
