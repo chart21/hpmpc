@@ -26,7 +26,8 @@ then
 comp="$COMPILER"
 fi
 
-flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+# flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -I SimpleNN -lstdc++fs"
 
 
 for i in {0..2}

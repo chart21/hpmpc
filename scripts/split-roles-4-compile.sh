@@ -31,7 +31,8 @@ then
 comp="$COMPILER"
 fi
 
-flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -I SimpleNN -lstdc++fs"
+# flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
 
 O_IP1="127.0.0.1"
 O_IP2="127.0.0.1"
