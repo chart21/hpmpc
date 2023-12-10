@@ -169,9 +169,9 @@ public:
         }
         }
 
-        void complete_mult_public_fixed() {
+        void complete_public_mult_fixed() {
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i].complete_mult_public_fixed();
+            shares[i].complete_public_mult_fixed();
         }
         }
         
