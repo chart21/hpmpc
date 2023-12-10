@@ -80,6 +80,9 @@
 #define SHIFT_LEFT32 _mm512_slli_epi32_wrapper
 #define SHIFT_RIGHT64 _mm512_srai_epi64_wrapper
 #define SHIFT_LEFT64 _mm512_slli_epi64_wrapper
+#define SHIFT_LOG_RIGHT16 __mm_srl_epi16_wrapper
+#define SHIFT_LOG_RIGHT32 __mm_srl_epi32_wrapper
+#define SHIFT_LOG_RIGHT64 __mm_srl_epi64_wrapper
 
 
 // wrapper functions needed for some compilers
