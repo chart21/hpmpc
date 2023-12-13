@@ -92,7 +92,7 @@ TTP_Share mult_public(Datatype b, func_mul MULT)
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_Share& r_mk2, TTP_Share& r_msb, TTP_Share& c, TTP_Share& c_prime) {
     Datatype c_dat_prime = trunc(p1);
-    UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1;
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (BITLENGTH-FRACTIONAL-1)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
     c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1

@@ -40,8 +40,7 @@ void generateElements()
 
 }
 
-
-    template<typename T>
+template<typename T>
 void load_model(const Config& cfg, SimpleNN<T>& model)
 {
 	if (cfg.model == "lenet5") {
@@ -53,9 +52,9 @@ void load_model(const Config& cfg, SimpleNN<T>& model)
 				else {
 					model.add(new Conv2d<T>(6, 16, 5, 0, cfg.init));
 				}
-				/* if (cfg.use_batchnorm) { */
-				/* 	model.add(new BatchNorm2d<T>); */
-				/* } */
+				if (cfg.use_batchnorm) {
+					model.add(new BatchNorm2d<T>);
+				}
 				if (cfg.activ == "relu") {
 					model.add(new ReLU<T>);
 				}
@@ -79,9 +78,9 @@ void load_model(const Config& cfg, SimpleNN<T>& model)
 				else {
 					model.add(new Linear<T>(120, 84, cfg.init));
 				}
-				/* if (cfg.use_batchnorm) { */
-				/* 	model.add(new BatchNorm1d<T>); */
-				/* } */
+				if (cfg.use_batchnorm) {
+					model.add(new BatchNorm1d<T>);
+				}
 				if (cfg.activ == "relu") {
 					model.add(new ReLU<T>);
 				}
@@ -91,9 +90,9 @@ void load_model(const Config& cfg, SimpleNN<T>& model)
 			}
 			else {
 				model.add(new Linear<T>(84, 10, cfg.init));
-				/* if (cfg.use_batchnorm) { */
-				/* 	model.add(new BatchNorm1d<T>); */
-				/* } */
+				if (cfg.use_batchnorm) {
+					model.add(new BatchNorm1d<T>);
+				}
 				/* if (cfg.loss == "cross_entropy") { */
 				/* 	model.add(new Softmax<T>); */
 				/* } */
@@ -112,9 +111,9 @@ void load_model(const Config& cfg, SimpleNN<T>& model)
 				else {
 					model.add(new Linear<T>(500, 150, cfg.init));
 				}
-				/* if (cfg.use_batchnorm) { */
-				/* 	model.add(new BatchNorm1d<T>); */
-				/* } */
+				if (cfg.use_batchnorm) {
+					model.add(new BatchNorm1d<T>);
+				}
 				if (cfg.activ == "relu") {
 					model.add(new ReLU<T>);
 				}
@@ -124,9 +123,9 @@ void load_model(const Config& cfg, SimpleNN<T>& model)
 			}
 			else {
 				model.add(new Linear<T>(150, 10, cfg.init));
-				/* if (cfg.use_batchnorm) { */
-				/* 	model.add(new BatchNorm1d<T>); */
-				/* } */
+				if (cfg.use_batchnorm) {
+					model.add(new BatchNorm1d<T>);
+				}
 				/* if (cfg.loss == "cross_entropy") { */
 				/* 	model.add(new Softmax<T>); */
 				/* } */
@@ -137,6 +136,103 @@ void load_model(const Config& cfg, SimpleNN<T>& model)
 		}
 	}
 }
+
+    /* template<typename T> */
+/* void load_model(const Config& cfg, SimpleNN<T>& model) */
+/* { */
+	/* if (cfg.model == "lenet5") { */
+		/* for (int i = 0; i < 6; i++) { */
+			/* if (i < 2) { */
+				/* if (i == 0) { */
+					/* model.add(new Conv2d<T>(1, 6, 5, 2, cfg.init)); */
+				/* } */
+				/* else { */
+					/* model.add(new Conv2d<T>(6, 16, 5, 0, cfg.init)); */
+				/* } */
+				/* if (cfg.use_batchnorm) { */
+					/* model.add(new BatchNorm2d<T>); */
+				/* } */
+				/* if (cfg.activ == "relu") { */
+					/* model.add(new ReLU<T>); */
+				/* } */
+				/* /1* else { *1/ */
+				/* /1* 	model.add(new Tanh<T>); *1/ */
+				/* /1* } *1/ */
+				/* if (cfg.pool == "max") { */
+					/* model.add(new MaxPool2d<T>(2, 2)); */
+				/* } */
+				/* else { */
+					/* model.add(new AvgPool2d<T>(2, 2)); */
+				/* } */
+			/* } */
+			/* else if (i == 2) { */
+				/* model.add(new Flatten<T>); */
+			/* } */
+			/* else if (i < 5) { */
+				/* if (i == 3) { */
+					/* model.add(new Linear<T>(400, 120, cfg.init)); */
+				/* } */
+				/* else { */
+					/* model.add(new Linear<T>(120, 84, cfg.init)); */
+				/* } */
+				/* if (cfg.use_batchnorm) { */
+					/* model.add(new BatchNorm1d<T>); */
+				/* } */
+				/* if (cfg.activ == "relu") { */
+					/* model.add(new ReLU<T>); */
+				/* } */
+				/* /1* else { *1/ */
+				/* /1* 	model.add(new Tanh<T>); *1/ */
+				/* /1* } *1/ */
+			/* } */
+			/* else { */
+				/* model.add(new Linear<T>(84, 10, cfg.init)); */
+				/* if (cfg.use_batchnorm) { */
+					/* model.add(new BatchNorm1d<T>); */
+				/* } */
+				/* /1* if (cfg.loss == "cross_entropy") { *1/ */
+				/* /1* 	model.add(new Softmax<T>); *1/ */
+				/* /1* } *1/ */
+				/* /1* else { *1/ */
+				/* /1* 	model.add(new Sigmoid<T>); *1/ */
+				/* /1* } *1/ */
+			/* } */
+		/* } */
+	/* } */
+	/* else { */
+		/* for (int i = 0; i < 3; i++) { */
+			/* if (i < 2) { */
+				/* if (i == 0) { */
+					/* model.add(new Linear<T>(784, 500, cfg.init)); */
+				/* } */
+				/* else { */
+					/* model.add(new Linear<T>(500, 150, cfg.init)); */
+				/* } */
+				/* if (cfg.use_batchnorm) { */
+					/* model.add(new BatchNorm1d<T>); */
+				/* } */
+				/* if (cfg.activ == "relu") { */
+					/* model.add(new ReLU<T>); */
+				/* } */
+				/* /1* else { *1/ */
+				/* /1* 	model.add(new Tanh<T>); *1/ */
+				/* /1* } *1/ */
+			/* } */
+			/* else { */
+				/* model.add(new Linear<T>(150, 10, cfg.init)); */
+				/* if (cfg.use_batchnorm) { */
+					/* model.add(new BatchNorm1d<T>); */
+				/* } */
+				/* /1* if (cfg.loss == "cross_entropy") { *1/ */
+				/* /1* 	model.add(new Softmax<T>); *1/ */
+				/* /1* } *1/ */
+				/* /1* else { *1/ */
+				/* /1* 	model.add(new Sigmoid<T>); *1/ */
+				/* /1* } *1/ */
+			/* } */
+		/* } */
+	/* } */
+/* } */
 
     template<typename Share>
 void inference(DATATYPE* res)
@@ -179,19 +275,30 @@ void inference(DATATYPE* res)
 	cfg.parse(argc, argv);
 	cfg.print_config();
 
-	int n_train = 60000, n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28;
-
-	MatX<float> train_X, test_X;
-
-	VecXi train_Y, test_Y;
-
-#if JIT_VEC == 0
-	DataLoader<modeltype> train_loader, test_loader;
-#else
-	DataLoader<float> train_loader, test_loader;
+	int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28;
+	
+    MatX<float> test_X;
+	VecXi test_Y;
+#if IS_TRAINING == 1
+	MatX<float> train_X;
+    VecXi train_Y;
+    int n_train = 60000;
 #endif
 
-	if (cfg.mode == "train") {
+
+#if JIT_VEC == 0
+#if IS_TRAINING == 1
+	DataLoader<modeltype> train_loader;
+#endif
+	DataLoader<modeltype> test_loader;
+#else
+#if IS_TRAINING == 1
+	DataLoader<float> train_loader;
+#endif
+    DataLoader<float> test_loader;
+#endif
+
+#if IS_TRAINING == 1
 		train_X = read_mnist(cfg.data_dir, "train-images.idx3-ubyte", n_train);
 		train_Y = read_mnist_label(cfg.data_dir, "train-labels.idx1-ubyte", n_train);
         MatX<A> train_XX = train_X.unaryExpr([](float val) { 
@@ -211,8 +318,7 @@ void inference(DATATYPE* res)
             }
 
 		/* train_loader.load(train_XX, train_Y, cfg.batch, ch, h, w, cfg.shuffle_train); */
-	}
-
+#endif
     std::cout << "Reading MNIST test data..." << std::endl;
 	test_X = read_mnist(cfg.data_dir, "t10k-images.idx3-ubyte", n_test);
 	test_Y = read_mnist_label(cfg.data_dir, "t10k-labels.idx1-ubyte", n_test);

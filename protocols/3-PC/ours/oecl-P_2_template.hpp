@@ -492,7 +492,7 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     r_msb.template prepare_receive_from<P_0>(ADD, SUB);
     
     Datatype c_dat_prime = trunc(ADD(p1,p2));
-    UINT_TYPE maskValue = (1 << (BITLENGTH-FRACTIONAL-1)) - 1;
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (BITLENGTH-FRACTIONAL-1)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
     c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1

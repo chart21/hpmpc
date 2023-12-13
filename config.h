@@ -1,10 +1,10 @@
 #pragma once
 
 
-#define PROTOCOL 10
+#define PROTOCOL 5
 
 // Party ID (starting from 0)
-#define PARTY 3
+#define PARTY 2
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
@@ -14,7 +14,7 @@
 #define FUNCTION_IDENTIFIER 36
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 128
+#define DATTYPE 32
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
@@ -125,7 +125,9 @@ int base_port = BASE_PORT; // temporary solution
 
 #define TRUNC_THEN_MULT 0 // 0 = mult then trunc, 1 = trunc then mult
 #define TRUNC_APPROACH 0 // 0: cut, 1: interactive
-                         
+#define TRUNC_DELAYED 0 // 0: truncate after each fixed point multiplication, 1: truncate after next ReLU (might produce errors in some networks)
+
+
 #define JIT_VEC 1 // 0: vectorize and share inputs from the beginning, 1: vectorize and share inputs just in time, load a batch of images, then vectorize
 #define BASETYPE 0 // 0: Additive_Share, 1: sint
 
@@ -138,3 +140,5 @@ int base_port = BASE_PORT; // temporary solution
         #define BASE_DIV DATTYPE
     #endif
 #endif
+
+#define IS_TRAINING 0

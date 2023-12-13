@@ -159,7 +159,7 @@ std::cout << "PARTY " << PARTY <<  ": Time Adder (in RELU): " << double(std::chr
     for(int i = 0; i < len; i++)
     {
         val[i] = result[i].prepare_dot(val[i]);
-#if TRUNC_APPROACH == 0
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
         val[i].mask_and_send_dot();
 #else
         val[i].mask_and_send_dot_without_trunc();
@@ -169,7 +169,7 @@ std::cout << "PARTY " << PARTY <<  ": Time Adder (in RELU): " << double(std::chr
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-#if TRUNC_APPROACH == 0
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
         val[i].complete_mult();
 #else
         val[i].complete_mult_without_trunc();
@@ -183,7 +183,7 @@ r1 = std::chrono::high_resolution_clock::now();
     for(int i = 0; i < len; i++)
         val[i] = val[i].prepare_dot( t1[i] + t2[i]) - (val[i] + val[i]).prepare_dot3(t1[i],t2[i]); // (a+b) v - 2abv
 
-#if TRUNC_APPROACH == 0
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
     for(int i = 0; i < len; i++)
         val[i].mask_and_send_dot(); // important: do not mix with prepare_dot in same loop because of send recv order
 #else
@@ -196,7 +196,7 @@ r1 = std::chrono::high_resolution_clock::now();
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-#if TRUNC_APPROACH == 0
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
         /* t1[i].complete_mult(); */
         /* t2[i].complete_mult(); */
         /* val[i] = t1[i] - t2[i]; */
@@ -213,7 +213,7 @@ r1 = std::chrono::high_resolution_clock::now();
     Share::communicate();
 
 
-#if TRUNC_APPROACH == 1
+#if TRUNC_APPROACH == 1 && TRUNC_DELAYED == 1
     r1 = std::chrono::high_resolution_clock::now();
     trunc_2k_in_place(val, len);
 r2 = std::chrono::high_resolution_clock::now();
