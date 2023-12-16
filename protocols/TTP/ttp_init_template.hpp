@@ -35,11 +35,11 @@ TTP_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD
 {
    return TTP_init();
 }
-    
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed(func_add ADD, func_sub SUB)
 {
 }
+    
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 TTP_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const

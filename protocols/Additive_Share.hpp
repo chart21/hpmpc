@@ -37,7 +37,7 @@ public:
         
         Additive_Share operator*(const UINT_TYPE other) const
         {
-        return Additive_Share(Share_Type::mult_public_fixed(PROMOTE(other), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC));
+        return Additive_Share(Share_Type::prepare_mult_public_fixed(PROMOTE(other), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC));
         }
 
         void operator*=(const UINT_TYPE other) 

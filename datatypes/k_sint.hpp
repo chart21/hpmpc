@@ -163,6 +163,14 @@ public:
         }
         }
 
+        sint_t operator*(const UINT_TYPE other) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i] * other;
+        }
+        return result;
+        }
+
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {
             shares[i].prepare_mult_public_fixed(other);

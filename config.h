@@ -127,7 +127,7 @@ int base_port = BASE_PORT; // temporary solution
 #define TRUNC_APPROACH 0 // 0: cut, 1: interactive
 #define TRUNC_DELAYED 0 // 0: truncate after each fixed point multiplication, 1: truncate after next ReLU (might produce errors in some networks)
 #define COMPUTE_ARGMAX 0 // 0: skip final argmax during inference, 1: Compute final argmax during inference
-
+#define PUBLIC_WEIGHTS 0 // 0: weights are secretly shared, 1: weights are public
 
 
 #define JIT_VEC 1 // 0: vectorize and share inputs from the beginning, 1: vectorize and share inputs just in time, load a batch of images, then vectorize
