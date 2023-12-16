@@ -273,7 +273,7 @@ public:
             return shares[idx];
         }
         
-        static sint_t<Share> load_shares(int l, const Share shares[BITLENGTH]) {
+        static sint_t<Share> load_shares(int l, const Share shares[]) {
             sint_t<Share> result;
             for(int i = 0; i < l; ++i) {
                 result[i] = shares[i];

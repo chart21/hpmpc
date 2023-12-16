@@ -1,7 +1,7 @@
 #pragma once
 
 
-#define PROTOCOL 5
+#define PROTOCOL 13
 
 // Party ID (starting from 0)
 #define PARTY 2
@@ -126,6 +126,8 @@ int base_port = BASE_PORT; // temporary solution
 #define TRUNC_THEN_MULT 0 // 0 = mult then trunc, 1 = trunc then mult
 #define TRUNC_APPROACH 0 // 0: cut, 1: interactive
 #define TRUNC_DELAYED 0 // 0: truncate after each fixed point multiplication, 1: truncate after next ReLU (might produce errors in some networks)
+#define COMPUTE_ARGMAX 0 // 0: skip final argmax during inference, 1: Compute final argmax during inference
+
 
 
 #define JIT_VEC 1 // 0: vectorize and share inputs from the beginning, 1: vectorize and share inputs just in time, load a batch of images, then vectorize

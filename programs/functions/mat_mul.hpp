@@ -948,7 +948,7 @@ using sint = sint_t<A>;
    {
        int counter = m/2; // 
         int offset = m % 2; // if m is odd, offset is 1
-        S* msb = new S[m];
+        S* msb = new S[counter+offset];
         if(want_max)
             max_min_msb_range<k>(val,msb,m,true); //get msb and max of 0 -> counter
         else
@@ -1043,7 +1043,8 @@ void argmax_test(DATATYPE* res)
 using S = XOR_Share<DATATYPE, Share>;
 using A = Additive_Share<DATATYPE, Share>;
 using sint = sint_t<A>;
-const int k = REDUCED_BITLENGTH;
+/* const int k = REDUCED_BITLENGTH; */
+const int k = BITLENGTH;
 auto a = new sint[NUM_INPUTS];
 auto max_output = new S[NUM_INPUTS];
 auto min_output = new S[NUM_INPUTS];

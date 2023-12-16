@@ -28,6 +28,7 @@
 #include "headers/config.h"
 
 #include "Relu.hpp"
+#include "arg_max.hpp"
 #define FUNCTION inference
 #define RESULTTYPE DATATYPE
 using namespace std;
@@ -93,9 +94,9 @@ void load_model(const Config& cfg, SimpleNN<T>& model)
 				if (cfg.use_batchnorm) {
 					model.add(new BatchNorm1d<T>);
 				}
-				/* if (cfg.loss == "cross_entropy") { */
-				/* 	model.add(new Softmax<T>); */
-				/* } */
+				if (cfg.loss == "cross_entropy") {
+					model.add(new Softmax<T>);
+				}
 				/* else { */
 				/* 	model.add(new Sigmoid<T>); */
 				/* } */
