@@ -940,7 +940,9 @@ using sint = sint_t<A>;
     std::copy(begin, end, val);
    if(m == 1)
    {
-       return val[0];
+       sint ret = val[0];
+       delete[] val;
+       return ret;
    }
 
    int log2m = std::ceil(std::log2(m)); 
@@ -957,7 +959,9 @@ using sint = sint_t<A>;
         delete[] msb;
         m = counter + offset;
     }
-   return val[0];
+   sint ret = val[0];
+   delete[] val;
+   return ret;
 }
 
 

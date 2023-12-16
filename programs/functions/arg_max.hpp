@@ -174,37 +174,41 @@ using sint = sint_t<A>;
 
 }
     
-    template<int k, typename Datatype, typename Share>
-sint_t<Additive_Share<Datatype, Share>> max_min(const sint_t<Additive_Share<Datatype, Share>>* begin, const sint_t<Additive_Share<Datatype, Share>>* end, bool want_max)
+    template<int bm,int bk, typename Datatype, typename Share>
+void max_min(const sint_t<Additive_Share<Datatype, Share>>* begin, int len, sint_t<Additive_Share<Datatype, Share>>* output, int batch_size, bool want_max)
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
 using sint = sint_t<A>;
-   int m = end - begin;
-   int og_len = m;
+int og_len = len;
+int m = len;
 
-   sint* val = new sint[m];
-    std::copy(begin, end, val);
-   if(m == 1)
-   {
-       return val[0];
-   }
+sint* val = new sint[batch_size*og_len];
+std::copy(begin, begin+batch_size*og_len, val);
+if(len == 1)
+{
+   for(int b = 0; b < batch_size; b++)
+       output[b] = val[0];
+   return;
+}
 
-   int log2m = std::ceil(std::log2(m)); 
-   for(int i = 0; i < log2m; i++)
-   {
-       int counter = m/2; // 
-        int offset = m % 2; // if m is odd, offset is 1
-        S* msb = new S[m];
-        if(want_max)
-            max_min_msb_range<k>(val,msb,m,true); //get msb and max of 0 -> counter
-        else
-            max_min_msb_range<k>(val,msb,m,false); //get msb and max of 0 -> counter
+int log2m = std::ceil(std::log2(m)); 
+for(int i = 0; i < log2m; i++)
+{
+    int counter = m/2; // 
+    int offset = m % 2; // if m is odd, offset is 1
+    int q = (m+1)/2;
+    S* msb = new S[batch_size*q];
+    max_min_msb_range<bm,bk>(val,msb,og_len,m,batch_size,want_max); //get msb and max of 0 -> counter
 
-        delete[] msb;
-        m = counter + offset;
+    delete[] msb;
+    m = counter + offset;
+}
+for(int b = 0; b < batch_size; b++)
+    {
+       output[b] = val[b*og_len];
     }
-   return val[0];
+delete[] val;
 }
 
 
@@ -237,10 +241,7 @@ int m = len;
         int offset = m % 2; // if m is odd, offset is 1
         int q = (m+1)/2;
         S* msb = new S[batch_size*q];
-        if(want_max)
-            max_min_msb_range<bm,bk>(val,msb,og_len,m,batch_size,true); //get msb and max of 0 -> counter
-        else
-            max_min_msb_range<bm,bk>(val,msb,og_len,m,batch_size,false); //get msb and max of 0 -> counter
+        max_min_msb_range<bm,bk>(val,msb,og_len,m,batch_size,want_max); //get msb and max of 0 -> counter
 
         //update args
        if (i == 0) // first round
@@ -294,6 +295,7 @@ int m = len;
         delete[] msb;
         m = counter + offset;
        }
+   delete[] val;
 }
     
     template<int bm, int bk, typename Datatype, typename Share>
@@ -308,6 +310,52 @@ bitinj_range(tmp_output, len*batch_size, output); //TODO: remove this overhead s
 delete[] tmp_output;
 }
     
+    template<int bm, int bk, typename Datatype, typename Share>
+void max_min_sint(const sint_t<Additive_Share<Datatype, Share>>* begin, int len, sint_t<Additive_Share<Datatype, Share>>* output, int batch_size, bool want_max)
+{
+using S = XOR_Share<Datatype, Share>;
+using A = Additive_Share<Datatype, Share>;
+using sint = sint_t<A>;
+max_min<bm,bk>(begin, len, output, batch_size, want_max);
+} 
+    template<int bm, int bk, typename Datatype, typename Share>
+void max_min_sint(const Additive_Share<Datatype, Share>* begin, int len, Additive_Share<Datatype, Share>* output,int batch_size, bool want_max)
+{
+using S = XOR_Share<Datatype, Share>;
+using A = Additive_Share<Datatype, Share>;
+using sint = sint_t<A>;
+sint *tmp_output = new sint[((batch_size-1)/BITLENGTH+1)];
+sint *tmp_begin = new sint[len*((batch_size-1)/BITLENGTH+1)];
+int k = 0;
+int c = 0;
+for(int i = 0; i < len; i++)
+{
+    for(int j = 0; j < batch_size; j++)
+    {
+        tmp_begin[c*len+i][k++] = begin[j*len+i]; //load all shares at position i into one sint
+        if(k == BITLENGTH)
+        {
+            k = 0;
+            c++;
+        } 
+    }
+    k = 0;
+    c = 0;
+}
+
+max_min_sint<bm,bk>(tmp_begin, len, tmp_output,(batch_size-1)/BITLENGTH+1, want_max); //TODO: Warning because of massive overhead
+    for(int j = 0; j < batch_size; j++)
+    {
+        output[j] = tmp_output[c][k++]; //load result into output
+        if(k == BITLENGTH)
+        {
+            k = 0;
+            c++;
+        } 
+    }
+delete[] tmp_output;
+delete[] tmp_begin;
+}
     template<int bm, int bk, typename Datatype, typename Share>
 void argmax_argmin_sint(const Additive_Share<Datatype, Share>* begin, int len, Additive_Share<Datatype, Share>* output,int batch_size, bool want_max)
 {

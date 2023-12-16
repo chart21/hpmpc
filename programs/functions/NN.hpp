@@ -258,7 +258,7 @@ void inference(DATATYPE* res)
 	Config cfg;
    
     // Array of string literals
-    const char* literals[] = {"simplenn", "--mode=test", "--save_dir=./SimpleNN/model_zoo", "--pretrained=lenet5.pth", "--pool=avg"};
+    const char* literals[] = {"simplenn", "--mode=test", "--save_dir=./SimpleNN/model_zoo", "--pretrained=lenet5.pth"};
 
     // Number of arguments
     size_t numArgs = sizeof(literals) / sizeof(literals[0]);
@@ -272,7 +272,7 @@ void inference(DATATYPE* res)
         argv[i] = new char[length + 1];  // +1 for the null terminator
         std::strcpy(argv[i], literals[i]);
     } 
-    int argc = 5;
+    int argc = 4;
 	cfg.parse(argc, argv);
 	cfg.print_config();
 
