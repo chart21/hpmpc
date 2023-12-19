@@ -21,7 +21,7 @@
 #include "programs/mult_init.hpp"
 #elif FUNCTION_IDENTIFIER >= 7 && FUNCTION_IDENTIFIER <= 9
 #include "programs/debug_init.hpp"
-#elif FUNCTION_IDENTIFIER > 11 && FUNCTION_IDENTIFIER <= 35
+#elif (FUNCTION_IDENTIFIER > 11 && FUNCTION_IDENTIFIER <= 35) || FUNCTION_IDENTIFIER > 36
 #include "programs/mat_mul_init.hpp"
 #elif FUNCTION_IDENTIFIER == 36
 #include "programs/functions/NN.hpp"

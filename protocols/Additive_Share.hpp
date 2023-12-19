@@ -32,7 +32,8 @@ public:
 
     Additive_Share operator*(const Additive_Share<Datatype, Share_Type>& b) const
     {
-        return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT));
+        return Additive_Share(Share_Type::prepare_dot(b, OP_ADD, OP_SUB, OP_MULT));
+        /* return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT)); */
     }
         
         Additive_Share operator*(const UINT_TYPE other) const
