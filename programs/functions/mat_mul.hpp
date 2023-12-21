@@ -57,7 +57,7 @@
 #define FUNCTION dot234_test
 #elif FUNCTION_IDENTIFIER == 35
 #define FUNCTION RELU_range_test
-#elif FUNCTION_IDENTIFIER == 37 || FUNCTION_IDENTIFIER == 38 || FUNCTION_IDENTIFIER == 39 || FUNCTION_IDENTIFIER == 40 || FUNCTION_IDENTIFIER == 41 || FUNCTION_IDENTIFIER == 42 || FUNCTION_IDENTIFIER == 43 || FUNCTION_IDENTIFIER == 44 || FUNCTION_IDENTIFIER == 45 || FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47 || FUNCTION_IDENTIFIER == 48 || FUNCTION_IDENTIFIER == 49
+#elif FUNCTION_IDENTIFIER >= 37 && FUNCTION_IDENTIFIER <= 57
 #define USE_EIGEN 1
 #define FUNCTION conv2D_bench
 #endif
@@ -1278,6 +1278,19 @@ class Conv2d : public Layer<T>
         void forward9(const MatX<T>& prev_out, bool is_training);
         void forward10(const MatX<T>& prev_out, bool is_training);
         void forward11(const MatX<T>& prev_out, bool is_training);
+        void forward12(const MatX<T>& prev_out, bool is_training);
+        void forward13(const MatX<T>& prev_out, bool is_training);
+        void forward14(const MatX<T>& prev_out, bool is_training);
+        void forward15(const MatX<T>& prev_out, bool is_training);
+        void forward16(const MatX<T>& prev_out, bool is_training);
+        void forward17(const MatX<T>& prev_out, bool is_training);
+        void forward18(const MatX<T>& prev_out, bool is_training);
+        void forward19(const MatX<T>& prev_out, bool is_training);
+        void forward20(const MatX<T>& prev_out, bool is_training);
+        void forward21(const MatX<T>& prev_out, bool is_training);
+        void forward22(const MatX<T>& prev_out, bool is_training);
+        void forward23(const MatX<T>& prev_out, bool is_training);
+        void forward24(const MatX<T>& prev_out, bool is_training);
 		void backward(const MatX<T>& prev_out, MatX<T>& prev_delta) override;
 		/* void update_weight(T lr, T decay) override; */
 		/* void zero_grad() override; */
@@ -1334,6 +1347,7 @@ class Conv2d : public Layer<T>
 	}
 
 
+int TILE_SIZE = 8;
     template<typename T>
 	void Conv2d<T>::forward(const MatX<T>& prev_out, bool is_training)
 	{
@@ -1611,7 +1625,7 @@ class Conv2d : public Layer<T>
     auto A = kernel.data();
     auto B = im_col.data();
     auto C = this->output.data() + (oc * ohw) * n;
-    const int TILE_SIZE = 64;
+    
     /* const int m = kernel.rows(); */
     /* const int f = kernel.cols(); */
     /* const int p = im_col.cols(); */
@@ -1673,7 +1687,7 @@ class Conv2d : public Layer<T>
             auto A = kernel.data();
     auto B = im_col.data();
     auto C = this->output.data() + (oc * ohw) * n;
-    const int TILE_SIZE = 64;
+    
     const int m = oc;
     const int f = kernel.cols();
     const int p = ohw;
@@ -1732,11 +1746,11 @@ class Conv2d : public Layer<T>
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
-
-            auto A = kernel.data();
+    auto A = kernel.data();
+    /* auto B = im_col.transpose().data(); */
     auto B = im_col.data();
     auto C = this->output.data() + (oc * ohw) * n;
-    const int TILE_SIZE = 64;
+    
     const int m = oc;
     const int f = kernel.cols();
     const int p = ohw;
@@ -1748,8 +1762,9 @@ class Conv2d : public Layer<T>
                 int k_max = std::min(k + TILE_SIZE, f);
                         for (int kk = k; kk < k_max; ++kk) {
                 for (int ii = i; ii < i_max; ++ii) {
+                    T temp = A[ii*f+kk]; 
                     for (int jj = j; jj < j_max; ++jj) {
-                       C[ii * p + jj] += A[ii * f + kk] * B[kk * p + jj]; 
+                       C[ii * p + jj] += temp * B[kk*p + jj]; 
                         }
                     }
                 }
@@ -1799,7 +1814,7 @@ class Conv2d : public Layer<T>
             auto A = kernel.data();
     auto B = im_col.data();
     auto C = this->output.data() + (oc * ohw) * n;
-    const int TILE_SIZE = 64;
+    
     const int m = oc;
     const int f = kernel.cols();
     const int p = ohw;
@@ -1835,6 +1850,866 @@ class Conv2d : public Layer<T>
 
 
         } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    
+    template<typename T>
+	void Conv2d<T>::forward12(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                for (int ii = i; ii < i_max; ++ii) {
+                    const int row = ii*p;
+                        for (int kk = k; kk < k_max; ++kk) {
+                    const int row2 = kk*p;
+                    /* const int row2 = ii*f+kk; */
+                    auto temp = A[ii*f+kk];
+                    for (int jj = j; jj < j_max; ++jj) {
+                       C[row + jj] += temp * B[row2 + jj]; 
+                        }
+                    }
+            }
+                }
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[row + jj].mask_and_send_dot();
+                }
+            }
+            }
+        }
+    }
+        
+
+
+
+
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    template<typename T>
+	void Conv2d<T>::forward13(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+       
+for (int i = 0; i < m; i += TILE_SIZE) {
+    int i_max = std::min(i + TILE_SIZE, m);
+    for (int k = 0; k < f; k += TILE_SIZE) {
+        int k_max = std::min(k + TILE_SIZE, f);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+
+            for (int ii = i; ii < i_max; ++ii) {
+                for (int kk = k; kk < k_max; ++kk) {
+                    auto temp = A[ii * f + kk];
+                    for (int jj = j; jj < j_max; ++jj) {
+                        C[ii * p + jj] += temp * B[kk * p + jj];
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Post-processing step
+for (int i = 0; i < m; ++i) {
+    for (int j = 0; j < p; ++j) {
+        C[i * p + j].mask_and_send_dot();
+    }
+}
+
+}
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+
+
+    template<typename T>
+	void Conv2d<T>::forward14(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+        
+
+for (int i0 = 0; i0 < m; i0 += TILE_SIZE) {
+    int i_max = std::min(i0 + TILE_SIZE, m);
+    for (int k0 = 0; k0 < f; k0 += TILE_SIZE) {
+        int k_max = std::min(k0 + TILE_SIZE, f);
+        for (int j0 = 0; j0 < p; j0 += TILE_SIZE) {
+            int j_max = std::min(j0 + TILE_SIZE, p);
+
+            for (int i = i0; i < i_max; ++i) {
+                for (int j = j0; j < j_max; ++j) {
+                    T temp_sum = T(0);
+                    for (int k = k0; k < k_max; ++k) {
+                        temp_sum += A[i * f + k] * B[k * p + j];
+                    }
+                    C[i * p + j] += temp_sum;
+                }
+            }
+        }
+    }
+}
+
+// Post-processing step
+for (int i = 0; i < m; ++i) {
+    for (int j = 0; j < p; ++j) {
+        C[i * p + j].mask_and_send_dot();
+    }
+}
+
+
+
+
+
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    
+    template<typename T>
+	void Conv2d<T>::forward15(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                for (int ii = i; ii < i_max; ++ii) {
+                    const int row = ii*p;
+                        for (int kk = k; kk < k_max; ++kk) {
+                    const int row2 = kk*p;
+                    /* const int row2 = ii*f+kk; */
+                    auto temp = A[ii*f+kk];
+                    for (int jj = j; jj < j_max; ++jj) {
+                       C[row + jj] += temp * B[row2 + jj]; 
+                        }
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[row + jj].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        
+
+
+
+
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+
+    template<typename T>
+	void Conv2d<T>::forward16(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                for (int ii = i; ii < i_max; ++ii) {
+                        for (int kk = k; kk < k_max; ++kk) {
+                    /* const int row2 = ii*f+kk; */
+                    auto temp = A[ii*f+kk];
+                    for (int jj = j; jj < j_max; ++jj) {
+                       C[ii*p + jj] += temp * B[kk*p + jj]; 
+                        }
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[row + jj].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+
+        
+
+    template<typename T>
+	void Conv2d<T>::forward17(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                        for (int kk = k; kk < k_max; ++kk) {
+                for (int ii = i; ii < i_max; ++ii) {
+                    /* const int row2 = ii*f+kk; */
+                    auto temp = A[ii*f+kk];
+                    for (int jj = j; jj < j_max; ++jj) {
+                       C[ii*p + jj] += temp * B[kk*p + jj]; 
+                        }
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[row + jj].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        
+
+
+
+
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    template<typename T>
+	void Conv2d<T>::forward18(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                    /* const int row2 = ii*f+kk; */
+                    for (int jj = j; jj < j_max; ++jj) {
+                        for (int kk = k; kk < k_max; ++kk) {
+                            auto temp = B[kk*p + jj];
+                for (int ii = i; ii < i_max; ++ii) {
+                       C[ii*p + jj] += A[ii*f+kk] * temp; 
+                        }
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[row + jj].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        
+
+
+
+
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    template<typename T>
+	void Conv2d<T>::forward19(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                    /* const int row2 = ii*f+kk; */
+                    for (int jj = j; jj < j_max; ++jj) {
+                        for (int kk = k; kk < k_max; ++kk) {
+                    auto temp = B[kk*p + jj];
+                for (int ii = i; ii < i_max; ++ii) {
+                       C[ii*p + jj] += temp * B[kk*p + jj]; 
+                        }
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[row + jj].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        
+
+
+
+
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    template<typename T>
+	void Conv2d<T>::forward20(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.transpose().data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                for (int ii = i; ii < i_max; ++ii) {
+                        for (int kk = k; kk < k_max; ++kk) {
+                    /* const int row2 = ii*f+kk; */
+                    auto temp = A[ii*f+kk];
+                    for (int jj = j; jj < j_max; ++jj) {
+                       C[ii*p + jj] += temp * B[jj*f + kk]; 
+                        }
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[row + jj].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        
+
+
+
+
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    template<typename T>
+	void Conv2d<T>::forward21(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    auto B = im_col.transpose().data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                for (int ii = i; ii < i_max; ++ii) {
+                    for (int jj = j; jj < j_max; ++jj) {
+                        for (int kk = k; kk < k_max; ++kk) {
+                       C[ii*p + jj] += A[ii*f+kk] * B[jj*f + kk]; 
+                        }
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[row + jj].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        
+
+
+
+
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    template<typename T>
+	void Conv2d<T>::forward22(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    MatX<T> BM = im_col.transpose();
+    auto B = BM.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                for (int ii = i; ii < i_max; ++ii) {
+                    /* const int row2 = ii*f+kk; */
+                    for (int jj = j; jj < j_max; ++jj) {
+                        T temp_sum = T(0);
+                        for (int kk = k; kk < k_max; ++kk) {
+                       temp_sum += A[ii*f+kk] * B[jj*f + kk]; 
+                        }
+                        C[ii*p + jj] += temp_sum;
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[row + jj].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        
+
+
+
+
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    template<typename T>
+	void Conv2d<T>::forward23(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    MatX<T> BM = im_col.transpose();
+    auto B = BM.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                    for (int jj = j; jj < j_max; ++jj) {
+                for (int ii = i; ii < i_max; ++ii) {
+                    int row = ii*f+k;
+                    int row2 = jj*f+k;
+                    /* const int row2 = ii*f+kk; */
+                        T temp_sum = T(0);
+                        while(row < ii*f+k_max){
+                       temp_sum += A[row++] * B[row2++]; 
+                        }
+                        C[ii*p + jj] += temp_sum;
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                int row = ii*p+j;
+                while(row < ii*p+j_max){
+                    C[row++].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        
+
+
+
+
+        } 
+        /* for (int i = 0; i < this->output.size(); i++) { */
+        /*     this->output(i).mask_and_send_dot(); */
+    /* } */
+            T::communicate();
+            for (int i = 0; i < this->output.size(); i++) {
+                this->output(i).complete_mult();
+            }
+		for (int n = 0; n < batch; n++) {
+			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
+	}
+    }
+    template<typename T>
+	void Conv2d<T>::forward24(const MatX<T>& prev_out, bool is_training)
+	{
+            /* for(int i = 0; i < oc; ++i) { */
+            /*     T sum = T(0); */
+            /*     for(int j = 0; j < ohw; ++j) { */
+            /*             for(int k = 0; k < kernel.cols(); ++k) { */
+            /*         sum += (kernel(i, k) * im_col(k, j));  // Use custom * and + operators */
+        std::cout << "prev_out: " << prev_out.size() << std::endl;
+        std::cout << "output: " << this->output.size() << std::endl;
+		for (int n = 0; n < batch; n++) {
+			const T* im = prev_out.data() + (ic * ihw) * n;
+			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+            /* auto A = kernel; */
+            /* auto B = im_col; */
+            /* auto C = this->output; */
+
+            auto A = kernel.data();
+    MatX<T> BM = im_col.transpose();
+    auto B = BM.data();
+    auto C = this->output.data() + (oc * ohw) * n;
+    
+    const int m = oc;
+    const int f = kernel.cols();
+    const int p = ohw;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                    for (int jj = j; jj < j_max; ++jj) {
+                for (int ii = i; ii < i_max; ++ii) {
+                    /* const int row2 = ii*f+kk; */
+                        T temp_sum = T(0);
+                        for (int kk = k; kk < k_max; ++kk) {
+                       temp_sum += A[ii*f+kk] * B[jj*f + kk]; 
+                        }
+                        C[ii*p + jj] += temp_sum;
+                    }
+                }
+            }
+            for (int ii = i; ii < i_max; ++ii) {
+                for (int jj = j; jj < j_max; ++jj) {
+                    C[ii*p + jj].mask_and_send_dot();
+                }
+            }
+        }
+    }
+        
+
+        }
+
+
+        
+    
         /* for (int i = 0; i < this->output.size(); i++) { */
         /*     this->output(i).mask_and_send_dot(); */
     /* } */
@@ -2052,6 +2927,165 @@ d_conv.forward9(input, false);
 d_conv.forward10(input, false);
 #elif FUNCTION_IDENTIFIER == 47
 d_conv.forward11(input, false);
+#elif FUNCTION_IDENTIFIER == 48
+d_conv.forward12(input, false);
+#elif FUNCTION_IDENTIFIER == 49
+d_conv.forward13(input, false);
+#elif FUNCTION_IDENTIFIER == 50
+d_conv.forward14(input, false);
+#elif FUNCTION_IDENTIFIER == 51
+d_conv.forward23(input, false);
+#elif FUNCTION_IDENTIFIER == 52
+d_conv.forward16(input, false);
+#elif FUNCTION_IDENTIFIER == 53
+d_conv.forward17(input, false);
+#elif FUNCTION_IDENTIFIER == 54
+std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward10(input, false);
+std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 10: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward11(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 11: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward12(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 12: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward13(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 13: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward14(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 14: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward15(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 15: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward16(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 16: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward17(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 17: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward18(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 18: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward19(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 19: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward20(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 20: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward21(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken 21: " << duration << std::endl;
+t1 = std::chrono::high_resolution_clock::now();
+d_conv.forward22(input, false);
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+std::cout << "Time taken 22: " << duration << std::endl;
+#elif FUNCTION_IDENTIFIER == 55
+std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+t1 = std::chrono::high_resolution_clock::now();
+while(TILE_SIZE < 225)
+{
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+    d_conv.forward11(input, false);
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    std::cout << "Time taken for 11, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
+    TILE_SIZE += 8;
+}
+TILE_SIZE = 8;
+
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 11: " << duration << std::endl;
+
+t1 = std::chrono::high_resolution_clock::now();
+while(TILE_SIZE < 225)
+{
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+    d_conv.forward17(input, false);
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    std::cout << "Time taken for 17, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
+    TILE_SIZE += 8;
+}
+TILE_SIZE = 8;
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 17: " << duration << std::endl;
+
+t1 = std::chrono::high_resolution_clock::now();
+while(TILE_SIZE < 225)
+{
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+    d_conv.forward22(input, false);
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    std::cout << "Time taken for 22, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
+    TILE_SIZE += 8;
+}
+TILE_SIZE = 8;
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 22: " << duration << std::endl;
+
+t1 = std::chrono::high_resolution_clock::now();
+while(TILE_SIZE < 225)
+{
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+    d_conv.forward23(input, false);
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    std::cout << "Time taken for 23, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
+    TILE_SIZE += 8;
+}
+TILE_SIZE = 8;
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 23: " << duration << std::endl;
+
+t1 = std::chrono::high_resolution_clock::now();
+while(TILE_SIZE < 225)
+{
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+    d_conv.forward24(input, false);
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    std::cout << "Time taken for 24, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
+    TILE_SIZE += 8;
+}
+TILE_SIZE = 8;
+t2 = std::chrono::high_resolution_clock::now();
+duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+std::cout << "Time taken for 24: " << duration << std::endl;
+
+
 #endif
     //dummy reveal
     d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
