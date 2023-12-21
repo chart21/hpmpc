@@ -48,10 +48,10 @@ void load_model(const Config& cfg, SimpleNN<T>& model)
 		for (int i = 0; i < 6; i++) {
 			if (i < 2) {
 				if (i == 0) {
-					model.add(new Conv2d<T>(1, 6, 5, 2, cfg.init));
+					model.add(new Conv2d<T>(1, 6, 5, 1, 2, cfg.init));
 				}
 				else {
-					model.add(new Conv2d<T>(6, 16, 5, 0, cfg.init));
+					model.add(new Conv2d<T>(6, 16, 5, 1, 0, cfg.init));
 				}
 				if (cfg.use_batchnorm) {
 					model.add(new BatchNorm2d<T>);
