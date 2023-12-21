@@ -2286,9 +2286,8 @@ for (int i = 0; i < m; ++i) {
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
-
             auto A = kernel.data();
-    auto B = im_col.data();
+    auto B = im_col.transpose().data();
     auto C = this->output.data() + (oc * ohw) * n;
     
     const int m = oc;
@@ -2300,13 +2299,14 @@ for (int i = 0; i < m; ++i) {
             int j_max = std::min(j + TILE_SIZE, p);
             for (int k = 0; k < f; k += TILE_SIZE) {
                 int k_max = std::min(k + TILE_SIZE, f);
+                for (int ii = i; ii < i_max; ++ii) {
                     /* const int row2 = ii*f+kk; */
+                    auto temp = T(0);
                     for (int jj = j; jj < j_max; ++jj) {
                         for (int kk = k; kk < k_max; ++kk) {
-                            auto temp = B[kk*p + jj];
-                for (int ii = i; ii < i_max; ++ii) {
-                       C[ii*p + jj] += A[ii*f+kk] * temp; 
+                       temp += A[ii*f+kk] * B[jj*f + kk]; 
                         }
+                        C[ii*p + jj] += temp;
                     }
                 }
             }
@@ -2318,6 +2318,7 @@ for (int i = 0; i < m; ++i) {
             }
         }
     }
+
         
 
 
@@ -2351,9 +2352,8 @@ for (int i = 0; i < m; ++i) {
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
-
             auto A = kernel.data();
-    auto B = im_col.data();
+    auto B = im_col.transpose().data();
     auto C = this->output.data() + (oc * ohw) * n;
     
     const int m = oc;
@@ -2363,26 +2363,20 @@ for (int i = 0; i < m; ++i) {
         int i_max = std::min(i + TILE_SIZE, m);
         for (int j = 0; j < p; j += TILE_SIZE) {
             int j_max = std::min(j + TILE_SIZE, p);
-            for (int k = 0; k < f; k += TILE_SIZE) {
-                int k_max = std::min(k + TILE_SIZE, f);
-                    /* const int row2 = ii*f+kk; */
-                    for (int jj = j; jj < j_max; ++jj) {
-                        for (int kk = k; kk < k_max; ++kk) {
-                    auto temp = B[kk*p + jj];
                 for (int ii = i; ii < i_max; ++ii) {
-                       C[ii*p + jj] += temp * B[kk*p + jj]; 
+                    /* const int row2 = ii*f+kk; */
+                    auto temp = T(0);
+                    for (int jj = j; jj < j_max; ++jj) {
+                        for (int k = 0; k < f; k += TILE_SIZE) {
+                       temp += A[ii*f+k] * B[jj*f + k]; 
                         }
+                        temp.mask_and_send_dot();
+                        C[ii*p + jj] = temp;
                     }
                 }
             }
-            for (int ii = i; ii < i_max; ++ii) {
-                const int row = ii*p;
-                for (int jj = j; jj < j_max; ++jj) {
-                    C[row + jj].mask_and_send_dot();
-                }
             }
-        }
-    }
+
         
 
 
@@ -2425,35 +2419,45 @@ for (int i = 0; i < m; ++i) {
     const int f = kernel.cols();
     const int p = ohw;
   for (int i = 0; i < m; i += TILE_SIZE) {
-        int i_max = std::min(i + TILE_SIZE, m);
         for (int j = 0; j < p; j += TILE_SIZE) {
-            int j_max = std::min(j + TILE_SIZE, p);
-            for (int k = 0; k < f; k += TILE_SIZE) {
-                int k_max = std::min(k + TILE_SIZE, f);
-                for (int ii = i; ii < i_max; ++ii) {
-                        for (int kk = k; kk < k_max; ++kk) {
-                    /* const int row2 = ii*f+kk; */
-                    auto temp = A[ii*f+kk];
-                    for (int jj = j; jj < j_max; ++jj) {
-                       C[ii*p + jj] += temp * B[jj*f + kk]; 
+                    auto temp = T(0);
+                        for (int k = 0; k < f; k += TILE_SIZE) {
+                       temp += A[i*f+k] * B[j*f + k]; 
                         }
+                        temp.mask_and_send_dot();
+                        C[i*p + j] = temp;
                     }
                 }
             }
-            for (int ii = i; ii < i_max; ++ii) {
-                const int row = ii*p;
-                for (int jj = j; jj < j_max; ++jj) {
-                    C[row + jj].mask_and_send_dot();
-                }
-            }
-        }
-    }
+  /* for (int i = 0; i < m; i += TILE_SIZE) { */
+  /*       int i_max = std::min(i + TILE_SIZE, m); */
+  /*       for (int j = 0; j < p; j += TILE_SIZE) { */
+  /*           int j_max = std::min(j + TILE_SIZE, p); */
+  /*           for (int k = 0; k < f; k += TILE_SIZE) { */
+  /*               int k_max = std::min(k + TILE_SIZE, f); */
+  /*               for (int ii = i; ii < i_max; ++ii) { */
+  /*                       for (int kk = k; kk < k_max; ++kk) { */
+  /*                   /1* const int row2 = ii*f+kk; *1/ */
+  /*                   auto temp = A[ii*f+kk]; */
+  /*                   for (int jj = j; jj < j_max; ++jj) { */
+  /*                      C[ii*p + jj] += temp * B[jj*f + kk]; */ 
+  /*                       } */
+  /*                   } */
+  /*               } */
+  /*           } */
+  /*           for (int ii = i; ii < i_max; ++ii) { */
+  /*               const int row = ii*p; */
+  /*               for (int jj = j; jj < j_max; ++jj) { */
+  /*                   C[row + jj].mask_and_send_dot(); */
+  /*               } */
+  /*           } */
+  /*       } */
+  /*   } */
         
 
 
 
 
-        } 
         /* for (int i = 0; i < this->output.size(); i++) { */
         /*     this->output(i).mask_and_send_dot(); */
     /* } */
@@ -3392,19 +3396,19 @@ MatX<D> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
 #if FUNCTION_IDENTIFIER == 37
 d_conv.forward1(input, false);
 #elif FUNCTION_IDENTIFIER == 38
-d_conv.forward2(input, false);
+d_conv.forward18(input, false);
 #elif FUNCTION_IDENTIFIER == 39
-d_conv.forward3(input, false);
+d_conv.forward19(input, false);
 #elif FUNCTION_IDENTIFIER == 40
-d_conv.forward4(input, false);
+d_conv.forward20(input, false);
 #elif FUNCTION_IDENTIFIER == 41
-d_conv.forward5(input, false);
+d_conv.forward10(input, false);
 #elif FUNCTION_IDENTIFIER == 42
-d_conv.forward6(input, false);
+d_conv.forward11(input, false);
 #elif FUNCTION_IDENTIFIER == 43
-d_conv.forward7(input, false);
+d_conv.forward17(input, false);
 #elif FUNCTION_IDENTIFIER == 44
-d_conv.forward8(input, false);
+d_conv.forward21(input, false);
 #elif FUNCTION_IDENTIFIER == 45
 d_conv.forward9(input, false);
 #elif FUNCTION_IDENTIFIER == 46
@@ -3425,6 +3429,7 @@ d_conv.forward16(input, false);
 d_conv.forward17(input, false);
 #elif FUNCTION_IDENTIFIER == 54
 std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+for (int i = 0; i < 5; i++) 
 d_conv.forward10(input, false);
 std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
