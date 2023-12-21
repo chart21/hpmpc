@@ -3387,6 +3387,7 @@ Conv2d<D> d_conv(64, 64, 3, 1, "xavier_normal"); // Assuming Conv2d takes in(inp
 vector<int> input_shape = {batch, 64, NUM_INPUTS, NUM_INPUTS};
 MatX<D> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
     d_conv.set_layer(input_shape);
+    alignas(sizeof(DATATYPE))UINT_TYPE dummy[DATTYPE];
 
 #if FUNCTION_IDENTIFIER == 37
 d_conv.forward1(input, false);
@@ -3431,180 +3432,270 @@ std::cout << "Time taken for 10: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward1(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 1: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward2(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 2: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward3(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 3: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward4(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 4: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward5(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 5: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward6(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 6: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward7(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 7: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward8(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 8: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward9(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken 9: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward11(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 11: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward12(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 12: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward13(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 13: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward14(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 14: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward15(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 15: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward16(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 16: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward17(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 17: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward18(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 18: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward19(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 19: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward20(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken for 20: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward21(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 std::cout << "Time taken 21: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward22(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 22: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward23(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 23: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward24(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 24: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward25(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 25: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward26(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 26: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward27(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 27: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward28(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 28: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward29(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 29: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward30(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 30: " << duration << std::endl;
 t1 = std::chrono::high_resolution_clock::now();
 for (int i = 0; i < 5; i++) 
 d_conv.forward31(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 std::cout << "Time taken 31: " << duration << std::endl;
@@ -3618,6 +3709,9 @@ while(TILE_SIZE < 225)
 {
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     d_conv.forward23(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
     std::cout << "Time taken for 23, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
@@ -3633,6 +3727,9 @@ while(TILE_SIZE < 225)
 {
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     d_conv.forward11(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
     std::cout << "Time taken for 11, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
@@ -3649,6 +3746,9 @@ while(TILE_SIZE < 225)
 {
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     d_conv.forward17(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
     std::cout << "Time taken for 17, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
@@ -3664,6 +3764,9 @@ while(TILE_SIZE < 225)
 {
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     d_conv.forward22(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
     std::cout << "Time taken for 22, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
@@ -3680,6 +3783,9 @@ while(TILE_SIZE < 225)
 {
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     d_conv.forward24(input, false);
+    d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
+    Share::communicate();
+    d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
     std::cout << "Time taken for 24, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
@@ -3695,7 +3801,6 @@ std::cout << "Time taken for 24: " << duration << std::endl;
     //dummy reveal
     d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
     Share::communicate();
-    alignas(sizeof(DATATYPE))UINT_TYPE dummy[DATTYPE];
     d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 
 
