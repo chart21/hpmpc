@@ -2056,7 +2056,7 @@ d_conv.forward11(input, false);
     //dummy reveal
     d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
     Share::communicate();
-    UINT_TYPE dummy[DATTYPE];
+    alignas(sizeof(DATATYPE))UINT_TYPE dummy[DATTYPE];
     d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
 
 

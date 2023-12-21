@@ -5,7 +5,6 @@ class OECL2_Share
 {
 Datatype p1;
 Datatype p2;
-bool optimized_sharing;
 public:
 OECL2_Share() {}
 OECL2_Share(Datatype p1) : p1(p1) {}
