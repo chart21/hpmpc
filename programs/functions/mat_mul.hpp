@@ -2367,7 +2367,7 @@ for (int i = 0; i < m; ++i) {
                     /* const int row2 = ii*f+kk; */
                     auto temp = T(0);
                     for (int jj = j; jj < j_max; ++jj) {
-                        for (int k = 0; k < f; k += TILE_SIZE) {
+                        for (int k = 0; k < f; k ++) {
                        temp += A[ii*f+k] * B[jj*f + k]; 
                         }
                         temp.mask_and_send_dot();
@@ -2418,10 +2418,10 @@ for (int i = 0; i < m; ++i) {
     const int m = oc;
     const int f = kernel.cols();
     const int p = ohw;
-  for (int i = 0; i < m; i += TILE_SIZE) {
-        for (int j = 0; j < p; j += TILE_SIZE) {
+  for (int i = 0; i < m; i ++) {
+        for (int j = 0; j < p; j ++) {
                     auto temp = T(0);
-                        for (int k = 0; k < f; k += TILE_SIZE) {
+                        for (int k = 0; k < f; k ++) {
                        temp += A[i*f+k] * B[j*f + k]; 
                         }
                         temp.mask_and_send_dot();
@@ -3768,38 +3768,38 @@ t1 = std::chrono::high_resolution_clock::now();
 while(TILE_SIZE < 225)
 {
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    d_conv.forward22(input, false);
+    d_conv.forward18(input, false);
     d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
     Share::communicate();
     d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-    std::cout << "Time taken for 22, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
+    std::cout << "Time taken for 18, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
     TILE_SIZE += 8;
 }
 TILE_SIZE = 8;
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-std::cout << "Time taken for 22: " << duration << std::endl;
+std::cout << "Time taken for 18: " << duration << std::endl;
 
 
 t1 = std::chrono::high_resolution_clock::now();
 while(TILE_SIZE < 225)
 {
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    d_conv.forward24(input, false);
+    d_conv.forward10(input, false);
     d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
     Share::communicate();
     d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-    std::cout << "Time taken for 24, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
+    std::cout << "Time taken for 10, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
     TILE_SIZE += 8;
 }
 TILE_SIZE = 8;
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-std::cout << "Time taken for 24: " << duration << std::endl;
+std::cout << "Time taken for 10: " << duration << std::endl;
 
 
 #endif
