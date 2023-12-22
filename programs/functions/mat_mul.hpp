@@ -1896,34 +1896,23 @@ int TILE_SIZE = 64;
     const int m = oc;
     const int f = kernel.cols();
     const int p = ohw;
-  for (int i = 0; i < m; i += TILE_SIZE) {
-        int i_max = std::min(i + TILE_SIZE, m);
         for (int j = 0; j < p; j += TILE_SIZE) {
             int j_max = std::min(j + TILE_SIZE, p);
             for (int k = 0; k < f; k += TILE_SIZE) {
                 int k_max = std::min(k + TILE_SIZE, f);
-                for (int ii = i; ii < i_max; ++ii) {
-                    const int row = ii*p;
-                        for (int kk = k; kk < k_max; ++kk) {
-                    const int row2 = kk*p;
-                    /* const int row2 = ii*f+kk; */
-                    auto temp = A[ii*f+kk];
+          for (int i = 0; i < n; i ++) {
                     for (int jj = j; jj < j_max; ++jj) {
-                       C[row + jj] += temp * B[row2 + jj]; 
+                        T temp = T(0);
+                        for (int kk = k; kk < k_max; ++kk) {
+                    temp += A[i*f+kk] * B[kk*p + jj]; 
                         }
-                    }
-            }
-                }
-            for (int ii = i; ii < i_max; ++ii) {
-                const int row = ii*p;
-                for (int jj = j; jj < j_max; ++jj) {
-                    C[row + jj].mask_and_send_dot();
-                }
-            }
+                        temp.mask_and_send_dot();
+                       C[i * p + jj] += temp; 
+    }
+  }
             }
         }
-    }
-        
+        } 
 
 
 
@@ -2294,8 +2283,10 @@ for (int i = 0; i < m; ++i) {
     const int f = kernel.cols();
     const int p = ohw;
   for (int i = 0; i < m; i += TILE_SIZE) {
+      _mm_prefetch(A + i * f, _MM_HINT_T0);
         int i_max = std::min(i + TILE_SIZE, m);
         for (int j = 0; j < p; j += TILE_SIZE) {
+            _mm_prefetch(B + j * f, _MM_HINT_T0);
             int j_max = std::min(j + TILE_SIZE, p);
             for (int k = 0; k < f; k += TILE_SIZE) {
                 int k_max = std::min(k + TILE_SIZE, f);
@@ -2304,6 +2295,7 @@ for (int i = 0; i < m; ++i) {
                     auto temp = T(0);
                     for (int jj = j; jj < j_max; ++jj) {
                         for (int kk = k; kk < k_max; ++kk) {
+                            _mm_prefetch(C + ii * p + jj, _MM_HINT_T0);
                        temp += A[ii*f+kk] * B[jj*f + kk]; 
                         }
                         C[ii*p + jj] += temp;
@@ -3396,17 +3388,17 @@ MatX<D> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
 #if FUNCTION_IDENTIFIER == 37
 d_conv.forward1(input, false);
 #elif FUNCTION_IDENTIFIER == 38
-d_conv.forward18(input, false);
-#elif FUNCTION_IDENTIFIER == 39
-d_conv.forward19(input, false);
-#elif FUNCTION_IDENTIFIER == 40
-d_conv.forward20(input, false);
-#elif FUNCTION_IDENTIFIER == 41
 d_conv.forward10(input, false);
-#elif FUNCTION_IDENTIFIER == 42
+#elif FUNCTION_IDENTIFIER == 39
 d_conv.forward11(input, false);
-#elif FUNCTION_IDENTIFIER == 43
+#elif FUNCTION_IDENTIFIER == 40
 d_conv.forward17(input, false);
+#elif FUNCTION_IDENTIFIER == 41
+d_conv.forward18(input, false);
+#elif FUNCTION_IDENTIFIER == 42
+d_conv.forward21(input, false);
+#elif FUNCTION_IDENTIFIER == 43
+d_conv.forward26(input, false);
 #elif FUNCTION_IDENTIFIER == 44
 d_conv.forward21(input, false);
 #elif FUNCTION_IDENTIFIER == 45
@@ -3713,19 +3705,19 @@ t1 = std::chrono::high_resolution_clock::now();
 while(TILE_SIZE < 225)
 {
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    d_conv.forward25(input, false);
+    d_conv.forward12(input, false);
     d_conv.output(d_conv.output.size() - 1).prepare_reveal_to_all();
     Share::communicate();
     d_conv.output(d_conv.output.size() - 1).complete_reveal_to_all(dummy);
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-    std::cout << "Time taken for 25, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
+    std::cout << "Time taken for 12, TILE_SIZE: " << TILE_SIZE << " " << duration << std::endl;
     TILE_SIZE += 8;
 }
 TILE_SIZE = 8;
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-std::cout << "Time taken for 25: " << duration << std::endl;
+std::cout << "Time taken for 12: " << duration << std::endl;
 
 t1 = std::chrono::high_resolution_clock::now();
 while(TILE_SIZE < 225)
@@ -3850,7 +3842,7 @@ while(TILE_SIZE < 225)
 TILE_SIZE = 8;
 t2 = std::chrono::high_resolution_clock::now();
 duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-std::cout << "Time taken for 10: " << duration << std::endl;
+std::cout << "Time taken for 15: " << duration << std::endl;
 
 while(TILE_SIZE < 225)
 {
