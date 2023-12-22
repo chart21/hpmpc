@@ -11,7 +11,7 @@
 //7-9: Debug: 7: 1-bit, 8: 32-bit, 9: 64-bit
 //13,14: Dot product, 16,17 RELU, 20,21 Conv Forward (*10), Conv Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards (Different Sizes), 25,26 Forward Backwards (Different Sizes), 27 Mat Mul Eigen, 28 max/min/argmax/argmin, 29 mult3, 30 mult 4, 31-34 dot2/dot3/dot4/dotmixed, 
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
-#define FUNCTION_IDENTIFIER 39
+#define FUNCTION_IDENTIFIER 55
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
 #define DATTYPE 128
