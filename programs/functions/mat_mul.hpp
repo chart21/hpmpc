@@ -2283,10 +2283,10 @@ for (int i = 0; i < m; ++i) {
     const int f = kernel.cols();
     const int p = ohw;
   for (int i = 0; i < m; i += TILE_SIZE) {
-      _mm_prefetch(A + i * f, _MM_HINT_T0);
+      /* _mm_prefetch(A + i * f, _MM_HINT_T0); */
         int i_max = std::min(i + TILE_SIZE, m);
         for (int j = 0; j < p; j += TILE_SIZE) {
-            _mm_prefetch(B + j * f, _MM_HINT_T0);
+            /* _mm_prefetch(B + j * f, _MM_HINT_T0); */
             int j_max = std::min(j + TILE_SIZE, p);
             for (int k = 0; k < f; k += TILE_SIZE) {
                 int k_max = std::min(k + TILE_SIZE, f);
@@ -2295,7 +2295,7 @@ for (int i = 0; i < m; ++i) {
                     auto temp = T(0);
                     for (int jj = j; jj < j_max; ++jj) {
                         for (int kk = k; kk < k_max; ++kk) {
-                            _mm_prefetch(C + ii * p + jj, _MM_HINT_T0);
+                            /* _mm_prefetch(C + ii * p + jj, _MM_HINT_T0); */
                        temp += A[ii*f+kk] * B[jj*f + kk]; 
                         }
                         C[ii*p + jj] += temp;

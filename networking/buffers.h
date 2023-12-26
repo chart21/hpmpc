@@ -53,4 +53,4 @@ uint64_t num_generated[num_players*player_multiplier] = {0};
 
 int use_srng_for_inputs = 1;
 
-int current_phase = 0; //Keeping track of current pahse
+volatile int current_phase = 0; //Keeping track of current pahse
