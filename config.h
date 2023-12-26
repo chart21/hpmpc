@@ -22,7 +22,7 @@
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 3
+#define NUM_INPUTS 100
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1

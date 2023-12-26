@@ -2276,7 +2276,9 @@ for (int i = 0; i < m; ++i) {
             /* auto B = im_col; */
             /* auto C = this->output; */
             auto A = kernel.data();
-    auto B = im_col.transpose().data();
+    /* auto B = im_col.transpose().data(); */
+        MatX<T> BM = im_col.transpose();
+    auto B = BM.data();
     auto C = this->output.data() + (oc * ohw) * n;
     
     const int m = oc;
