@@ -7,6 +7,30 @@
 #include <stdio.h>
 #include "../config.h"
 
+#if PRINT_TIMINGS == 1
+std::chrono::high_resolution_clock::time_point time_start;
+std::chrono::high_resolution_clock::time_point time_stop;
+std::chrono::microseconds time_duration;
+#define start_timer() \
+    if(current_phase == 1 ) { \
+    time_start = std::chrono::high_resolution_clock::now(); \
+    } 
+#define stop_timer(FUNCTION_NAME) \
+    if(current_phase == 1 ) { \
+    time_stop = std::chrono::high_resolution_clock::now(); \
+    time_duration = std::chrono::duration_cast<std::chrono::microseconds>(1E6 * (time_stop - time_start)); \
+    printf("P%i: %s took %li seconds\n", PARTY, FUNCTION_NAME, time_duration.count()); \
+    }
+#else
+#define start_timer()
+#define stop_timer(FUNCTION_NAME)
+#endif
+
+#define print_online(x) \
+    if(current_phase == 1) { \
+        std::cout << "P" << PARTY << ": " << x << std::endl; \
+    }
+
 void print(const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -27,4 +51,5 @@ void print_result(T* var)
         std::cout << std::bitset<sizeof(uint8_t)*8>(v8val[i-1]);
     printf("\n");
 }
+
 
