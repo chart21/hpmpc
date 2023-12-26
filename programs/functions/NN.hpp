@@ -356,9 +356,6 @@ void load_model(const Config& cfg, SimpleNN<T>& model)
     template<typename Share>
 void inference(DATATYPE* res)
 {
-	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
-    
-    /* using DATATYPE = uint32_t; */
     using FLOATTYPE = float;
     using SHARETYPE = Wrapper<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL, DATATYPE>;
     using S = XOR_Share<DATATYPE, Share>;
@@ -370,6 +367,38 @@ void inference(DATATYPE* res)
 #else
     using modeltype = sint;
 #endif
+
+
+#if FUNCTION_IDENTIFIER == 60
+	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
+    auto model = VGG<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 61
+	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
+    auto model = ResNet50<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 62 
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
+    auto model = DRD_C100_230K<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 63
+	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = VGG<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 64
+	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = ResNet50<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 65
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = DRD_C100_230K<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 66
+	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 100;
+    auto model = VGG<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 67
+	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 100;
+    auto model = ResNet50<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 68
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 100;
+    auto model = DRD_C100_230K<modeltype>(num_classes);
+#endif
+    
+    /* using DATATYPE = uint32_t; */
     /* const int parallel_factor = 1; */
     /* using cleartype = k_clear<A>; */
 
@@ -499,7 +528,6 @@ test_loader.load(test_X, test_Y, cfg.batch, ch, h, w, cfg.shuffle_test);
     /* ResNet<modeltype> model = ResNet50<modeltype>(num_classes); */
     /* AlexNet_32<modeltype> model = AlexNet_32<modeltype>(num_classes); */
     /* VGG<modeltype> model = VGG<modeltype>(num_classes); */
-    auto model = VGG<modeltype>(num_classes);
 	/* load_model(cfg, model); */
     
     /* if (cfg.mode == "train") { */
