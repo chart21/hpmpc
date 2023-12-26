@@ -1,7 +1,7 @@
 #pragma once
 
 #define MODELOWNER P_0 //Who holds the model parameters?
-#define DATAOWNER P_0 //Who holds the data?
+#define DATAOWNER -1 //Who holds the data?
 
 #define PROTOCOL 5
 
@@ -16,13 +16,13 @@
 #define FUNCTION_IDENTIFIER 36
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 32
+#define DATTYPE 128
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 100
+#define NUM_INPUTS 1
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1

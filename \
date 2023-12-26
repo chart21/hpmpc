@@ -453,7 +453,7 @@ void inference(DATATYPE* res)
 #endif
 #if DATAOWNER == -1
     auto test_Y = read_dummy_labels(n_test);
-    auto test_X = read_dummy_images(n_test * ch, ch, h, w);
+    auto text_X = read_dummy_images(n_test * ch, ch, h, w);
 #else
 #if PSELF == DATAOWNER
     print_online("Reading dataset from file...");
