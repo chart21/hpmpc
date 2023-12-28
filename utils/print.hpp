@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <chrono>
 #include "../config.h"
 
 #if PRINT_TIMINGS == 1
@@ -18,9 +19,10 @@ std::chrono::microseconds time_duration;
 #define stop_timer(FUNCTION_NAME) \
     if(current_phase == 1 ) { \
     time_stop = std::chrono::high_resolution_clock::now(); \
-    time_duration = std::chrono::duration_cast<std::chrono::microseconds>(1E6 * (time_stop - time_start)); \
-    printf("P%i: %s took %li seconds\n", PARTY, FUNCTION_NAME, time_duration.count()); \
-    }
+    time_duration = std::chrono::duration_cast<std::chrono::microseconds>(time_stop - time_start); \
+        double time_duration_sec = time_duration.count() / 1000000.0; \
+        std::cout << "P" << PARTY << ": " << FUNCTION_NAME << " took " << time_duration_sec << " seconds" << std::endl; }
+    /* printf("P%i: %s took %li seconds\n", PARTY, FUNCTION_NAME, time_duration.count()); } */
 #else
 #define start_timer()
 #define stop_timer(FUNCTION_NAME)
