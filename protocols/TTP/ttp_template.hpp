@@ -540,11 +540,19 @@ void complete_trunc_2k(func_add ADD, func_sub SUB){
 TTP_Share relu() const
 {
 #if SIMULATE_MPC_FUNCTIONS == 1
-    auto result = FUNC_TRUNC(relu_epi(OP_SUB(p1,p2)));
+
+    auto result = relu_epi(OP_SUB(p1,p2));
+#if TRUNC_DELAYED == 1
+    result = FUNC_TRUNC(result);
+#endif
     auto randVal = getRandomVal(0);
     return TTP_Share(OP_ADD(result,randVal),randVal);
 #else
+#if TRUNC_DELAYED == 1
     return TTP_Share(FUNC_TRUNC(relu_epi(p1)));
+#else
+    return TTP_Share(relu_epi(p1));
+#endif
 #endif
 }    
 };

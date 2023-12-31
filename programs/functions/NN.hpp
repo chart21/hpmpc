@@ -410,8 +410,8 @@ void inference(DATATYPE* res)
     cfg.data_dir = "./SimpleNN/dataset";
     /* cfg.pretrained = "model_DRD_C100_230K.bin"; */
     /* cfg.pretrained = "resnet50_cifar100.bin"; */
-    cfg.pretrained = "dummy.dummy";
-    /* cfg.pretrained = "vgg16_cifar.bin"; */
+    /* cfg.pretrained = "dummy.dummy"; */
+    cfg.pretrained = "vgg16_cifar.bin";
     /* cfg.pretrained = "lenet5.pth"; */
     cfg.image_file = "cifar10-test-images.bin";
     cfg.label_file = "cifar10-test-labels.bin";
