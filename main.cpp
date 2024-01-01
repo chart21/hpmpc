@@ -1,4 +1,5 @@
 #include "config.h"
+#include "networking/buffers.h"
 #include "protocol_executer.hpp"
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -16,6 +17,7 @@ int status = 0;
 for (int id=0; id<PROCESS_NUM; id++) {
     if ((child_pid = fork()) == 0) {
         base_port += num_players*(num_players-1)*id;
+        process_offset = ( (base_port % 1000) / (num_players*(num_players-1)) ); //offsets the starting input for each process, base port must be multiple of 1000 to work
         executeProgram(argc, argv, child_pid, PROCESS_NUM); //child code
         exit(0);
     }

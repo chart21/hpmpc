@@ -13,19 +13,19 @@
 //7-9: Debug: 7: 1-bit, 8: 32-bit, 9: 64-bit
 //13,14: Dot product, 16,17 RELU, 20,21 Conv Forward (*10), Conv Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards (Different Sizes), 25,26 Forward Backwards (Different Sizes), 27 Mat Mul Eigen, 28 max/min/argmax/argmin, 29 mult3, 30 mult 4, 31-34 dot2/dot3/dot4/dotmixed, 
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
-#define FUNCTION_IDENTIFIER 60
+#define FUNCTION_IDENTIFIER 61
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
-#define DATTYPE 32
+#define DATTYPE 128
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 32
+#define NUM_INPUTS 1
 
 // Number of parallel processes to use
-#define PROCESS_NUM 1
+#define PROCESS_NUM 0
 
 // 0 = xorshift, 1 = AES_BS, 2 = VAES/AES-NI. 0 is not secure.
 #define RANDOM_ALGORITHM 2
@@ -48,7 +48,7 @@
 
 #define FRACTIONAL 5 // fractional bits for fixed point numbers
 
-// Starting port for required port range of the sockets
+// Starting port for required port range of the sockets, must be multiple of 1000 for some applications
 #define BASE_PORT 11000
 int base_port = BASE_PORT; // temporary solution
 
