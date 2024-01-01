@@ -3,10 +3,10 @@
 #define MODELOWNER P_0 //Who holds the model parameters?
 #define DATAOWNER -1 //Who holds the data?
 
-#define PROTOCOL 5
+#define PROTOCOL 10
 
 // Party ID (starting from 0)
-#define PARTY 2
+#define PARTY 3
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
