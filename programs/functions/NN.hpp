@@ -109,9 +109,9 @@ void inference(DATATYPE* res)
     cfg.data_dir = "./SimpleNN/dataset";
     /* cfg.pretrained = "model_DRD_C100_230K.bin"; */
     /* cfg.pretrained = "resnet50_cifar100.bin"; */
-    /* cfg.pretrained = "dummy.dummy"; */
+    cfg.pretrained = "dummy.dummy";
     /* cfg.pretrained = "vgg16_cifar.bin"; */
-    cfg.pretrained = "lenet5_avg.pth";
+    /* cfg.pretrained = "lenet5_avg.pth"; */
     cfg.image_file = "cifar10-test-images.bin";
     cfg.label_file = "cifar10-test-labels.bin";
     /* cfg.image_file = "CIFAR-100_test_images.bin"; */
@@ -187,15 +187,15 @@ void inference(DATATYPE* res)
     print_online("Reading dataset from file...");
 		/* auto test_X = read_mnist(cfg.data_dir, "t10k-images.idx3-ubyte", n_test); */
     string path = cfg.data_dir + "/" + cfg.image_file;
-    /* auto test_X = read_custom_images(path, n_test, ch, h, w); */
-	auto test_X = read_mnist(cfg.data_dir, "t10k-images.idx3-ubyte", n_test);
+    auto test_X = read_custom_images(path, n_test, ch, h, w);
+	/* auto test_X = read_mnist(cfg.data_dir, "t10k-images.idx3-ubyte", n_test); */
     print_online("Dataset imported.");
 #else
     auto test_X = read_dummy_images(n_test, ch, h, w);
 #endif
     string lpath = cfg.data_dir + "/" + cfg.label_file;
-    /* auto test_Y = read_custom_labels(lpath, n_test); */
-	auto test_Y = read_mnist_label(cfg.data_dir, "t10k-labels.idx1-ubyte", n_test);
+    auto test_Y = read_custom_labels(lpath, n_test);
+	/* auto test_Y = read_mnist_label(cfg.data_dir, "t10k-labels.idx1-ubyte", n_test); */
 #endif
 /* #endif */
 

@@ -142,4 +142,6 @@ then
 
 fi
 
+sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"0"/" config.h
+
 echo "Finished compiling"

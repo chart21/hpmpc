@@ -1,7 +1,7 @@
 #pragma once
 
 #define MODELOWNER P_0 //Who holds the model parameters?
-#define DATAOWNER P_0 //Who holds the data?
+#define DATAOWNER -1 //Who holds the data?
 
 #define PROTOCOL 5
 
@@ -13,7 +13,7 @@
 //7-9: Debug: 7: 1-bit, 8: 32-bit, 9: 64-bit
 //13,14: Dot product, 16,17 RELU, 20,21 Conv Forward (*10), Conv Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards (Different Sizes), 25,26 Forward Backwards (Different Sizes), 27 Mat Mul Eigen, 28 max/min/argmax/argmin, 29 mult3, 30 mult 4, 31-34 dot2/dot3/dot4/dotmixed, 
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
-#define FUNCTION_IDENTIFIER 69
+#define FUNCTION_IDENTIFIER 60
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
 #define DATTYPE 128
@@ -22,10 +22,10 @@
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 12
+#define NUM_INPUTS 6
 
 // Number of parallel processes to use
-#define PROCESS_NUM 2
+#define PROCESS_NUM 1
 
 // 0 = xorshift, 1 = AES_BS, 2 = VAES/AES-NI. 0 is not secure.
 #define RANDOM_ALGORITHM 2
@@ -50,7 +50,7 @@
 
 // Starting port for required port range of the sockets, must be multiple of 1000 for some applications
 #define BASE_PORT 10000
-#define SPLIT_ROLES_OFFSET 5
+#define SPLIT_ROLES_OFFSET 0
 int base_port = BASE_PORT; // temporary solution
 
 // Timeout in seconds when connecting to a socket
