@@ -1,20 +1,23 @@
-runbin/bash
+#!/bin/bash
 helpFunction()
 {
-   echo "Script to compile and run 6 mixed constellations of players in parallel"
+   echo "Script to compile and run 6 mixed constellations of a 3-PC protocol in parallel"
    echo -e "\t-p Party number or all for running locally"
-   echo -e "\t-a IP address of lower index player "
-   echo -e "\t-b IP address of higher index player "
+   echo -e "\t-a IP address of player 0 (if ip matches player_id can be empty)"
+   echo -e "\t-b IP address of player 1 (if ip matches player_id can be empty)"
+   echo -e "\t-c IP address of player 2 (if ip matches player_id can be empty)"
    echo -e "\t-x Compiler (g++/clang++/..)"
+
    exit 1 # Exit script after printing help
 }
 
-while getopts "p:a:b:x:" opt
+while getopts "p:a:b:c:x:" opt
 do
    case "$opt" in
-      p ) PARTY="$OPTARG" ;;
+      p ) O_PARTY="$OPTARG" ;;
       a ) IP1="$OPTARG" ;;
       b ) IP2="$OPTARG" ;;
+      c ) IP3="$OPTARG" ;;
       x ) COMPILER="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
@@ -26,35 +29,117 @@ then
 comp="$COMPILER"
 fi
 
-# flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
 flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -I SimpleNN -lstdc++fs"
+# flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+
+O_IP1="127.0.0.1"
+O_IP2="127.0.0.1"
+O_IP3="127.0.0.1"
+
+if [ ! -z "$IP1" ];
+then
+O_IP1="$IP1"
+fi
+
+if [ ! -z "$IP2" ];
+then
+O_IP2="$IP2"
+fi
+
+if [ ! -z "$IP3" ];
+then
+O_IP3="$IP3"
+fi
 
 
-for i in {0..2}
-    do
-    for j in {0..2}
-        do
-            for z in {0..1}
-                do
-                    let "s = (1-z)*(j+i)%3+z*(3+2-i-j)%3"
-            if [ "$i" = "$PARTY" ] || [ "$PARTY" = "all" ];
-            then
-                sed -i -e "s/\(PARTY \).*/\1"$s"/" config.h
-                sed -i -e "s/\(BASE_PORT \).*/\1"$((6000 + (j+z*3) * 1000))"/" config.h
-                if [ "$LIVE" = "0" ] && [ "$INIT" = "1" ]; 
-                then
-                    sed -i -e "s/\(LIVE \).*/\10/" config.h
-                    sed -i -e "s/\(INIT \).*/\11/" config.h
-                    echo "Compiling INIT executable for P-"$s"-"$i"-"$z" ..."
-                    "$comp" main.cpp -o ./run-P"$s"-"$i"-"$z"-INIT.o $flags
-                    ./run-P"$j"-"$i"-"$z"-INIT.o
-                    sed -i -e "s/\(LIVE \).*/\11/" config.h
-                    sed -i -e "s/\(INIT \).*/\10/" config.h
-                fi
-                    echo "Compiling executable for P-"$s"-"$i"-"$z" ..."
-                    "$comp" main.cpp -o ./run-P"$s"-"$i"-"$z".o $flags
-            fi
-        done
-    done
-done
+# Compile all executables for P0
+if [ "$O_PARTY" = "0" ] || [ "$O_PARTY" = "all" ]
+then
+    echo "Compiling executables for P0 ..."
+    sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"0"/" config.h
+    "$comp" main.cpp -o ./run-P0--0-1-2.o $flags
+    
+    sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"1"/" config.h
+    "$comp" main.cpp -o ./run-P0--0-2-1.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"2"/" config.h
+    "$comp" main.cpp -o ./run-P0--1-0-2.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"3"/" config.h
+    "$comp" main.cpp -o ./run-P0--1-2-0.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"4"/" config.h
+    "$comp" main.cpp -o ./run-P0--2-0-1.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"5"/" config.h
+    "$comp" main.cpp -o ./run-P0--2-1-0.o $flags
+
+fi
+
+# Compile all executables for -3P2
+if [ "$O_PARTY" = "1" ] || [ "$O_PARTY" = "all" ]
+then
+    echo "Compiling executables for P1 ..."
+    sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"0"/" config.h
+    "$comp" main.cpp -o ./run-P1--0-1-2.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"1"/" config.h
+    "$comp" main.cpp -o ./run-P1--0-2-1.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"2"/" config.h
+    "$comp" main.cpp -o ./run-P1--1-0-2.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"3"/" config.h
+    "$comp" main.cpp -o ./run-P1--1-2-0.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"4"/" config.h
+    "$comp" main.cpp -o ./run-P1--2-0-1.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"5"/" config.h
+    "$comp" main.cpp -o ./run-P1--2-1-0.o $flags
+
+fi
+
+# Compile all executables for P2
+if [ "$O_PARTY" = "2" ] || [ "$O_PARTY" = "all" ]
+then
+    echo "Compiling executables for P2 ..."
+    sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"0"/" config.h
+    "$comp" main.cpp -o ./run-P2--0-1-2.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"1"/" config.h
+    "$comp" main.cpp -o ./run-P2--0-2-1.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"2"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"2"/" config.h
+    "$comp" main.cpp -o ./run-P2--1-0-2.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"3"/" config.h
+    "$comp" main.cpp -o ./run-P2--1-2-0.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"4"/" config.h
+    "$comp" main.cpp -o ./run-P2--2-0-1.o $flags
+
+    sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
+    sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"5"/" config.h
+    "$comp" main.cpp -o ./run-P2--2-1-0.o $flags
+
+fi
+
 echo "Finished compiling"

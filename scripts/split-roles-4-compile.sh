@@ -94,15 +94,15 @@ then
     
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
-    sed -i -e "s/\(BASE_PORT \).*/\1"61000"/" config.h
+    sed -i -e "s/\(BASE_PORT \).*/\1"12000"/" config.h
     "$comp" main.cpp -o ./run-P1--1-2-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
-    sed -i -e "s/\(BASE_PORT \).*/\1"64000"/" config.h
+    sed -i -e "s/\(BASE_PORT \).*/\1"13000"/" config.h
     "$comp" main.cpp -o ./run-P1--1-4-2-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
-    sed -i -e "s/\(BASE_PORT \).*/\1"62000"/" config.h
+    sed -i -e "s/\(BASE_PORT \).*/\1"14000"/" config.h
     "$comp" main.cpp -o ./run-P1--2-1-4-3.o $flags
 
     sed -i -e "s/\(PARTY \).*/\1"2"/" config.h

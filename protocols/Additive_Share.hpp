@@ -236,15 +236,6 @@ public:
         #endif
     }
 
-#if SIMULATE_MPC_FUNCTIONS == 0
-static void RELU(const Additive_Share* begin, const Additive_Share* end,  Additive_Share* output){
-    int i = 0;
-    for (const Additive_Share* iter = begin; iter != end; ++iter) {
-            output[i++] = iter->relu();
-    }
-}
-#endif
-    
 
 
 

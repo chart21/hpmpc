@@ -30,14 +30,14 @@ std::chrono::microseconds time_duration;
 
 #define print_online(x) \
     if(current_phase == 1) { \
-        std::cout << "P" << PARTY << ": " << x << std::endl; \
+        std::cout << "P" << PARTY << ", PID" << process_offset << ": " << x << std::endl; \
     }
 
 void print(const char* format, ...) {
     va_list args;
     va_start(args, format);
 
-    printf("P%i: ", PARTY);
+    printf("P%i, PID%i: ", PARTY, process_offset);
     vprintf(format, args);
 
     va_end(args);

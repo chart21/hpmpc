@@ -13,11 +13,11 @@ void print_communication()
 /*     printf("Receiving from other players:" PRIu64 "MB, " PRIu64 "MB, " PRIu64 "MB ", total_recv[PPREV]* sizeof(DATTYPE), total_recv[PMIDDLE]* sizeof(DATTYPE), total_recv[PNEXT]* sizeof(DATTYPE)); */
 /* #endif //change to std::cout */
 #if num_players == 3
-    std::cout << "P" << PARTY << ": " << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
-    std::cout << "P" << PARTY << ": " << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", PID" << process_offset <<  ": " << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
 #elif num_players == 4
-    std::cout << "P" << PARTY << ": " << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
-    std::cout << "P" << PARTY << ": " << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", PID" << process_offset <<  ": "  << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
 #endif
 
 

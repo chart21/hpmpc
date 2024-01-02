@@ -367,19 +367,6 @@ public:
                 shares[i].complete_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i]);
         }
 
-#if SIMULATE_MPC_FUNCTIONS == 0
-static void RELU(const sint_t* begin, const sint_t* end,  sint_t* output){
-    /* int i = 0; */
-    /* for (const sint_t* iter = begin; iter != end; ++iter) { */
-    /*         output[i++] = iter->relu(); */
-    /* } */
-    int len = end - begin;
-    std::copy(begin, end, output);
-    for(int i = 0; i < len; ++i) {
-        output[i] = output[i].relu();
-    }
-}
-#endif
 
 };
 

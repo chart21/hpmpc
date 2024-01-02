@@ -16,7 +16,7 @@
 /* #include "ppa_msb.hpp" */
 /* #include "ppa.hpp" */
 /* #include "ppa_msb_unsafe.hpp" */
-#if PROTOCOL_LIVE == TTP_Share && SIMULATE_MPC_FUNCTIONS == 0
+#if TTP_PROTOCOL == 1 && SIMULATE_MPC_FUNCTIONS == 0
 template<int m, int k,typename Share, typename Datatype>
 void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 {

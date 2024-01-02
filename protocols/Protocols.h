@@ -185,6 +185,7 @@
 #elif PROTOCOL == ttp3 || PROTOCOL == ttp4 || PROTOCOL == Simulate
         #define PROTOCOL_LIVE TTP_Share
         #define PROTOCOL_INIT TTP_init
+        #define TTP_PROTOCOL 1
         #if INIT == 1 
             #include "TTP/ttp_init_template.hpp"
         #endif
