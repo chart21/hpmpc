@@ -32,7 +32,7 @@ void MULT_BENCH(DATATYPE* res)
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        c[i].complete_mult();
+        c[i].complete_mult_without_trunc();
     }
     Share::communicate();
 
@@ -67,7 +67,7 @@ Share::communicate();
 
 for (int s = 0; s < loop_num; s++) {
     int i = s+j*loop_num;
-    c[i].complete_mult();
+    c[i].complete_mult_without_trunc();
 }
 Share::communicate();
 
