@@ -109,8 +109,8 @@ void inference(DATATYPE* res)
     cfg.data_dir = "./SimpleNN/dataset";
     /* cfg.pretrained = "model_DRD_C100_230K.bin"; */
     /* cfg.pretrained = "resnet50_cifar100.bin"; */
-    cfg.pretrained = "dummy.dummy";
-    /* cfg.pretrained = "vgg16_cifar.bin"; */
+    /* cfg.pretrained = "dummy.dummy"; */
+    cfg.pretrained = "vgg16_cifar.bin";
     /* cfg.pretrained = "lenet5_avg.pth"; */
     cfg.image_file = "cifar10-test-images.bin";
     cfg.label_file = "cifar10-test-labels.bin";
@@ -247,7 +247,9 @@ std::cout << "Loading Model Parameters..." << std::endl;
 #if PSELF == MODELOWNER
         print_online("Loading model parameters from file...");
 #endif
+#if MODELOWNER != -1
         model.template load<MODELOWNER>(cfg.save_dir, cfg.pretrained);
+#endif
         print_online("Received Secret Share of Model Parameters.");
         model.evaluate(test_loader);
     /* } */
