@@ -260,7 +260,7 @@ static void trunc_2k_in_place(T*  val, const int len){
 /* } */
 
 
-template<typename Share, typename Datatype>
+template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype>
 static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_Share<Datatype, Share>* end, Additive_Share<Datatype, Share>*  output){
     using sint = sint_t<Additive_Share<Datatype, Share>>;
     /* std::copy(begin, end, output); */
@@ -299,7 +299,7 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
     }
     if(m > 0)
         tmp[counter++] = sint::load_shares(m, begin+counter*BITLENGTH);
-    RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k,Share>(tmp, counter);
+    RELU_range_in_place<rm,rk,Share>(tmp, counter);
     /* for(int i = 0; i < counter; i++) */
     /* { */
         /* std::cout << tmp[i].get_p1() << std::endl; */
@@ -328,13 +328,13 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
 
 
 
-template<typename Share, typename Datatype>
+template<typename Share, typename Datatype,int m = 0, int k = BITLENGTH>
 static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const sint_t<Additive_Share<Datatype, Share>>* end, sint_t<Additive_Share<Datatype, Share>>*  output){
     std::copy(begin, end, output);
     int len = end - begin;
     /* for (const sint_t* iter = begin; iter != end; ++iter) { */
             /* output[i++] = iter->relu(); */
-    RELU_range_in_place<REDUCED_BITLENGTH_m,REDUCED_BITLENGTH_k,Share>(output, len);
+    RELU_range_in_place<m,k,Share>(output, len);
     /* } */
 }
 
