@@ -144,10 +144,10 @@ void inference(DATATYPE* res)
     /* cfg.pretrained = "vgg16_cifar.bin"; */
     /* cfg.pretrained = "lenet5_avg.pth"; */
     /* cfg.pretrained = "ResNet50_Cifar_Max.bin"; */
-    /* cfg.image_file = "cifar10-test-images.bin"; */
-    /* cfg.label_file = "cifar10-test-labels.bin"; */
-    cfg.image_file = "CIFAR-100_test_images.bin";
-    cfg.label_file = "CIFAR-100_test_labels.bin";
+    cfg.image_file = "cifar10-test-images.bin";
+    cfg.label_file = "cifar10-test-labels.bin";
+    /* cfg.image_file = "CIFAR-100_test_images.bin"; */
+    /* cfg.label_file = "CIFAR-100_test_labels.bin"; */
     cfg.batch = NUM_INPUTS*(BASE_DIV);
     /* cfg.batch = 1*BASE_DIV; */
 
