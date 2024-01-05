@@ -14,17 +14,22 @@ while getopts "p:a:b:c:" opt
 do
    case "$opt" in
       p ) O_PARTY="$OPTARG" ;;
-      a ) IP1="$OPTARG" ;;
-      b ) IP2="$OPTARG" ;;
-      c ) IP3="$OPTARG" ;;
+      a ) IP0="$OPTARG" ;;
+      b ) IP1="$OPTARG" ;;
+      c ) IP2="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
 
 
+O_IP0="127.0.0.1"
 O_IP1="127.0.0.1"
 O_IP2="127.0.0.1"
-O_IP3="127.0.0.1"
+
+if [ ! -z "$IP1" ];
+then
+O_IP0="$IP0"
+fi
 
 if [ ! -z "$IP1" ];
 then
@@ -34,11 +39,6 @@ fi
 if [ ! -z "$IP2" ];
 then
 O_IP2="$IP2"
-fi
-
-if [ ! -z "$IP3" ];
-then
-O_IP3="$IP3"
 fi
 
 
