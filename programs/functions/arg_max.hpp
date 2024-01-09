@@ -71,7 +71,11 @@ Bitset *s2 = new Bitset[len];
     /* std::vector<BooleanAdder_MSB<S>> adders; */
     /* std::vector<PPA_MSB_Unsafe<S>> adders; */
     /* std::vector<PPA_MSB_4Way<Bitset::get_bitlength(), S> > adders; */
-    std::vector<BooleanAdder_MSB<bk - bm, S> > adders;
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+    std::vector<BooleanAdder_MSB<bk-bm,S>> adders;
+#else
+    std::vector<PPA_MSB_4Way<bk-bm,S>> adders;
+#endif
     
     adders.reserve(len);
     for(int i = 0; i < len; i++)

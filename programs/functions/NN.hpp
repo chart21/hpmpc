@@ -96,34 +96,36 @@ void inference(DATATYPE* res)
     int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28, num_classes = 10;
     auto model = LeNet<modeltype>(num_classes);
 
-#elif FUNCTION_IDENTIFIER == 70
+#elif FUNCTION_IDENTIFIER == 70 || FUNCTION_IDENTIFIER == 80
 	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = ResNet18<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 71
+#elif FUNCTION_IDENTIFIER == 71 || FUNCTION_IDENTIFIER == 81
 	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = ResNet50<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 72
+#elif FUNCTION_IDENTIFIER == 72 || FUNCTION_IDENTIFIER == 82
 	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = ResNet101<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 73
+#elif FUNCTION_IDENTIFIER == 73 || FUNCTION_IDENTIFIER == 83
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = ResNet152<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 74
+#elif FUNCTION_IDENTIFIER == 74 || FUNCTION_IDENTIFIER == 84
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = VGG<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 75
+#elif FUNCTION_IDENTIFIER == 75 || FUNCTION_IDENTIFIER == 85
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28, num_classes = 10;
+    auto model = LeNet<modeltype>(num_classes);
 	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = ResNet18<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 76
+#elif FUNCTION_IDENTIFIER == 76 || FUNCTION_IDENTIFIER == 86
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = ResNet50<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 77
+#elif FUNCTION_IDENTIFIER == 77 || FUNCTION_IDENTIFIER == 87
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = ResNet101<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 78
+#elif FUNCTION_IDENTIFIER == 78 || FUNCTION_IDENTIFIER == 88
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = ResNet152<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 79
+#elif FUNCTION_IDENTIFIER == 79 || FUNCTION_IDENTIFIER == 89
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = VGG<modeltype>(num_classes);
 #endif
