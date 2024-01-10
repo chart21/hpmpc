@@ -11,7 +11,7 @@
 
 void compare(DATATYPE var[num_players][BITLENGTH], std::string test_func)
 {
-if (current_phase != 1)
+if (current_phase != PHASE_LIVE)
     return;
 auto inputs = new DATATYPE[num_players][BITLENGTH];
 for(int i = 0; i < num_players; i++)

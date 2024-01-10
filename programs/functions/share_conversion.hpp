@@ -48,7 +48,7 @@ void adder(DATATYPE* res)
     uint64_t result_arr[DATTYPE];
 
     z.complete_reveal_to_all(result_arr);
-    if(current_phase == 1)
+    if(current_phase == PHASE_LIVE)
     {
         std::cout << "P" << PARTY << ": Result: ";
     for(int i = 0; i < DATTYPE; i++)
@@ -171,7 +171,7 @@ void RELU(DATATYPE* res)
     }
     delete[] result;
 #if PRINT == 1
-    if(current_phase == 1)
+    if(current_phase == PHASE_LIVE)
     {
         std::cout << "P" << PARTY << ": Result: ";
         for(int i = 0; i < NUM_INPUTS; i++)
@@ -221,7 +221,7 @@ void bit_injection(DATATYPE* res)
     Share::communicate();
     uint64_t result_arr[DATTYPE];
     result.complete_reveal_to_all(result_arr);
-    if(current_phase == 1)
+    if(current_phase == PHASE_LIVE)
     {
         std::cout << "P" << PARTY << ": Result: ";
     for(int i = 0; i < DATTYPE; i++)
@@ -281,7 +281,7 @@ void convert_share(/*outputs*/ DATATYPE *result)
     /* temp[0] = ~ temp[0]; */
     /* temp[0] = NOT(temp[0]); */
     /* unorthogonalize_boolean(  temp, result_arr); */
-    if(current_phase == 1)
+    if(current_phase == PHASE_LIVE)
     {
         std::cout << "P" << PARTY << ": Result: ";
     for(int i = 0; i < DATTYPE; i++)

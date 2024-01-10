@@ -522,7 +522,7 @@ void simulate_live()
 
 void executeProgram(int argc, char *argv[], int process_id, int process_num)
 {
-    current_phase = 1;
+    current_phase = PHASE_LIVE;
     init_srng(0,0);
     generateElements();
     simulate_live();

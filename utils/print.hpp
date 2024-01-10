@@ -13,11 +13,11 @@ std::chrono::high_resolution_clock::time_point time_start;
 std::chrono::high_resolution_clock::time_point time_stop;
 std::chrono::microseconds time_duration;
 #define start_timer() \
-    if(current_phase == 1 ) { \
+    if(current_phase == PHASE_LIVE ) { \
     time_start = std::chrono::high_resolution_clock::now(); \
     } 
 #define stop_timer(FUNCTION_NAME) \
-    if(current_phase == 1 ) { \
+    if(current_phase == PHASE_LIVE ) { \
     time_stop = std::chrono::high_resolution_clock::now(); \
     time_duration = std::chrono::duration_cast<std::chrono::microseconds>(time_stop - time_start); \
         double time_duration_sec = time_duration.count() / 1000000.0; \
@@ -29,7 +29,7 @@ std::chrono::microseconds time_duration;
 #endif
 
 #define print_online(x) \
-    if(current_phase == 1) { \
+    if(current_phase == PHASE_LIVE) { \
         std::cout << "P" << PARTY << ", PID" << process_offset << ": " << x << std::endl; \
     }
 

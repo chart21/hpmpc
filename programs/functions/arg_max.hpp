@@ -447,7 +447,7 @@ auto max_int = NEW( UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)]);
 auto min_int = NEW( UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)]);
 max_val.complete_reveal_to_all(max_int);
 min_val.complete_reveal_to_all(min_int);
-if(current_phase == 1)
+if(current_phase == PHASE_LIVE)
 {
 #if DATTYPE <= 64
 for(int i = 0; i < NUM_INPUTS; i++)

@@ -280,7 +280,7 @@ for(int t=0;t<(num_players-1);t++) {
     sending_args[t].sent_elements[0] = NEW(DATATYPE[sending_args[t].elements_to_send[0]]); // Allocate memory for first round
 }
 
-#if MAL == 1
+#if MAL == 1  && PRE == 0
 for(int t=0;t<(num_players*player_multiplier);t++) {
 #if VERIFY_BUFFER > 0
     verify_buffer[t] = new DATATYPE[VERIFY_BUFFER];
@@ -297,7 +297,7 @@ rounds = 0;
 sending_rounds = 0;
 rb = 0;
 sb = 0;
-current_phase = 1;
+current_phase = PHASE_LIVE;
 print_communication();  
 }
 
@@ -342,6 +342,16 @@ for(int t=0;t<(num_players-1);t++) {
     share_buffer[t] = 0;  
 
 }
+#if MAL == 1  && PRE == 1
+for(int t=0;t<(num_players*player_multiplier);t++) {
+#if VERIFY_BUFFER > 0
+    verify_buffer[t] = new DATATYPE[VERIFY_BUFFER];
+#else
+    verify_buffer[t] = new DATATYPE[elements_to_compare[t]];
+#endif
+}
+#endif
+
 #if PRE == 1 && HAS_POST_PROTOCOL == 1
 preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
 preprocessed_outputs_index = 0;

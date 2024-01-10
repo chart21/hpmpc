@@ -351,7 +351,7 @@ void fixed_test(DATATYPE* res)
             /* #endif */
             }
         }
-            if(current_phase == 1)
+            if(current_phase == PHASE_LIVE)
     {
         std::cout << "P" << PARTY << ": Result: ";
         for (int i = 0; i < NUM_INPUTS*NUM_INPUTS; i++)
@@ -1087,7 +1087,7 @@ auto max_int = NEW( UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)]);
 auto min_int = NEW( UINT_TYPE[BITLENGTH * sizeof(DATATYPE)/sizeof(UINT_TYPE)]);
 max_val.complete_reveal_to_all(max_int);
 min_val.complete_reveal_to_all(min_int);
-if(current_phase == 1)
+if(current_phase == PHASE_LIVE)
 {
 #if DATTYPE <= 64
 for(int i = 0; i < NUM_INPUTS; i++)
@@ -4219,7 +4219,7 @@ result_arr[1]= ver_result.complete_reveal_to_all();
 result_arr[2] = result_tot.complete_reveal_to_all();
 result_arr[3]= ver_result_tot.complete_reveal_to_all();
 #endif
-if(current_phase == 1)
+if(current_phase == PHASE_LIVE)
 {
     std::cout << "P" << PARTY << " result: " << std::to_string(result_arr[0]) << " ver_result: " << std::to_string(result_arr[1]) << std::endl;
     std::cout << "P" << PARTY <<  " result2: " << std::to_string(result_arr[2]) << " ver_result2: " << std::to_string(result_arr[3]) << std::endl;
@@ -4370,7 +4370,7 @@ Share::communicate();
 DATATYPE* result_arr = new DATATYPE;
 result_arr[0] = result1.complete_reveal_to_all();
 #endif
-if(current_phase == 1)
+if(current_phase == PHASE_LIVE)
 {
     std::cout << "P" << PARTY << " result: " << std::to_string(result_arr[0]) << std::endl;
 }
@@ -4491,7 +4491,7 @@ Share::communicate();
 for(int i = 0; i < NUM_INPUTS; i++)
     a[i].complete_reveal_to_all(result_arr[i]);
 for(int i = 0; i < NUM_INPUTS; i++)
-    if(current_phase == 1)
+    if(current_phase == PHASE_LIVE)
     std::cout << "P" << PARTY << ": Result " << i << ": "<< result_arr[i][0] << std::endl;
 }
 #endif

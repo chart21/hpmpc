@@ -37,7 +37,7 @@ public:
 
     template <int id> void init(UINT_TYPE value[DATTYPE]) {
         if constexpr (id == PSELF) {
-          if (current_phase == 1) {
+          if (current_phase == PHASE_LIVE) {
 
             DATATYPE temp_d[BITLENGTH];
             orthogonalize_boolean(value, temp_d);

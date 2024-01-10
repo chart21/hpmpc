@@ -395,7 +395,7 @@ void prepare_bit_injection_S2(OEC_MAL0_Share out[])
             store_compare_view(P_2, OP_ADD(temp[i],getRandomVal(P_013))); //  - x_0 + r013
         #else
         #if PRE == 1
-            pre_send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013)); //  - x_0 + r013
+            pre_send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013))); //  - x_0 + r013
         #else
             send_to_live(P_2, OP_ADD(temp[i],getRandomVal(P_013))); //  - x_0 + r013
         #endif
