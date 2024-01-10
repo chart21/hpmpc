@@ -3,17 +3,17 @@
 #define MODELOWNER -1 //Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing)
 #define DATAOWNER -1 //Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing)
 
-#define PROTOCOL 12
+#define PROTOCOL 13
 
 // Party ID (starting from 0)
-#define PARTY 3
+#define PARTY 0
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
 //7-9: Debug: 7: 1-bit, 8: 32-bit, 9: 64-bit
 //13,14: Dot product, 16,17 RELU, 20,21 Conv Forward (*10), Conv Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards (Different Sizes), 25,26 Forward Backwards (Different Sizes), 27 Mat Mul Eigen, 28 max/min/argmax/argmin, 29 mult3, 30 mult 4, 31-34 dot2/dot3/dot4/dotmixed, 
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
-#define FUNCTION_IDENTIFIER 74
+#define FUNCTION_IDENTIFIER 91
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512)
 #define DATTYPE 32
@@ -100,7 +100,7 @@ int base_port = BASE_PORT; // temporary solution
 #define MULTI_INPUT 0
 #endif
 
-#if FUNCTION_IDENTIFIER < 80
+#if FUNCTION_IDENTIFIER < 80 || (FUNCTION_IDENTIFIER > 89 && FUNCTION_IDENTIFIER < 100)
 #define BANDWIDTH_OPTIMIZED 1 // 1 if bandwidth optimized (e.g. Ripple Carry Adder), 0 if Latency optimized (e.g. Multi-input AND gates, Parallel Prefix Adder)
 #define ONLINE_OPTIMIZED 0 // 1 if online optimized (e.g. MULTI_INPUT AND gates), 0 if optimized for total communication (e.g. no MULTI_INPUT AND gates)
 #else

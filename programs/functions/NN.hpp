@@ -128,6 +128,15 @@ void inference(DATATYPE* res)
 #elif FUNCTION_IDENTIFIER == 79 || FUNCTION_IDENTIFIER == 89
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = VGG<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 90 || FUNCTION_IDENTIFIER == 100
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
+    auto model = AlexNet_32<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 91 || FUNCTION_IDENTIFIER == 101
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
+    auto model = AlexNet_CryptGpu<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 92 || FUNCTION_IDENTIFIER == 102
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28, num_classes = 10;
+    auto model = LeNet<modeltype>(num_classes);
 #endif
     
     /* using DATATYPE = uint32_t; */
@@ -142,8 +151,8 @@ void inference(DATATYPE* res)
     cfg.data_dir = "./SimpleNN/dataset";
     /* cfg.pretrained = "model_DRD_C100_230K.bin"; */
     /* cfg.pretrained = "resnet50_cifar100.bin"; */
-    /* cfg.pretrained = "dummy.dummy"; */
-    cfg.pretrained = "vgg16_cifar.bin";
+    cfg.pretrained = "dummy.dummy";
+    /* cfg.pretrained = "vgg16_cifar.bin"; */
     /* cfg.pretrained = "lenet5_avg.pth"; */
     /* cfg.pretrained = "ResNet50_Cifar_Max.bin"; */
     cfg.image_file = "cifar10-test-images.bin";
