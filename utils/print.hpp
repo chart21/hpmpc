@@ -6,6 +6,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <chrono>
+#include <vector>
+#include <unordered_map>
 #include "../config.h"
 
 #if PRINT_TIMINGS == 1
@@ -13,11 +15,11 @@ std::chrono::high_resolution_clock::time_point time_start;
 std::chrono::high_resolution_clock::time_point time_stop;
 std::chrono::microseconds time_duration;
 #define start_timer() \
-    if(current_phase == PHASE_LIVE ) { \
+    if(current_phase != PHASE_INIT ) { \
     time_start = std::chrono::high_resolution_clock::now(); \
     } 
 #define stop_timer(FUNCTION_NAME) \
-    if(current_phase == PHASE_LIVE ) { \
+    if(current_phase != PHASE_INIT ) { \
     time_stop = std::chrono::high_resolution_clock::now(); \
     time_duration = std::chrono::duration_cast<std::chrono::microseconds>(time_stop - time_start); \
         double time_duration_sec = time_duration.count() / 1000000.0; \
@@ -54,4 +56,114 @@ void print_result(T* var)
     printf("\n");
 }
 
+struct Layer_Timing
+{
+    int layer_id;
+    std::string layer_name;
+    std::chrono::microseconds pre_time_duration;
+    std::chrono::microseconds live_time_duration;
+    std::chrono::high_resolution_clock::time_point timer;
+    uint64_t elements_sent_live;
+    uint64_t elements_sent_pre;
+    uint64_t elements_received_live;
+    uint64_t elements_received_pre;
+    uint64_t elements_sent_live_bytes;
+};    
+
+std::vector<Layer_Timing> layer_stats;
+
+void start_layer_stats(std::string layer_name, int layer_id) {
+    if(current_phase == PHASE_INIT) {
+        layer_stats.push_back(Layer_Timing());
+        layer_stats.back().layer_id = layer_id;
+        layer_stats.back().layer_name = layer_name;
+#if num_players == 3
+        #if PRE == 1
+        layer_stats.back().elements_sent_pre = total_send_pre[0] + total_send_pre[1];
+        layer_stats.back().elements_received_pre = total_recv_pre[0] + total_recv_pre[1];
+        #endif
+        layer_stats.back().elements_sent_live = total_send[0] + total_send[1];
+        layer_stats.back().elements_received_live = total_recv[0] + total_recv[1];
+#elif num_players == 4
+        #if PRE == 1
+        layer_stats.back().elements_sent_pre = total_send_pre[0] + total_send_pre[1] + total_send_pre[2];
+        layer_stats.back().elements_received_pre = total_recv_pre[0] + total_recv_pre[1] + total_recv_pre[2];
+        #endif
+        layer_stats.back().elements_sent_live = total_send[0] + total_send[1] + total_send[2];
+        layer_stats.back().elements_received_live = total_recv[0] + total_recv[1] + total_recv[2];
+#endif
+    }
+    else if(current_phase == PHASE_PRE) {
+        layer_stats[layer_id].timer = std::chrono::high_resolution_clock::now();
+    }
+    else if(current_phase == PHASE_LIVE) {
+        layer_stats[layer_id].timer = std::chrono::high_resolution_clock::now();
+    }
+}
+
+void stop_layer_stats(int layer_id) {
+    if(current_phase == PHASE_INIT) {
+#if num_players == 3
+        #if PRE == 1
+        layer_stats.back().elements_sent_pre = total_send_pre[0] + total_send_pre[1] - layer_stats.back().elements_sent_pre;
+        layer_stats.back().elements_received_pre = total_recv_pre[0] + total_recv_pre[1] - layer_stats.back().elements_received_pre;
+        #endif
+        layer_stats.back().elements_sent_live = total_send[0] + total_send[1] - layer_stats.back().elements_sent_live;
+        layer_stats.back().elements_received_live = total_recv[0] + total_recv[1] - layer_stats.back().elements_received_live;
+#elif num_players == 4
+        #if PRE == 1
+        layer_stats.back().elements_sent_pre = total_send_pre[0] + total_send_pre[1] + total_send_pre[2] - layer_stats.back().elements_sent_pre;
+        layer_stats.back().elements_received_pre = total_recv_pre[0] + total_recv_pre[1] + total_recv_pre[2] - layer_stats.back().elements_received_pre;
+        #endif
+        layer_stats.back().elements_sent_live = total_send[0] + total_send[1] + total_send[2] - layer_stats.back().elements_sent_live;
+        layer_stats.back().elements_received_live = total_recv[0] + total_recv[1] + total_recv[2] - layer_stats.back().elements_received_live;
+#endif
+    }
+    else if(current_phase == PHASE_PRE) {
+        layer_stats[layer_id].pre_time_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - layer_stats[layer_id].timer);
+    }
+    else if(current_phase == PHASE_LIVE) {
+        layer_stats[layer_id].live_time_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - layer_stats[layer_id].timer);
+    }
+}
+
+void print_layer_stats()
+{
+#if PRE == 1
+    for(auto& layer : layer_stats) {
+        std::cout << "P" << PARTY << ": --NN_STATS (Individual)-- ID: " << layer.layer_id << " " << layer.layer_name << "    MB SENT:" << layer.elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << layer.elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << layer.elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << layer.elements_received_pre << "    ms LIVE: " << double(layer.live_time_duration.count()) /1000 << "    ms PRE: " << doulbe(layer.pre_time_duration.count()) /1000 << std::endl;
+    }
+#else
+    for(auto& layer : layer_stats) {
+        std::cout << "P" << PARTY << ": --NN_STATS (Individual)-- ID: " << layer.layer_id << " " << layer.layer_name << "    MB SENT:" << layer.elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << layer.elements_received_live*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(layer.live_time_duration.count()) /1000 << std::endl;
+    }
+#endif
+//define hashmap with all layer types
+std::unordered_map<std::string, std::vector<Layer_Timing>> layer_stats_map;
+for(auto& layer : layer_stats) {
+    layer_stats_map[layer.layer_name].push_back(layer);
+}
+
+for(auto& layer_pair : layer_stats_map) {
+    uint64_t total_elements_sent_live = 0;
+    uint64_t total_elements_sent_pre = 0;
+    uint64_t total_elements_received_live = 0;
+    uint64_t total_elements_received_pre = 0;
+    double total_live_time_duration = 0;
+    double total_pre_time_duration = 0;
+    for(auto& layer_stats : layer_pair.second) {
+        total_elements_sent_live += layer_stats.elements_sent_live;
+        total_elements_sent_pre += layer_stats.elements_sent_pre;
+        total_elements_received_live += layer_stats.elements_received_live;
+        total_elements_received_pre += layer_stats.elements_received_pre;
+        total_live_time_duration += layer_stats.live_time_duration.count();
+        total_pre_time_duration += layer_stats.pre_time_duration.count();
+    }
+#if PRE == 1
+    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED: " << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << total_elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << total_elements_received_pre*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << total_live_time_duration /1000 << "    ms PRE: " << total_pre_time_duration /1000 << std::endl;
+#else
+    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << total_live_time_duration /1000 << std::endl;
+#endif
+}
+}
 

@@ -37,7 +37,7 @@ public:
 
     template <int id> void init(UINT_TYPE value[DATTYPE]) {
         if constexpr (id == PSELF) {
-          if (current_phase == PHASE_LIVE) {
+          if (current_phase != PHASE_INIT) { //TODO: Should only happen either in PRE or in live pahse
 
             DATATYPE temp_d[BITLENGTH];
             orthogonalize_boolean(value, temp_d);

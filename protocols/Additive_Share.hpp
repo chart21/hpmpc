@@ -87,7 +87,7 @@ public:
     template<int id>
     void prepare_receive_and_replicate(UINT_TYPE value) {
         if constexpr (id == PSELF || PROTOCOL == 13) {
-          if (current_phase == PHASE_LIVE) {
+          if (current_phase != PHASE_INIT) { //TODO: Should only happen either in PRE or in live pahse
             /* prepare_receive_from<id>(PROMOTE(value)); */
             prepare_receive_from<id>(PROMOTE(value)); 
             return;

@@ -5,22 +5,23 @@
 
 void print_communication()
 {
-/* #if num_players == 3 */ 
-/*     printf("Sending to other players:" PRIu64 "MB, " PRIu64 "MB ", total_send[PPREV]*(DATTYPE/(8000*1000*DATTYPE)), total_send[PNEXT]* sizeof(DATTYPE)); */
-/*     printf("Receiving from other players:" PRIu64 "MB, " PRIu64 "MB ", total_recv[PPREV]* sizeof(DATTYPE), total_recv[PNEXT]* sizeof(DATTYPE)); */
-/* #elif num_players == 4 */
-/*     printf("Sending to other players:" PRIu64 "MB, " PRIu64 "MB, " PRIu64 "MB ", total_send[PPREV]* sizeof(DATTYPE), total_send[PMIDDLE]* sizeof(DATTYPE), total_send[PNEXT]* sizeof(DATTYPE)); */
-/*     printf("Receiving from other players:" PRIu64 "MB, " PRIu64 "MB, " PRIu64 "MB ", total_recv[PPREV]* sizeof(DATTYPE), total_recv[PMIDDLE]* sizeof(DATTYPE), total_recv[PNEXT]* sizeof(DATTYPE)); */
-/* #endif //change to std::cout */
+#if PRE == 1
 #if num_players == 3
-    std::cout << "P" << PARTY << ", PID" << process_offset <<  ": " << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
-    std::cout << "P" << PARTY << ", PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": " << "Sending to other players:" << total_send_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send_pre[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv_pre[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
 #elif num_players == 4
-    std::cout << "P" << PARTY << ", PID" << process_offset <<  ": "  << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
-    std::cout << "P" << PARTY << ", PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": "  << "Sending to other players:" << total_send_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send_pre[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send_pre[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv_pre[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv_pre[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+#endif
 #endif
 
-
+#if num_players == 3
+    std::cout << "P" << PARTY << ", ONLINE, PID" << process_offset <<  ": " << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", ONLINE PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+#elif num_players == 4
+    std::cout << "P" << PARTY << ", ONLINE, PID" << process_offset <<  ": "  << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+    std::cout << "P" << PARTY << ", ONLINE, PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB ";
+#endif
 }
 
 
@@ -56,7 +57,7 @@ sockets_received.push_back(0);
 void pre_send_to_(int player_index)
 {
 sending_args_pre[player_index].elements_to_send[0] += 1;
-total_send[player_index] += 1;
+total_send_pre[player_index] += 1;
 /* sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] += 1; */
 }
 
@@ -64,7 +65,7 @@ void pre_receive_from_(int player_index)
 {
 /* receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1; */
 receiving_args_pre[player_index].elements_to_rec[0] += 1;
-total_recv[player_index] += 1;
+total_recv_pre[player_index] += 1;
 }
 #endif
 
@@ -361,7 +362,8 @@ rounds = 0;
 sending_rounds = 0;
 rb = 0;
 sb = 0;
-print_communication();  
+current_phase = PHASE_PRE;
+/* print_communication(); */  
 }
 
 

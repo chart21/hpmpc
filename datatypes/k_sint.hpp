@@ -44,7 +44,7 @@ public:
     template<int id>
     void prepare_receive_and_replicate(UINT_TYPE value) {
         if constexpr (id == PSELF || PROTOCOL == 13) {
-          if (current_phase == PHASE_LIVE) {
+          if (current_phase != PHASE_INIT) { //TODO: Should only happen either in PRE or in live phase
             /* alignas(sizeof(DATATYPE)) UINT_TYPE temp_u[DATTYPE] = {value}; */
             /* orthogonalize_arithmetic(temp_u, (DATATYPE*) temp_u); */
             /* prepare_receive_from<id>((DATATYPE*) temp_u); */
@@ -65,7 +65,7 @@ public:
 
     template <int id> void init(UINT_TYPE value[DATTYPE]) {
         if constexpr (id == PSELF) {
-          if (current_phase == PHASE_LIVE) {
+          if (current_phase != PHASE_INIT) {//TODO: Should only happen either in PRE or in live phase
 
             DATATYPE temp_d[BITLENGTH];
             orthogonalize_arithmetic(value, temp_d);
