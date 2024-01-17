@@ -44,7 +44,7 @@
 #define VERIFY_BUFFER 16
 // Print additional info?
 #define PRINT 0
-#define PRINT_TIMINGS 1
+#define PRINT_TIMINGS 0
 
 #define FRACTIONAL 5 // fractional bits for fixed point numbers
 
