@@ -129,9 +129,10 @@ void stop_layer_stats(int layer_id) {
 
 void print_layer_stats()
 {
+    std::cout.precision(4);
 #if PRE == 1
     for(auto& layer : layer_stats) {
-        std::cout << "P" << PARTY << ": --NN_STATS (Individual)-- ID: " << layer.layer_id << " " << layer.layer_name << "    MB SENT:" << layer.elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << layer.elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << layer.elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << layer.elements_received_pre << "    ms LIVE: " << double(layer.live_time_duration.count()) /1000 << "    ms PRE: " << doulbe(layer.pre_time_duration.count()) /1000 << std::endl;
+        std::cout << "P" << PARTY << ": --NN_STATS (Individual)-- ID: " << layer.layer_id << " " << layer.layer_name << "    MB SENT:" << layer.elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << layer.elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << layer.elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << layer.elements_received_pre*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(layer.live_time_duration.count()) /1000 << "    ms PRE: " << double(layer.pre_time_duration.count()) /1000 << std::endl;
     }
 #else
     for(auto& layer : layer_stats) {
@@ -160,9 +161,9 @@ for(auto& layer_pair : layer_stats_map) {
         total_pre_time_duration += layer_stats.pre_time_duration.count();
     }
 #if PRE == 1
-    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED: " << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << total_elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << total_elements_received_pre*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << total_live_time_duration /1000 << "    ms PRE: " << total_pre_time_duration /1000 << std::endl;
+    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED: " << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << total_elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << total_elements_received_pre*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(total_live_time_duration) /1000 << "    ms PRE: " << double(total_pre_time_duration) /1000 << std::endl;
 #else
-    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << total_live_time_duration /1000 << std::endl;
+    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(total_live_time_duration) /1000 << std::endl;
 #endif
 }
 }
