@@ -61,12 +61,21 @@ OEC_MAL2_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
+#if PROTOCOL == 12
+#if PRE == 1
+    r = pre_receive_from_live(P_3);
+#else
+    r = receive_from_live(P_3);
+#endif
+    store_compare_view(P_0, r);
+#else
 #if PRE == 1
     r = pre_receive_from_live(P_0);
 #else
     r = receive_from_live(P_0);
 #endif
     store_compare_view(P_3, r);
+#endif
     /* v = ADD(v,val); */
 }
 
@@ -266,6 +275,17 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL2_Share& r_mk2, OEC_MAL2_Share& r_msb, OEC_MAL2_Share& c, OEC_MAL2_Share& c_prime) const{
+#if PROTOCOL == 12
+#if PRE == 1
+    r_mk2.r = pre_receive_from_live(P_3);
+    r_msb.r = pre_receive_from_live(P_3);
+#else
+    r_mk2.r = receive_from_live(P_3);
+    r_msb.r = receive_from_live(P_3);
+#endif
+    store_compare_view(P_0, r_mk2.r);
+    store_compare_view(P_0, r_msb.r);
+#else
 #if PRE == 0
     r_mk2.r = receive_from_live(P_0);
     r_msb.r = receive_from_live(P_0);
@@ -275,6 +295,7 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 #endif
     store_compare_view(P_3, r_mk2.r);
     store_compare_view(P_3, r_msb.r);
+#endif
     r_mk2.v = SET_ALL_ZERO();
     r_msb.v = SET_ALL_ZERO();
 }

@@ -37,7 +37,15 @@ OEC_MAL3_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 #endif
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
+#if PROTOCOL == 12
+#if PRE == 1
+    pre_send_to_live(P_2, val);
+#else
+    send_to_live(P_2, val);
+#endif
+#else
     store_compare_view(P_2, val);
+#endif
     
     return OEC_MAL3_Share(getRandomVal(P_123),result);
 } 
@@ -201,8 +209,18 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     r_mk2.r1 = SUB(SET_ALL_ZERO(), rmk2);
     r_msb.r0 = SET_ALL_ZERO();
     r_msb.r1 = SUB(SET_ALL_ZERO(), rmsb);
+#if PROTOCOL == 12
+#if PRE == 1
+    pre_send_to_live(P_2, SUB(r_mk2.r1, getRandomVal(P_013)));
+    pre_send_to_live(P_2, SUB(r_msb.r1, getRandomVal(P_013)));
+#else
+    send_to_live(P_2, SUB(r_mk2.r1, getRandomVal(P_013)));
+    send_to_live(P_2, SUB(r_msb.r1, getRandomVal(P_013)));
+#endif
+#else
     store_compare_view(P_2, SUB(r_mk2.r1, getRandomVal(P_013)));
     store_compare_view(P_2, SUB(r_msb.r1, getRandomVal(P_013)));
+#endif
 
     c.r0 = getRandomVal(P_123);
     c.r1 = SET_ALL_ZERO();

@@ -6,7 +6,7 @@
 #define PROTOCOL 12
 
 // Party ID (starting from 0)
-#define PARTY 3
+#define PARTY 2
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
@@ -22,7 +22,7 @@
 #define PRE 1
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 16
+#define NUM_INPUTS 1
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -65,7 +65,7 @@ int base_port = BASE_PORT; // temporary solution
 #define SHARE_PREP 1
 
 // Compress binary data into chars before sending them over the netowrk? Only relevant for DATTYPE = 1
-#define COMPRESS 0
+#define COMPRESS 1
 
 // Use optimized secret sharing? Often utilizes SRNG instead of secret sharing with communication
 #define OPT_SHARE 1

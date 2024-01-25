@@ -494,6 +494,7 @@ double dummy_time = 0.00;
 #else
 void simulate_live()
 {
+    current_phase = PHASE_LIVE;
     clock_t time_function_start = clock ();
     clock_gettime(CLOCK_REALTIME, &l1);
     std::chrono::high_resolution_clock::time_point c1 =

@@ -30,12 +30,21 @@ OEC_MAL2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_ad
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
+#if PROTOCOL == 12
+#if PRE == 1
+pre_receive_from_(P_3);
+#else
+receive_from_(P_3);
+#endif
+store_compare_view_init(P_0);
+#else
 #if PRE == 1
     pre_receive_from_(P_0);
 #else
     receive_from_(P_0);
 #endif
     store_compare_view_init(P_3);
+#endif
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
@@ -46,6 +55,17 @@ send_to_(P_0);
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL2_init& r_mk2, OEC_MAL2_init& r_msb, OEC_MAL2_init& c, OEC_MAL2_init& c_prime){
+#if PROTOCOL == 12
+#if PRE == 1
+pre_receive_from_(P_3);
+pre_receive_from_(P_3);
+#else
+receive_from_(P_3);
+receive_from_(P_3);
+#endif
+store_compare_view_init(P_0);
+store_compare_view_init(P_0);
+#else
 #if PRE == 0
 receive_from_(P_0);
 receive_from_(P_0);
@@ -55,6 +75,7 @@ pre_receive_from_(P_0);
 #endif
 store_compare_view_init(P_3);
 store_compare_view_init(P_3);
+#endif
 }
 
 

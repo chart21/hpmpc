@@ -21,12 +21,17 @@ OEC_MAL0_init mult_public(const Datatype b, func_mul MULT) const
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_init& r_mk2, OEC_MAL0_init& r_msb, OEC_MAL0_init& c, OEC_MAL0_init& c_prime){
+#if PROTOCOL == 12 || PROTOCOL == 8
+    store_compare_view_init(P_2);
+    store_compare_view_init(P_2);
+#else
 #if PRE == 1
     pre_send_to_(P_2);
     pre_send_to_(P_2);
 #else
     send_to_(P_2);
     send_to_(P_2);
+#endif
 #endif
 }
 
@@ -43,10 +48,14 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OEC_MAL0_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
+#if PROTOCOL == 12 || PROTOCOL == 8
+    store_compare_view_init(P_2);
+#else
 #if PRE == 1
     pre_send_to_(P_2);
 #else
     send_to_(P_2);
+#endif
 #endif
     return OEC_MAL0_init();
 } 

@@ -50,14 +50,14 @@ rounds+=1;
 /*                      .count(); */
       /* printf("finished waiting for receive in round %i \n", rounds - 1); */
       pthread_mutex_unlock(&mtx_receive_next);
-      /* for(int t = 0; t < (num_players-1); t++) */
-      /* { */
-      /*     if(rounds > 2) */
-      /*         if(receiving_args[t].rec_rounds > 1) */
-      /*             if(receiving_args[t].received_elements[rounds - 2] != NULL) */ 
-      /*               delete[] receiving_args[t].received_elements[rounds - 2]; // delete memory of last round */
-/* /1* printf("Time spent waiting for data chrono: %fs \n", time / 1000000); *1/ */
-      /* } */
+      for(int t = 0; t < (num_players-1); t++)
+      {
+          if(rounds > 2)
+              if(receiving_args[t].rec_rounds > 1)
+                  /* if(receiving_args[t].received_elements[rounds - 2] != NULL) */ 
+                    delete[] receiving_args[t].received_elements[rounds - 2]; // delete memory of last round
+/* printf("Time spent waiting for data chrono: %fs \n", time / 1000000); */
+      }
       rb = 0;
 }
 
