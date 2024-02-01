@@ -84,8 +84,6 @@ void inference(DATATYPE* res)
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = VGG<modeltype>(num_classes);
 #elif FUNCTION_IDENTIFIER == 75 || FUNCTION_IDENTIFIER == 175 || FUNCTION_IDENTIFIER == 275 || FUNCTION_IDENTIFIER == 375
-    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
-    auto model = AlexNet_32<modeltype>(num_classes);
 	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = ResNet18<modeltype>(num_classes);
 #elif FUNCTION_IDENTIFIER == 76 || FUNCTION_IDENTIFIER == 176 || FUNCTION_IDENTIFIER == 276 || FUNCTION_IDENTIFIER == 376
@@ -109,6 +107,9 @@ void inference(DATATYPE* res)
 #elif FUNCTION_IDENTIFIER == 82 || FUNCTION_IDENTIFIER == 182 || FUNCTION_IDENTIFIER == 282 || FUNCTION_IDENTIFIER == 382
     int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28, num_classes = 10;
     auto model = LeNet<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 83 || FUNCTION_IDENTIFIER == 183 || FUNCTION_IDENTIFIER == 283 || FUNCTION_IDENTIFIER == 383
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = AlexNet_CryptGpu<modeltype>(num_classes);
 #endif
 
     
