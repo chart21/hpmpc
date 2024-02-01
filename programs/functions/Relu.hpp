@@ -10,8 +10,10 @@
 
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
 #include "boolean_adder_msb.hpp"
-#else
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
 #include "ppa_msb_4_way.hpp"
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+#include "ppa_msb.hpp"
 #endif
 /* #include "ppa_msb.hpp" */
 /* #include "ppa.hpp" */
@@ -72,8 +74,10 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int
     /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     std::vector<BooleanAdder_MSB<k-m,S>> adders;
-#else
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
     std::vector<PPA_MSB_4Way<k-m,S>> adders;
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+    std::vector<PPA_MSB<k-m,S>> adders;
 #endif
     /* std::vector<PPA_MSB_4Way<k,S>> adders; */
     adders.reserve(len);

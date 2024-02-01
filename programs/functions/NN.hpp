@@ -65,76 +65,48 @@ void inference(DATATYPE* res)
 #endif
 
 
-#if FUNCTION_IDENTIFIER == 60
-	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
-    auto model = VGG<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 61
-	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
-    auto model = ResNet50<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 62 
-    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
-    auto model = DRD_C100_230K<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 63
-	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
-    auto model = VGG<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 64
-	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
-    auto model = ResNet50<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 65
-    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
-    auto model = DRD_C100_230K<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 66
-	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 100;
-    auto model = VGG<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 67
-	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 100;
-    auto model = ResNet50<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 68
-    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 100;
-    auto model = DRD_C100_230K<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 69
-    int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28, num_classes = 10;
-    auto model = LeNet<modeltype>(num_classes);
+    /* int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10; */
+    /* auto model = DRD_C100_230K<modeltype>(num_classes); */
 
-#elif FUNCTION_IDENTIFIER == 70 || FUNCTION_IDENTIFIER == 80 || FUNCTION_IDENTIFIER == 170 || FUNCTION_IDENTIFIER == 180
+#if FUNCTION_IDENTIFIER == 70 || FUNCTION_IDENTIFIER == 170 || FUNCTION_IDENTIFIER == 270 || FUNCTION_IDENTIFIER == 370
 	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = ResNet18<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 71 || FUNCTION_IDENTIFIER == 81 || FUNCTION_IDENTIFIER == 171 || FUNCTION_IDENTIFIER == 181
+#elif FUNCTION_IDENTIFIER == 71 || FUNCTION_IDENTIFIER == 171 || FUNCTION_IDENTIFIER == 271 || FUNCTION_IDENTIFIER == 371
 	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = ResNet50<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 72 || FUNCTION_IDENTIFIER == 82 || FUNCTION_IDENTIFIER == 172 || FUNCTION_IDENTIFIER == 182
+#elif FUNCTION_IDENTIFIER == 72 || FUNCTION_IDENTIFIER == 172 || FUNCTION_IDENTIFIER == 272 || FUNCTION_IDENTIFIER == 372
 	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = ResNet101<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 73 || FUNCTION_IDENTIFIER == 83 || FUNCTION_IDENTIFIER == 173 || FUNCTION_IDENTIFIER == 183
+#elif FUNCTION_IDENTIFIER == 73 || FUNCTION_IDENTIFIER == 173 || FUNCTION_IDENTIFIER == 273 || FUNCTION_IDENTIFIER == 373
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = ResNet152<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 74 || FUNCTION_IDENTIFIER == 84 || FUNCTION_IDENTIFIER == 174 || FUNCTION_IDENTIFIER == 184
+#elif FUNCTION_IDENTIFIER == 74 || FUNCTION_IDENTIFIER == 174 || FUNCTION_IDENTIFIER == 274 || FUNCTION_IDENTIFIER == 374
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = VGG<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 75 || FUNCTION_IDENTIFIER == 85 || FUNCTION_IDENTIFIER == 175 || FUNCTION_IDENTIFIER == 185
-    //int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28, num_classes = 10;
-    //auto model = LeNet<modeltype>(num_classes);
-	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
-    auto model = ResNet18<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 76 || FUNCTION_IDENTIFIER == 86 || FUNCTION_IDENTIFIER == 176 || FUNCTION_IDENTIFIER == 186
-    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
-    auto model = ResNet50<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 77 || FUNCTION_IDENTIFIER == 87 || FUNCTION_IDENTIFIER == 177 || FUNCTION_IDENTIFIER == 187
-    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
-    auto model = ResNet101<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 78 || FUNCTION_IDENTIFIER == 88 || FUNCTION_IDENTIFIER == 178 || FUNCTION_IDENTIFIER == 188
-    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
-    auto model = ResNet152<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 79 || FUNCTION_IDENTIFIER == 89 || FUNCTION_IDENTIFIER == 179 || FUNCTION_IDENTIFIER == 189
-    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
-    auto model = VGG<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 90 || FUNCTION_IDENTIFIER == 100 || FUNCTION_IDENTIFIER == 190 || FUNCTION_IDENTIFIER == 200
+#elif FUNCTION_IDENTIFIER == 75 || FUNCTION_IDENTIFIER == 175 || FUNCTION_IDENTIFIER == 275 || FUNCTION_IDENTIFIER == 375
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = AlexNet_32<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 91 || FUNCTION_IDENTIFIER == 101 || FUNCTION_IDENTIFIER == 191 || FUNCTION_IDENTIFIER == 201
+	int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = ResNet18<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 76 || FUNCTION_IDENTIFIER == 176 || FUNCTION_IDENTIFIER == 276 || FUNCTION_IDENTIFIER == 376
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = ResNet50<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 77 || FUNCTION_IDENTIFIER == 177 || FUNCTION_IDENTIFIER == 277 || FUNCTION_IDENTIFIER == 377
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = ResNet101<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 78 || FUNCTION_IDENTIFIER == 178 || FUNCTION_IDENTIFIER == 278 || FUNCTION_IDENTIFIER == 378
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = ResNet152<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 79 || FUNCTION_IDENTIFIER == 179 || FUNCTION_IDENTIFIER == 279 || FUNCTION_IDENTIFIER == 379
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = VGG<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 80 || FUNCTION_IDENTIFIER == 180 || FUNCTION_IDENTIFIER == 280 || FUNCTION_IDENTIFIER == 380
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
+    auto model = AlexNet_32<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 81 || FUNCTION_IDENTIFIER == 181 || FUNCTION_IDENTIFIER == 281 || FUNCTION_IDENTIFIER == 381
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 10;
     auto model = AlexNet_CryptGpu<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 92 || FUNCTION_IDENTIFIER == 102 || FUNCTION_IDENTIFIER == 192 || FUNCTION_IDENTIFIER == 202
+#elif FUNCTION_IDENTIFIER == 82 || FUNCTION_IDENTIFIER == 182 || FUNCTION_IDENTIFIER == 282 || FUNCTION_IDENTIFIER == 382
     int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28, num_classes = 10;
     auto model = LeNet<modeltype>(num_classes);
 #endif
@@ -297,7 +269,9 @@ std::cout << "Loading Model Parameters..." << std::endl;
         model.template load<MODELOWNER>(cfg.save_dir, cfg.pretrained);
 #endif
         print_online("Received Secret Share of Model Parameters.");
+#if FUNCTION_IDENTIFIER < 300 // otherwise only measure secret sharing of model
         model.evaluate(test_loader);
+#endif
     /* } */
 
 	/* return 0; */

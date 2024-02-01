@@ -7,8 +7,10 @@
 #include <chrono>
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
 #include "boolean_adder_msb.hpp"
-#else
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
 #include "ppa_msb_4_way.hpp"
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+#include "ppa_msb.hpp"
 #endif
 
 
