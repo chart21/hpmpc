@@ -153,8 +153,8 @@ void inference(DATATYPE* res)
     cfg.data_dir = "./SimpleNN/dataset";
     /* cfg.pretrained = "model_DRD_C100_230K.bin"; */
     /* cfg.pretrained = "resnet50_cifar100.bin"; */
-    /* cfg.pretrained = "dummy.dummy"; */
-    cfg.pretrained = "vgg16_cifar.bin";
+    cfg.pretrained = "dummy.dummy";
+    /* cfg.pretrained = "vgg16_cifar.bin"; */
     /* cfg.pretrained = "alex32.bin"; */
     /* cfg.pretrained = "lenet5_avg.pth"; */
     /* cfg.pretrained = "ResNet50_Cifar_Max.bin"; */

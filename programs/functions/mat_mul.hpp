@@ -1369,7 +1369,8 @@ int TILE_SIZE = 64;
 			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
 		}
 	}
-    
+   
+//Eigen
     template<typename T>
 	void Conv2d<T>::forward1(const MatX<T>& prev_out, bool is_training)
 	{
@@ -1453,7 +1454,7 @@ int TILE_SIZE = 64;
 			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
 	}
 	}
-            
+      // naive      
             template<typename T>
 	void Conv2d<T>::forward4(const MatX<T>& prev_out, bool is_training)
 	{
@@ -2260,6 +2261,8 @@ for (int i = 0; i < m; ++i) {
 			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
 	}
     }
+
+    // all opt
     template<typename T>
 	void Conv2d<T>::forward18(const MatX<T>& prev_out, bool is_training)
 	{
@@ -2482,6 +2485,8 @@ for (int i = 0; i < m; ++i) {
 			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
 	}
     }
+
+    //transpose
     template<typename T>
 	void Conv2d<T>::forward20(const MatX<T>& prev_out, bool is_training)
 	{
@@ -2500,7 +2505,10 @@ for (int i = 0; i < m; ++i) {
             /* auto C = this->output; */
 
             auto A = kernel.data();
-    auto B = im_col.transpose().data();
+    /* auto B = im_col.transpose().data(); */
+    auto BM = im_col.transpose();
+        /* MatX<T> BM = im_col.transpose(); */
+    auto B = BM.data();
     auto C = this->output.data() + (oc * ohw) * n;
     
     const int m = oc;
@@ -3469,7 +3477,8 @@ MatX<D> input(1, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
 void conv2D_bench(DATATYPE* res)
 {
 Share::communicate(); // Dummy communication round to simulate input sharing
-using D = Additive_Share<DATATYPE, Share>;
+/* using D = Additive_Share<DATATYPE, Share>; */
+using D = Matrix_Share<DATATYPE, Share>;
 const int batch = 1;
 /* using D = Matrix_Share<DATATYPE, Share>; */
 /* using M = SH<DATATYPE>; */
