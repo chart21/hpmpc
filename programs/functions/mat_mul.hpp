@@ -2336,7 +2336,7 @@ for (int i = 0; i < m; ++i) {
             /*     this->output(i).complete_mult(); */
             /* } */
         T::communicate();
-            auto b = bias.data();
+            /* auto b = bias.data(); */
             const int m = oc;
             const int p = ohw;
 		for (int n = 0; n < batch; n++) {
@@ -2349,12 +2349,14 @@ for (int i = 0; i < m; ++i) {
                         const int row = ii*p;
                         for (int jj = j; jj < j_max; ++jj) {
                             C[row + jj].complete_mult();
-                            C[row + jj] += b[row+jj];
+                            /* C[row + jj] += b[row+jj]; */
                         }
                     }
                 }
             }
     }
+		for (int n = 0; n < batch; n++)
+            this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
     }
     template<typename T>
 	void Conv2d<T>::forward18_old(const MatX<T>& prev_out, bool is_training)
