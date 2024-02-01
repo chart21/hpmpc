@@ -3489,8 +3489,11 @@ vector<int> input_shape = {batch, 64, NUM_INPUTS, NUM_INPUTS};
 MatX<D> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
     d_conv.set_layer(input_shape);
     alignas(sizeof(DATATYPE))UINT_TYPE dummy[DATTYPE];
-
-#if FUNCTION_IDENTIFIER == 37
+#if FUNCTION_IDENTIFIER == 56
+d_conv.forward4(input, false);
+#elif FUNCTION_IDENTIFIER == 57
+d_conv.forward20(input, false);
+#elif FUNCTION_IDENTIFIER == 37
 d_conv.forward1(input, false);
 #elif FUNCTION_IDENTIFIER == 38
 d_conv.forward10(input, false);
