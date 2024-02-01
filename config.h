@@ -102,7 +102,7 @@ int base_port = BASE_PORT; // temporary solution
 #endif
 
 #if FUNCTION_IDENTIFIER >= 170
-#define SIMULATE_QUANT 1 // Simulate 8-bit quantization
+#define SIMULATE_QUANT 0 // Simulate 8-bit quantization
 #endif
 
 #if FUNCTION_IDENTIFIER < 80 || (FUNCTION_IDENTIFIER > 89 && FUNCTION_IDENTIFIER < 100) || (FUNCTION_IDENTIFIER >= 170 && FUNCTION_IDENTIFIER < 180) || (FUNCTION_IDENTIFIER >= 190 && FUNCTION_IDENTIFIER < 200)
