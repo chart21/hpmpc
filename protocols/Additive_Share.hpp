@@ -32,8 +32,8 @@ public:
 
     Additive_Share operator*(const Additive_Share<Datatype, Share_Type>& b) const
     {
-        /* return Additive_Share(Share_Type::prepare_dot(b, OP_ADD, OP_SUB, OP_MULT)); */
-        return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT));
+        return Additive_Share(Share_Type::prepare_dot(b, OP_ADD, OP_SUB, OP_MULT));
+        /* return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT)); */
     }
         
         Additive_Share operator*(const UINT_TYPE other) const
@@ -146,13 +146,18 @@ public:
         return ret[0];
         }
 
+    Additive_Share prepare_mult(const Additive_Share<Datatype, Share_Type>& b) const
+    {
+        return Additive_Share(Share_Type::prepare_mult(b, OP_ADD, OP_SUB, OP_MULT));
+    }
+
     Additive_Share prepare_mult3(const Additive_Share<Datatype, Share_Type>& b, const Additive_Share<Datatype, Share_Type>& c) const
     {
         return Additive_Share(Share_Type::prepare_mult3(b, c, OP_ADD, OP_SUB, OP_MULT));
     }
         
     void prepare_XOR(const Additive_Share &a, const Additive_Share &b) {
-                *this = a * b;
+                *this = a.prepare_mult(b);
         }
 
     void complete_XOR(const Additive_Share &a, const Additive_Share &b) {

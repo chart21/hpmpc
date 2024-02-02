@@ -304,7 +304,7 @@ public:
 
         void prepare_XOR(const sint_t<Share> &a, const sint_t<Share> &b) {
             for(int i = 0; i < BITLENGTH; ++i) {
-                shares[i] = a[i] * b[i];
+                shares[i] = a[i].prepare_mult(b[i]);
             }
         }
 

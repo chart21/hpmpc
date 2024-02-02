@@ -151,7 +151,7 @@ using sint = sint_t<A>;
 /* #if PARTY ==2 */
 /*             std::cout << "max idx: " << max_idx[i].get_p1() << std::endl; */
 /* #endif */
-        max_idx[i+b*len] = max_idx[i+b*len] * (val[2*i+b*og_len] - val[2*i+1 + b*og_len]);
+        max_idx[i+b*len] = max_idx[i+b*len].prepare_mult((val[2*i+b*og_len] - val[2*i+1 + b*og_len]));
     }
     }
     Share::communicate();
