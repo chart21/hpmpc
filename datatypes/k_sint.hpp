@@ -190,6 +190,14 @@ public:
         }
         return result;
         }
+
+        sint_t prepare_mult(const sint_t& other) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i].prepare_mult(other[i]);
+        }
+        return result;
+        }
     
     bool operator==(const sint_t& b) const
     {
