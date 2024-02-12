@@ -431,7 +431,7 @@ void SubBytes__ (S inputSB__[128][NUM_INPUTS], S out__[128][NUM_INPUTS]) {
 
   // Instructions (body)
   for (int i = 0; i <= 15; i++) {
-    SubBytes_single__(inputSB__[((i * 8) + 0)],inputSB__[((i * 8) + 1)],inputSB__[((i * 8) + 2)],inputSB__[((i * 8) + 3)],inputSB__[((i * 8) + 4)],inputSB__[((i * 8) + 5)],inputSB__[((i * 8) + 6)],inputSB__[((i * 8) + 7)],&out__[((i * 8) + 0)],&out__[((i * 8) + 1)],&out__[((i * 8) + 2)],&out__[((i * 8) + 3)],&out__[((i * 8) + 4)],&out__[((i * 8) + 5)],&out__[((i * 8) + 6)],&out__[((i * 8) + 7)]);
+    SubBytes_single__(inputSB__[((i * 8) + 0)],inputSB__[((i * 8) + 1)],inputSB__[((i * 8) + 2)],inputSB__[((i * 8) + 3)],inputSB__[((i * 8) + 4)],inputSB__[((i * 8) + 5)],inputSB__[((i * 8) + 6)],inputSB__[((i * 8) + 7)],out__[((i * 8) + 0)],out__[((i * 8) + 1)],out__[((i * 8) + 2)],out__[((i * 8) + 3)],out__[((i * 8) + 4)],out__[((i * 8) + 5)],out__[((i * 8) + 6)],out__[((i * 8) + 7)]);
   
 
 }
