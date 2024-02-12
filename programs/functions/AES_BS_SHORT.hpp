@@ -1270,7 +1270,7 @@ void MixColumn__ (S inp__[128][NUM_INPUTS], /*outputs*/ S out__[128][NUM_INPUTS]
     out__[125][i] = MixColumn_single___4__tmp21_[5][i] ^ MixColumn_single___4_times3___3__tmp6_[5][i];
     out__[126][i] = MixColumn_single___4__tmp21_[6][i] ^ MixColumn_single___4_times3___3__tmp6_[6][i];
     out__[127][i] = MixColumn_single___4__tmp21_[7][i] ^ MixColumn_single___4_times3___3__tmp6_[7][i];
-  
+  }  
   // Clean memory
 delete[] MixColumn_single___1__tmp10_;
 delete[] MixColumn_single___1__tmp12_;
@@ -1343,7 +1343,7 @@ delete[] MixColumn_single___4_times3___3__tmp6_;
 
 
 
-}
+
 }
 
 template <typename S>

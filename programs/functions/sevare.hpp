@@ -249,6 +249,7 @@ void COMP_BENCH(DATATYPE* res)
         tmp[i] = b[i] - a[i];
     }
     get_msb_range<0, k>(tmp, c, NUM_INPUTS);
+    dummy_reveal<Share>();
 }
 #endif
 
@@ -341,6 +342,7 @@ void AES_Bench(DATATYPE *res)
     auto key = new S[11][128][NUM_INPUTS];
     auto cipher = new S[128][NUM_INPUTS];
     AES__<S>(plain, key, cipher);
+    dummy_reveal<Share>();
 }
 #endif
 
@@ -353,6 +355,7 @@ void Logistic_Regression_Bench(DATATYPE *res)
     auto y_Shared = new Additive_Share<DATATYPE, Share>[NUM_INPUTS];
     auto weights = new Additive_Share<DATATYPE, Share>[NUM_FEATURES];
     logistic_regression<Share>(X_Shared, y_Shared, weights);
+    dummy_reveal<Share>();
 }
 #endif
 
@@ -379,7 +382,6 @@ void Private_Auction_Bench(DATATYPE *res)
     //compute max of all possible clearing prices
     S result;
     max_min_sint<0, BITLENGTH>(clearing_prices, price_range, &result, 1, true);
-
-
+    dummy_reveal<Share>();
 }
 #endif
