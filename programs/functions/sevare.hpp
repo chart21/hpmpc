@@ -79,6 +79,7 @@ void generateElements()
 template<typename Share>
 void dummy_reveal()
 {
+    using A = Additive_Share<DATATYPE, Share>;
     A dummy;
     dummy.prepare_reveal_to_all();
     Share::communicate();
