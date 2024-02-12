@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <cmath>
 #include "sevare_helper.hpp"
 #include "../../protocols/Protocols.h"
 #include "../../protocols/XOR_Share.hpp"
@@ -9,53 +10,67 @@
 #include "../../datatypes/k_sint.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../utils/print.hpp"
+//Each circuit will be evaluated in parallel, specified by NUM_PROCESSES. And additionally the Split-Roles mulitplier and vectorization multiplier.
+//Split-roles multipliers: 
+//1 (3-PC): 6
+//2 (3-PC -> 4-PC) 24,
+//3 (4-PC): 24 
 
-#include <cmath>
 
-/* #include "boolean_adder.hpp" */
-/* #include "ppa.hpp" */
-// 40: 1M Mult (int), 41: 1M Mult (fixed), 42: 1M Div (fixed), 43: 1M comparison, 44: 1M bit_ands, 45: 1M max, 46: 1M min, 47: 1M avg (fixed), 48: 1M sum, 49: Naive Intersection, 50: AES, 51: Logistic Regression, 52: Private Auction
+//Vectorization multipliers depend on the functions and are just state explicitly in the comments of the function definitions.
+//Vectorization multipliers (Example for BITLENGTH = 32):
+//DATTYPE = 32: 1
+//DATTYPE = 128: 4
+//DATTYPE = 256: 8
+//DATTYPE = 512: 16
+
+// For instance, evaluating arithmetic operations such as MULT bench with NUM_INPUTS=100, 3-PC split-roles, NUM_PROCESSES=4,DATTYPE=256,BITLENGTH=32 will evaluate 100*6*4*8 = 19200 AND gates in parallel.
+// Evaluating Boolean oeprations such as AND Bench with the same parameters will evaluate 100*6*4*256 = 614400 AND gates in parallel.
+
 #if FUNCTION_IDENTIFIER == 40
-#define FUNCTION AND_BENCH
+#define FUNCTION AND_BENCH //AND gates benchmark, n NUM_INPUTS = n*(DATTYPE/BITLENGTH) AND gates
 #elif FUNCTION_IDENTIFIER == 41
-#define FUNCTION MULT_BENCH //int
+#define FUNCTION MULT_BENCH //Integer multiplication, n NUM_INPUTS = n*(DATTYPE/BITLENGTH) multiplications
 #elif FUNCTION_IDENTIFIER == 42
-#define FUNCTION MULT_BENCH //fixed
+#define FUNCTION MULT_BENCH //Fixed point multiplication, n NUM_INPUTS = n*(DATTYPE/BITLENGTH) multiplications
 #elif FUNCTION_IDENTIFIER == 43
-#define FUNCTION DIV_BENCH //fixed
+#define FUNCTION DIV_BENCH //Fixed point division using Newton-Raphson approximation, n NUM_INPUTS = n*(DATTYPE/BITLENGTH) divisions. Number of iterations for Newton-Raphson approximation can be adjusted.
 #elif FUNCTION_IDENTIFIER == 44
-#define FUNCTION SHARE_BENCH
+#define FUNCTION SHARE_BENCH // Secret Sharing of inputs, n NUM_INPUTS = n*(DATTYPE/BITLENGTH) Inputs shared by P_0
 #elif FUNCTION_IDENTIFIER == 45
-#define FUNCTION REVEAL_BENCH
+#define FUNCTION REVEAL_BENCH // Reveal of inputs, n NUM_INPUTS = n*(DATTYPE/BITLENGTH) Inputs revealed to all parties
 #elif FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47 || FUNCTION_IDENTIFIER == 48
 #include "boolean_adder_bandwidth.hpp"
 #include "boolean_adder_msb.hpp"
 #include "ppa_msb.hpp"
-#define FUNCTION COMP_BENCH
+#define FUNCTION COMP_BENCH // Batched comparison of two secret numbers, n NUM_INPUTS = n*DATTYPE comparisons (!). Functions use RCA, PPA, or PPA 4-Way respectively
 #elif FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 51
 #include "boolean_adder_bandwidth.hpp"
 #include "boolean_adder_msb.hpp"
 #include "ppa_msb.hpp"
-#define FUNCTION MAXMIN_BENCH //max
-#elif FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54
+#define FUNCTION MAXMIN_BENCH // Maximum of a range of secret numbers, n NUM_INPUTS = DATTYPE/BITLENGTH maximums of n inputs. Functions use RCA, PPA, or PPA 4-Way respectively
+#elif FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54 
 #include "boolean_adder_bandwidth.hpp"
 #include "boolean_adder_msb.hpp"
 #include "ppa_msb.hpp"
-#define FUNCTION MAXMIN_BENCH //min
+#define FUNCTION MAXMIN_BENCH  // Minimum of a range of secret numbers, n NUM_INPUTS = DATTYPE/BITLENGTH minimums of n inputs. Functions use RCA, PPA, or PPA 4-Way respectively
 #elif FUNCTION_IDENTIFIER == 55
-#define FUNCTION AVG_BENCH //fixed
+#define FUNCTION AVG_BENCH // Fixed point average of a range of secret numbers, n NUM_INPUTS = DATTYPE/BITLENGTH average of n inputs
 #elif FUNCTION_IDENTIFIER == 56
-#define FUNCTION SUM_BENCH
+#define FUNCTION SUM_BENCH // Sum of a range of secret numbers, n NUM_INPUTS = DATTYPE/BITLENGTH sums of n inputs
 #elif FUNCTION_IDENTIFIER == 57
-#define FUNCTION Naive_Intersection_Bench
-#elif FUNCTION_IDENTIFIER == 58
+#define FUNCTION Naive_Intersection_Bench // Naive intersection of two sets of secret numbers, one set is assumed to be tiled. n NUM_INPUTS = 1 intersection of tiled input a and non-tiled input b.
+//Bitsliced Function -> Intersection size is TILZE_SIZE*DATTTYPE. Can be combined with split-roles and multiprocessing to efficiently compute intersection of large sets with small tiles. Tile size can be adjusted.
+#elif FUNCTION_IDENTIFIER == 58 // Bitsliced AES (Reference Code: USUBA). n NUM_INPUTS = DATTYPE*n AES encryptions of blocksize 128.
 #include "AES_BS_SHORT.hpp"
 #define FUNCTION AES_Bench
 #elif FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 60 || FUNCTION_IDENTIFIER == 61
-#include "log_reg.hpp"
-#define FUNCTION Logistic_Regression_Bench
+#include "log_reg.hpp" 
+//Important: Using vectorization, split-roles and multiprocessing will train independent models. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will train a single model without any optimizations.
+#define FUNCTION Logistic_Regression_Bench // Logistic Regression, n NUM_INPUTS = n samples, DATTYPE/BITLENGTH independent models, number of features and training iterations can be adjusted.  
 #elif FUNCTION_IDENTIFIER == 62 || FUNCTION_IDENTIFIER == 63 || FUNCTION_IDENTIFIER == 64
-#define FUNCTION Private_Auction_Bench
+#define FUNCTION Private_Auction_Bench // Private Auction, n NUM_INPUTS = n bids/offers, DATTYPE/BITLENGTH independent auctions, price_range is the number of possible distinct prices, can be adjusted.
+//Important: Using vectorization, split-roles and multiprocessing will conduct multiple independent auctions. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will train a single model without any optimizations.
 #endif
 
 #if FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 62 //RCA
