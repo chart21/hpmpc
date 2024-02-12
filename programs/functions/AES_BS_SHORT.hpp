@@ -166,7 +166,7 @@ S* z9 = new S[NUM_INPUTS];
   t13[i] = y14[i].prepare_and(y17[i]);
   t15[i] = y8[i].prepare_and(y10[i]);
   }
-  Share::communicate()
+  Share::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t2[i].complete_and();
@@ -191,14 +191,14 @@ S* z9 = new S[NUM_INPUTS];
   t25[i] = t23[i] ^ t24[i];
   t26[i] = t25[i].prepare_and(t24[i]);
   }
-  Share::communicate()
+  Share::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t26[i].complete_and();
   t27[i] = t26[i] ^ t22[i];
   t28[i] = t25[i].prepare_and(t27[i]);
   }
-  Share::communicate()
+  Share::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t28[i].complete_and();
@@ -206,7 +206,7 @@ S* z9 = new S[NUM_INPUTS];
   t30[i] = t25[i] ^ t29[i];
   t31[i] = t30[i].prepare_and(t29[i]);
   }
-  Share::communicate()
+  Share::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t31[i].complete_and();
@@ -214,7 +214,7 @@ S* z9 = new S[NUM_INPUTS];
   t33[i] = t30[i] ^ t32[i];
   t34[i] = t33[i].prepare_and(t24[i]);
   }
-  Share::communicate()
+  Share::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t34[i].complete_and();
@@ -222,14 +222,14 @@ S* z9 = new S[NUM_INPUTS];
   t36[i] = t33[i] ^ t35[i];
   t37[i] = t36[i].prepare_and(t29[i]);
   }
-  Share::communicate()
+  Share::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t37[i].complete_and();
   t38[i] = t37[i] ^ t34[i];
   t39[i] = t38[i].prepare_and(t36[i]);
   }
-  Share::communicate()
+  Share::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t39[i].complete_and();
@@ -258,7 +258,7 @@ S* z9 = new S[NUM_INPUTS];
   z16[i] = t45[i].prepare_and(y14[i]);
   z17[i] = t41[i].prepare_and(y8[i]);
   }
-  Share::communicate()
+  Share::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   z0[i].complete_and();
@@ -313,115 +313,115 @@ S* z9 = new S[NUM_INPUTS];
   S5[i] = tc21[i] ^ tc17[i];
   }
   // Clean memory
-  delete[] _tmp1_;
-delete[] _tmp2_;
-delete[] _tmp3_;
-delete[] _tmp4_;
-delete[] t0_;
-delete[] t1_;
-delete[] t10_;
-delete[] t11_;
-delete[] t12_;
-delete[] t13_;
-delete[] t14_;
-delete[] t15_;
-delete[] t16_;
-delete[] t17_;
-delete[] t18_;
-delete[] t19_;
-delete[] t2_;
-delete[] t20_;
-delete[] t21_;
-delete[] t22_;
-delete[] t23_;
-delete[] t24_;
-delete[] t25_;
-delete[] t26_;
-delete[] t27_;
-delete[] t28_;
-delete[] t29_;
-delete[] t3_;
-delete[] t30_;
-delete[] t31_;
-delete[] t32_;
-delete[] t33_;
-delete[] t34_;
-delete[] t35_;
-delete[] t36_;
-delete[] t37_;
-delete[] t38_;
-delete[] t39_;
-delete[] t4_;
-delete[] t40_;
-delete[] t41_;
-delete[] t42_;
-delete[] t43_;
-delete[] t44_;
-delete[] t45_;
-delete[] t5_;
-delete[] t6_;
-delete[] t7_;
-delete[] t8_;
-delete[] t9_;
-delete[] tc1_;
-delete[] tc10_;
-delete[] tc11_;
-delete[] tc12_;
-delete[] tc13_;
-delete[] tc14_;
-delete[] tc16_;
-delete[] tc17_;
-delete[] tc18_;
-delete[] tc2_;
-delete[] tc20_;
-delete[] tc21_;
-delete[] tc26_;
-delete[] tc3_;
-delete[] tc4_;
-delete[] tc5_;
-delete[] tc6_;
-delete[] tc7_;
-delete[] tc8_;
-delete[] tc9_;
-delete[] y1_;
-delete[] y10_;
-delete[] y11_;
-delete[] y12_;
-delete[] y13_;
-delete[] y14_;
-delete[] y15_;
-delete[] y16_;
-delete[] y17_;
-delete[] y18_;
-delete[] y19_;
-delete[] y2_;
-delete[] y20_;
-delete[] y21_;
-delete[] y3_;
-delete[] y4_;
-delete[] y5_;
-delete[] y6_;
-delete[] y7_;
-delete[] y8_;
-delete[] y9_;
-delete[] z0_;
-delete[] z1_;
-delete[] z10_;
-delete[] z11_;
-delete[] z12_;
-delete[] z13_;
-delete[] z14_;
-delete[] z15_;
-delete[] z16_;
-delete[] z17_;
-delete[] z2_;
-delete[] z3_;
-delete[] z4_;
-delete[] z5_;
-delete[] z6_;
-delete[] z7_;
-delete[] z8_;
-delete[] z9_;
+  delete[] _tmp1;
+delete[] _tmp2;
+delete[] _tmp3;
+delete[] _tmp4;
+delete[] t0;
+delete[] t1;
+delete[] t10;
+delete[] t11;
+delete[] t12;
+delete[] t13;
+delete[] t14;
+delete[] t15;
+delete[] t16;
+delete[] t17;
+delete[] t18;
+delete[] t19;
+delete[] t2;
+delete[] t20;
+delete[] t21;
+delete[] t22;
+delete[] t23;
+delete[] t24;
+delete[] t25;
+delete[] t26;
+delete[] t27;
+delete[] t28;
+delete[] t29;
+delete[] t3;
+delete[] t30;
+delete[] t31;
+delete[] t32;
+delete[] t33;
+delete[] t34;
+delete[] t35;
+delete[] t36;
+delete[] t37;
+delete[] t38;
+delete[] t39;
+delete[] t4;
+delete[] t40;
+delete[] t41;
+delete[] t42;
+delete[] t43;
+delete[] t44;
+delete[] t45;
+delete[] t5;
+delete[] t6;
+delete[] t7;
+delete[] t8;
+delete[] t9;
+delete[] tc1;
+delete[] tc10;
+delete[] tc11;
+delete[] tc12;
+delete[] tc13;
+delete[] tc14;
+delete[] tc16;
+delete[] tc17;
+delete[] tc18;
+delete[] tc2;
+delete[] tc20;
+delete[] tc21;
+delete[] tc26;
+delete[] tc3;
+delete[] tc4;
+delete[] tc5;
+delete[] tc6;
+delete[] tc7;
+delete[] tc8;
+delete[] tc9;
+delete[] y1;
+delete[] y10;
+delete[] y11;
+delete[] y12;
+delete[] y13;
+delete[] y14;
+delete[] y15;
+delete[] y16;
+delete[] y17;
+delete[] y18;
+delete[] y19;
+delete[] y2;
+delete[] y20;
+delete[] y21;
+delete[] y3;
+delete[] y4;
+delete[] y5;
+delete[] y6;
+delete[] y7;
+delete[] y8;
+delete[] y9;
+delete[] z0;
+delete[] z1;
+delete[] z10;
+delete[] z11;
+delete[] z12;
+delete[] z13;
+delete[] z14;
+delete[] z15;
+delete[] z16;
+delete[] z17;
+delete[] z2;
+delete[] z3;
+delete[] z4;
+delete[] z5;
+delete[] z6;
+delete[] z7;
+delete[] z8;
+delete[] z9;
 }
 
 template <typename Share>
@@ -433,7 +433,7 @@ void SubBytes__ (/*inputs*/ XOR_Share<DATATYPE,Share> inputSB__[128][NUM_INPUTS]
   // Instructions (body)
   for (int i = 0; i <= 15; i++) {
     SubBytes_single__(inputSB__[((i * 8) + 0)],inputSB__[((i * 8) + 1)],inputSB__[((i * 8) + 2)],inputSB__[((i * 8) + 3)],inputSB__[((i * 8) + 4)],inputSB__[((i * 8) + 5)],inputSB__[((i * 8) + 6)],inputSB__[((i * 8) + 7)],&out__[((i * 8) + 0)],&out__[((i * 8) + 1)],&out__[((i * 8) + 2)],&out__[((i * 8) + 3)],&out__[((i * 8) + 4)],&out__[((i * 8) + 5)],&out__[((i * 8) + 6)],&out__[((i * 8) + 7)]);
-  }
+  
 
 }
 template <typename Share>
@@ -718,38 +718,38 @@ void MixColumn__ (/*inputs*/ XOR_Share<DATATYPE,Share> inp__[128][NUM_INPUTS], /
     MixColumn_single___1__tmp15_[5][i] = MixColumn_single___1__tmp14_[5][i] ^ inp__[29][i];
     MixColumn_single___1__tmp15_[6][i] = MixColumn_single___1__tmp14_[6][i] ^ inp__[30][i];
     MixColumn_single___1__tmp15_[7][i] = MixColumn_single___1__tmp14_[7][i] ^ inp__[31][i];
-    MixColumn__single__1__tmp15_[0][i] = inp__[0][i] ^ inp__[8][i];
-    MixColumn__single__1__tmp15_[1][i] = inp__[1][i] ^ inp__[9][i];
-    MixColumn__single__1__tmp15_[2][i] = inp__[2][i] ^ inp__[10][i];
-    MixColumn__single__1__tmp15_[3][i] = inp__[3][i] ^ inp__[11][i];
-    MixColumn__single__1__tmp15_[4][i] = inp__[4][i] ^ inp__[12][i];
-    MixColumn__single__1__tmp15_[5][i] = inp__[5][i] ^ inp__[13][i];
-    MixColumn__single__1__tmp15_[6][i] = inp__[6][i] ^ inp__[14][i];
-    MixColumn__single__1__tmp15_[7][i] = inp__[7][i] ^ inp__[15][i];
-    MixColumn__single__1__tmp17_[0][i] = MixColumn__single__1__tmp15_[0][i] ^ MixColumn__single__1_times3___2__tmp6_[0][i];
-    MixColumn__single__1__tmp17_[1][i] = MixColumn__single__1__tmp15_[1][i] ^ MixColumn__single__1_times3___2__tmp6_[1][i];
-    MixColumn__single__1__tmp17_[2][i] = MixColumn__single__1__tmp15_[2][i] ^ MixColumn__single__1_times3___2__tmp6_[2][i];
-    MixColumn__single__1__tmp17_[3][i] = MixColumn__single__1__tmp15_[3][i] ^ MixColumn__single__1_times3___2__tmp6_[3][i];
-    MixColumn__single__1__tmp17_[4][i] = MixColumn__single__1__tmp15_[4][i] ^ MixColumn__single__1_times3___2__tmp6_[4][i];
-    MixColumn__single__1__tmp17_[5][i] = MixColumn__single__1__tmp15_[5][i] ^ MixColumn__single__1_times3___2__tmp6_[5][i];
-    MixColumn__single__1__tmp17_[6][i] = MixColumn__single__1__tmp15_[6][i] ^ MixColumn__single__1_times3___2__tmp6_[6][i];
-    MixColumn__single__1__tmp17_[7][i] = MixColumn__single__1__tmp15_[7][i] ^ MixColumn__single__1_times3___2__tmp6_[7][i];
-    MixColumn__single__1_times3___3__tmp6_[0][i] = inp__[25][i] ^ MixColumn__single__1_times2___1__tmp5_[7][i];
-    MixColumn__single__1_times3___3__tmp6_[1][i] = inp__[26][i] ^ MixColumn__single__1_times2___1__tmp5_[7][i];
-    MixColumn__single__1_times3___3__tmp6_[2][i] = inp__[27][i] ^ MixColumn__single__1_times2___1__tmp5_[7][i];
-    MixColumn__single__1_times3___3__tmp6_[3][i] = inp__[28][i] ^ inp__[24][i];
-    MixColumn__single__1_times3___3__tmp6_[4][i] = inp__[29][i] ^ inp__[24][i];
-    MixColumn__single__1_times3___3__tmp6_[5][i] = inp__[30][i] ^ MixColumn__single__1_times2___1__tmp5_[7][i];
-    MixColumn__single__1_times3___3__tmp6_[6][i] = inp__[31][i] ^ inp__[24][i];
-    MixColumn__single__1_times3___3__tmp6_[7][i] = MixColumn__single__1_times2___1__tmp5_[7][i] ^ inp__[24][i];
-    MixColumn__single__1__tmp18_[0][i] = MixColumn__single__1_times3___3__tmp6_[0][i] ^ inp__[24][i];
-    MixColumn__single__1__tmp18_[1][i] = MixColumn__single__1_times3___3__tmp6_[1][i] ^ inp__[25][i];
-    MixColumn__single__1__tmp18_[2][i] = MixColumn__single__1_times3___3__tmp6_[2][i] ^ inp__[26][i];
-    MixColumn__single__1__tmp18_[3][i] = MixColumn__single__1_times3___3__tmp6_[3][i] ^ inp__[27][i];
-    MixColumn__single__1__tmp18_[4][i] = MixColumn__single__1_times3___3__tmp6_[4][i] ^ inp__[28][i];
-    MixColumn__single__1__tmp18_[5][i] = MixColumn__single__1_times3___3__tmp6_[5][i] ^ inp__[29][i];
-    MixColumn__single__1__tmp18_[6][i] = MixColumn__single__1_times3___3__tmp6_[6][i] ^ inp__[30][i];
-    MixColumn__single__1__tmp18_[7][i] = MixColumn__single__1_times3___3__tmp6_[7][i] ^ inp__[31][i];
+    MixColumn_single__1__tmp15_[0][i] = inp__[0][i] ^ inp__[8][i];
+    MixColumn_single__1__tmp15_[1][i] = inp__[1][i] ^ inp__[9][i];
+    MixColumn_single__1__tmp15_[2][i] = inp__[2][i] ^ inp__[10][i];
+    MixColumn_single__1__tmp15_[3][i] = inp__[3][i] ^ inp__[11][i];
+    MixColumn_single__1__tmp15_[4][i] = inp__[4][i] ^ inp__[12][i];
+    MixColumn_single__1__tmp15_[5][i] = inp__[5][i] ^ inp__[13][i];
+    MixColumn_single__1__tmp15_[6][i] = inp__[6][i] ^ inp__[14][i];
+    MixColumn_single__1__tmp15_[7][i] = inp__[7][i] ^ inp__[15][i];
+    MixColumn_single__1__tmp17_[0][i] = MixColumn__single__1__tmp15_[0][i] ^ MixColumn__single__1_times3___2__tmp6_[0][i];
+    MixColumn_single__1__tmp17_[1][i] = MixColumn__single__1__tmp15_[1][i] ^ MixColumn__single__1_times3___2__tmp6_[1][i];
+    MixColumn_single__1__tmp17_[2][i] = MixColumn__single__1__tmp15_[2][i] ^ MixColumn__single__1_times3___2__tmp6_[2][i];
+    MixColumn_single__1__tmp17_[3][i] = MixColumn__single__1__tmp15_[3][i] ^ MixColumn__single__1_times3___2__tmp6_[3][i];
+    MixColumn_single__1__tmp17_[4][i] = MixColumn__single__1__tmp15_[4][i] ^ MixColumn__single__1_times3___2__tmp6_[4][i];
+    MixColumn_single__1__tmp17_[5][i] = MixColumn__single__1__tmp15_[5][i] ^ MixColumn__single__1_times3___2__tmp6_[5][i];
+    MixColumn_single__1__tmp17_[6][i] = MixColumn__single__1__tmp15_[6][i] ^ MixColumn__single__1_times3___2__tmp6_[6][i];
+    MixColumn_single__1__tmp17_[7][i] = MixColumn__single__1__tmp15_[7][i] ^ MixColumn__single__1_times3___2__tmp6_[7][i];
+    MixColumn_single__1_times3___3__tmp6_[0][i] = inp__[25][i] ^ MixColumn__single__1_times2___1__tmp5_[7][i];
+    MixColumn_single__1_times3___3__tmp6_[1][i] = inp__[26][i] ^ MixColumn__single__1_times2___1__tmp5_[7][i];
+    MixColumn_single__1_times3___3__tmp6_[2][i] = inp__[27][i] ^ MixColumn__single__1_times2___1__tmp5_[7][i];
+    MixColumn_single__1_times3___3__tmp6_[3][i] = inp__[28][i] ^ inp__[24][i];
+    MixColumn_single__1_times3___3__tmp6_[4][i] = inp__[29][i] ^ inp__[24][i];
+    MixColumn_single__1_times3___3__tmp6_[5][i] = inp__[30][i] ^ MixColumn__single__1_times2___1__tmp5_[7][i];
+    MixColumn_single__1_times3___3__tmp6_[6][i] = inp__[31][i] ^ inp__[24][i];
+    MixColumn_single__1_times3___3__tmp6_[7][i] = MixColumn__single__1_times2___1__tmp5_[7][i] ^ inp__[24][i];
+    MixColumn_single__1__tmp18_[0][i] = MixColumn__single__1_times3___3__tmp6_[0][i] ^ inp__[24][i];
+    MixColumn_single__1__tmp18_[1][i] = MixColumn__single__1_times3___3__tmp6_[1][i] ^ inp__[25][i];
+    MixColumn_single__1__tmp18_[2][i] = MixColumn__single__1_times3___3__tmp6_[2][i] ^ inp__[26][i];
+    MixColumn_single__1__tmp18_[3][i] = MixColumn__single__1_times3___3__tmp6_[3][i] ^ inp__[27][i];
+    MixColumn_single__1__tmp18_[4][i] = MixColumn__single__1_times3___3__tmp6_[4][i] ^ inp__[28][i];
+    MixColumn_single__1__tmp18_[5][i] = MixColumn__single__1_times3___3__tmp6_[5][i] ^ inp__[29][i];
+    MixColumn_single__1__tmp18_[6][i] = MixColumn__single__1_times3___3__tmp6_[6][i] ^ inp__[30][i];
+    MixColumn_single__1__tmp18_[7][i] = MixColumn__single__1_times3___3__tmp6_[7][i] ^ inp__[31][i];
     out__[16][i] = MixColumn__single__1__tmp17_[0][i] ^ MixColumn__single__1__tmp18_[0][i];
     out__[17][i] = MixColumn__single__1__tmp17_[1][i] ^ MixColumn__single__1__tmp18_[1][i];
     out__[18][i] = MixColumn__single__1__tmp17_[2][i] ^ MixColumn__single__1__tmp18_[2][i];
