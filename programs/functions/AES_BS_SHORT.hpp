@@ -733,8 +733,8 @@ void MixColumn__ (/*inputs*/ XOR_Share<DATATYPE,Share> inp__[128][NUM_INPUTS], /
     MixColumn_single___1__tmp17_[3][i] = MixColumn_single___1__tmp15_[3][i] ^ MixColumn_single___1_times3___2__tmp6_[3][i];
     MixColumn_single___1__tmp17_[4][i] = MixColumn_single___1__tmp15_[4][i] ^ MixColumn_single___1_times3___2__tmp6_[4][i];
     MixColumn_single___1__tmp17_[5][i] = MixColumn_single___1__tmp15_[5][i] ^ MixColumn_single___1_times3___2__tmp6_[5][i];
-    MixColumn_single____1__tmp17_[6][i] = MixColumn_single___1__tmp15_[6][i] ^ MixColumn_single___1_times3___2__tmp6_[6][i];
-    MixColumn_single___1__tmp17_[7][i] = MixColumn_single__1__tmp15_[7][i] ^ MixColumn_single__1_times3___2__tmp6_[7][i];
+    MixColumn_single___1__tmp17_[6][i] = MixColumn_single___1__tmp15_[6][i] ^ MixColumn_single___1_times3___2__tmp6_[6][i];
+    MixColumn_single___1__tmp17_[7][i] = MixColumn_single___1__tmp15_[7][i] ^ MixColumn_single___1_times3___2__tmp6_[7][i];
     MixColumn_single___1_times3___3__tmp6_[0][i] = inp__[25][i] ^ MixColumn_single___1_times2___1__tmp5_[7][i];
     MixColumn_single___1_times3___3__tmp6_[1][i] = inp__[26][i] ^ MixColumn_single___1_times2___1__tmp5_[7][i];
     MixColumn_single___1_times3___3__tmp6_[2][i] = inp__[27][i] ^ MixColumn_single___1_times2___1__tmp5_[7][i];
@@ -1362,16 +1362,16 @@ void AddRoundKey__ (/*inputs*/ XOR_Share<DATATYPE,Share> a__[128][NUM_INPUTS],XO
 }
 
 /* main function */
-template <typename DATATYPE,typename Share>
-void AES__ (/*inputs*/ XOR_Share<DATATYPE,Share> plain__[128][NUM_INPUTS],XOR_Share<DATATYPE,Share> key__[11][128][NUM_INPUTS], /*outputs*/ XOR_Share<DATATYPE,Share> cipher__[128][NUM_INPUTS]) {
+template <typename Share>
+void AES__ (/*inputs*/ Share plain[128][NUM_INPUTS],Share key[11][128][NUM_INPUTS], /*outputs*/ Share cipher[128][NUM_INPUTS]) {
   
   // Variables declaration
-  auto _tmp23_ = new XOR_Share<DATATYPE,Share>[128][NUM_INPUTS];
-  auto _tmp24_ = new XOR_Share<DATATYPE,Share>[128][NUM_INPUTS];
-  auto _tmp25_ = new XOR_Share<DATATYPE,Share>[128][NUM_INPUTS];
-  auto _tmp26_ = new XOR_Share<DATATYPE,Share>[128][NUM_INPUTS];
-  auto _tmp27_ = new XOR_Share<DATATYPE,Share>[128][NUM_INPUTS];
-  auto tmp__ = new XOR_Share<DATATYPE,Share>[128][NUM_INPUTS];
+  auto _tmp23_ = new Share[128][NUM_INPUTS];
+  auto _tmp24_ = new Share[128][NUM_INPUTS];
+  auto _tmp25_ = new Share[128][NUM_INPUTS];
+  auto _tmp26_ = new Share[128][NUM_INPUTS];
+  auto _tmp27_ = new Share[128][NUM_INPUTS];
+  auto tmp__ = new Share[128][NUM_INPUTS];
   
   //Instructions (body)
   AddRoundKey__(plain__,key__[0],tmp__);
