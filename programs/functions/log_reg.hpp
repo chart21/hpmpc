@@ -8,7 +8,6 @@ template<typename Share>
 void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS][NUM_FEATURES], const Additive_Share<DATATYPE, Share> y_Shared[NUM_INPUTS], const Additive_Share<DATATYPE, Share> weights[NUM_FEATURES], Additive_Share<DATATYPE, Share> gradient[NUM_FEATURES])
 {
     // Compute gradient
-    Additive_Share<DATATYPE, Share> gradient[NUM_FEATURES];
     auto z = new Additive_Share<DATATYPE, Share>[NUM_INPUTS]{0};
     for(int i = 0; i < NUM_INPUTS; i++)
     {
@@ -35,7 +34,7 @@ void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS]
 //DRELU
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        sigmoid[i] = 1 - d_1[i].prepare_dot(z[i] + zero_point_five);
+        sigmoid[i] = Additive_Share<DATATYPE, Share>(1) - d_1[i].prepare_dot(z[i] + zero_point_five);
         sigmoid[i].mask_and_send_dot();
     }
     Share::communicate();
