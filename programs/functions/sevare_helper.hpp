@@ -153,7 +153,7 @@ using sint = sint_t<A>;
     { 
     for(int i = 0; i < counter; i++)
     {
-        max_idx[i+b*len] = max_idx[i+b*len] * (val[2*i+b*og_len] - val[2*i+1 + b*og_len]);
+        max_idx[i+b*len] = max_idx[i+b*len].prepare_mult((val[2*i+b*og_len] - val[2*i+1 + b*og_len]));
     }
     }
     Share::communicate();
@@ -259,7 +259,7 @@ void intersect(const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* a, con
     for(int i = 0; i < len_a; i++)
     {
         intersect[i] = SET_ALL_ZERO();
-        for (int j = 1; j < len_b; i++) 
+        for (int j = 1; j < len_b; j++) 
           intersect[i] = intersect[i] ^ tmp[i*len_b + j][0]; //intersect is 1 if element has been found
     }
         
