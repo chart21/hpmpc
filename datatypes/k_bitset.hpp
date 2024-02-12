@@ -83,6 +83,14 @@ public:
         return result;
     }
 
+        sbitset_t prepare_and(const sbitset_t & other) const {
+        sbitset_t result;
+        for(int i = 0; i < k; ++i) {
+            result[i] = shares[i].prepare_and(other[i]);
+        }
+        return result;
+        }
+
         void complete_and() {
         for(int i = 0; i < k; ++i) {
             shares[i].complete_and();
