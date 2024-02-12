@@ -165,7 +165,7 @@ S* z9 = new S[NUM_INPUTS];
   t13[i] = y14[i].prepare_and(y17[i]);
   t15[i] = y8[i].prepare_and(y10[i]);
   }
-  Share::communicate();
+  S::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t2[i].complete_and();
@@ -190,14 +190,14 @@ S* z9 = new S[NUM_INPUTS];
   t25[i] = t23[i] ^ t24[i];
   t26[i] = t25[i].prepare_and(t24[i]);
   }
-  Share::communicate();
+  S::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t26[i].complete_and();
   t27[i] = t26[i] ^ t22[i];
   t28[i] = t25[i].prepare_and(t27[i]);
   }
-  Share::communicate();
+  S::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t28[i].complete_and();
@@ -205,7 +205,7 @@ S* z9 = new S[NUM_INPUTS];
   t30[i] = t25[i] ^ t29[i];
   t31[i] = t30[i].prepare_and(t29[i]);
   }
-  Share::communicate();
+  S::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t31[i].complete_and();
@@ -213,7 +213,7 @@ S* z9 = new S[NUM_INPUTS];
   t33[i] = t30[i] ^ t32[i];
   t34[i] = t33[i].prepare_and(t24[i]);
   }
-  Share::communicate();
+  S::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t34[i].complete_and();
@@ -221,14 +221,14 @@ S* z9 = new S[NUM_INPUTS];
   t36[i] = t33[i] ^ t35[i];
   t37[i] = t36[i].prepare_and(t29[i]);
   }
-  Share::communicate();
+  S::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t37[i].complete_and();
   t38[i] = t37[i] ^ t34[i];
   t39[i] = t38[i].prepare_and(t36[i]);
   }
-  Share::communicate();
+  S::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   t39[i].complete_and();
@@ -257,7 +257,7 @@ S* z9 = new S[NUM_INPUTS];
   z16[i] = t45[i].prepare_and(y14[i]);
   z17[i] = t41[i].prepare_and(y8[i]);
   }
-  Share::communicate();
+  S::communicate();
   for(int i = 0; i < NUM_INPUTS; i++)
   {
   z0[i].complete_and();
@@ -423,8 +423,8 @@ delete[] z8;
 delete[] z9;
 }
 
-template <typename Share>
-void SubBytes__ (/*inputs*/ XOR_Share<DATATYPE,Share> inputSB__[128][NUM_INPUTS], /*outputs*/ XOR_Share<DATATYPE,Share> out__[128][NUM_INPUTS]) {
+template <typename S>
+void SubBytes__ (S inputSB__[128][NUM_INPUTS], S out__[128][NUM_INPUTS]) {
   
   // Variables declaration
   ;
@@ -436,8 +436,8 @@ void SubBytes__ (/*inputs*/ XOR_Share<DATATYPE,Share> inputSB__[128][NUM_INPUTS]
 
 }
 }
-template <typename Share>
-void ShiftRows__ (/*inputs*/ XOR_Share<DATATYPE,Share> inputSR__[128][NUM_INPUTS], /*outputs*/ XOR_Share<DATATYPE,Share> output__[128][NUM_INPUTS]) {
+template <typename S>
+void ShiftRows__ (S inputSR__[128][NUM_INPUTS], S output__[128][NUM_INPUTS]) {
   
   // Variables declaration
   ;
@@ -556,75 +556,75 @@ void ShiftRows__ (/*inputs*/ XOR_Share<DATATYPE,Share> inputSR__[128][NUM_INPUTS
 
 
 
-template <typename Share>
-void MixColumn__ (/*inputs*/ XOR_Share<DATATYPE,Share> inp__[128][NUM_INPUTS], /*outputs*/ XOR_Share<DATATYPE,Share> out__[128][NUM_INPUTS])
+template <typename S>
+void MixColumn__ (S inp__[128][NUM_INPUTS], /*outputs*/ S out__[128][NUM_INPUTS])
 {
   // Variables declaration
-  auto MixColumn_single___1__tmp10_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp12_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp13_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp14_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp15_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp17_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp18_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp19_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp20_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp21_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp7_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp8_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1__tmp9_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1_times2___1__tmp5_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1_times3___1__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1_times3___2__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___1_times3___3__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp10_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp12_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp13_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp14_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp15_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp17_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp18_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp19_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp20_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp21_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp7_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp8_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2__tmp9_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2_times3___1__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2_times3___2__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___2_times3___3__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp10_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp12_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp13_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp14_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp15_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp17_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp18_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp19_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp20_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp21_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp7_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp8_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3__tmp9_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3_times3___1__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3_times3___2__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___3_times3___3__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp10_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp12_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp13_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp14_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp15_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp17_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp18_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp19_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp20_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp21_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp7_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp8_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4__tmp9_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4_times3___1__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4_times3___2__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
-  auto MixColumn_single___4_times3___3__tmp6_ = new XOR_Share<DATATYPE,Share>[8][NUM_INPUTS];
+  auto MixColumn_single___1__tmp10_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp12_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp13_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp14_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp15_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp17_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp18_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp19_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp20_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp21_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp7_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp8_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1__tmp9_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1_times2___1__tmp5_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1_times3___1__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1_times3___2__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___1_times3___3__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp10_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp12_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp13_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp14_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp15_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp17_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp18_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp19_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp20_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp21_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp7_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp8_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2__tmp9_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2_times3___1__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2_times3___2__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___2_times3___3__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp10_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp12_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp13_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp14_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp15_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp17_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp18_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp19_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp20_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp21_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp7_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp8_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3__tmp9_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3_times3___1__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3_times3___2__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___3_times3___3__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp10_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp12_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp13_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp14_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp15_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp17_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp18_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp19_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp20_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp21_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp7_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp8_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4__tmp9_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4_times3___1__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4_times3___2__tmp6_ = new S[NUM_INPUTS];
+  auto MixColumn_single___4_times3___3__tmp6_ = new S[NUM_INPUTS];
 
   // Instructions (body)
   for (int i = 0; i < NUM_INPUTS; i++)
@@ -1346,8 +1346,8 @@ delete[] MixColumn_single___4_times3___3__tmp6_;
 }
 }
 
-template <typename DATATYPE,typename Share>
-void AddRoundKey__ (/*inputs*/ XOR_Share<DATATYPE,Share> a__[128][NUM_INPUTS],XOR_Share<DATATYPE,Share> b__[128][NUM_INPUTS], /*outputs*/ XOR_Share<DATATYPE,Share> c__[128][NUM_INPUTS]) {
+template <typename S>
+void AddRoundKey__ (S a__[128][NUM_INPUTS],S b__[128][NUM_INPUTS],S c__[128][NUM_INPUTS]) {
   
   // Variables declaration
   ;
@@ -1361,16 +1361,16 @@ void AddRoundKey__ (/*inputs*/ XOR_Share<DATATYPE,Share> a__[128][NUM_INPUTS],XO
 }
 
 /* main function */
-template <typename Share>
-void AES__ (/*inputs*/ Share plain__[128][NUM_INPUTS],Share key__[11][128][NUM_INPUTS], /*outputs*/ Share cipher__[128][NUM_INPUTS]) {
+template <typename S>
+void AES__ (/*inputs*/ S plain__[128][NUM_INPUTS],S key__[11][128][NUM_INPUTS], /*outputs*/ S cipher__[128][NUM_INPUTS]) {
   
   // Variables declaration
-  auto _tmp23_ = new Share[128][NUM_INPUTS];
-  auto _tmp24_ = new Share[128][NUM_INPUTS];
-  auto _tmp25_ = new Share[128][NUM_INPUTS];
-  auto _tmp26_ = new Share[128][NUM_INPUTS];
-  auto _tmp27_ = new Share[128][NUM_INPUTS];
-  auto tmp__ = new Share[128][NUM_INPUTS];
+  auto _tmp23_ = new S[128][NUM_INPUTS];
+  auto _tmp24_ = new S[128][NUM_INPUTS];
+  auto _tmp25_ = new S[128][NUM_INPUTS];
+  auto _tmp26_ = new S[128][NUM_INPUTS];
+  auto _tmp27_ = new S[128][NUM_INPUTS];
+  auto tmp__ = new S[128][NUM_INPUTS];
   
   //Instructions (body)
   AddRoundKey__(plain__,key__[0],tmp__);
