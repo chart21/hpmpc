@@ -77,7 +77,7 @@ void Bind(int port) {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
   std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    while (bind(sock_, (struct sockaddr *)&address, sizeof(address)) < 0) {
+    while (::bind(sock_, (struct sockaddr *)&address, sizeof(address)) < 0) {
       /* throw std::runtime_error("Error connecting to remote server"); */
     if( std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - t1).count() > CONNECTION_TIMEOUT) {
     throw std::runtime_error("Timeout exceeded when trying to binding socket to local address on port " + std::to_string(port));

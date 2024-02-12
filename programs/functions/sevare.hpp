@@ -1,23 +1,11 @@
 #pragma once
-#include "sevare_helper.hpp"
-#include "../../protocols/Protocols.h"
 #include <cstdint>
 #include <cstring>
 #include <iostream>
-#include <bitset>
+#include "sevare_helper.hpp"
+#include "../../protocols/Protocols.h"
 #include "../../protocols/XOR_Share.hpp"
 #include "../../protocols/Additive_Share.hpp"
-#include "../../protocols/Matrix_Share.hpp"
-#include "../../datatypes/k_bitset.hpp"
-#include "../../datatypes/k_sint.hpp"
-#include "boolean_adder_bandwidth.hpp"
-#include "boolean_adder_msb.hpp"
-#include "ppa_msb.hpp"
-#include "ppa.hpp"
-#include "ppa_msb_unsafe.hpp"
-#include "ppa_msb_4_way.hpp"
-#include "AES_BS_SHORT.hpp"
-#include "log_reg.hpp"
 #include "../../utils/print.hpp"
 
 #include <cmath>
@@ -38,10 +26,19 @@
 #elif FUNCTION_IDENTIFIER == 45
 #define FUNCTION REVEAL_BENCH
 #elif FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47 || FUNCTION_IDENTIFIER == 48
+#include "boolean_adder_bandwidth.hpp"
+#include "boolean_adder_msb.hpp"
+#include "ppa_msb.hpp"
 #define FUNCTION COMP_BENCH
 #elif FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 51
+#include "boolean_adder_bandwidth.hpp"
+#include "boolean_adder_msb.hpp"
+#include "ppa_msb.hpp"
 #define FUNCTION MAXMIN_BENCH //max
 #elif FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54
+#include "boolean_adder_bandwidth.hpp"
+#include "boolean_adder_msb.hpp"
+#include "ppa_msb.hpp"
 #define FUNCTION MAXMIN_BENCH //min
 #elif FUNCTION_IDENTIFIER == 55
 #define FUNCTION AVG_BENCH //fixed
@@ -50,8 +47,10 @@
 #elif FUNCTION_IDENTIFIER == 57
 #define FUNCTION Naive_Intersection_Bench
 #elif FUNCTION_IDENTIFIER == 58
+#include "AES_BS_SHORT.hpp"
 #define FUNCTION AES_Bench
 #elif FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 60 || FUNCTION_IDENTIFIER == 61
+#include "log_reg.hpp"
 #define FUNCTION Logistic_Regression_Bench
 #elif FUNCTION_IDENTIFIER == 62 || FUNCTION_IDENTIFIER == 63 || FUNCTION_IDENTIFIER == 64
 #define FUNCTION Private_Auction_Bench
@@ -68,6 +67,12 @@
 #define ONLINE_OPTIMIZED 1
 #endif
 
+
+//Boilerplate
+#define RESULTTYPE DATATYPE
+void generateElements()
+{}
+
 //if placed after a function, gurantees that all parties have finished computation and communication
 template<typename Share>
 void dummy_reveal()
@@ -79,7 +84,35 @@ void dummy_reveal()
     dummy.complete_reveal_to_all();
 }
 
-    template<typename Share>
+#if FUNCTION_IDENTIFIER == 40
+template<typename Share>
+void AND_BENCH(DATATYPE* res)
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    auto a = new S[NUM_INPUTS];
+    auto b = new S[NUM_INPUTS];
+    auto c = new S[NUM_INPUTS];
+    Share::communicate(); // dummy round
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        c[i] = a[i] & b[i];
+    }
+    Share::communicate();
+
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        c[i].complete_and();
+    }
+
+    Share::communicate();
+
+    dummy_reveal<Share>();
+
+}
+#endif
+
+#if FUNCTION_IDENTIFIER == 41 || FUNCTION_IDENTIFIER == 42
+template<typename Share>
 void MULT_BENCH(DATATYPE* res)
 {
     using S = Additive_Share<DATATYPE, Share>;
@@ -110,7 +143,10 @@ void MULT_BENCH(DATATYPE* res)
 
     dummy_reveal<Share>();
 }
+#endif
 
+
+#if FUNCTION_IDENTIFIER == 43
 template<typename Share>
 void DIV_BENCH(DATATYPE* res)
 {
@@ -148,8 +184,49 @@ void DIV_BENCH(DATATYPE* res)
 
     dummy_reveal<Share>();
 }
+#endif
 
+#if FUNCTION_IDENTIFIER == 44
+template<typename Share>
+void REVEAL_BENCH(DATATYPE* res)
+{
+    using A = Additive_Share<DATATYPE, Share>;
+    auto inputs = new A[NUM_INPUTS];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        inputs[i].prepare_reveal_to_all();
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        inputs[i].complete_reveal_to_all();
+    }
 
+    dummy_reveal<Share>();
+}
+#endif
+
+#if FUNCTION_IDENTIFIER == 45
+template<typename Share>
+void SHARE_BENCH(DATATYPE* res)
+{
+    using A = Additive_Share<DATATYPE, Share>;
+    auto inputs = new A[NUM_INPUTS];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        inputs[i].template preapre_receive_from<P_0>(0);
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        inputs[i].template complete_receive_from<P_0>(0);
+    }
+
+    dummy_reveal<Share>();
+}
+#endif
+
+#if FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47 || FUNCTION_IDENTIFIER == 48
 template<typename Share>
 void COMP_BENCH(DATATYPE* res)
 {
@@ -168,33 +245,9 @@ void COMP_BENCH(DATATYPE* res)
 
     dummy_reveal<Share>();
 }
+#endif
 
-
-template<typename Share>
-void AND_BENCH(DATATYPE* res)
-{
-    using S = XOR_Share<DATATYPE, Share>;
-    auto a = new S[NUM_INPUTS];
-    auto b = new S[NUM_INPUTS];
-    auto c = new S[NUM_INPUTS];
-    Share::communicate(); // dummy round
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        c[i] = a[i] & b[i];
-    }
-    Share::communicate();
-
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        c[i].complete_and();
-    }
-
-    Share::communicate();
-
-    dummy_reveal<Share>();
-
-}
-
+#if FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 51 || FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54
 template<typename Share>
 void MAXMIN_BENCH(DATATYPE *res)
 {
@@ -203,17 +256,18 @@ using A = Additive_Share<DATATYPE, Share>;
 using sint = sint_t<A>;
 const int k = BITLENGTH;
 auto inputs = new sint[NUM_INPUTS];
-#if FUNCTION_IDENTIFIER == 45 || FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47
+#if FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 51
 auto max_val = max_min<k>(inputs, inputs+NUM_INPUTS, true);
-#elif FUNCTION_IDENTIFIER == 55 || FUNCTION_IDENTIFIER == 56 || FUNCTION_IDENTIFIER == 57
+#elif FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54
 auto min_val = max_min<k>(inputs, inputs+NUM_INPUTS, false);
 #endif
 delete[] inputs;
 
 dummy_reveal<Share>();
 }
+#endif
 
-
+#if FUNCTION_IDENTIFIER == 55
 template<typename Share>
 void AVG_BENCH(DATATYPE* res)
 {
@@ -231,7 +285,9 @@ void AVG_BENCH(DATATYPE* res)
 
     dummy_reveal<Share>();
 }
+#endif
 
+#if FUNCTION_IDENTIFIER == 56
 template<typename Share>
 void SUM_BENCH(DATATYPE* res)
 {
@@ -246,44 +302,11 @@ void SUM_BENCH(DATATYPE* res)
 
     dummy_reveal<Share>();
 }
-
-template<typename Share>
-void REVEAL_BENCH(DATATYPE* res)
-{
-    using A = Additive_Share<DATATYPE, Share>;
-    auto inputs = new A[NUM_INPUTS];
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        inputs[i].prepare_reveal_to_all();
-    }
-    Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        inputs[i].complete_reveal_to_all();
-    }
-
-    dummy_reveal<Share>();
-}
-
-template<typename Share>
-void SHARE_BENCH(DATATYPE* res)
-{
-    using A = Additive_Share<DATATYPE, Share>;
-    auto inputs = new A[NUM_INPUTS];
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        inputs[i].template preapre_receive_from<P_0>(0);
-    }
-    Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        inputs[i].template complete_receive_from<P_0>(0);
-    }
-
-    dummy_reveal<Share>();
-}
+#endif
 
 
+
+#if FUNCTION_IDENTIFIER == 57
 template<typename Share>
 void Naive_Intersection_Bench(DATATYPE *res)
 {
@@ -297,7 +320,9 @@ void Naive_Intersection_Bench(DATATYPE *res)
 
    dummy_reveal<Share>();
 }
+#endif
 
+#if FUNCTION_IDENTIFIER == 58
 template<typename Share>
 void AES_Bench(DATATYPE *res)
 {
@@ -307,7 +332,9 @@ void AES_Bench(DATATYPE *res)
     auto cipher = new S[128][NUM_INPUTS];
     AES__<S>(plain, key, cipher);
 }
+#endif
 
+#if FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 60 || FUNCTION_IDENTIFIER == 61
 template<typename Share>
 void Logistic_Regression_Bench(DATATYPE *res)
 {
@@ -316,6 +343,9 @@ void Logistic_Regression_Bench(DATATYPE *res)
     auto weights = new Additive_Share<DATATYPE, Share>[NUM_FEATURES];
     logistic_regression<Share>(X_Shared, y_Shared, weights);
 }
+#endif
+
+#if FUNCTION_IDENTIFIER == 62 || FUNCTION_IDENTIFIER == 63 || FUNCTION_IDENTIFIER == 64
 template<typename Share>
 void Private_Auction_Bench(DATATYPE *res)
 {
@@ -340,3 +370,4 @@ void Private_Auction_Bench(DATATYPE *res)
 
 
 }
+#endif
