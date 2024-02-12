@@ -44,7 +44,7 @@ void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS]
     }
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        sigmoid[i] = ( 1 - d_0[i]).prepare_dot(sigmoid[i]);
+        sigmoid[i] = ( Additive_Share<DATATYPE, Share>(1) - d_0[i]).prepare_dot(sigmoid[i]);
         sigmoid[i].mask_and_send_dot();
     }
     Share::communicate();
