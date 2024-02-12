@@ -24,11 +24,14 @@
 #include <algorithm>
 #include <assert.h>
 #if FUNCTION_IDENTIFIER == 43 || FUNCTION_IDENTIFIER == 45 || FUNCTION_IDENTIFIER == 46
-#define RCA 1
+#define BANDWIDTH_OPTIMIZED 1
+#define ONLINE_OPTIMIZED 0
 #elif FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 55 || FUNCTION_IDENTIFIER == 57
-#define PPA2 1
+#define BANDWIDTH_OPTIMIZED 0
+#define ONLINE_OPTIMIZED 0
 #elif FUNCTION_IDENTIFIER == 54 || FUNCTION_IDENTIFIER == 56 || FUNCTION_IDENTIFIER == 58
-#define PPA4 1
+#define BANDWIDTH_OPTIMIZED 0
+#define ONLINE_OPTIMIZED 1
 #endif
 
 
@@ -87,12 +90,12 @@ Bitset *s2 = new Bitset[len];
         s2[i].complete_A2B_S2();
     }
 
-#if RCA == 1
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     std::vector<BooleanAdder_MSB<bk-bm,S>> adders;
-#elif PPA2 == 1
-    std::vector<PPA_MSB<bk-bm,S>> adders;
-#elif PPA4 == 1
+#elif ONLINE_OPTIMIZED == 1 && BANDWIDTH_OPTIMIZED == 0
     std::vector<PPA_MSB_4Way<bk-bm,S>> adders;
+#elif ONLINE_OPTIMIZED == 0 && BANDWIDTH_OPTIMIZED == 0
+    std::vector<PPA_MSB<bk-bm,S>> adders;
 #endif
     
     adders.reserve(len);

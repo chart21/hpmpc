@@ -16,7 +16,8 @@
 #include "ppa.hpp"
 #include "ppa_msb_unsafe.hpp"
 #include "ppa_msb_4_way.hpp"
-
+#include "AES_BS_SHORT.hpp"
+#include "log_reg.hpp"
 #include "../../utils/print.hpp"
 
 #include <cmath>
@@ -25,31 +26,46 @@
 /* #include "ppa.hpp" */
 // 40: 1M Mult (int), 41: 1M Mult (fixed), 42: 1M Div (fixed), 43: 1M comparison, 44: 1M bit_ands, 45: 1M max, 46: 1M min, 47: 1M avg (fixed), 48: 1M sum, 49: Naive Intersection, 50: AES, 51: Logistic Regression, 52: Private Auction
 #if FUNCTION_IDENTIFIER == 40
-#define FUNCTION MULT_BENCH //int
-#elif FUNCTION_IDENTIFIER == 41
-#define FUNCTION MULT_BENCH //fixed
-#elif FUNCTION_IDENTIFIER == 42
-#define FUNCTION DIV_BENCH //fixed
-#elif FUNCTION_IDENTIFIER == 43 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54
-#define FUNCTION COMP_BENCH
-#elif FUNCTION_IDENTIFIER == 44
 #define FUNCTION AND_BENCH
-#elif FUNCTION_IDENTIFIER == 45 || FUNCTION_IDENTIFIER == 55 || FUNCTION_IDENTIFIER == 56
+#elif FUNCTION_IDENTIFIER == 41
+#define FUNCTION MULT_BENCH //int
+#elif FUNCTION_IDENTIFIER == 42
+#define FUNCTION MULT_BENCH //fixed
+#elif FUNCTION_IDENTIFIER == 43
+#define FUNCTION DIV_BENCH //fixed
+#elif FUNCTION_IDENTIFIER == 44
+#define FUNCTION SHARE_BENCH
+#elif FUNCTION_IDENTIFIER == 45
+#define FUNCTION REVEAL_BENCH
+#elif FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47 || FUNCTION_IDENTIFIER == 48
+#define FUNCTION COMP_BENCH
+#elif FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 51
 #define FUNCTION MAXMIN_BENCH //max
-#elif FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 57 || FUNCTION_IDENTIFIER == 58
+#elif FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54
 #define FUNCTION MAXMIN_BENCH //min
-#elif FUNCTION_IDENTIFIER == 47
+#elif FUNCTION_IDENTIFIER == 55
 #define FUNCTION AVG_BENCH //fixed
-#elif FUNCTION_IDENTIFIER == 48
+#elif FUNCTION_IDENTIFIER == 56
 #define FUNCTION SUM_BENCH
-#elif FUNCTION_IDENTIFIER == 49
+#elif FUNCTION_IDENTIFIER == 57
 #define FUNCTION Naive_Intersection_Bench
-#elif FUNCTION_IDENTIFIER == 50
+#elif FUNCTION_IDENTIFIER == 58
 #define FUNCTION AES_Bench
-#elif FUNCTION_IDENTIFIER == 51
+#elif FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 60 || FUNCTION_IDENTIFIER == 61
 #define FUNCTION Logistic_Regression_Bench
-#elif FUNCTION_IDENTIFIER == 52
+#elif FUNCTION_IDENTIFIER == 62 || FUNCTION_IDENTIFIER == 63 || FUNCTION_IDENTIFIER == 64
 #define FUNCTION Private_Auction_Bench
+#endif
+
+#if FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 62 //RCA
+#define BANDWIDTH_OPTIMIZED 1
+#define ONLINE_OPTIMIZED 0
+#elif FUNCTION_IDENTIFIER == 47 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 60 || FUNCTION_IDENTIFIER == 63 //PPA
+#define BANDWIDTH_OPTIMIZED 0
+#define ONLINE_OPTIMIZED 0
+#elif FUNCTION_IDENTIFIER == 48 || FUNCTION_IDENTIFIER == 51 || FUNCTION_IDENTIFIER == 54 || FUNCTION_IDENTIFIER == 61 || FUNCTION_IDENTIFIER == 64 //PPA 4-Way
+#define BANDWIDTH_OPTIMIZED 0
+#define ONLINE_OPTIMIZED 1
 #endif
 
 //if placed after a function, gurantees that all parties have finished computation and communication
@@ -232,7 +248,7 @@ void SUM_BENCH(DATATYPE* res)
 }
 
 template<typename Share>
-void SHARE_BENCH(DATATYPE* res)
+void REVEAL_BENCH(DATATYPE* res)
 {
     using A = Additive_Share<DATATYPE, Share>;
     auto inputs = new A[NUM_INPUTS];
@@ -249,6 +265,24 @@ void SHARE_BENCH(DATATYPE* res)
     dummy_reveal<Share>();
 }
 
+template<typename Share>
+void SHARE_BENCH(DATATYPE* res)
+{
+    using A = Additive_Share<DATATYPE, Share>;
+    auto inputs = new A[NUM_INPUTS];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        inputs[i].template preapre_receive_from<P_0>(0);
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        inputs[i].template complete_receive_from<P_0>(0);
+    }
+
+    dummy_reveal<Share>();
+}
+
 
 template<typename Share>
 void Naive_Intersection_Bench(DATATYPE *res)
@@ -257,8 +291,6 @@ void Naive_Intersection_Bench(DATATYPE *res)
    const int tile = 100;
    assert(tile <= NUM_INPUTS);
    auto a = new S[tile]; // ideally, a is a smaller subarray of a larger array, then tile intersects can be computed in parallel
-   /* auto b = new S; // single element, n parallel processes/vectorization to compute intersection */
-   /* auto result = intersect_single(a, b, NUM_INPUTS); */
    auto b = new S[NUM_INPUTS];
    auto result = new S[tile];
    intersect(a, b, result, tile, NUM_INPUTS);
@@ -269,13 +301,20 @@ void Naive_Intersection_Bench(DATATYPE *res)
 template<typename Share>
 void AES_Bench(DATATYPE *res)
 {
-    //TODO: implement AES
+    using S = XOR_Share<DATATYPE, Share>;
+    auto plain = new S[128][NUM_INPUTS]; 
+    auto key = new S[11][128][NUM_INPUTS];
+    auto cipher = new S[128][NUM_INPUTS];
+    AES__<S>(plain, key, cipher);
 }
 
 template<typename Share>
 void Logistic_Regression_Bench(DATATYPE *res)
 {
-    //TODO: implement Logistic Regression
+    auto X_Shared = new Additive_Share<DATATYPE, Share>[NUM_INPUTS][NUM_FEATURES];
+    auto y_Shared = new Additive_Share<DATATYPE, Share>[NUM_INPUTS];
+    auto weights = new Additive_Share<DATATYPE, Share>[NUM_FEATURES];
+    logistic_regression<Share>(X_Shared, y_Shared, weights);
 }
 template<typename Share>
 void Private_Auction_Bench(DATATYPE *res)
@@ -292,7 +331,12 @@ void Private_Auction_Bench(DATATYPE *res)
             accum[i+1] += bids[j][i/2];
         }
     }
-    max_min_sint<0, BITLENGTH>(accum, price_range*2, clearing_prices, NUM_INPUTS, price_range);
+    auto clearing_prices = new S[price_range];
+    //compute pairwise min of supply and demand for each price
+    max_min_sint<0, BITLENGTH>(accum, 2, clearing_prices, price_range, false);
+    //compute max of all possible clearing prices
+    S result;
+    max_min_sint<0, BITLENGTH>(clearing_prices, price_range, &result, 1, true);
 
 
 }
