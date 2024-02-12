@@ -233,14 +233,14 @@ void REVEAL_BENCH(DATATYPE* res)
 template<typename Share>
 void COMP_BENCH(DATATYPE* res)
 {
-    // a > b = msb(b-a)
+    // c = (a > b) = msb(b-a)
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
     using sint = sint_t<A>; //Share conversion is currently only supported in minimal batch sizes of size DATTYPE
     auto a = new sint[NUM_INPUTS];
     auto b = new sint[NUM_INPUTS];
     auto tmp = new sint[NUM_INPUTS];
-    auto c = new sint[NUM_INPUTS];
+    auto c = new S[NUM_INPUTS];
     const int k = BITLENGTH; //Reducing k will make the calculation probabilistic
     for(int i = 0; i < NUM_INPUTS; i++)
     {
