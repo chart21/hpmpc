@@ -16,10 +16,9 @@
 #include "../../arch/DATATYPE.h"
 
 /* auxiliary functions */
-template <typename Share>
-void SubBytes_single__ (/*inputs*/ XOR_Share<DATATYPE, Share> U0[NUM_INPUTS], XOR_Share<DATATYPE, Share> U1[NUM_INPUTS], XOR_Share<DATATYPE, Share> U2[NUM_INPUTS], XOR_Share<DATATYPE, Share> U3[NUM_INPUTS], XOR_Share<DATATYPE, Share> U4[NUM_INPUTS], XOR_Share<DATATYPE, Share> U5[NUM_INPUTS], XOR_Share<DATATYPE, Share> U6[NUM_INPUTS], XOR_Share<DATATYPE, Share> U7[NUM_INPUTS], /*outputs*/ XOR_Share<DATATYPE, Share> S0[NUM_INPUTS], XOR_Share<DATATYPE, Share> S1[NUM_INPUTS], XOR_Share<DATATYPE, Share> S2[NUM_INPUTS], XOR_Share<DATATYPE, Share> S3[NUM_INPUTS], XOR_Share<DATATYPE, Share> S4[NUM_INPUTS], XOR_Share<DATATYPE, Share> S5[NUM_INPUTS], XOR_Share<DATATYPE, Share> S6[NUM_INPUTS], XOR_Share<DATATYPE, Share> S7[NUM_INPUTS]) 
+template <typename S>
+void SubBytes_single__ (/*inputs*/ S U0[NUM_INPUTS], S U1[NUM_INPUTS], S U2[NUM_INPUTS], S U3[NUM_INPUTS], S U4[NUM_INPUTS], S U5[NUM_INPUTS], S U6[NUM_INPUTS], S U7[NUM_INPUTS], /*outputs*/ S S0[NUM_INPUTS], S S1[NUM_INPUTS], S S2[NUM_INPUTS], S S3[NUM_INPUTS], S S4[NUM_INPUTS], S S5[NUM_INPUTS], S S6[NUM_INPUTS], S S7[NUM_INPUTS]) 
 {
-using S = XOR_Share<DATATYPE, Share>;
   // Variables declaration
 S* _tmp1 = new S[NUM_INPUTS];
 S* _tmp2 = new S[NUM_INPUTS];
