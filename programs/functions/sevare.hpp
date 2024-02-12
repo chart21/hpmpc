@@ -213,6 +213,7 @@ void SHARE_BENCH(DATATYPE* res)
 template<typename Share>
 void REVEAL_BENCH(DATATYPE* res)
 {
+    Share::communicate(); // dummy round
     using A = Additive_Share<DATATYPE, Share>;
     auto inputs = new A[NUM_INPUTS];
     for(int i = 0; i < NUM_INPUTS; i++)
@@ -234,6 +235,7 @@ template<typename Share>
 void COMP_BENCH(DATATYPE* res)
 {
     // c = (a > b) = msb(b-a)
+    Share::communicate(); // dummy round
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
     using sint = sint_t<A>; //Share conversion is currently only supported in minimal batch sizes of size DATTYPE
@@ -254,6 +256,7 @@ void COMP_BENCH(DATATYPE* res)
 template<typename Share>
 void MAXMIN_BENCH(DATATYPE *res)
 {
+Share::communicate(); // dummy round
 using S = XOR_Share<DATATYPE, Share>;
 using A = Additive_Share<DATATYPE, Share>;
 using sint = sint_t<A>;
@@ -314,6 +317,7 @@ void SUM_BENCH(DATATYPE* res)
 template<typename Share>
 void Naive_Intersection_Bench(DATATYPE *res)
 {
+   Share::communicate(); // dummy round
    using S = XOR_Share<DATATYPE, Share>; 
    using Bitset = sbitset_t<BITLENGTH,S>;
    const int tile = 100;
@@ -331,6 +335,7 @@ void Naive_Intersection_Bench(DATATYPE *res)
 template<typename Share>
 void AES_Bench(DATATYPE *res)
 {
+    Share::communicate(); // dummy round
     using S = XOR_Share<DATATYPE, Share>;
     auto plain = new S[128][NUM_INPUTS]; 
     auto key = new S[11][128][NUM_INPUTS];
@@ -343,6 +348,7 @@ void AES_Bench(DATATYPE *res)
 template<typename Share>
 void Logistic_Regression_Bench(DATATYPE *res)
 {
+    Share::communicate(); // dummy round
     auto X_Shared = new Additive_Share<DATATYPE, Share>[NUM_INPUTS][NUM_FEATURES];
     auto y_Shared = new Additive_Share<DATATYPE, Share>[NUM_INPUTS];
     auto weights = new Additive_Share<DATATYPE, Share>[NUM_FEATURES];
@@ -354,6 +360,7 @@ void Logistic_Regression_Bench(DATATYPE *res)
 template<typename Share>
 void Private_Auction_Bench(DATATYPE *res)
 {
+    Share::communicate(); // dummy round
     const int price_range = 100;
     using A = Additive_Share<DATATYPE, Share>;
     using S = XOR_Share<DATATYPE, Share>;
