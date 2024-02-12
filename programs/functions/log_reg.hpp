@@ -29,7 +29,7 @@ void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS]
     for(int i = 0; i < NUM_INPUTS; i++)
     {
         d_1[i] = z[i] - zero_point_five; 
-        d_0[i] = Share(0) - d_1[i];
+        d_0[i] = Additive_Share<DATATYPE, Share>(0) - d_1[i];
     }
     auto sigmoid = new Additive_Share<DATATYPE, Share>[NUM_INPUTS];
 //DRELU
