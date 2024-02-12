@@ -373,7 +373,7 @@ void Private_Auction_Bench(DATATYPE *res)
             accum[i+1] += bids[j][i/2];
         }
     }
-    auto clearing_prices = new S[price_range];
+    auto clearing_prices = new A[price_range];
     //compute pairwise min of supply and demand for each price
     max_min_sint<0, BITLENGTH>(accum, 2, clearing_prices, price_range, false);
     //compute max of all possible clearing prices
