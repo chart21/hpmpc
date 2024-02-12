@@ -1363,7 +1363,7 @@ void AddRoundKey__ (/*inputs*/ XOR_Share<DATATYPE,Share> a__[128][NUM_INPUTS],XO
 
 /* main function */
 template <typename Share>
-void AES__ (/*inputs*/ Share plain[128][NUM_INPUTS],Share key[11][128][NUM_INPUTS], /*outputs*/ Share cipher[128][NUM_INPUTS]) {
+void AES__ (/*inputs*/ Share plain__[128][NUM_INPUTS],Share key__[11][128][NUM_INPUTS], /*outputs*/ Share cipher__[128][NUM_INPUTS]) {
   
   // Variables declaration
   auto _tmp23_ = new Share[128][NUM_INPUTS];
