@@ -285,7 +285,7 @@ void AVG_BENCH(DATATYPE* res)
     }
     c *= UINT_TYPE(1.0/NUM_INPUTS); //TODO: convert 1/NUM_INPUTS to fixed point
     Share::communicate();
-    c.complete_public_mult_fixed()
+    c.complete_public_mult_fixed();
 
     dummy_reveal<Share>();
 }
