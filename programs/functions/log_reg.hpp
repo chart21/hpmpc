@@ -28,9 +28,10 @@ void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS]
     const int zero_point_five = 1 << (FRACTIONAL -1);
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        d_0[i] = zero_point_five - z[i]; 
         d_1[i] = z[i] - zero_point_five; 
+        d_0[i] = Share(0) - d_1[i];
     }
+    auto sigmoid = new Additive_Share<DATATYPE, Share>[NUM_INPUTS];
 //DRELU
     for(int i = 0; i < NUM_INPUTS; i++)
     {
@@ -60,6 +61,11 @@ void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS]
             gradient[i] += (sigmoid[j] - y_Shared[j]) * X_Shared[j][i];
         }
     }
+
+    delete[] z;
+    delete[] d_0;
+    delete[] d_1;
+    delete[] sigmoid;
 }
 
 template<typename Share>

@@ -6,6 +6,8 @@
 #include "../../protocols/Protocols.h"
 #include "../../protocols/XOR_Share.hpp"
 #include "../../protocols/Additive_Share.hpp"
+#include "../../datatypes/k_sint.hpp"
+#include "../../datatypes/k_bitset.hpp"
 #include "../../utils/print.hpp"
 
 #include <cmath>
@@ -77,7 +79,6 @@ void generateElements()
 template<typename Share>
 void dummy_reveal()
 {
-    using A = Additive_Share<DATATYPE, Share>;
     A dummy;
     dummy.prepare_reveal_to_all();
     Share::communicate();
@@ -167,7 +168,7 @@ void DIV_BENCH(DATATYPE* res)
         for(int i = 0; i < NUM_INPUTS; i++)
         {
             c[i] = c[i] + c[i] - b[i].prepare_dot(c[i]);
-            c.mask_and_send_dot();
+            c[i].mask_and_send_dot();
         }
         Share::communicate();
         for(int i = 0; i < NUM_INPUTS; i++)
@@ -186,27 +187,8 @@ void DIV_BENCH(DATATYPE* res)
 }
 #endif
 
+
 #if FUNCTION_IDENTIFIER == 44
-template<typename Share>
-void REVEAL_BENCH(DATATYPE* res)
-{
-    using A = Additive_Share<DATATYPE, Share>;
-    auto inputs = new A[NUM_INPUTS];
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        inputs[i].prepare_reveal_to_all();
-    }
-    Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        inputs[i].complete_reveal_to_all();
-    }
-
-    dummy_reveal<Share>();
-}
-#endif
-
-#if FUNCTION_IDENTIFIER == 45
 template<typename Share>
 void SHARE_BENCH(DATATYPE* res)
 {
@@ -226,6 +208,26 @@ void SHARE_BENCH(DATATYPE* res)
 }
 #endif
 
+#if FUNCTION_IDENTIFIER == 45
+template<typename Share>
+void REVEAL_BENCH(DATATYPE* res)
+{
+    using A = Additive_Share<DATATYPE, Share>;
+    auto inputs = new A[NUM_INPUTS];
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        inputs[i].prepare_reveal_to_all();
+    }
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        inputs[i].complete_reveal_to_all();
+    }
+
+    dummy_reveal<Share>();
+}
+#endif
+
 #if FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47 || FUNCTION_IDENTIFIER == 48
 template<typename Share>
 void COMP_BENCH(DATATYPE* res)
@@ -233,17 +235,17 @@ void COMP_BENCH(DATATYPE* res)
     // a > b = msb(b-a)
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
-    auto a = new A[NUM_INPUTS];
-    auto b = new A[NUM_INPUTS];
-    auto tmp = new A[NUM_INPUTS];
-    auto c = new S[NUM_INPUTS];
+    using sint = sint_t<A>; //Share conversion is currently only supported in minimal batch sizes of size DATTYPE
+    auto a = new sint[NUM_INPUTS];
+    auto b = new sint[NUM_INPUTS];
+    auto tmp = new sint[NUM_INPUTS];
+    auto c = new sint[NUM_INPUTS];
+    const int k = BITLENGTH; //Reducing k will make the calculation probabilistic
     for(int i = 0; i < NUM_INPUTS; i++)
     {
         tmp[i] = b[i] - a[i];
     }
-    get_msb_range<0, BITLENGTH>(tmp, c, NUM_INPUTS);
-
-    dummy_reveal<Share>();
+    get_msb_range<0, k>(tmp, c, NUM_INPUTS);
 }
 #endif
 
@@ -254,12 +256,12 @@ void MAXMIN_BENCH(DATATYPE *res)
 using S = XOR_Share<DATATYPE, Share>;
 using A = Additive_Share<DATATYPE, Share>;
 using sint = sint_t<A>;
-const int k = BITLENGTH;
+const int k = BITLENGTH; //Reducing k will make the calculation probabilistic
 auto inputs = new sint[NUM_INPUTS];
 #if FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 51
-auto max_val = max_min<k>(inputs, inputs+NUM_INPUTS, true);
+auto max_val = max_min_sint<0,k>(inputs, inputs+NUM_INPUTS, true);
 #elif FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54
-auto min_val = max_min<k>(inputs, inputs+NUM_INPUTS, false);
+auto min_val = max_min_sint<0,k>(inputs, inputs+NUM_INPUTS, false);
 #endif
 delete[] inputs;
 
@@ -281,7 +283,7 @@ void AVG_BENCH(DATATYPE* res)
     }
     c *= UINT_TYPE(1.0/NUM_INPUTS); //TODO: convert 1/NUM_INPUTS to fixed point
     Share::communicate();
-    c.complete_mult_public_fixed();
+    c.complete_public_mult_fixed()
 
     dummy_reveal<Share>();
 }
@@ -311,11 +313,12 @@ template<typename Share>
 void Naive_Intersection_Bench(DATATYPE *res)
 {
    using S = XOR_Share<DATATYPE, Share>; 
+   using Bitset = sbitset_t<BITLENGTH,S>;
    const int tile = 100;
    assert(tile <= NUM_INPUTS);
-   auto a = new S[tile]; // ideally, a is a smaller subarray of a larger array, then tile intersects can be computed in parallel
-   auto b = new S[NUM_INPUTS];
-   auto result = new S[tile];
+   auto a = new Bitset[tile]; // ideally, a is a smaller subarray of a larger array, then tile intersects can be computed in parallel
+   auto b = new Bitset[NUM_INPUTS];
+   auto result = new Bitset[tile];
    intersect(a, b, result, tile, NUM_INPUTS);
 
    dummy_reveal<Share>();
