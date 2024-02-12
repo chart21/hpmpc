@@ -258,11 +258,12 @@ using S = XOR_Share<DATATYPE, Share>;
 using A = Additive_Share<DATATYPE, Share>;
 using sint = sint_t<A>;
 const int k = BITLENGTH; //Reducing k will make the calculation probabilistic
-auto inputs = new sint[NUM_INPUTS];
+auto inputs = new A[NUM_INPUTS];
+A result;
 #if FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 51
-auto max_val = max_min_sint<0,k>(inputs, inputs+NUM_INPUTS, true);
+max_min_sint<0,k>(inputs, NUM_INPUTS, &result, 1, true);
 #elif FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54
-auto min_val = max_min_sint<0,k>(inputs, inputs+NUM_INPUTS, false);
+max_min_sint<0,k>(inputs, NUM_INPUTS, &result, 1, false);
 #endif
 delete[] inputs;
 
