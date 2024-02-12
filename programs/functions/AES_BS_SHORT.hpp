@@ -436,6 +436,7 @@ void SubBytes__ (/*inputs*/ XOR_Share<DATATYPE,Share> inputSB__[128][NUM_INPUTS]
   
 
 }
+}
 template <typename Share>
 void ShiftRows__ (/*inputs*/ XOR_Share<DATATYPE,Share> inputSR__[128][NUM_INPUTS], /*outputs*/ XOR_Share<DATATYPE,Share> output__[128][NUM_INPUTS]) {
   
