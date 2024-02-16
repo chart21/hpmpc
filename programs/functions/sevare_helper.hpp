@@ -234,7 +234,7 @@ void intersect(const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* a, con
             int j = i * 2;
         for (int s = 0; s < len_a; s++) {
             for(int t = 0; t < len_b; t++)
-                tmp[s*len_b + t][i] = tmp[s*len_b + t][j] & tmp[s*len_b + t][j +1];
+                tmp[s*len_b + t][i] = tmp[s*len_b + t][j] & tmp[s*len_b + t][j +1]; //Only if all bits of the comparison are 1, the result should be 1
         }
         }
 
@@ -260,12 +260,12 @@ void intersect(const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* a, con
     {
         intersect[i] = SET_ALL_ZERO();
         for (int j = 1; j < len_b; j++) 
-          intersect[i] = intersect[i] ^ tmp[i*len_b + j][0]; //intersect is 1 if element has been found
+          intersect[i] = intersect[i] ^ tmp[i*len_b + j][0]; //intersect is 1 if element has been found in any of the comparisons (assumes no duplicates)
     }
         
     for(int i = 0; i < len_a; i++)
         for (int k = 0; k < BITLENGTH; k++)
-            result[i][k] = a[i][k] & intersect[i]; // store element if it has been found, otherwise 0
+            result[i][k] = a[i][k] & intersect[i]; // store element as a result if it has been found, otherwise 0
     Protocol::communicate();
     for(int i = 0; i < len_a; i++)
         for (int k = 0; k < BITLENGTH; k++)

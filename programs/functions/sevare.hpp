@@ -59,8 +59,8 @@
 #elif FUNCTION_IDENTIFIER == 56
 #define FUNCTION SUM_BENCH // Sum of a range of secret numbers, n NUM_INPUTS = DATTYPE/BITLENGTH sums of n inputs
 #elif FUNCTION_IDENTIFIER == 57
-#define FUNCTION Naive_Intersection_Bench // Naive intersection of two sets of secret numbers, one set is assumed to be tiled. n NUM_INPUTS = 1 intersection of tiled input a and non-tiled input b.
-//Bitsliced Function -> Intersection size is TILZE_SIZE*DATTTYPE. Can be combined with split-roles and multiprocessing to efficiently compute intersection of large sets with small tiles. Tile size can be adjusted.
+#define FUNCTION Naive_Tiled_Intersection_Bench // Naive intersection of two sets of secret numbers, one set is assumed to be tiled. n NUM_INPUTS = 1 intersection of tiled input a and non-tiled input b.
+//Bitsliced Function -> Intersection size is TILZE_SIZE*DATTTYPE. Can be combined with split-roles and multiprocessing to efficiently compute intersection of large sets with small tiles. Tile size can be adjusted. Assumes that secret shares of inputs are already available.
 #elif FUNCTION_IDENTIFIER == 58 // Bitsliced AES (Reference Code: USUBA). n NUM_INPUTS = DATTYPE*n AES encryptions of blocksize 128.
 #include "AES_BS_SHORT.hpp"
 #define FUNCTION AES_Bench
@@ -71,6 +71,8 @@
 #elif FUNCTION_IDENTIFIER == 62 || FUNCTION_IDENTIFIER == 63 || FUNCTION_IDENTIFIER == 64
 #define FUNCTION Private_Auction_Bench // Private Auction, n NUM_INPUTS = n bids/offers, DATTYPE/BITLENGTH independent auctions, price_range is the number of possible distinct prices, can be adjusted.
 //Important: Using vectorization, split-roles and multiprocessing will conduct multiple independent auctions. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will train a single model without any optimizations.
+#elif FUNCTION_IDENTIFIER == 65
+#define FUNCTION Naive_Intersection_Bench // Naive intersection of two sets of secret numbers. n NUM_INPUTS = 1 intersection of input a and input b, both having length n. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will perform a single intersection without the tiling optimization from function 57.
 #endif
 
 #if FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 62 //RCA
@@ -331,7 +333,7 @@ void SUM_BENCH(DATATYPE* res)
 
 #if FUNCTION_IDENTIFIER == 57
 template<typename Share>
-void Naive_Intersection_Bench(DATATYPE *res)
+void Naive_Tiled_Intersection_Bench(DATATYPE *res)
 {
    Share::communicate(); // dummy round
    using S = XOR_Share<DATATYPE, Share>; 
@@ -398,5 +400,21 @@ void Private_Auction_Bench(DATATYPE *res)
     S result;
     max_min_sint<0, BITLENGTH>(clearing_prices, price_range, &result, 1, true);
     dummy_reveal<Share>();
+}
+#endif
+
+#if FUNCTION_IDENTIFIER == 65
+template<typename Share>
+void Naive_Intersection_Bench(DATATYPE *res)
+{
+   Share::communicate(); // dummy round
+   using S = XOR_Share<DATATYPE, Share>; 
+   using Bitset = sbitset_t<BITLENGTH,S>;
+   auto a = new Bitset[NUM_INPUTS]; 
+   auto b = new Bitset[NUM_INPUTS];
+   auto result = new Bitset[NUM_INPUTS];
+   intersect(a, b, result, NUM_INPUTS, NUM_INPUTS);
+
+   dummy_reveal<Share>();
 }
 #endif
