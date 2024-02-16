@@ -24,7 +24,8 @@
 #define ZERO false
 #define ONES true
 
-/* Defining macros */
+#define SET_ALL_ONE()  true
+#define SET_ALL_ZERO() false
 
 #define AND(a,b)  ((a) && (b))
 #define OR(a,b)   ((a) || (b))
@@ -50,11 +51,28 @@
 #define FUNC_SUB64 std::bit_xor<bool>()
 #define FUNC_MUL64 std::bit_and<bool>()
 
+#define SHIFT_RIGHT8 SET_ZERO
+#define SHIFT_RIGHT16 SET_ZERO
+#define SHIFT_RIGHT32 SET_ZERO
+#define SHIFT_RIGHT64 SET_ZERO
+#define SHIFT_LOG_RIGHT8 SET_ZERO
+#define SHIFT_LOG_RIGHT16 SET_ZERO
+#define SHIFT_LOG_RIGHT32 SET_ZERO
+#define SHIFT_LOG_RIGHT64 SET_ZERO
+#define SHIFT_LEFT8 SET_ZERO
+#define SHIFT_LEFT16 SET_ZERO
+#define SHIFT_LEFT32 SET_ZERO
+#define SHIFT_LEFT64 SET_ZERO
+
+template <int n>
+bool SET_ZERO(bool value) {
+  return false;
+}
+
+
 #ifndef DATATYPE
 #define DATATYPE bool 
 #endif
-#define SET_ALL_ONE()  true
-#define SET_ALL_ZERO() false
 
 #define PROMOTE(x) (SET_ALL_ONE())
 
@@ -81,4 +99,23 @@ void unorthogonalize_boolean(bool *arr, UINT_TYPE *num) {
     *num |= tmp << (BITLENGTH - i - 1);    
     }
 }
+
+void orthogonalize_arithmetic(UINT_TYPE* num, bool* out, int bitlength) {
+  for (int i = 0; i < bitlength; i++)
+  {
+    out[bitlength-i-1] = *num & 1;
+    *num /= 2;
+  }
+}
+
+void unorthogonalize_arithmetic(bool *arr, UINT_TYPE *num, int bitlength) {
+   UINT_TYPE tmp;
+    for (int i = 0; i < bitlength; i++)
+    {
+    tmp = arr[i];
+    *num |= tmp << (bitlength - i - 1);    
+    }
+}
+
+
 

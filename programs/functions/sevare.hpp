@@ -3,12 +3,14 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
-#include "sevare_helper.hpp"
 #include "../../protocols/Protocols.h"
 #include "../../protocols/XOR_Share.hpp"
+#include "../../datatypes/k_bitset.hpp"
+#if DATTYPE > 1
+#include "sevare_helper.hpp"
 #include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_sint.hpp"
-#include "../../datatypes/k_bitset.hpp"
+#endif
 #include "../../utils/print.hpp"
 //Each circuit will be evaluated in parallel, specified by NUM_PROCESSES. And additionally the Split-Roles mulitplier and vectorization multiplier.
 //Split-roles multipliers: 
@@ -72,6 +74,7 @@
 #define FUNCTION Private_Auction_Bench // Private Auction, n NUM_INPUTS = n bids/offers, DATTYPE/BITLENGTH independent auctions, price_range is the number of possible distinct prices, can be adjusted.
 //Important: Using vectorization, split-roles and multiprocessing will conduct multiple independent auctions. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will train a single model without any optimizations.
 #elif FUNCTION_IDENTIFIER == 65
+#include "intersect_bool.hpp"
 #define FUNCTION Naive_Intersection_Bench // Naive intersection of two sets of secret numbers. n NUM_INPUTS = 1 intersection of input a and input b, both having length n. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will perform a single intersection without the tiling optimization from function 57.
 #endif
 
@@ -96,8 +99,8 @@ void generateElements()
 template<typename Share>
 void dummy_reveal()
 {
-    using A = Additive_Share<DATATYPE, Share>;
-    A dummy;
+    using S = XOR_Share<DATATYPE, Share>;
+    S dummy;
     dummy.prepare_reveal_to_all();
     Share::communicate();
     dummy.complete_reveal_to_all();
