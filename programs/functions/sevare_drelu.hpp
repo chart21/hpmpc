@@ -13,7 +13,7 @@
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
 #include "ppa_msb_4_way.hpp"
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
-#include "ppa_msb.hpp"
+#include "ppa_msb_unsafe.hpp"
 #endif
 template<int m, int k,typename Share, typename Datatype>
 void DRELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
@@ -47,7 +47,7 @@ void DRELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const in
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
     std::vector<PPA_MSB_4Way<k-m,S>> adders;
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
-    std::vector<PPA_MSB<k-m,S>> adders;
+    std::vector<PPA_MSB_Unsafe<k-m,S>> adders;
 #endif
     adders.reserve(len);
     for(int i = 0; i < len; i++)

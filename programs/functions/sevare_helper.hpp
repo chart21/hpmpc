@@ -10,13 +10,6 @@
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
 #include "boolean_adder_bandwidth.hpp"
-
-#include "boolean_adder_msb.hpp"
-#include "ppa_msb.hpp"
-#include "ppa.hpp"
-#include "ppa_msb_unsafe.hpp"
-#include "ppa_msb_4_way.hpp"
-
 #include "../../utils/print.hpp"
 
 #include <cmath>
@@ -24,12 +17,15 @@
 #include <algorithm>
 #include <assert.h>
 #if FUNCTION_IDENTIFIER == 43 || FUNCTION_IDENTIFIER == 45 || FUNCTION_IDENTIFIER == 46
+#include "boolean_adder_msb.hpp"
 #define BANDWIDTH_OPTIMIZED 1
 #define ONLINE_OPTIMIZED 0
 #elif FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 55 || FUNCTION_IDENTIFIER == 57
+#include "ppa_msb_unsafe.hpp"
 #define BANDWIDTH_OPTIMIZED 0
 #define ONLINE_OPTIMIZED 0
 #elif FUNCTION_IDENTIFIER == 54 || FUNCTION_IDENTIFIER == 56 || FUNCTION_IDENTIFIER == 58
+#include "ppa_msb_4_way.hpp"
 #define BANDWIDTH_OPTIMIZED 0
 #define ONLINE_OPTIMIZED 1
 #endif
@@ -95,7 +91,7 @@ Bitset *s2 = new Bitset[len];
 #elif ONLINE_OPTIMIZED == 1 && BANDWIDTH_OPTIMIZED == 0
     std::vector<PPA_MSB_4Way<bk-bm,S>> adders;
 #elif ONLINE_OPTIMIZED == 0 && BANDWIDTH_OPTIMIZED == 0
-    std::vector<PPA_MSB<bk-bm,S>> adders;
+    std::vector<PPA_MSB_Unsafe<bk-bm,S>> adders;
 #endif
     
     adders.reserve(len);

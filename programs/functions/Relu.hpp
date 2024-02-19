@@ -13,7 +13,7 @@
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
 #include "ppa_msb_4_way.hpp"
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
-#include "ppa_msb.hpp"
+#include "ppa_msb_unsafe.hpp"
 #endif
 /* #include "ppa_msb.hpp" */
 /* #include "ppa.hpp" */
@@ -77,7 +77,7 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
     std::vector<PPA_MSB_4Way<k-m,S>> adders;
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
-    std::vector<PPA_MSB<k-m,S>> adders;
+    std::vector<PPA_MSB_Unsafe<k-m,S>> adders;
 #endif
     /* std::vector<PPA_MSB_4Way<k,S>> adders; */
     adders.reserve(len);
@@ -332,7 +332,7 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
 
 
 
-template<typename Share, typename Datatype,int m = 0, int k = BITLENGTH>
+template<int m = 0, int k = BITLENGTH, typename Share, typename Datatype>
 static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const sint_t<Additive_Share<Datatype, Share>>* end, sint_t<Additive_Share<Datatype, Share>>*  output){
     std::copy(begin, end, output);
     int len = end - begin;

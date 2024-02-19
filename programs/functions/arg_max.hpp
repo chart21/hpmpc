@@ -75,7 +75,9 @@ Bitset *s2 = new Bitset[len];
     /* std::vector<PPA_MSB_4Way<Bitset::get_bitlength(), S> > adders; */
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     std::vector<BooleanAdder_MSB<bk-bm,S>> adders;
-#else
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+    std::vector<PPA_MSB_Unsafe<bk-bm,S>> adders;
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
     std::vector<PPA_MSB_4Way<bk-bm,S>> adders;
 #endif
     

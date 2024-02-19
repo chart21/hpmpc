@@ -25,8 +25,10 @@
 #include "programs/mat_mul_init.hpp"
 #elif FUNCTION_IDENTIFIER >= 40 && FUNCTION_IDENTIFIER <= 65
 #include "programs/functions/sevare.hpp"
-#else
+#elif FUNCTION_IDENTIFIER < 400
 #include "programs/functions/NN.hpp"
+#else 
+#include "programs/functions/cryptgpu_piranha_bench.hpp"
 #endif
 
 #include "utils/xorshift.h"

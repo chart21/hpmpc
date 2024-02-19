@@ -3474,6 +3474,16 @@ MatX<D> input(1, 64 * NUM_INPUTS/2 * NUM_INPUTS/2);
 
 
 }
+template<typename Share>
+void cryptgpu_figure1a(DATATYPE* res)
+{
+using D = Matrix_Share<DATATYPE, Share>;
+const int batch = 1;
+Conv2d<D> d_conv(3, 64, 11, 4, "xavier_normal"); // Assuming Conv2d takes in(input_channels, output_channels, kernel_size, stride, initialization_method)
+vector<int> input_shape = {batch, 64, NUM_INPUTS, NUM_INPUTS};
+MatX<D> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
+
+}
     
     template<typename Share>
 void conv2D_bench(DATATYPE* res)
