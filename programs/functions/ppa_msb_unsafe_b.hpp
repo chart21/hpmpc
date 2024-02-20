@@ -4,10 +4,10 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
-
+// overwrites a and b but therefore in-place
 template<int k, typename Share>
 class PPA_MSB_Unsafe {
-    using Bitset = sbitset_t<k,Share>;
+    using Bitset = sbitset_t<k, Share>;
 private:
     Bitset &a;
     Bitset &b;
@@ -67,7 +67,7 @@ void complete_Step() {
 }
 
 void step() {
-    const int log2k = std::ceil(std::log2(k));
+        const int log2k = std::ceil(std::log2(k));
     switch(level) {
         case -2:
             a[0] = a[0] ^ b[0];
@@ -124,4 +124,3 @@ bool is_done() {
 }
 
 };
-
