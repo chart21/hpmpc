@@ -100,94 +100,86 @@ dummy_reveal<Share>();
 template<typename Share>
 void mat_mul_bench(DATATYPE* res)
 {
-    using S = Matrix_Share<DATATYPE, Share>;
+    using S = Additive_Share<DATATYPE, Share>;
+    const int batch = 1; 
     Share::communicate(); // dummy round
-    const int batch = 1;
-    MatX<S> OM(batch, NUM_INPUTS, NUM_INPUTS);
-    MatX<S> AM(batch, NUM_INPUTS, NUM_INPUTS);
+    MatX<S> OM(NUM_INPUTS, NUM_INPUTS);
+    MatX<S> AM(NUM_INPUTS, NUM_INPUTS);
     MatX<S> BM(NUM_INPUTS, NUM_INPUTS);
     const int TILE_SIZE = 64;
-    for(int i = 0; i < this->output.size(); ++i)
-        this->output(i) = T(0);
-    for (int n = 0; n < batch; n++) {
-        auto A = AM.data();
-        MatX<S> BMT = BT.transpose();
-        auto B = BMT.data();
-        auto C = this->output.data() + (NUM_INPUTS*NUM_INPUTS) * n;
-        const int m = NUM_INPUTS;
-        const int p = NUM_INPUTS;
-        const int f = NUM_INPUTS;
-        for (int i = 0; i < m; i += TILE_SIZE) {
-                int i_max = std::min(i + TILE_SIZE, m);
-                for (int j = 0; j < p; j += TILE_SIZE) {
-                    int j_max = std::min(j + TILE_SIZE, p);
-                    for (int k = 0; k < f; k += TILE_SIZE) {
-                        int k_max = std::min(k + TILE_SIZE, f);
-                        for (int ii = i; ii < i_max; ++ii) {
-                            const int iip = ii*p;
-                            const int iif = ii*f;
-                            for (int jj = j; jj < j_max; ++jj) {
-                                const int jjf = jj*f;
-                                auto temp = T(0);
-                                for (int kk = k; kk < k_max; ++kk) {
-                                    #if PUBLIC_WEIGHTS == 0
-                                        temp += A[iif+kk].prepare_dot(B[jjf + kk]);
-                                    #else
-                                        temp += A[iif+kk].mult_public(B[jjf + kk]);
-                                    #endif
-                                }
-                                C[iip + jj] += temp;
-                            }
-                        }
-                    }
-                    for (int ii = i; ii < i_max; ++ii) {
-                        const int row = ii*p;
-                        for (int jj = j; jj < j_max; ++jj) {
-                        #if PUBLIC_WEIGHTS == 0
-                        #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
-                                C[row + jj].mask_and_send_dot_without_trunc();
-                        #else
-                                C[row + jj].mask_and_send_dot();
-                        #endif
-                        #else
-                            #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
-                            #else
-                                C[row + jj].prepare_mult_public_fixed(1); //initiate truncation
-                            #endif
-                        #endif
-                }
-            }
-        }
-    }
-
-    }
-    S::communicate();
-    for (int n = 0; n < batch; n++) {
-        auto C = this->output.data() + (NUM_INPUTS * NUM_INPUTS) * n;
-        const int m = NUM_INPUTS
-        const int p = NUM_INPUTS
-        for (int i = 0; i < m; i += TILE_SIZE) {
+    for(int i = 0; i < BM.size(); ++i)
+    OM(i) = Share(0);
+    auto A = AM.data();
+    MatX<S> BMT = BM.transpose();
+    auto B = BMT.data();
+    auto C = OM.data();
+    const int m = NUM_INPUTS;
+    const int p = NUM_INPUTS;
+    const int f = NUM_INPUTS;
+    for (int i = 0; i < m; i += TILE_SIZE) {
             int i_max = std::min(i + TILE_SIZE, m);
             for (int j = 0; j < p; j += TILE_SIZE) {
                 int j_max = std::min(j + TILE_SIZE, p);
+                for (int k = 0; k < f; k += TILE_SIZE) {
+                    int k_max = std::min(k + TILE_SIZE, f);
                     for (int ii = i; ii < i_max; ++ii) {
-                        const int row = ii*p;
+                        const int iip = ii*p;
+                        const int iif = ii*f;
                         for (int jj = j; jj < j_max; ++jj) {
-                        #if PUBLIC_WEIGHTS == 0
-                        #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
-                                        C[row+jj].complete_mult_without_trunc();
-                        #else
-                                        C[row+jj].complete_mult();
-                        #endif
-                        #else
-                            #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
-                            #else
-                                        C[row+jj].complete_mult_public_fixed();
-                            #endif
-                        #endif
+                            const int jjf = jj*f;
+                            auto temp = S(0);
+                            for (int kk = k; kk < k_max; ++kk) {
+                                #if PUBLIC_WEIGHTS == 0
+                                    temp += A[iif+kk].prepare_dot(B[jjf + kk]);
+                                #else
+                                    temp += A[iif+kk].mult_public(B[jjf + kk]);
+                                #endif
+                            }
+                            C[iip + jj] += temp;
                         }
                     }
+                }
+                for (int ii = i; ii < i_max; ++ii) {
+                    const int row = ii*p;
+                    for (int jj = j; jj < j_max; ++jj) {
+                    #if PUBLIC_WEIGHTS == 0
+                    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+                            C[row + jj].mask_and_send_dot_without_trunc();
+                    #else
+                            C[row + jj].mask_and_send_dot();
+                    #endif
+                    #else
+                        #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+                        #else
+                            C[row + jj].prepare_mult_public_fixed(1); //initiate truncation
+                        #endif
+                    #endif
             }
+        }
+    }
+    }
+    S::communicate();
+    for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            int j_max = std::min(j + TILE_SIZE, p);
+                for (int ii = i; ii < i_max; ++ii) {
+                    const int row = ii*p;
+                    for (int jj = j; jj < j_max; ++jj) {
+                    #if PUBLIC_WEIGHTS == 0
+                    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+                                    C[row+jj].complete_mult_without_trunc();
+                    #else
+                                    C[row+jj].complete_mult();
+                    #endif
+                    #else
+                        #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+                        #else
+                                    C[row+jj].complete_mult_public_fixed();
+                        #endif
+                    #endif
+                    }
+                }
         }
     }
     dummy_reveal<Share>();
