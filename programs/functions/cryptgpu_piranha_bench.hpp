@@ -108,7 +108,7 @@ void mat_mul_bench(DATATYPE* res)
     MatX<S> BM(NUM_INPUTS, NUM_INPUTS);
     const int TILE_SIZE = 64;
     for(int i = 0; i < BM.size(); ++i)
-    OM(i) = Share(0);
+    OM(i) = S(0);
     auto A = AM.data();
     MatX<S> BMT = BM.transpose();
     auto B = BMT.data();
