@@ -13,7 +13,7 @@
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
 #include "ppa_msb_4_way.hpp"
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
-#include "ppa_msb_unsafe.hpp"
+#include "ppa_msb.hpp"
 #endif
 /* #include "ppa_msb.hpp" */
 /* #include "ppa.hpp" */
@@ -77,7 +77,7 @@ void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
     std::vector<PPA_MSB_4Way<k-m,S>> adders;
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
-    std::vector<PPA_MSB_Unsafe<k-m,S>> adders;
+    std::vector<PPA_MSB<k-m,S>> adders;
 #endif
     /* std::vector<PPA_MSB_4Way<k,S>> adders; */
     adders.reserve(len);

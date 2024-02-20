@@ -6,11 +6,6 @@
 #include "../../protocols/Protocols.h"
 #include "../../protocols/XOR_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
-#if DATTYPE > 1
-#include "sevare_helper.hpp"
-#include "../../protocols/Additive_Share.hpp"
-#include "../../datatypes/k_sint.hpp"
-#endif
 #include "../../utils/print.hpp"
 //Each circuit will be evaluated in parallel, specified by NUM_PROCESSES. And additionally the Split-Roles mulitplier and vectorization multiplier.
 //Split-roles multipliers: 
@@ -42,19 +37,10 @@
 #elif FUNCTION_IDENTIFIER == 45
 #define FUNCTION REVEAL_BENCH // Reveal of inputs, n NUM_INPUTS = n*(DATTYPE/BITLENGTH) Inputs revealed to all parties
 #elif FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47 || FUNCTION_IDENTIFIER == 48
-#include "boolean_adder_bandwidth.hpp"
-#include "boolean_adder_msb.hpp"
-#include "ppa_msb.hpp"
 #define FUNCTION COMP_BENCH // Batched comparison of two secret numbers, n NUM_INPUTS = n*DATTYPE comparisons (!). Functions use RCA, PPA, or PPA 4-Way respectively
 #elif FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 51
-#include "boolean_adder_bandwidth.hpp"
-#include "boolean_adder_msb.hpp"
-#include "ppa_msb.hpp"
 #define FUNCTION MAXMIN_BENCH // Maximum of a range of secret numbers, n NUM_INPUTS = DATTYPE/BITLENGTH maximums of n inputs. Functions use RCA, PPA, or PPA 4-Way respectively
 #elif FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 54 
-#include "boolean_adder_bandwidth.hpp"
-#include "boolean_adder_msb.hpp"
-#include "ppa_msb.hpp"
 #define FUNCTION MAXMIN_BENCH  // Minimum of a range of secret numbers, n NUM_INPUTS = DATTYPE/BITLENGTH minimums of n inputs. Functions use RCA, PPA, or PPA 4-Way respectively
 #elif FUNCTION_IDENTIFIER == 55
 #define FUNCTION AVG_BENCH // Fixed point average of a range of secret numbers, n NUM_INPUTS = DATTYPE/BITLENGTH average of n inputs
@@ -78,15 +64,11 @@
 #define FUNCTION Naive_Intersection_Bench // Naive intersection of two sets of secret numbers. n NUM_INPUTS = 1 intersection of input a and input b, both having length n. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will perform a single intersection without the tiling optimization from function 57.
 #endif
 
-#if FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 62 //RCA
-#define BANDWIDTH_OPTIMIZED 1
-#define ONLINE_OPTIMIZED 0
-#elif FUNCTION_IDENTIFIER == 47 || FUNCTION_IDENTIFIER == 50 || FUNCTION_IDENTIFIER == 53 || FUNCTION_IDENTIFIER == 60 || FUNCTION_IDENTIFIER == 63 //PPA
-#define BANDWIDTH_OPTIMIZED 0
-#define ONLINE_OPTIMIZED 0
-#elif FUNCTION_IDENTIFIER == 48 || FUNCTION_IDENTIFIER == 51 || FUNCTION_IDENTIFIER == 54 || FUNCTION_IDENTIFIER == 61 || FUNCTION_IDENTIFIER == 64 //PPA 4-Way
-#define BANDWIDTH_OPTIMIZED 0
-#define ONLINE_OPTIMIZED 1
+
+#if DATTYPE > 1
+#include "sevare_helper.hpp"
+#include "../../protocols/Additive_Share.hpp"
+#include "../../datatypes/k_sint.hpp"
 #endif
 
 
@@ -217,12 +199,12 @@ void SHARE_BENCH(DATATYPE* res)
     auto inputs = new A[NUM_INPUTS];
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        inputs[i].template preapre_receive_from<P_0>(0);
+        inputs[i].template prepare_receive_from<P_0>(0);
     }
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        inputs[i].template complete_receive_from<P_0>(0);
+        inputs[i].template complete_receive_from<P_0>();
     }
 
     dummy_reveal<Share>();
@@ -400,8 +382,8 @@ void Private_Auction_Bench(DATATYPE *res)
     //compute pairwise min of supply and demand for each price
     max_min_sint<0, BITLENGTH>(accum, 2, clearing_prices, price_range, false);
     //compute max of all possible clearing prices
-    S result;
-    max_min_sint<0, BITLENGTH>(clearing_prices, price_range, &result, 1, true);
+    A result;
+    /* argmax_argmin_sint<0, BITLENGTH>(clearing_prices, price_range, &result, 1, true); */
     dummy_reveal<Share>();
 }
 #endif
@@ -416,7 +398,7 @@ void Naive_Intersection_Bench(DATATYPE *res)
    auto a = new Bitset[NUM_INPUTS]; 
    auto b = new Bitset[NUM_INPUTS];
    auto result = new Bitset[NUM_INPUTS];
-   intersect(a, b, result, NUM_INPUTS, NUM_INPUTS);
+   intersect_bool(a, b, result, NUM_INPUTS, NUM_INPUTS);
 
    dummy_reveal<Share>();
 }

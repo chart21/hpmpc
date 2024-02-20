@@ -3,7 +3,7 @@
 #include "../../protocols/XOR_Share.hpp"
 #include <cassert>
     template<typename Protocol>
-void intersect(const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* a, const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* b, sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* result, const int len_a, const int len_b)
+void intersect_bool(const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* a, const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* b, sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* result, const int len_a, const int len_b)
 {
     using S = XOR_Share<DATATYPE, Protocol>;
     using Bitset = sbitset_t<BITLENGTH,S>;
