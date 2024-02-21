@@ -46,6 +46,7 @@ using namespace std;
 using namespace simple_nn;
 using namespace Eigen;
 
+const int num_repeat = 20;
 
 void generateElements()
 {
@@ -66,6 +67,8 @@ void dummy_reveal()
 #if FUNCTION_IDENTIFIER == 400 || FUNCTION_IDENTIFIER == 401 || FUNCTION_IDENTIFIER == 402
 template<typename Share>
 void conv_2D_bench(DATATYPE* res)
+{
+for(int i = 0; i < num_repeat; ++i)
 {
 using S = Additive_Share<DATATYPE, Share>;
 Share::communicate(); // dummy round
@@ -92,6 +95,8 @@ MatX<S> input(batch, 512 * NUM_INPUTS * NUM_INPUTS);
 conv.set_layer(input_shape);
 conv.forward(input, false);
 dummy_reveal<Share>();
+
+}
 }
 #endif
 
@@ -100,6 +105,8 @@ dummy_reveal<Share>();
 template<typename Share>
 void mat_mul_bench(DATATYPE* res)
 {
+    for(int i = 0; i < num_repeat; ++i)
+    {
     using S = Additive_Share<DATATYPE, Share>;
     const int batch = 1; 
     Share::communicate(); // dummy round
@@ -184,6 +191,7 @@ void mat_mul_bench(DATATYPE* res)
     }
     dummy_reveal<Share>();
     }
+}
 #endif
 
 #if FUNCTION_IDENTIFIER == 404 || FUNCTION_IDENTIFIER == 405 || FUNCTION_IDENTIFIER == 406  
