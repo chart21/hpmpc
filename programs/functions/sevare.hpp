@@ -199,7 +199,7 @@ void SHARE_BENCH(DATATYPE* res)
     auto inputs = new A[NUM_INPUTS];
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        inputs[i].template prepare_receive_from<P_0>(0);
+        inputs[i].template prepare_receive_from<P_0>(SET_ALL_ZERO());
     }
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
