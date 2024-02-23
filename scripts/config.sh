@@ -89,6 +89,8 @@ else
     #flags="-march=native -Ofast -std=c++2a -pthread"
 fi
 
+flags="$flags MP-SPDZ/lib/help/Util.cpp"
+
 if [ ! -z "$GNU_OPTIONS" ]
 then
 flags="$GNU_OPTIONS"

@@ -1,0 +1,7 @@
+---
+BasedOnStyle: LLVM
+IndentWidth:     4
+PointerAlignment: Left
+AccessModifierOffset: -2
+AlwaysBreakTemplateDeclarations: Yes
+ColumnLimit:     100
