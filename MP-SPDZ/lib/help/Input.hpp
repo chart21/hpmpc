@@ -109,7 +109,7 @@ std::vector<Input>::iterator get_input_from(const int& player_num) {
 }
 
 int next_input(const int& player_num, const int& thread_id) {
-    if (player_num != PARTY)
+    if (current_phase == PHASE_INIT || player_num != PARTY)
         return 0;
 
     auto in = get_input_from(player_num);
