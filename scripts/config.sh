@@ -98,6 +98,8 @@ then
     flags=$flags" -c"
 fi
 
+flags="$flags MP-SPDZ/lib/help/Util.cpp"
+
 if [ ! -z "$GNU_OPTIONS" ]
 then
     flags=$flags" "$GNU_OPTIONS
