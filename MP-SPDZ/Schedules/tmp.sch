@@ -1,9 +1,9 @@
 1
 1
-tmp-0:477
+tmp-0:59
 1 0
 0
-./compile.py -v -B 64 -a debug tmp
-lgp:0
+./compile.py -v -R 64 -a debug tmp
+R:64
 opts: 
-sec:40
+sec:0

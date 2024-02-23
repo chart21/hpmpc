@@ -612,6 +612,18 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             update_max_reg(Type::INT, dest + inst.get_size(), inst.get_opcode());
             break;
         }
+        case Opcode::TRUNC_PR: {
+            unsigned args = read_next_int(fd, buf, 4);
+
+            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned source = inst.add_reg(read_next_int(fd, buf, 4));
+
+            inst.add_reg(read_next_int(fd, buf, 4)); // bits to use
+            inst.add_reg(read_next_int(fd, buf, 4)); // bits to truncate
+
+            update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
+            break;
+        }
         default:
             log(Level::WARNING, "unknown operation");
             log(Level::WARNING, "read: ", cur);
@@ -715,7 +727,7 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf || opc == 0xe1 || opc == 0xca ||
         opc == 0x9a || opc == 0xf2 || opc == 0x2f || opc == 0x20a || opc == 0x217 || opc == 0x218 ||
         opc == 0x203 || opc == 0x204 || opc == 0x244 || opc == 0x214 || opc == 0x24a ||
-        opc == 0x1f || opc == 0xe0 || opc == 0x240 || opc == 0x241 || opc == 0x200 ||
+        opc == 0x1f || opc == 0xe0 || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0xa9 ||
         opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x20b ||
         opc == 0x20f || opc == 0x220 || opc == 0xd1 || opc == 0xe9 || opc == 0x95 || opc == 0x9c ||
         opc == 0x9b) {
@@ -891,7 +903,10 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::OPEN:
             p.popen(regs, get_size());
             return;
-            // break;
+        case Opcode::TRUNC_PR:
+            print("TODO: TRUNC_PR\n");
+            assert(regs[3] == FRACTIONAL);
+            break;
         case Opcode::STMS:
             m.s_mem[n + vec] = p.s_register[regs[0] + vec];
             break;

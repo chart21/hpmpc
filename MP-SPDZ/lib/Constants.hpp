@@ -92,6 +92,8 @@ enum class Opcode {
     PRINT_FLOAT_PREC = 0xe0,  // set precision for print_float_*
     PRINT_FLOAT_PLAIN = 0xbc, // print float
 
+    TRUNC_PR = 0xa9,
+
     LDMINT = 0xca,
     LDINT = 0x9a,
     ACTIVE = 0xe9,
