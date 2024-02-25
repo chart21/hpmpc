@@ -113,31 +113,6 @@ class Program {
     void update_max_reg(const Type& reg, const unsigned& sreg, const Opcode& op);
 };
 
-template <class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<sint, sbit, BitShare, N>::dotprods(const vector<int>& regs, const size_t& size) {
-    for (size_t vec = 0; vec < size; ++vec) {
-        for (auto it = regs.begin(); it != regs.end(); ++it) {
-            auto next = it + *it;
-            it += 2;
-            while (it != next) {
-                // protocol.prepare_dots(s_register[*(it) + vec],
-                //                       s_register[*(it + 1) + vec]);
-            }
-            // protocol.next_dots();
-        }
-    }
-
-    sint::communicate();
-
-    for (size_t vec = 0; vec < size; ++vec) {
-        for (auto it = regs.begin(); it != regs.end(); ++it) {
-            auto next = it + *it;
-            it++;
-            // s_register[*it + vec] = protocol.finalize_dots();
-            it = next;
-        }
-    }
-}
 
 template <class sint, template <int, class> class sbit, class BitShare, int N>
 bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare, N>& m) {
@@ -624,6 +599,21 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
             break;
         }
+        case Opcode::DOTPRODS: {
+            unsigned args = read_next_int(fd, buf, 4);
+            for (size_t i = 0; i < args; ++i) {
+                unsigned len = inst.add_reg(read_next_int(fd, buf, 4)) - 2;
+
+                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+                update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
+
+                for (size_t j = 0; j < len; ++j)
+                    inst.add_reg(read_next_int(fd, buf, 4));
+
+                i += len + 1;
+            }
+            break;
+        }
         default:
             log(Level::WARNING, "unknown operation");
             log(Level::WARNING, "read: ", cur);
@@ -695,6 +685,7 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::MOVS:
     case Opcode::BIT:
     case Opcode::SUBSFI:
+    case Opcode::DOTPRODS:
     case Opcode::ADDSI:
         return Type::SINT;
     default:
@@ -728,7 +719,7 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0x9a || opc == 0xf2 || opc == 0x2f || opc == 0x20a || opc == 0x217 || opc == 0x218 ||
         opc == 0x203 || opc == 0x204 || opc == 0x244 || opc == 0x214 || opc == 0x24a ||
         opc == 0x1f || opc == 0xe0 || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0xa9 ||
-        opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x20b ||
+        opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x20b || opc == 0xa8 ||
         opc == 0x20f || opc == 0x220 || opc == 0xd1 || opc == 0xe9 || opc == 0x95 || opc == 0x9c ||
         opc == 0x9b) {
         op = static_cast<Opcode>(opc);
@@ -836,6 +827,10 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         }
         case Opcode::MATMULSM:
             p.matmulsm(regs, m);
+            return;
+        case Opcode::DOTPRODS:
+            p.dotprods(regs, get_size());
+            return;
         case Opcode::USE: // for statistics
         case Opcode::USE_INP:
         case Opcode::USE_MATMUL:
@@ -1405,6 +1400,33 @@ void Program<sint, sbit, BitShare, N>::matmulsm_prepare(const vector<int>& regs,
         iterator cur_2 = source2 + row_2 * regs[11] + col_2;
 
         matrix.add_mul(*cur_1, *cur_2);
+    }
+}
+
+template <class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<sint, sbit, BitShare, N>::dotprods(const vector<int>& regs, const size_t& size) {
+    for (size_t vec = 0; vec < size; ++vec) {
+        for (auto it = regs.begin(); it != regs.end();) {
+            auto next = it + *it;
+            it += 2;
+
+            matrix.next_dotprod();
+            while (it != next) {
+                matrix.add_mul(s_register[*(it++) + vec],
+                                       s_register[*(it++) + vec]);
+            }
+        }
+    }
+
+    sint::communicate();
+
+    for (size_t vec = 0; vec < size; ++vec) {
+        for (auto it = regs.begin(); it != regs.end();) {
+            auto next = it + *it;
+            it++;
+            s_register[*it + vec] = matrix.get_next();
+            it = next;
+        }
     }
 }
 

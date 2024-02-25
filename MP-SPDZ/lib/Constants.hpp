@@ -122,6 +122,7 @@ enum class Opcode {
     INPUTBVEC = 0x247,
 
     MATMULSM = 0xab,
+    DOTPRODS = 0xa8,
     INCINT = 0xd1,
     USE_MATMUL = 0x1f,
 };
