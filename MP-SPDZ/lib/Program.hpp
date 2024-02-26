@@ -113,7 +113,6 @@ class Program {
     void update_max_reg(const Type& reg, const unsigned& sreg, const Opcode& op);
 };
 
-
 template <class sint, template <int, class> class sbit, class BitShare, int N>
 bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare, N>& m) {
     int fd = open(path.c_str(), O_RDONLY);
@@ -139,6 +138,7 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::JMPEQZ:
         case Opcode::LDI:
         case Opcode::LDINT:
+        case Opcode::RANDOMS:
         case Opcode::PRINT4COND: {
             unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
             inst.set_immediate(int(read_next_int(fd, buf, 4)));
@@ -614,6 +614,33 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             }
             break;
         }
+        case Opcode::SPLIT: {
+            unsigned args = read_next_int(fd, buf, 4);
+
+            inst.add_reg(read_next_int(fd, buf, 4)); // num player
+            inst.add_reg(read_next_int(fd, buf, 4)); // source
+
+            for (size_t i = 2; i < args; ++i) {
+                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+                update_max_reg(Type::SBIT, dest + div_ceil(vec, BIT_LEN), inst.get_opcode());
+            }
+            break;
+        }
+        case Opcode::DABIT: {
+            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+            update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
+            dest = inst.add_reg(read_next_int(fd, buf, 4));
+            update_max_reg(Type::SBIT, dest + div_ceil(vec, BIT_LEN), inst.get_opcode());
+            break;
+        }
+        case Opcode::CONVCBITVEC: {
+            unsigned bits = inst.set_immediate(read_next_int(fd, buf, 4));
+
+            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+            update_max_reg(Type::SINT, dest + bits, inst.get_opcode());
+            inst.add_reg(read_next_int(fd, buf, 4)); // source
+            break;
+        }
         default:
             log(Level::WARNING, "unknown operation");
             log(Level::WARNING, "read: ", cur);
@@ -687,6 +714,7 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::SUBSFI:
     case Opcode::DOTPRODS:
     case Opcode::ADDSI:
+    case Opcode::RANDOMS:
         return Type::SINT;
     default:
         break;
@@ -711,17 +739,17 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
     if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 ||
         opc == 0x91 || opc == 0x92 || opc == 0x98 || opc == 0x11 || opc == 0x2e || opc == 0x04 ||
         opc == 0x05 || opc == 0x06 || opc == 0xcb || opc == 0x08 || opc == 0xa || opc == 0x51 ||
-        opc == 0xc || opc == 0xc0 || opc == 0xc1 || opc == 0x99 || opc == 0x17 || opc == 0x18 ||
-        opc == 0x21 || opc == 0x24 || opc == 0x26 || opc == 0x103 || opc == 0x104 || opc == 0xa5 ||
-        opc == 0xa6 || opc == 0x23 || opc == 0x31 || opc == 0x22 || opc == 0x32 || opc == 0x33 ||
-        opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x82 || opc == 0x83 ||
-        opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf || opc == 0xe1 || opc == 0xca ||
-        opc == 0x9a || opc == 0xf2 || opc == 0x2f || opc == 0x20a || opc == 0x217 || opc == 0x218 ||
-        opc == 0x203 || opc == 0x204 || opc == 0x244 || opc == 0x214 || opc == 0x24a ||
-        opc == 0x1f || opc == 0xe0 || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0xa9 ||
-        opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x20b || opc == 0xa8 ||
-        opc == 0x20f || opc == 0x220 || opc == 0xd1 || opc == 0xe9 || opc == 0x95 || opc == 0x9c ||
-        opc == 0x9b) {
+        opc == 0x58 || opc == 0xc || opc == 0xc0 || opc == 0xc1 || opc == 0x99 || opc == 0x17 ||
+        opc == 0x18 || opc == 0x21 || opc == 0x24 || opc == 0x26 || opc == 0x103 || opc == 0x104 ||
+        opc == 0xa5 || opc == 0xa6 || opc == 0x23 || opc == 0x31 || opc == 0x22 || opc == 0x32 ||
+        opc == 0x33 || opc == 0x231 || opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 ||
+        opc == 0x82 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf ||
+        opc == 0xe1 || opc == 0xca || opc == 0x9a || opc == 0xf2 || opc == 0x2f || opc == 0x20a ||
+        opc == 0x217 || opc == 0x218 || opc == 0x203 || opc == 0x204 || opc == 0x244 ||
+        opc == 0x214 || opc == 0x24a || opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0xe0 ||
+        opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0xa9 || opc == 0x247 ||
+        opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x20b || opc == 0xa8 || opc == 0x20f ||
+        opc == 0x220 || opc == 0xd1 || opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
         op = Opcode::NONE;
@@ -1118,6 +1146,12 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::BIT:
             p.s_register[regs[0] + vec] = p.rand_engine() & 1;
             break;
+        case Opcode::CONVCBITVEC:
+            for (size_t i = 0; i < n; ++i) {
+                p.i_register[regs[0] + i] =
+                    ((p.cb_register[regs[0] + i / BIT_LEN] >> (i % BIT_LEN)) & 1).get();
+            }
+            break;
         case Opcode::CONVMODP:
             if (n == 0) { // unsigned conversion
                 p.i_register[regs[0] + vec] = (unsigned long)p.c_register[regs[1] + vec].get();
@@ -1412,8 +1446,7 @@ void Program<sint, sbit, BitShare, N>::dotprods(const vector<int>& regs, const s
 
             matrix.next_dotprod();
             while (it != next) {
-                matrix.add_mul(s_register[*(it++) + vec],
-                                       s_register[*(it++) + vec]);
+                matrix.add_mul(s_register[*(it++) + vec], s_register[*(it++) + vec]);
             }
         }
     }
