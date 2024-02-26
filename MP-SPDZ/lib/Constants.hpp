@@ -125,6 +125,11 @@ enum class Opcode {
     DOTPRODS = 0xa8,
     INCINT = 0xd1,
     USE_MATMUL = 0x1f,
+
+    CONVCBITVEC = 0x231,
+    DABIT = 0x58,
+    RANDOMS = 0x5b,
+    SPLIT = 0x248, // local share conversion
 };
 
 enum class Type {
