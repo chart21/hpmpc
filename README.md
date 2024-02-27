@@ -18,6 +18,7 @@ You can use the provided Dockerfile or set up the project manually
 The only dependencies are OpenSSL and Eigen. Install on your target system, for instance via ```apt install libssl-dev libeigen3-dev```
 Clone our inference engine.
 > git clone https://github.com/chart21/flexNN/tree/hpmpc SimpleNN
+
 To export a model or dataset from PyTorch use [Pygeon](https://github.com/chart21/pygeon) and save the resulting bin files to `SimpleNN/dataset` or `SimpleNN/model_zoo`.
 Existing networks are defined in `SimpleNN/architectures`. `Programs/functions/NN.hpp` includes a FUNCTION_IDENTIFIER for different model architectures and datasets (for instance 70 for RestNet18 on CIFAR-10). 
 You can select a protocol and function in the file `config.h`. 
