@@ -4,7 +4,8 @@ This branch extends HPMPC with private inference capabilities. The framework is 
 
 * [FlexNN](https://github.com/chart21/flexNN/tree/hpmpc): A templated neural network inference engine that performs the forward pass of a CNN generically
 * `Programs/functions` contains MPC-generic implementations of functions such as ReLU
-* `Protocols` contains the MPC protocols that are required by the middlelayer.
+* `Protocols` Implements the MPC protocols and primitives that are required by the `Programs/functions`.
+* [Pygeon](https://github.com/chart21/Pygeon): Python scripts for exporting models and datsets from PyTorch to the inference engine. 
 
 The following protocols are currently fully supported by PIGEON.
 
@@ -17,8 +18,8 @@ The following protocols are currently fully supported by PIGEON.
 You can use the provided Dockerfile or set up the project manually.
 The only dependencies are OpenSSL and Eigen. Install on your target system, for instance via ```apt install libssl-dev libeigen3-dev```
 
-First, clone our inference engine.
-> git clone https://github.com/chart21/flexNN/tree/hpmpc SimpleNN
+First, initialize the submodules.
+> git submodule init
 
 To export a model or dataset from PyTorch use [Pygeon](https://github.com/chart21/pygeon) and save the resulting bin files to `SimpleNN/dataset` or `SimpleNN/model_zoo`. Then define the model architecture in `SimpleNN/architectures/`. Finally, specify your datasetfile and modelfile in `Programs/functions/NN.hpp` and if it does not exist, add a FUNCTION_IDENTIFIER for your function.
 ```

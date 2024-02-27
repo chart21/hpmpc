@@ -11,7 +11,8 @@ RUN apt-get update && \
 # Clone repositories without needing to disable SSL verification
 RUN git clone --branch NN --depth 1 https://github.com/chart21/hpmpc && \
     cd hpmpc && \
-    git clone --branch hpmpc --depth 1 https://github.com/chart21/flexNN SimpleNN
+    git submodule update --init --recursive
+    # git clone --branch hpmpc --depth 1 https://github.com/chart21/flexNN SimpleNN
 
 WORKDIR /hpmpc
 
