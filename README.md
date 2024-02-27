@@ -20,7 +20,14 @@ The only dependencies are OpenSSL and Eigen. Install on your target system, for 
 First, clone our inference engine.
 > git clone https://github.com/chart21/flexNN/tree/hpmpc SimpleNN
 
-To export a model or dataset from PyTorch use [Pygeon](https://github.com/chart21/pygeon) and save the resulting bin files to `SimpleNN/dataset` or `SimpleNN/model_zoo`.
+To export a model or dataset from PyTorch use [Pygeon](https://github.com/chart21/pygeon) and save the resulting bin files to `SimpleNN/dataset` or `SimpleNN/model_zoo`. Then define the model architecture in `SimpleNN/architectures/`. Finally, specify your datasetfile and modelfile in `Programs/functions/NN.hpp` and if it does not exist, add a FUNCTION_IDENTIFIER for your function.
+```
+    cfg.save_dir = "./SimpleNN/model_zoo"; // Your model should be in this folder
+    cfg.data_dir = "./SimpleNN/dataset"; // Your dataset should be in this folder
+    cfg.image_file = "cifar10-test-images.bin"; // Your test images, exported by Pygeon
+    cfg.label_file = "cifar10-test-labels.bin"; // Your test labels, exported by Pygeon
+    cfg.pretrained = "AlexNet.bin"; // Your model parameters, exported by Pygeon
+```
 
 Existing networks are defined in `SimpleNN/architectures`. `Programs/functions/NN.hpp` includes a FUNCTION_IDENTIFIER for different model architectures and datasets (for instance 70 for RestNet18 on CIFAR-10). 
 You can select a protocol and function in the file `config.h`. 
