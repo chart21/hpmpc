@@ -18,13 +18,13 @@
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
-#define DATTYPE 1
+#define DATTYPE 32
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 100
+#define NUM_INPUTS 10
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -67,7 +67,7 @@ int base_port = BASE_PORT; // temporary solution
 #define SHARE_PREP 1
 
 // Compress binary data into chars before sending them over the netowrk? Only relevant for DATTYPE = 1
-#define COMPRESS 0
+#define COMPRESS 1
 
 // Use optimized secret sharing? Often utilizes SRNG instead of secret sharing with communication
 #define OPT_SHARE 1
