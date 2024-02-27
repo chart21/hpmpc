@@ -10,7 +10,7 @@ The following protocols are currently fully supported by PIGEON.
 
 3-PC: OECL (Ours, Protocol 5), TTP (Protocol 6)
 
-4-PC: OEC-MAL (Ours, Protocol 12), TTP (Protocol 6)
+4-PC: OEC-MAL (Ours, Protocol 12), TTP (Protocol 7)
 
 ## Getting Started
 
