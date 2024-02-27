@@ -19,8 +19,7 @@ You can use the provided Dockerfile or set up the project manually.
 The only dependencies are OpenSSL and Eigen. Install on your target system, for instance via ```apt install libssl-dev libeigen3-dev```
 
 First, initialize the submodules.
-> git submodule init
-
+> git submodule update --init --recursive
 To export a model or dataset from PyTorch use [Pygeon](https://github.com/chart21/pygeon) and save the resulting bin files to `SimpleNN/dataset` or `SimpleNN/model_zoo`. Then define the model architecture in `SimpleNN/architectures/`. Finally, specify your datasetfile and modelfile in `Programs/functions/NN.hpp` and if it does not exist, add a FUNCTION_IDENTIFIER for your function.
 ```
     cfg.save_dir = "./SimpleNN/model_zoo"; // Your model should be in this folder
