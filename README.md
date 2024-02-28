@@ -2,8 +2,8 @@
 
 This branch extends HPMPC with private inference capabilities. The framework is structured as follows.
 
-* [FlexNN](https://github.com/chart21/flexNN/tree/hpmpc): A templated neural network inference engine that performs the forward pass of a CNN generically
-* `Programs/functions` contains MPC-generic implementations of functions such as ReLU
+* [FlexNN](https://github.com/chart21/flexNN/tree/hpmpc): A templated neural network inference engine that performs the forward pass of a CNN generically.
+* `Programs/functions` contains MPC-generic implementations of functions such as ReLU.
 * `Protocols` Implements the MPC protocols and primitives that are required by `Programs/functions`.
 * [Pygeon](https://github.com/chart21/Pygeon): Python scripts for exporting models and datsets from PyTorch to the inference engine. 
 
@@ -16,7 +16,7 @@ The following protocols are currently fully supported by PIGEON.
 ## Getting Started
 
 You can use the provided Dockerfile or set up the project manually.
-The only dependencies are OpenSSL and Eigen. Install on your target system, for instance via ```apt install libssl-dev libeigen3-dev```
+The only dependencies are OpenSSL and Eigen. Install on your target system, for instance via ```apt install libssl-dev libeigen3-dev```.
 
 First, initialize the submodules.
 > git submodule update --init --recursive
@@ -36,6 +36,7 @@ You can select a protocol and function in the file `config.h`. The config contai
 * Which party should share the dataset, Which party should share the function?
 * How many bits should be used for the fractional part, how many bits for the total bitlength?
 * Which truncation approach should be used? Should ReLUs by default be evaluated with reduced Bitwidth?
+* Should the inference be optimized for latency, bandwidth, Online Phase, or total execution time? Should a Preprocessing phase be used?
 
 
 The following commands are a quick way to compile the current configuration for a 3-PC protocol and run all executables locally. This compiles all player executables using g++ with -Ofast and runs all executables on localhost on the same machine.
@@ -51,7 +52,7 @@ For a 4-PC protocol, you can run.
 
 ## Configuration and Compilation
 
-Most configuration is contained in the file `config.h`. Take a careful look at its documentation and different options. For instance you can specify which party should provide the model and which party should provide the data for private inference.
+Most configuration is contained in the file `config.h`. Take a careful look at its documentation and different options.
 
 The Split-Roles scripts transform a protocol into a homogeneous protocol by running multiple executables with different player assignments in parallel.
 
