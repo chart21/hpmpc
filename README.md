@@ -4,7 +4,7 @@ This branch extends HPMPC with private inference capabilities. The framework is 
 
 * [FlexNN](https://github.com/chart21/flexNN/tree/hpmpc): A templated neural network inference engine that performs the forward pass of a CNN generically
 * `Programs/functions` contains MPC-generic implementations of functions such as ReLU
-* `Protocols` Implements the MPC protocols and primitives that are required by the `Programs/functions`.
+* `Protocols` Implements the MPC protocols and primitives that are required by `Programs/functions`.
 * [Pygeon](https://github.com/chart21/Pygeon): Python scripts for exporting models and datsets from PyTorch to the inference engine. 
 
 The following protocols are currently fully supported by PIGEON.
