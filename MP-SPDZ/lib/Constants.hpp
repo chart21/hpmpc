@@ -73,6 +73,16 @@ enum class Opcode {
     MULCI = 0x32,
     ADDCI = 0x23,
 
+    SUBC = 0x25,
+    ADDC = 0x20,
+    MULC = 0x30,
+    EQC = 0x97,
+    ORC = 0x72,
+    SHLC = 0x80,
+    SHRC = 0x81,
+    SUBCFI = 0x2b,
+    MOVC = 0xb,
+
     MULM = 0x31,
     ADDM = 0x22,
 
@@ -89,6 +99,7 @@ enum class Opcode {
     PRINT4 = 0xb5,
     PRINT4COND = 0xbf,
     PRINT_COND_PLAIN = 0xe1,
+    PRINT_INT = 0x9f,
     PRINT_FLOAT_PREC = 0xe0,  // set precision for print_float_*
     PRINT_FLOAT_PLAIN = 0xbc, // print float
 
