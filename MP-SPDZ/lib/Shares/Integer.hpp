@@ -75,7 +75,10 @@ class Integer {
     }
 
     Integer operator-() const { return Integer{-a}; }
-    Integer operator*(const Integer& other) const { return Integer{a * other.a}; }
+    Integer operator*(const Integer& other) const {
+        UBase ua = a;
+        return Integer{Base(ua * other.a)};
+    }
     Integer operator~() const {
         UBase b(a);
         UBase c(-1);
@@ -108,6 +111,8 @@ class Integer {
     Integer operator<<(const Integer& other) const { return Integer{a << other.a}; }
     Integer operator>>(const Integer& other) const {
         UBase tmp(a);
+        if (other.a >= sizeof(Base) * 8)
+            return Integer{0};
         return Integer{Base(tmp >> UBase(other.a))};
     }
 
