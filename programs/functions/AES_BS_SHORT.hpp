@@ -308,7 +308,7 @@ S* z9 = new S[NUM_INPUTS];
   S1[i] = !(_tmp3[i]);
   tc26[i] = tc17[i] ^ tc20[i];
   _tmp4[i] = tc26[i] ^ z17[i];
-  S2[i] = NOT(_tmp4[i]);
+  S2[i] = !(_tmp4[i]);
   S5[i] = tc21[i] ^ tc17[i];
   }
   // Clean memory

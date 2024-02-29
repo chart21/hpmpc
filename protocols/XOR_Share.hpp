@@ -57,6 +57,12 @@ public:
     }
 
     template <int id>
+    void prepare_receive_from(Datatype val) // If all bits should be 0 use SET_ALL_ZERO(), if all bits should be 1 use SET_ALL_ONE()
+    {
+        Share_Type::template prepare_receive_from<id>(val, std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
+    }
+
+    template <int id>
     void complete_receive_from()
     {
         Share_Type::template complete_receive_from<id>(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
