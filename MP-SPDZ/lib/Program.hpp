@@ -1323,7 +1323,7 @@ void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs) {
 
         switch (regs[i]) {
         case 0: // int
-            input = next_input(regs[i + 2], thread_id);
+            input = next_input(regs[i + 2], thread_id)[0];
             break;
         case 1: { // fix
             float tmp = next_input_f(regs[i + 3], thread_id);
