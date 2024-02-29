@@ -1355,7 +1355,7 @@ void AddRoundKey__ (S a__[128][NUM_INPUTS],S b__[128][NUM_INPUTS],S c__[128][NUM
   // Instructions (body)
   for (int i = 0; i <= 127; i++) {
     for (int j = 0; j <= NUM_INPUTS-1; j++) {
-      c__[i][j] = XOR(a__[i][j],b__[i][j]);
+      c__[i][j] = a__[i][j] ^ b__[i][j];
     }
   }
 }
