@@ -12,7 +12,7 @@ inline const std::string ROOT_DIR = "MP-SPDZ";
 inline const std::string SCHEDULES_PATH = ROOT_DIR + "/Schedules/";
 inline const std::string BYTECODE_PATH = ROOT_DIR + "/Bytecodes/";
 
-constexpr size_t SIZE_VEC = DATTYPE/BITLENGTH;
+constexpr size_t SIZE_VEC = DATTYPE / BITLENGTH;
 
 enum class Opcode {
     NONE,
@@ -140,6 +140,9 @@ enum class Opcode {
     USE_MATMUL = 0x1f,
 
     CONVCBITVEC = 0x231,
+    CONVCINTVEC = 0x21f,
+    CONVCBIT2S = 0x249,
+    ANDM = 0x20e,
     DABIT = 0x58,
     RANDOMS = 0x5b,
     SPLIT = 0x248, // local share conversion
