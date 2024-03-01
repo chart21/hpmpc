@@ -53,7 +53,6 @@ void MP_MACHINE_TMP(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using sint = sint_t<A>;
 
-    Share::communicate();
     IR::Machine<A, sbitset_t, S> m("tmp.sch");
     m.run();
 }
