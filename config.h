@@ -126,7 +126,7 @@ int base_port = BASE_PORT; // temporary solution
 #define MAL 1
 #endif
 
-#define SIMULATE_MPC_FUNCTIONS 1
+#define SIMULATE_MPC_FUNCTIONS 0
 
 #if BITLENGTH == 64
     #define INT_TYPE int64_t

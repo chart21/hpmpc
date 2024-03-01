@@ -154,7 +154,7 @@ pre_send_to_live(P_2, SUB( ADD(MULT(p1,b.p1),maskP_1), MULT( SUB(p1,p2), SUB(b.p
 #else
 send_to_live(P_2, SUB( ADD(MULT(p1,b.p1),maskP_1), MULT( SUB(p1,p2), SUB(b.p1,b.p2)  ))); 
 #endif
-// for arithmetic circuikts this will be more efficient to reduce mult from 3 to 2: p1 b.p1 + (p1 + p2) (b.p1 + b.p2)
+// for arithmetic circuits this will be more efficient to reduce mult from 3 to 2: p1 b.p1 + (p1 + p2) (b.p1 + b.p2)
 return OECL0_Share(getRandomVal(P_2),getRandomVal(P_1));
 }
 
@@ -274,6 +274,28 @@ static void prepare_A2B_S1(int m, int k, OECL0_Share in[], OECL0_Share out[])
     }
 }
 
+
+/* static void get_dabit(OECL0_Share bool_out, OECL0_Share arith_out[]) */
+/* { */
+/*     Datatype temp[BITLENGTH]{0}; */
+/*     bool_out.p1 = getRandomVal(P_2); */
+/*     bool_out.p2 = getRandomVal(P_1); */
+/*     temp[BITLENGTH - 1] = FUNC_XOR(bool_out.p1,bool_out.p2); */
+/*     alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE]; */
+/*     unorthogonalize_boolean(temp, temp2); */
+/*     orthogonalize_arithmetic(temp2, temp); */
+/*     for(int i = 0; i < BITLENGTH; i++) */
+/*     { */
+/*         arith_out[i].p2 = getRandomVal(P_1); // set second share to r0,1 */
+/*         arith_out[i].p1 = OP_SUB(SET_ALL_ZERO(), OP_ADD(temp[i], out[i].p2)) ; // set first share to -(x0 + r0,1) */
+/*         #if PRE == 1 */
+/*             pre_send_to_live(P_2, arith_out[i].p1); //  - (x0 + r0,1) to P_2 */
+/*         #else */
+/*             send_to_live(P_2, arith_out[i].p1); // - (x0 + r0,1) to P_2 */
+/*         #endif */
+        
+/*     } */
+/* } */
 
 static void prepare_A2B_S2(int m, int k, OECL0_Share in[], OECL0_Share out[])
 {
