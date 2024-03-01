@@ -126,9 +126,9 @@ void MULT_BENCH(DATATYPE* res)
     Share::communicate(); // dummy round
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-    #if FUNCTION_IDENTIFIER == 40 // int
+    #if FUNCTION_IDENTIFIER == 41 // int
         c[i] = a[i] * b[i];
-    #elif FUNCTION_IDENTIFIER == 41 // fixed
+    #elif FUNCTION_IDENTIFIER == 42 // fixed
         c[i] = a[i].prepare_dot(b[i]);
         c[i].mask_and_send_dot();
     #endif
@@ -137,9 +137,9 @@ void MULT_BENCH(DATATYPE* res)
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-    #if FUNCTION_IDENTIFIER == 40 // int
+    #if FUNCTION_IDENTIFIER == 41 // int
         c[i].complete_mult_without_trunc();
-    #elif FUNCTION_IDENTIFIER == 41 // fixed
+    #elif FUNCTION_IDENTIFIER == 42 // fixed
         c[i].complete_mult();
     #endif
     }
