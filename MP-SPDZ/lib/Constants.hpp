@@ -15,7 +15,7 @@ inline const std::string BYTECODE_PATH = ROOT_DIR + "/Bytecodes/";
 constexpr size_t SIZE_VEC = DATTYPE / BITLENGTH;
 
 enum class Opcode {
-    NONE,
+    CISC = 0x0,
     // conf / ring size
     REQBL = 0x12,
     CRASH = 0x1b,
@@ -146,6 +146,7 @@ enum class Opcode {
     DABIT = 0x58,
     RANDOMS = 0x5b,
     SPLIT = 0x248, // local share conversion
+    NONE = 0xff,
 };
 
 enum class Type {
