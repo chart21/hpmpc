@@ -51,6 +51,7 @@ class Program {
 
         inline unsigned get_size() const { return size; }
 
+        string cisc; // for cisc command (LTZ, EQZ, ...)
       private:
         Opcode op;        // opcode
         unsigned size;    // vectorized
@@ -690,6 +691,34 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             inst.add_reg(read_next_int(fd, buf, 4)); // source
             break;
         }
+        case Opcode::CISC: {
+            unsigned args = read_next_int(fd, buf, 4);
+            print("reading CISC: %u\n", args);
+            char op[16];
+            read(fd, op, 16);
+            inst.cisc = string(op, 16);
+            std::cout << "GOT: " << inst.cisc << "\n";
+            
+            if (strncmp(op, "LTZ", 3) == 0 || strncmp(op, "EQZ", 3) == 0) {
+                for (size_t i = 0; i < args - 1; i += 6) {
+                    unsigned size = inst.add_reg(read_next_int(fd, buf, 4)); // arguments
+                    unsigned vec = inst.add_reg(read_next_int(fd, buf, 4));
+                    assert(size == 6);
+                    unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+                    inst.add_reg(read_next_int(fd, buf, 4)); // result
+                    inst.add_reg(read_next_int(fd, buf, 4)); // bit_length
+                    inst.add_reg(read_next_int(fd, buf, 4)); // ignore
+                    update_max_reg(Type::SINT, dest + vec, inst.get_opcode());
+                    m.get_out() << "s" << dest << "\n";
+                }
+            } else {
+                for (size_t i = 0; i < args - 1; ++i) {
+                    unsigned cur = inst.add_reg(read_next_int(fd, buf, 4));
+                    std::cout << cur << "\n";
+                }
+            }
+            break;
+        }
         default:
             log(Level::WARNING, "unknown operation");
             log(Level::WARNING, "read: ", cur);
@@ -805,7 +834,7 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 ||
         opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf || opc == 0x30 ||
         opc == 0xe1 || opc == 0xca || opc == 0x9a || opc == 0xf2 || opc == 0x2f || opc == 0x20a ||
-        opc == 0x97 || opc == 0x217 || opc == 0x218 || opc == 0x203 || opc == 0x204 ||
+        opc == 0x97 || opc == 0x217 || opc == 0x218 || opc == 0x203 || opc == 0x204 || opc == 0x00 ||
         opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f || opc == 0x80 || opc == 0x2b ||
         opc == 0x214 || opc == 0x24a || opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0xe0 ||
         opc == 0x81 || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0xa9 ||
@@ -1334,6 +1363,10 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::GLDMS:
             // std::cerr << "DEBUG: GLDMS\n";
             break;
+        case Opcode::CISC: {
+            print("TODO: %s\n", cisc.c_str());
+            return;
+        }
         case Opcode::NONE:
             log(Level::WARNING, "unknown opcode: ", n);
             break;
