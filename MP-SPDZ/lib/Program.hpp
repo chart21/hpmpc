@@ -10,6 +10,7 @@
 #include <iostream> // default precision
 #include <random>   // random bit
 #include <string>   // bytecode path
+#include <string_view> // cisc instruction
 #include <utility>  // move
 #include <vector>   // register
 
@@ -85,6 +86,8 @@ class Program {
     template <class iterator>
     void matmulsm_prepare(const vector<int>& regs, const int& row_1, const int& j, iterator source1,
                           iterator source2);
+
+    void cisc(const vector<int>& regs, const std::string_view cisc);
 
     // sbit operations
     void inputbvec(const vector<int>& regs);
@@ -709,7 +712,6 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
                     inst.add_reg(read_next_int(fd, buf, 4)); // bit_length
                     inst.add_reg(read_next_int(fd, buf, 4)); // ignore
                     update_max_reg(Type::SINT, dest + vec, inst.get_opcode());
-                    m.get_out() << "s" << dest << "\n";
                 }
             } else {
                 for (size_t i = 0; i < args - 1; ++i) {
@@ -1364,7 +1366,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             // std::cerr << "DEBUG: GLDMS\n";
             break;
         case Opcode::CISC: {
-            print("TODO: %s\n", cisc.c_str());
+            p.cisc(regs, cisc);
             return;
         }
         case Opcode::NONE:
@@ -1622,6 +1624,21 @@ void Program<sint, sbit, BitShare, N>::dotprods(const vector<int>& regs, const s
             it++;
             s_register[*it + vec] = matrix.get_next();
             it = next;
+        }
+    }
+}
+
+template <class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<sint, sbit, BitShare, N>::cisc(const vector<int>& regs, const std::string_view cisc) {
+    if (cisc.starts_with("LTZ")) {
+        print("LTZ\n");
+        for (size_t i = 0; i < regs.size(); i += 6) {
+            std::cout << "s" << regs[i + 2] << " = s" << regs[i + 3] << "(" << regs[i + 4] << ") < 0" << "\n"; 
+        }
+    } else if (cisc.starts_with("EQZ")) {
+        print("EQZ\n");
+        for (size_t i = 0; i < regs.size(); i += 6) {
+            std::cout << "s" << regs[i + 2] << " = s" << regs[i + 3] << "(" << regs[i + 4] << ") == 0" << "\n";
         }
     }
 }

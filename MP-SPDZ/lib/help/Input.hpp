@@ -127,7 +127,6 @@ std::array<int, SIZE_VEC> next_input(const int& player_num, const int& thread_id
         int a = in->template next<int>(
             [](const std::string& s) -> int { return std::stoi(s.c_str(), nullptr, 10); });
 
-        print("READ: %i\n", a);
         res[cur] = a;
     }
     return res;
