@@ -1433,7 +1433,7 @@ void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs) {
             input = next_input(regs[i + 2], thread_id)[0];
             break;
         case 1: { // fix
-            float tmp = next_input_f(regs[i + 3], thread_id);
+            float tmp = next_input_f(regs[i + 3], thread_id)[0];
             input = static_cast<INT_TYPE>(tmp * (1u << regs[i + 2]));
             i++;
             break;
