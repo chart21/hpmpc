@@ -127,7 +127,7 @@ void MULT_BENCH(DATATYPE* res)
     for(int i = 0; i < NUM_INPUTS; i++)
     {
     #if FUNCTION_IDENTIFIER == 41 // int
-        c[i] = a[i] * b[i];
+        c[i] = a[i].prepare_mult(b[i]);
     #elif FUNCTION_IDENTIFIER == 42 // fixed
         c[i] = a[i].prepare_dot(b[i]);
         c[i].mask_and_send_dot();
