@@ -33,7 +33,7 @@ To export a model or dataset from PyTorch use [Pygeon](https://github.com/chart2
 Existing networks are defined in `SimpleNN/architectures`. `Programs/functions/NN.hpp` includes a FUNCTION_IDENTIFIER for different model architectures and datasets (for instance 70 for RestNet18 on CIFAR-10). 
 You can select a protocol and function in the file `config.h`. The config contains numerous settings. Here are just some examples: 
 * Should the weights be public or private?
-* Which party should share the dataset, Which party should share the function?
+* Which party should share the dataset, Which party should share the model parameters?
 * How many bits should be used for the fractional part, how many bits for the total bitlength?
 * Which truncation approach should be used? Should ReLUs by default be evaluated with reduced Bitwidth?
 * Should the inference be optimized for latency, bandwidth, Online Phase, or total execution time? Should a Preprocessing phase be used?
