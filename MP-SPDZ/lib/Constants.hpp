@@ -81,6 +81,8 @@ enum class Opcode {
     DIVC = 0x34,
     DIVCI = 0x35,
     FLOORDIVC = 0x3b,
+    MODC = 0x36,
+    MODCI = 0x37,
     EQC = 0x97,
     ORC = 0x72,
     SHLC = 0x80,
