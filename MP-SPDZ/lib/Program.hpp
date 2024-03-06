@@ -494,6 +494,15 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             update_max_reg(Type::INT, sreg + inst.get_size(), inst.get_opcode());
             break;
         }
+        case Opcode::STMSBI:
+        case Opcode::LDMSBI: {
+            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            update_max_reg(Type::SBIT, sreg + inst.get_size(), inst.get_opcode());
+
+            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            update_max_reg(Type::INT, sreg + inst.get_size(), inst.get_opcode());
+            break;
+        }
         // sreg + sreg + sreg
         case Opcode::XORCB:
             inst.set_immediate(read_next_int(fd, buf, 4)); // + BIT_LEN
@@ -888,8 +897,8 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0x74 || opc == 0x75 || opc == 0x76 || opc == 0x20e || opc == 0x244 || opc == 0x72 ||
         opc == 0x9f || opc == 0x80 || opc == 0x36 || opc == 0x2b || opc == 0x214 || opc == 0x24a ||
         opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 ||
-        opc == 0x21e || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 ||
-        opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 || opc == 0x70 ||
+        opc == 0x21e || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 || opc == 0x242 ||
+        opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 || opc == 0x70 || opc == 0x243 ||
         opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x21b ||
         opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x20f ||
         opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0xe9 || opc == 0x95 || opc == 0x9c ||
@@ -959,7 +968,17 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             p.s_register[regs[0] + vec] = m.s_mem[p.i_register[regs[1]] + vec];
             break;
         case Opcode::STMSI:
+            if (vec + p.i_register[regs[1]] + 1 > m.s_mem.size())
+                m.s_mem.resize(vec + p.i_register[regs[1]] + 1);
             m.s_mem[vec + p.i_register[regs[1]]] = p.s_register[regs[0] + vec];
+            break;
+        case Opcode::STMSBI:
+            if (vec + p.i_register[regs[1]] + 1 > m.sb_mem.size())
+                m.sb_mem.resize(vec + p.i_register[regs[1]] + 1);
+            m.sb_mem[vec + p.i_register[regs[1]]] = p.sb_register[regs[0] + vec];
+            break;
+        case Opcode::LDMSBI:
+            p.sb_register[regs[0] + vec] = m.sb_mem[p.i_register[regs[1]] + vec];
             break;
         case Opcode::LDSI:
             p.s_register[regs[0] + vec] = int(n);
