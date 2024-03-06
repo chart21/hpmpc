@@ -40,7 +40,12 @@ enum class Opcode {
     GTC = 0x96,
     ADDINT = 0x9b,
     SUBINT = 0x9c,
+    MULINT = 0x9d,
+    DIVINT = 0x9e,
     STMINT = 0xcb,
+    LDMINTI = 0xcc,
+    STMINTI = 0xcd,
+    MOVINT = 0xd0,
 
     BIT = 0x51,
 
@@ -112,8 +117,8 @@ enum class Opcode {
     // IO
     PRINT_REG_PLAIN = 0xb3,
     PRINT_CHR = 0xb4,
-    PRINT4 = 0xb5,
-    PRINT4COND = 0xbf,
+    PRINT4 = 0xb5,     // PRINTSTR
+    PRINT4COND = 0xbf, // CONDPRINTSTR
     PRINT_COND_PLAIN = 0xe1,
     PRINT_INT = 0x9f,
     PRINT_FLOAT_PREC = 0xe0,  // set precision for print_float_*
@@ -139,8 +144,8 @@ enum class Opcode {
     ANDS = 0x20b,
     NOTS = 0x20f,
 
-    ANDRSVEC = 0x24a, // unstable :D
-    BITDECS = 0x203,  // unstable :c
+    ANDRSVEC = 0x24a,
+    BITDECS = 0x203,
 
     REVEAL = 0x214,
     TRANSPOSE = 0x20c,
