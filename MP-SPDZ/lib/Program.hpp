@@ -647,6 +647,17 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             }
             break;
         }
+        case Opcode::ANDRS: {
+            unsigned args = read_next_int(fd, buf, 4);
+            for (size_t i = 0; i < args; i += 4) {
+                unsigned vec = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+                update_max_reg(Type::SBIT, dest + div_ceil(vec, BIT_LEN), inst.get_opcode());
+                inst.add_reg(read_next_int(fd, buf, 4)); // source
+                inst.add_reg(read_next_int(fd, buf, 4)); // const factor
+            }
+            break;
+        }
         case Opcode::MULRS: {
             unsigned args = read_next_int(fd, buf, 4);
             for (size_t i = 0; i < args; i += 4) {
@@ -908,7 +919,7 @@ template <class sint, template <int, class> class sbit, class BitShare, int N>
 Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, const int& vec)
     : size(vec) {
     // only if opc is known
-    if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 ||
+    if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 || opc == 0x96 ||
         opc == 0x21f || opc == 0xb || opc == 0x91 || opc == 0x92 || opc == 0x98 || opc == 0x11 ||
         opc == 0x2e || opc == 0x249 || opc == 0x04 || opc == 0x05 || opc == 0x06 || opc == 0xcb ||
         opc == 0xcc || opc == 0xcd || opc == 0x08 || opc == 0xa || opc == 0x51 || opc == 0x58 ||
@@ -1552,6 +1563,24 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         }
         case Opcode::ANDRSVEC:
             p.andrsvec(regs);
+            return;
+        case Opcode::ANDRS:
+            for (size_t i = 0; i < regs.size(); i += 4) {
+                int vec_size = regs[i];
+                for (int j = 0; j < vec_size; ++j) {
+                    p.sb_register[regs[i + 1] + j / BIT_LEN][j % BIT_LEN] =
+                        p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN] & p.sb_register[regs[i + 3]][0];
+                }
+            }
+
+            BitShare::communicate();
+
+            for (size_t i = 0; i < regs.size(); i += 4) {
+                int vec_size = regs[i];
+                for (int j = 0; j < vec_size; ++j) {
+                    p.sb_register[regs[i + 1] + j / BIT_LEN][j % BIT_LEN].complete_and();
+                }
+            }
             return;
         case Opcode::MULRS:
             for (size_t i = 0; i < regs.size(); i += 4) {
