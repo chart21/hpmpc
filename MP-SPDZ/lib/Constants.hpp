@@ -162,6 +162,15 @@ enum class Opcode {
     SPLIT = 0x248, // local share conversion
     NONE = 0xff,
     RAND = 0xb2,
+
+    NOTCB = 0x212,
+    XORCB = 0x219,
+    ADDCB = 0x21a,
+    ADDCBI = 0x21b,
+    MULCBI = 0x21c,
+    XORCBI = 0x210,
+    SHRCBI = 0x21d,
+    SHLCBI = 0x21e,
 };
 
 enum class Type {
