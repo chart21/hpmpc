@@ -425,6 +425,7 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::SHRCI:
         case Opcode::SHLCI:
         case Opcode::ADDCI:
+        case Opcode::DIVCI:
         case Opcode::ADDSI:
         case Opcode::SUBSFI:
         case Opcode::SUBCFI:
@@ -484,6 +485,8 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::ADDS:
         case Opcode::SUBC:
         case Opcode::ADDC:
+        case Opcode::FLOORDIVC:
+        case Opcode::DIVC:
         case Opcode::MULC:
         case Opcode::ORC:
         case Opcode::SHLC:
@@ -776,6 +779,7 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::SHLCI:
     case Opcode::MULCI:
     case Opcode::ADDCI:
+    case Opcode::DIVCI:
     case Opcode::PRINT_REG_PLAIN:
     case Opcode::PRINT_COND_PLAIN:
     case Opcode::PRINT4COND:
@@ -783,6 +787,8 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::ADDC:
     case Opcode::SUBC:
     case Opcode::MULC:
+    case Opcode::DIVC:
+    case Opcode::FLOORDIVC:
     case Opcode::ORC:
     case Opcode::SHLC:
     case Opcode::SHRC:
@@ -833,10 +839,10 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0xc1 || opc == 0x99 || opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 ||
         opc == 0x26 || opc == 0x103 || opc == 0x104 || opc == 0xa5 || opc == 0xa6 || opc == 0x23 ||
         opc == 0x31 || opc == 0x22 || opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 ||
-        opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 ||
-        opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf || opc == 0x30 ||
+        opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 || opc == 0x35 ||
+        opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf || opc == 0x30 || opc == 0x34 ||
         opc == 0xe1 || opc == 0xca || opc == 0x9a || opc == 0xf2 || opc == 0x2f || opc == 0x20a ||
-        opc == 0x97 || opc == 0x217 || opc == 0x218 || opc == 0x203 || opc == 0x204 ||
+        opc == 0x97 || opc == 0x217 || opc == 0x218 || opc == 0x203 || opc == 0x204 || opc == 0x3b ||
         opc == 0x00 || opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f || opc == 0x80 ||
         opc == 0x2b || opc == 0x214 || opc == 0x24a || opc == 0x5b || opc == 0x248 || opc == 0x1f ||
         opc == 0xe0 || opc == 0x81 || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0xa9 ||
@@ -970,6 +976,10 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::ORC:
             p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] | p.c_register[regs[2] + vec];
             break;
+        case Opcode::DIVC:
+        case Opcode::FLOORDIVC:
+            p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] / p.c_register[regs[2] + vec];
+            break;
         case Opcode::SHLC:
             p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec]
                                           << p.c_register[regs[2] + vec];
@@ -1002,6 +1012,9 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             break;
         case Opcode::ADDCI:
             p.c_register[regs[0] + vec] = (p.c_register[regs[1] + vec]) + int(n);
+            break;
+        case Opcode::DIVCI:
+            p.c_register[regs[0] + vec] = (p.c_register[regs[1] + vec]) / int(n);
             break;
         case Opcode::ADDSI:
             p.s_register[regs[0] + vec] = p.s_register[regs[1] + vec] + sint(int(n));
