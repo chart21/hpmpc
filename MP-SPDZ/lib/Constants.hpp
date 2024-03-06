@@ -164,6 +164,7 @@ enum class Opcode {
 
     CONVCBITVEC = 0x231,
     CONVCINTVEC = 0x21f,
+    CONVCINT = 0x213,
     CONVCBIT2S = 0x249,
     ANDM = 0x20e,
     DABIT = 0x58,
