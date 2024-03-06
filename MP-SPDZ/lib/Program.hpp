@@ -434,6 +434,11 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::ORCI:
         case Opcode::ANDCI:
         case Opcode::NOTC:
+        case Opcode::ADDCBI:
+        case Opcode::MULCBI:
+        case Opcode::XORCBI:
+        case Opcode::SHRCBI:
+        case Opcode::SHLCBI:
         case Opcode::MULCI: {
             unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
@@ -490,6 +495,9 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             break;
         }
         // sreg + sreg + sreg
+        case Opcode::XORCB:
+            inst.set_immediate(read_next_int(fd, buf, 4)); // + BIT_LEN
+        case Opcode::ADDCB:
         case Opcode::ADDS:
         case Opcode::SUBC:
         case Opcode::ADDC:
@@ -567,6 +575,7 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             break;
         }
         // im(32) + sreg + sreg
+        case Opcode::NOTCB:
         case Opcode::MOVSB: {
             unsigned num = inst.set_immediate(read_next_int(fd, buf, 4));
 
@@ -767,6 +776,14 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::PRINT_REG_SIGNED:
     case Opcode::LDMCB:
     case Opcode::STMCB:
+    case Opcode::NOTCB:
+    case Opcode::XORCB:
+    case Opcode::ADDCB:
+    case Opcode::ADDCBI:
+    case Opcode::MULCBI:
+    case Opcode::SHRCBI:
+    case Opcode::SHLCBI:
+    case Opcode::XORCBI:
         return Type::CBIT;
     case Opcode::LDMINT:
     case Opcode::LDARG:
@@ -867,13 +884,16 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0x82 || opc == 0x35 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 ||
         opc == 0xbf || opc == 0x30 || opc == 0x34 || opc == 0xe1 || opc == 0xca || opc == 0x9a ||
         opc == 0xf2 || opc == 0x2f || opc == 0x20a || opc == 0x37 || opc == 0x97 || opc == 0x217 ||
-        opc == 0x218 || opc == 0x203 || opc == 0x204 || opc == 0x3b || opc == 0x00 || opc == 0x73 || opc == 0x74 || opc == 0x75 || opc == 0x76 ||
-        opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f || opc == 0x80 || opc == 0x36 ||
-        opc == 0x2b || opc == 0x214 || opc == 0x24a || opc == 0x5b || opc == 0x248 || opc == 0x1f ||
-        opc == 0x71 || opc == 0xe0 || opc == 0x81 || opc == 0x240 || opc == 0x241 || opc == 0x200 ||
-        opc == 0xa9 || opc == 0x70 || opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc ||
-        opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x20f || opc == 0x220 || opc == 0xd1 ||
-        opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x93 || opc == 0x9b) {
+        opc == 0x218 || opc == 0x203 || opc == 0x204 || opc == 0x3b || opc == 0x00 || opc == 0x73 ||
+        opc == 0x74 || opc == 0x75 || opc == 0x76 || opc == 0x20e || opc == 0x244 || opc == 0x72 ||
+        opc == 0x9f || opc == 0x80 || opc == 0x36 || opc == 0x2b || opc == 0x214 || opc == 0x24a ||
+        opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 ||
+        opc == 0x21e || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 ||
+        opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 || opc == 0x70 ||
+        opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x21b ||
+        opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x20f ||
+        opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0xe9 || opc == 0x95 || opc == 0x9c ||
+        opc == 0x93 || opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
         op = Opcode::NONE;
@@ -1234,6 +1254,45 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                 p.sb_register[regs[0] + i / BIT_LEN][i % BIT_LEN] =
                     ~(p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN]);
             return;
+        case Opcode::NOTCB: {
+            long cur = n;
+            for (size_t i = 0; i < div_ceil(n, BIT_LEN); ++i) {
+                long bits = std::min(cur, long(BIT_LEN));
+                auto num = ~p.cb_register[regs[1] + i];
+                p.cb_register[regs[0] + i] = bits == BIT_LEN ? num : num & ((1lu << bits) - 1lu);
+                cur -= BIT_LEN;
+            }
+            return;
+        }
+        case Opcode::XORCB: {
+            long cur = n;
+            for (size_t i = 0; i < div_ceil(n, BIT_LEN); ++i) {
+                long bits = std::min(cur, long(BIT_LEN));
+                auto num = p.cb_register[regs[1] + i] ^ p.cb_register[regs[2] + i];
+                p.cb_register[regs[0] + i] = bits == BIT_LEN ? num : num & ((1lu << bits) - 1lu);
+                cur -= BIT_LEN;
+            }
+            return;
+        }
+        case Opcode::ADDCB:
+            p.cb_register[regs[0] + vec] =
+                p.cb_register[regs[1] + vec] + p.cb_register[regs[2] + vec];
+            return;
+        case Opcode::ADDCBI:
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] + int(n);
+            break;
+        case Opcode::MULCBI:
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] * int(n);
+            break;
+        case Opcode::XORCBI:
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] ^ int(n);
+            break;
+        case Opcode::SHRCBI:
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] >> int(n);
+            break;
+        case Opcode::SHLCBI:
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] << int(n);
+            break;
         case Opcode::REVEAL:
             for (size_t i = 0; i < regs.size(); i += 3) {
                 for (int j = 0; j < regs[i]; ++j) {
@@ -1249,7 +1308,8 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                 for (int j = 0; j < regs[i]; ++j) {
                     p.cb_register[regs[i + 1] + j / BIT_LEN] |=
                         (p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN]
-                            .complete_reveal_to_all() & 1)
+                             .complete_reveal_to_all() &
+                         1)
                         << (j % BIT_LEN);
                 }
             }
