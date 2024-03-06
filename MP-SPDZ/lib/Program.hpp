@@ -430,6 +430,10 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::ADDSI:
         case Opcode::SUBSFI:
         case Opcode::SUBCFI:
+        case Opcode::XORCI:
+        case Opcode::ORCI:
+        case Opcode::ANDCI:
+        case Opcode::NOTC:
         case Opcode::MULCI: {
             unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
@@ -494,6 +498,8 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::MODC:
         case Opcode::MULC:
         case Opcode::ORC:
+        case Opcode::ANDC:
+        case Opcode::XORC:
         case Opcode::SHLC:
         case Opcode::SHRC:
         case Opcode::EQC:
@@ -802,10 +808,16 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::MODC:
     case Opcode::FLOORDIVC:
     case Opcode::ORC:
+    case Opcode::ANDC:
+    case Opcode::XORC:
+    case Opcode::NOTC:
     case Opcode::SHLC:
     case Opcode::SHRC:
     case Opcode::SUBCFI:
     case Opcode::MOVC:
+    case Opcode::XORCI:
+    case Opcode::ORCI:
+    case Opcode::ANDCI:
         return Type::CINT;
     case Opcode::LDMS:
     case Opcode::INPUTMIXED:
@@ -847,20 +859,21 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
     if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 ||
         opc == 0x21f || opc == 0xb || opc == 0x91 || opc == 0x92 || opc == 0x98 || opc == 0x11 ||
         opc == 0x2e || opc == 0x249 || opc == 0x04 || opc == 0x05 || opc == 0x06 || opc == 0xcb ||
-        opc == 0x08 || opc == 0xa || opc == 0x51 || opc == 0x58 || opc == 0xc || opc == 0xc0 || opc == 0xb2 ||
-        opc == 0xc1 || opc == 0x99 || opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 ||
-        opc == 0x26 || opc == 0x103 || opc == 0x104 || opc == 0xa5 || opc == 0xa6 || opc == 0x23 ||
-        opc == 0x31 || opc == 0x22 || opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 ||
-        opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 || opc == 0x35 ||
-        opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf || opc == 0x30 || opc == 0x34 ||
-        opc == 0xe1 || opc == 0xca || opc == 0x9a || opc == 0xf2 || opc == 0x2f || opc == 0x20a || opc == 0x37 ||
-        opc == 0x97 || opc == 0x217 || opc == 0x218 || opc == 0x203 || opc == 0x204 || opc == 0x3b ||
-        opc == 0x00 || opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f || opc == 0x80 || opc == 0x36 ||
+        opc == 0x08 || opc == 0xa || opc == 0x51 || opc == 0x58 || opc == 0xc || opc == 0xc0 ||
+        opc == 0xb2 || opc == 0xc1 || opc == 0x99 || opc == 0x17 || opc == 0x18 || opc == 0x21 ||
+        opc == 0x24 || opc == 0x26 || opc == 0x103 || opc == 0x104 || opc == 0xa5 || opc == 0xa6 ||
+        opc == 0x23 || opc == 0x31 || opc == 0x22 || opc == 0x32 || opc == 0x20 || opc == 0x33 ||
+        opc == 0x231 || opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 ||
+        opc == 0x82 || opc == 0x35 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 ||
+        opc == 0xbf || opc == 0x30 || opc == 0x34 || opc == 0xe1 || opc == 0xca || opc == 0x9a ||
+        opc == 0xf2 || opc == 0x2f || opc == 0x20a || opc == 0x37 || opc == 0x97 || opc == 0x217 ||
+        opc == 0x218 || opc == 0x203 || opc == 0x204 || opc == 0x3b || opc == 0x00 || opc == 0x73 || opc == 0x74 || opc == 0x75 || opc == 0x76 ||
+        opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f || opc == 0x80 || opc == 0x36 ||
         opc == 0x2b || opc == 0x214 || opc == 0x24a || opc == 0x5b || opc == 0x248 || opc == 0x1f ||
-        opc == 0xe0 || opc == 0x81 || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0xa9 ||
-        opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x20b || opc == 0xa8 || opc == 0x94 ||
-        opc == 0x20f || opc == 0x220 || opc == 0xd1 || opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x93 ||
-        opc == 0x9b) {
+        opc == 0x71 || opc == 0xe0 || opc == 0x81 || opc == 0x240 || opc == 0x241 || opc == 0x200 ||
+        opc == 0xa9 || opc == 0x70 || opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc ||
+        opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x20f || opc == 0x220 || opc == 0xd1 ||
+        opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x93 || opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
         op = Opcode::NONE;
@@ -988,6 +1001,24 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::ORC:
             p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] | p.c_register[regs[2] + vec];
             break;
+        case Opcode::ANDC:
+            p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] & p.c_register[regs[2] + vec];
+            break;
+        case Opcode::XORC:
+            p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] ^ p.c_register[regs[2] + vec];
+            break;
+        case Opcode::ORCI:
+            p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] | int(n);
+            break;
+        case Opcode::XORCI:
+            p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] ^ int(n);
+            break;
+        case Opcode::NOTC:
+            p.c_register[regs[0] + vec] = (~p.c_register[regs[1] + vec]) & ((1lu << int(n)) - 1lu);
+            break;
+        case Opcode::ANDCI:
+            p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] & int(n);
+            break;
         case Opcode::DIVC:
         case Opcode::FLOORDIVC:
             p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] / p.c_register[regs[2] + vec];
@@ -1026,16 +1057,15 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                 p.i_register[regs[1] + vec] == p.i_register[regs[2] + vec];
             break;
         case Opcode::EQZC:
-            p.i_register[regs[0] + vec] =
-                p.i_register[regs[1] + vec] == 0;
+            p.i_register[regs[0] + vec] = p.i_register[regs[1] + vec] == 0;
             break;
         case Opcode::LTZC:
-            p.i_register[regs[0] + vec] =
-                p.i_register[regs[1] + vec] < 0;
+            p.i_register[regs[0] + vec] = p.i_register[regs[1] + vec] < 0;
             break;
         case Opcode::RAND: {
             long rand = p.rand_engine();
-            rand = p.i_register[regs[1] + vec] >= 64 ? rand : rand % (1 << p.i_register[regs[1] + vec]);
+            rand = p.i_register[regs[1] + vec] >= 64 ? rand
+                                                     : rand % (1 << p.i_register[regs[1] + vec]);
             p.i_register[regs[0] + vec] = rand;
             break;
         }
@@ -1163,7 +1193,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                 log(Level::ERROR, "public val too long :c");
 
             for (int j = 0; j < regs[1]; j++) {
-                p.sb_register[regs[0]][j] = ((n >> j) & 1);
+                p.sb_register[regs[0]][j] = BitShare(((n >> j) & 1) == 1 ? 1 : ZERO);
             }
 
             return;
@@ -1202,7 +1232,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::NOTS:
             for (int i = 0; i < int(n); ++i)
                 p.sb_register[regs[0] + i / BIT_LEN][i % BIT_LEN] =
-                    ~p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN];
+                    ~(p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN]);
             return;
         case Opcode::REVEAL:
             for (size_t i = 0; i < regs.size(); i += 3) {
@@ -1218,8 +1248,8 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                     p.cb_register[regs[i + 1] + j] = 0;
                 for (int j = 0; j < regs[i]; ++j) {
                     p.cb_register[regs[i + 1] + j / BIT_LEN] |=
-                        p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN]
-                            .complete_reveal_to_all()
+                        (p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN]
+                            .complete_reveal_to_all() & 1)
                         << (j % BIT_LEN);
                 }
             }
