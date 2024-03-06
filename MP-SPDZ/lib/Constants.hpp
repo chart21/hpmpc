@@ -68,6 +68,7 @@ enum class Opcode {
 
     // ARITHM
     MULS = 0xa6,
+    MULRS = 0xa7,
 
     LDMCB = 0x217,
     STMCB = 0x218,
@@ -142,6 +143,7 @@ enum class Opcode {
 
     XORS = 0x200,
     ANDS = 0x20b,
+    ANDRS = 0x202,
     NOTS = 0x20f,
 
     ANDRSVEC = 0x24a,
