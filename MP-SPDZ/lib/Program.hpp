@@ -455,6 +455,9 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         }
         // sreg + sreg
         case Opcode::MOVC:
+        case Opcode::EQZC:
+        case Opcode::LTZC:
+        case Opcode::RAND:
         case Opcode::MOVS: {
             unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
@@ -495,6 +498,7 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::SHRC:
         case Opcode::EQC:
         case Opcode::LTC:
+        case Opcode::GTC:
         case Opcode::SUBINT:
         case Opcode::ADDINT:
         case Opcode::PRINT_COND_PLAIN:
@@ -766,12 +770,16 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::LDINT:
     case Opcode::STMINT:
     case Opcode::LTC:
+    case Opcode::GTC:
     case Opcode::SUBINT:
     case Opcode::ADDINT:
     case Opcode::JMPEQZ:
     case Opcode::JMPNZ:
     case Opcode::INCINT:
     case Opcode::EQC:
+    case Opcode::EQZC:
+    case Opcode::LTZC:
+    case Opcode::RAND:
     case Opcode::PRINT_INT:
         return Type::INT;
     case Opcode::LDI:
@@ -839,7 +847,7 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
     if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 ||
         opc == 0x21f || opc == 0xb || opc == 0x91 || opc == 0x92 || opc == 0x98 || opc == 0x11 ||
         opc == 0x2e || opc == 0x249 || opc == 0x04 || opc == 0x05 || opc == 0x06 || opc == 0xcb ||
-        opc == 0x08 || opc == 0xa || opc == 0x51 || opc == 0x58 || opc == 0xc || opc == 0xc0 ||
+        opc == 0x08 || opc == 0xa || opc == 0x51 || opc == 0x58 || opc == 0xc || opc == 0xc0 || opc == 0xb2 ||
         opc == 0xc1 || opc == 0x99 || opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 ||
         opc == 0x26 || opc == 0x103 || opc == 0x104 || opc == 0xa5 || opc == 0xa6 || opc == 0x23 ||
         opc == 0x31 || opc == 0x22 || opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 ||
@@ -850,8 +858,8 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0x00 || opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f || opc == 0x80 || opc == 0x36 ||
         opc == 0x2b || opc == 0x214 || opc == 0x24a || opc == 0x5b || opc == 0x248 || opc == 0x1f ||
         opc == 0xe0 || opc == 0x81 || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0xa9 ||
-        opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x20b || opc == 0xa8 ||
-        opc == 0x20f || opc == 0x220 || opc == 0xd1 || opc == 0xe9 || opc == 0x95 || opc == 0x9c ||
+        opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x20b || opc == 0xa8 || opc == 0x94 ||
+        opc == 0x20f || opc == 0x220 || opc == 0xd1 || opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x93 ||
         opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
@@ -1017,6 +1025,20 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             p.i_register[regs[0] + vec] =
                 p.i_register[regs[1] + vec] == p.i_register[regs[2] + vec];
             break;
+        case Opcode::EQZC:
+            p.i_register[regs[0] + vec] =
+                p.i_register[regs[1] + vec] == 0;
+            break;
+        case Opcode::LTZC:
+            p.i_register[regs[0] + vec] =
+                p.i_register[regs[1] + vec] < 0;
+            break;
+        case Opcode::RAND: {
+            long rand = p.rand_engine();
+            rand = p.i_register[regs[1] + vec] >= 64 ? rand : rand % (1 << p.i_register[regs[1] + vec]);
+            p.i_register[regs[0] + vec] = rand;
+            break;
+        }
         case Opcode::ADDCI:
             p.c_register[regs[0] + vec] = (p.c_register[regs[1] + vec]) + int(n);
             break;
@@ -1045,6 +1067,10 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::LTC:
             p.i_register[regs[0] + vec] =
                 p.i_register[regs[1] + vec] < p.i_register[regs[2] + vec] ? 1 : 0;
+            break;
+        case Opcode::GTC:
+            p.i_register[regs[0] + vec] =
+                p.i_register[regs[1] + vec] > p.i_register[regs[2] + vec] ? 1 : 0;
             break;
         case Opcode::SUBINT:
             p.i_register[regs[0] + vec] = p.i_register[regs[1] + vec] - p.i_register[regs[2] + vec];

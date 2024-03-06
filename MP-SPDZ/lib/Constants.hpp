@@ -37,6 +37,7 @@ enum class Opcode {
     STMSI = 0xa,
 
     LTC = 0x95,
+    GTC = 0x96,
     ADDINT = 0x9b,
     SUBINT = 0x9c,
     STMINT = 0xcb,
@@ -84,6 +85,8 @@ enum class Opcode {
     MODC = 0x36,
     MODCI = 0x37,
     EQC = 0x97,
+    EQZC = 0x93,
+    LTZC = 0x94,
     ORC = 0x72,
     SHLC = 0x80,
     SHRC = 0x81,
@@ -152,6 +155,7 @@ enum class Opcode {
     RANDOMS = 0x5b,
     SPLIT = 0x248, // local share conversion
     NONE = 0xff,
+    RAND = 0xb2,
 };
 
 enum class Type {
