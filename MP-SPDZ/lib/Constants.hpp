@@ -132,6 +132,8 @@ enum class Opcode {
     LDBITS = 0x20a,
     LDMSB = 0x240,
     STMSB = 0x241,
+    LDMSBI = 0x242,
+    STMSBI = 0x243,
 
     XORS = 0x200,
     ANDS = 0x20b,
