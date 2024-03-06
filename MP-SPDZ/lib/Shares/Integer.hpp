@@ -79,6 +79,10 @@ class Integer {
         UBase ua = a;
         return Integer{Base(ua * other.a)};
     }
+    Integer operator/(const Integer& other) const {
+        UBase ua = a;
+        return Integer{Base(ua / other.a)};
+    }
     Integer operator~() const {
         UBase b(a);
         UBase c(-1);
