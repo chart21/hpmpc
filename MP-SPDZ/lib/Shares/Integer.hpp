@@ -90,8 +90,8 @@ class Integer {
     }
     Integer operator~() const {
         UBase b(a);
-        UBase c(-1);
-        return Integer{Base(c + b)};
+        // UBase c(-1);
+        return Integer{Base(~b)};
     }
 
     bool operator<(const Base& other) const { return a < other; }
