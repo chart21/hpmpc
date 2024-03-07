@@ -121,6 +121,7 @@ enum class Opcode {
     PRINT4 = 0xb5,     // PRINTSTR
     PRINT4COND = 0xbf, // CONDPRINTSTR
     PRINT_COND_PLAIN = 0xe1,
+    COND_PRINT_STRB = 0x224,
     PRINT_INT = 0x9f,
     PRINT_FLOAT_PREC = 0xe0,  // set precision for print_float_*
     PRINT_FLOAT_PLAIN = 0xbc, // print float
@@ -165,6 +166,7 @@ enum class Opcode {
     CONVCBITVEC = 0x231,
     CONVCINTVEC = 0x21f,
     CONVCINT = 0x213,
+    CONVSINT = 0x205,
     CONVCBIT2S = 0x249,
     ANDM = 0x20e,
     DABIT = 0x58,
