@@ -464,11 +464,13 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             break;
         }
         // sreg + sreg
+        case Opcode::SHUFFLE:
         case Opcode::MOVC:
         case Opcode::MOVINT:
         case Opcode::EQZC:
         case Opcode::LTZC:
         case Opcode::RAND:
+        case Opcode::PREFIXSUMS:
         case Opcode::MOVS: {
             unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
@@ -865,6 +867,7 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::RAND:
     case Opcode::MOVINT:
     case Opcode::PRINT_INT:
+    case Opcode::SHUFFLE:
         return Type::INT;
     case Opcode::LDI:
     case Opcode::LDMC:
@@ -913,6 +916,7 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::DOTPRODS:
     case Opcode::ADDSI:
     case Opcode::RANDOMS:
+    case Opcode::PREFIXSUMS:
         return Type::SINT;
     default:
         break;
@@ -935,8 +939,8 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
     : size(vec) {
     // only if opc is known
     if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 ||
-        opc == 0x96 || opc == 0x21f || opc == 0xb || opc == 0x91 || opc == 0x92 || opc == 0x98 ||
-        opc == 0x11 || opc == 0x2e || opc == 0x249 || opc == 0x04 || opc == 0x05 || opc == 0x06 ||
+        opc == 0x96 || opc == 0x21f || opc == 0xb || opc == 0x91 || opc == 0x92 || opc == 0x98 || opc == 0x2d ||
+        opc == 0x11 || opc == 0x2e || opc == 0x249 || opc == 0x04 || opc == 0x05 || opc == 0x06 || opc == 0xd2 ||
         opc == 0xcb || opc == 0xcc || opc == 0xcd || opc == 0x08 || opc == 0xa || opc == 0x51 ||
         opc == 0x58 || opc == 0xc || opc == 0xc0 || opc == 0xb2 || opc == 0xc1 || opc == 0x99 ||
         opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 || opc == 0x26 || opc == 0x103 ||
@@ -1000,6 +1004,14 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                                                             size_t& pc) const {
     for (size_t vec = 0; vec < size; ++vec) {
         switch (op) {
+        case Opcode::PREFIXSUMS: {
+            sint s(0);
+            for (size_t vec = 0; vec < size; ++vec) {
+                s += p.s_register[regs[1] + vec];
+                p.s_register[regs[0] + vec] = s;
+            }
+            return;
+        }
         case Opcode::LDARG:
             p.i_register[regs[0]] = p.get_argument();
             break;
@@ -1019,28 +1031,28 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             p.s_register[regs[0] + vec] = m.s_mem[n + vec];
             break;
         case Opcode::LDMSI:
-            p.s_register[regs[0] + vec] = m.s_mem[p.i_register[regs[1]] + vec];
+            p.s_register[regs[0] + vec] = m.s_mem[p.i_register[regs[1] + vec]];
             break;
         case Opcode::STMSI:
             if (vec + p.i_register[regs[1]] + 1 > m.s_mem.size())
-                m.s_mem.resize(vec + p.i_register[regs[1]] + 1);
-            m.s_mem[vec + p.i_register[regs[1]]] = p.s_register[regs[0] + vec];
+                m.s_mem.resize(p.i_register[regs[1] + vec] + 1);
+            m.s_mem[p.i_register[regs[1] + vec]] = p.s_register[regs[0] + vec];
             break;
         case Opcode::STMSBI:
             if (vec + p.i_register[regs[1]] + 1 > m.sb_mem.size())
-                m.sb_mem.resize(vec + p.i_register[regs[1]] + 1);
-            m.sb_mem[vec + p.i_register[regs[1]]] = p.sb_register[regs[0] + vec];
+                m.sb_mem.resize(p.i_register[regs[1] + vec] + 1);
+            m.sb_mem[p.i_register[regs[1] + vec]] = p.sb_register[regs[0] + vec];
             break;
         case Opcode::LDMSBI:
-            p.sb_register[regs[0] + vec] = m.sb_mem[p.i_register[regs[1]] + vec];
+            p.sb_register[regs[0] + vec] = m.sb_mem[p.i_register[regs[1] + vec]];
             break;
         case Opcode::STMINTI:
             if (vec + p.i_register[regs[1]] + 1 > m.ci_mem.size())
-                m.ci_mem.resize(vec + p.i_register[regs[1]] + 1);
-            m.ci_mem[p.i_register[regs[1]] + vec] = p.i_register[regs[0] + vec];
+                m.ci_mem.resize(p.i_register[regs[1] + vec] + 1);
+            m.ci_mem[p.i_register[regs[1] + vec]] = p.i_register[regs[0] + vec];
             break;
         case Opcode::LDMINTI:
-            p.i_register[regs[0] + vec] = m.ci_mem[p.i_register[regs[1]] + vec];
+            p.i_register[regs[0] + vec] = m.ci_mem[p.i_register[regs[1] + vec]];
             break;
         case Opcode::LDSI:
             p.s_register[regs[0] + vec] = int(n);
@@ -1503,6 +1515,15 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             break;
         case Opcode::INPUTBVEC:
             p.inputbvec(regs);
+            return;
+        case Opcode::SHUFFLE:
+            for (size_t i = 0; i < size; ++i)
+                p.i_register[regs[0] + i] = p.i_register[regs[1] + i];
+
+            for (size_t i = 0; i < size; ++i) {
+                size_t j = p.rand_engine() % (size - i); // should be shared random value
+                std::swap(p.i_register[regs[0] + i], p.i_register[regs[0] + i + j]);
+            }
             return;
         case Opcode::JMP:
             pc += (signed int)n;

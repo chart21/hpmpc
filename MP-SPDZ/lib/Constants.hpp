@@ -60,8 +60,11 @@ enum class Opcode {
     GLDMS = 0x104,
 
     ADDS = 0x21,
+    PREFIXSUMS = 0x2d,
     ADDSI = 0x24,
     SUBS = 0x26,
+
+    SHUFFLE = 0xd2,
 
     // REVEAL SINT
     OPEN = 0xa5,
