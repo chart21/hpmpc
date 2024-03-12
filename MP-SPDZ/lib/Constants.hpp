@@ -186,6 +186,13 @@ enum class Opcode {
     XORCBI = 0x210,
     SHRCBI = 0x21d,
     SHLCBI = 0x21e,
+
+    NPLAYERS = 0xe2,
+    THRESHOLD = 0xe3,
+    PLAYERID = 0xe4,
+    TIME = 0x14,
+    START = 0x15,
+    STOP = 0x16,
 };
 
 enum class Type {
