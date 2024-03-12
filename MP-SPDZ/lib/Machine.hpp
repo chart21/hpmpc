@@ -7,6 +7,8 @@
 #include <string>   // file path
 #include <thread>   // for the tapes
 #include <vector>   // register
+#include <chrono>
+#include <map>
 
 #include "Constants.hpp"
 #include "Program.hpp"
@@ -17,6 +19,22 @@ using std::thread;
 using std::vector;
 
 namespace IR {
+
+struct Timer {
+    void start() { started = true; cur = std::chrono::high_resolution_clock::now(); }
+    double stop() { double res = get_time(); started = false; return res; }
+    double get_time() const {
+        if (started)
+            return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - cur).count();
+        else
+            return 0;
+    }
+
+private:
+    bool started = false;
+
+    std::chrono::time_point<std::chrono::high_resolution_clock> cur;
+};
 
 template <class sint, template <int, class> class sbit, class BitShare, int N = 64>
 class Machine {
@@ -45,12 +63,17 @@ class Machine {
 
     std::ostream& get_out() const { return std::cout; }
 
+    void start(const int& index);
+    void stop(const int& index);
+    void time() const;
+
   private:
     vector<Program<sint, sbit, BitShare, N>> progs; // all bytecode-files
     vector<thread> tapes;                           // all threads running the VM
 
     unsigned max_mem[REG_TYPES]; // save max value -> size of memory
     bool loaded;
+    std::map<int, Timer> timer;
 };
 
 template <class sint, template <int, class> class sbit, class BitShare, int N>
@@ -127,6 +150,7 @@ void Machine<sint, sbit, BitShare, N>::run() {
 
     setup();
 
+    timer[0].start();
     thread& cur = run_tape(0, 0);
     cur.join();
 }
@@ -146,6 +170,24 @@ void Machine<sint, sbit, BitShare, N>::update_max_mem(const Type& type, const un
     if (max_mem[i] < addr) {
         max_mem[i] = addr;
     }
+}
+
+template <class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<sint, sbit, BitShare, N>::start(const int& index) {
+    timer[index].start();
+    get_out() << "starting timer " << index << " at 0\n";
+}
+
+template <class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<sint, sbit, BitShare, N>::stop(const int& index) {
+    auto res = timer[index].stop();
+    get_out() << "stopping timer " << index << " at " << res << "\n";
+}
+
+template <class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<sint, sbit, BitShare, N>::time() const {
+    auto res = timer.at(0).get_time();
+    get_out() << "Elapsed time: " << res << "\n";
 }
 
 } // namespace IR

@@ -263,6 +263,8 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::PRINT4:
         case Opcode::JMP:
         case Opcode::ACTIVE:
+        case Opcode::START:
+        case Opcode::STOP:
         case Opcode::PRINT_CHR:
         case Opcode::PRINT_FLOAT_PREC:
             inst.set_immediate(read_next_int(fd, buf, 4));
@@ -303,6 +305,9 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::BIT:
         case Opcode::JMPI:
         case Opcode::CRASH:
+        case Opcode::NPLAYERS:
+        case Opcode::THRESHOLD:
+        case Opcode::PLAYERID:
         case Opcode::LDARG: {
             unsigned reg = inst.add_reg(read_next_int(fd, buf, 4));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), reg + inst.get_size(),
@@ -804,6 +809,8 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             }
             break;
         }
+        case Opcode::TIME:
+            break;
         default:
             log(Level::WARNING, "unknown operation");
             log(Level::WARNING, "read: ", cur);
@@ -868,6 +875,9 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::MOVINT:
     case Opcode::PRINT_INT:
     case Opcode::SHUFFLE:
+    case Opcode::NPLAYERS:
+    case Opcode::THRESHOLD:
+    case Opcode::PLAYERID:
         return Type::INT;
     case Opcode::LDI:
     case Opcode::LDMC:
@@ -941,12 +951,12 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
     if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 ||
         opc == 0x96 || opc == 0x21f || opc == 0xb || opc == 0x91 || opc == 0x92 || opc == 0x98 || opc == 0x2d ||
         opc == 0x11 || opc == 0x2e || opc == 0x249 || opc == 0x04 || opc == 0x05 || opc == 0x06 || opc == 0xd2 ||
-        opc == 0xcb || opc == 0xcc || opc == 0xcd || opc == 0x08 || opc == 0xa || opc == 0x51 ||
-        opc == 0x58 || opc == 0xc || opc == 0xc0 || opc == 0xb2 || opc == 0xc1 || opc == 0x99 ||
-        opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 || opc == 0x26 || opc == 0x103 ||
-        opc == 0x104 || opc == 0xa5 || opc == 0xa6 || opc == 0xa7 || opc == 0x23 || opc == 0x31 ||
-        opc == 0x22 || opc == 0x224 || opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 ||
-        opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 ||
+        opc == 0xcb || opc == 0xcc || opc == 0xcd || opc == 0x08 || opc == 0xa || opc == 0x51 || opc == 0xe2 ||
+        opc == 0x58 || opc == 0xc || opc == 0xc0 || opc == 0xb2 || opc == 0xc1 || opc == 0x99 || opc == 0xe3 ||
+        opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 || opc == 0x26 || opc == 0x103 || opc == 0xe4 ||
+        opc == 0x104 || opc == 0xa5 || opc == 0xa6 || opc == 0xa7 || opc == 0x23 || opc == 0x31 || opc == 0x14 ||
+        opc == 0x22 || opc == 0x224 || opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 || opc == 0x15 ||
+        opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 || opc == 0x16 ||
         opc == 0x35 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf ||
         opc == 0x30 || opc == 0x34 || opc == 0xe1 || opc == 0xca || opc == 0x9a || opc == 0xf2 ||
         opc == 0x2f || opc == 0x20a || opc == 0x205 || opc == 0x37 || opc == 0x97 || opc == 0x217 ||
@@ -1672,6 +1682,24 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::GLDMS:
             // std::cerr << "DEBUG: GLDMS\n";
             break;
+        case Opcode::NPLAYERS:
+            p.i_register[regs[0] + vec] = num_players;
+            break;
+        case Opcode::THRESHOLD:
+            p.i_register[regs[0] + vec] = 0;
+            break;
+        case Opcode::PLAYERID:
+            p.i_register[regs[0] + vec] = PARTY;
+            break;
+        case Opcode::START:
+            m.start(n);
+            return;
+        case Opcode::STOP:
+            m.stop(n);
+            return;
+        case Opcode::TIME:
+            m.time();
+            return;
         case Opcode::CISC: {
             p.cisc(regs, cisc);
             return;
