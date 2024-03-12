@@ -80,7 +80,7 @@ class Program {
     void muls(const vector<int>& regs);
     void mulm(const vector<int>& regs, const size_t& vec);
     void dotprods(const vector<int>& regs, const size_t& size); // TODO
-    void inputmixed(const vector<int>& regs);
+    void inputmixed(const vector<int>& regs, const bool from_reg);
 
     void matmulsm(const vector<int>& regs, Machine<sint, sbit, BitShare, N>& m);
     template <class iterator>
@@ -385,6 +385,7 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             inst.set_immediate(read_next_int(fd, buf, 8));
             break;
         }
+        case Opcode::INPUTMIXEDREG:
         case Opcode::INPUTMIXED: {
             unsigned num = read_next_int(fd, buf, 4);
             for (size_t i = 0; i < num; ++i) {
@@ -401,7 +402,7 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
                 }
 
                 update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
-                inst.add_reg(read_next_int(fd, buf, 4));
+                inst.add_reg(read_next_int(fd, buf, 4)); // input PLAYER (regint for ...REG)
 
                 i += 2;
             }
@@ -912,6 +913,7 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
         return Type::CINT;
     case Opcode::LDMS:
     case Opcode::INPUTMIXED:
+    case Opcode::INPUTMIXEDREG:
     case Opcode::LDSI:
     case Opcode::STMS:
     case Opcode::MULS:
@@ -958,7 +960,7 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0x22 || opc == 0x224 || opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 || opc == 0x15 ||
         opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 || opc == 0x16 ||
         opc == 0x35 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf ||
-        opc == 0x30 || opc == 0x34 || opc == 0xe1 || opc == 0xca || opc == 0x9a || opc == 0xf2 ||
+        opc == 0x30 || opc == 0x34 || opc == 0xe1 || opc == 0xca || opc == 0x9a || opc == 0xf2 || opc == 0xf3 ||
         opc == 0x2f || opc == 0x20a || opc == 0x205 || opc == 0x37 || opc == 0x97 || opc == 0x217 ||
         opc == 0x218 || opc == 0x203 || opc == 0x202 || opc == 0x204 || opc == 0x3b ||
         opc == 0x00 || opc == 0x73 || opc == 0x74 || opc == 0x75 || opc == 0x76 || opc == 0x20e ||
@@ -1308,7 +1310,10 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             }
             break;
         case Opcode::INPUTMIXED: // fine
-            p.inputmixed(regs);
+            p.inputmixed(regs, false);
+            return;
+        case Opcode::INPUTMIXEDREG:
+            p.inputmixed(regs, true);
             return;
         case Opcode::CONCATS: {
             auto dest = p.s_register.begin() + regs[0];
@@ -1760,17 +1765,23 @@ void Program<sint, sbit, BitShare, N>::inputbvec(const vector<int>& regs) {
 }
 
 template <class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs) {
+void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs, bool from_reg) {
     for (size_t i = 0; i < regs.size(); i += 3) {
         INT_TYPE input = 0;
         int dest = regs[i + 1];
 
+        int player = 0;
+
         switch (regs[i]) {
         case 0: // int
-            input = next_input(regs[i + 2], thread_id)[0];
+            player = from_reg ? i_register[regs[i + 2]] : regs[i + 2];
+
+            input = next_input(player, thread_id)[0];
             break;
         case 1: { // fix
-            float tmp = next_input_f(regs[i + 3], thread_id)[0];
+            player = from_reg ? i_register[regs[i + 3]] : regs[i + 3];
+
+            float tmp = next_input_f(player, thread_id)[0];
             input = static_cast<INT_TYPE>(tmp * (1u << regs[i + 2]));
             i++;
             break;
@@ -1779,7 +1790,7 @@ void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs) {
             break;
         }
 
-        switch (regs[i + 2]) {
+        switch (player) {
         case 0:
             s_register[dest].template prepare_receive_and_replicate<P_0>(input);
             break;
@@ -1800,8 +1811,8 @@ void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs) {
         if (regs[i] == 1) {
             i += 1;
         }
-
-        switch (regs[i + 2]) {
+        int player = from_reg ? i_register[regs[i + 2]] : regs[i + 2];
+        switch (player) {
         case 0:
             s_register[dest].template complete_receive_from<P_0>();
             break;

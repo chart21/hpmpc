@@ -135,6 +135,11 @@ enum class Opcode {
     LDINT = 0x9a,
     ACTIVE = 0xe9,
     INPUTMIXED = 0xf2,
+    INPUTMIXEDREG = 0xf3,
+    PUBINPUT = 0xb6, // TODO
+    INTOUTPUT = 0xe6, // TODO
+    FLOUTOUTPUT = 0xe7, // TODO
+    FIXINPUT = 0xe8, // TODO
 
     CONCATS = 0x2f,
 
