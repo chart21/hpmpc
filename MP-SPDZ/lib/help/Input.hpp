@@ -22,25 +22,10 @@ class Input {
   public:
     explicit Input(const std::string& path, const int& player_num, const int& cur_vec)
         : player_num(player_num), vec(cur_vec), cur(0) {
-        int fd = open(path.c_str(), O_RDONLY);
-        if (fd < 0) {
-            log(Level::ERROR, "couldn 't open file \"", path, "\"");
-        }
-
-        struct stat stats;
-        if (fstat(fd, &stats) == -1) {
-            log(Level::ERROR, "couldn't get stats for \"", path, "\"");
-        }
-
-        size = stats.st_size;
-        file = static_cast<char*>(mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0));
-
-        close(fd);
-
-        if (file == MAP_FAILED) {
-            log(Level::ERROR, "map failed for \"", path, "\"");
-        }
+        open_input_file(path);
     }
+
+    Input() : player_num(0), vec(1), file(nullptr), cur(0) {};
 
     Input(const Input& other) = delete;
     Input(Input&& other) noexcept
@@ -63,6 +48,27 @@ class Input {
         return *this;
     }
 
+    void open_input_file(const std::string& path) {
+        int fd = open(path.c_str(), O_RDONLY);
+        if (fd < 0) {
+            log(Level::ERROR, "couldn 't open file \"", path, "\"");
+        }
+
+        struct stat stats;
+        if (fstat(fd, &stats) == -1) {
+            log(Level::ERROR, "couldn't get stats for \"", path, "\"");
+        }
+
+        size = stats.st_size;
+        file = static_cast<char*>(mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0));
+
+        close(fd);
+
+        if (file == MAP_FAILED) {
+            log(Level::ERROR, "map failed for \"", path, "\"");
+        }
+    }
+
     ~Input() {
         if (file) {
             munmap(file, size);
@@ -74,6 +80,7 @@ class Input {
 
     inline int get_player() const { return player_num; };
     inline int get_vec_num() const { return vec; };
+    inline bool is_open() const { return file; }
 
   private:
     int player_num;
@@ -85,6 +92,8 @@ class Input {
 
 template <class T>
 T Input::next(std::function<T(const std::string&)> convert) {
+    if (!is_open())
+        return 0;
     std::string_view content(file + cur, size - cur);
     size_t index = content.find_first_of(' ');
 

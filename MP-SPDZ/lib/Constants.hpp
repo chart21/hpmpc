@@ -128,6 +128,7 @@ enum class Opcode {
     PRINT_INT = 0x9f,
     PRINT_FLOAT_PREC = 0xe0,  // set precision for print_float_*
     PRINT_FLOAT_PLAIN = 0xbc, // print float
+    PRINTREG = 0xb1,
 
     TRUNC_PR = 0xa9,
 
@@ -136,10 +137,10 @@ enum class Opcode {
     ACTIVE = 0xe9,
     INPUTMIXED = 0xf2,
     INPUTMIXEDREG = 0xf3,
-    PUBINPUT = 0xb6, // TODO
-    INTOUTPUT = 0xe6, // TODO
+    PUBINPUT = 0xb6,
+    INTOUTPUT = 0xe6,   // TODO
     FLOUTOUTPUT = 0xe7, // TODO
-    FIXINPUT = 0xe8, // TODO
+    FIXINPUT = 0xe8,    // TODO
 
     CONCATS = 0x2f,
 
