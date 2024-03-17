@@ -144,6 +144,7 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::LDINT:
         case Opcode::RANDOMS:
         case Opcode::COND_PRINT_STRB:
+        case Opcode::PRINTREG:
         case Opcode::PRINT4COND: {
             unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
             inst.set_immediate(int(read_next_int(fd, buf, 4)));
@@ -306,6 +307,7 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::JMPI:
         case Opcode::CRASH:
         case Opcode::NPLAYERS:
+        case Opcode::PUBINPUT:
         case Opcode::THRESHOLD:
         case Opcode::PLAYERID:
         case Opcode::LDARG: {
@@ -910,6 +912,8 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::XORCI:
     case Opcode::ORCI:
     case Opcode::ANDCI:
+    case Opcode::PRINTREG:
+    case Opcode::PUBINPUT:
         return Type::CINT;
     case Opcode::LDMS:
     case Opcode::INPUTMIXED:
@@ -951,28 +955,30 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
     : size(vec) {
     // only if opc is known
     if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 ||
-        opc == 0x96 || opc == 0x21f || opc == 0xb || opc == 0x91 || opc == 0x92 || opc == 0x98 || opc == 0x2d ||
-        opc == 0x11 || opc == 0x2e || opc == 0x249 || opc == 0x04 || opc == 0x05 || opc == 0x06 || opc == 0xd2 ||
-        opc == 0xcb || opc == 0xcc || opc == 0xcd || opc == 0x08 || opc == 0xa || opc == 0x51 || opc == 0xe2 ||
-        opc == 0x58 || opc == 0xc || opc == 0xc0 || opc == 0xb2 || opc == 0xc1 || opc == 0x99 || opc == 0xe3 ||
-        opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 || opc == 0x26 || opc == 0x103 || opc == 0xe4 ||
-        opc == 0x104 || opc == 0xa5 || opc == 0xa6 || opc == 0xa7 || opc == 0x23 || opc == 0x31 || opc == 0x14 ||
-        opc == 0x22 || opc == 0x224 || opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 || opc == 0x15 ||
-        opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 || opc == 0x16 ||
-        opc == 0x35 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf ||
-        opc == 0x30 || opc == 0x34 || opc == 0xe1 || opc == 0xca || opc == 0x9a || opc == 0xf2 || opc == 0xf3 ||
-        opc == 0x2f || opc == 0x20a || opc == 0x205 || opc == 0x37 || opc == 0x97 || opc == 0x217 ||
-        opc == 0x218 || opc == 0x203 || opc == 0x202 || opc == 0x204 || opc == 0x3b ||
-        opc == 0x00 || opc == 0x73 || opc == 0x74 || opc == 0x75 || opc == 0x76 || opc == 0x20e ||
-        opc == 0x244 || opc == 0x72 || opc == 0x9f || opc == 0x80 || opc == 0x36 || opc == 0x2b ||
-        opc == 0x214 || opc == 0x24a || opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0x71 ||
-        opc == 0xe0 || opc == 0x81 || opc == 0x21e || opc == 0x240 || opc == 0x241 ||
-        opc == 0x200 || opc == 0x212 || opc == 0x242 || opc == 0x219 || opc == 0x21d ||
-        opc == 0x21a || opc == 0xa9 || opc == 0x70 || opc == 0x243 || opc == 0x247 || opc == 0xab ||
-        opc == 0x20c || opc == 0xbc || opc == 0x21b || opc == 0x210 || opc == 0x20b ||
-        opc == 0xa8 || opc == 0x94 || opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 ||
-        opc == 0x21c || opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e ||
-        opc == 0x93 || opc == 0x9b) {
+        opc == 0x96 || opc == 0x21f || opc == 0xb || opc == 0x91 || opc == 0x92 || opc == 0x98 ||
+        opc == 0x2d || opc == 0x11 || opc == 0x2e || opc == 0x249 || opc == 0x04 || opc == 0x05 ||
+        opc == 0x06 || opc == 0xd2 || opc == 0xcb || opc == 0xcc || opc == 0xcd || opc == 0x08 ||
+        opc == 0xa || opc == 0x51 || opc == 0xe2 || opc == 0x58 || opc == 0xc || opc == 0xc0 ||
+        opc == 0xb2 || opc == 0xc1 || opc == 0x99 || opc == 0xe3 || opc == 0x17 || opc == 0x18 ||
+        opc == 0x21 || opc == 0x24 || opc == 0x26 || opc == 0x103 || opc == 0xe4 || opc == 0x104 ||
+        opc == 0xa5 || opc == 0xa6 || opc == 0xa7 || opc == 0x23 || opc == 0x31 || opc == 0x14 ||
+        opc == 0x22 || opc == 0x224 || opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 ||
+        opc == 0x15 || opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 ||
+        opc == 0x82 || opc == 0x16 || opc == 0x35 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 ||
+        opc == 0xb5 || opc == 0xbf || opc == 0xb6 || opc == 0x30 || opc == 0x34 || opc == 0xe1 ||
+        opc == 0xca || opc == 0x9a || opc == 0xf2 || opc == 0xf3 || opc == 0x2f || opc == 0x20a ||
+        opc == 0x205 || opc == 0x37 || opc == 0x97 || opc == 0x217 || opc == 0x218 || opc == 0xb1 ||
+        opc == 0x203 || opc == 0x202 || opc == 0x204 || opc == 0x3b || opc == 0x00 || opc == 0x73 ||
+        opc == 0x74 || opc == 0x75 || opc == 0x76 || opc == 0x20e || opc == 0x244 || opc == 0x72 ||
+        opc == 0x9f || opc == 0x80 || opc == 0x36 || opc == 0x2b || opc == 0x214 || opc == 0x24a ||
+        opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 ||
+        opc == 0x21e || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 ||
+        opc == 0x242 || opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 ||
+        opc == 0x70 || opc == 0x243 || opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc ||
+        opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 ||
+        opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c ||
+        opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e || opc == 0x93 ||
+        opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
         op = Opcode::NONE;
@@ -1277,6 +1283,9 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::PRINT4:
             m.get_out() << string((char*)&n, 4);
             break;
+        case Opcode::PRINTREG:
+            m.get_out() << "Reg[" << regs[0] + vec << "] = " << p.c_register[regs[0] + vec].get() << string((char*)&n, 4) << "\n";
+            break;
         case Opcode::PRINT4COND:
             if (p.c_register[regs[0]] != 0)
                 m.get_out() << string((char*)&n, 4);
@@ -1315,6 +1324,13 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::INPUTMIXEDREG:
             p.inputmixed(regs, true);
             return;
+        case Opcode::PUBINPUT:
+            if (!m.public_input.is_open())
+                m.public_input.open_input_file(ROOT_DIR + "/PUB-INPUT");
+
+            p.c_register[regs[0] + vec] = m.public_input.template next<int>(
+                [](const std::string& s) -> int { return std::stoi(s.c_str(), nullptr, 10); });
+            break;
         case Opcode::CONCATS: {
             auto dest = p.s_register.begin() + regs[0];
 
@@ -1978,17 +1994,31 @@ template <class sint, template <int, class> class sbit, class BitShare, int N>
 void Program<sint, sbit, BitShare, N>::cisc(const vector<int>& regs, const std::string_view cisc) {
     if (cisc.starts_with("LTZ")) {
         print("LTZ\n");
+        vector<int> op1(0);
+        vector<int> op2(0);
+        op1.reserve(regs.size()/6);
+        op1.reserve(regs.size()/6);
+
         for (size_t i = 0; i < regs.size(); i += 6) {
             std::cout << "s" << regs[i + 2] << " = s" << regs[i + 3] << "(" << regs[i + 4]
                       << ") < 0"
                       << "\n";
+            op1.push_back(regs[i + 3]);
+            op2.push_back(regs[i + 4]);
         }
     } else if (cisc.starts_with("EQZ")) {
         print("EQZ\n");
+        vector<int> op1(0);
+        vector<int> op2(0);
+        op1.reserve(regs.size()/6);
+        op1.reserve(regs.size()/6);
+        
         for (size_t i = 0; i < regs.size(); i += 6) {
             std::cout << "s" << regs[i + 2] << " = s" << regs[i + 3] << "(" << regs[i + 4]
                       << ") == 0"
                       << "\n";
+            op1.push_back(regs[i + 3]);
+            op2.push_back(regs[i + 4]);
         }
     }
 }

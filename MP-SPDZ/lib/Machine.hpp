@@ -1,14 +1,14 @@
 #ifndef MACHINE_H
 #define MACHINE_H
 
+#include <chrono>
 #include <fstream>  // ifstream for schedule file
 #include <iostream> // to print results to STDOUT
-#include <sstream>  // to seperate bytecode files
-#include <string>   // file path
-#include <thread>   // for the tapes
-#include <vector>   // register
-#include <chrono>
 #include <map>
+#include <sstream> // to seperate bytecode files
+#include <string>  // file path
+#include <thread>  // for the tapes
+#include <vector>  // register
 
 #include "Constants.hpp"
 #include "Program.hpp"
@@ -21,16 +21,24 @@ using std::vector;
 namespace IR {
 
 struct Timer {
-    void start() { started = true; cur = std::chrono::high_resolution_clock::now(); }
-    double stop() { double res = get_time(); started = false; return res; }
+    void start() {
+        started = true;
+        cur = std::chrono::high_resolution_clock::now();
+    }
+    double stop() {
+        double res = get_time();
+        started = false;
+        return res;
+    }
     double get_time() const {
         if (started)
-            return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - cur).count();
+            return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - cur)
+                .count();
         else
             return 0;
     }
 
-private:
+  private:
     bool started = false;
 
     std::chrono::time_point<std::chrono::high_resolution_clock> cur;
@@ -66,6 +74,8 @@ class Machine {
     void start(const int& index);
     void stop(const int& index);
     void time() const;
+
+    Input public_input;
 
   private:
     vector<Program<sint, sbit, BitShare, N>> progs; // all bytecode-files
