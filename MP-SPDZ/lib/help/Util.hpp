@@ -1,6 +1,4 @@
-#ifndef UTIL_H
-#define UTIL_H
-
+#pragma once
 #include <cmath> // std::round
 #include <cstddef>
 #include <cstdint>
@@ -50,10 +48,7 @@ void log(Level level, Args... args) {
 uint64_t read_next_int(const int& fd, unsigned char* buf, const size_t& size);
 uint64_t to_int_n(const unsigned char* buf, const size_t& size);
 
-template <class int_t, class uint_t>
-uint64_t mask(const Integer<int_t, uint_t>& num, const uint64_t& bits) {
-    return bits < (64) ? (num & ((1lu << bits) - 1)).get() : num.get();
-}
+uint64_t mask(const uint64_t& num, const uint64_t& bits);
 
 inline uint64_t div_ceil(const uint64_t& a, const uint64_t& b) {
     return a == 0lu ? 0lu : 1lu + ((a - 1lu) / b);
@@ -62,5 +57,3 @@ inline uint64_t div_ceil(const uint64_t& a, const uint64_t& b) {
 static std::queue<uint8_t> bit_queue;
 
 } // namespace IR
-
-#endif

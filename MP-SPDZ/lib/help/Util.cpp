@@ -32,4 +32,8 @@ uint64_t to_int_n(const unsigned char* buf, const size_t& size) {
     return int(be32toh(cur));
 }
 
+uint64_t mask(const uint64_t& num, const uint64_t& bits) {
+    return bits < (64) ? (num & ((1lu << bits) - 1)) : num;
+}
+
 } // namespace IR
