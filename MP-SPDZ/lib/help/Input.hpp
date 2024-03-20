@@ -25,7 +25,7 @@ class Input {
         open_input_file(path);
     }
 
-    Input() : player_num(0), vec(1), file(nullptr), cur(0) {};
+    Input() : player_num(0), vec(1), file(nullptr), cur(0){};
 
     Input(const Input& other) = delete;
     Input(Input&& other) noexcept
@@ -120,7 +120,7 @@ std::vector<Input>::iterator get_input_from(const int& player_num, const size_t&
 }
 
 std::array<int, SIZE_VEC> next_input(const int& player_num, const int& thread_id) {
-    std::array<int, SIZE_VEC> res;
+    std::array<int, SIZE_VEC> res{};
     if (current_phase == PHASE_INIT || player_num != PARTY)
         return res;
 
@@ -142,7 +142,7 @@ std::array<int, SIZE_VEC> next_input(const int& player_num, const int& thread_id
 }
 
 std::array<float, SIZE_VEC> next_input_f(const int& player_num, const int& thread_id) {
-    std::array<float, SIZE_VEC> res;
+    std::array<float, SIZE_VEC> res{};
     if (current_phase == PHASE_INIT || player_num != PARTY)
         return res;
 
