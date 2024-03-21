@@ -15,6 +15,7 @@
 #include <vector>      // register
 
 #include "Constants.hpp"
+#include "Shares/CInteger.hpp"
 #include "Shares/Integer.hpp"
 #include "help/Input.hpp"
 #include "help/Util.hpp"
@@ -30,7 +31,7 @@ class Machine;
 
 template <class sint, template <int, class> class sbit, class BitShare, int N = 64>
 class Program {
-    using BitType = Integer<INT_TYPE, UINT_TYPE>;
+    using BitType = CInteger<INT_TYPE, UINT_TYPE>;
     static constexpr size_t BIT_LEN = N;
 
     class Instruction {
@@ -104,11 +105,11 @@ class Program {
 
     unsigned max_reg[REG_TYPES]; // to get required register size for all types
 
-    vector<sint> s_register;                         // secret share
-    vector<Integer<INT_TYPE, UINT_TYPE>> c_register; // clear share
-    vector<long> i_register;                         // integer
-    vector<sbit<N, BitShare>> sb_register;           // secret bit
-    vector<BitType> cb_register;                     // clear bit
+    vector<sint> s_register;                          // secret share
+    vector<CInteger<INT_TYPE, UINT_TYPE>> c_register; // clear share
+    vector<Integer<int64_t, uint64_t>> i_register;    // integer
+    vector<sbit<N, BitShare>> sb_register;            // secret bit
+    vector<BitType> cb_register;                      // clear bit
 
     std::mt19937 rand_engine;
 
@@ -1049,34 +1050,34 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             p.s_register[regs[0] + vec] = m.s_mem[n + vec];
             break;
         case Opcode::LDMSI:
-            p.s_register[regs[0] + vec] = m.s_mem[p.i_register[regs[1] + vec]];
+            p.s_register[regs[0] + vec] = m.s_mem[p.i_register[regs[1] + vec].get()];
             break;
         case Opcode::STMSI:
-            if (vec + p.i_register[regs[1]] + 1 > m.s_mem.size())
-                m.s_mem.resize(p.i_register[regs[1] + vec] + 1);
-            m.s_mem[p.i_register[regs[1] + vec]] = p.s_register[regs[0] + vec];
+            if (vec + p.i_register[regs[1]].get() + 1 > m.s_mem.size())
+                m.s_mem.resize(p.i_register[regs[1] + vec].get() + 1);
+            m.s_mem[p.i_register[regs[1] + vec].get()] = p.s_register[regs[0] + vec];
             break;
         case Opcode::STMSBI:
-            if (vec + p.i_register[regs[1]] + 1 > m.sb_mem.size())
-                m.sb_mem.resize(p.i_register[regs[1] + vec] + 1);
-            m.sb_mem[p.i_register[regs[1] + vec]] = p.sb_register[regs[0] + vec];
+            if (vec + p.i_register[regs[1]].get() + 1 > m.sb_mem.size())
+                m.sb_mem.resize(p.i_register[regs[1] + vec].get() + 1);
+            m.sb_mem[p.i_register[regs[1] + vec].get()] = p.sb_register[regs[0] + vec];
             break;
         case Opcode::LDMSBI:
-            p.sb_register[regs[0] + vec] = m.sb_mem[p.i_register[regs[1] + vec]];
+            p.sb_register[regs[0] + vec] = m.sb_mem[p.i_register[regs[1] + vec].get()];
             break;
         case Opcode::STMINTI:
-            if (vec + p.i_register[regs[1]] + 1 > m.ci_mem.size())
-                m.ci_mem.resize(p.i_register[regs[1] + vec] + 1);
-            m.ci_mem[p.i_register[regs[1] + vec]] = p.i_register[regs[0] + vec];
+            if (vec + p.i_register[regs[1]].get() + 1 > m.ci_mem.size())
+                m.ci_mem.resize(p.i_register[regs[1] + vec].get() + 1);
+            m.ci_mem[p.i_register[regs[1] + vec].get()] = p.i_register[regs[0] + vec];
             break;
         case Opcode::LDMINTI:
-            p.i_register[regs[0] + vec] = m.ci_mem[p.i_register[regs[1] + vec]];
+            p.i_register[regs[0] + vec] = m.ci_mem[p.i_register[regs[1] + vec].get()];
             break;
         case Opcode::LDSI:
             p.s_register[regs[0] + vec] = int(n);
             break;
         case Opcode::LDI:
-            p.c_register[regs[0] + vec] = int(n);
+            p.c_register[regs[0] + vec] = PROMOTE(int(n));
             break;
         case Opcode::LDINT:
             p.i_register[regs[0] + vec] = int(n);
@@ -1084,9 +1085,9 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::INCINT: {
             auto dest = p.i_register.begin() + regs[0];
             auto base = p.i_register[regs[1]];
-            long cur = base;
+            Integer<int64_t, uint64_t> cur = base;
 
-            const int& inc = regs[2];
+            const Integer<int64_t, uint64_t> inc = int64_t(regs[2]);
             int repeat = regs[3];
             int wrap = regs[4];
 
@@ -1102,7 +1103,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                         cur = base;
                         wrap = regs[4];
                     } else {
-                        cur += inc;
+                        cur = cur + inc;
                     }
                 }
             }
@@ -1196,8 +1197,9 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             break;
         case Opcode::RAND: {
             long rand = p.rand_engine();
-            rand = p.i_register[regs[1] + vec] >= 64 ? rand
-                                                     : rand % (1 << p.i_register[regs[1] + vec]);
+            rand = p.i_register[regs[1] + vec].get() >= 64
+                       ? rand
+                       : rand % (1 << p.i_register[regs[1] + vec].get());
             p.i_register[regs[0] + vec] = rand;
             break;
         }
@@ -1218,7 +1220,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             break;
         case Opcode::SUBCFI:
             p.c_register[regs[0] + vec] =
-                Integer<INT_TYPE, UINT_TYPE>(INT_TYPE(int(n))) - (p.c_register[regs[1] + vec]);
+                CInteger<INT_TYPE, UINT_TYPE>(INT_TYPE(int(n))) - (p.c_register[regs[1] + vec]);
             break;
         case Opcode::SHRCI:
             p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] >> INT_TYPE(int(n));
@@ -1227,12 +1229,10 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] << INT_TYPE(int(n));
             break;
         case Opcode::LTC:
-            p.i_register[regs[0] + vec] =
-                p.i_register[regs[1] + vec] < p.i_register[regs[2] + vec] ? 1 : 0;
+            p.i_register[regs[0] + vec] = p.i_register[regs[1] + vec] < p.i_register[regs[2] + vec];
             break;
         case Opcode::GTC:
-            p.i_register[regs[0] + vec] =
-                p.i_register[regs[1] + vec] > p.i_register[regs[2] + vec] ? 1 : 0;
+            p.i_register[regs[0] + vec] = p.i_register[regs[1] + vec] > p.i_register[regs[2] + vec];
             break;
         case Opcode::SUBINT:
             p.i_register[regs[0] + vec] = p.i_register[regs[1] + vec] - p.i_register[regs[2] + vec];
@@ -1301,20 +1301,29 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             break;
         }
         case Opcode::PRINT4COND:
-            if (p.c_register[regs[0]] != 0)
+            if (p.c_register[regs[0]].get() != 0)
                 m.get_out() << string((char*)&n, 4);
             break;
         case Opcode::COND_PRINT_STRB:
-            if (p.cb_register[regs[0]] != 0)
+            if (p.cb_register[regs[0]].get() != 0)
                 m.get_out() << string((char*)&n, 4);
             break;
         case Opcode::PRINT_CHR: {
             m.get_out() << static_cast<char>(n);
             break;
         }
-        case Opcode::PRINT_INT:
-            m.get_out() << p.i_register[regs[0]];
+        case Opcode::PRINT_INT: {
+#if BITLENGTH == DATTYPE
+            m.get_out() << p.i_register[regs[0]].get();
+#else
+            const auto& vec = p.i_register[regs[0]].get_all();
+            m.get_out() << "(" << vec[0];
+            for (size_t i = 1; i < vec.size(); ++i)
+                m.get_out() << ", " << vec[i];
+            m.get_out() << ")";
+#endif
             return;
+        }
         case Opcode::PRINT_REG_PLAIN: {
             if (size > 1)
                 m.get_out() << "[";
@@ -1344,7 +1353,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             return;
         }
         case Opcode::PRINT_COND_PLAIN:
-            if (p.c_register[regs[0]] != 0) {
+            if (p.c_register[regs[0]].get() != 0) {
                 m.get_out() << (p.c_register[regs[1]] << p.c_register[regs[2]]).get();
             }
             break;
@@ -1358,8 +1367,8 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             if (!m.public_input.is_open())
                 m.public_input.open_input_file(ROOT_DIR + "/PUB-INPUT");
 
-            p.c_register[regs[0] + vec] = m.public_input.template next<int>(
-                [](const std::string& s) -> int { return std::stoi(s.c_str(), nullptr, 10); });
+            p.c_register[regs[0] + vec] = PROMOTE(m.public_input.template next<int>(
+                [](const std::string& s) -> int { return std::stoi(s.c_str(), nullptr, 10); }));
             break;
         case Opcode::CONCATS: {
             auto dest = p.s_register.begin() + regs[0];
@@ -1470,7 +1479,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
 
             for (size_t i = 0; i < regs.size(); i += 3) {
                 for (int j = 0; j < div_ceil(regs[i], BIT_LEN); ++j)
-                    p.cb_register[regs[i + 1] + j] = 0;
+                    p.cb_register[regs[i + 1] + j] = ZERO;
                 for (int j = 0; j < regs[i]; ++j) {
                     p.cb_register[regs[i + 1] + j / BIT_LEN] |=
                         (p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN]
@@ -1595,14 +1604,14 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             pc += (signed int)n;
             break;
         case Opcode::JMPI:
-            pc += (signed int)p.i_register[regs[0] + vec];
+            pc += (signed int)p.i_register[regs[0] + vec].get();
             break;
         case Opcode::JMPNZ:
-            if (p.i_register[regs[0]] != 0)
+            if (p.i_register[regs[0]].get() != 0)
                 pc += (signed int)n;
             return;
         case Opcode::JMPEQZ:
-            if (p.i_register[regs[0]] == 0)
+            if (p.i_register[regs[0]].get() == 0)
                 pc += (signed int)n;
             return;
         case Opcode::BIT:
@@ -1616,27 +1625,30 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         }
         case Opcode::CONVCBITVEC:
             for (size_t i = 0; i < n; ++i) {
-                p.i_register[regs[0] + i] =
-                    ((p.cb_register[regs[1] + i / BIT_LEN] >> INT_TYPE(i % BIT_LEN)) & INT_TYPE(1))
-                        .get();
+                Integer<int64_t, uint64_t> res(vector<int64_t>(0));
+                const auto& nums = (p.cb_register[regs[1] + i / BIT_LEN]).get_all();
+                for (auto& ele : nums)
+                    res.add((ele >> INT_TYPE(i % BIT_LEN)) & INT_TYPE(1));
+                p.i_register[regs[0] + i] = res;
             }
             break;
         case Opcode::CONVSINT: {
-            for (int i = 0; i < regs[0]; ++i)
+            for (int i = 0; i < regs[0]; ++i) {
                 p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN] =
-                    BitShare(PROMOTE((p.i_register[regs[2] + i / 64] >> (i % 64)) & 1));
+                    BitShare(((p.i_register[regs[2] + i / 64] >> int64_t(i % 64)) & 1l).get_type());
+            }
             return;
         }
         case Opcode::CONVCINT: {
             p.cb_register[regs[0] + vec] = p.i_register[regs[1] + vec];
-            return;
+            break;
         }
         case Opcode::CONVCINTVEC: {
             for (size_t i = 0; i < get_size(); ++i) {
                 auto source = p.c_register[regs[0] + i];
                 for (size_t j = 1; j < regs.size(); ++j) {
                     if (i % BIT_LEN == 0)
-                        p.cb_register[regs[j] + i / BIT_LEN] = 0;
+                        p.cb_register[regs[j] + i / BIT_LEN] = ZERO;
                     p.cb_register[regs[j] + i / BIT_LEN] ^=
                         ((source >> INT_TYPE(j - 1)) & INT_TYPE(1)) << INT_TYPE(i % BIT_LEN);
                 }
@@ -1652,31 +1664,55 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             return;
         case Opcode::CONVMODP:
             if (n == 0) { // unsigned conversion
-                p.i_register[regs[0] + vec] = (unsigned long)p.c_register[regs[1] + vec].get();
+                Integer<int64_t, uint64_t> tmp(vector<int64_t>(0l));
+                const auto& nums = p.c_register[regs[1] + vec].get_all();
+
+                for (unsigned long ele : nums)
+                    tmp.add(ele);
+
+                p.i_register[regs[0] + vec] = tmp;
             } else if (n <= BIT_LEN) {
                 auto dest = p.i_register.begin() + regs[0] + vec;
                 auto x = p.c_register[regs[1] + vec];
                 if (n == 1) {
-                    *dest = (x & INT_TYPE(1)).get();
-                } else if (n == BIT_LEN) {
-                    *dest = x.get();
-                } else {
-                    Integer a = x.abs();
-                    a &= INT_TYPE(~(uint64_t(-1) << (n - 1) << 1));
-                    if (x < 0)
-                        a = -a;
+                    Integer<int64_t, uint64_t> tmp(vector<int64_t>(0l));
+                    const auto& vec = x.get_all();
 
-                    *dest = a.get();
+                    for (int64_t ele : vec)
+                        tmp.add(ele & 1);
+
+                    *dest = tmp;
+                } else if (n == BIT_LEN) {
+                    Integer<int64_t, uint64_t> tmp(vector<int64_t>(0l));
+                    const auto& vec = x.get_all();
+
+                    for (int64_t ele : vec)
+                        tmp.add(ele);
+
+                    *dest = tmp;
+                } else {
+                    Integer<int64_t, uint64_t> tmp(vector<int64_t>(0l));
+                    const auto& vec = x.get_all();
+
+                    for (INT_TYPE ele : vec) {
+                        auto a = std::abs(ele);
+                        a &= INT_TYPE(~(uint64_t(-1) << (n - 1) << 1));
+                        if (ele < 0)
+                            a = -a;
+                        tmp.add(a);
+                    }
+
+                    *dest = tmp;
                 }
             } else {
                 log(Level::WARNING, "CONVMODP with bit size > 64 is not possible");
             }
             break;
         case Opcode::BITDECINT: {
-            long x = p.i_register[regs[0] + vec];
+            const auto x = p.i_register[regs[0] + vec];
 
             for (size_t i = 1; i < regs.size(); ++i) {
-                p.i_register[regs[i] + vec] = (x >> (i - 1)) & 1;
+                p.i_register[regs[i] + vec] = (x >> int64_t(i - 1)) & 1l;
             }
             break;
         }
@@ -1727,7 +1763,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             m.ci_mem[n + vec] = p.i_register[regs[0] + vec];
             break;
         case Opcode::CRASH:
-            if (p.i_register[regs[0]] != 0)
+            if (p.i_register[regs[0]].get() != 0)
                 log(Level::ERROR, "CRASH");
             break;
         case Opcode::ACTIVE:
@@ -1827,7 +1863,7 @@ void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs, bool 
 
         switch (regs[i]) {
         case 0: { // int
-            player = from_reg ? i_register[regs[i + 2]] : regs[i + 2];
+            player = from_reg ? i_register[regs[i + 2]].get() : regs[i + 2];
 
             auto res = next_input(player, thread_id);
             for (size_t j = 0; j < SIZE_VEC; ++j)
@@ -1836,7 +1872,7 @@ void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs, bool 
             break;
         }
         case 1: { // fix
-            player = from_reg ? i_register[regs[i + 3]] : regs[i + 3];
+            player = from_reg ? i_register[regs[i + 3]].get() : regs[i + 3];
 
             auto tmp = next_input_f(player, thread_id);
             for (size_t j = 0; j < SIZE_VEC; ++j)
@@ -1872,7 +1908,7 @@ void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs, bool 
         if (regs[i] == 1) {
             i += 1;
         }
-        int player = from_reg ? i_register[regs[i + 2]] : regs[i + 2];
+        int player = from_reg ? i_register[regs[i + 2]].get() : regs[i + 2];
         switch (player) {
         case 0:
             s_register[dest].template complete_receive_from<P_0>();
@@ -1899,10 +1935,7 @@ void Program<sint, sbit, BitShare, N>::popen(const vector<int>& regs, const size
 
     for (size_t i = 0; i < regs.size(); i += 2)
         for (size_t vec = 0; vec < size; ++vec) {
-            vector<INT_TYPE> res;
-            res.resize(SIZE_VEC);
-            s_register[regs[i + 1] + vec].complete_reveal_to_all((UINT_TYPE*)res.data());
-            c_register[regs[i] + vec] = Integer<INT_TYPE, UINT_TYPE>(res);
+            c_register[regs[i] + vec] = s_register[regs[i + 1] + vec].complete_reveal_to_all();
         }
 }
 
@@ -1970,14 +2003,14 @@ template <class sint, template <int, class> class sbit, class BitShare, int N>
 void Program<sint, sbit, BitShare, N>::matmulsm(const vector<int>& regs,
                                                 Machine<sint, sbit, BitShare, N>& m) {
     auto res = s_register.begin() + regs[0];
-    auto source1 = m.s_mem.begin() + i_register[regs[1]];
-    auto source2 = m.s_mem.begin() + i_register[regs[2]];
+    auto source1 = m.s_mem.begin() + i_register[regs[1]].get();
+    auto source2 = m.s_mem.begin() + i_register[regs[2]].get();
 
     int rows = regs[3]; // for 1st but also final
     int cols = regs[5]; // for 2nd but also final
 
     for (int i = 0; i < rows; ++i) {
-        auto row_1 = i_register[regs[6] + i]; // rows to use what ever that means
+        auto row_1 = i_register[regs[6] + i].get(); // rows to use what ever that means
 
         for (int j = 0; j < cols; ++j) {
             matmulsm_prepare(regs, row_1, j, source1, source2); // calculate dotprod
@@ -1998,12 +2031,12 @@ template <class iterator>
 void Program<sint, sbit, BitShare, N>::matmulsm_prepare(const vector<int>& regs, const int& row_1,
                                                         const int& j, iterator source1,
                                                         iterator source2) {
-    auto col_2 = i_register[regs[9] + j]; // column of 2nd factor
+    auto col_2 = i_register[regs[9] + j].get(); // column of 2nd factor
 
     matrix.next_dotprod();
-    for (int k = 0; k < regs[4]; ++k) {       // length of dot_prod
-        auto col_1 = i_register[regs[7] + k]; // column of first factor
-        auto row_2 = i_register[regs[8] + k]; // row of 2nd factor
+    for (int k = 0; k < regs[4]; ++k) {             // length of dot_prod
+        auto col_1 = i_register[regs[7] + k].get(); // column of first factor
+        auto row_2 = i_register[regs[8] + k].get(); // row of 2nd factor
 
         iterator cur_1 = source1 + row_1 * regs[10] + col_1;
         iterator cur_2 = source2 + row_2 * regs[11] + col_2;

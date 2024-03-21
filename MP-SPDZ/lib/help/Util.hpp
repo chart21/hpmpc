@@ -8,9 +8,6 @@
 
 namespace IR {
 
-template <class int_t, class uint_t>
-class Integer;
-
 enum class Level {
     WARNING,
     INFO,
