@@ -12,6 +12,7 @@
 
 #include "Constants.hpp"
 #include "Program.hpp"
+#include "Shares/CInteger.hpp"
 #include "Shares/Integer.hpp"
 #include "help/Util.hpp"
 
@@ -64,10 +65,10 @@ class Machine {
                         const unsigned& addr); // required while parsing to get memory size
 
     vector<sint> s_mem;
-    vector<Integer<INT_TYPE, UINT_TYPE>> c_mem;
-    vector<long> ci_mem;
+    vector<CInteger<INT_TYPE, UINT_TYPE>> c_mem;
+    vector<Integer<int64_t, uint64_t>> ci_mem;
     vector<sbit<N, BitShare>> sb_mem;
-    vector<Integer<INT_TYPE, UINT_TYPE>> cb_mem;
+    vector<CInteger<INT_TYPE, UINT_TYPE>> cb_mem;
 
     std::ostream& get_out() const { return std::cout; }
 

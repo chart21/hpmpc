@@ -61,9 +61,11 @@ class Integer {
     Integer operator%(const Integer& other) const;
     Integer operator~() const;
 
-    bool operator<(const Base& other) const { return nums[0] < other; }
-    // bool operator<(const Integer& other) const { return a < other.a; }
-    bool operator!=(const Base& other) const { return nums[0] != other; }
+    Integer operator==(const Integer& other) const;
+    Integer operator<(const Integer& other) const;
+    Integer operator>(const Integer& other) const;
+    Integer operator<(const Base& other) const;
+    Integer operator==(const Base& other) const;
 
     Integer operator&(const Integer& other) const;
     Integer& operator&=(const Integer& other);
@@ -77,19 +79,31 @@ class Integer {
     Integer operator<<(const Integer& other) const;
     Integer operator>>(const Integer& other) const;
 
-    Integer abs() const;
-
     inline Base& get() { return nums[0]; }
-    DATATYPE get_type() const;
-    inline std::vector<Base>& get_all() { return nums; }
+    std::vector<Base> get_all() const { return nums; }
+    DATATYPE get_type() const {
+        if (nums.size() == SIZE_VEC) {
+            std::vector<UINT_TYPE> vec;
+            for (const auto& ele : nums) {
+                vec.emplace_back(ele);
+            }
+            DATATYPE a;
+            orthogonalize_arithmetic(vec.data(), &a, 1);
+            return a;
+        } else {
+            return PROMOTE(UINT_TYPE(nums[0]));
+        }
+    }
+
+    void add(const Base& a) { nums.push_back(a); }
+
+    size_t size() const { return nums.size(); }
 
   private:
     alignas(DATATYPE) std::vector<Base> nums;
 
     Base plus(const UBase& a, const UBase& other) const;
     Base minus(const Base& a, const Base& other) const;
-
-    void add(const Base& a) { nums.push_back(a); }
 };
 
 template <class int_t, class uint_t>
@@ -414,21 +428,69 @@ Integer<int_t, uint_t>::operator>>(const Integer<int_t, uint_t>& other) const {
 }
 
 template <class int_t, class uint_t>
-DATATYPE Integer<int_t, uint_t>::get_type() const {
-    if (nums.size() == SIZE_VEC) {
-        DATATYPE a;
-        orthogonalize_arithmetic((UBase*)nums.data(), &a, 1);
-        return a;
+Integer<int_t, uint_t>
+Integer<int_t, uint_t>::operator==(const Integer<int_t, uint_t>& other) const {
+    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    if (nums.size() == other.nums.size()) {
+        for (size_t i = 0; i < nums.size(); ++i)
+            res.add(nums[i] == other.nums[i]);
+    } else if (nums.size() > other.nums.size()) {
+        for (const auto& ele : nums)
+            res.add(ele == other.nums[0]);
     } else {
-        return PROMOTE(nums[0]);
+        for (const auto& ele : other.nums)
+            res.add(nums[0] == ele);
     }
+    return res;
 }
 
 template <class int_t, class uint_t>
-Integer<int_t, uint_t> Integer<int_t, uint_t>::abs() const {
+Integer<int_t, uint_t>
+Integer<int_t, uint_t>::operator<(const Integer<int_t, uint_t>& other) const {
+    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    if (nums.size() == other.nums.size()) {
+        for (size_t i = 0; i < nums.size(); ++i)
+            res.add(nums[i] < other.nums[i]);
+    } else if (nums.size() > other.nums.size()) {
+        for (const auto& ele : nums)
+            res.add(ele < other.nums[0]);
+    } else {
+        for (const auto& ele : other.nums)
+            res.add(nums[0] < ele);
+    }
+    return res;
+}
+
+template <class int_t, class uint_t>
+Integer<int_t, uint_t>
+Integer<int_t, uint_t>::operator>(const Integer<int_t, uint_t>& other) const {
+    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    if (nums.size() == other.nums.size()) {
+        for (size_t i = 0; i < nums.size(); ++i)
+            res.add(nums[i] > other.nums[i]);
+    } else if (nums.size() > other.nums.size()) {
+        for (const auto& ele : nums)
+            res.add(ele > other.nums[0]);
+    } else {
+        for (const auto& ele : other.nums)
+            res.add(nums[0] > ele);
+    }
+    return res;
+}
+
+template <class int_t, class uint_t>
+Integer<int_t, uint_t> Integer<int_t, uint_t>::operator<(const Base& other) const {
     Integer<int_t, uint_t> res(std::vector<Base>(0));
     for (const auto& ele : nums)
-        res.add(ele < 0 ? -ele : ele);
+        res.add(ele < other);
+    return res;
+}
+
+template <class int_t, class uint_t>
+Integer<int_t, uint_t> Integer<int_t, uint_t>::operator==(const Base& other) const {
+    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    for (const auto& ele : nums)
+        res.add(ele == other);
     return res;
 }
 
