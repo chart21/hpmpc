@@ -23,6 +23,8 @@
 #define FUNCTION MP_MACHINE_MUL
 #elif FUNCTION_IDENTIFIER == 504
 #define FUNCTION MP_MACHINE_MUL_FIX
+#elif FUNCTION_IDENTIFIER == 505
+#define FUNCTION MP_MACHINE_INT_TESTS
 #endif
 
 //Boilerplate
@@ -99,5 +101,26 @@ void MP_MACHINE_MUL_FIX(DATATYPE* res)
     IR::Machine<A, sbitset_t, S> m("mul_fix.sch");
     m.run();
 }
+
+#elif FUNCTION_IDENTIFIER == 505
+template<typename Share>
+void MP_MACHINE_INT_TESTS(DATATYPE* res)
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<64, S>;
+
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+
+    Share::communicate();
+#if BITLENGTH == 64
+    IR::Machine<A, sbitset_t, S> m("int_test.sch");
+    m.run();
+#else
+    IR::Machine<A, sbitset_t, S> m("int_test_32.sch");
+    m.run();
+#endif
+}
+
 #endif
 

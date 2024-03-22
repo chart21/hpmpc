@@ -1147,7 +1147,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             break;
         case Opcode::NOTC:
             p.c_register[regs[0] + vec] =
-                (~p.c_register[regs[1] + vec]) & INT_TYPE((1lu << int(n)) - 1lu);
+                (~p.c_register[regs[1] + vec]) + INT_TYPE((1lu << int(n)));
             break;
         case Opcode::ANDCI:
             p.c_register[regs[0] + vec] = p.c_register[regs[1] + vec] & INT_TYPE(int(n));
