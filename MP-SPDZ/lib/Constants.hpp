@@ -167,6 +167,7 @@ enum class Opcode {
     PRINT_REG_SIGNED = 0x220,
     INPUTBVEC = 0x247,
 
+    MATMULS = 0xaa,
     MATMULSM = 0xab,
     DOTPRODS = 0xa8,
     INCINT = 0xd1,
