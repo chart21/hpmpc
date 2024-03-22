@@ -84,6 +84,7 @@ class Program {
     void inputmixed(const vector<int>& regs, const bool from_reg);
 
     void matmulsm(const vector<int>& regs, Machine<sint, sbit, BitShare, N>& m);
+    void matmuls(const vector<int>& regs);
     template <class iterator>
     void matmulsm_prepare(const vector<int>& regs, const int& row_1, const int& j, iterator source1,
                           iterator source2);
@@ -701,13 +702,31 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
             inst.add_reg(read_next_int(fd, buf, 4)); // factor 2
 
             int rows = inst.add_reg(read_next_int(fd, buf, 4));
-            inst.add_reg(read_next_int(fd, buf, 4)); // cols/ropws of 1st/2nd factor
+            inst.add_reg(read_next_int(fd, buf, 4)); // cols/rows of 1st/2nd factor
             int cols = inst.add_reg(read_next_int(fd, buf, 4));
 
             update_max_reg(Type::SINT, dest + rows * cols, inst.get_opcode());
 
             for (size_t i = 0; i < 6u; ++i) {
                 inst.add_reg(read_next_int(fd, buf, 4));
+            }
+
+            break;
+        }
+        case Opcode::MATMULS: {
+            unsigned args = read_next_int(fd, buf, 4);
+            assert(args % 6 == 0);
+            for (size_t i = 0; i < args; ++i) {
+                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4)); // (sint)
+
+                inst.add_reg(read_next_int(fd, buf, 4)); // factor 1 (sint)
+                inst.add_reg(read_next_int(fd, buf, 4)); // factor 2 (sint)
+
+                int rows = inst.add_reg(read_next_int(fd, buf, 4));
+                inst.add_reg(read_next_int(fd, buf, 4)); // cols/rows of 1st/2nd factor
+                int cols = inst.add_reg(read_next_int(fd, buf, 4));
+
+                update_max_reg(Type::SINT, dest + rows * cols, inst.get_opcode());
             }
 
             break;
@@ -975,8 +994,8 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 ||
         opc == 0x21e || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 ||
         opc == 0x242 || opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 ||
-        opc == 0x70 || opc == 0x243 || opc == 0x247 || opc == 0xab || opc == 0x20c || opc == 0xbc ||
-        opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 ||
+        opc == 0x70 || opc == 0x243 || opc == 0x247 || opc == 0xaa || opc == 0xab || opc == 0x20c ||
+        opc == 0xbc || opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 ||
         opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c ||
         opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e || opc == 0x93 ||
         opc == 0x9b) {
@@ -1111,6 +1130,9 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         }
         case Opcode::MATMULSM:
             p.matmulsm(regs, m);
+            return;
+        case Opcode::MATMULS:
+            p.matmuls(regs);
             return;
         case Opcode::DOTPRODS:
             p.dotprods(regs, get_size());
@@ -2042,6 +2064,36 @@ void Program<sint, sbit, BitShare, N>::matmulsm_prepare(const vector<int>& regs,
         iterator cur_2 = source2 + row_2 * regs[11] + col_2;
 
         matrix.add_mul(*cur_1, *cur_2);
+    }
+}
+
+template <class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<sint, sbit, BitShare, N>::matmuls(const vector<int>& regs) {
+    assert(regs.size() % 6 == 0);
+    for (size_t vec = 0; vec < regs.size(); vec += 6) {
+        const int& rows1 = regs[vec + 3];
+        const int& cr = regs[vec + 4];
+        const int& cols2 = regs[vec + 5];
+        for (int i = 0; i < rows1; ++i) {     // rows
+            for (int j = 0; j < cols2; ++j) { // cols
+                matrix.next_dotprod();
+                for (int k = 0; k < cr; ++k) // cols/rows
+                    matrix.add_mul(s_register[regs[vec + 1] + i * cr + k],
+                                   s_register[regs[vec + 2] + k * cols2 + j]);
+            }
+        }
+    }
+    
+    sint::communicate();
+
+    for (size_t vec = 0; vec < regs.size(); vec += 6) {
+        const int& rows = regs[vec + 3];
+        const int& cols = regs[vec + 5];
+        for (int i = 0; i < rows; ++i) {     // rows
+            for (int j = 0; j < cols; ++j) { // cols
+                s_register[regs[vec] + i * rows + j] = matrix.get_next();
+            }
+        }
     }
 }
 
