@@ -216,11 +216,11 @@ Integer<int_t, uint_t>::operator/(const Integer<int_t, uint_t>& other) const {
         if (other.nums[0] == 0) {
             res.add(0);
         } else {
-            for (const UBase& ele : nums)
+            for (const Base& ele : nums)
                 res.add(ele / other.nums[0]);
         }
     } else {
-        for (const UBase& ele : other.nums) {
+        for (const Base& ele : other.nums) {
             if (ele == 0) {
                 res.add(0);
             } else {

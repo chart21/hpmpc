@@ -148,7 +148,7 @@ CInteger<int_t, uint_t>::operator/(const CInteger<int_t, uint_t>& other) const {
 
     std::vector<UINT_TYPE> res;
     for (size_t i = 0; i < vec1.size(); ++i)
-        res.push_back(UINT_TYPE(vec1[i]) / vec2[i]);
+        res.push_back(INT_TYPE(vec1[i]) / vec2[i]);
 
     DATATYPE dt;
     orthogonalize_arithmetic(res.data(), &dt, 1);
@@ -168,7 +168,7 @@ CInteger<int_t, uint_t>::operator%(const CInteger<int_t, uint_t>& other) const {
         if (vec2[i] == 0)
             res.push_back(0u);
         else
-            res.push_back(UINT_TYPE(vec1[i]) % vec2[i]);
+            res.push_back(INT_TYPE(vec1[i]) % vec2[i]);
     }
 
     DATATYPE dt;
