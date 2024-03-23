@@ -22,8 +22,11 @@ class Integer {
     Integer() : nums{0} {}
     Integer(Base a) : nums{a} {}
     Integer(DATATYPE a) : nums() {
-        nums.resize(SIZE_VEC);
-        unorthogonalize_arithmetic(&a, (UBase*)nums.data(), 1);
+        std::vector<UINT_TYPE> tmp;
+        tmp.resize(SIZE_VEC);
+        unorthogonalize_arithmetic(&a, tmp.data(), 1);
+        for (const auto& ele : tmp)
+            nums.push_back(INT_TYPE(ele));
     }
     Integer(const std::vector<Base>& a) : nums(a) {}
     Integer(const Integer& other) : nums(other.nums) {}                // copy

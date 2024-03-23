@@ -32,8 +32,13 @@ class Machine;
 
 template <class sint, template <int, class> class sbit, class BitShare, int N = 64>
 class Program {
+    #if BITLENGTH == 64
     using BitType = CInteger<INT_TYPE, UINT_TYPE>;
+    #else
+    using BitType = Integer<int64_t, uint64_t>;
+    #endif
     using IntType = Integer<int64_t, uint64_t>;
+
     static constexpr size_t BIT_LEN = N;
 
     class Instruction {
@@ -1305,8 +1310,8 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             for (int i = 0; i < regs[0]; ++i) {
                 p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN] =
                     p.sb_register[regs[2] + i / BIT_LEN][i % BIT_LEN].prepare_and(
-                        BitShare(((p.cb_register[regs[3] + i / BIT_LEN] >> INT_TYPE(i % BIT_LEN)) &
-                                  INT_TYPE(1))
+                        BitShare(((p.cb_register[regs[3] + i / BIT_LEN] >> BitType::Base(i % BIT_LEN)) &
+                                  BitType::Base(1))
                                      .get_type()));
             }
             BitShare::communicate();
@@ -1507,7 +1512,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                 long bits = std::min(cur, long(BIT_LEN));
                 auto num = ~p.cb_register[regs[1] + i];
                 p.cb_register[regs[0] + i] =
-                    bits == BIT_LEN ? num : num & INT_TYPE((1lu << bits) - 1lu);
+                    bits == BIT_LEN ? num : num & BitType::Base((1lu << bits) - 1lu);
                 cur -= BIT_LEN;
             }
             return;
@@ -1518,7 +1523,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                 long bits = std::min(cur, long(BIT_LEN));
                 auto num = p.cb_register[regs[1] + i] ^ p.cb_register[regs[2] + i];
                 p.cb_register[regs[0] + i] =
-                    bits == BIT_LEN ? num : num & INT_TYPE((1lu << bits) - 1lu);
+                    bits == BIT_LEN ? num : num & BitType::Base((1lu << bits) - 1lu);
                 cur -= BIT_LEN;
             }
             return;
@@ -1528,19 +1533,19 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                 p.cb_register[regs[1] + vec] + p.cb_register[regs[2] + vec];
             return;
         case Opcode::ADDCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] + INT_TYPE(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] + BitType::Base(int(n));
             break;
         case Opcode::MULCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] * INT_TYPE(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] * BitType::Base(int(n));
             break;
         case Opcode::XORCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] ^ INT_TYPE(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] ^ BitType::Base(int(n));
             break;
         case Opcode::SHRCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] >> INT_TYPE(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] >> BitType::Base(int(n));
             break;
         case Opcode::SHLCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] << INT_TYPE(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] << BitType::Base(int(n));
             break;
         case Opcode::REVEAL:
             for (size_t i = 0; i < regs.size(); i += 3) {
@@ -1744,7 +1749,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                     if (i % BIT_LEN == 0)
                         p.cb_register[regs[j] + i / BIT_LEN] = ZERO;
                     p.cb_register[regs[j] + i / BIT_LEN] ^=
-                        ((source >> INT_TYPE(j - 1)) & INT_TYPE(1)) << INT_TYPE(i % BIT_LEN);
+                        (((source >> INT_TYPE(j - 1)) & INT_TYPE(1)) << INT_TYPE(i % BIT_LEN)).get_type();
                 }
             }
             return;
@@ -1752,7 +1757,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::CONVCBIT2S:
             for (int i = 0; i < int(n); ++i) {
                 p.sb_register[regs[0] + i / BIT_LEN][i % BIT_LEN] =
-                    ((p.cb_register[regs[1] + i / BIT_LEN] >> INT_TYPE(i % BIT_LEN)) & INT_TYPE(1))
+                    ((p.cb_register[regs[1] + i / BIT_LEN] >> BitType::Base(i % BIT_LEN)) & BitType::Base(1))
                         .get_type();
             }
             return;
