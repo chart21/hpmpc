@@ -84,6 +84,7 @@ enum class Opcode {
 
     MULCI = 0x32,
     ADDCI = 0x23,
+    SUBCI = 0x29,
 
     SUBC = 0x25,
     ADDC = 0x20,
@@ -216,6 +217,7 @@ enum class Type {
     CGF2N = 7,
     NONE = 8,
 };
+
 } // namespace IR
 
 #endif
