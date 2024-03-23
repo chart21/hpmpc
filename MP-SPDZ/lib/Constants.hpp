@@ -138,9 +138,9 @@ enum class Opcode {
     INPUTMIXED = 0xf2,
     INPUTMIXEDREG = 0xf3,
     PUBINPUT = 0xb6,
-    INTOUTPUT = 0xe6,   // TODO
-    FLOUTOUTPUT = 0xe7, // TODO
-    FIXINPUT = 0xe8,    // TODO
+    INTOUTPUT = 0xe6,
+    FLOATOUTPUT = 0xe7,
+    FIXINPUT = 0xe8, // TODO
 
     CONCATS = 0x2f,
 
@@ -200,6 +200,9 @@ enum class Opcode {
     TIME = 0x14,
     START = 0x15,
     STOP = 0x16,
+
+    PUSHINT = 0xce, // considered obsolete
+    POPINT = 0xcf,  // considered obsolete
 };
 
 enum class Type {
