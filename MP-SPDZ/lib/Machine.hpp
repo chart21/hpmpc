@@ -68,7 +68,11 @@ class Machine {
     vector<CInteger<INT_TYPE, UINT_TYPE>> c_mem;
     vector<Integer<int64_t, uint64_t>> ci_mem;
     vector<sbit<N, BitShare>> sb_mem;
+    #if BITLENGTH == 64
     vector<CInteger<INT_TYPE, UINT_TYPE>> cb_mem;
+    #else
+    vector<Integer<int64_t, uint64_t>> cb_mem;
+    #endif
 
     std::ostream& get_out() const { return std::cout; }
 
