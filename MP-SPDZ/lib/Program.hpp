@@ -1570,23 +1570,30 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             break;
         case Opcode::PRINT_REG_SIGNED: {
             const auto& nums = p.cb_register[regs[0]].get_all();
-            for (uint64_t reg_val : nums) {
-                long cur = 0;
-                assert(n <= BIT_LEN);
+            m.get_out() << "(";
+            int64_t reg_val = nums[0];
+            // long cur = 0;
+            assert(n <= BIT_LEN);
 
-                for (size_t j = 0; j < div_ceil(n, BIT_LEN); ++j) {
-                    cur |= long(IR::mask(reg_val, n)) << (BIT_LEN * j);
-                }
+            unsigned n_shift = 0;
+            if (n > 1)
+                n_shift = sizeof(BitType::Base) * 8 - n;
+            if (n_shift > 63)
+                n_shift = 0;
 
-                long res;
-                if (n < BIT_LEN and n > 1 and cur & (long(1l) << (n - 1))) {
-                    res = static_cast<long>(cur | (~((long(1l) << n) - 1l)));
-                } else {
-                    res = static_cast<long>(cur);
-                }
+            m.get_out() << (reg_val << n_shift >> n_shift); // signed shift
+            for (size_t i = 1; i < nums.size(); ++i) {
+                int64_t reg_val = nums[i];
 
-                m.get_out() << static_cast<long long>(res);
+                unsigned n_shift = 0;
+                if (n > 1)
+                    n_shift = sizeof(BitType::Base) * 8 - n;
+                if (n_shift > 63)
+                    n_shift = 0;
+
+                m.get_out() << ", " << (reg_val << n_shift >> n_shift);
             }
+            m.get_out() << ")";
             break;
         }
         case Opcode::PRINT_FLOAT_PREC:
