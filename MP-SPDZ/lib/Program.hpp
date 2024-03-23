@@ -1570,7 +1570,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             break;
         case Opcode::PRINT_REG_SIGNED: {
             const auto& nums = p.cb_register[regs[0]].get_all();
-            for (UINT_TYPE reg_val : nums) {
+            for (uint64_t reg_val : nums) {
                 long cur = 0;
                 assert(n <= BIT_LEN);
 
