@@ -9,6 +9,7 @@
 #include <iomanip>     // set precision
 #include <iostream>    // default precision
 #include <random>      // random bit
+#include <stack>       // stack for thread local ints (obsolete)
 #include <string>      // bytecode path
 #include <string_view> // cisc instruction
 #include <utility>     // move
@@ -32,6 +33,7 @@ class Machine;
 template <class sint, template <int, class> class sbit, class BitShare, int N = 64>
 class Program {
     using BitType = CInteger<INT_TYPE, UINT_TYPE>;
+    using IntType = Integer<int64_t, uint64_t>;
     static constexpr size_t BIT_LEN = N;
 
     class Instruction {
@@ -108,9 +110,11 @@ class Program {
 
     vector<sint> s_register;                          // secret share
     vector<CInteger<INT_TYPE, UINT_TYPE>> c_register; // clear share
-    vector<Integer<int64_t, uint64_t>> i_register;    // integer
+    vector<IntType> i_register;                       // integer
     vector<sbit<N, BitShare>> sb_register;            // secret bit
     vector<BitType> cb_register;                      // clear bit
+
+    std::stack<IntType> i_stack;
 
     std::mt19937 rand_engine;
 
@@ -319,6 +323,8 @@ bool Program<sint, sbit, BitShare, N>::load_program(Machine<sint, sbit, BitShare
         case Opcode::PUBINPUT:
         case Opcode::THRESHOLD:
         case Opcode::PLAYERID:
+        case Opcode::PUSHINT:
+        case Opcode::POPINT:
         case Opcode::LDARG: {
             unsigned reg = inst.add_reg(read_next_int(fd, buf, 4));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), reg + inst.get_size(),
@@ -917,6 +923,8 @@ Type Program<sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& o
     case Opcode::THRESHOLD:
     case Opcode::PLAYERID:
     case Opcode::INTOUTPUT:
+    case Opcode::PUSHINT:
+    case Opcode::POPINT:
         return Type::INT;
     case Opcode::LDI:
     case Opcode::LDMC:
@@ -993,28 +1001,29 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
     if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 ||
         opc == 0x96 || opc == 0x21f || opc == 0xb || opc == 0x91 || opc == 0x92 || opc == 0x98 ||
         opc == 0x2d || opc == 0x11 || opc == 0x2e || opc == 0x249 || opc == 0x04 || opc == 0x05 ||
-        opc == 0x06 || opc == 0xd2 || opc == 0xcb || opc == 0xcc || opc == 0xcd || opc == 0x08 ||
-        opc == 0xa || opc == 0x51 || opc == 0xe2 || opc == 0xe6 || opc == 0xe7 || opc == 0x58 ||
-        opc == 0xc || opc == 0xc0 || opc == 0xb2 || opc == 0xc1 || opc == 0x99 || opc == 0xe3 ||
-        opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 || opc == 0x26 || opc == 0x103 ||
-        opc == 0xe4 || opc == 0x104 || opc == 0xa5 || opc == 0xa6 || opc == 0xa7 || opc == 0x23 ||
-        opc == 0x31 || opc == 0x14 || opc == 0x22 || opc == 0x224 || opc == 0x32 || opc == 0x20 ||
-        opc == 0x33 || opc == 0x231 || opc == 0x15 || opc == 0x2a || opc == 0x2c || opc == 0x27 ||
-        opc == 0x28 || opc == 0x25 || opc == 0x82 || opc == 0x16 || opc == 0x35 || opc == 0x83 ||
-        opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf || opc == 0xb6 || opc == 0x30 ||
-        opc == 0x34 || opc == 0xe1 || opc == 0xca || opc == 0x9a || opc == 0xf2 || opc == 0xf3 ||
-        opc == 0x2f || opc == 0x20a || opc == 0x205 || opc == 0x37 || opc == 0x97 || opc == 0x217 ||
-        opc == 0x218 || opc == 0xb1 || opc == 0x203 || opc == 0x202 || opc == 0x204 ||
-        opc == 0x3b || opc == 0x00 || opc == 0x73 || opc == 0x74 || opc == 0x75 || opc == 0x76 ||
-        opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f || opc == 0x80 || opc == 0x36 ||
-        opc == 0x2b || opc == 0x214 || opc == 0x24a || opc == 0x5b || opc == 0x248 || opc == 0x1f ||
-        opc == 0x71 || opc == 0xe0 || opc == 0x81 || opc == 0x21e || opc == 0x240 || opc == 0x241 ||
-        opc == 0x200 || opc == 0x212 || opc == 0x242 || opc == 0x219 || opc == 0x21d ||
-        opc == 0x21a || opc == 0xa9 || opc == 0x70 || opc == 0x243 || opc == 0x247 || opc == 0xaa ||
-        opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x21b || opc == 0x210 ||
-        opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x20f || opc == 0x213 ||
-        opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0xe9 || opc == 0x95 || opc == 0x9c ||
-        opc == 0x9d || opc == 0x9e || opc == 0x93 || opc == 0x9b) {
+        opc == 0x06 || opc == 0xd2 || opc == 0xcb || opc == 0xcc || opc == 0xcd || opc == 0xce ||
+        opc == 0xcf || opc == 0x08 || opc == 0xa || opc == 0x51 || opc == 0xe2 || opc == 0xe6 ||
+        opc == 0xe7 || opc == 0x58 || opc == 0xc || opc == 0xc0 || opc == 0xb2 || opc == 0xc1 ||
+        opc == 0x99 || opc == 0xe3 || opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 ||
+        opc == 0x26 || opc == 0x103 || opc == 0xe4 || opc == 0x104 || opc == 0xa5 || opc == 0xa6 ||
+        opc == 0xa7 || opc == 0x23 || opc == 0x31 || opc == 0x14 || opc == 0x22 || opc == 0x224 ||
+        opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 || opc == 0x15 || opc == 0x2a ||
+        opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 || opc == 0x16 ||
+        opc == 0x35 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf ||
+        opc == 0xb6 || opc == 0x30 || opc == 0x34 || opc == 0xe1 || opc == 0xca || opc == 0x9a ||
+        opc == 0xf2 || opc == 0xf3 || opc == 0x2f || opc == 0x20a || opc == 0x205 || opc == 0x37 ||
+        opc == 0x97 || opc == 0x217 || opc == 0x218 || opc == 0xb1 || opc == 0x203 ||
+        opc == 0x202 || opc == 0x204 || opc == 0x3b || opc == 0x00 || opc == 0x73 || opc == 0x74 ||
+        opc == 0x75 || opc == 0x76 || opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f ||
+        opc == 0x80 || opc == 0x36 || opc == 0x2b || opc == 0x214 || opc == 0x24a || opc == 0x5b ||
+        opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 || opc == 0x21e ||
+        opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 || opc == 0x242 ||
+        opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 || opc == 0x70 ||
+        opc == 0x243 || opc == 0x247 || opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc ||
+        opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 ||
+        opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c ||
+        opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e || opc == 0x93 ||
+        opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
         op = Opcode::NONE;
@@ -1120,9 +1129,9 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::INCINT: {
             auto dest = p.i_register.begin() + regs[0];
             auto base = p.i_register[regs[1]];
-            Integer<int64_t, uint64_t> cur = base;
+            IntType cur = base;
 
-            const Integer<int64_t, uint64_t> inc = int64_t(regs[2]);
+            const IntType inc = int64_t(regs[2]);
             int repeat = regs[3];
             int wrap = regs[4];
 
@@ -1705,7 +1714,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         }
         case Opcode::CONVCBITVEC:
             for (size_t i = 0; i < n; ++i) {
-                Integer<int64_t, uint64_t> res(vector<int64_t>(0));
+                IntType res(vector<int64_t>(0));
                 const auto& nums = (p.cb_register[regs[1] + i / BIT_LEN]).get_all();
                 for (auto& ele : nums)
                     res.add((ele >> INT_TYPE(i % BIT_LEN)) & INT_TYPE(1));
@@ -1744,7 +1753,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             return;
         case Opcode::CONVMODP:
             if (n == 0) { // unsigned conversion
-                Integer<int64_t, uint64_t> tmp(vector<int64_t>(0l));
+                IntType tmp(vector<int64_t>(0l));
                 const auto& nums = p.c_register[regs[1] + vec].get_all();
 
                 for (unsigned long ele : nums)
@@ -1755,7 +1764,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                 auto dest = p.i_register.begin() + regs[0] + vec;
                 auto x = p.c_register[regs[1] + vec];
                 if (n == 1) {
-                    Integer<int64_t, uint64_t> tmp(vector<int64_t>(0l));
+                    IntType tmp(vector<int64_t>(0l));
                     const auto& vec = x.get_all();
 
                     for (int64_t ele : vec)
@@ -1763,7 +1772,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
 
                     *dest = tmp;
                 } else if (n == 64) {
-                    Integer<int64_t, uint64_t> tmp(vector<int64_t>(0l));
+                    IntType tmp(vector<int64_t>(0l));
                     const auto& vec = x.get_all();
 
                     for (int64_t ele : vec)
@@ -1771,7 +1780,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
 
                     *dest = tmp;
                 } else {
-                    Integer<int64_t, uint64_t> tmp(vector<int64_t>(0l));
+                    IntType tmp(vector<int64_t>(0l));
                     const auto& vec = x.get_all();
 
                     for (INT_TYPE ele : vec) {
@@ -1864,6 +1873,13 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             break;
         case Opcode::PLAYERID:
             p.i_register[regs[0] + vec] = PARTY;
+            break;
+        case Opcode::PUSHINT:
+            p.i_stack.push(p.i_register[regs[0] + vec]);
+            break;
+        case Opcode::POPINT:
+            p.i_register[regs[0] + vec] = p.i_stack.top();
+            p.i_stack.pop();
             break;
         case Opcode::START:
             m.start(n);
