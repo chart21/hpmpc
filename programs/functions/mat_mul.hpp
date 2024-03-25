@@ -57,6 +57,9 @@
 #define FUNCTION dot234_test
 #elif FUNCTION_IDENTIFIER == 35
 #define FUNCTION RELU_range_test
+#elif FUNCTION_IDENTIFIER == 39
+#include "comp_trunc.hpp"
+#define FUNCTION test_comp_trunc
 #elif FUNCTION_IDENTIFIER >= 37 && FUNCTION_IDENTIFIER <= 57
 #define USE_EIGEN 1
 #define FUNCTION conv2D_bench

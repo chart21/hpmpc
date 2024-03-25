@@ -112,31 +112,31 @@ void inference(DATATYPE* res)
     auto model = AlexNet_CryptGpu<modeltype>(num_classes);
 #endif
 
-    
-    
-    /* using DATATYPE = uint32_t; */
-    /* const int parallel_factor = 1; */
-    /* using cleartype = k_clear<A>; */
-
-    /* using Sharetype = Wrapper<DATATYPE>; */
-    /* using F = FloatFixedConverter<FLOATTYPE, UINTTYPE, ANOTHER_FRACTIONAL_VALUE> ; */
 	Config cfg;
     cfg.mode = "test";
     cfg.save_dir = "./SimpleNN/model_zoo";
     cfg.data_dir = "./SimpleNN/dataset";
+    /* cfg.pretrained = "dummy.dummy"; */
+    cfg.pretrained = "vgg16_cifar.bin";
+    cfg.image_file = "cifar10-test-images.bin";
+    cfg.label_file = "cifar10-test-labels.bin";
+    cfg.batch = NUM_INPUTS*(BASE_DIV);
+    
+
+    /* cfg.batch = 1*BASE_DIV; */
+    /* using DATATYPE = uint32_t; */
+    /* const int parallel_factor = 1; */
+    /* using cleartype = k_clear<A>; */
     /* cfg.pretrained = "model_DRD_C100_230K.bin"; */
     /* cfg.pretrained = "resnet50_cifar100.bin"; */
-    cfg.pretrained = "dummy.dummy";
-    /* cfg.pretrained = "vgg16_cifar.bin"; */
+    /* cfg.image_file = "CIFAR-100_test_images.bin"; */
+    /* cfg.label_file = "CIFAR-100_test_labels.bin"; */
     /* cfg.pretrained = "alex32.bin"; */
     /* cfg.pretrained = "lenet5_avg.pth"; */
     /* cfg.pretrained = "ResNet50_Cifar_Max.bin"; */
-    cfg.image_file = "cifar10-test-images.bin";
-    cfg.label_file = "cifar10-test-labels.bin";
-    /* cfg.image_file = "CIFAR-100_test_images.bin"; */
-    /* cfg.label_file = "CIFAR-100_test_labels.bin"; */
-    cfg.batch = NUM_INPUTS*(BASE_DIV);
-    /* cfg.batch = 1*BASE_DIV; */
+
+    /* using Sharetype = Wrapper<DATATYPE>; */
+    /* using F = FloatFixedConverter<FLOATTYPE, UINTTYPE, ANOTHER_FRACTIONAL_VALUE> ; */
 
    
     /* // Array of string literals */
@@ -163,7 +163,6 @@ void inference(DATATYPE* res)
     VecXi train_Y;
     int n_train = 60000;
 #endif
-
 
 #if JIT_VEC == 0
 #if IS_TRAINING == 1
