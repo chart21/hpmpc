@@ -83,10 +83,10 @@ void LTZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     adders.clear();
     adders.shrink_to_fit();
     
-    for(int i = 0; i < len; i++)
-    {
-        y[i] = ~ y[i];
-    }
+    /* for(int i = 0; i < len; i++) */
+    /* { */
+    /*     y[i] = ~ y[i]; */
+    /* } */
     /* if(current_phase == 1) */
     /*     std::cout << "Bit inj ..." << std::endl; */
     

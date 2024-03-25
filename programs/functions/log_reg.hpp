@@ -1,7 +1,31 @@
 #include <stdint.h>
 #include "../protocols/XOR_Share.hpp"
 #include "../protocols/Additive_Share.hpp"
+#include "../datatypes/k_sint.hpp"
+#include "comp_trunc.hpp"
 #include "../../protocols/Protocols.h"
+
+    template<int bm, int bk, typename Datatype, typename Share>
+void DRELU_range_inplace(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
+{
+    using S = XOR_Share<Datatype, Share>;
+    using A = Additive_Share<Datatype, Share>;
+    using sint = sint_t<A>;
+    S* msb = new S[len];
+    sint* msb_sint = new sint[len];
+
+    get_msb_range<bm,bk>(val, msb, len);
+    bitinj_range(msb,len, msb_sint);
+    for(int i = 0; i < len; i++)
+    {
+        val[i] = val[i].prepare_mult(msb_sint[i]);
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        val[i].complete_mult();
+    }
+}
 
 const int NUM_FEATURES = 10;
 template<typename Share>
@@ -22,19 +46,30 @@ void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS]
     {
         z[i].complete_mult();
     }
-    auto d_0 = new Additive_Share<DATATYPE, Share>[NUM_INPUTS];
-    auto d_1 = new Additive_Share<DATATYPE, Share>[NUM_INPUTS];
+    auto d = new Additive_Share<DATATYPE, Share>[NUM_INPUTS*2];
+    /* auto d_1 = new Additive_Share<DATATYPE, Share>[NUM_INPUTS]; */
     const int zero_point_five = 1 << (FRACTIONAL -1);
-    for(int i = 0; i < NUM_INPUTS; i++)
+    for(int i = 0; i < NUM_INPUTS*2; i+=2)
     {
-        d_1[i] = z[i] - zero_point_five; 
-        d_0[i] = Additive_Share<DATATYPE, Share>(0) - d_1[i];
+        d[i] = z[i/2] - zero_point_five;
+        d[i+1] = Additive_Share<DATATYPE, Share>(0) - d[i];
+        /* d_1[i] = z[i] - zero_point_five; */ 
+        /* d_0[i] = Additive_Share<DATATYPE, Share>(0) - d_1[i]; */
     }
+    delete[] z;
     auto sigmoid = new Additive_Share<DATATYPE, Share>[NUM_INPUTS];
 //DRELU
+    /* DRELU_range_inplace<0,BITLENGTH>(d, NUM_INPUTS*2); */
+    auto dp = new Additive_Share<DATATYPE, Share>[NUM_INPUTS*2];
+    pack_additive<0, BITLENGTH>(d, dp, NUM_INPUTS*2, LTZ<0, BITLENGTH, Share, DATATYPE>); //LTZ
+    delete[] d;
+    
+    /* DRELU_range_inplace<0,BITLENGTH>(d_0, NUM_INPUTS); */
+    
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        sigmoid[i] = Additive_Share<DATATYPE, Share>(1) - d_1[i].prepare_dot(z[i] + zero_point_five);
+        /* sigmoid[i] = Additive_Share<DATATYPE, Share>(1) - d_1[i].prepare_dot(z[i] + zero_point_five); */
+        sigmoid[i] = Additive_Share<DATATYPE, Share>(1) - dp[i*2+1].prepare_dot(z[i] + zero_point_five);
         sigmoid[i].mask_and_send_dot();
     }
     Share::communicate();
@@ -44,9 +79,11 @@ void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS]
     }
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        sigmoid[i] = ( Additive_Share<DATATYPE, Share>(1) - d_0[i]).prepare_dot(sigmoid[i]);
+        /* sigmoid[i] = ( Additive_Share<DATATYPE, Share>(1) - d_0[i]).prepare_dot(sigmoid[i]); */
+        sigmoid[i] = ( Additive_Share<DATATYPE, Share>(1) - dp[i*2]).prepare_dot(sigmoid[i]);
         sigmoid[i].mask_and_send_dot();
     }
+    delete[] dp;
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
@@ -61,9 +98,8 @@ void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS]
         }
     }
 
-    delete[] z;
-    delete[] d_0;
-    delete[] d_1;
+    /* delete[] d_0; */
+    /* delete[] d_1; */
     delete[] sigmoid;
 }
 
