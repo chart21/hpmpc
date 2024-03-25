@@ -56,21 +56,16 @@ class CInteger {
     }
 
     CInteger& operator=(const Integer<int64_t, uint64_t>& other) { // INT -> CINT
-        const auto all = other.get_all();
+        const auto& all = other.get_all();
 
         if (all.size() == 1) {
-            nums = PROMOTE(uint_t(all[0]));
+            nums = PROMOTE(all[0]);
             return *this;
         }
 
         assert(all.size() == SIZE_VEC);
-        std::vector<uint_t> tmp;
-        tmp.reserve(SIZE_VEC);
 
-        for (const auto& ele : all)
-            tmp.emplace_back(int_t(ele));
-
-        orthogonalize_arithmetic(tmp.data(), &nums, 1);
+        orthogonalize_arithmetic((uint_t*)all.data(), &nums, 1);
         return *this;
     }
 

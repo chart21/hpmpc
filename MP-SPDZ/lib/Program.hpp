@@ -116,7 +116,7 @@ class Program {
     vector<sint> s_register;                          // secret share
     vector<CInteger<INT_TYPE, UINT_TYPE>> c_register; // clear share
     vector<IntType> i_register;                       // integer
-    vector<sbit<N, BitShare>> sb_register;            // secret bit
+    vector<sbitset_t<N, BitShare>> sb_register;            // secret bit
     vector<BitType> cb_register;                      // clear bit
 
     std::stack<IntType> i_stack;
@@ -1040,7 +1040,7 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
 
 template <class sint, template <int, class> class sbit, class BitShare, int N>
 Program<sint, sbit, BitShare, N>::Program(const string&& path, size_t thread)
-    : precision(6), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21), matrix() {
+    : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21), matrix() {
 }
 
 template <class sint, template <int, class> class sbit, class BitShare, int N>
@@ -1333,10 +1333,28 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::OPEN:
             p.popen(regs, get_size());
             return;
-        case Opcode::TRUNC_PR:
-            print("TODO: TRUNC_PR\n");
-            assert(regs[3] == FRACTIONAL);
-            break;
+        case Opcode::TRUNC_PR: {
+            assert(regs.size() % 4 == 0);
+            vector<sint> input;
+            vector<int> idxs;
+            for (size_t i = 0; i < regs.size(); i += 4) {
+                assert(regs[i + 3] == FRACTIONAL and "FRACTIONAL not set correctly");
+
+                for (size_t j = 0; j < get_size(); ++j)
+                    input.push_back(p.s_register[regs[i + 1] + j]);
+                idxs.push_back(regs[i]); // dest
+            }
+            sint* res = new sint[input.size()];
+            // trunc_pr<sint>(input.data(), res, input.size()); // TODO
+
+            for (size_t i = 0; i < idxs.size(); ++i) {
+                for (size_t j = 0; j < get_size(); ++j)
+                    p.s_register[idxs[i] + j] = res[i * get_size() + j];
+            }
+
+            delete[] res;
+            return;
+        }
         case Opcode::STMS:
             m.s_mem[n + vec] = p.s_register[regs[0] + vec];
             break;
@@ -2218,32 +2236,46 @@ template <class sint, template <int, class> class sbit, class BitShare, int N>
 void Program<sint, sbit, BitShare, N>::cisc(const vector<int>& regs, const std::string_view cisc) {
     if (cisc.starts_with("LTZ")) {
         print("LTZ\n");
-        vector<int> op1(0);
-        vector<int> op2(0);
-        op1.reserve(regs.size() / 6);
-        op1.reserve(regs.size() / 6);
+        vector<sint> op(0);
+        vector<int> ires(0);
+        op.reserve(regs.size() / 6);
+        ires.reserve(regs.size() / 6);
 
         for (size_t i = 0; i < regs.size(); i += 6) {
             std::cout << "s" << regs[i + 2] << " = s" << regs[i + 3] << "(" << regs[i + 4]
                       << ") < 0"
                       << "\n";
-            op1.push_back(regs[i + 3]);
-            op2.push_back(regs[i + 4]);
+            op.push_back(s_register[regs[i + 3]]); // operant
+            ires.push_back(regs[i + 2]); // dest
         }
+        sint* res = new sint[op.size()];
+        // pack_additive<0, BITLENGTH>(op.data(), res, op.size(), LTZ<0, BITLENGTH, sint::Share, DATATYPE>);
+
+
+        for (size_t i = 0; i < ires.size(); ++i)
+            s_register[ires[i]] = res[i];
+        delete[] res;
     } else if (cisc.starts_with("EQZ")) {
         print("EQZ\n");
-        vector<int> op1(0);
-        vector<int> op2(0);
-        op1.reserve(regs.size() / 6);
-        op1.reserve(regs.size() / 6);
+        vector<sint> op(0);
+        vector<int> ires(0);
+        op.reserve(regs.size() / 6);
+        ires.reserve(regs.size() / 6);
 
         for (size_t i = 0; i < regs.size(); i += 6) {
             std::cout << "s" << regs[i + 2] << " = s" << regs[i + 3] << "(" << regs[i + 4]
                       << ") == 0"
                       << "\n";
-            op1.push_back(regs[i + 3]);
-            op2.push_back(regs[i + 4]);
+            op.push_back(regs[i + 3]);
+            ires.push_back(regs[i + 2]);
         }
+
+        sint* res = new sint[op.size()];
+        // pack_additive<0, BITLENGTH>(op.data(), res, op.size(), EQZ<0, BITLENGTH, sint::Share, DATATYPE>);
+
+        for (size_t i = 0; i < ires.size(); ++i)
+            s_register[ires[i]] = res[i];
+        delete[] res;
     }
 }
 

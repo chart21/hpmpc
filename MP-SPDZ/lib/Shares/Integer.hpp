@@ -83,7 +83,12 @@ class Integer {
     Integer operator>>(const Integer& other) const;
 
     inline Base& get() { return nums[0]; }
-    std::vector<Base> get_all() const { return nums; }
+    std::vector<INT_TYPE> get_all() const {
+        std::vector<INT_TYPE> res(0);
+        for (const auto& ele : nums)
+            res.push_back(ele);
+        return res;
+    }
     DATATYPE get_type() const {
         if (nums.size() == SIZE_VEC) {
             std::vector<UINT_TYPE> vec;
