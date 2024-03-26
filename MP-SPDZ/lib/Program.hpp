@@ -22,6 +22,8 @@
 #include "help/Util.hpp"
 #include "help/matrix.hpp"
 
+#include "../../programs/functions/comp_trunc.hpp"
+
 using std::string;
 using std::vector;
 
@@ -32,11 +34,11 @@ class Machine;
 
 template <class sint, template <int, class> class sbit, class BitShare, int N = 64>
 class Program {
-    #if BITLENGTH == 64
+#if BITLENGTH == 64
     using BitType = CInteger<INT_TYPE, UINT_TYPE>;
-    #else
+#else
     using BitType = Integer<int64_t, uint64_t>;
-    #endif
+#endif
     using IntType = Integer<int64_t, uint64_t>;
 
     static constexpr size_t BIT_LEN = N;
@@ -88,7 +90,7 @@ class Program {
     void muls(const vector<int>& regs);
     void mulm(const vector<int>& regs, const size_t& vec);
     void dotprods(const vector<int>& regs, const size_t& size); // TODO
-    void inputmixed(const vector<int>& regs, const bool from_reg);
+    void inputmixed(const vector<int>& regs, const bool from_reg, const size_t& vec);
 
     void matmulsm(const vector<int>& regs, Machine<sint, sbit, BitShare, N>& m);
     void matmuls(const vector<int>& regs);
@@ -116,7 +118,7 @@ class Program {
     vector<sint> s_register;                          // secret share
     vector<CInteger<INT_TYPE, UINT_TYPE>> c_register; // clear share
     vector<IntType> i_register;                       // integer
-    vector<sbitset_t<N, BitShare>> sb_register;            // secret bit
+    vector<sbitset_t<N, BitShare>> sb_register;       // secret bit
     vector<BitType> cb_register;                      // clear bit
 
     std::stack<IntType> i_stack;
@@ -1013,13 +1015,13 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
         opc == 0xe7 || opc == 0x58 || opc == 0xc || opc == 0xc0 || opc == 0xb2 || opc == 0xc1 ||
         opc == 0x99 || opc == 0xe3 || opc == 0x17 || opc == 0x18 || opc == 0x21 || opc == 0x24 ||
         opc == 0x26 || opc == 0x103 || opc == 0xe4 || opc == 0x104 || opc == 0xa5 || opc == 0xa6 ||
-        opc == 0xa7 || opc == 0x23 || opc == 0x29 || opc == 0x31 || opc == 0x14 || opc == 0x22 || opc == 0x224 ||
-        opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 || opc == 0x15 || opc == 0x2a ||
-        opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 || opc == 0x16 ||
-        opc == 0x35 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 || opc == 0xbf ||
-        opc == 0xb6 || opc == 0x30 || opc == 0x34 || opc == 0xe1 || opc == 0xca || opc == 0x9a ||
-        opc == 0xf2 || opc == 0xf3 || opc == 0x2f || opc == 0x20a || opc == 0x205 || opc == 0x37 ||
-        opc == 0x97 || opc == 0x217 || opc == 0x218 || opc == 0xb1 || opc == 0x203 ||
+        opc == 0xa7 || opc == 0x23 || opc == 0x29 || opc == 0x31 || opc == 0x14 || opc == 0x22 ||
+        opc == 0x224 || opc == 0x32 || opc == 0x20 || opc == 0x33 || opc == 0x231 || opc == 0x15 ||
+        opc == 0x2a || opc == 0x2c || opc == 0x27 || opc == 0x28 || opc == 0x25 || opc == 0x82 ||
+        opc == 0x16 || opc == 0x35 || opc == 0x83 || opc == 0xb3 || opc == 0xb4 || opc == 0xb5 ||
+        opc == 0xbf || opc == 0xb6 || opc == 0x30 || opc == 0x34 || opc == 0xe1 || opc == 0xca ||
+        opc == 0x9a || opc == 0xf2 || opc == 0xf3 || opc == 0x2f || opc == 0x20a || opc == 0x205 ||
+        opc == 0x37 || opc == 0x97 || opc == 0x217 || opc == 0x218 || opc == 0xb1 || opc == 0x203 ||
         opc == 0x202 || opc == 0x204 || opc == 0x3b || opc == 0x00 || opc == 0x73 || opc == 0x74 ||
         opc == 0x75 || opc == 0x76 || opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f ||
         opc == 0x80 || opc == 0x36 || opc == 0x2b || opc == 0x214 || opc == 0x24a || opc == 0x5b ||
@@ -1040,8 +1042,8 @@ Program<sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, 
 
 template <class sint, template <int, class> class sbit, class BitShare, int N>
 Program<sint, sbit, BitShare, N>::Program(const string&& path, size_t thread)
-    : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21), matrix() {
-}
+    : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21),
+      matrix() {}
 
 template <class sint, template <int, class> class sbit, class BitShare, int N>
 void Program<sint, sbit, BitShare, N>::update_max_reg(const Type& reg, const unsigned& sreg,
@@ -1309,10 +1311,10 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::ANDM:
             for (int i = 0; i < regs[0]; ++i) {
                 p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN] =
-                    p.sb_register[regs[2] + i / BIT_LEN][i % BIT_LEN].prepare_and(
-                        BitShare(((p.cb_register[regs[3] + i / BIT_LEN] >> BitType::Base(i % BIT_LEN)) &
-                                  BitType::Base(1))
-                                     .get_type()));
+                    p.sb_register[regs[2] + i / BIT_LEN][i % BIT_LEN].prepare_and(BitShare(
+                        ((p.cb_register[regs[3] + i / BIT_LEN] >> BitType::Base(i % BIT_LEN)) &
+                         BitType::Base(1))
+                            .get_type()));
             }
             BitShare::communicate();
             for (int i = 0; i < regs[0]; ++i)
@@ -1345,7 +1347,7 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                 idxs.push_back(regs[i]); // dest
             }
             sint* res = new sint[input.size()];
-            // trunc_pr<sint>(input.data(), res, input.size()); // TODO
+            trunc_pr<sint>(input.data(), res, input.size()); // TODO
 
             for (size_t i = 0; i < idxs.size(); ++i) {
                 for (size_t j = 0; j < get_size(); ++j)
@@ -1433,10 +1435,10 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
             }
             break;
         case Opcode::INPUTMIXED: // fine
-            p.inputmixed(regs, false);
+            p.inputmixed(regs, false, get_size());
             return;
         case Opcode::INPUTMIXEDREG:
-            p.inputmixed(regs, true);
+            p.inputmixed(regs, true, get_size());
             return;
         case Opcode::PUBINPUT:
             if (!m.public_input.is_open())
@@ -1774,7 +1776,8 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
                     if (i % BIT_LEN == 0)
                         p.cb_register[regs[j] + i / BIT_LEN] = ZERO;
                     p.cb_register[regs[j] + i / BIT_LEN] ^=
-                        (((source >> INT_TYPE(j - 1)) & INT_TYPE(1)) << INT_TYPE(i % BIT_LEN)).get_type();
+                        (((source >> INT_TYPE(j - 1)) & INT_TYPE(1)) << INT_TYPE(i % BIT_LEN))
+                            .get_type();
                 }
             }
             return;
@@ -1782,7 +1785,8 @@ void Program<sint, sbit, BitShare, N>::Instruction::execute(Program<sint, sbit, 
         case Opcode::CONVCBIT2S:
             for (int i = 0; i < int(n); ++i) {
                 p.sb_register[regs[0] + i / BIT_LEN][i % BIT_LEN] =
-                    ((p.cb_register[regs[1] + i / BIT_LEN] >> BitType::Base(i % BIT_LEN)) & BitType::Base(1))
+                    ((p.cb_register[regs[1] + i / BIT_LEN] >> BitType::Base(i % BIT_LEN)) &
+                     BitType::Base(1))
                         .get_type();
             }
             return;
@@ -1985,71 +1989,102 @@ void Program<sint, sbit, BitShare, N>::inputbvec(const vector<int>& regs) {
 }
 
 template <class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs, bool from_reg) {
+void Program<sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs, bool from_reg,
+                                                  const size_t& vec) {
     for (size_t i = 0; i < regs.size(); i += 3) {
-        alignas(DATATYPE) UINT_TYPE input[DATTYPE / BITLENGTH];
-        int dest = regs[i + 1];
+        for (size_t offset = 0; offset < vec; ++offset) {
+            alignas(DATATYPE) UINT_TYPE input[DATTYPE / BITLENGTH];
+            int dest = regs[i + 1] + offset;
 
-        int player = 0;
+            int player = 0;
 
+            switch (regs[i]) {
+            case 0: { // int
+                player = from_reg ? i_register[regs[i + 2]].get() : regs[i + 2];
+
+                auto res = next_input(player, thread_id);
+                for (size_t j = 0; j < SIZE_VEC; ++j)
+                    input[j] = res[j];
+
+                break;
+            }
+            case 1: { // fix
+                player = from_reg ? i_register[regs[i + 3]].get() : regs[i + 3];
+
+                auto tmp = next_input_f(player, thread_id);
+                for (size_t j = 0; j < SIZE_VEC; ++j)
+                    input[j] = (static_cast<INT_TYPE>(tmp[j] * (1u << regs[i + 2])));
+                break;
+            }
+            case 2: // float
+                break;
+            }
+
+            DATATYPE in;
+            orthogonalize_arithmetic(input, &in, 1);
+
+            switch (player) {
+            case 0:
+                s_register[dest].template prepare_receive_from<P_0>(in);
+                break;
+            case 1:
+                s_register[dest].template prepare_receive_from<P_1>(in);
+                break;
+            case 2:
+                s_register[dest].template prepare_receive_from<P_2>(in);
+                break;
+            }
+        }
         switch (regs[i]) {
-        case 0: { // int
-            player = from_reg ? i_register[regs[i + 2]].get() : regs[i + 2];
-
-            auto res = next_input(player, thread_id);
-            for (size_t j = 0; j < SIZE_VEC; ++j)
-                input[j] = res[j];
-
-            break;
-        }
-        case 1: { // fix
-            player = from_reg ? i_register[regs[i + 3]].get() : regs[i + 3];
-
-            auto tmp = next_input_f(player, thread_id);
-            for (size_t j = 0; j < SIZE_VEC; ++j)
-                input[j] = (static_cast<INT_TYPE>(tmp[j] * (1u << regs[i + 2])));
-            i++;
-            break;
-        }
-        case 2: // float
-            break;
-        }
-
-        DATATYPE in;
-        orthogonalize_arithmetic(input, &in, 1);
-
-        switch (player) {
         case 0:
-            s_register[dest].template prepare_receive_from<P_0>(in);
+        case 2:
             break;
         case 1:
-            s_register[dest].template prepare_receive_from<P_1>(in);
+            i += 1;
             break;
-        case 2:
-            s_register[dest].template prepare_receive_from<P_2>(in);
-            break;
+        default:
+            log(Level::ERROR, "inputmixed: unknown type");
         }
     }
 
     sint::communicate();
 
     for (size_t i = 0; i < regs.size(); i += 3) {
-        int dest = regs[i + 1];
+        for (size_t offset = 0; offset < vec; ++offset) {
+            int dest = regs[i + 1] + offset;
 
-        if (regs[i] == 1) {
-            i += 1;
+            int player = 0;
+            switch (regs[i]) {
+            case 1:
+                player = from_reg ? i_register[regs[i + 3]].get() : regs[i + 3];
+                break;
+            case 0:
+            case 2:
+                player = from_reg ? i_register[regs[i + 2]].get() : regs[i + 2];
+                break;
+            }
+
+            switch (player) {
+            case 0:
+                s_register[dest].template complete_receive_from<P_0>();
+                break;
+            case 1:
+                s_register[dest].template complete_receive_from<P_1>();
+                break;
+            case 2:
+                s_register[dest].template complete_receive_from<P_2>();
+                break;
+            }
         }
-        int player = from_reg ? i_register[regs[i + 2]].get() : regs[i + 2];
-        switch (player) {
+        switch (regs[i]) {
         case 0:
-            s_register[dest].template complete_receive_from<P_0>();
+        case 2:
             break;
         case 1:
-            s_register[dest].template complete_receive_from<P_1>();
+            i += 1;
             break;
-        case 2:
-            s_register[dest].template complete_receive_from<P_2>();
-            break;
+        default:
+            log(Level::ERROR, "inputmixed: unknown type");
         }
     }
 }
@@ -2246,11 +2281,11 @@ void Program<sint, sbit, BitShare, N>::cisc(const vector<int>& regs, const std::
                       << ") < 0"
                       << "\n";
             op.push_back(s_register[regs[i + 3]]); // operant
-            ires.push_back(regs[i + 2]); // dest
+            ires.push_back(regs[i + 2]);           // dest
         }
         sint* res = new sint[op.size()];
-        // pack_additive<0, BITLENGTH>(op.data(), res, op.size(), LTZ<0, BITLENGTH, sint::Share, DATATYPE>);
-
+        // pack_additive<0, BITLENGTH>(op.data(), res, op.size(), LTZ<0, BITLENGTH, sint::Share,
+        // DATATYPE>);
 
         for (size_t i = 0; i < ires.size(); ++i)
             s_register[ires[i]] = res[i];
@@ -2271,7 +2306,8 @@ void Program<sint, sbit, BitShare, N>::cisc(const vector<int>& regs, const std::
         }
 
         sint* res = new sint[op.size()];
-        // pack_additive<0, BITLENGTH>(op.data(), res, op.size(), EQZ<0, BITLENGTH, sint::Share, DATATYPE>);
+        // pack_additive<0, BITLENGTH>(op.data(), res, op.size(), EQZ<0, BITLENGTH, sint::Share,
+        // DATATYPE>);
 
         for (size_t i = 0; i < ires.size(); ++i)
             s_register[ires[i]] = res[i];
