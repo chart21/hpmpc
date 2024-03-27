@@ -42,14 +42,14 @@ class CIntSet {
         return res;
     }
 
-    const vector<INT_TYPE> get_all() {
+    vector<INT_TYPE> get_all() const {
         vector<INT_TYPE> tmp(DATTYPE);
         tmp.resize(DATTYPE); // TODO
         unorthogonalize_arithmetic((DATATYPE*)(get_type().data()), (UINT_TYPE*)tmp.data());
         return tmp;
     }
 
-    const cint::IBase get() { return nums[0].get(); }
+    cint::IBase get() const { return nums[0].get(); }
 
     CIntSet& operator=(const cint::IBase& other) {
         nums.clear();
@@ -62,10 +62,19 @@ class CIntSet {
 
     CIntSet& operator=(const Integer<int64_t, uint64_t>& other) {
         nums.clear();
-        nums.reserve(LENGTH);
-        for (size_t i = 0; i < LENGTH; ++i)
-            nums.push_back(other);
+        vector<DATATYPE> tmp;
+        tmp.resize(LENGTH);
 
+        orthogonalize_arithmetic((UINT_TYPE*)other.get_all().data(), tmp.data());
+
+        for (auto& ele : tmp)
+            nums.push_back(ele);
+        // nums.clear();
+        // nums.reserve(LENGTH);
+        // 
+        // for (size_t i = 0; i < LENGTH; ++i)
+        //     nums.push_back(other);
+// 
         return *this;
     }
 
