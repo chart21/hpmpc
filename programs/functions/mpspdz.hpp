@@ -13,6 +13,7 @@
 
 #include "../../MP-SPDZ/lib/Machine.hpp"
 #include "../../MP-SPDZ/lib/Shares/CInteger.hpp"
+#include "../../MP-SPDZ/lib/Shares/Integer.hpp"
 
 #if FUNCTION_IDENTIFIER == 500
 #define FUNCTION MP_MACHINE_TUTORIAL
@@ -37,12 +38,15 @@ void generateElements()
 template<typename Share>
 void MP_MACHINE_TUTORIAL(DATATYPE* res)
 {
+    using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
+
     using S = XOR_Share<DATATYPE, Share>;
 
     using A = Additive_Share<DATATYPE, Share>;
     using sint = sint_t<A>;
 
-    IR::Machine<Share, sint, sbitset_t, S> m("tutorial.sch");
+    IR::Machine<int_t, Share, sint, sbitset_t, S> m("tutorial.sch");
     m.run();
 }
 
@@ -51,6 +55,7 @@ template<typename Share>
 void MP_MACHINE_TMP(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
 
     using S = XOR_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<64, S>;
@@ -59,7 +64,7 @@ void MP_MACHINE_TMP(DATATYPE* res)
     using sint = sint_t<A>;
 
     Share::communicate();
-    IR::Machine<cint, Share, A, sbitset_t, S> m("tmp.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("tmp.sch");
     m.run();
 }
 
@@ -68,6 +73,7 @@ template<typename Share>
 void MP_MACHINE_ADD(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
 
     using S = XOR_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<64, S>;
@@ -75,7 +81,7 @@ void MP_MACHINE_ADD(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using sint = sint_t<A>;
 
-    IR::Machine<cint, Share, A, sbitset_t, S> m("add.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("add.sch");
     m.run();
 }
 
@@ -84,6 +90,7 @@ template<typename Share>
 void MP_MACHINE_MUL(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
 
     using S = XOR_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<64, S>;
@@ -91,7 +98,7 @@ void MP_MACHINE_MUL(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using sint = sint_t<A>;
 
-    IR::Machine<cint, Share, A, sbitset_t, S> m("mul.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("mul.sch");
     m.run();
 }
 
@@ -100,6 +107,7 @@ template<typename Share>
 void MP_MACHINE_MUL_FIX(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
 
     using S = XOR_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<64, S>;
@@ -107,7 +115,7 @@ void MP_MACHINE_MUL_FIX(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using sint = sint_t<A>;
 
-    IR::Machine<cint, Share, A, sbitset_t, S> m("mul_fix.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("mul_fix.sch");
     m.run();
 }
 
@@ -116,6 +124,7 @@ template<typename Share>
 void MP_MACHINE_INT_TESTS(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
 
     using S = XOR_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<64, S>;
@@ -125,10 +134,10 @@ void MP_MACHINE_INT_TESTS(DATATYPE* res)
 
     Share::communicate();
 #if BITLENGTH == 64
-    IR::Machine<cint, Share, A, sbitset_t, S> m("int_test.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("int_test.sch");
     m.run();
 #else
-    IR::Machine<cint, Share, A, sbitset_t, S> m("int_test_32.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("int_test_32.sch");
     m.run();
 #endif
 }

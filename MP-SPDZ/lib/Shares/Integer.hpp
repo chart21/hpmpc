@@ -82,7 +82,7 @@ class Integer {
     Integer operator<<(const Integer& other) const;
     Integer operator>>(const Integer& other) const;
 
-    inline IBase& get() { return nums[0]; }
+    IBase get() const { return nums[0]; }
     std::vector<INT_TYPE> get_all() const {
         std::vector<INT_TYPE> res(0);
         for (const auto& ele : nums)

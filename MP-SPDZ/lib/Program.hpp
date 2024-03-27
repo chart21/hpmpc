@@ -31,20 +31,19 @@ using std::vector;
 namespace IR {
 
 template class CIntSet<CInteger<INT_TYPE, UINT_TYPE>>;
-template class CIntSet<Integer<int64_t, uint64_t>>;
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
 class Machine;
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N = 64>
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N = 64>
 class Program {
     public:
 #if BITLENGTH == 64
-    using BitType = CInteger<INT_TYPE, UINT_TYPE>;
+    using BitType = cint;
 #else
-    using BitType = Integer<int64_t, uint64_t>;
+    using BitType = int_t;
 #endif
-    using IntType = Integer<int64_t, uint64_t>;
+    using IntType = int_t;
     using ClearIntType = cint;
 
     static constexpr size_t BIT_LEN = N;
@@ -53,7 +52,7 @@ class Program {
       public:
         explicit Instruction(const uint32_t& op, const int& vec);
 
-        void execute(Program& p, Machine<cint, Share, sint, sbit, BitShare, N>& m, size_t& pc) const;
+        void execute(Program& p, Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m, size_t& pc) const;
 
         const Opcode& get_opcode() const { return op; }
 
@@ -84,9 +83,9 @@ class Program {
     Program& operator=(const Program& other) = delete;
     Program& operator=(Program&& other) = default;
 
-    bool load_program(Machine<cint, Share, sint, sbit, BitShare, N>& m); // parse bytecode file
+    bool load_program(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m); // parse bytecode file
     void setup();                                           // parse bytecode file
-    void run(Machine<cint, Share, sint, sbit, BitShare, N>& m,
+    void run(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m,
              const int& arg); // execute all instructions
 
     inline int get_argument() const { return arg; }
@@ -98,7 +97,7 @@ class Program {
     void dotprods(const vector<int>& regs, const size_t& size); // TODO
     void inputmixed(const vector<int>& regs, const bool from_reg, const size_t& vec);
 
-    void matmulsm(const vector<int>& regs, Machine<cint, Share, sint, sbit, BitShare, N>& m);
+    void matmulsm(const vector<int>& regs, Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m);
     void matmuls(const vector<int>& regs);
     template <class iterator>
     void matmulsm_prepare(const vector<int>& regs, const int& row_1, const int& j, iterator source1,
@@ -136,8 +135,8 @@ class Program {
     void update_max_reg(const Type& reg, const unsigned& sreg, const Opcode& op);
 };
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-bool Program<cint, Share, sint, sbit, BitShare, N>::load_program(Machine<cint, Share, sint, sbit, BitShare, N>& m) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m) {
     int fd = open(path.c_str(), O_RDONLY);
     if (fd < 0) {
         log(Level::WARNING, "couldn't open file: ", path);
@@ -879,8 +878,8 @@ bool Program<cint, Share, sint, sbit, BitShare, N>::load_program(Machine<cint, S
     return true;
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-Type Program<cint, Share, sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& op) const {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+Type Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::get_reg_type(const Opcode& op) const {
     switch (op) {
     case Opcode::LDBITS:
     case Opcode::BITCOMS:
@@ -1006,8 +1005,8 @@ Type Program<cint, Share, sint, sbit, BitShare, N>::Instruction::get_reg_type(co
     return Type::SINT;
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-Program<cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, const int& vec)
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(const uint32_t& opc, const int& vec)
     : size(vec) {
     // only if opc is known
     if (opc == 0x01 || opc == 0x02 || opc == 0x03 || opc == 0x12 || opc == 0x1b || opc == 0x90 ||
@@ -1043,20 +1042,20 @@ Program<cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(const ui
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-Program<cint, Share, sint, sbit, BitShare, N>::Program(const string&& path, size_t thread)
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+Program<int_t, cint, Share, sint, sbit, BitShare, N>::Program(const string&& path, size_t thread)
     : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21),
       matrix() {}
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::update_max_reg(const Type& reg, const unsigned& sreg,
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::update_max_reg(const Type& reg, const unsigned& sreg,
                                                       const Opcode& op [[maybe_unused]]) {
     if (max_reg[static_cast<unsigned>(reg)] < sreg)
         max_reg[static_cast<unsigned>(reg)] = sreg;
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::setup() {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::setup() {
     // prepare register
     s_register.resize(max_reg[static_cast<unsigned>(Type::SINT)]);
     c_register.resize(max_reg[static_cast<unsigned>(Type::CINT)]);
@@ -1065,17 +1064,17 @@ void Program<cint, Share, sint, sbit, BitShare, N>::setup() {
     sb_register.resize(max_reg[static_cast<unsigned>(Type::SBIT)]);
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::run(Machine<cint, Share, sint, sbit, BitShare, N>& m, const int& argi) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::run(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m, const int& argi) {
     arg = argi;
 
     for (size_t pc = 0; pc < prog.size(); ++pc)
         prog[pc].execute(*this, m, pc);
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program<cint, Share, sint, sbit, BitShare, N>& p,
-                                                            Machine<cint, Share, sint, sbit, BitShare, N>& m,
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program<int_t, cint, Share, sint, sbit, BitShare, N>& p,
+                                                            Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m,
                                                             size_t& pc) const {
     for (size_t vec = 0; vec < size; ++vec) {
         switch (op) {
@@ -1315,8 +1314,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
             for (int i = 0; i < regs[0]; ++i) {
                 p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN] =
                     p.sb_register[regs[2] + i / BIT_LEN][i % BIT_LEN].prepare_and(BitShare(
-                        ((p.cb_register[regs[3] + i / BIT_LEN] >> BitType::IBase(i % BIT_LEN)) &
-                         BitType::IBase(1))
+                        ((p.cb_register[regs[3] + i / BIT_LEN] >> int64_t(i % BIT_LEN)) &
+                         int64_t(1))
                             .get_type()));
             }
             Share::communicate();
@@ -1535,7 +1534,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 long bits = std::min(cur, long(BIT_LEN));
                 auto num = ~p.cb_register[regs[1] + i];
                 p.cb_register[regs[0] + i] =
-                    bits == BIT_LEN ? num : num & BitType::IBase((1lu << bits) - 1lu);
+                    bits == BIT_LEN ? num : num & int64_t((1lu << bits) - 1lu);
                 cur -= BIT_LEN;
             }
             return;
@@ -1546,7 +1545,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 long bits = std::min(cur, long(BIT_LEN));
                 auto num = p.cb_register[regs[1] + i] ^ p.cb_register[regs[2] + i];
                 p.cb_register[regs[0] + i] =
-                    bits == BIT_LEN ? num : num & BitType::IBase((1lu << bits) - 1lu);
+                    bits == BIT_LEN ? num : num & int64_t((1lu << bits) - 1lu);
                 cur -= BIT_LEN;
             }
             return;
@@ -1556,19 +1555,19 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 p.cb_register[regs[1] + vec] + p.cb_register[regs[2] + vec];
             return;
         case Opcode::ADDCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] + BitType::IBase(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] + int64_t(int(n));
             break;
         case Opcode::MULCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] * BitType::IBase(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] * int64_t(int(n));
             break;
         case Opcode::XORCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] ^ BitType::IBase(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] ^ int64_t(int(n));
             break;
         case Opcode::SHRCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] >> BitType::IBase(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] >> int64_t(int(n));
             break;
         case Opcode::SHLCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] << BitType::IBase(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] << int64_t(int(n));
             break;
         case Opcode::REVEAL:
             for (size_t i = 0; i < regs.size(); i += 3) {
@@ -1600,7 +1599,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
 
             unsigned n_shift = 0;
             if (n > 1)
-                n_shift = sizeof(BitType::IBase) * 8 - n;
+                n_shift = sizeof(int64_t) * 8 - n;
             if (n_shift > 63)
                 n_shift = 0;
 
@@ -1610,7 +1609,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
 
                 unsigned n_shift = 0;
                 if (n > 1)
-                    n_shift = sizeof(BitType::IBase) * 8 - n;
+                    n_shift = sizeof(int64_t) * 8 - n;
                 if (n_shift > 63)
                     n_shift = 0;
 
@@ -1788,8 +1787,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
         case Opcode::CONVCBIT2S:
             for (int i = 0; i < int(n); ++i) {
                 p.sb_register[regs[0] + i / BIT_LEN][i % BIT_LEN] =
-                    ((p.cb_register[regs[1] + i / BIT_LEN] >> BitType::IBase(i % BIT_LEN)) &
-                     BitType::IBase(1))
+                    ((p.cb_register[regs[1] + i / BIT_LEN] >> int64_t(i % BIT_LEN)) &
+                     int64_t(1))
                         .get_type();
             }
             return;
@@ -1945,8 +1944,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::inputbvec(const vector<int>& regs) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputbvec(const vector<int>& regs) {
     for (size_t i = 0; i < regs.size(); i += 3) {
         unsigned bits = regs[i] - 3;
         assert(bits == BITLENGTH and "BITLENGTH must equal -B <int>");
@@ -1991,8 +1990,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::inputbvec(const vector<int>&
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs, bool from_reg,
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputmixed(const vector<int>& regs, bool from_reg,
                                                   const size_t& vec) {
     for (size_t i = 0; i < regs.size(); i += 3) {
         for (size_t offset = 0; offset < vec; ++offset) {
@@ -2092,8 +2091,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::inputmixed(const vector<int>
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::popen(const vector<int>& regs, const size_t& size) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::popen(const vector<int>& regs, const size_t& size) {
     for (size_t i = 0; i < regs.size(); i += 2) {
         for (size_t vec = 0; vec < size; ++vec) {
             s_register[regs[i + 1] + vec].prepare_reveal_to_all();
@@ -2108,15 +2107,15 @@ void Program<cint, Share, sint, sbit, BitShare, N>::popen(const vector<int>& reg
         }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::mulm(const vector<int>& regs, const size_t& size) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::mulm(const vector<int>& regs, const size_t& size) {
     for (size_t vec = 0; vec < size; ++vec)
         s_register[regs[0] + vec] =
             s_register[regs[1] + vec].mult_public(UINT_TYPE(c_register[regs[2] + vec].get()));
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::muls(const vector<int>& regs) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::muls(const vector<int>& regs) {
     for (size_t i = 0; i < regs.size(); i += 4) {
         for (int j = 0; j < regs[i]; j++) {
             s_register[regs[i + 1] + j] =
@@ -2133,8 +2132,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::muls(const vector<int>& regs
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::andrsvec(const vector<int>& regs) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::andrsvec(const vector<int>& regs) {
     auto it = regs.begin();
     while (it < regs.end()) {
         int total = *it++;
@@ -2168,9 +2167,9 @@ void Program<cint, Share, sint, sbit, BitShare, N>::andrsvec(const vector<int>& 
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::matmulsm(const vector<int>& regs,
-                                                Machine<cint, Share, sint, sbit, BitShare, N>& m) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmulsm(const vector<int>& regs,
+                                                Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m) {
     auto res = s_register.begin() + regs[0];
     auto source1 = m.s_mem.begin() + i_register[regs[1]].get();
     auto source2 = m.s_mem.begin() + i_register[regs[2]].get();
@@ -2195,9 +2194,9 @@ void Program<cint, Share, sint, sbit, BitShare, N>::matmulsm(const vector<int>& 
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
 template <class iterator>
-void Program<cint, Share, sint, sbit, BitShare, N>::matmulsm_prepare(const vector<int>& regs, const int& row_1,
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmulsm_prepare(const vector<int>& regs, const int& row_1,
                                                         const int& j, iterator source1,
                                                         iterator source2) {
     auto col_2 = i_register[regs[9] + j].get(); // column of 2nd factor
@@ -2214,8 +2213,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::matmulsm_prepare(const vecto
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::matmuls(const vector<int>& regs) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmuls(const vector<int>& regs) {
     assert(regs.size() % 6 == 0);
     for (size_t vec = 0; vec < regs.size(); vec += 6) {
         const int& rows1 = regs[vec + 3];
@@ -2244,8 +2243,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::matmuls(const vector<int>& r
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::dotprods(const vector<int>& regs, const size_t& size) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::dotprods(const vector<int>& regs, const size_t& size) {
     for (size_t vec = 0; vec < size; ++vec) {
         for (auto it = regs.begin(); it != regs.end();) {
             auto next = it + *it;
@@ -2270,8 +2269,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::dotprods(const vector<int>& 
     }
 }
 
-template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Program<cint, Share, sint, sbit, BitShare, N>::cisc(const vector<int>& regs, const std::string_view cisc) {
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::cisc(const vector<int>& regs, const std::string_view cisc) {
     if (cisc.starts_with("LTZ")) {
         vector<sint> op(0);
         vector<int> ires(0);
