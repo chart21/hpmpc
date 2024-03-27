@@ -21,15 +21,23 @@ template <class int_t, class uint_t>
 class CInteger {
   public:
     using Base = DATATYPE;
+    using IBase = int_t;
     // using UBase = uint_t;
 
     CInteger() : nums(PROMOTE(0)) {}
     CInteger(int_t a) : nums(PROMOTE(a)) {}
-    CInteger(DATATYPE a) : nums(a) {
-        // nums.resize(SIZE_VEC);
-        // unorthogonalize_arithmetic(&a, (UBase*)nums.data(), 1);
+    CInteger(DATATYPE a) : nums(a) {}
+    CInteger(const Integer<int64_t, uint64_t>& other)  {
+        const auto& all = other.get_all();
+
+        if (all.size() == 1) {
+            nums = PROMOTE(all[0]);
+        } else {
+            assert(all.size() == SIZE_VEC);
+
+            orthogonalize_arithmetic((uint_t*)all.data(), &nums, 1);
+        }
     }
-    // CInteger(const std::vector<Base>& a) : nums(a) {}
     CInteger(const CInteger& other) : nums(other.nums) {}                // copy
     CInteger(CInteger&& other) noexcept : nums(std::move(other.nums)) {} // move
 
@@ -48,8 +56,6 @@ class CInteger {
     }
 
     CInteger& operator=(DATATYPE other) { // DATATYPE -> CINT
-        // nums.resize(SIZE_VEC);
-        // unorthogonalize_arithmetic(&other, (UBase*)nums.data(), 1);
         nums = other;
 
         return *this;
