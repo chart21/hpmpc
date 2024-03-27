@@ -1315,11 +1315,11 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
             for (int i = 0; i < regs[0]; ++i) {
                 p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN] =
                     p.sb_register[regs[2] + i / BIT_LEN][i % BIT_LEN].prepare_and(BitShare(
-                        ((p.cb_register[regs[3] + i / BIT_LEN] >> BitType::Base(i % BIT_LEN)) &
-                         BitType::Base(1))
+                        ((p.cb_register[regs[3] + i / BIT_LEN] >> BitType::IBase(i % BIT_LEN)) &
+                         BitType::IBase(1))
                             .get_type()));
             }
-            BitShare::communicate();
+            Share::communicate();
             for (int i = 0; i < regs[0]; ++i)
                 p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN].complete_and();
             return;
@@ -1516,7 +1516,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 }
             }
 
-            BitShare::communicate();
+            Share::communicate();
 
             for (size_t i = 0; i < regs.size(); i += 4) {
                 for (int j = 0; j < regs[i]; ++j) {
@@ -1535,7 +1535,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 long bits = std::min(cur, long(BIT_LEN));
                 auto num = ~p.cb_register[regs[1] + i];
                 p.cb_register[regs[0] + i] =
-                    bits == BIT_LEN ? num : num & BitType::Base((1lu << bits) - 1lu);
+                    bits == BIT_LEN ? num : num & BitType::IBase((1lu << bits) - 1lu);
                 cur -= BIT_LEN;
             }
             return;
@@ -1546,7 +1546,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 long bits = std::min(cur, long(BIT_LEN));
                 auto num = p.cb_register[regs[1] + i] ^ p.cb_register[regs[2] + i];
                 p.cb_register[regs[0] + i] =
-                    bits == BIT_LEN ? num : num & BitType::Base((1lu << bits) - 1lu);
+                    bits == BIT_LEN ? num : num & BitType::IBase((1lu << bits) - 1lu);
                 cur -= BIT_LEN;
             }
             return;
@@ -1556,19 +1556,19 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 p.cb_register[regs[1] + vec] + p.cb_register[regs[2] + vec];
             return;
         case Opcode::ADDCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] + BitType::Base(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] + BitType::IBase(int(n));
             break;
         case Opcode::MULCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] * BitType::Base(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] * BitType::IBase(int(n));
             break;
         case Opcode::XORCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] ^ BitType::Base(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] ^ BitType::IBase(int(n));
             break;
         case Opcode::SHRCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] >> BitType::Base(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] >> BitType::IBase(int(n));
             break;
         case Opcode::SHLCBI:
-            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] << BitType::Base(int(n));
+            p.cb_register[regs[0] + vec] = p.cb_register[regs[1] + vec] << BitType::IBase(int(n));
             break;
         case Opcode::REVEAL:
             for (size_t i = 0; i < regs.size(); i += 3) {
@@ -1577,7 +1577,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 }
             }
 
-            BitShare::communicate();
+            Share::communicate();
 
             for (size_t i = 0; i < regs.size(); i += 3) {
                 for (int j = 0; j < div_ceil(regs[i], BIT_LEN); ++j)
@@ -1600,7 +1600,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
 
             unsigned n_shift = 0;
             if (n > 1)
-                n_shift = sizeof(BitType::Base) * 8 - n;
+                n_shift = sizeof(BitType::IBase) * 8 - n;
             if (n_shift > 63)
                 n_shift = 0;
 
@@ -1610,7 +1610,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
 
                 unsigned n_shift = 0;
                 if (n > 1)
-                    n_shift = sizeof(BitType::Base) * 8 - n;
+                    n_shift = sizeof(BitType::IBase) * 8 - n;
                 if (n_shift > 63)
                     n_shift = 0;
 
@@ -1788,8 +1788,8 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
         case Opcode::CONVCBIT2S:
             for (int i = 0; i < int(n); ++i) {
                 p.sb_register[regs[0] + i / BIT_LEN][i % BIT_LEN] =
-                    ((p.cb_register[regs[1] + i / BIT_LEN] >> BitType::Base(i % BIT_LEN)) &
-                     BitType::Base(1))
+                    ((p.cb_register[regs[1] + i / BIT_LEN] >> BitType::IBase(i % BIT_LEN)) &
+                     BitType::IBase(1))
                         .get_type();
             }
             return;
@@ -1860,7 +1860,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 }
             }
 
-            BitShare::communicate();
+            Share::communicate();
 
             for (size_t i = 0; i < regs.size(); i += 4) {
                 int vec_size = regs[i];
@@ -1878,7 +1878,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::Instruction::execute(Program
                 }
             }
 
-            sint::communicate();
+            Share::communicate();
 
             for (size_t i = 0; i < regs.size(); i += 4) {
                 int vec_size = regs[i];
@@ -1970,7 +1970,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::inputbvec(const vector<int>&
         i += bits;
     }
 
-    BitShare::communicate();
+    Share::communicate();
 
     for (size_t i = 0; i < regs.size(); i += 3) {
         unsigned bits = regs[i] - 3;
@@ -2050,7 +2050,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::inputmixed(const vector<int>
         }
     }
 
-    sint::communicate();
+    Share::communicate();
 
     for (size_t i = 0; i < regs.size(); i += 3) {
         for (size_t offset = 0; offset < vec; ++offset) {
@@ -2100,7 +2100,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::popen(const vector<int>& reg
         }
     }
 
-    sint::communicate();
+    Share::communicate();
 
     for (size_t i = 0; i < regs.size(); i += 2)
         for (size_t vec = 0; vec < size; ++vec) {
@@ -2151,7 +2151,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::andrsvec(const vector<int>& 
         it += total - 2;
     }
 
-    BitShare::communicate();
+    Share::communicate();
 
     it = regs.begin();
     while (it < regs.end()) {
@@ -2186,7 +2186,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::matmulsm(const vector<int>& 
         }
     }
 
-    sint::communicate();
+    Share::communicate();
 
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
@@ -2231,7 +2231,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::matmuls(const vector<int>& r
         }
     }
 
-    sint::communicate();
+    Share::communicate();
 
     for (size_t vec = 0; vec < regs.size(); vec += 6) {
         const int& rows = regs[vec + 3];
@@ -2258,7 +2258,7 @@ void Program<cint, Share, sint, sbit, BitShare, N>::dotprods(const vector<int>& 
         }
     }
 
-    sint::communicate();
+    Share::communicate();
 
     for (size_t vec = 0; vec < size; ++vec) {
         for (auto it = regs.begin(); it != regs.end();) {
