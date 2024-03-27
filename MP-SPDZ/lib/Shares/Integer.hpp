@@ -16,19 +16,19 @@ namespace IR {
 template <class int_t, class uint_t>
 class Integer {
   public:
-    using Base = int_t;
+    using IBase = int_t;
     using UBase = uint_t;
 
     Integer() : nums{0} {}
-    Integer(Base a) : nums{a} {}
+    Integer(IBase a) : nums{a} {}
     Integer(DATATYPE a) : nums() {
         std::vector<UINT_TYPE> tmp;
         tmp.resize(SIZE_VEC);
-        unorthogonalize_arithmetic(&a, tmp.data(), 1);
+        unorthogonalize_arithmetic(&a, tmp.data());
         for (const auto& ele : tmp)
             nums.push_back(INT_TYPE(ele));
     }
-    Integer(const std::vector<Base>& a) : nums(a) {}
+    Integer(const std::vector<IBase>& a) : nums(a) {}
     Integer(const Integer& other) : nums(other.nums) {}                // copy
     Integer(Integer&& other) noexcept : nums(std::move(other.nums)) {} // move
 
@@ -46,7 +46,7 @@ class Integer {
         return *this;
     }
 
-    Integer& operator=(const Base& other) { // Base assignable
+    Integer& operator=(const IBase& other) { // Base assignable
         nums.clear();
         nums.push_back(other);
 
@@ -67,8 +67,8 @@ class Integer {
     Integer operator==(const Integer& other) const;
     Integer operator<(const Integer& other) const;
     Integer operator>(const Integer& other) const;
-    Integer operator<(const Base& other) const;
-    Integer operator==(const Base& other) const;
+    Integer operator<(const IBase& other) const;
+    Integer operator==(const IBase& other) const;
 
     Integer operator&(const Integer& other) const;
     Integer& operator&=(const Integer& other);
@@ -82,7 +82,7 @@ class Integer {
     Integer operator<<(const Integer& other) const;
     Integer operator>>(const Integer& other) const;
 
-    inline Base& get() { return nums[0]; }
+    inline IBase& get() { return nums[0]; }
     std::vector<INT_TYPE> get_all() const {
         std::vector<INT_TYPE> res(0);
         for (const auto& ele : nums)
@@ -103,21 +103,21 @@ class Integer {
         }
     }
 
-    void add(const Base& a) { nums.push_back(a); }
+    void add(const IBase& a) { nums.push_back(a); }
 
     size_t size() const { return nums.size(); }
 
   private:
-    alignas(DATATYPE) std::vector<Base> nums;
+    alignas(DATATYPE) std::vector<IBase> nums;
 
-    Base plus(const UBase& a, const UBase& other) const;
-    Base minus(const Base& a, const Base& other) const;
+    IBase plus(const UBase& a, const UBase& other) const;
+    IBase minus(const IBase& a, const IBase& other) const;
 };
 
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator+(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
 
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
@@ -133,17 +133,17 @@ Integer<int_t, uint_t>::operator+(const Integer<int_t, uint_t>& other) const {
 }
 
 template <class int_t, class uint_t>
-Integer<int_t, uint_t>::Base Integer<int_t, uint_t>::plus(const UBase& a,
+Integer<int_t, uint_t>::IBase Integer<int_t, uint_t>::plus(const UBase& a,
                                                           const UBase& other) const {
     if (a >= 0) {
-        Base diff = std::numeric_limits<Base>::max() - a;
+        IBase diff = std::numeric_limits<IBase>::max() - a;
         if (diff < other) {
-            return std::numeric_limits<Base>::min() + other - 1 - diff;
+            return std::numeric_limits<IBase>::min() + other - 1 - diff;
         }
     } else {
-        Base diff = std::numeric_limits<Base>::min() - a;
+        IBase diff = std::numeric_limits<IBase>::min() - a;
         if (other < diff) {
-            return std::numeric_limits<Base>::max() + other + 1 - diff;
+            return std::numeric_limits<IBase>::max() + other + 1 - diff;
         }
     }
     return a + other;
@@ -151,7 +151,7 @@ Integer<int_t, uint_t>::Base Integer<int_t, uint_t>::plus(const UBase& a,
 
 template <class int_t, class uint_t>
 Integer<int_t, uint_t> Integer<int_t, uint_t>::operator-() const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     for (const auto& ele : nums)
         res.add(-ele);
     return res;
@@ -160,7 +160,7 @@ Integer<int_t, uint_t> Integer<int_t, uint_t>::operator-() const {
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator-(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
             res.add(minus(nums[i], other.nums[i]));
@@ -175,15 +175,15 @@ Integer<int_t, uint_t>::operator-(const Integer<int_t, uint_t>& other) const {
 }
 
 template <class int_t, class uint_t>
-Integer<int_t, uint_t>::Base Integer<int_t, uint_t>::minus(const Base& a, const Base& other) const {
-    if ((other > 0 && a < std::numeric_limits<Base>::min() + other) ||
-        (other < 0 && a > std::numeric_limits<Base>::max() + other)) {
+Integer<int_t, uint_t>::IBase Integer<int_t, uint_t>::minus(const IBase& a, const IBase& other) const {
+    if ((other > 0 && a < std::numeric_limits<IBase>::min() + other) ||
+        (other < 0 && a > std::numeric_limits<IBase>::max() + other)) {
         if (other > 0) { // underflow
-            Base diff = std::numeric_limits<Base>::min() - a;
-            return std::numeric_limits<Base>::max() - (other - 1 + diff);
+            IBase diff = std::numeric_limits<IBase>::min() - a;
+            return std::numeric_limits<IBase>::max() - (other - 1 + diff);
         } else { // overflow
-            Base diff = std::numeric_limits<Base>::max() - a;
-            return std::numeric_limits<Base>::min() - (other + 1 + diff);
+            IBase diff = std::numeric_limits<IBase>::max() - a;
+            return std::numeric_limits<IBase>::min() - (other + 1 + diff);
         }
     }
     return a - other;
@@ -192,7 +192,7 @@ Integer<int_t, uint_t>::Base Integer<int_t, uint_t>::minus(const Base& a, const 
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator*(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
             res.add(UBase(nums[i]) * other.nums[i]);
@@ -211,7 +211,7 @@ Integer<int_t, uint_t>::operator*(const Integer<int_t, uint_t>& other) const {
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator/(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i) {
             if (other.nums[i] == 0) {
@@ -224,11 +224,11 @@ Integer<int_t, uint_t>::operator/(const Integer<int_t, uint_t>& other) const {
         if (other.nums[0] == 0) {
             res.add(0);
         } else {
-            for (const Base& ele : nums)
+            for (const IBase& ele : nums)
                 res.add(ele / other.nums[0]);
         }
     } else {
-        for (const Base& ele : other.nums) {
+        for (const IBase& ele : other.nums) {
             if (ele == 0) {
                 res.add(0);
             } else {
@@ -244,7 +244,7 @@ Integer<int_t, uint_t>::operator/(const Integer<int_t, uint_t>& other) const {
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator%(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i) {
             if (other.nums[i] == 0) {
@@ -277,7 +277,7 @@ Integer<int_t, uint_t>::operator%(const Integer<int_t, uint_t>& other) const {
 
 template <class int_t, class uint_t>
 Integer<int_t, uint_t> Integer<int_t, uint_t>::operator~() const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     for (const UBase& ele : nums)
         res.add(~ele);
     // UBase b(a);
@@ -289,7 +289,7 @@ Integer<int_t, uint_t> Integer<int_t, uint_t>::operator~() const {
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator&(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
             res.add(nums[i] & other.nums[i]);
@@ -326,7 +326,7 @@ Integer<int_t, uint_t>& Integer<int_t, uint_t>::operator&=(const Integer<int_t, 
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator^(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
 
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
@@ -363,7 +363,7 @@ Integer<int_t, uint_t>& Integer<int_t, uint_t>::operator^=(const Integer<int_t, 
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator|(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; nums.size(); ++i)
             res.add(nums[i] | other.nums[i]);
@@ -399,7 +399,7 @@ Integer<int_t, uint_t>& Integer<int_t, uint_t>::operator|=(const Integer<int_t, 
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator<<(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
             res.add(nums[i] << other.nums[i]);
@@ -417,7 +417,7 @@ Integer<int_t, uint_t>::operator<<(const Integer<int_t, uint_t>& other) const {
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator>>(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
             res.add(UBase(nums[i]) >> other.nums[i]);
@@ -438,7 +438,7 @@ Integer<int_t, uint_t>::operator>>(const Integer<int_t, uint_t>& other) const {
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator==(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
             res.add(nums[i] == other.nums[i]);
@@ -455,7 +455,7 @@ Integer<int_t, uint_t>::operator==(const Integer<int_t, uint_t>& other) const {
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator<(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
             res.add(nums[i] < other.nums[i]);
@@ -472,7 +472,7 @@ Integer<int_t, uint_t>::operator<(const Integer<int_t, uint_t>& other) const {
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>
 Integer<int_t, uint_t>::operator>(const Integer<int_t, uint_t>& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     if (nums.size() == other.nums.size()) {
         for (size_t i = 0; i < nums.size(); ++i)
             res.add(nums[i] > other.nums[i]);
@@ -487,16 +487,16 @@ Integer<int_t, uint_t>::operator>(const Integer<int_t, uint_t>& other) const {
 }
 
 template <class int_t, class uint_t>
-Integer<int_t, uint_t> Integer<int_t, uint_t>::operator<(const Base& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+Integer<int_t, uint_t> Integer<int_t, uint_t>::operator<(const IBase& other) const {
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     for (const auto& ele : nums)
         res.add(ele < other);
     return res;
 }
 
 template <class int_t, class uint_t>
-Integer<int_t, uint_t> Integer<int_t, uint_t>::operator==(const Base& other) const {
-    Integer<int_t, uint_t> res(std::vector<Base>(0));
+Integer<int_t, uint_t> Integer<int_t, uint_t>::operator==(const IBase& other) const {
+    Integer<int_t, uint_t> res(std::vector<IBase>(0));
     for (const auto& ele : nums)
         res.add(ele == other);
     return res;

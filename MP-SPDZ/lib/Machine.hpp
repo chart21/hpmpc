@@ -45,7 +45,7 @@ struct Timer {
     std::chrono::time_point<std::chrono::high_resolution_clock> cur;
 };
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N = 64>
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N = 64>
 class Machine {
   public:
     explicit Machine(std::string&& path);
@@ -57,7 +57,7 @@ class Machine {
     thread& run_tape(const unsigned& tape, const int& arg);
 
     /* main method for each thread */
-    inline static void execute(Machine& m, Program<Share, sint, sbit, BitShare, N>& p, int arg) {
+    inline static void execute(Machine& m, Program<cint, Share, sint, sbit, BitShare, N>& p, int arg) {
         p.run(m, arg);
     }
 
@@ -65,7 +65,7 @@ class Machine {
                         const unsigned& addr); // required while parsing to get memory size
 
     vector<sint> s_mem;
-    vector<CInteger<INT_TYPE, UINT_TYPE>> c_mem;
+    vector<cint> c_mem;
     vector<Integer<int64_t, uint64_t>> ci_mem;
     vector<sbit<N, BitShare>> sb_mem;
 #if BITLENGTH == 64
@@ -83,7 +83,7 @@ class Machine {
     Input public_input;
 
   private:
-    vector<Program<Share, sint, sbit, BitShare, N>> progs; // all bytecode-files
+    vector<Program<cint, Share, sint, sbit, BitShare, N>> progs; // all bytecode-files
     vector<thread> tapes;                           // all threads running the VM
 
     unsigned max_mem[REG_TYPES]; // save max value -> size of memory
@@ -91,13 +91,13 @@ class Machine {
     std::map<int, Timer> timer;
 };
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-Machine<Share, sint, sbit, BitShare, N>::Machine(std::string&& path) : max_mem(), loaded(false) {
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+Machine<cint, Share, sint, sbit, BitShare, N>::Machine(std::string&& path) : max_mem(), loaded(false) {
     load_schedule(std::move(path));
 }
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Machine<Share, sint, sbit, BitShare, N>::load_schedule(std::string&& path) {
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<cint, Share, sint, sbit, BitShare, N>::load_schedule(std::string&& path) {
     std::ifstream file(SCHEDULES_PATH + path);
 
     if (not file.is_open()) {
@@ -145,8 +145,8 @@ void Machine<Share, sint, sbit, BitShare, N>::load_schedule(std::string&& path) 
     }
 }
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Machine<Share, sint, sbit, BitShare, N>::setup() {
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<cint, Share, sint, sbit, BitShare, N>::setup() {
     c_mem.resize(max_mem[static_cast<unsigned>(Type::CINT)]);
     s_mem.resize(max_mem[static_cast<unsigned>(Type::SINT)]);
     ci_mem.resize(max_mem[static_cast<unsigned>(Type::INT)]);
@@ -157,8 +157,8 @@ void Machine<Share, sint, sbit, BitShare, N>::setup() {
         prog.setup();
 }
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Machine<Share, sint, sbit, BitShare, N>::run() {
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<cint, Share, sint, sbit, BitShare, N>::run() {
     if (progs.size() == 0 || not loaded) {
         return;
     }
@@ -170,16 +170,16 @@ void Machine<Share, sint, sbit, BitShare, N>::run() {
     cur.join();
 }
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-thread& Machine<Share, sint, sbit, BitShare, N>::run_tape(const unsigned& tape, const int& arg) {
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+thread& Machine<cint, Share, sint, sbit, BitShare, N>::run_tape(const unsigned& tape, const int& arg) {
     if (progs.size() <= tape)
         log(Level::ERROR, "can't run tape: ", tape);
 
     return tapes.emplace_back(execute, std::ref(*this), std::ref(progs[tape]), arg);
 }
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Machine<Share, sint, sbit, BitShare, N>::update_max_mem(const Type& type, const unsigned& addr) {
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<cint, Share, sint, sbit, BitShare, N>::update_max_mem(const Type& type, const unsigned& addr) {
     size_t i = static_cast<size_t>(type);
 
     if (max_mem[i] < addr) {
@@ -187,20 +187,20 @@ void Machine<Share, sint, sbit, BitShare, N>::update_max_mem(const Type& type, c
     }
 }
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Machine<Share, sint, sbit, BitShare, N>::start(const int& index) {
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<cint, Share, sint, sbit, BitShare, N>::start(const int& index) {
     timer[index].start();
     get_out() << "starting timer " << index << " at 0\n";
 }
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Machine<Share, sint, sbit, BitShare, N>::stop(const int& index) {
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<cint, Share, sint, sbit, BitShare, N>::stop(const int& index) {
     auto res = timer[index].stop();
     get_out() << "stopping timer " << index << " at " << res << "\n";
 }
 
-template <class Share, class sint, template <int, class> class sbit, class BitShare, int N>
-void Machine<Share, sint, sbit, BitShare, N>::time() const {
+template <class cint, class Share, class sint, template <int, class> class sbit, class BitShare, int N>
+void Machine<cint, Share, sint, sbit, BitShare, N>::time() const {
     auto res = timer.at(0).get_time();
     get_out() << "Elapsed time: " << res << "\n";
 }
