@@ -373,6 +373,66 @@ static void complete_A2B_S2(int k, OEC_MAL0_Share out[])
 
 }
 
+void prepare_opt_bit_injection(OEC_MAL0_Share x[], OEC_MAL0_Share out[])
+{
+    Datatype y0[BITLENGTH]{0};
+    y0[BITLENGTH - 1] = r; //convert b to an arithemtic value
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(y0, temp2);
+    orthogonalize_arithmetic(temp2, y0);
+    Datatype b0v[BITLENGTH]{0};
+    b0v[BITLENGTH - 1] = FUNC_XOR(v,r); //convert b0v to an arithemtic value
+    unorthogonalize_boolean(b0v, temp2);
+    orthogonalize_arithmetic(temp2, b0v);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        Datatype r013 = getRandomVal(P_013);
+        Datatype r013_2 = getRandomVal(P_013);
+        Datatype m00 = OP_SUB(y0[i], r013);
+        Datatype m01 = OP_SUB(OP_MULT(x[i].r, y0[i]), r013_2);
+#if PROTOCOL != 12
+#if PRE == 1
+        pre_send_to_live(P_2, m00);
+        pre_send_to_live(P_2, m01);
+#else
+        send_to_live(P_2, m00);
+        send_to_live(P_2, m01);
+#endif
+#else
+        store_compare_view(P_2, m00);
+        store_compare_view(P_2, m01);
+#endif
+
+#if PRE == 1
+        Datatype m30 = pre_receive_from_live(P_3);
+        Datatype m31 = pre_receive_from_live(P_3);
+#else
+        Datatype m30 = receive_from_live(P_3);
+        Datatype m31 = receive_from_live(P_3);
+#endif 
+        Datatype a0u = OP_ADD(x[i].v, x[i].r); // set share to a_0 + u
+        Datatype c0w = OP_MULT(a0u, b0v[i]);
+        Datatype tmp = OP_SUB(OP_ADD(b0v[i], b0v[i]), PROMOTE(1));
+        tmp = OP_MULT(tmp, OP_SUB(m31, OP_MULT(a0u, m30)));
+        tmp = OP_SUB(tmp, OP_MULT(b0v[i], a[i].p2));
+        c0w = OP_ADD(c0w, tmp);
+        out[i].v = c0w;
+        out[i].r = OP_ADD(getRandomVal(P_013), getRandomVal(P_023));
+    }
+}
+
+void complete_opt_bit_injection()
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        Datatype m20 = receive_from_live(P_2);
+        store_compare_view(P_1, m20);
+        out[i].v = OP_ADD(out[i].v, m20);
+        store_compare_view(P_012, out[i].v);
+        out[i].v = OP_SUB(out[i].v, out[i].r);
+    }
+}
+
 void prepare_bit_injection_S1(OEC_MAL0_Share out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
