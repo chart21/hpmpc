@@ -18,6 +18,13 @@ public:
         init(temp_u);
         }
 
+    sbitset_t(UINT_TYPE value[DATTYPE]) {
+        DATATYPE temp_d[BITLENGTH];
+        orthogonalize_boolean(value, temp_d);
+        for (int i = 0; i < k; i++) 
+          shares[i] = Share(temp_d[i]);
+        }
+
     template<int id>
     sbitset_t(UINT_TYPE value[DATTYPE]) {
                 init(value);
@@ -87,6 +94,14 @@ public:
         sbitset_t result;
         for(int i = 0; i < k; ++i) {
             result[i] = shares[i].prepare_and(other[i]);
+        }
+        return result;
+        }
+
+        sbitset_t and_public(const UINT_TYPE other) const {
+        sbitset_t result;
+        for(int i = 0; i < k; ++i) {
+            result[i] = shares[i].and_public(other);
         }
         return result;
         }

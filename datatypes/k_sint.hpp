@@ -23,6 +23,10 @@ public:
         init(temp_u);
         }
 
+    sint_t(DATATYPE value[BITLENGTH]) {
+        for (int i = 0; i < BITLENGTH; i++) 
+          shares[i] = Share::public_val(value[i]);
+        }
 
     template<int id>
     sint_t(UINT_TYPE value[DATTYPE]) {
@@ -171,6 +175,16 @@ public:
         return result;
         }
 
+        sint_t prepare_mult_public_fixed_dat(const DATATYPE other) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i].prepare_mult_public_fixed_dat(other);
+        }
+        return result;
+        }
+
+        
+
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {
             shares[i].prepare_mult_public_fixed(other);
@@ -187,6 +201,14 @@ public:
         sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
             result[i] = shares[i].mult_public(other);
+        }
+        return result;
+        }
+
+        sint_t mult_public_dat(const DATATYPE other) const {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i].mult_public_dat(other);
         }
         return result;
         }
@@ -326,6 +348,11 @@ public:
 
         void complete_bit_injection_S1() {
             Share::complete_bit_injection_S1(shares);
+        }
+
+        void complete_opt_bit_injection() {
+            for(int i = 0; i < BITLENGTH; ++i) 
+                shares[i].complete_opt_bit_injection();
         }
 
         void mask_and_send_dot()

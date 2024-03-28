@@ -15,6 +15,10 @@ public:
         *this = Share_Type::public_val(PROMOTE(a));
     }
 
+    Additive_Share get_share_from_public_dat(Datatype a) {
+        return Share_Type::public_val(a);
+    }
+
     Additive_Share operator+(const Additive_Share<Datatype,Share_Type>& b) const
     {
         return Additive_Share(Share_Type::Add(b, OP_ADD));
@@ -55,10 +59,20 @@ public:
     {
         return Additive_Share(Share_Type::mult_public(PROMOTE(b), OP_MULT));
     }
+    
+    Additive_Share mult_public_dat(const Datatype b) const
+    {
+        return Additive_Share(Share_Type::mult_public(b, OP_MULT));
+    }
 
     void prepare_mult_public_fixed(const UINT_TYPE b)
     {
         *this = Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
+    }
+
+    void prepare_mult_public_fixed_dat(const Datatype b)
+    {
+        *this = Share_Type::prepare_mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
     }
 
     void complete_public_mult_fixed()

@@ -41,6 +41,11 @@ public:
         return XOR_Share(Share_Type::prepare_mult(b, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }
 
+    XOR_Share and_public(const Datatype& b) const
+    {
+        return XOR_Share(Share_Type::mult_public(b, std::bit_and<Datatype>()));
+    }
+
     void complete_and()
     {
 #if PROTOCOL == 1 // Sharemind needs custom overload

@@ -189,6 +189,19 @@ static void complete_A2B_S2( int k, OECL1_init out[])
 
 }
 
+void prepare_opt_bit_injection(OECL1_init x[], OECL1_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        send_to_(P_2);
+    }
+}
+
+void complete_opt_bit_injection()
+{
+        receive_from_(P_2);
+}
+
 void prepare_bit_injection_S1( OECL1_init out[])
 {
 }

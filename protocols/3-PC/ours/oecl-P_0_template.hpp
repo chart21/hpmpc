@@ -333,6 +333,35 @@ static void complete_A2B_S2(int k, OECL0_Share out[])
 
 }
 
+void prepare_opt_bit_injection(OECL0_Share x[], OECL0_Share out[])
+{
+    Datatype y0[BITLENGTH]{0};
+    y0[BITLENGTH - 1] = FUNC_XOR(p1,p2); //convert b to an arithemtic value
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(y0, temp2);
+    orthogonalize_arithmetic(temp2, y0);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        Datatype r01 = getRandomVal(P_1);
+        Datatype r01_2 = getRandomVal(P_1);
+        Datatype m00 = OP_SUB(y0[i], r01);
+        Datatype m01 = OP_SUB(OP_MULT(OP_ADD(x[i].p1,x[i].p2), y0[i]), r01_2);
+#if PRE == 1
+        pre_send_to_live(P_2, m00);
+        pre_send_to_live(P_2, m01);
+#else
+        send_to_live(P_2, m00);
+        send_to_live(P_2, m01);
+#endif
+        out[i].p1 = getRandomVal(P_2); // set share to z_2
+        out[i].p2 = getRandomVal(P_1); // set other share to z_1
+    }
+}
+
+void complete_opt_bit_injection()
+{
+}
+
 void prepare_bit_injection_S1(OECL0_Share out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
@@ -363,6 +392,8 @@ void prepare_bit_injection_S2(OECL0_Share out[])
         
     }
 }
+
+
 
 static void complete_bit_injection_S1(OECL0_Share out[])
 {
