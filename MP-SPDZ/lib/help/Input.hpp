@@ -127,7 +127,7 @@ std::array<int, SIZE_VEC> next_input(const int& player_num, const int& thread_id
     for (size_t cur = 0; cur < SIZE_VEC; cur++) {
         auto in = get_input_from(player_num, cur);
         if (in == inputs.end()) {
-            inputs.emplace_back(ROOT_DIR + "/Input-P" + std::to_string(player_num) + "-" +
+            inputs.emplace_back(INPUT_PATH + "Input-P" + std::to_string(player_num) + "-" +
                                     std::to_string(thread_id) + "-" + std::to_string(cur),
                                 player_num, cur);
             in = inputs.end() - 1;
@@ -149,7 +149,7 @@ std::array<float, SIZE_VEC> next_input_f(const int& player_num, const int& threa
     for (size_t cur = 0; cur < SIZE_VEC; ++cur) {
         auto in = get_input_from(player_num, 0);
         if (in == inputs.end()) {
-            inputs.emplace_back(ROOT_DIR + "/Input-P" + std::to_string(player_num) + "-" +
+            inputs.emplace_back(INPUT_PATH + "Input-P" + std::to_string(player_num) + "-" +
                                     std::to_string(thread_id) + "-" + std::to_string(cur),
                                 player_num, 0);
             in = inputs.end() - 1;
