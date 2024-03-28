@@ -51,7 +51,7 @@
 #define PRINT_TIMINGS 1
 #define PRINT_IMPORTANT 1
 
-#define FRACTIONAL 5
+#define FRACTIONAL 5 // fractional bits for fixed point numbers
 
 #define SRNG_SEED 0 // Seed for the random number generator.
 

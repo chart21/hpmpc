@@ -162,16 +162,25 @@ std::array<float, SIZE_VEC> next_input_f(const int& player_num, const int& threa
     return res;
 }
 
-uint8_t get_next_bit(const int& player_id) {
+static std::queue<DATATYPE> bit_queue;
+
+DATATYPE get_next_bit(const int& player_id) {
     if (current_phase == PHASE_INIT || player_id != PARTY)
         return 0;
 
     if (bit_queue.empty()) {
-        auto input = next_input_f(player_id, 0)[0];
-        long in = std::round(input);
+        auto input = next_input_f(player_id, 0);
+        std::vector<UINT_TYPE> tmp;
+        tmp.reserve(DATTYPE/BITLENGTH);
 
         for (size_t i = 0; i < BITLENGTH; i++) {
-            bit_queue.push((in >> i) & 1);
+            for (const auto& ele : input) {
+                tmp.push_back((UINT_TYPE(std::round(ele)) >> i) & 1u);
+            }
+            DATATYPE dat;
+            orthogonalize_arithmetic((UINT_TYPE*)tmp.data(), &dat, 1);
+            bit_queue.push(dat);
+            tmp.clear();
         }
     }
 
