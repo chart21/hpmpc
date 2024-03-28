@@ -24,7 +24,7 @@
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 80
+#define NUM_INPUTS 100
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -48,7 +48,7 @@
 #define PRINT 0
 #define PRINT_TIMINGS 0
 
-#define FRACTIONAL 5 // fractional bits for fixed point numbers
+#define FRACTIONAL 5
 
 // Starting port for required port range of the sockets, must be multiple of 1000 for some applications
 #define BASE_PORT 10000
@@ -163,9 +163,9 @@ int base_port = BASE_PORT; // temporary solution
 #endif
 
 
-#define TRUNC_THEN_MULT 0 // 0 = mult then trunc, 1 = trunc then mult
-#define TRUNC_APPROACH 0 // 0: cut, 1: interactive
-#define TRUNC_DELAYED 0 // 0: truncate after each fixed point multiplication, 1: truncate after next ReLU (might produce errors in some networks)
+#define TRUNC_THEN_MULT 0
+#define TRUNC_APPROACH 0
+#define TRUNC_DELAYED 0
 #define COMPUTE_ARGMAX 0 // 0: skip final argmax during inference, 1: Compute final argmax during inference
 #define PUBLIC_WEIGHTS 0 // 0: weights are secretly shared, 1: weights are public
 

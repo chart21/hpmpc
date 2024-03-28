@@ -117,9 +117,60 @@ void inference(DATATYPE* res)
     cfg.save_dir = "./SimpleNN/model_zoo";
     cfg.data_dir = "./SimpleNN/dataset";
     /* cfg.pretrained = "dummy.dummy"; */
-    cfg.pretrained = "vgg16_cifar.bin";
-    cfg.image_file = "cifar10-test-images.bin";
-    cfg.label_file = "cifar10-test-labels.bin";
+    /* cfg.pretrained = "old/vgg16_cifar.bin"; */
+    /* cfg.image_file = "old/cifar10-test-images.bin"; */
+    /* cfg.label_file = "old/cifar10-test-labels.bin"; */
+    cfg.pretrained = "VGG16_CIFAR-10_standard_best.bin";
+    cfg.image_file = "CIFAR-10_standard_test_images.bin";
+    cfg.label_file = "CIFAR-10_standard_test_labels.bin";
+    
+    //read details from file instead
+    /* auto file = fopen("config.txt", "r"); */
+    /* if (file == NULL) { */
+    /*     std::cout << "Error opening file" << std::endl; */
+    /*     exit(1); */
+    /* } */
+    /* char line[256]; */
+    /* while (fgets(line, sizeof(line), file)) { */
+    /*     char* token = strtok(line, "="); */
+    /*     if (strcmp(token, "mode") == 0) { */
+    /*         token = strtok(NULL, "="); */
+    /*         cfg.mode = token; */
+    /*     } */
+    /*     else if (strcmp(token, "save_dir") == 0) { */
+    /*         token = strtok(NULL, "="); */
+    /*         cfg.save_dir = token; */
+    /*     } */
+    /*     else if (strcmp(token, "data_dir") == 0) { */
+    /*         token = strtok(NULL, "="); */
+    /*         cfg.data_dir = token; */
+    /*     } */
+    /*     else if (strcmp(token, "pretrained") == 0) { */
+    /*         token = strtok(NULL, "="); */
+    /*         cfg.pretrained = token; */
+    /*     } */
+    /*     else if (strcmp(token, "image_file") == 0) { */
+    /*         token = strtok(NULL, "="); */
+    /*         cfg.image_file = token; */
+    /*     } */
+    /*     else if (strcmp(token, "label_file") == 0) { */
+    /*         token = strtok(NULL, "="); */
+    /*         cfg.label_file = token; */
+    /*     } */
+    /* } */
+    /* std::cout << "Mode: " << cfg.mode << std::endl; */
+    /* std::cout << "Save Directory: " << cfg.save_dir << std::endl; */
+    /* std::cout << "Data Directory: " << cfg.data_dir << std::endl; */
+    /* std::cout << "Pretrained Model: " << cfg.pretrained << std::endl; */
+    /* std::cout << "Image File: " << cfg.image_file << std::endl; */
+    /* std::cout << "Label File: " << cfg.label_file << std::endl; */
+
+
+    /* fclose(file); */
+    //file should look like this:
+    //mode=test
+    //save_dir=./SimpleNN/model_zoo
+
     cfg.batch = NUM_INPUTS*(BASE_DIV);
     
 

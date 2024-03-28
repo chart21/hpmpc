@@ -1,0 +1,7 @@
+    mode=test
+    save_dir=SimpleNN/model_zoo
+    data_dir=SimpleNN/dataset
+    pretrained=old/vgg16_cifar.bin
+    image_file=CIFAR-10_standard_test_images.bin
+    label_file=CIFAR-10_standard_test_labels.bin
+
