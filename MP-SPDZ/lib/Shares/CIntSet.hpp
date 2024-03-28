@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "Integer.hpp"
+
 using std::vector;
 
 #ifndef BITLENGTH
@@ -13,7 +15,7 @@ namespace IR {
 
 template <class cint, size_t LENGTH = BITLENGTH>
 class CIntSet {
-    public:
+  public:
     CIntSet() : nums(LENGTH) {}
 
     CIntSet(const vector<DATATYPE>& vec) {
@@ -66,7 +68,7 @@ class CIntSet {
 
         DATATYPE tmp[LENGTH];
         orthogonalize_arithmetic((UINT_TYPE*)other.data(), tmp);
-        
+
         for (size_t i = 0; i < LENGTH; ++i)
             nums.push_back(tmp[i]);
 
@@ -84,10 +86,10 @@ class CIntSet {
             nums.push_back(ele);
         // nums.clear();
         // nums.reserve(LENGTH);
-        // 
+        //
         // for (size_t i = 0; i < LENGTH; ++i)
         //     nums.push_back(other);
-// 
+        //
         return *this;
     }
 
@@ -118,7 +120,6 @@ class CIntSet {
         for (size_t i = 0; i < LENGTH; ++i)
             set[i] = nums[i] * other.nums[i];
         return set;
-
     }
     CIntSet operator/(const CIntSet& other) const {
         CIntSet set;
@@ -204,7 +205,7 @@ class CIntSet {
         for (size_t i = 0; i < BITLENGTH; ++i) {
             res[i] = nums[i] < other.nums[i];
         }
-        
+
         return res;
     }
     CIntSet operator>(const CIntSet& other) const {
@@ -213,7 +214,7 @@ class CIntSet {
         for (size_t i = 0; i < BITLENGTH; ++i) {
             res[i] = nums[i] > other.nums[i];
         }
-        
+
         return res;
     }
     CIntSet operator<(const cint::IBase& other) const {
@@ -222,7 +223,7 @@ class CIntSet {
         for (size_t i = 0; i < BITLENGTH; ++i) {
             res[i] = nums[i] < other;
         }
-        
+
         return res;
     }
 
@@ -232,11 +233,11 @@ class CIntSet {
         for (size_t i = 0; i < BITLENGTH; ++i) {
             res[i] = nums[i] == other;
         }
-        
+
         return res;
     }
 
-private:
+  private:
     vector<cint> nums;
 };
 

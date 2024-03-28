@@ -117,11 +117,26 @@ class CInteger {
 
     size_t size() const { return SIZE_VEC; }
 
-    CInteger operator==(const CInteger& other) const { log(Level::ERROR, "unsupported operation"); return CInteger(); }
-    CInteger operator<(const CInteger& other) const { log(Level::ERROR, "unsupported operation"); return CInteger(); }
-    CInteger operator>(const CInteger& other) const { log(Level::ERROR, "unsupported operation"); return CInteger(); }
-    CInteger operator<(const IBase& other) const { log(Level::ERROR, "unsupported operation"); return CInteger(); }
-    CInteger operator==(const IBase& other) const { log(Level::ERROR, "unsupported operation"); return CInteger(); }
+    CInteger operator==(const CInteger& other) const {
+        log(Level::ERROR, "unsupported operation");
+        return CInteger();
+    }
+    CInteger operator<(const CInteger& other) const {
+        log(Level::ERROR, "unsupported operation");
+        return CInteger();
+    }
+    CInteger operator>(const CInteger& other) const {
+        log(Level::ERROR, "unsupported operation");
+        return CInteger();
+    }
+    CInteger operator<(const IBase& other) const {
+        log(Level::ERROR, "unsupported operation");
+        return CInteger();
+    }
+    CInteger operator==(const IBase& other) const {
+        log(Level::ERROR, "unsupported operation");
+        return CInteger();
+    }
 
   private:
     Base nums;
