@@ -47,7 +47,7 @@
 #define PRINT 0
 #define PRINT_TIMINGS 0
 
-#define FRACTIONAL 5
+#define FRACTIONAL 5 // fractional bits for fixed point numbers
 
 // Starting port for required port range of the sockets, must be multiple of 1000 for some applications
 #define BASE_PORT 10000

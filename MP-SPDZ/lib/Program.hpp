@@ -1349,7 +1349,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                 idxs.push_back(regs[i]); // dest
             }
             sint* res = new sint[input.size()];
-            trunc_pr<sint>(input.data(), res, input.size()); // TODO
+            trunc_pr<sint>(input.data(), res, input.size());
 
             for (size_t i = 0; i < idxs.size(); ++i) {
                 for (size_t j = 0; j < get_size(); ++j)
@@ -1956,13 +1956,13 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputbvec(const vecto
                 log(Level::ERROR, "input is too big");
             switch (regs[i + 2]) {
             case 0:
-                sb_register[regs[i + 3 + j]][0].template prepare_receive_from<P_0>();
+                sb_register[regs[i + 3 + j]][0].template prepare_receive_from<P_0>(input);
                 break;
             case 1:
-                sb_register[regs[i + 3 + j]][0].template prepare_receive_from<P_1>();
+                sb_register[regs[i + 3 + j]][0].template prepare_receive_from<P_1>(input);
                 break;
             case 2:
-                sb_register[regs[i + 3 + j]][0].template prepare_receive_from<P_2>();
+                sb_register[regs[i + 3 + j]][0].template prepare_receive_from<P_2>(input);
                 break;
             }
         }

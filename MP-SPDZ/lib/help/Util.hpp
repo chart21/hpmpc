@@ -51,6 +51,4 @@ inline uint64_t div_ceil(const uint64_t& a, const uint64_t& b) {
     return a == 0lu ? 0lu : 1lu + ((a - 1lu) / b);
 }
 
-static std::queue<uint8_t> bit_queue;
-
 } // namespace IR
