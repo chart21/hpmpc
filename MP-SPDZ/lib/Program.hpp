@@ -1444,7 +1444,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             return;
         case Opcode::PUBINPUT:
             if (!m.public_input.is_open())
-                m.public_input.open_input_file(ROOT_DIR + "/PUB-INPUT");
+                m.public_input.open_input_file(INPUT_PATH + "PUB-INPUT");
 
             p.c_register[regs[0] + vec] = PROMOTE(m.public_input.template next<int>(
                 [](const std::string& s) -> int { return std::stoi(s.c_str(), nullptr, 10); }));

@@ -11,6 +11,7 @@ inline constexpr unsigned int REG_TYPES = 9;
 inline const std::string ROOT_DIR = "MP-SPDZ";
 inline const std::string SCHEDULES_PATH = ROOT_DIR + "/Schedules/";
 inline const std::string BYTECODE_PATH = ROOT_DIR + "/Bytecodes/";
+inline const std::string INPUT_PATH = ROOT_DIR + "/Input/";
 
 constexpr size_t SIZE_VEC = DATTYPE / BITLENGTH;
 
