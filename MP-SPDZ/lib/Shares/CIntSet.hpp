@@ -60,6 +60,19 @@ class CIntSet {
         return *this;
     }
 
+    CIntSet& operator=(const vector<UINT_TYPE>& other) {
+        nums.clear();
+        nums.reserve(LENGTH);
+
+        DATATYPE tmp[LENGTH];
+        orthogonalize_arithmetic((UINT_TYPE*)other.data(), tmp);
+        
+        for (size_t i = 0; i < LENGTH; ++i)
+            nums.push_back(tmp[i]);
+
+        return *this;
+    }
+
     CIntSet& operator=(const Integer<int64_t, uint64_t>& other) {
         nums.clear();
         vector<DATATYPE> tmp;
