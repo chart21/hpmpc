@@ -2103,7 +2103,10 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::popen(const vector<in
 
     for (size_t i = 0; i < regs.size(); i += 2)
         for (size_t vec = 0; vec < size; ++vec) {
-            c_register[regs[i] + vec] = s_register[regs[i + 1] + vec].complete_reveal_to_all();
+            std::vector<UINT_TYPE> res;
+            res.resize(DATTYPE/BITLENGTH); // TODO
+            s_register[regs[i + 1] + vec].complete_reveal_to_all(res.data());
+            c_register[regs[i] + vec] = res;
         }
 }
 

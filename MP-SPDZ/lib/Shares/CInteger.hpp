@@ -27,7 +27,7 @@ class CInteger {
     CInteger() : nums(PROMOTE(0)) {}
     CInteger(int_t a) : nums(PROMOTE(a)) {}
     CInteger(DATATYPE a) : nums(a) {}
-    CInteger(const Integer<int64_t, uint64_t>& other)  {
+    CInteger(const Integer<int64_t, uint64_t>& other) {
         const auto& all = other.get_all();
 
         if (all.size() == 1) {
@@ -57,6 +57,12 @@ class CInteger {
 
     CInteger& operator=(DATATYPE other) { // DATATYPE -> CINT
         nums = other;
+
+        return *this;
+    }
+
+    CInteger& operator=(const std::vector<UINT_TYPE>& other) {
+        orthogonalize_arithmetic((UINT_TYPE*)other.data(), &nums, 1);
 
         return *this;
     }
