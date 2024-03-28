@@ -171,7 +171,7 @@ DATATYPE get_next_bit(const int& player_id) {
     if (bit_queue.empty()) {
         auto input = next_input_f(player_id, 0);
         std::vector<UINT_TYPE> tmp;
-        tmp.reserve(DATTYPE/BITLENGTH);
+        tmp.reserve(DATTYPE / BITLENGTH);
 
         for (size_t i = 0; i < BITLENGTH; i++) {
             for (const auto& ele : input) {
