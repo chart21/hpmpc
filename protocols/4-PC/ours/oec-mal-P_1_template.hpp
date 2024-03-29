@@ -428,7 +428,7 @@ void prepare_opt_bit_injection(OEC_MAL1_Share a[], OEC_MAL1_Share out[])
        
         Datatype r123 = getRandomVal(P_123);
         Datatype r123_2 = getRandomVal(P_123);
-        Datatype a0u = OP_ADD(x[i].v, x[i].m); // set share to a_0 + u
+        Datatype a0u = OP_ADD(a[i].v, a[i].m); // set share to a_0 + u
         
         tmp = OP_SUB(OP_ADD(b0v[i], b0v[i]), PROMOTE(1));
         tmp = OP_MULT(tmp, OP_SUB(r123_2, OP_MULT(a0u, r123)));
@@ -441,12 +441,9 @@ void prepare_opt_bit_injection(OEC_MAL1_Share a[], OEC_MAL1_Share out[])
 
 void complete_opt_bit_injection()
 {
-    for(int i = 0; i < BITLENGTH; i++)
-    {
         Datatype m21 = receive_from_live(P_2);
-        out[i].v = OP_ADD(out[i].v, m21);
-        store_compare_view(P_012, OP_ADD(out[i].v, out[i].m));
-    }
+        v = OP_ADD(v, m21);
+        store_compare_view(P_012, OP_ADD(v, m));
 }
 
 void prepare_bit_injection_S1(OEC_MAL1_Share out[])

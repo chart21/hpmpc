@@ -398,7 +398,7 @@ void prepare_opt_bit_injection(OEC_MAL3_Share x[], OEC_MAL3_Share out[])
     alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
     unorthogonalize_boolean(y0, temp2);
     orthogonalize_arithmetic(temp2, y0);
-    Datatype b0v[BITLENGTH]{0};
+    Datatype y0v[BITLENGTH]{0};
     y0v[BITLENGTH - 1] = FUNC_XOR(r1,r0); //convert y_0 xor v to an arithemtic value
     unorthogonalize_boolean(y0v, temp2);
     orthogonalize_arithmetic(temp2, y0v);
@@ -441,14 +441,6 @@ void prepare_opt_bit_injection(OEC_MAL3_Share x[], OEC_MAL3_Share out[])
 
 void complete_opt_bit_injection()
 {
-    for(int i = 0; i < BITLENGTH; i++)
-    {
-        Datatype m20 = receive_from_live(P_2);
-        store_compare_view(P_1, m20);
-        out[i].v = OP_ADD(out[i].v, m20);
-        store_compare_view(P_012, out[i].v);
-        out[i].v = OP_SUB(out[i].v, out[i].r);
-    }
 }
 
 

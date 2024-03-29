@@ -224,6 +224,22 @@ static void complete_A2B_S2(int k, OEC_MAL1_init out[])
 
 }
 
+void prepare_opt_bit_injection(OEC_MAL1_init a[], OEC_MAL1_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        send_to_(P_2);
+        store_compare_view_init(P_0);
+    }
+}
+
+void complete_opt_bit_injection()
+{
+        receive_from_(P_2);
+        store_compare_view_init(P_012);
+}
+
+
 void prepare_bit_injection_S1(OEC_MAL1_init out[])
 {
     for (int j = 0; j < BITLENGTH; j++)

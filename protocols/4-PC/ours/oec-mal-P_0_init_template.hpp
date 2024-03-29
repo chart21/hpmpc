@@ -305,6 +305,40 @@ static void complete_A2B_S2(int k, OEC_MAL0_init out[])
 
 }
 
+void prepare_opt_bit_injection(OEC_MAL0_init x[], OEC_MAL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if PROTOCOL != 12
+#if PRE == 1
+        pre_send_to_(P_2);
+        pre_send_to_(P_2);
+#else
+        send_to_(P_2);
+        send_to_(P_2);
+#endif
+#else
+        store_compare_view_init(P_2);
+        store_compare_view_init(P_2);
+#endif
+
+#if PRE == 1
+        pre_receive_from_(P_3);
+        pre_receive_from_(P_3);
+#else
+        receive_from_(P_3);
+        receive_from_(P_3);
+#endif 
+    }
+}
+
+void complete_opt_bit_injection()
+{
+        store_compare_view_init(P_1);
+        store_compare_view_init(P_012);
+}
+
+
 void prepare_bit_injection_S1(OEC_MAL0_init out[])
 {
 }

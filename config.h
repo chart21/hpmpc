@@ -3,7 +3,7 @@
 #define MODELOWNER P_0 //Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing)
 #define DATAOWNER P_1 //Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing)
 
-#define PROTOCOL 5
+#define PROTOCOL 12
 
 // Party ID (starting from 0)
 #define PARTY 2
