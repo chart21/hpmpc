@@ -120,56 +120,27 @@ void RELU(DATATYPE* res)
     {
         msb[i] = ~ y[i][0];
     }
-    sint* t1 = new sint[NUM_INPUTS];
-    sint* t2 = new sint[NUM_INPUTS];
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        msb[i].prepare_bit_injection_S1(t1[i].get_share_pointer());
-        msb[i].prepare_bit_injection_S2(t2[i].get_share_pointer());
+        y[i].prepare_opt_bit_injection(val[i].get_share_pointer(),val[i].get_share_pointer());
     }
-    delete[] msb;
+    delete[] y;
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        t1[i].complete_bit_injection_S1();
-        t2[i].complete_bit_injection_S2();
+        val[i].complete_opt_bit_injection();
     }
-    sint* result = new sint[NUM_INPUTS];
+    
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        result[i].prepare_XOR(t1[i],t2[i]);
-    }
-    Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        result[i].complete_XOR(t1[i],t2[i]);
-    }
-    delete[] t1;
-    delete[] t2;
-
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        result[i] = result[i] * val[i];
-    }
-    delete[] val;
-    Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        result[i].complete_mult();
-    }
-
-
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        result[i].prepare_reveal_to_all();
+        val[i].prepare_reveal_to_all();
     }
     Share::communicate();
     auto result_arr = new UINT_TYPE[NUM_INPUTS][DATTYPE];
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        result[i].complete_reveal_to_all(result_arr[i]);
+        val[i].complete_reveal_to_all(result_arr[i]);
     }
-    delete[] result;
 #if PRINT == 1
     if(current_phase == PHASE_LIVE)
     {

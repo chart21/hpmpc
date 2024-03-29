@@ -73,43 +73,17 @@ void DRELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const in
         y[i] = ~ y[i];
     }
     
-    sint* t1 = new sint[len];
-    sint* t2 = new sint[len];
     for(int i = 0; i < len; i++)
     {
-        y[i].prepare_bit_injection_S1(t1[i].get_share_pointer());
-        y[i].prepare_bit_injection_S2(t2[i].get_share_pointer());
+        y[i].prepare_opt_bit_injection(val[i].get_share_pointer(),val[i].get_share_pointer());
     }
     delete[] y;
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        t1[i].complete_bit_injection_S1();
-        t2[i].complete_bit_injection_S2();
+        val[i].complete_opt_bit_injection();
     }
     
-    Share::communicate();
-    
-    sint* result = new sint[len];
-    for(int i = 0; i < len; i++)
-    {
-        result[i].prepare_XOR(t1[i],t2[i]);
-    }
-    Share::communicate();
-    for(int i = 0; i < len; i++)
-    {
-        result[i].complete_XOR(t1[i],t2[i]);
-    }
-    delete[] t1;
-    delete[] t2;
-
-    Share::communicate();
-    
-
-    for(int i = 0; i < len; i++)
-    {
-        val[i] = result[i];
-    }
 } 
 
 

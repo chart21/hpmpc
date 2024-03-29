@@ -15,7 +15,7 @@
 
 
 template<typename Share, typename Datatype>
-void bitinj_range(XOR_Share<Datatype, Share>* bit_val, int len, sint_t<Additive_Share<Datatype, Share>>* output)
+void bit2A_range(XOR_Share<Datatype, Share>* bit_val, int len, sint_t<Additive_Share<Datatype, Share>>* output)
 {
 using S = XOR_Share<Datatype, Share>;
 using A = Additive_Share<Datatype, Share>;
@@ -146,7 +146,7 @@ using sint = sint_t<A>;
 
     // get arithmetic version of msb to update values
     auto max_idx = new sint[batch_size*len];
-    bitinj_range(msb, batch_size*len, max_idx);
+    bit2A_range(msb, batch_size*len, max_idx);
     for(int b = 0; b < batch_size; b++)
     { 
     for(int i = 0; i < counter; i++)
