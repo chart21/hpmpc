@@ -355,6 +355,11 @@ public:
                 shares[i].complete_opt_bit_injection();
         }
 
+        void complete_bit2a() {
+            for(int i = 0; i < BITLENGTH; ++i) 
+                shares[i].complete_bit2a();
+        }
+
         void mask_and_send_dot()
         {
             for(int i = 0; i < BITLENGTH; ++i) 

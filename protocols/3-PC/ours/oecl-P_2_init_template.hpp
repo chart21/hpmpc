@@ -253,6 +253,24 @@ void complete_opt_bit_injection()
         receive_from_(P_1);
 }
 
+void prepare_bit2a(OECL2_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if PRE == 1
+        pre_receive_from_(P_0);
+#else
+        receive_from_(P_0);
+#endif
+        send_to_(P_1);
+    }
+}
+
+void complete_bit2a()
+{
+    receive_from_(P_1);
+}
+
 void prepare_bit_injection_S1( OECL2_init out[])
 {
 }

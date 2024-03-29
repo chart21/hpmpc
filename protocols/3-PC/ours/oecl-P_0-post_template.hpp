@@ -174,6 +174,15 @@ void complete_opt_bit_injection()
 {
 }
 
+void prepare_bit2a(OECL0_POST_Share out[])
+{
+}
+
+void complete_bit2a()
+{
+}
+
+
 
 void prepare_bit_injection_S1(OECL0_POST_Share out[])
 {

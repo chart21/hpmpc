@@ -292,6 +292,33 @@ static void complete_A2B_S2(int k, OEC_MAL3_init out[])
 
 }
 
+void prepare_bit2a( OEC_MAL3_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if PROTOCOL == 12
+#if PRE == 1
+        pre_send_to_(P_2);
+#else
+        send_to_(P_2);
+#endif
+#else
+        store_compare_view_init(P_2);
+#endif
+        
+#if PRE == 1
+        pre_send_to_(P_0);
+#else
+        send_to_(P_0);
+#endif 
+    }
+}
+
+void complete_bit2a()
+{
+}
+
+
 void prepare_opt_bit_injection(OEC_MAL3_init x[], OEC_MAL3_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)

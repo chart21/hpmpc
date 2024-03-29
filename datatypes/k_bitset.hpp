@@ -202,6 +202,8 @@ public:
             Share::complete_bit_injection_S2(shares);
         }
 
+
+
   static constexpr int get_bitlength() {
         return k; 
     }

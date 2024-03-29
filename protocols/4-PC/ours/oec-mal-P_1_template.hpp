@@ -402,6 +402,46 @@ static void complete_A2B_S2(int k, OEC_MAL1_Share out[])
 
 }
 
+void prepare_bit2a(OEC_MAL1_Share out[])
+{
+    Datatype b0[BITLENGTH]{0};
+    b0[BITLENGTH - 1] = v; //convert b0 to an arithemtic value
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(b0, temp2);
+    orthogonalize_arithmetic(temp2, b0);
+    Datatype b0v[BITLENGTH]{0};
+    b0v[BITLENGTH - 1] = FUNC_XOR(v,m); //convert b0v to an arithemtic value
+    unorthogonalize_boolean(b0v, temp2);
+    orthogonalize_arithmetic(temp2, b0v);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        Datatype r013 = getRandomVal(P_013);
+         
+        Datatype tmp = OP_SUB(r013, OP_MULT(OP_ADD(b0[i], b0[i]), r013));
+        Datatype out_r = getRandomVal(P_013);
+        Datatype m1 = OP_ADD(out_r, tmp);
+        send_to_live(P_2, m1); //m1
+       
+        Datatype r123 = getRandomVal(P_123);
+        
+        tmp = OP_SUB(r123, OP_MULT(OP_ADD(b0v[i], b0v[i]), r123));
+        out[i].m = getRandomVal(P_123);
+        store_compare_view(P_0, OP_ADD(out[i].m, tmp)); //m20
+        
+        out[i].r = out_r;
+        out[i].v = OP_ADD(b0[i], m1);
+        
+    }
+}
+
+void complete_bit2a()
+{
+        Datatype m21 = receive_from_live(P_2);
+        v = OP_ADD(v, m21);
+        store_compare_view(P_012, OP_ADD(v, m));
+}
+
+
 void prepare_opt_bit_injection(OEC_MAL1_Share a[], OEC_MAL1_Share out[])
 {
     Datatype b0[BITLENGTH]{0};

@@ -362,6 +362,30 @@ void complete_opt_bit_injection()
 {
 }
 
+void prepare_bit2a(OECL0_Share out[])
+{
+    Datatype temp[BITLENGTH]{0};
+    temp[BITLENGTH - 1] = FUNC_XOR(p1,p2); // convert y_0 to an arithmetic value
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
+
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if PRE == 1
+        pre_send_to_live(P_2, OP_SUB(temp[i], getRandomVal(P_1))); // send y_0 - r_0,1 to P_2
+#else
+        send_to_live(P_2, OP_SUB(temp[i], getRandomVal(P_1))); // send y_0 - r_0,1 to P_2
+#endif
+        out[i].p1 = getRandomVal(P_2); // set share to z_2
+        out[i].p2 = getRandomVal(P_1); // set other share to z_1
+    }
+}
+
+void complete_bit2a()
+{
+}
+
 void prepare_bit_injection_S1(OECL0_Share out[])
 {
     for(int i = 0; i < BITLENGTH; i++)

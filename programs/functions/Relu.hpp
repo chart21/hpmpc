@@ -143,6 +143,124 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 
 }
 
+    template<int m, int k,typename Share, typename Datatype>
+void RELU_range_in_place_optB2A(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<k-m, S>;
+    using sint = sint_t<A>;
+   
+    /* if(current_phase == 1) */
+    /* std::cout << "RELU ..." << std::endl; */
+    
+    Share::communicate();
+    Bitset *s1 = new Bitset[len];
+    Bitset *s2 = new Bitset[len];
+    for(int i = 0; i < len; i++)
+    {
+        s1[i] = Bitset::prepare_A2B_S1(m, (S*) val[i].get_share_pointer());
+        s2[i] = Bitset::prepare_A2B_S2(m, (S*) val[i].get_share_pointer());
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        s1[i].complete_A2B_S1();
+        s2[i].complete_A2B_S2();
+    }
+    /* if(current_phase == 1) */
+    /* std::cout << "A2B completed ..." << std::endl; */
+    
+    Share::communicate();
+    /* if(current_phase == 1) */
+    /* std::cout << "Adder ..." << std::endl; */
+
+    /* Bitset* y = new Bitset[NUM_INPUTS]; */
+    S *y = new S[len];
+    /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+    std::vector<BooleanAdder_MSB<k-m,S>> adders;
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
+    std::vector<PPA_MSB_4Way<k-m,S>> adders;
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+    /* std::vector<PPA_MSB<k-m,S>> adders; */
+    std::vector<PPA_MSB_Unsafe<k-m,S>> adders;
+#endif
+    /* std::vector<PPA_MSB_4Way<k,S>> adders; */
+    adders.reserve(len);
+    for(int i = 0; i < len; i++)
+    {
+        /* adder[i].set_values(s1[i], s2[i], y[i]); */
+        adders.emplace_back(s1[i], s2[i], y[i]);
+    }
+
+    while(!adders[0].is_done())
+    {
+        for(int i = 0; i < len; i++)
+        {
+            adders[i].step();
+        }
+        /* std::cout << "Adder step ..." << std::endl; */
+        Share::communicate();
+    }
+    delete[] s1;
+    delete[] s2;
+    adders.clear();
+    adders.shrink_to_fit();
+    
+    for(int i = 0; i < len; i++)
+    {
+        y[i] = ~ y[i];
+    }
+    /* if(current_phase == 1) */
+    /*     std::cout << "Bit inj ..." << std::endl; */
+    
+    sint* result = new sint[len];
+    for(int i = 0; i < len; i++)
+    {
+        y[i].prepare_bit2a(result[i].get_share_pointer());
+    }
+    delete[] y;
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        result[i].complete_bit2a();
+    }
+    
+    Share::communicate();
+
+    for(int i = 0; i < len; i++)
+    {
+        val[i] = result[i].prepare_dot(val[i]);
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
+        val[i].mask_and_send_dot();
+#else
+        val[i].mask_and_send_dot_without_trunc();
+#endif 
+    }
+    delete[] result;
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
+        val[i].complete_mult();
+#else
+        val[i].complete_mult_without_trunc();
+#endif
+        /* val[i] -= sint(1); // To counter the +1 in TRUNC */
+    }
+
+
+    Share::communicate();
+
+
+#if TRUNC_APPROACH == 1 && TRUNC_DELAYED == 1
+    trunc_2k_in_place(val, len);
+#endif
+
+
+}
+
 template<int m, int k,typename Share, typename Datatype>
 void RELU_range_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
 {
@@ -412,6 +530,7 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
         tmp[counter++] = sint::load_shares(m, begin+counter*BITLENGTH);
     /* RELU_range_in_place<rm,rk,Share>(tmp, counter); */
     RELU_range_in_place_opt<rm,rk,Share>(tmp, counter);
+    /* RELU_range_in_place_optB2A<rm,rk,Share>(tmp, counter); */
     /* for(int i = 0; i < counter; i++) */
     /* { */
         /* std::cout << tmp[i].get_p1() << std::endl; */
