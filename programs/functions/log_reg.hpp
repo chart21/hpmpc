@@ -5,28 +5,6 @@
 #include "comp_trunc.hpp"
 #include "../../protocols/Protocols.h"
 
-    template<int bm, int bk, typename Datatype, typename Share>
-void DRELU_range_inplace(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
-{
-    using S = XOR_Share<Datatype, Share>;
-    using A = Additive_Share<Datatype, Share>;
-    using sint = sint_t<A>;
-    S* msb = new S[len];
-    sint* msb_sint = new sint[len];
-
-    get_msb_range<bm,bk>(val, msb, len);
-    bitinj_range(msb,len, msb_sint);
-    for(int i = 0; i < len; i++)
-    {
-        val[i] = val[i].prepare_mult(msb_sint[i]);
-    }
-    Share::communicate();
-    for(int i = 0; i < len; i++)
-    {
-        val[i].complete_mult();
-    }
-}
-
 const int NUM_FEATURES = 10;
 template<typename Share>
 void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS][NUM_FEATURES], const Additive_Share<DATATYPE, Share> y_Shared[NUM_INPUTS], const Additive_Share<DATATYPE, Share> weights[NUM_FEATURES], Additive_Share<DATATYPE, Share> gradient[NUM_FEATURES])

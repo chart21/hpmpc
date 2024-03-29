@@ -90,39 +90,17 @@ void LTZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     /* if(current_phase == 1) */
     /*     std::cout << "Bit inj ..." << std::endl; */
     
-    sint* t1 = new sint[len];
-    sint* t2 = new sint[len];
     for(int i = 0; i < len; i++)
     {
-        y[i].prepare_bit_injection_S1(t1[i].get_share_pointer());
-        y[i].prepare_bit_injection_S2(t2[i].get_share_pointer());
+        y[i].prepare_opt_bit_injection(result[i].get_share_pointer());
     }
     delete[] y;
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        t1[i].complete_bit_injection_S1();
-        t2[i].complete_bit_injection_S2();
+        result[i].complete_opt_bit_injection();
     }
     
-    Share::communicate();
-
-    
-    for(int i = 0; i < len; i++)
-    {
-        result[i].prepare_XOR(t1[i],t2[i]);
-    }
-    Share::communicate();
-    for(int i = 0; i < len; i++)
-    {
-        result[i].complete_XOR(t1[i],t2[i]);
-    }
-    delete[] t1;
-    delete[] t2;
-
-    Share::communicate();
-
-
 }
 
 template<int m, int k,typename Share, typename Datatype>
