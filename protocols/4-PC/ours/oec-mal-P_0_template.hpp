@@ -41,7 +41,7 @@ void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
     v = receive_from_live(P_2);
     store_compare_view(P_1, v);
-    store_compare_view(P_012, v);
+    /* store_compare_view(P_012, v); */
     v = SUB(v,r);
     /* v = ADD(v,val); */
 }
@@ -427,8 +427,8 @@ void complete_opt_bit_injection()
         Datatype m20 = receive_from_live(P_2);
         store_compare_view(P_1, m20);
         v = OP_ADD(v, m20);
-        store_compare_view(P_012, v);
-        v = OP_SUB(v, r);
+        store_compare_view(P_012, OP_ADD(v, r));
+        /* v = OP_SUB(v, r); */
 }
 
 void prepare_bit_injection_S1(OEC_MAL0_Share out[])
@@ -522,40 +522,6 @@ d.v = ADD(
 d.r = mxyz;
 d.v = SUB(SET_ALL_ZERO(), d.v); // trick to be compatible with dot2
 return d;
-}
-
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime) const{
-    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(r) );
-    Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(r);
-
-    r_mk2.v = rmk2;
-    r_mk2.r = SUB(SET_ALL_ZERO(), rmk2);
-    r_msb.v = rmsb;
-    r_msb.r = SUB(SET_ALL_ZERO(), rmsb);
-#if PROTOCOL == 12
-    store_compare_view(P_2, SUB(r_mk2.r, getRandomVal(P_013)));
-    store_compare_view(P_2, SUB(r_msb.r, getRandomVal(P_013)));
-#else
-#if PRE == 0
-    send_to_live(P_2, SUB(r_mk2.r, getRandomVal(P_013)));
-    send_to_live(P_2, SUB(r_msb.r, getRandomVal(P_013)));
-#else
-    pre_send_to_live(P_2, SUB(r_mk2.r, getRandomVal(P_013)));
-    pre_send_to_live(P_2, SUB(r_msb.r, getRandomVal(P_013)));
-#endif
-#endif
-
-    c.r = SET_ALL_ZERO();
-    c_prime.r = SET_ALL_ZERO();
-}
-
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime) const{
-    c.v = receive_from_live(P_2);
-    c_prime.v = receive_from_live(P_2);
-    store_compare_view(P_1, c.v);
-    store_compare_view(P_1, c_prime.v);
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
@@ -818,5 +784,40 @@ store_compare_view(P_012, ADD(v,r));
 }
 
 #endif
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc tr, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime) const{
+    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(r) );
+    Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(r);
+
+    r_mk2.v = rmk2;
+    r_mk2.r = SUB(SET_ALL_ZERO(), rmk2);
+    r_msb.v = rmsb;
+    r_msb.r = SUB(SET_ALL_ZERO(), rmsb);
+#if PROTOCOL == 12
+    store_compare_view(P_2, SUB(r_mk2.r, getRandomVal(P_013)));
+    store_compare_view(P_2, SUB(r_msb.r, getRandomVal(P_013)));
+#else
+#if PRE == 0
+    send_to_live(P_2, SUB(r_mk2.r, getRandomVal(P_013)));
+    send_to_live(P_2, SUB(r_msb.r, getRandomVal(P_013)));
+#else
+    pre_send_to_live(P_2, SUB(r_mk2.r, getRandomVal(P_013)));
+    pre_send_to_live(P_2, SUB(r_msb.r, getRandomVal(P_013)));
+#endif
+#endif
+
+    c.r = SET_ALL_ZERO();
+    c_prime.r = SET_ALL_ZERO();
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc tr, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime) const{
+    c.v = receive_from_live(P_2);
+    c_prime.v = receive_from_live(P_2);
+    store_compare_view(P_1, c.v);
+    store_compare_view(P_1, c_prime.v);
+}
+
 
 };

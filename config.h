@@ -2,7 +2,6 @@
 
 #define MODELOWNER P_0 //Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing)
 #define DATAOWNER P_1 //Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing)
-
 #define PROTOCOL 12
 
 // Party ID (starting from 0)
@@ -24,7 +23,7 @@
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 100
+#define NUM_INPUTS 5
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -99,11 +98,11 @@ int base_port = BASE_PORT; // temporary solution
 #define SIMULATE_QUANT 1 // Simulate 8-bit quantization
 #endif
 
-#define MULTI_INPUT 1 // activate multi input Multiplication gates?
+/* #define MULTI_INPUT 1 // activate multi input Multiplication gates? */
 /* #if BANDWIDTH_OPTIMIZED == 0 || ONLINE_OPTIMIZED == 1 //if BANDWIDTH_OPTIMIZED and not ONLINE_OPTIMIZED we don't need MULTI_INPUT_AND gates */
 /* #define MULTI_INPUT 1 // activate multi input Multiplication gates? */
 /* #else */
-/* #define MULTI_INPUT 0 */
+#define MULTI_INPUT 1
 /* #endif */
 
 #if FUNCTION_IDENTIFIER < 65

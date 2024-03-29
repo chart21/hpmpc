@@ -418,13 +418,12 @@ void prepare_opt_bit_injection(OEC_MAL1_Share a[], OEC_MAL1_Share out[])
         Datatype r013 = getRandomVal(P_013);
         Datatype r013_2 = getRandomVal(P_013);
          
-        Datatype tmp = OP_SUB(OP_ADD(b0[i], a[i].v), PROMOTE(1));
+        Datatype tmp = OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1));
         tmp = OP_MULT(tmp, OP_SUB(r013_2, OP_MULT(a[i].v, r013)));
         tmp = OP_SUB(tmp, OP_MULT(b0[i], a[i].r));
-        out[i].r = getRandomVal(P_013);
-        Datatype m1 = OP_ADD(out[i].r, tmp);
+        Datatype out_r = getRandomVal(P_013);
+        Datatype m1 = OP_ADD(out_r, tmp);
         send_to_live(P_2, m1); //m1
-        out[i].v = OP_ADD(OP_MULT(a[i].v, b0[i]), m1);
        
         Datatype r123 = getRandomVal(P_123);
         Datatype r123_2 = getRandomVal(P_123);
@@ -435,6 +434,9 @@ void prepare_opt_bit_injection(OEC_MAL1_Share a[], OEC_MAL1_Share out[])
         tmp = OP_SUB(tmp, OP_MULT(b0v[i], a[i].m));
         out[i].m = getRandomVal(P_123);
         store_compare_view(P_0, OP_ADD(out[i].m, tmp)); //m20
+        
+        out[i].r = out_r;
+        out[i].v = OP_ADD(OP_MULT(a[i].v, b0[i]), m1);
         
     }
 }
