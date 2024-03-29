@@ -116,8 +116,8 @@ void inference(DATATYPE* res)
     cfg.mode = "test";
     cfg.save_dir = "./SimpleNN/model_zoo";
     cfg.data_dir = "./SimpleNN/dataset";
-    /* cfg.pretrained = "dummy.dummy"; */
-    cfg.pretrained = "old/vgg16_cifar.bin";
+    cfg.pretrained = "dummy.dummy";
+    /* cfg.pretrained = "old/vgg16_cifar.bin"; */
     /* cfg.image_file = "old/cifar10-test-images.bin"; */
     /* cfg.label_file = "old/cifar10-test-labels.bin"; */
     /* cfg.pretrained = "VGG16_CIFAR-10_standard_best.bin"; */

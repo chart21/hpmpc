@@ -166,6 +166,15 @@ static void complete_A2B_S2(int k, OECL0_POST_Share out[])
 
 }
 
+void prepare_opt_bit_injection(OECL0_POST_Share x[], OECL0_POST_Share out[])
+{
+}
+
+void complete_opt_bit_injection()
+{
+}
+
+
 void prepare_bit_injection_S1(OECL0_POST_Share out[])
 {
 }
