@@ -543,7 +543,7 @@ void prepare_opt_bit_injection(OEC_MAL2_Share a[], OEC_MAL2_Share out[])
         Datatype tmp = OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1));
         tmp = OP_MULT(tmp, OP_SUB(m01, OP_MULT(a[i].v, m00)));
         tmp = OP_SUB(tmp, OP_MULT(b0[i], a[i].r));
-        Datatype out_r = getRandomVal(P_013);
+        Datatype out_r = getRandomVal(P_023);
         Datatype m21 = OP_ADD(out_r, tmp);
         send_to_live(P_1, m21); //m21
        
