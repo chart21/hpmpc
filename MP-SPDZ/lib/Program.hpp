@@ -1331,14 +1331,11 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
         case Opcode::ANDM:
             for (int i = 0; i < regs[0]; ++i) {
                 p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN] =
-                    p.sb_register[regs[2] + i / BIT_LEN][i % BIT_LEN].prepare_and(
-                        BitShare(((p.cb_register[regs[3] + i / BIT_LEN] >> int64_t(i % BIT_LEN)) &
-                                  int64_t(1))
-                                     .get_type()));
+                    p.sb_register[regs[2] + i / BIT_LEN][i % BIT_LEN].and_public(
+                        ((p.cb_register[regs[3] + i / BIT_LEN] >> int64_t(i % BIT_LEN)) &
+                         int64_t(1))
+                            .get_type());
             }
-            Share::communicate();
-            for (int i = 0; i < regs[0]; ++i)
-                p.sb_register[regs[1] + i / BIT_LEN][i % BIT_LEN].complete_and();
             return;
         case Opcode::SUBML:
             p.s_register[regs[0] + vec] =
@@ -2138,7 +2135,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::mulm(const vector<int
                                                                 const size_t& size) {
     for (size_t vec = 0; vec < size; ++vec)
         s_register[regs[0] + vec] =
-            s_register[regs[1] + vec].mult_public(UINT_TYPE(c_register[regs[2] + vec].get()));
+            s_register[regs[1] + vec].mult_public_dat(c_register[regs[2] + vec].get_type());
 }
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
