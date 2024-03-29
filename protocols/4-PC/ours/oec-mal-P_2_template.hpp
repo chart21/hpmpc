@@ -508,7 +508,7 @@ static void complete_A2B_S2(int k, OEC_MAL2_Share out[])
 void prepare_opt_bit_injection(OEC_MAL2_Share a[], OEC_MAL2_Share out[])
 {
     Datatype b0[BITLENGTH]{0};
-    b0[BITLENGTH - 1] = v; //convert b to an arithemtic value
+    b0[BITLENGTH - 1] = v; //convert b0 to an arithemtic value
     alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
     unorthogonalize_boolean(b0, temp2);
     orthogonalize_arithmetic(temp2, b0);
@@ -543,7 +543,7 @@ void prepare_opt_bit_injection(OEC_MAL2_Share a[], OEC_MAL2_Share out[])
         Datatype tmp = OP_SUB(OP_ADD(b0[i], a[i].v), PROMOTE(1));
         tmp = OP_MULT(tmp, OP_SUB(m01, OP_MULT(a[i].v, m00)));
         tmp = OP_SUB(tmp, OP_MULT(b0[i], a[i].r));
-        out[i].r = getRandomVal(P_013);
+        out[i].r = getRandomVal(P_023);
         Datatype m21 = OP_ADD(out[i].r, tmp);
         send_to_live(P_1, m21); //m21
         out[i].v = OP_ADD(OP_MULT(a[i].v, b0[i]), m21);
@@ -616,7 +616,7 @@ static void complete_bit_injection_S2(OEC_MAL2_Share out[])
         Datatype m0 = pre_receive_from_live(P_0);
         #endif
         store_compare_view(P_3, m0);
-#else
+        #else
         #if PRE == 0
         Datatype m0 = receive_from_live(P_3);
         #else

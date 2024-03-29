@@ -6,7 +6,7 @@
 #define PROTOCOL 12
 
 // Party ID (starting from 0)
-#define PARTY 2
+#define PARTY 3
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
@@ -99,11 +99,12 @@ int base_port = BASE_PORT; // temporary solution
 #define SIMULATE_QUANT 1 // Simulate 8-bit quantization
 #endif
 
-#if BANDWIDTH_OPTIMIZED == 0 || ONLINE_OPTIMIZED == 1 //if BANDWIDTH_OPTIMIZED and not ONLINE_OPTIMIZED we don't need MULTI_INPUT_AND gates
 #define MULTI_INPUT 1 // activate multi input Multiplication gates?
-#else
-#define MULTI_INPUT 0
-#endif
+/* #if BANDWIDTH_OPTIMIZED == 0 || ONLINE_OPTIMIZED == 1 //if BANDWIDTH_OPTIMIZED and not ONLINE_OPTIMIZED we don't need MULTI_INPUT_AND gates */
+/* #define MULTI_INPUT 1 // activate multi input Multiplication gates? */
+/* #else */
+/* #define MULTI_INPUT 0 */
+/* #endif */
 
 #if FUNCTION_IDENTIFIER < 65
 #if FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 49 || FUNCTION_IDENTIFIER == 52 || FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 62 //RCA

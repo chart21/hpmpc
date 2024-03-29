@@ -41,6 +41,7 @@ void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
     v = receive_from_live(P_2);
     store_compare_view(P_1, v);
+    store_compare_view(P_012, v);
     v = SUB(v,r);
     /* v = ADD(v,val); */
 }
@@ -376,7 +377,7 @@ static void complete_A2B_S2(int k, OEC_MAL0_Share out[])
 void prepare_opt_bit_injection(OEC_MAL0_Share x[], OEC_MAL0_Share out[])
 {
     Datatype y0[BITLENGTH]{0};
-    y0[BITLENGTH - 1] = r; //convert b to an arithemtic value
+    y0[BITLENGTH - 1] = r; //convert y0 to an arithemtic value
     alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
     unorthogonalize_boolean(y0, temp2);
     orthogonalize_arithmetic(temp2, y0);

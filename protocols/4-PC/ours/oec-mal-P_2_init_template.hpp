@@ -347,6 +347,7 @@ void prepare_opt_bit_injection(OEC_MAL2_init a[], OEC_MAL2_init out[])
 #endif
         store_compare_view_init(P_3);
         store_compare_view_init(P_3);
+#else
 #if PRE == 1
         pre_receive_from_(P_3);
         pre_receive_from_(P_3);

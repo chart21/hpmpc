@@ -407,7 +407,7 @@ void prepare_opt_bit_injection(OEC_MAL3_Share x[], OEC_MAL3_Share out[])
         Datatype r013 = getRandomVal(P_013);
         Datatype r013_2 = getRandomVal(P_013);
         Datatype m00 = OP_SUB(y0[i], r013);
-        Datatype m01 = OP_SUB(OP_MULT(x[i].r, y0[i]), r013_2);
+        Datatype m01 = OP_SUB(OP_MULT(x[i].r1, y0[i]), r013_2);
 #if PROTOCOL == 12
 #if PRE == 1
         pre_send_to_live(P_2, m00);

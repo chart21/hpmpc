@@ -334,6 +334,7 @@ void prepare_opt_bit_injection(OEC_MAL0_init x[], OEC_MAL0_init out[])
 
 void complete_opt_bit_injection()
 {
+        receive_from_(P_2);
         store_compare_view_init(P_1);
         store_compare_view_init(P_012);
 }

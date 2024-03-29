@@ -410,8 +410,8 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
     }
     if(m > 0)
         tmp[counter++] = sint::load_shares(m, begin+counter*BITLENGTH);
-    RELU_range_in_place<rm,rk,Share>(tmp, counter);
-    /* RELU_range_in_place_opt<rm,rk,Share>(tmp, counter); */
+    /* RELU_range_in_place<rm,rk,Share>(tmp, counter); */
+    RELU_range_in_place_opt<rm,rk,Share>(tmp, counter);
     /* for(int i = 0; i < counter; i++) */
     /* { */
         /* std::cout << tmp[i].get_p1() << std::endl; */
