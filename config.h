@@ -86,16 +86,16 @@ int base_port = BASE_PORT; // temporary solution
 // Bitlength of integers (currently not used)
 #define BITLENGTH 32
 // Reduced Bitlength that might be used for RELU, etc
-
+#define SIMULATE_QUANT 0 // Simulate 8-bit quantization
 #if COMPRESS == 0
 #define REDUCED_BITLENGTH_k 32
 #define REDUCED_BITLENGTH_m 0
-#define SIMULATE_QUANT 0 // Simulate 8-bit quantization
+/* #define SIMULATE_QUANT 0 // Simulate 8-bit quantization */
 #else
 #define REDUCED_BITLENGTH_k 20
 #define REDUCED_BITLENGTH_m 12
 // Temporarily placed here
-#define SIMULATE_QUANT 1 // Simulate 8-bit quantization
+/* #define SIMULATE_QUANT 1 // Simulate 8-bit quantization */
 #endif
 
 /* #define MULTI_INPUT 1 // activate multi input Multiplication gates? */
