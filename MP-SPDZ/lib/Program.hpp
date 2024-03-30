@@ -2021,7 +2021,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputmixed(const vect
             case 0: { // int
                 player = from_reg ? i_register[regs[i + 2]].get() : regs[i + 2];
 
-                auto res = next_input(player, thread_id);
+                auto res = next_input<SIZE_VEC>(player, thread_id);
                 for (size_t j = 0; j < SIZE_VEC; ++j)
                     input[j] = res[j];
 
@@ -2030,7 +2030,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputmixed(const vect
             case 1: { // fix
                 player = from_reg ? i_register[regs[i + 3]].get() : regs[i + 3];
 
-                auto tmp = next_input_f(player, thread_id);
+                auto tmp = next_input_f<SIZE_VEC>(player, thread_id);
                 for (size_t j = 0; j < SIZE_VEC; ++j)
                     input[j] = (static_cast<INT_TYPE>(tmp[j] * (1u << regs[i + 2])));
                 break;
