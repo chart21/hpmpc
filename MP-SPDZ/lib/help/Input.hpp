@@ -166,7 +166,7 @@ static std::queue<DATATYPE> bit_queue;
 
 DATATYPE get_next_bit(const int& player_id) {
     if (current_phase == PHASE_INIT || player_id != PARTY)
-        return 0;
+        return ZERO;
 
     if (bit_queue.empty()) {
         auto input = next_input_f(player_id, 0);

@@ -24,7 +24,7 @@ class Integer {
     Integer(DATATYPE a) : nums() {
         std::vector<UINT_TYPE> tmp;
         tmp.resize(SIZE_VEC);
-        unorthogonalize_arithmetic(&a, tmp.data());
+        unorthogonalize_arithmetic(&a, tmp.data(), 1);
         for (const auto& ele : tmp)
             nums.push_back(INT_TYPE(ele));
     }
