@@ -119,12 +119,13 @@ std::vector<Input>::iterator get_input_from(const int& player_num, const size_t&
     return it;
 }
 
-std::array<int, SIZE_VEC> next_input(const int& player_num, const int& thread_id) {
-    std::array<int, SIZE_VEC> res{};
+template <size_t VEC_SIZE>
+std::array<int, VEC_SIZE> next_input(const int& player_num, const int& thread_id) {
+    std::array<int, VEC_SIZE> res{};
     if (current_phase == PHASE_INIT || player_num != PARTY)
         return res;
 
-    for (size_t cur = 0; cur < SIZE_VEC; cur++) {
+    for (size_t cur = 0; cur < VEC_SIZE; cur++) {
         auto in = get_input_from(player_num, cur);
         if (in == inputs.end()) {
             inputs.emplace_back(INPUT_PATH + "Input-P" + std::to_string(player_num) + "-" +
@@ -141,12 +142,13 @@ std::array<int, SIZE_VEC> next_input(const int& player_num, const int& thread_id
     return res;
 }
 
-std::array<float, SIZE_VEC> next_input_f(const int& player_num, const int& thread_id) {
-    std::array<float, SIZE_VEC> res{};
+template <size_t VEC_SIZE>
+std::array<float, VEC_SIZE> next_input_f(const int& player_num, const int& thread_id) {
+    std::array<float, VEC_SIZE> res{};
     if (current_phase == PHASE_INIT || player_num != PARTY)
         return res;
 
-    for (size_t cur = 0; cur < SIZE_VEC; ++cur) {
+    for (size_t cur = 0; cur < VEC_SIZE; ++cur) {
         auto in = get_input_from(player_num, 0);
         if (in == inputs.end()) {
             inputs.emplace_back(INPUT_PATH + "Input-P" + std::to_string(player_num) + "-" +
@@ -169,7 +171,7 @@ DATATYPE get_next_bit(const int& player_id) {
         return ZERO;
 
     if (bit_queue.empty()) {
-        auto input = next_input_f(player_id, 0);
+        auto input = next_input_f<SIZE_VEC>(player_id, 0);
         std::vector<UINT_TYPE> tmp;
         tmp.reserve(DATTYPE / BITLENGTH);
 
