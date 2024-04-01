@@ -183,7 +183,11 @@ public:
         return result;
         }
 
-        
+        void prepare_mult_public_fixed(const UINT_TYPE other) {
+        for(int i = 0; i < BITLENGTH; ++i) {
+            shares[i].prepare_mult_public_fixed(other);
+        }
+        }
 
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {

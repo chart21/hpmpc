@@ -114,7 +114,8 @@ void inference(DATATYPE* res)
 
 	Config cfg;
     cfg.mode = "test";
-    cfg.save_dir = "./SimpleNN/model_zoo";
+    cfg.save_dir = "./SimpleNN/model_zoo/pthAdamModels/cifar10_ADAM_001/";
+    /* cfg.save_dir = "./SimpleNN/model_zoo/"; */
     cfg.data_dir = "./SimpleNN/dataset";
     cfg.pretrained = "dummy.dummy";
     /* cfg.pretrained = "old/vgg16_cifar.bin"; */
@@ -123,6 +124,9 @@ void inference(DATATYPE* res)
     /* cfg.pretrained = "VGG16_CIFAR-10_standard_best.bin"; */
     cfg.image_file = "CIFAR-10_standard_test_images.bin";
     cfg.label_file = "CIFAR-10_standard_test_labels.bin";
+    /* cfg.pretrained = "VGG16_CIFAR-10_custom_best.bin"; */
+    /* cfg.image_file = "CIFAR-10_custom_test_images.bin"; */
+    /* cfg.label_file = "CIFAR-10_custom_test_labels.bin"; */
     
     //read details from file instead
     /* auto file = fopen("config.txt", "r"); */

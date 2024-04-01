@@ -19,7 +19,8 @@ for f in "${functions[@]}"
         sed -i -e "s/\(define DATTYPE \).*/\1$bitlength/" config.h
         sed -i -e "s/\(define REDUCED_BITLENGTH_k \).*/\1$bitlength/" config.h
         #loop over 1:bitlength-1
-        for b in "${loopvals[@]}"
+        for b in $(seq 1 $bitlength)
+        # for b in "${loopvals[@]}"
             do
             sed -i -e "s/\(define FRACTIONAL \).*/\1$b/" config.h
             for ta in "${trunc_apporach[@]}"
