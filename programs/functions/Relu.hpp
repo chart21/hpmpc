@@ -126,12 +126,12 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 #if TRUNC_APPROACH == 0
     for(int i = 0; i < len; i++)
     {
-        val[i] = val[i].prepare_mult_public_fixed(UINT_TYPE(1)); //multiply by 1 to trigeger truncation
+        val[i].prepare_mult_public_fixed(UINT_TYPE(1)); //multiply by 1 to trigeger truncation
     }
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        val[i].complete_mult_public_fixed();
+        val[i].complete_public_mult_fixed();
     }
     Share::communicate();
 #elif TRUNC_APPROACH == 1
