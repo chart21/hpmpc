@@ -27,6 +27,10 @@
 #define FUNCTION MP_MACHINE_MUL_FIX
 #elif FUNCTION_IDENTIFIER == 505
 #define FUNCTION MP_MACHINE_INT_TESTS
+#elif FUNCTION_IDENTIFIER == 506
+#define FUNCTION MP_MACHINE_MUL_BENCH
+#elif FUNCTION_IDENTIFIER == 507
+#define FUNCTION MP_MACHINE_COMP_BENCH
 #endif
 
 //Boilerplate
@@ -140,6 +144,42 @@ void MP_MACHINE_INT_TESTS(DATATYPE* res)
     IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("int_test_32.sch");
     m.run();
 #endif
+}
+
+#elif FUNCTION_IDENTIFIER == 506
+template<typename Share>
+void MP_MACHINE_MUL_BENCH(DATATYPE* res)
+{
+    using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<64, S>;
+
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+
+    Share::communicate();
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("mul_bench.sch");
+    m.run();
+}
+
+#elif FUNCTION_IDENTIFIER == 507
+template<typename Share>
+void MP_MACHINE_COMP_BENCH(DATATYPE* res)
+{
+    using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<64, S>;
+
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+
+    Share::communicate();
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("comp_bench.sch");
+    m.run();
 }
 
 #endif
