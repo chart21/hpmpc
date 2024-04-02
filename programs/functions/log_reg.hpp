@@ -5,7 +5,7 @@
 #include "comp_trunc.hpp"
 #include "../../protocols/Protocols.h"
 
-const int NUM_FEATURES = 10;
+const int NUM_FEATURES = 5;
 template<typename Share>
 void compute_gradient(const Additive_Share<DATATYPE, Share> X_Shared[NUM_INPUTS][NUM_FEATURES], const Additive_Share<DATATYPE, Share> y_Shared[NUM_INPUTS], const Additive_Share<DATATYPE, Share> weights[NUM_FEATURES], Additive_Share<DATATYPE, Share> gradient[NUM_FEATURES])
 {
