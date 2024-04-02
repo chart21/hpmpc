@@ -152,6 +152,7 @@ void inference(DATATYPE* res)
 
         if (key && value) {
             // Compare the key and assign the value to the appropriate field in cfg
+            /* std::cout << " Key: " << key << " Value: " << value << std::endl; */
             if (strcmp(key, "mode") == 0) {
                 cfg.mode = value;
             }

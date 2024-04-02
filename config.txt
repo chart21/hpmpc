@@ -4,19 +4,27 @@ data_dir=SimpleNN/dataset
 
 #LeNet5
 #pretrained=pretrained_models/LeNet5/LeNet5_MNIST_standard_best.bin
+#10000: 0.93 (Frac 5)
 #pretrained=pretrained_models/LeNet5/LeNet5_MNIST_custom_best.bin
-
+#10000: 1.22 (Frac 5)
 #pretrained=pretrained_models/old_models/lenet_temp.bin
+#does not match
 #pretrained=pretrained_models/old_models_hpmpc/lenet.bin
-#pretrained=pretrained_models/old_models/lenet5.pth
-#pretrained=pretrained_models/old_models/lenet5_avg.pth
-#pretrained=pretrained_models/old_models/lenet5_batch_avg.pth
-#pretrained=pretrained_models/old_models/lenet5_batch_max_20.pth
-#pretrained=pretrained_models/old_models/lenet_no_batch.pth
-#pretrained=pretrained_models/old_models/lenet_torch.bin
+#does not match
+#pretrained=pretrained_models/old_models_hpmpc/lenet5.pth
+#does not match
+#pretrained=pretrained_models/old_models_hpmpc/lenet5_avg.pth
+#10000: 13.86 (Frac 5)
+#pretrained=pretrained_models/old_models_hpmpc/lenet5_batch_avg.pth
+#pretrained=pretrained_models/old_models_hpmpc/lenet5_batch_max_20.pth
+#pretrained=pretrained_models/old_models_hpmpc/lenet_no_batch.pth
+#10000: 13.86 (Frac 5)
+#pretrained=pretrained_models/old_models_hpmpc/lenet_torch.bin
+#does not match
 
 #AlexNet32
 #pretrained=pretrained_models/old_models_hpmpc/alex32.bin
+#100 79 (Frac 5)
 #pretrained=pretrained_models/old_models/alexnet32t_cifar10_temp.bin
 #pretrained=pretrained_models/old_models/og_alexnet32t_cifar10.bin
 #pretained=pretrained_models/old/alex32.bin
@@ -125,8 +133,8 @@ ResNet18
 
 #Images
 
-#image_file=CIFAR-10_standard_test_images.bin
-#label_file=CIFAR-10_standard_test_labels.bin
+image_file=CIFAR-10_standard_test_images.bin
+label_file=CIFAR-10_standard_test_labels.bin
 #image_file=CIFAR-10_custom_test_images.bin
 #label_file=CIFAR-10_custom_test_labels.bin
 #image_file=CIFAR-100_standard_test_images.bin

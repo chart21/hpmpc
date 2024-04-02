@@ -22,12 +22,12 @@ using A = Additive_Share<Datatype, Share>;
 using sint = sint_t<A>;
 for (int i = 0; i < len; i++)
 {
-    bit_val[i].prepare_bit2A(output[i].get_share_pointer());
+    bit_val[i].prepare_bit2a(output[i].get_share_pointer());
 }
 Share::communicate();
 for (int i = 0; i < len; i++)
 {
-    output[i].complete_bit2A();
+    output[i].complete_bit2a();
 }
 }
 
