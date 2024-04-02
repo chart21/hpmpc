@@ -107,67 +107,82 @@ void inference(DATATYPE* res)
 #elif FUNCTION_IDENTIFIER == 82 || FUNCTION_IDENTIFIER == 182 || FUNCTION_IDENTIFIER == 282 || FUNCTION_IDENTIFIER == 382
     int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28, num_classes = 10;
     auto model = LeNet<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 83 || FUNCTION_IDENTIFIER == 183 || FUNCTION_IDENTIFIER == 283 || FUNCTION_IDENTIFIER == 383
+#elif FUNCTION_IDENTIFIER == 83 || FUNCTION_IDENTcFIER == 183 || FUNCTION_IDENTIFIER == 283 || FUNCTION_IDENTIFIER == 383
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = AlexNet_CryptGpu<modeltype>(num_classes);
 #endif
 
 	Config cfg;
     cfg.mode = "test";
-    cfg.save_dir = "./SimpleNN/model_zoo/pthAdamModels/cifar10_ADAM_001/";
+    /* cfg.save_dir = "./SimpleNN/model_zoo/pthAdamModels/cifar10_ADAM_001/"; */
+    /* cfg.save_dir = "./SimpleNN/model_zoo"; */
     /* cfg.save_dir = "./SimpleNN/model_zoo/"; */
-    cfg.data_dir = "./SimpleNN/dataset";
-    cfg.pretrained = "dummy.dummy";
+    /* cfg.data_dir = "./SimpleNN/dataset"; */
+    /* cfg.pretrained = "dummy.dummy"; */
+    /* cfg.image_file = "MNIST_standard_test_images.bin"; */
+    /* cfg.label_file = "MNIST_standard_test_labels.bin"; */
+    /* cfg.pretrained = "pretrained_models/LeNet5/LeNet5_MNIST_standard_best.bin"; */
+
     /* cfg.pretrained = "old/vgg16_cifar.bin"; */
     /* cfg.image_file = "old/cifar10-test-images.bin"; */
     /* cfg.label_file = "old/cifar10-test-labels.bin"; */
     /* cfg.pretrained = "VGG16_CIFAR-10_standard_best.bin"; */
-    cfg.image_file = "CIFAR-10_standard_test_images.bin";
-    cfg.label_file = "CIFAR-10_standard_test_labels.bin";
+    /* cfg.image_file = "CIFAR-10_standard_test_images.bin"; */
+    /* cfg.label_file = "CIFAR-10_standard_test_labels.bin"; */
     /* cfg.pretrained = "VGG16_CIFAR-10_custom_best.bin"; */
     /* cfg.image_file = "CIFAR-10_custom_test_images.bin"; */
     /* cfg.label_file = "CIFAR-10_custom_test_labels.bin"; */
-    
-    //read details from file instead
-    /* auto file = fopen("config.txt", "r"); */
-    /* if (file == NULL) { */
-    /*     std::cout << "Error opening file" << std::endl; */
-    /*     exit(1); */
-    /* } */
-    /* char line[256]; */
-    /* while (fgets(line, sizeof(line), file)) { */
-    /*     char* token = strtok(line, "="); */
-    /*     if (strcmp(token, "mode") == 0) { */
-    /*         token = strtok(NULL, "="); */
-    /*         cfg.mode = token; */
-    /*     } */
-    /*     else if (strcmp(token, "save_dir") == 0) { */
-    /*         token = strtok(NULL, "="); */
-    /*         cfg.save_dir = token; */
-    /*     } */
-    /*     else if (strcmp(token, "data_dir") == 0) { */
-    /*         token = strtok(NULL, "="); */
-    /*         cfg.data_dir = token; */
-    /*     } */
-    /*     else if (strcmp(token, "pretrained") == 0) { */
-    /*         token = strtok(NULL, "="); */
-    /*         cfg.pretrained = token; */
-    /*     } */
-    /*     else if (strcmp(token, "image_file") == 0) { */
-    /*         token = strtok(NULL, "="); */
-    /*         cfg.image_file = token; */
-    /*     } */
-    /*     else if (strcmp(token, "label_file") == 0) { */
-    /*         token = strtok(NULL, "="); */
-    /*         cfg.label_file = token; */
-    /*     } */
-    /* } */
-    /* std::cout << "Mode: " << cfg.mode << std::endl; */
-    /* std::cout << "Save Directory: " << cfg.save_dir << std::endl; */
-    /* std::cout << "Data Directory: " << cfg.data_dir << std::endl; */
-    /* std::cout << "Pretrained Model: " << cfg.pretrained << std::endl; */
-    /* std::cout << "Image File: " << cfg.image_file << std::endl; */
-    /* std::cout << "Label File: " << cfg.label_file << std::endl; */
+   
+// Open the configuration file
+    FILE* file = fopen("config.txt", "r");
+    if (file == NULL) {
+        std::cerr << "Error opening file" << std::endl;
+        exit(1);
+    }
+
+    // Buffer to hold each line from the file
+    char line[256];
+
+    // Read the file line by line
+    while (fgets(line, sizeof(line), file)) {
+        // Get the key part of the line
+        char* key = strtok(line, "=");
+        // Get the value part of the line
+        char* value = strtok(NULL, "\n");
+
+        if (key && value) {
+            // Compare the key and assign the value to the appropriate field in cfg
+            if (strcmp(key, "mode") == 0) {
+                cfg.mode = value;
+            }
+            else if (strcmp(key, "save_dir") == 0) {
+                cfg.save_dir = value;
+            }
+            else if (strcmp(key, "data_dir") == 0) {
+                cfg.data_dir = value;
+            }
+            else if (strcmp(key, "pretrained") == 0) {
+                cfg.pretrained = value;
+            }
+            else if (strcmp(key, "image_file") == 0) {
+                cfg.image_file = value;
+            }
+            else if (strcmp(key, "label_file") == 0) {
+                cfg.label_file = value;
+            }
+        }
+    }
+
+    // Close the file after reading
+    fclose(file);
+
+    // Print out the loaded configuration values
+    std::cout << "Mode: " << cfg.mode << std::endl;
+    std::cout << "Save Directory: " << cfg.save_dir << std::endl;
+    std::cout << "Data Directory: " << cfg.data_dir << std::endl;
+    std::cout << "Pretrained Model: " << cfg.pretrained << std::endl;
+    std::cout << "Image File: " << cfg.image_file << std::endl;
+    std::cout << "Label File: " << cfg.label_file << std::endl;
 
 
     /* fclose(file); */
