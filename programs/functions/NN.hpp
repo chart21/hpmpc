@@ -132,7 +132,9 @@ void inference(DATATYPE* res)
     /* cfg.pretrained = "VGG16_CIFAR-10_custom_best.bin"; */
     /* cfg.image_file = "CIFAR-10_custom_test_images.bin"; */
     /* cfg.label_file = "CIFAR-10_custom_test_labels.bin"; */
-   
+  
+
+#if MODELOWNER != -1 || DATAOWNER != -1
 // Open the configuration file
     FILE* file = fopen("config.txt", "r");
     if (file == NULL) {
@@ -185,6 +187,7 @@ void inference(DATATYPE* res)
     std::cout << "Image File: " << cfg.image_file << std::endl;
     std::cout << "Label File: " << cfg.label_file << std::endl;
 
+#endif
 
     /* fclose(file); */
     //file should look like this:
