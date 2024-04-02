@@ -5,11 +5,6 @@
 #include <cstddef>
 #include <vector>
 
-#ifndef BITLENGTH
-#define BITLENGTH 32
-#define DATATYPE int32_t
-#endif
-
 namespace IR {
 
 template <class int_t, class uint_t, size_t LENGTH = BITLENGTH>

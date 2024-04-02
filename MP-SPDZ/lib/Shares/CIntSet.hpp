@@ -7,10 +7,6 @@
 
 using std::vector;
 
-#ifndef BITLENGTH
-#define BITLENGTH 32
-#endif
-
 namespace IR {
 
 template <class cint, size_t LENGTH = BITLENGTH>
