@@ -92,7 +92,7 @@ void LTZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     
     for(int i = 0; i < len; i++)
     {
-        y[i].prepare_opt_bit_injection(result[i].get_share_pointer());
+        y[i].prepare_opt_bit_injection(result[i].get_share_pointer(),result[i].get_share_pointer());
     }
     delete[] y;
     Share::communicate();
