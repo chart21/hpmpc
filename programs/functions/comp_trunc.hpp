@@ -199,13 +199,13 @@ void EQZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     
     for(int i = 0; i < len; i++)
     {
-        y[i].prepare_opt_bit_injection(val[i].get_share_pointer(),val[i].get_share_pointer());
+        y[i].prepare_opt_bit_injection(result[i].get_share_pointer(),result[i].get_share_pointer());
     }
     delete[] y;
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        val[i].complete_opt_bit_injection();
+        result[i].complete_opt_bit_injection();
     }
     
 
@@ -261,7 +261,7 @@ static void pack_additive(const Additive_Share<Datatype, Share>*  input, Additiv
     sint* tmp = new sint[(m-1)/BITLENGTH+1];
     sint* tmp_output = new sint[(m-1)/BITLENGTH+1];
     int counter = 0;
-    while(m > 31)
+    while(m > BITLENGTH-1)
     {
        tmp[counter++] = sint::load_shares(input+counter*BITLENGTH);
        m -= BITLENGTH;
@@ -275,7 +275,7 @@ static void pack_additive(const Additive_Share<Datatype, Share>*  input, Additiv
     /* } */
     counter = 0;
     m = len;
-    while(m > 31)
+    while(m > BITLENGTH-1)
     {
         for(int j = 0; j < BITLENGTH; j++)
         {

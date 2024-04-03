@@ -521,7 +521,7 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
     int m = end - begin;
     sint* tmp = new sint[(m-1)/BITLENGTH+1];
     int counter = 0;
-    while(m > 31)
+    while(m > BITLENGTH-1)
     {
        tmp[counter++] = sint::load_shares(begin+counter*BITLENGTH);
        m -= BITLENGTH;
@@ -537,7 +537,7 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
     /* } */
     counter = 0;
     m = end - begin;
-    while(m > 31)
+    while(m > BITLENGTH-1)
     {
         for(int j = 0; j < BITLENGTH; j++)
         {
