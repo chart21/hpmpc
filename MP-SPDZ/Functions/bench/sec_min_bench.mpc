@@ -1,0 +1,22 @@
+import operator
+
+from Compiler.types import sint, Array, MemValue
+from Compiler.library import print_ln, for_range
+
+
+program.bit_length = 32
+size = int(program.args[1])
+player = int(3)
+input_size=size
+datatype = sint
+
+inputs=Array(input_size,datatype)
+#Use the same loop to calculate the min, max and sum of the values
+min_value=Array(1,sint)
+inputs.assign_all(1)
+min_value[0]=inputs[0]
+@for_range_opt(input_size)
+def _(i):
+        min_value[0]=(inputs[i].min(min_value[0]))
+
+min_value[0].reveal()
