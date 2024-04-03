@@ -107,7 +107,7 @@ void inference(DATATYPE* res)
 #elif FUNCTION_IDENTIFIER == 82 || FUNCTION_IDENTIFIER == 182 || FUNCTION_IDENTIFIER == 282 || FUNCTION_IDENTIFIER == 382
     int n_test = NUM_INPUTS*BASE_DIV, ch = 1, h = 28, w = 28, num_classes = 10;
     auto model = LeNet<modeltype>(num_classes);
-#elif FUNCTION_IDENTIFIER == 83 || FUNCTION_IDENTcFIER == 183 || FUNCTION_IDENTIFIER == 283 || FUNCTION_IDENTIFIER == 383
+#elif FUNCTION_IDENTIFIER == 83 || FUNCTION_IDENTIFIER == 183 || FUNCTION_IDENTIFIER == 283 || FUNCTION_IDENTIFIER == 383
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = AlexNet_CryptGpu<modeltype>(num_classes);
 #elif FUNCTION_IDENTIFIER == 84 || FUNCTION_IDENTIFIER == 184 || FUNCTION_IDENTIFIER == 284 || FUNCTION_IDENTIFIER == 384
