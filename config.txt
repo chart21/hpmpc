@@ -26,106 +26,168 @@ data_dir=SimpleNN/dataset
 #pretrained=pretrained_models/old_models_hpmpc/alex32.bin
 #100 79 (Frac 5)
 #pretrained=pretrained_models/old_models/alexnet32t_cifar10_temp.bin
+#100 88 (Frac 5)
 #pretrained=pretrained_models/old_models/og_alexnet32t_cifar10.bin
-#pretained=pretrained_models/old/alex32.bin
-#pretained=pretrained_models/cifar10_ADAM_001/AlexNet_32_CIFAR-10_standard_best.bin
+#100 82 (Frac 5)
+#pretrained=pretrained_models/old_models_hpmpc/alex32.bin
+#100 79 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_001/AlexNet_32_CIFAR-10_standard_best.bin
+#100 71 (Frac 5)
 
 #pretrained=pretrained_models/old_models/AlexNet32_avg_c10_custom_best_50.bin
-#pretained=pretrained_models/cifar10_ADAM_001/AlexNet_32_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/AlexNet_32_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/AlexNet_32_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/AlexNet_32_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/AlexNet_32_CIFAR-10_custom_best.bin
+#100 76 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_001/AlexNet_32_CIFAR-10_custom_best.bin
+#100 63 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/AlexNet_32_CIFAR-10_standard_best.bin
+#100 62 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/AlexNet_32_CIFAR-10_custom_best.bin
+#100 68 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/AlexNet_32_CIFAR-10_standard_best.bin
+#100 63 (Frac 5)
+$pretrained=pretrained_models/cifar10_SGD_001/AlexNet_32_CIFAR-10_custom_best.bin
+#100 70 (Frac 5)
 
 
 #AlexNetC
 
-#pretained=pretrained_models/cifar10_ADAM_001/AlexNet_CryptGPU_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/AlexNet_CryptGPU_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/AlexNet_CryptGPU_CIFAR-10_standard_best.bin
+#pretrained=pretrained_models/cifar10_ADAM_001/AlexNet_CryptGPU_CIFAR-10_standard_best.bin
+#100 29 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/AlexNet_CryptGPU_CIFAR-10_standard_best.bin
+#100 25 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/AlexNet_CryptGPU_CIFAR-10_standard_best.bin
+#100 28 (Frac 5)
+
 
 #pretrained=pretrained_models/old_models/AlexNetC_avg_c10_custom_best_50.bin
-#pretained=pretrained_models/cifar10_ADAM_001/AlexNet_CryptGPU_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/AlexNet_CryptGPU_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/AlexNet_CryptGPU_CIFAR-10_custom_best.bin
+#100 26 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_001/AlexNet_CryptGPU_CIFAR-10_custom_best.bin
+#100 26 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/AlexNet_CryptGPU_CIFAR-10_custom_best.bin
+#100 43 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/AlexNet_CryptGPU_CIFAR-10_custom_best.bin
+#100 39 (Frac 5)
 
 #VGG16
 
 #pretrained=pretrained_models/old_models_hpmpc/vgg16_cifar.bin
+#100 31 (Frac 5)
 #pretrained=pretrained_models/old_models/og_vgg16_cifar10.bin
+#100 93 (Frac 5)
 #pretrained=pretrained_models/old_models/og_vgg16_cifar10B.bin
+#does not match
 #pretrained=pretrained_models/old_models/vgg_c10_standard_100_best.bin
-#pretained=pretrained_models/cifar10_ADAM_001/VGG16_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/VGG16_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/VGG16_CIFAR-10_standard_best.bin
+#100 93 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_001/VGG16_CIFAR-10_standard_best.bin
+#100 92 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/VGG16_CIFAR-10_standard_best.bin
+#100 90 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/VGG16_CIFAR-10_standard_best.bin
+#100 88 (Frac 5)
 
-#pretained=pretrained_models/cifar10_ADAM_001/VGG16_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/VGG16_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/VGG16_CIFAR-10_custom_best.bin
+#pretrained=pretrained_models/cifar10_ADAM_001/VGG16_CIFAR-10_custom_best.bin
+#100 93 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/VGG16_CIFAR-10_custom_best.bin
+#100 89 (Frac 5)
+pretrained=pretrained_models/cifar10_SGD_001/VGG16_CIFAR-10_custom_best.bin
+#100 88 (Frac 5)
 
 ResNet18
 
-#pretained=pretrained_models/cifar10_ADAM_001/ResNet18_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/ResNet18_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/ResNet18_CIFAR-10_standard_best.bin
+#pretrained=pretrained_models/cifar10_ADAM_001/ResNet18_avg_CIFAR-10_standard_best.bin
+#100 39 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/ResNet18_avg_CIFAR-10_standard_best.bin
+#100 36 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/ResNet18_avg_CIFAR-10_standard_best.bin
+#100 40 (Frac 5)
 
-#pretained=pretrained_models/cifar10_ADAM_001/ResNet18_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/ResNet18_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/ResNet18_CIFAR-10_custom_best.bin
+#pretrained=pretrained_models/cifar10_ADAM_001/ResNet18_avg_CIFAR-10_custom_best.bin
+#100 40 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/ResNet18_avg_CIFAR-10_custom_best.bin
+#100 49 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/ResNet18_CIFAR-10_custom_best.bin
+#100 54 (Frac 5)
 
 
 #ResNet50
 
 #pretrained=pretrained_models/old_models_hpmpc/ResNet50_cifar.bin
+#100 78 (Frac 5)
 #pretrained=pretrained_models/old_models_hpmpc/Resnet50_cifar.bin
-#pretained=pretrained_models/cifar10_ADAM_001/ResNet50_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/ResNet50_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/ResNet50_CIFAR-10_standard_best.bin
+#100 78 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_001/ResNet50_avg_CIFAR-10_standard_best.bin
+#100 56 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/ResNet50_avg_CIFAR-10_standard_best.bin
+#100 55 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/ResNet50_avg_CIFAR-10_standard_best.bin
+#100 42 (Frac 5)
 
 #pretrained=pretrained_models/old_models_hpmpc/ResNet50_custom.bin
+#100 82 (Frac 5)
 #pretrained=pretrained_models/old_models_hpmpc/ResNet50_custom2.bin
-#pretrained=pretrained_models/old_models_hpmpc/Resnet50_avg_c10_custom_best_50.bin
-#pretained=pretrained_models/cifar10_ADAM_001/ResNet50_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/ResNet50_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/ResNet50_CIFAR-10_custom_best.bin
+#100 74 (Frac 5)
+#pretrained=pretrained_models/old_models/ResNet50_avg_c10_custom_best_50.bin
+#100 38 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_001/ResNet50_avg_CIFAR-10_custom_best.bin
+#100 83 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/ResNet50_avg_CIFAR-10_custom_best.bin
+#100 88 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/ResNet50_avg_CIFAR-10_custom_best.bin
+100 80 (Frac 5)
 
 #pretrained=pretrained_models/old_models_hpmpc/resnet50_cifar100.bin
+#does not match
 #pretrained=pretrained_models/old_models_hpmpc/ResNet50_Cifar_Max.bin
-#pretrained=pretrained_models/old_models_hpmpc/ResNet50_Adapt.bin
+#100 78 (Frac 5) (avg instead of max)
+#pretrained=pretrained_models/old_models_hpmpc/Restnet50_Adapt.bin
+#100 67 (Frac 5)
 
 #ResNet101
 
-#pretained=pretrained_models/cifar10_ADAM_001/ResNet101_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/ResNet101_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/ResNet101_CIFAR-10_standard_best.bin
+#pretrained=pretrained_models/cifar10_ADAM_001/ResNet101_avg_CIFAR-10_standard_best.bin
+#100 54 (Frac 5)
+#pretrained=pretrained_models/cifar10_ADAM_005/ResNet101_avg_CIFAR-10_standard_best.bin
+#100 59 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/ResNet101_avg_CIFAR-10_standard_best.bin
+#100 91 (Frac 5)
 
-#pretained=pretrained_models/cifar10_ADAM_001/ResNet101_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/ResNet101_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/ResNet101_CIFAR-10_custom_best.bin
+#pretrained=pretrained_models/cifar10_ADAM_001/ResNet101_avg_CIFAR-10_custom_best.bin
+#does not exist
+#pretrained=pretrained_models/cifar10_ADAM_005/ResNet101_avg_CIFAR-10_custom_best.bin
+#100 79 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/ResNet101_avg_CIFAR-10_custom_best.bin
+#100 94 (Frac 5)
+
 
 #ResNet152
 
 #pretrained=pretrained_models/old_models_hpmpc/ResNet152_cifar.bin
-#pretained=pretrained_models/cifar10_ADAM_001/ResNet152_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/ResNet152_CIFAR-10_standard_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/ResNet152_CIFAR-10_standard_best.bin
+#does not match
+#pretrained=pretrained_models/cifar10_ADAM_001/ResNet152_avg_CIFAR-10_standard_best.bin
+#does not exist
+#pretrained=pretrained_models/cifar10_ADAM_005/ResNet152_avg_CIFAR-10_standard_best.bin
+#100 95 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/ResNet152_avg_CIFAR-10_standard_best.bin
+#100 83 (Frac 5)
 
-#pretained=pretrained_models/cifar10_ADAM_001/ResNet152_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_ADAM_005/ResNet152_CIFAR-10_custom_best.bin
-#pretained=pretrained_models/cifar10_SGD_001/ResNet152_CIFAR-10_custom_best.bin
+#pretrained=pretrained_models/cifar10_ADAM_001/ResNet152_avg_CIFAR-10_custom_best.bin
+#does not exist
+#pretrained=pretrained_models/cifar10_ADAM_005/ResNet152_avg_CIFAR-10_custom_best.bin
+#100 93 (Frac 5)
+#pretrained=pretrained_models/cifar10_SGD_001/ResNet152_avg_CIFAR-10_custom_best.bin
+#100 95 (Frac 5)
 
 
 #DRD
 
-#pretrained=pretrained_models/old_models_hpmpc/mode_DRD_C100_7K.bin
-#pretrained=pretrained_models/old_models_hpmpc/mode_DRD_C100_12K.bin
-#pretrained=pretrained_models/old_models_hpmpc/mode_DRD_C100_14K.bin
-#pretrained=pretrained_models/old_models_hpmpc/mode_DRD_C100_29K.bin
-#pretrained=pretrained_models/old_models_hpmpc/mode_DRD_C100_49K.bin
-#pretrained=pretrained_models/old_models_hpmpc/mode_DRD_C100_57K.bin
-#pretrained=pretrained_models/old_models_hpmpc/mode_DRD_C100_115K.bin
-#pretrained=pretrained_models/old_models_hpmpc/mode_DRD_C100_230K.bin
-#pretrained=pretrained_models/old_models_hpmpc/mode_DRD_C100_230K_mod.bin
+#pretrained=pretrained_models/old_models_hpmpc/model_DRD_C100_7K.bin
+#pretrained=pretrained_models/old_models_hpmpc/model_DRD_C100_12K.bin
+#pretrained=pretrained_models/old_models_hpmpc/model_DRD_C100_14K.bin
+#pretrained=pretrained_models/old_models_hpmpc/model_DRD_C100_29K.bin
+#pretrained=pretrained_models/old_models_hpmpc/model_DRD_C100_49K.bin
+#pretrained=pretrained_models/old_models_hpmpc/model_DRD_C100_57K.bin
+#pretrained=pretrained_models/old_models_hpmpc/model_DRD_C100_115K.bin
+#pretrained=pretrained_models/old_models_hpmpc/model_DRD_C100_230K.bin
+#pretrained=pretrained_models/old_models_hpmpc/model_DRD_C100_230K_mod.bin
 
 # Uknown
 #pretrained=pretrained_models/old_models_hpmpc/best_model.pth
@@ -133,16 +195,20 @@ ResNet18
 
 #Images
 
-image_file=CIFAR-10_standard_test_images.bin
-label_file=CIFAR-10_standard_test_labels.bin
-#image_file=CIFAR-10_custom_test_images.bin
-#label_file=CIFAR-10_custom_test_labels.bin
+#image_file=CIFAR-10_standard_test_images.bin
+#label_file=CIFAR-10_standard_test_labels.bin
+image_file=CIFAR-10_custom_test_images.bin
+label_file=CIFAR-10_custom_test_labels.bin
+#image_file=old/CIFAR-100_test_images.bin
+#label_file=old/CIFAR-100_test_labels.bin
 #image_file=CIFAR-100_standard_test_images.bin
 #label_file=CIFAR-100_standard_test_labels.bin
 #image_file=CIFAR-100_custom_test_images.bin
 #label_file=CIFAR-100_custom_test_labels.bin
+
 #image_file=MNIST_standard_test_images.bin
 #label_file=MNIST_standard_test_labels.bin
 #image_file=MNIST_custom_test_images.bin
 #label_file=MNIST_custom_test_labels.bin
+
 

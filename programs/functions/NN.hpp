@@ -110,6 +110,9 @@ void inference(DATATYPE* res)
 #elif FUNCTION_IDENTIFIER == 83 || FUNCTION_IDENTcFIER == 183 || FUNCTION_IDENTIFIER == 283 || FUNCTION_IDENTIFIER == 383
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = AlexNet_CryptGpu<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 84 || FUNCTION_IDENTIFIER == 184 || FUNCTION_IDENTIFIER == 284 || FUNCTION_IDENTIFIER == 384
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 100;
+    auto model = DRD_C100_7K<modeltype>(num_classes);
 #endif
 
 	Config cfg;
