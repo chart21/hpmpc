@@ -83,23 +83,47 @@ void LTZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     adders.clear();
     adders.shrink_to_fit();
     
-    /* for(int i = 0; i < len; i++) */
-    /* { */
-    /*     y[i] = ~ y[i]; */
-    /* } */
-    /* if(current_phase == 1) */
-    /*     std::cout << "Bit inj ..." << std::endl; */
-    
+
+    sint* t1 = new sint[len];
+    sint* t2 = new sint[len];
     for(int i = 0; i < len; i++)
     {
-        y[i].prepare_opt_bit_injection(result[i].get_share_pointer(),result[i].get_share_pointer());
+        y[i].prepare_bit_injection_S1(t1[i].get_share_pointer());
+        y[i].prepare_bit_injection_S2(t2[i].get_share_pointer());
     }
     delete[] y;
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        result[i].complete_opt_bit_injection();
+        t1[i].complete_bit_injection_S1();
+        t2[i].complete_bit_injection_S2();
     }
+    
+    Share::communicate();
+    
+    for(int i = 0; i < len; i++)
+    {
+        result[i].prepare_XOR(t1[i],t2[i]);
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        result[i].complete_XOR(t1[i],t2[i]);
+    }
+    
+    delete[] t1;
+    delete[] t2;
+    
+    /* for(int i = 0; i < len; i++) */
+    /* { */
+    /*     y[i].prepare_opt_bit_injection(result[i].get_share_pointer(),result[i].get_share_pointer()); */
+    /* } */
+    /* delete[] y; */
+    /* Share::communicate(); */
+    /* for(int i = 0; i < len; i++) */
+    /* { */
+    /*     result[i].complete_opt_bit_injection(); */
+    /* } */
     
 }
 
@@ -197,17 +221,46 @@ void EQZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     /* if(current_phase == 1) */
     /*     std::cout << "Bit inj ..." << std::endl; */
     
+    /* for(int i = 0; i < len; i++) */
+    /* { */
+    /*     y[i].prepare_opt_bit_injection(result[i].get_share_pointer(),result[i].get_share_pointer()); */
+    /* } */
+    /* delete[] y; */
+    /* Share::communicate(); */
+    /* for(int i = 0; i < len; i++) */
+    /* { */
+    /*     result[i].complete_opt_bit_injection(); */
+    /* } */
+    
+    sint* t1 = new sint[len];
+    sint* t2 = new sint[len];
     for(int i = 0; i < len; i++)
     {
-        y[i].prepare_opt_bit_injection(result[i].get_share_pointer(),result[i].get_share_pointer());
+        y[i].prepare_bit_injection_S1(t1[i].get_share_pointer());
+        y[i].prepare_bit_injection_S2(t2[i].get_share_pointer());
     }
     delete[] y;
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        result[i].complete_opt_bit_injection();
+        t1[i].complete_bit_injection_S1();
+        t2[i].complete_bit_injection_S2();
     }
     
+    Share::communicate();
+    
+    for(int i = 0; i < len; i++)
+    {
+        result[i].prepare_XOR(t1[i],t2[i]);
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        result[i].complete_XOR(t1[i],t2[i]);
+    }
+    
+    delete[] t1;
+    delete[] t2;
 
 
 
@@ -261,7 +314,7 @@ static void pack_additive(const Additive_Share<Datatype, Share>*  input, Additiv
     sint* tmp = new sint[(m-1)/BITLENGTH+1];
     sint* tmp_output = new sint[(m-1)/BITLENGTH+1];
     int counter = 0;
-    while(m > BITLENGTH-1)
+    while(m > (BITLENGTH-1))
     {
        tmp[counter++] = sint::load_shares(input+counter*BITLENGTH);
        m -= BITLENGTH;
@@ -275,7 +328,7 @@ static void pack_additive(const Additive_Share<Datatype, Share>*  input, Additiv
     /* } */
     counter = 0;
     m = len;
-    while(m > BITLENGTH-1)
+    while(m > (BITLENGTH-1))
     {
         for(int j = 0; j < BITLENGTH; j++)
         {
@@ -304,19 +357,57 @@ void test_comp_trunc(DATATYPE *res)
 
     //Syntax for additive shares
     A* input = new A[NUM_INPUTS];
-    A* output = new A[NUM_INPUTS];
-    pack_additive<0, BITLENGTH>(input, output, NUM_INPUTS, LTZ<0, BITLENGTH, Share, DATATYPE>); //LTZ
-    pack_additive<0, BITLENGTH>(input, output, NUM_INPUTS, EQZ<0, BITLENGTH, Share, DATATYPE>); //EQZ
-    trunc_pr<A>(input, output, NUM_INPUTS);
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        if(i % 10 == 0)
+            input[i] = PROMOTE(0);
+        else if(i % 2 == 0)
+            input[i] = PROMOTE(i);
+        else
+            input[i] = PROMOTE(-i);
+    }
+    A* ltz_output = new A[NUM_INPUTS];
+    A* eqz_output = new A[NUM_INPUTS];
+    pack_additive<0, BITLENGTH>(input, ltz_output, NUM_INPUTS, LTZ<0, BITLENGTH, Share, DATATYPE>); //LTZ
+    pack_additive<0, BITLENGTH>(input, eqz_output, NUM_INPUTS, EQZ<0, BITLENGTH, Share, DATATYPE>); //EQZ
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        input[i].prepare_reveal_to_all();
+        ltz_output[i].prepare_reveal_to_all();
+        eqz_output[i].prepare_reveal_to_all();
+    } 
+    Share::communicate();
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        auto inp = input[i].complete_reveal_to_all();
+        auto res = ltz_output[i].complete_reveal_to_all();
+        auto res2 = eqz_output[i].complete_reveal_to_all();
+        UINT_TYPE uint_inp[DATTYPE/BITLENGTH];
+        UINT_TYPE ltz_res[DATTYPE/BITLENGTH];
+        UINT_TYPE eqz_res[DATTYPE/BITLENGTH];
+        unorthogonalize_arithmetic(&inp, uint_inp, 1);
+        unorthogonalize_arithmetic(&res, ltz_res, 1);
+        unorthogonalize_arithmetic(&res2, eqz_res, 1);
+        for(int j = 0; j < DATTYPE/BITLENGTH; j++)
+        {
+            std::cout << "Result: " << "input: " << INT_TYPE(uint_inp[j]) << " LTZ: " << ltz_res[j] << " EQZ: " << eqz_res[j] << std::endl;
+        }
+
+    }
+
+    /* trunc_pr<A>(input, output, NUM_INPUTS); */
     delete[] input;
-    delete[] output;
+    delete[] ltz_output;
+    delete[] eqz_output;
 
     //Syntax for sint
-    sint* sint_input = new sint[NUM_INPUTS];
-    sint* sint_output = new sint[NUM_INPUTS];
-    LTZ<0, BITLENGTH, Share, DATATYPE>(sint_input, sint_output, NUM_INPUTS);
-    EQZ<0, BITLENGTH, Share, DATATYPE>(sint_input, sint_output, NUM_INPUTS);
-    trunc_pr<sint>(sint_input, sint_output, NUM_INPUTS);
-    delete[] sint_input;
-    delete[] sint_output;
+    /* sint* sint_input = new sint[NUM_INPUTS]; */
+    /* sint* sint_output = new sint[NUM_INPUTS]; */
+    /* LTZ<0, BITLENGTH, Share, DATATYPE>(sint_input, sint_output, NUM_INPUTS); */
+    /* EQZ<0, BITLENGTH, Share, DATATYPE>(sint_input, sint_output, NUM_INPUTS); */
+    /* trunc_pr<sint>(sint_input, sint_output, NUM_INPUTS); */
+    /* delete[] sint_input; */
+    /* delete[] sint_output; */
 }
+
+
