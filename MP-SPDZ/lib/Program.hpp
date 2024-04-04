@@ -2278,12 +2278,14 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::dotprods(const vector
     for (size_t vec = 0; vec < size; ++vec) {
         for (auto it = regs.begin(); it != regs.end();) {
             auto next = it + *it;
+            int dest = *(it + 1);
             it += 2;
+            s_register[dest] = ZERO;
 
-            matrix.next_dotprod();
             while (it != next) {
-                matrix.add_mul(s_register[*(it++) + vec], s_register[*(it++) + vec]);
+                s_register[dest] += s_register[*(it++) + vec].prepare_dot(s_register[*(it++) + vec]);
             }
+            s_register[dest].mask_and_send_dot_without_trunc();
         }
     }
 
@@ -2293,7 +2295,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::dotprods(const vector
         for (auto it = regs.begin(); it != regs.end();) {
             auto next = it + *it;
             it++;
-            s_register[*it + vec] = matrix.get_next();
+            s_register[*it + vec].complete_mult_without_trunc();
             it = next;
         }
     }
