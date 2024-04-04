@@ -21,7 +21,6 @@
 #include "Shares/Integer.hpp"
 #include "help/Input.hpp"
 #include "help/Util.hpp"
-#include "help/matrix.hpp"
 
 #include "../../programs/functions/comp_trunc.hpp"
 
@@ -133,8 +132,6 @@ class Program {
     std::stack<IntType> i_stack;
 
     std::mt19937 rand_engine;
-
-    MatrixCalculus101<sint> matrix;
 
     void update_max_reg(const Type& reg, const unsigned& sreg, const Opcode& op);
 };
@@ -1055,8 +1052,7 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 Program<int_t, cint, Share, sint, sbit, BitShare, N>::Program(const string&& path, size_t thread)
-    : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21),
-      matrix() {}
+    : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21) {}
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
@@ -2216,7 +2212,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmulsm(
 
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
-            *(res + i * cols + j) = matrix.get_next();
+            (res + i * cols + j)->complete_mult_without_trunc();
         }
     }
 }
@@ -2228,7 +2224,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmulsm_prepare(
     const vector<int>& regs, const int& row_1, const int& j, iterator source1, iterator source2) {
     auto col_2 = i_register[regs[9] + j].get(); // column of 2nd factor
 
-    matrix.next_dotprod();
+    s_register[regs[0] + row_1 * regs[5] + j] = ZERO;
     for (int k = 0; k < regs[4]; ++k) {             // length of dot_prod
         auto col_1 = i_register[regs[7] + k].get(); // column of first factor
         auto row_2 = i_register[regs[8] + k].get(); // row of 2nd factor
@@ -2236,8 +2232,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmulsm_prepare(
         iterator cur_1 = source1 + row_1 * regs[10] + col_1;
         iterator cur_2 = source2 + row_2 * regs[11] + col_2;
 
-        matrix.add_mul(*cur_1, *cur_2);
+        s_register[regs[0] + row_1 * regs[5] + j] += cur_1->prepare_dot(*cur_2);
     }
+    s_register[regs[0] + row_1 * regs[5] + j].mask_and_send_dot_without_trunc();
 }
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
@@ -2250,10 +2247,12 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmuls(const vector<
         const int& cols2 = regs[vec + 5];
         for (int i = 0; i < rows1; ++i) {     // rows
             for (int j = 0; j < cols2; ++j) { // cols
-                matrix.next_dotprod();
+                s_register[regs[vec] + i * rows1 + j] = ZERO;
                 for (int k = 0; k < cr; ++k) // cols/rows
-                    matrix.add_mul(s_register[regs[vec + 1] + i * cr + k],
-                                   s_register[regs[vec + 2] + k * cols2 + j]);
+                    s_register[regs[vec] + i * rows1 + j] +=
+                        s_register[regs[vec + 1] + i * cr + k].prepare_dot(
+                            s_register[regs[vec + 2] + k * cols2 + j]);
+                s_register[regs[vec] + i * rows1 + j].mask_and_send_dot_without_trunc();
             }
         }
     }
@@ -2263,10 +2262,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmuls(const vector<
     for (size_t vec = 0; vec < regs.size(); vec += 6) {
         const int& rows = regs[vec + 3];
         const int& cols = regs[vec + 5];
-        for (int i = 0; i < rows; ++i) {     // rows
-            for (int j = 0; j < cols; ++j) { // cols
-                s_register[regs[vec] + i * rows + j] = matrix.get_next();
-            }
+        for (int i = 0; i < rows; ++i) {   // rows
+            for (int j = 0; j < cols; ++j) // cols
+                s_register[regs[vec] + i * rows + j].complete_mult_without_trunc();
         }
     }
 }
@@ -2283,7 +2281,8 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::dotprods(const vector
             s_register[dest] = ZERO;
 
             while (it != next) {
-                s_register[dest] += s_register[*(it++) + vec].prepare_dot(s_register[*(it++) + vec]);
+                s_register[dest] +=
+                    s_register[*(it++) + vec].prepare_dot(s_register[*(it++) + vec]);
             }
             s_register[dest].mask_and_send_dot_without_trunc();
         }
@@ -2316,7 +2315,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::cisc(const vector<int
         for (size_t i = 0; i < regs.size(); i += 6) {
             for (size_t vec = 0; vec < regs[i + 1]; ++vec) {
                 op.push_back(s_register[regs[i + 3] + vec]); // operant
-                ires.push_back(regs[i + 2] + vec);          // dest
+                ires.push_back(regs[i + 2] + vec);           // dest
             }
         }
 
