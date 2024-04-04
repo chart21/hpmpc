@@ -2304,7 +2304,6 @@ template <class int_t, class cint, class Share, class sint, template <int, class
 void Program<int_t, cint, Share, sint, sbit, BitShare, N>::cisc(const vector<int>& regs,
                                                                 const std::string_view cisc) {
     if (cisc.starts_with("LTZ")) {
-        // std::cout << "LTZ\n";
         vector<sint> op(0);
         vector<int> ires(0);
         op.reserve(regs.size() / 6);
@@ -2313,30 +2312,19 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::cisc(const vector<int
         assert(regs.size() % 6 == 0);
 
         for (size_t i = 0; i < regs.size(); i += 6) {
-            op.push_back(s_register[regs[i + 3]]); // operant
-            ires.push_back(regs[i + 2]);           // dest
+            for (size_t vec = 0; vec < regs[i + 1]; ++vec) {
+                op.push_back(s_register[regs[i + 3] + vec]); // operant
+                ires.push_back(regs[i + 2] + vec);          // dest
+            }
         }
-
-        // for (auto& ele : op) {
-        //     ele.prepare_reveal_to_all();
-        //     Share::communicate();
-        //     std::cout << INT_TYPE(ele.complete_reveal_to_all()) << "\n";
-        // }
 
         sint* res = new sint[op.size()];
         pack_additive<0, BITLENGTH>(op.data(), res, op.size(), LTZ<0, BITLENGTH, Share, DATATYPE>);
-
-        // for (size_t i = 0; i < op.size(); ++i) {
-        //     res[i].prepare_reveal_to_all();
-        //     Share::communicate();
-        //     std::cout << INT_TYPE(res[i].complete_reveal_to_all()) << "\n";
-        // }
 
         for (size_t i = 0; i < ires.size(); ++i)
             s_register[ires[i]] = res[i];
         delete[] res;
     } else if (cisc.starts_with("EQZ")) {
-        // std::cout << "EQZ\n";
         vector<sint> op(0);
         vector<int> ires(0);
         op.reserve(regs.size() / 6);
@@ -2345,24 +2333,14 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::cisc(const vector<int
         assert(regs.size() % 6 == 0);
 
         for (size_t i = 0; i < regs.size(); i += 6) {
-            op.push_back(s_register[regs[i + 3]]);
-            ires.push_back(regs[i + 2]);
+            for (size_t vec = 0; vec < regs[i + 1]; ++vec) {
+                op.push_back(s_register[regs[i + 3] + vec]);
+                ires.push_back(regs[i + 2] + vec);
+            }
         }
-
-        // for (auto& ele : op) {
-        //     ele.prepare_reveal_to_all();
-        //     Share::communicate();
-        //     std::cout << INT_TYPE(ele.complete_reveal_to_all()) << "\n";
-        // }
 
         sint* res = new sint[op.size()];
         pack_additive<0, BITLENGTH>(op.data(), res, op.size(), EQZ<0, BITLENGTH, Share, DATATYPE>);
-
-        // for (size_t i = 0; i < op.size(); ++i) {
-        //     res[i].prepare_reveal_to_all();
-        //     Share::communicate();
-        //     std::cout << INT_TYPE(res[i].complete_reveal_to_all()) << "\n";
-        // }
 
         for (size_t i = 0; i < ires.size(); ++i)
             s_register[ires[i]] = res[i];
