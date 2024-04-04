@@ -183,12 +183,12 @@ void inference(DATATYPE* res)
     fclose(file);
 
     // Print out the loaded configuration values
-    std::cout << "Mode: " << cfg.mode << std::endl;
-    std::cout << "Save Directory: " << cfg.save_dir << std::endl;
-    std::cout << "Data Directory: " << cfg.data_dir << std::endl;
-    std::cout << "Pretrained Model: " << cfg.pretrained << std::endl;
-    std::cout << "Image File: " << cfg.image_file << std::endl;
-    std::cout << "Label File: " << cfg.label_file << std::endl;
+    print_online("Mode: " + cfg.mode);
+    print_online("Save Directory: " + cfg.save_dir);
+    print_online("Data Directory: " + cfg.data_dir);
+    print_online("Pretrained Model: " + cfg.pretrained);
+    print_online("Image File: " + cfg.image_file);
+    print_online("Label File: " + cfg.label_file);
 
 #endif
 
