@@ -336,9 +336,11 @@ test_loader.load(test_X, test_Y, cfg.batch, ch, h, w, cfg.shuffle_test);
     /* } */
     
     /* else { */
-std::cout << "Compiling model..." << std::endl;
+/* std::cout << "Compiling model..." << std::endl; */
+print_online("Compiling model...");
         model.compile({ cfg.batch/(BASE_DIV), ch, h, w });
-std::cout << "Loading Model Parameters..." << std::endl;
+/* std::cout << "Loading Model Parameters..." << std::endl; */
+print_online("Loading model Parameters...");
 #if PSELF == MODELOWNER
         print_online("Loading model parameters from file...");
 #endif

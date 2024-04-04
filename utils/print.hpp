@@ -31,7 +31,7 @@ std::chrono::microseconds time_duration;
 #endif
 
 #define print_online(x) \
-    if(current_phase == PHASE_LIVE) { \
+    if(current_phase == PHASE_LIVE && PRINT_IMPORTANT) { \
         std::cout << "P" << PARTY << ", PID" << process_offset << ": " << x << std::endl; \
     }
 

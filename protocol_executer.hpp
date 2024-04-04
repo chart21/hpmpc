@@ -355,8 +355,8 @@ int ret;
 
 
     // waiting until all threads connected
-
     /* printf("m: locking conn \n"); */
+    print("Initialized circuit, waiting for all parties to connect ... \n");
     pthread_mutex_lock(&mtx_connection_established);
     /* printf("m: locked conn \n"); */
     while (num_successful_connections < 2 * (num_players -1)) {
