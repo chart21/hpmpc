@@ -1,8 +1,8 @@
 #ifndef DATASET_H
 #define DATASET_H
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 namespace IR {
@@ -40,7 +40,7 @@ class DataSet {
     DataSet(const DataSet& other) {
         for (size_t i = 0; i < LENGTH; ++i)
             nums[i] = other.nums[i];
-    }                // copy
+    } // copy
     DataSet(DataSet&& other) noexcept {
         for (size_t i = 0; i < LENGTH; ++i)
             nums[i] = other.nums[i];
@@ -148,9 +148,7 @@ class DataSet {
         return DataSet();
     }
 
-    DATATYPE& operator[](const size_t& i)  {
-        return nums[i];
-    }
+    DATATYPE& operator[](const size_t& i) { return nums[i]; }
 
   private:
     Base nums[LENGTH];
@@ -164,7 +162,7 @@ DataSet<int_t, uint_t, LENGTH>
 DataSet<int_t, uint_t, LENGTH>::operator+(const DataSet<int_t, uint_t, LENGTH>& other) const {
     DataSet res;
     for (size_t i = 0; i < LENGTH; ++i)
-            res[i] = OP_ADD(nums[i], other.nums[i]);
+        res[i] = OP_ADD(nums[i], other.nums[i]);
     return res;
 }
 
@@ -172,7 +170,7 @@ template <class int_t, class uint_t, size_t LENGTH>
 DataSet<int_t, uint_t, LENGTH> DataSet<int_t, uint_t, LENGTH>::operator-() const {
     DataSet res;
     for (size_t i = 0; i < LENGTH; ++i)
-            res[i] = OP_SUB(ZERO, nums[i]);
+        res[i] = OP_SUB(ZERO, nums[i]);
     return res;
 }
 
@@ -181,7 +179,7 @@ DataSet<int_t, uint_t, LENGTH>
 DataSet<int_t, uint_t, LENGTH>::operator-(const DataSet<int_t, uint_t, LENGTH>& other) const {
     DataSet<int_t, uint_t, LENGTH> res;
     for (size_t i = 0; i < LENGTH; ++i)
-            res[i] = OP_SUB(nums[i], other.nums[i]);
+        res[i] = OP_SUB(nums[i], other.nums[i]);
     return res;
 }
 
@@ -190,7 +188,7 @@ DataSet<int_t, uint_t, LENGTH>
 DataSet<int_t, uint_t, LENGTH>::operator*(const DataSet<int_t, uint_t, LENGTH>& other) const {
     DataSet<int_t, uint_t, LENGTH> res;
     for (size_t i = 0; i < LENGTH; ++i)
-            res[i] = OP_MULT(nums[i], other.nums[i]);
+        res[i] = OP_MULT(nums[i], other.nums[i]);
     return res;
 }
 
@@ -232,7 +230,7 @@ template <class int_t, class uint_t, size_t LENGTH>
 DataSet<int_t, uint_t, LENGTH> DataSet<int_t, uint_t, LENGTH>::operator~() const {
     DataSet<int_t, uint_t, LENGTH> res;
     for (size_t i = 0; i < LENGTH; ++i)
-            res[i] = NOT(nums[i]);
+        res[i] = NOT(nums[i]);
     return res;
 }
 
@@ -241,14 +239,15 @@ DataSet<int_t, uint_t, LENGTH>
 DataSet<int_t, uint_t, LENGTH>::operator&(const DataSet<int_t, uint_t, LENGTH>& other) const {
     DataSet<int_t, uint_t, LENGTH> res;
     for (size_t i = 0; i < LENGTH; ++i)
-            res[i] = AND(nums[i], other.nums[i]);
+        res[i] = AND(nums[i], other.nums[i]);
     return res;
 }
 
 template <class int_t, class uint_t, size_t LENGTH>
-DataSet<int_t, uint_t, LENGTH>& DataSet<int_t, uint_t, LENGTH>::operator&=(const DataSet<int_t, uint_t, LENGTH>& other) {
+DataSet<int_t, uint_t, LENGTH>&
+DataSet<int_t, uint_t, LENGTH>::operator&=(const DataSet<int_t, uint_t, LENGTH>& other) {
     for (size_t i = 0; i < LENGTH; ++i)
-            nums[i] = AND(nums[i], other.nums[i]);
+        nums[i] = AND(nums[i], other.nums[i]);
     return *this;
 }
 
@@ -257,14 +256,15 @@ DataSet<int_t, uint_t, LENGTH>
 DataSet<int_t, uint_t, LENGTH>::operator^(const DataSet<int_t, uint_t, LENGTH>& other) const {
     DataSet<int_t, uint_t, LENGTH> res;
     for (size_t i = 0; i < LENGTH; ++i)
-            res[i] = XOR(nums[i], other.nums[i]);
+        res[i] = XOR(nums[i], other.nums[i]);
     return res;
 }
 
 template <class int_t, class uint_t, size_t LENGTH>
-DataSet<int_t, uint_t, LENGTH>& DataSet<int_t, uint_t, LENGTH>::operator^=(const DataSet<int_t, uint_t, LENGTH>& other) {
+DataSet<int_t, uint_t, LENGTH>&
+DataSet<int_t, uint_t, LENGTH>::operator^=(const DataSet<int_t, uint_t, LENGTH>& other) {
     for (size_t i = 0; i < LENGTH; ++i)
-            nums[i] = XOR(nums[i], other.nums[i]);
+        nums[i] = XOR(nums[i], other.nums[i]);
     return *this;
 }
 
@@ -273,14 +273,15 @@ DataSet<int_t, uint_t, LENGTH>
 DataSet<int_t, uint_t, LENGTH>::operator|(const DataSet<int_t, uint_t, LENGTH>& other) const {
     DataSet<int_t, uint_t, LENGTH> res;
     for (size_t i = 0; i < LENGTH; ++i)
-            res[i] = OR(nums[i], other.nums[i]);
+        res[i] = OR(nums[i], other.nums[i]);
     return res;
 }
 
 template <class int_t, class uint_t, size_t LENGTH>
-DataSet<int_t, uint_t, LENGTH>& DataSet<int_t, uint_t, LENGTH>::operator|=(const DataSet<int_t, uint_t, LENGTH>& other) {
+DataSet<int_t, uint_t, LENGTH>&
+DataSet<int_t, uint_t, LENGTH>::operator|=(const DataSet<int_t, uint_t, LENGTH>& other) {
     for (size_t i = 0; i < LENGTH; ++i)
-            nums[i] = OR(nums[i], other.nums[i]);
+        nums[i] = OR(nums[i], other.nums[i]);
     return *this;
 }
 
