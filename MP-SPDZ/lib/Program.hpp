@@ -2224,7 +2224,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmulsm_prepare(
     const vector<int>& regs, const int& row_1, const int& j, iterator source1, iterator source2) {
     auto col_2 = i_register[regs[9] + j].get(); // column of 2nd factor
 
-    s_register[regs[0] + row_1 * regs[5] + j] = ZERO;
+    s_register[regs[0] + row_1 * regs[5] + j] = 0;
     for (int k = 0; k < regs[4]; ++k) {             // length of dot_prod
         auto col_1 = i_register[regs[7] + k].get(); // column of first factor
         auto row_2 = i_register[regs[8] + k].get(); // row of 2nd factor
@@ -2247,7 +2247,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmuls(const vector<
         const int& cols2 = regs[vec + 5];
         for (int i = 0; i < rows1; ++i) {     // rows
             for (int j = 0; j < cols2; ++j) { // cols
-                s_register[regs[vec] + i * rows1 + j] = ZERO;
+                s_register[regs[vec] + i * rows1 + j] = 0;
                 for (int k = 0; k < cr; ++k) // cols/rows
                     s_register[regs[vec] + i * rows1 + j] +=
                         s_register[regs[vec + 1] + i * cr + k].prepare_dot(
@@ -2278,7 +2278,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::dotprods(const vector
             auto next = it + *it;
             int dest = *(it + 1);
             it += 2;
-            s_register[dest] = ZERO;
+            s_register[dest] = 0;
 
             while (it != next) {
                 s_register[dest] +=
