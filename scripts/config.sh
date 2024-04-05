@@ -98,7 +98,7 @@ then
     flags=$flags" -c"
 fi
 
-flags="$flags MP-SPDZ/lib/help/Util.cpp"
+flags="$flags MP-SPDZ/lib/help/Util.cpp -DNDEBUG"
 
 if [ ! -z "$GNU_OPTIONS" ]
 then

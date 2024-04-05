@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <istream>
 #include <queue>
 
 namespace IR {
@@ -42,8 +43,8 @@ void log(Level level, Args... args) {
     }
 }
 
-uint64_t read_next_int(const int& fd, unsigned char* buf, const size_t& size);
-uint64_t to_int_n(const unsigned char* buf, const size_t& size);
+int64_t read_long(std::istream& fd);
+int32_t read_int(std::istream& fd);
 
 uint64_t mask(const uint64_t& num, const uint64_t& bits);
 

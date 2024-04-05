@@ -8,6 +8,7 @@
 #include <cstdint>     // int_t
 #include <iomanip>     // set precision
 #include <iostream>    // default precision
+#include <istream>
 #include <random>      // random bit
 #include <stack>       // stack for thread local ints (obsolete)
 #include <string>      // bytecode path
@@ -58,7 +59,7 @@ class Program {
 
         const Opcode& get_opcode() const { return op; }
 
-        const size_t& set_immediate(const size_t& im) {
+        const size_t& set_immediate(const int64_t& im) {
             n = im;
             return n;
         }
@@ -140,17 +141,15 @@ template <class int_t, class cint, class Share, class sint, template <int, class
           class BitShare, int N>
 bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
     Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m) {
-    int fd = open(path.c_str(), O_RDONLY);
-    if (fd < 0) {
+    std::ifstream fd(path, std::ios::in);
+    if (fd.fail()) {
         log(Level::WARNING, "couldn't open file: ", path);
         return false;
     }
 
-    unsigned char buf[8]; // 32bit buffer
-    int ans;
-
-    while ((ans = read(fd, buf, 8)) > 0) {
-        uint64_t num = to_int_n(buf, 8);
+    while (true) {
+        uint64_t num = read_long(fd);
+        if (fd.fail()) break;
         int cur = 0x3ff & num;
         size_t vec = num >> 10; // 1st 22bits for vectorized command
 
@@ -167,8 +166,8 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::COND_PRINT_STRB:
         case Opcode::PRINTREG:
         case Opcode::PRINT4COND: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
-            inst.set_immediate(int(read_next_int(fd, buf, 4)));
+            unsigned sreg = inst.add_reg(read_int(fd));
+            inst.set_immediate(read_int(fd));
 
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
@@ -187,8 +186,8 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::GLDMC:
         case Opcode::GLDMS:
         case Opcode::LDMINT: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));         // dest
-            size_t mem_addr = inst.set_immediate(read_next_int(fd, buf, 8)); // source
+            unsigned sreg = inst.add_reg(read_int(fd));         // dest
+            size_t mem_addr = inst.set_immediate(read_long(fd)); // source
 
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
@@ -197,10 +196,10 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         }
         // sreg + im(32) + im(32)
         case Opcode::LDBITS: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
-            unsigned bits = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
+            unsigned bits = inst.add_reg(read_int(fd));
 
-            inst.set_immediate(read_next_int(fd, buf, 4));
+            inst.set_immediate(read_int(fd));
 
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + div_ceil(bits, BIT_LEN),
                            inst.get_opcode());
@@ -209,24 +208,24 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::XORS:
         case Opcode::ANDS:
         case Opcode::MULS: {
-            unsigned args = read_next_int(fd, buf, 4);
+            unsigned args = read_int(fd);
 
             assert(args % 2 == 0);
 
             for (size_t i = 1; i < args; i += 4) {
-                int size = inst.add_reg(read_next_int(fd, buf, 4)); // vector size
+                int size = inst.add_reg(read_int(fd)); // vector size
 
-                unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4)); // destination
+                unsigned sreg = inst.add_reg(read_int(fd)); // destination
 
                 size = inst.get_opcode() == Opcode::MULS ? size : div_ceil(size, BIT_LEN);
                 update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + size,
                                inst.get_opcode());
 
-                sreg = inst.add_reg(read_next_int(fd, buf, 4)); // factor 1
+                sreg = inst.add_reg(read_int(fd)); // factor 1
                 update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + size,
                                inst.get_opcode());
 
-                sreg = inst.add_reg(read_next_int(fd, buf, 4)); // factor 2
+                sreg = inst.add_reg(read_int(fd)); // factor 2
                 update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + size,
                                inst.get_opcode());
             }
@@ -234,32 +233,32 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         }
         // im(32) + sreg + sreg
         case Opcode::NOTS: {
-            size_t bits = inst.set_immediate(read_next_int(fd, buf, 4));
+            size_t bits = inst.set_immediate(read_int(fd));
 
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, sreg + div_ceil(bits, BIT_LEN), inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, sreg + div_ceil(bits, BIT_LEN), inst.get_opcode());
             break;
         }
         case Opcode::CONVCBIT2S: {
-            size_t bits = inst.set_immediate(read_next_int(fd, buf, 4));
+            size_t bits = inst.set_immediate(read_int(fd));
 
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, sreg + div_ceil(bits, BIT_LEN), inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::CBIT, sreg + div_ceil(bits, BIT_LEN), inst.get_opcode());
             break;
         }
         case Opcode::OPEN: {
-            uint32_t num = inst.set_immediate(read_next_int(fd, buf, 4));
-            read_next_int(fd, buf, 4); // check after opening (idk)
+            uint32_t num = inst.set_immediate(read_int(fd));
+            read_int(fd); // check after opening (idk)
 
             for (size_t i = 1; i < num; i += 2) {
-                unsigned creg = inst.add_reg(read_next_int(fd, buf, 4));
-                unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned creg = inst.add_reg(read_int(fd));
+                unsigned sreg = inst.add_reg(read_int(fd));
 
                 update_max_reg(Type::CINT, creg + inst.get_size(), inst.get_opcode());
                 update_max_reg(Type::SINT, sreg + inst.get_size(), inst.get_opcode());
@@ -267,13 +266,13 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             break;
         }
         case Opcode::REVEAL: {
-            uint32_t num = read_next_int(fd, buf, 4);
+            uint32_t num = read_int(fd);
 
             for (size_t i = 0; i < num; i += 3) {
-                unsigned num = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned num = inst.add_reg(read_int(fd));
 
-                unsigned creg = inst.add_reg(read_next_int(fd, buf, 4)); // des
-                unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4)); // source
+                unsigned creg = inst.add_reg(read_int(fd)); // des
+                unsigned sreg = inst.add_reg(read_int(fd)); // source
 
                 update_max_reg(Type::CBIT, creg + div_ceil(num, BIT_LEN), inst.get_opcode());
                 update_max_reg(Type::SBIT, sreg + div_ceil(num, sizeof(sint) * 8),
@@ -289,12 +288,12 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::STOP:
         case Opcode::PRINT_CHR:
         case Opcode::PRINT_FLOAT_PREC:
-            inst.set_immediate(read_next_int(fd, buf, 4));
+            inst.set_immediate(read_int(fd));
             break;
         case Opcode::REQBL: // requirement for modulus prime calculus
                             // min bit length
         {
-            int ring = read_next_int(fd, buf, 4);
+            int ring = read_int(fd);
             if (ring > 0) {
                 log(Level::ERROR, "compiled for fields not rings");
             } else if (-ring != BITLENGTH) {
@@ -305,28 +304,28 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         }
         case Opcode::PRINT_FLOAT_PLAIN: {
             assert(inst.get_size() == 1);
-            int reg = inst.add_reg(read_next_int(fd, buf, 4)); // significant
+            int reg = inst.add_reg(read_int(fd)); // significant
             update_max_reg(Type::CINT, reg + inst.get_size(), inst.get_opcode());
 
-            reg = inst.add_reg(read_next_int(fd, buf, 4)); // exponent
+            reg = inst.add_reg(read_int(fd)); // exponent
             update_max_reg(Type::CINT, reg + inst.get_size(), inst.get_opcode());
 
-            reg = inst.add_reg(read_next_int(fd, buf, 4)); // zero bit (zero if == 1)
+            reg = inst.add_reg(read_int(fd)); // zero bit (zero if == 1)
             update_max_reg(Type::CINT, reg + inst.get_size(), inst.get_opcode());
 
-            reg = inst.add_reg(read_next_int(fd, buf, 4)); // sign bit (neg if == 1)
+            reg = inst.add_reg(read_int(fd)); // sign bit (neg if == 1)
             update_max_reg(Type::CINT, reg + inst.get_size(), inst.get_opcode());
 
-            reg = inst.add_reg(read_next_int(fd, buf, 4)); // NaN (reg num if zero)
+            reg = inst.add_reg(read_int(fd)); // NaN (reg num if zero)
             update_max_reg(Type::CINT, reg + inst.get_size(), inst.get_opcode());
             break;
         }
         case Opcode::FLOATOUTPUT:
-            inst.set_immediate(read_next_int(fd, buf, 4));
-            inst.add_reg(read_next_int(fd, buf, 4)); // significant
-            inst.add_reg(read_next_int(fd, buf, 4)); // exponent
-            inst.add_reg(read_next_int(fd, buf, 4)); // zero bit
-            inst.add_reg(read_next_int(fd, buf, 4)); // sign bit
+            inst.set_immediate(read_int(fd));
+            inst.add_reg(read_int(fd)); // significant
+            inst.add_reg(read_int(fd)); // exponent
+            inst.add_reg(read_int(fd)); // zero bit
+            inst.add_reg(read_int(fd)); // sign bit
             break;
         // reg
         case Opcode::PRINT_REG_PLAIN:
@@ -341,35 +340,35 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::PUSHINT:
         case Opcode::POPINT:
         case Opcode::LDARG: {
-            unsigned reg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned reg = inst.add_reg(read_int(fd));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), reg + inst.get_size(),
                            inst.get_opcode());
             break;
         }
         // im(32) + reg
         case Opcode::INTOUTPUT: {
-            unsigned im = inst.set_immediate(read_next_int(fd, buf, 4));
-            unsigned reg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned im = inst.set_immediate(read_int(fd));
+            unsigned reg = inst.add_reg(read_int(fd));
 
             update_max_reg(inst.get_reg_type(inst.get_opcode()), reg + inst.get_size(),
                            inst.get_opcode());
             break;
         }
         case Opcode::PRINT_REG_SIGNED: {
-            unsigned im = inst.set_immediate(read_next_int(fd, buf, 4));
-            unsigned cbit = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned im = inst.set_immediate(read_int(fd));
+            unsigned cbit = inst.add_reg(read_int(fd));
 
             update_max_reg(Type::CBIT, cbit + div_ceil(im, BIT_LEN), inst.get_opcode());
             break;
         }
         case Opcode::BITDECINT: {
-            unsigned args = read_next_int(fd, buf, 4);
-            unsigned source = inst.add_reg(read_next_int(fd, buf, 4)); // source
+            unsigned args = read_int(fd);
+            unsigned source = inst.add_reg(read_int(fd)); // source
 
             update_max_reg(Type::SINT, source + inst.get_size(), inst.get_opcode());
 
             for (size_t i = 1; i < args; i++) {
-                unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned sreg = inst.add_reg(read_int(fd));
 
                 update_max_reg(Type::INT, sreg + inst.get_size(), inst.get_opcode());
             }
@@ -377,14 +376,14 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             break;
         }
         case Opcode::CONCATS: {
-            unsigned args = read_next_int(fd, buf, 4);
-            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4)); // dest
+            unsigned args = read_int(fd);
+            unsigned dest = inst.add_reg(read_int(fd)); // dest
 
             update_max_reg(Type::SINT, dest + 1, inst.get_opcode());
 
             for (size_t i = 1; i < args; i += 2) {
-                unsigned off = inst.add_reg(read_next_int(fd, buf, 4)); // offset
-                unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned off = inst.add_reg(read_int(fd)); // offset
+                unsigned sreg = inst.add_reg(read_int(fd));
 
                 dest += off;
 
@@ -395,24 +394,24 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             break;
         }
         case Opcode::TRANSPOSE: {
-            unsigned num = read_next_int(fd, buf, 4);
-            unsigned outs = inst.set_immediate(read_next_int(fd, buf, 4));
+            unsigned num = read_int(fd);
+            unsigned outs = inst.set_immediate(read_int(fd));
 
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, sreg + div_ceil(num - 1 - outs, BIT_LEN), inst.get_opcode());
 
             for (size_t i = 2; i < num; ++i) {
-                sreg = inst.add_reg(read_next_int(fd, buf, 4));
+                sreg = inst.add_reg(read_int(fd));
                 update_max_reg(Type::SBIT, sreg + div_ceil(outs, BIT_LEN), inst.get_opcode());
             }
             break;
         }
         case Opcode::PICKS: {
-            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
-            unsigned source = inst.add_reg(read_next_int(fd, buf, 4));
-            unsigned off = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned dest = inst.add_reg(read_int(fd));
+            unsigned source = inst.add_reg(read_int(fd));
+            unsigned off = inst.add_reg(read_int(fd));
 
-            int step(inst.set_immediate(read_next_int(fd, buf, 4)));
+            int step(inst.set_immediate(read_int(fd)));
 
             update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
             update_max_reg(Type::SINT, source + off + step * vec + 1, inst.get_opcode());
@@ -420,46 +419,46 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         }
         case Opcode::USE:
         case Opcode::USE_INP: {
-            inst.add_reg(read_next_int(fd, buf, 4));
-            inst.add_reg(read_next_int(fd, buf, 4));
-            inst.set_immediate(read_next_int(fd, buf, 8));
+            inst.add_reg(read_int(fd));
+            inst.add_reg(read_int(fd));
+            inst.set_immediate(read_long(fd));
             break;
         }
         case Opcode::INPUTMIXEDREG:
         case Opcode::INPUTMIXED: {
-            unsigned num = read_next_int(fd, buf, 4);
+            unsigned num = read_int(fd);
             for (size_t i = 0; i < num; ++i) {
-                uint32_t cur = inst.add_reg(read_next_int(fd, buf, 4));
+                uint32_t cur = inst.add_reg(read_int(fd));
                 if (cur == 2) {
                     log(Level::ERROR, "INPUTMIXED: only int/fix is supported");
                 }
 
-                uint32_t dest = inst.add_reg(read_next_int(fd, buf, 4));
+                uint32_t dest = inst.add_reg(read_int(fd));
 
                 if (cur == 1) {                              // fix-point
-                    inst.add_reg(read_next_int(fd, buf, 4)); // precision
+                    inst.add_reg(read_int(fd)); // precision
                     i++;
                 }
 
                 update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
-                inst.add_reg(read_next_int(fd, buf, 4)); // input PLAYER (regint for ...REG)
+                inst.add_reg(read_int(fd)); // input PLAYER (regint for ...REG)
 
                 i += 2;
             }
             break;
         }
         case Opcode::INPUTBVEC: {
-            unsigned num = read_next_int(fd, buf, 4);
+            unsigned num = read_int(fd);
 
             for (size_t i = 1; i < num; i += 3) {
-                unsigned bits = inst.add_reg(read_next_int(fd, buf, 4)) - 3;
-                inst.add_reg(read_next_int(fd, buf, 4)); // 2^n
-                inst.add_reg(read_next_int(fd, buf, 4)); // player id
+                unsigned bits = inst.add_reg(read_int(fd)) - 3;
+                inst.add_reg(read_int(fd)); // 2^n
+                inst.add_reg(read_int(fd)); // player id
 
                 i += bits;
 
                 for (unsigned j = 0; j < bits; ++j) {
-                    unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+                    unsigned sreg = inst.add_reg(read_int(fd));
                     update_max_reg(Type::SBIT, sreg + 1, inst.get_opcode());
                 }
             }
@@ -488,25 +487,25 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::SHRCBI:
         case Opcode::SHLCBI:
         case Opcode::MULCI: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
 
-            inst.set_immediate(int(read_next_int(fd, buf, 4)));
+            inst.set_immediate(int(read_int(fd)));
             break;
         }
         case Opcode::SUBMR: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SINT, sreg + inst.get_size(), inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::CINT, sreg + inst.get_size(), inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SINT, sreg + inst.get_size(), inst.get_opcode());
             break;
         }
@@ -519,53 +518,53 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::RAND:
         case Opcode::PREFIXSUMS:
         case Opcode::MOVS: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
             break;
         }
         case Opcode::CONVINT: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::CINT, sreg + inst.get_size(), inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::INT, sreg + inst.get_size(), inst.get_opcode());
             break;
         }
         case Opcode::STMSI:
         case Opcode::LDMSI: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SINT, sreg + inst.get_size(), inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::INT, sreg + inst.get_size(), inst.get_opcode());
             break;
         }
         case Opcode::STMSBI:
         case Opcode::LDMSBI: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, sreg + inst.get_size(), inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::INT, sreg + inst.get_size(), inst.get_opcode());
             break;
         }
         case Opcode::STMINTI:
         case Opcode::LDMINTI: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::INT, sreg + inst.get_size(), inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::INT, sreg + inst.get_size(), inst.get_opcode());
             break;
         }
         // sreg + sreg + sreg
         case Opcode::XORCB:
-            inst.set_immediate(read_next_int(fd, buf, 4)); // + BIT_LEN
+            inst.set_immediate(read_int(fd)); // + BIT_LEN
         case Opcode::ADDCB:
         case Opcode::ADDS:
         case Opcode::SUBC:
@@ -588,15 +587,15 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::DIVINT:
         case Opcode::PRINT_COND_PLAIN:
         case Opcode::SUBS: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
             break;
@@ -604,104 +603,104 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::MULM:
         case Opcode::SUBML:
         case Opcode::ADDM: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SINT, sreg + inst.get_size(),
                            inst.get_opcode()); // dest
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SINT, sreg + inst.get_size(),
                            inst.get_opcode()); // sum1
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::CINT, sreg + inst.get_size(),
                            inst.get_opcode()); // sum2
             break;
         }
         case Opcode::ANDM: {
-            inst.add_reg(read_next_int(fd, buf, 4)); // bits
+            inst.add_reg(read_int(fd)); // bits
 
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, sreg + inst.get_size(),
                            inst.get_opcode()); // dest
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, sreg + inst.get_size(),
                            inst.get_opcode()); // sum1
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::CBIT, sreg + inst.get_size(),
                            inst.get_opcode()); // sum2
             break;
         }
         case Opcode::CONVMODP: {
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::INT, sreg + inst.get_size(),
                            inst.get_opcode()); // dest
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::CINT, sreg + inst.get_size(),
                            inst.get_opcode()); // sum1
 
-            inst.set_immediate(read_next_int(fd, buf, 4));
+            inst.set_immediate(read_int(fd));
             break;
         }
         // im(32) + sreg + sreg
         case Opcode::NOTCB:
         case Opcode::MOVSB: {
-            unsigned num = inst.set_immediate(read_next_int(fd, buf, 4));
+            unsigned num = inst.set_immediate(read_int(fd));
 
-            unsigned sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, sreg + div_ceil(num, BIT_LEN), inst.get_opcode());
 
-            sreg = inst.add_reg(read_next_int(fd, buf, 4));
+            sreg = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, sreg + div_ceil(num, BIT_LEN), inst.get_opcode());
             break;
         }
         case Opcode::BITDECS:
         case Opcode::BITCOMS: {
-            unsigned num = read_next_int(fd, buf, 4);
-            unsigned bit = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned num = read_int(fd);
+            unsigned bit = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, bit + div_ceil(num, BIT_LEN), inst.get_opcode());
 
             for (size_t i = 1; i < num; ++i) {
-                bit = inst.add_reg(read_next_int(fd, buf, 4));
+                bit = inst.add_reg(read_int(fd));
                 update_max_reg(Type::SBIT, bit + 1, inst.get_opcode());
             }
             break;
         }
         case Opcode::CONVCINT: {
-            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
-            inst.add_reg(read_next_int(fd, buf, 4)); // source
+            unsigned dest = inst.add_reg(read_int(fd));
+            inst.add_reg(read_int(fd)); // source
             update_max_reg(Type::CBIT, dest + 1, inst.get_opcode());
             break;
         }
         case Opcode::CONVSINT: {
-            unsigned bits = inst.add_reg(read_next_int(fd, buf, 4));
-            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
-            inst.add_reg(read_next_int(fd, buf, 4)); // source
+            unsigned bits = inst.add_reg(read_int(fd));
+            unsigned dest = inst.add_reg(read_int(fd));
+            inst.add_reg(read_int(fd)); // source
             update_max_reg(Type::SBIT, dest + div_ceil(bits, BIT_LEN), inst.get_opcode());
             break;
         }
         case Opcode::CONVCINTVEC: {
-            unsigned bits = read_next_int(fd, buf, 4) - 1;
-            inst.add_reg(read_next_int(fd, buf, 4)); // source
+            unsigned bits = read_int(fd) - 1;
+            inst.add_reg(read_int(fd)); // source
 
             for (size_t i = 0; i < bits; ++i) {
-                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned dest = inst.add_reg(read_int(fd));
                 update_max_reg(Type::SBIT, dest + div_ceil(inst.get_size(), BIT_LEN),
                                inst.get_opcode());
             }
             break;
         }
         case Opcode::ANDRSVEC: {
-            unsigned num = read_next_int(fd, buf, 4);
+            unsigned num = read_int(fd);
 
             for (size_t i = 0; i < num;) {
-                unsigned one_op = inst.add_reg(read_next_int(fd, buf, 4));
-                unsigned vec = inst.add_reg(read_next_int(fd, buf, 4)); // vector size
+                unsigned one_op = inst.add_reg(read_int(fd));
+                unsigned vec = inst.add_reg(read_int(fd)); // vector size
 
                 for (size_t j = 2; j < one_op; ++j) {
-                    unsigned reg = inst.add_reg(read_next_int(fd, buf, 4));
+                    unsigned reg = inst.add_reg(read_int(fd));
 
                     update_max_reg(Type::SBIT, reg + div_ceil(vec, BIT_LEN), inst.get_opcode());
                 }
@@ -711,57 +710,57 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             break;
         }
         case Opcode::ANDRS: {
-            unsigned args = read_next_int(fd, buf, 4);
+            unsigned args = read_int(fd);
             for (size_t i = 0; i < args; i += 4) {
-                unsigned vec = inst.add_reg(read_next_int(fd, buf, 4));
-                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned vec = inst.add_reg(read_int(fd));
+                unsigned dest = inst.add_reg(read_int(fd));
                 update_max_reg(Type::SBIT, dest + div_ceil(vec, BIT_LEN), inst.get_opcode());
-                inst.add_reg(read_next_int(fd, buf, 4)); // source
-                inst.add_reg(read_next_int(fd, buf, 4)); // const factor
+                inst.add_reg(read_int(fd)); // source
+                inst.add_reg(read_int(fd)); // const factor
             }
             break;
         }
         case Opcode::MULRS: {
-            unsigned args = read_next_int(fd, buf, 4);
+            unsigned args = read_int(fd);
             for (size_t i = 0; i < args; i += 4) {
-                unsigned vec = inst.add_reg(read_next_int(fd, buf, 4));
-                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned vec = inst.add_reg(read_int(fd));
+                unsigned dest = inst.add_reg(read_int(fd));
                 update_max_reg(Type::SINT, dest + vec, inst.get_opcode());
-                inst.add_reg(read_next_int(fd, buf, 4)); // source
-                inst.add_reg(read_next_int(fd, buf, 4)); // const factor
+                inst.add_reg(read_int(fd)); // source
+                inst.add_reg(read_int(fd)); // const factor
             }
             break;
         }
         case Opcode::MATMULSM: {
-            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned dest = inst.add_reg(read_int(fd));
 
-            inst.add_reg(read_next_int(fd, buf, 4)); // factor 1
-            inst.add_reg(read_next_int(fd, buf, 4)); // factor 2
+            inst.add_reg(read_int(fd)); // factor 1
+            inst.add_reg(read_int(fd)); // factor 2
 
-            int rows = inst.add_reg(read_next_int(fd, buf, 4));
-            inst.add_reg(read_next_int(fd, buf, 4)); // cols/rows of 1st/2nd factor
-            int cols = inst.add_reg(read_next_int(fd, buf, 4));
+            int rows = inst.add_reg(read_int(fd));
+            inst.add_reg(read_int(fd)); // cols/rows of 1st/2nd factor
+            int cols = inst.add_reg(read_int(fd));
 
             update_max_reg(Type::SINT, dest + rows * cols, inst.get_opcode());
 
             for (size_t i = 0; i < 6u; ++i) {
-                inst.add_reg(read_next_int(fd, buf, 4));
+                inst.add_reg(read_int(fd));
             }
 
             break;
         }
         case Opcode::MATMULS: {
-            unsigned args = read_next_int(fd, buf, 4);
+            unsigned args = read_int(fd);
             assert(args % 6 == 0);
             for (size_t i = 0; i < args; ++i) {
-                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4)); // (sint)
+                unsigned dest = inst.add_reg(read_int(fd)); // (sint)
 
-                inst.add_reg(read_next_int(fd, buf, 4)); // factor 1 (sint)
-                inst.add_reg(read_next_int(fd, buf, 4)); // factor 2 (sint)
+                inst.add_reg(read_int(fd)); // factor 1 (sint)
+                inst.add_reg(read_int(fd)); // factor 2 (sint)
 
-                int rows = inst.add_reg(read_next_int(fd, buf, 4));
-                inst.add_reg(read_next_int(fd, buf, 4)); // cols/rows of 1st/2nd factor
-                int cols = inst.add_reg(read_next_int(fd, buf, 4));
+                int rows = inst.add_reg(read_int(fd));
+                inst.add_reg(read_int(fd)); // cols/rows of 1st/2nd factor
+                int cols = inst.add_reg(read_int(fd));
 
                 update_max_reg(Type::SINT, dest + rows * cols, inst.get_opcode());
             }
@@ -769,99 +768,99 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             break;
         }
         case Opcode::USE_MATMUL: {
-            inst.add_reg(read_next_int(fd, buf, 4));
-            inst.add_reg(read_next_int(fd, buf, 4));
-            inst.add_reg(read_next_int(fd, buf, 4));
-            inst.set_immediate(read_next_int(fd, buf, 8));
+            inst.add_reg(read_int(fd));
+            inst.add_reg(read_int(fd));
+            inst.add_reg(read_int(fd));
+            inst.set_immediate(read_long(fd));
             break;
         }
         case Opcode::INCINT: {
-            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned dest = inst.add_reg(read_int(fd));
 
-            inst.add_reg(read_next_int(fd, buf, 4)); // base
-            inst.add_reg(read_next_int(fd, buf, 4)); // increment
-            inst.add_reg(read_next_int(fd, buf, 4)); // repeat
-            inst.add_reg(read_next_int(fd, buf, 4)); // wrap
+            inst.add_reg(read_int(fd)); // base
+            inst.add_reg(read_int(fd)); // increment
+            inst.add_reg(read_int(fd)); // repeat
+            inst.add_reg(read_int(fd)); // wrap
 
             update_max_reg(Type::INT, dest + inst.get_size(), inst.get_opcode());
             break;
         }
         case Opcode::TRUNC_PR: {
-            unsigned args = read_next_int(fd, buf, 4);
+            unsigned args = read_int(fd);
 
             for (size_t i = 0; i < args; i += 4) {
-                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
-                unsigned source = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned dest = inst.add_reg(read_int(fd));
+                unsigned source = inst.add_reg(read_int(fd));
 
-                inst.add_reg(read_next_int(fd, buf, 4)); // bits to use
-                inst.add_reg(read_next_int(fd, buf, 4)); // bits to truncate
+                inst.add_reg(read_int(fd)); // bits to use
+                inst.add_reg(read_int(fd)); // bits to truncate
 
                 update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
             }
             break;
         }
         case Opcode::DOTPRODS: {
-            unsigned args = read_next_int(fd, buf, 4);
+            unsigned args = read_int(fd);
             for (size_t i = 0; i < args; ++i) {
-                unsigned len = inst.add_reg(read_next_int(fd, buf, 4)) - 2;
+                unsigned len = inst.add_reg(read_int(fd)) - 2;
 
-                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned dest = inst.add_reg(read_int(fd));
                 update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
 
                 for (size_t j = 0; j < len; ++j)
-                    inst.add_reg(read_next_int(fd, buf, 4));
+                    inst.add_reg(read_int(fd));
 
                 i += len + 1;
             }
             break;
         }
         case Opcode::SPLIT: {
-            unsigned args = read_next_int(fd, buf, 4);
+            unsigned args = read_int(fd);
 
-            inst.add_reg(read_next_int(fd, buf, 4)); // num player
-            inst.add_reg(read_next_int(fd, buf, 4)); // source
+            inst.add_reg(read_int(fd)); // num player
+            inst.add_reg(read_int(fd)); // source
 
             for (size_t i = 2; i < args; ++i) {
-                unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+                unsigned dest = inst.add_reg(read_int(fd));
                 update_max_reg(Type::SBIT, dest + div_ceil(vec, BIT_LEN), inst.get_opcode());
             }
             break;
         }
         case Opcode::DABIT: {
-            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned dest = inst.add_reg(read_int(fd));
             update_max_reg(Type::SINT, dest + inst.get_size(), inst.get_opcode());
-            dest = inst.add_reg(read_next_int(fd, buf, 4));
+            dest = inst.add_reg(read_int(fd));
             update_max_reg(Type::SBIT, dest + div_ceil(vec, BIT_LEN), inst.get_opcode());
             break;
         }
         case Opcode::CONVCBITVEC: {
-            unsigned bits = inst.set_immediate(read_next_int(fd, buf, 4));
+            unsigned bits = inst.set_immediate(read_int(fd));
 
-            unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
+            unsigned dest = inst.add_reg(read_int(fd));
             update_max_reg(Type::SINT, dest + bits, inst.get_opcode());
-            inst.add_reg(read_next_int(fd, buf, 4)); // source
+            inst.add_reg(read_int(fd)); // source
             break;
         }
         case Opcode::CISC: {
-            unsigned args = read_next_int(fd, buf, 4);
+            unsigned args = read_int(fd);
             char op[16];
-            read(fd, op, 16);
+            fd.read(op, 16);
             inst.cisc = string(op, 16);
 
             if (strncmp(op, "LTZ", 3) == 0 or strncmp(op, "EQZ", 3) == 0) {
                 for (size_t i = 0; i < args - 1; i += 6) {
-                    unsigned size = inst.add_reg(read_next_int(fd, buf, 4)); // arguments
-                    unsigned vec = inst.add_reg(read_next_int(fd, buf, 4));
+                    unsigned size = inst.add_reg(read_int(fd)); // arguments
+                    unsigned vec = inst.add_reg(read_int(fd));
                     assert(size == 6);
-                    unsigned dest = inst.add_reg(read_next_int(fd, buf, 4));
-                    inst.add_reg(read_next_int(fd, buf, 4)); // result
-                    inst.add_reg(read_next_int(fd, buf, 4)); // bit_length
-                    inst.add_reg(read_next_int(fd, buf, 4)); // ignore
+                    unsigned dest = inst.add_reg(read_int(fd));
+                    inst.add_reg(read_int(fd)); // result
+                    inst.add_reg(read_int(fd)); // bit_length
+                    inst.add_reg(read_int(fd)); // ignore
                     update_max_reg(Type::SINT, dest + vec, inst.get_opcode());
                 }
             } else {
                 for (size_t i = 0; i < args - 1; ++i) {
-                    unsigned cur = inst.add_reg(read_next_int(fd, buf, 4));
+                    unsigned cur = inst.add_reg(read_int(fd));
                 }
             }
             break;
@@ -872,12 +871,11 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             log(Level::WARNING, "unknown operation");
             log(Level::WARNING, "read: ", cur);
             log(Level::WARNING, "vec: ", vec);
-            close(fd);
+            fd.close();
             return false;
         }
     }
-
-    close(fd);
+    fd.close();
     return true;
 }
 
