@@ -212,6 +212,24 @@ static void prepare_A2B_S2(int m, int k, OECL0_init in[], OECL0_init out[])
     
 }
 
+static void prepare_B2A( OECL0_init z[], OECL0_init random_mask[], OECL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].template prepare_receive_from<P_0>(SET_ALL_ZERO(), OP_ADD, OP_SUB);
+    } 
+
+}
+
+static void complete_B2A(OECL0_init out[], OECL0_init z[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].template complete_receive_from<P_0>(OP_ADD, OP_SUB);
+    }
+
+}
+
 static void complete_A2B_S1( int k, OECL0_init out[])
 {
 
@@ -272,6 +290,10 @@ void prepare_bit_injection_S2( OECL0_init out[])
         #endif
         
     }
+}
+void get_random_B2A()
+{
+
 }
 
 static void complete_bit_injection_S1(OECL0_init out[])

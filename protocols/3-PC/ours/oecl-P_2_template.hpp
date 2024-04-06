@@ -216,8 +216,54 @@ static void communicate()
     communicate_live();
 }
 
+void get_random_B2A()
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        p1 = getRandomVal(P_0);
+        p2 = p1;
+    }
+}
+
 
 //higher level functions
+
+static void prepare_B2A( OECL2_Share z[], OECL2_Share random_mask[], OECL2_Share out[])
+{
+    // 1. Reveal z to P_1 and P_2
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        /* send_to_live(P_1, z[i].p1); */
+        send_to_live(P_1, z[i].p2); //reveal z to P_2
+        z[i].p2 = SET_ALL_ZERO(); //set mask to 0 since it is reveald
+    }
+    // 2. Share random mask
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].template prepare_receive_from<P_0>(OP_ADD, OP_SUB);
+    } 
+
+
+}
+
+static void complete_B2A(OECL2_Share z_bool[], OECL2_Share out[])
+{
+    Datatype z[BITLENGTH]; 
+    for(int i = 0; i < BITLENGTH; i++)
+        z[i] = FUNC_XOR(z_bool[i].p1, receive_from_live(P_1));
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(z, temp2);
+    orthogonalize_arithmetic(temp2, z);
+
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].template complete_receive_from<P_0>(OP_ADD, OP_SUB);
+        out[i] = out[i].Add(public_val(z[i]), OP_ADD);
+    }
+
+}
+
+
 
 
 static void prepare_A2B_S1(int m, int k, OECL2_Share in[], OECL2_Share out[])

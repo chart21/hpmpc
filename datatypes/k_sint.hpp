@@ -411,7 +411,19 @@ public:
                 shares[i].complete_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i]);
         }
 
+#if TRUNC_APPROACH == 2
+        template<typename X, typename A>
+        static void prepare_B2A(X z[], X r[], A out[])
+        {
+            Share::prepare_B2A(z, r, out); 
+        }
 
+        template<typename X, typename A>
+        static void complete_B2A(X z[], A out[])
+        {
+            Share::complete_B2A(z, out); 
+        }
+#endif
 };
 
 

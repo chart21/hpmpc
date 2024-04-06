@@ -210,6 +210,33 @@ void prepare_bit2a(OECL1_init out[])
     }
 }
 
+void get_random_B2A()
+{
+
+}
+
+static void prepare_B2A(OECL1_init z[],OECL1_init random_mask[],OECL1_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        send_to_(P_2);
+    }
+    for(int i = 0; i < BITLENGTH; i++)
+        out[i].template prepare_receive_from<P_0>(SET_ALL_ZERO(), OP_ADD, OP_SUB);
+
+}
+
+static void complete_B2A(OECL1_init out[],OECL1_init z[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        receive_from_(P_2);
+    }
+    for(int i = 0; i < BITLENGTH; i++)
+        out[i].template complete_receive_from<P_0>(OP_ADD, OP_SUB);
+
+}
+
 void complete_bit2a()
 {
     receive_from_(P_2);

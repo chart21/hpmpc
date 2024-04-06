@@ -264,6 +264,15 @@ static void communicate()
 #endif
 }
 
+void get_random_B2A()
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        p1 = getRandomVal(P_2);
+        p2 = getRandomVal(P_1);
+    }
+}
+
 static void prepare_A2B_S1(int m, int k, OECL0_Share in[], OECL0_Share out[])
 {
     for(int i = m; i < k; i++)
@@ -330,6 +339,44 @@ static void complete_A2B_S1(int k, OECL0_Share out[])
 }
 static void complete_A2B_S2(int k, OECL0_Share out[])
 {
+
+}
+
+
+static void prepare_B2A( OECL0_Share z[], OECL0_Share random_mask[], OECL0_Share out[])
+{
+    // 1. Reveal z to P_1 and P_2
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        /* send_to_live(P_1, z[i].p1); */
+        /* send_to_live(P_2, z[i].p2); */
+        z[i].p1 = SET_ALL_ZERO(); //set mask to 0 since it is reveald
+        z[i].p2 = SET_ALL_ZERO(); //set mask to 0 since it is reveald
+    }
+    // 2. Share random mask
+    Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            temp[j] = FUNC_XOR(random_mask[j].p1, random_mask[j].p2); // set share to r01 xor r02
+        }
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].template prepare_receive_from<P_0>(temp[i], OP_ADD, OP_SUB);
+    } 
+
+
+}
+
+static void complete_B2A(OECL0_Share z[], OECL0_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].template complete_receive_from<P_0>(OP_ADD, OP_SUB);
+        /* out[i] = out[i].Add(z[i], OP_SUB); // substrac mask o receive share of value */
+    }
 
 }
 
