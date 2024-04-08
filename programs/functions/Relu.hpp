@@ -110,7 +110,18 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        y[i].complete_and();
+        for(int j = 0; j < k-m; j++)
+            y[i][j].complete_and();
+    #if TRUNC_DELAYED == 1
+    for(int j = BITLENGTH; j > FRACTIONAL; j--)
+    {
+        y[i][j] = y[i][j - FRACTIONAL]; //shift right
+    }
+    for(int j = 0; j < FRACTIONAL; j++)
+    {
+       y[i][j] = SET_ALL_ZERO(); //set most significant bits to zero
+    }
+    #endif
     }
     /* if(current_phase == 1) */
     /*     std::cout << "Bit inj ..." << std::endl; */

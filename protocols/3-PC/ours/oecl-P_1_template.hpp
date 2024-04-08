@@ -316,7 +316,7 @@ static void complete_B2A(OECL1_Share z_bool[], OECL1_Share out[])
     for(int i = 0; i < BITLENGTH; i++)
     {
         out[i].template complete_receive_from<P_0>(OP_ADD, OP_SUB);
-        out[i] = out[i].Add(public_val(z[i]), OP_ADD);
+        out[i] = public_val(z[i]).Add(out[i], OP_SUB); // z - r
     }
 
 }
