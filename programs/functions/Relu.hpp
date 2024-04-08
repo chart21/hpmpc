@@ -269,7 +269,7 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
         val[i].complete_public_mult_fixed();
     }
     Share::communicate();
-#elif TRUNC_APPROACH == 1
+#else
     trunc_2k_in_place(val, len);
 #endif
 #endif
