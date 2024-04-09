@@ -113,7 +113,7 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
         for(int j = 0; j < k-m; j++)
             y[i][j].complete_and();
     #if TRUNC_DELAYED == 1
-    for(int j = BITLENGTH; j > FRACTIONAL; j--)
+    for(int j = BITLENGTH - 1; j >= FRACTIONAL; j--)
     {
         y[i][j] = y[i][j - FRACTIONAL]; //shift right
     }
@@ -157,7 +157,6 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
     adders2.clear();
     adders2.shrink_to_fit();
     delete[] y;
-    Share::communicate();
     for(int i = 0; i < len; i++)
     {
         /* sint::prepare_B2A((S*) z[i].get_share_pointer(), (S*) random_mask[i].get_share_pointer(), (S*) val[i].get_share_pointer()); */
@@ -168,7 +167,6 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
     {
         sint::complete_B2A(z[i].get_share_pointer(), val[i].get_share_pointer());
     }
-    Share::communicate();
     delete[] z;
     delete[] random_mask;
 }
