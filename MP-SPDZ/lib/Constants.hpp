@@ -203,6 +203,10 @@ enum class Opcode {
     START = 0x15,
     STOP = 0x16,
 
+    RUN_TAPE = 0x19,
+    JOIN_TAPE = 0x1a,
+    LDTN = 0x10,
+
     PUSHINT = 0xce, // considered obsolete
     POPINT = 0xcf,  // considered obsolete
 };

@@ -118,6 +118,7 @@ class Program {
     size_t thread_id;
 
     int arg;                  // thread arg
+    int thread_num; // thread num
     vector<Instruction> prog; // all instructions
 
     unsigned max_reg[REG_TYPES]; // to get required register size for all types
@@ -286,6 +287,7 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::STOP:
         case Opcode::PRINT_CHR:
         case Opcode::PRINT_FLOAT_PREC:
+        case Opcode::JOIN_TAPE:
             inst.set_immediate(read_int(fd));
             break;
         case Opcode::REQBL: // requirement for modulus prime calculus
@@ -337,6 +339,7 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::PLAYERID:
         case Opcode::PUSHINT:
         case Opcode::POPINT:
+        case Opcode::LDTN:
         case Opcode::LDARG: {
             unsigned reg = inst.add_reg(read_int(fd));
             update_max_reg(inst.get_reg_type(inst.get_opcode()), reg + inst.get_size(),
@@ -865,6 +868,16 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         }
         case Opcode::TIME:
             break;
+        case Opcode::RUN_TAPE: {
+            unsigned args = read_int(fd);
+
+            for (size_t i = 0; i < args; i += 3) {
+                 inst.add_reg(read_int(fd));
+                 inst.add_reg(read_int(fd));
+                 inst.add_reg(read_int(fd));
+            }
+            break;
+        }
         default:
             log(Level::WARNING, "unknown operation");
             log(Level::WARNING, "read: ", cur);
@@ -936,6 +949,7 @@ Type Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::get_reg_
     case Opcode::INTOUTPUT:
     case Opcode::PUSHINT:
     case Opcode::POPINT:
+    case Opcode::LDTN:
         return Type::INT;
     case Opcode::LDI:
     case Opcode::LDMC:
@@ -1032,10 +1046,10 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
         opc == 0x80 || opc == 0x36 || opc == 0x2b || opc == 0x214 || opc == 0x24a || opc == 0x5b ||
         opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 || opc == 0x21e ||
         opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 || opc == 0x242 ||
-        opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 || opc == 0x70 ||
+        opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 || opc == 0x70 || opc == 0x19 ||
         opc == 0x243 || opc == 0x247 || opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc ||
-        opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 ||
-        opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c ||
+        opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x1a ||
+        opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0x10 ||
         opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e || opc == 0x93 ||
         opc == 0x9b) {
         op = static_cast<Opcode>(opc);
@@ -1941,6 +1955,16 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             p.cisc(regs, cisc);
             return;
         }
+        case Opcode::RUN_TAPE:
+            // for (size_t i = 0; i < regs.size(); i += 3) 
+            //     m.run_tape(regs[i + 1], regs[i + 2], regs[i]);
+            return;
+        case Opcode::JOIN_TAPE:
+            // m.join_tape(int(n));
+            return;
+        case Opcode::LDTN:
+            p.i_register[regs[0] + vec] = p.thread_num;
+            break;
         case Opcode::NONE:
             log(Level::WARNING, "unknown opcode: ", n);
             break;
