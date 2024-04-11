@@ -27,6 +27,8 @@
 #include "programs/functions/sevare.hpp"
 #elif FUNCTION_IDENTIFIER < 400
 #include "programs/functions/NN.hpp"
+#elif FUNCTION_IDENTIFIER >= 500 && FUNCTION_IDENTIFIER <= 510
+#include "programs/functions/mpspdz.hpp"
 #else 
 #include "programs/functions/cryptgpu_piranha_bench.hpp"
 #endif

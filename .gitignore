@@ -7,3 +7,6 @@
 *.obj
 # Debugger config
 *.json
+
+Bytecodes
+Schedules

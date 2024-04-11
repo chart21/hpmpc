@@ -1,0 +1,55 @@
+def test(actual, expected):
+    print_ln('expected %s, got %s', expected, actual)
+
+print_ln('TESTS for R 64')
+print_ln('----------------------------------------------------------------------------------')
+print_ln('RUNNING REGINT TESTS')
+a = cint(-10)
+b = cint(-1)
+
+test(a + b, -11)
+test(a - b, -9)
+test(a * b, 10)
+test(a // b, 10)
+test(a % cint(-3), -1)
+
+test(a << cint(20), -10485760)
+test(a >> cint(1), 19223372036854775803)
+
+test(~a, -9223372036854775799)
+test(a ^ b, 9)
+test(a | b, -1)
+test(a & b, -10)
+
+a = cint(9223372036854775807)
+b = cint(1)
+test(a + b, -9223372036854775808)
+
+a = cint(-9223372036854775808)
+test(a - b, 9223372036854775807)
+
+
+print_ln('----------------------------------------------------------------------------------')
+print_ln('RUNNING REGINT TESTS')
+a = regint(-10)
+b = regint(-1)
+
+test(a + b, -11)
+test(a - b, -9)
+test(a * b, 10)
+test(a // b, 10)
+test(a % regint(-3), -1)
+
+test(a << regint(20), -10485760)
+test(a >> regint(1), 19223372036854775803)
+
+test(a ^ b, 9)
+test(a | b, -1)
+test(a & b, -10)
+
+a = regint(9223372036854775807)
+b = regint(1)
+test(a + b, -9223372036854775808)
+
+a = regint(-9223372036854775808)
+test(a - b, 9223372036854775807)
