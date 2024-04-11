@@ -49,7 +49,7 @@ class CIntSet {
 
     cint::IBase get() const { return nums[0].get(); }
 
-    CIntSet& operator=(const cint::IBase& other) {
+    CIntSet& operator=(const typename cint::IBase& other) {
         nums.clear();
         nums.reserve(LENGTH);
         for (size_t i = 0; i < LENGTH; ++i)

@@ -30,8 +30,6 @@ using std::vector;
 
 namespace IR {
 
-template class CIntSet<CInteger<INT_TYPE, UINT_TYPE>>;
-
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 class Machine;

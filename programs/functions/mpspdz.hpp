@@ -50,7 +50,7 @@ void MP_MACHINE_TUTORIAL(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using sint = sint_t<A>;
 
-    IR::Machine<int_t, Share, sint, sbitset_t, S> m("tutorial.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("tutorial.sch");
     m.run();
 }
 
