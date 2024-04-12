@@ -3,7 +3,6 @@ from util import if_else
 
 size = int(program.args[1])
 program.bit_length = 32
-player = int(program.args[2])
 n = size
 
 datatype = sint
