@@ -45,6 +45,8 @@
 #define FUNCTION MP_MACHINE_AVG_BENCH
 #elif FUNCTION_IDENTIFIER == 520
 #define FUNCTION MP_MACHINE_INTERSECTION_BENCH
+#elif FUNCTION_IDENTIFIER == 521 || FUNCTION_IDENTIFIER == 522 || FUNCTION_IDENTIFIER == 523
+#define FUNCTION MP_MACHINE_INTERSECTION_BENCH
 #endif
 
 //Boilerplate
@@ -310,6 +312,23 @@ void MP_MACHINE_INTERSECTION_BENCH(DATATYPE* res)
     using sint = sint_t<A>;
 
     IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("PrivateSetIntersection.sch");
+    m.run();
+}
+
+#elif FUNCTION_IDENTIFIER == 521 || FUNCTION_IDENTIFIER == 522 || FUNCTION_IDENTIFIER == 523
+template<typename Share>
+void MP_MACHINE_INTERSECTION_BENCH(DATATYPE* res)
+{
+    using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<64, S>;
+
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("SecureAuction.sch");
     m.run();
 }
 
