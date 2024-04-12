@@ -55,12 +55,14 @@ class Machine {
     void setup();                           // allocate registers/memory
     void run();                             // starts main thread and init memory
 
+    void run_tape_no_thread(const unsigned& tape, const int& arg);
+
     thread& run_tape(const unsigned& tape, const int& arg);
 
     /* main method for each thread */
     inline static void execute(Machine& m, Program<int_t, cint, Share, sint, sbit, BitShare, N>& p,
                                int arg) {
-        p.run(m, arg);
+        p.run(m, arg, 0); // only 1st(0) thread is started here
     }
 
     void update_max_mem(const Type& type,
@@ -218,6 +220,13 @@ template <class int_t, class cint, class Share, class sint, template <int, class
 void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::time() const {
     auto res = timer.at(0).get_time();
     get_out() << "Elapsed time: " << res << "\n";
+}
+
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
+          class BitShare, int N>
+void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::run_tape_no_thread(const unsigned& tape, const int& arg) {
+    auto& prog = progs[tape]; // no copy needed
+    prog.run(*this, arg, 1); // should always be thread 1
 }
 
 } // namespace IR

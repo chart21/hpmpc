@@ -85,7 +85,7 @@ class Program {
     load_program(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m); // parse bytecode file
     void setup();                                                          // parse bytecode file
     void run(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m,
-             const int& arg); // execute all instructions
+             const int& arg, const int& t_num); // execute all instructions
 
     inline int get_argument() const { return arg; }
 
@@ -1089,8 +1089,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::setup() {
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 void Program<int_t, cint, Share, sint, sbit, BitShare, N>::run(
-    Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m, const int& argi) {
+    Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m, const int& argi, const int& thread_number) {
     arg = argi;
+    thread_num = thread_number;
 
     for (size_t pc = 0; pc < prog.size(); ++pc)
         prog[pc].execute(*this, m, pc);
@@ -1998,9 +1999,14 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
         case Opcode::RUN_TAPE:
             // for (size_t i = 0; i < regs.size(); i += 3)
             //     m.run_tape(regs[i + 1], regs[i + 2], regs[i]);
+            assert(regs.size() == 3); // start only one thread
+            assert(regs[1] != 0); // no copy needed (test) since only the main thread(0) has important data
+            assert(regs[0] == 1); // assume it's the only thread running
+            m.run_tape_no_thread(regs[1], regs[2]);
             return;
         case Opcode::JOIN_TAPE:
             // m.join_tape(int(n));
+            assert(n == 1); // multithreading not supported
             return;
         case Opcode::LDTN:
             p.i_register[regs[0] + vec] = p.thread_num;
