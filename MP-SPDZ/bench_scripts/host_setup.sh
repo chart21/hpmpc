@@ -102,3 +102,4 @@ echo "global setup successful"
 cd "$REPO3_DIR"
 
 cp "$REPO_DIR"/MP-SPDZ/Functions/bench/* ./Programs/Source/
+cp "$REPO2_DIR"/experiments/mp-spdz/66_ThresholdSecurity/aes_128.txt ./Programs/Circuits/

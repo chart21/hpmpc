@@ -1,0 +1,50 @@
+import util
+from Compiler import types
+
+import math
+n_inputs = int(program.args[1])
+priceRange= int(10)
+
+n_bits = 32
+value_type = sint
+smallest_z=value_type(10000)
+this_z=0
+index=value_type(0)
+
+program.set_bit_length(n_bits)
+program.set_security(40)
+
+
+bids_price = value_type.Array(n_inputs)
+bids_price.assign_all(5)
+bids_quantity = value_type.Array(n_inputs)
+bids_quantity.assign_all(5)
+offers_price = value_type.Array(n_inputs)
+offers_price.assign_all(5)
+offers_quantity = value_type.Array(n_inputs)
+offers_quantity.assign_all(5)
+
+def calculateBidingPrice(bids_price,bids_quantity,offers_price,offers_quantity,priceRange):
+    @for_range_opt(priceRange)
+    def loop(i):
+        accumulatedSupply=0
+        accumulatedDemand=0
+        comp=offers_price.get_vector()<=i
+        a=comp.if_else(0,offers_quantity.get_vector())
+        for t in a:
+            accumulatedSupply= accumulatedSupply+t
+        comp=bids_price.get_vector()>=i
+        a=comp.if_else(0,bids_quantity.get_vector())
+        for t in a:
+            accumulatedSupply= accumulatedSupply+t
+        this_z = accumulatedDemand-accumulatedSupply
+        cond = abs(this_z)<abs(smallest_z)
+        smallest_z.update(cond.if_else(this_z,smallest_z))
+        index.update(cond.if_else(i,index))
+    return index
+
+
+results = calculateBidingPrice(bids_price,bids_quantity,offers_price,offers_quantity,priceRange)
+
+# print_ln('Market Clearing Price: %s', results.reveal())
+results.reveal()

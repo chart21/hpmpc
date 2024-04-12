@@ -1,0 +1,4 @@
+size = int(program.args[1])
+
+inputs = sint.Array(size)
+inputs.input_from(0)

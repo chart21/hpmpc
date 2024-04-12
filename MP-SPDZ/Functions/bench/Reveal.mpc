@@ -1,0 +1,9 @@
+program.bit_length = 32
+size = int(program.args[1])
+player = 3
+datatype = sint
+base = 0
+
+inputs=sint.Array(size)
+inputs=inputs.assign_all(base)
+inputs.reveal()

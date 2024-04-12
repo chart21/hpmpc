@@ -160,7 +160,7 @@ void MP_MACHINE_MUL_BENCH(DATATYPE* res)
     using sint = sint_t<A>;
 
     Share::communicate();
-    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("mul_bench.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("Int_Multiplication.sch");
     m.run();
 }
 
@@ -178,7 +178,7 @@ void MP_MACHINE_COMP_BENCH(DATATYPE* res)
     using sint = sint_t<A>;
 
     Share::communicate();
-    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("comp_bench.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("Int_Compare.sch");
     m.run();
 }
 

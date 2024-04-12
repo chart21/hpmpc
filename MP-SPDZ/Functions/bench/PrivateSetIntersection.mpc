@@ -1,0 +1,26 @@
+from util import if_else
+	
+
+size = int(program.args[1])
+program.bit_length = 32
+player = int(program.args[2])
+n = size
+
+datatype = sint
+"""Naive private set intersection on two Arrays, followed by computing the size and average of the intersection"""
+a = Array(n, datatype)
+b = Array(n, datatype)
+
+a.assign_all(1)
+b.assign_all(1)
+
+intersection = Array(n, sint)
+
+@for_range_opt(n)
+def _(i):
+	@for_range_opt(n)
+	def _(j):
+		match = a[i] == b[j]
+		intersection[i] = if_else(match, a[i], intersection[i]) 
+	
+intersection.reveal()
