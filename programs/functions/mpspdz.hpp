@@ -198,7 +198,7 @@ void MP_MACHINE_DIV_BENCH(DATATYPE* res)
     using sint = sint_t<A>;
 
     Share::communicate();
-    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("Int_Compare.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("Int_Division.sch");
     m.run();
 }
 
