@@ -21,4 +21,4 @@ def _(i):
 
 #Mean is calculated in clear since sum is revealed anyway
 sum_re = cfix(sum_value[0].reveal())
-mean_value= sum_re / total
+mean_value = sum_re / total
