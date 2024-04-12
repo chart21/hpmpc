@@ -1,14 +1,11 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
-#include <fcntl.h>  // open file
-#include <unistd.h> // close file
-
 #include <cassert>     // assert()
 #include <cstdint>     // int_t
 #include <iomanip>     // set precision
 #include <iostream>    // default precision
-#include <istream>
+#include <istream>     // for bytecode
 #include <random>      // random bit
 #include <stack>       // stack for thread local ints (obsolete)
 #include <string>      // bytecode path
@@ -96,6 +93,7 @@ class Program {
     void popen(const vector<int>& regs, const size_t& size);
     void muls(const vector<int>& regs);
     void mulm(const vector<int>& regs, const size_t& vec);
+    void xor_arith(const vector<sint>& x, const vector<sint>& y, vector<sint>& res);
     void dotprods(const vector<int>& regs, const size_t& size); // TODO
     void inputmixed(const vector<int>& regs, const bool from_reg, const size_t& vec);
 
@@ -118,7 +116,7 @@ class Program {
     size_t thread_id;
 
     int arg;                  // thread arg
-    int thread_num; // thread num
+    int thread_num;           // thread num
     vector<Instruction> prog; // all instructions
 
     unsigned max_reg[REG_TYPES]; // to get required register size for all types
@@ -131,7 +129,8 @@ class Program {
 
     std::stack<IntType> i_stack;
 
-    std::mt19937 rand_engine;
+    std::mt19937 rand_engine;      // creates the same random numbers for every party (testing)
+    std::mt19937 rand_engine_diff; // creates random numbers (different for every party)
 
     void update_max_reg(const Type& reg, const unsigned& sreg, const Opcode& op);
 };
@@ -148,7 +147,8 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
 
     while (true) {
         uint64_t num = read_long(fd);
-        if (fd.fail()) break;
+        if (fd.fail())
+            break;
         int cur = 0x3ff & num;
         size_t vec = num >> 10; // 1st 22bits for vectorized command
 
@@ -185,7 +185,7 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::GLDMC:
         case Opcode::GLDMS:
         case Opcode::LDMINT: {
-            unsigned sreg = inst.add_reg(read_int(fd));         // dest
+            unsigned sreg = inst.add_reg(read_int(fd));          // dest
             size_t mem_addr = inst.set_immediate(read_long(fd)); // source
 
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
@@ -436,7 +436,7 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
 
                 uint32_t dest = inst.add_reg(read_int(fd));
 
-                if (cur == 1) {                              // fix-point
+                if (cur == 1) {                 // fix-point
                     inst.add_reg(read_int(fd)); // precision
                     i++;
                 }
@@ -872,9 +872,9 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             unsigned args = read_int(fd);
 
             for (size_t i = 0; i < args; i += 3) {
-                 inst.add_reg(read_int(fd));
-                 inst.add_reg(read_int(fd));
-                 inst.add_reg(read_int(fd));
+                inst.add_reg(read_int(fd));
+                inst.add_reg(read_int(fd));
+                inst.add_reg(read_int(fd));
             }
             break;
         }
@@ -1049,9 +1049,9 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
         opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 || opc == 0x70 || opc == 0x19 ||
         opc == 0x243 || opc == 0x247 || opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc ||
         opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x1a ||
-        opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0x10 ||
-        opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e || opc == 0x93 ||
-        opc == 0x9b) {
+        opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c ||
+        opc == 0x10 || opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e ||
+        opc == 0x93 || opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
         op = Opcode::NONE;
@@ -1062,7 +1062,8 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 Program<int_t, cint, Share, sint, sbit, BitShare, N>::Program(const string&& path, size_t thread)
-    : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21) {}
+    : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21),
+      rand_engine_diff(std::random_device()()) {}
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
@@ -1763,9 +1764,39 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             if (p.i_register[regs[0]].get() == 0)
                 pc += (signed int)n;
             return;
-        case Opcode::BIT:
-            p.s_register[regs[0] + vec] = p.rand_engine() & 1; // welp for testing/simulation
-            break;
+        case Opcode::BIT: {
+            vector<sint> bits1;
+            vector<sint> bits2;
+            vector<sint> bits3;
+            bits1.resize(size);
+            bits2.resize(size);
+            bits3.resize(size);
+
+            for (size_t vec = 0; vec < size; ++vec) { // every party creates <size> random bits
+                DATATYPE bit = PROMOTE(p.rand_engine_diff() & 1);
+
+                bits1[vec].template prepare_receive_from<P_0>(bit);
+                bits2[vec].template prepare_receive_from<P_1>(bit);
+                bits3[vec].template prepare_receive_from<P_2>(bit);
+            }
+
+            Share::communicate();
+
+            for (size_t vec = 0; vec < size; ++vec) {
+                bits1[vec].template complete_receive_from<P_0>();
+                bits2[vec].template complete_receive_from<P_1>();
+                bits3[vec].template complete_receive_from<P_2>();
+            }
+            vector<sint> res;
+            res.resize(size);
+            p.xor_arith(bits1, bits2, res);
+            p.xor_arith(res, bits3, res);
+
+            for (size_t vec = 0; vec < size; ++vec) {
+                p.s_register[regs[0] + vec] = res[vec];
+            }
+            return;
+        }
         case Opcode::DABIT: { // TODO
             unsigned bit = p.rand_engine() & 1;
             p.s_register[regs[0] + vec] = bit;
@@ -1956,7 +1987,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             return;
         }
         case Opcode::RUN_TAPE:
-            // for (size_t i = 0; i < regs.size(); i += 3) 
+            // for (size_t i = 0; i < regs.size(); i += 3)
             //     m.run_tape(regs[i + 1], regs[i + 2], regs[i]);
             return;
         case Opcode::JOIN_TAPE:
@@ -2366,6 +2397,26 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::cisc(const vector<int
         for (size_t i = 0; i < ires.size(); ++i)
             s_register[ires[i]] = res[i];
         delete[] res;
+    }
+}
+
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
+          class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::xor_arith(const vector<sint>& x,
+                                                                     const vector<sint>& y,
+                                                                     vector<sint>& res) {
+    vector<sint> tmp;
+    tmp.resize(x.size());
+
+    for (size_t i = 0; i < x.size(); ++i) {
+        tmp[i] = x[i].prepare_mult(y[i]);
+    }
+
+    Share::communicate();
+
+    for (size_t i = 0; i < x.size(); ++i) {
+        tmp[i].complete_mult_without_trunc();
+        res[i] = x[i] + y[i] - tmp[i].mult_public(2);
     }
 }
 
