@@ -58,7 +58,7 @@ cd "$REPO3_DIR"
 
 for func in "${files[@]}"; do
     echo "./compile.py $func $size"
-    ./compile.py -R 64 -X -K LTZ,EQZ "$func" "$size"
+    ./compile.py -R 32 -X -K LTZ,EQZ "$func" "$size"
     mv "$REPO3_DIR"/Programs/Schedules/"$func"-"$size".sch "$SCHEDULE_PATH"/"$func".sch
 done
 
