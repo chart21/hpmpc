@@ -1644,43 +1644,52 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             p.precision = int(n);
             return;
         case Opcode::PRINT_FLOAT_PLAIN: {
-            const auto& sigs = p.c_register[regs[0]].get_all();
-            const auto& exp = p.c_register[regs[1]].get_all();
-            const auto& zero = p.c_register[regs[2]].get_all();
-            const auto& sign = p.c_register[regs[3]].get_all();
-            const auto& nan = p.c_register[regs[4]].get_all();
+            if (size > 1)
+                m.get_out() << "[";
 
-#if BITLENGTH != DATTYPE
-            m.get_out() << "(";
-#endif
+            for (size_t vec = 0; vec < size; ++vec) {
+                if (size > 1 and vec != 0)
+                    m.get_out() << ", ";
+                const auto& sigs = p.c_register[regs[0] + vec].get_all();
+                const auto& exp = p.c_register[regs[1] + vec].get_all();
+                const auto& zero = p.c_register[regs[2] + vec].get_all();
+                const auto& sign = p.c_register[regs[3] + vec].get_all();
+                const auto& nan = p.c_register[regs[4]+ vec].get_all();
 
-            if (nan[0]) {
-                m.get_out() << "NaN";
-                return;
-            } else if (zero[0]) {
-                m.get_out() << "0";
-                return;
-            }
+    #if BITLENGTH != DATTYPE
+                m.get_out() << "(";
+    #endif
 
-            double res = sigs[0] * powf(2, exp[0]) * (sign[0] == 1 ? -1.f : 1.f);
-            m.get_out() << std::setprecision(p.precision) << res;
-
-            for (size_t i = 1; i < SIZE_VEC; ++i) {
-                if (nan[i]) {
+                if (nan[0]) {
                     m.get_out() << "NaN";
                     return;
-                } else if (zero[i]) {
+                } else if (zero[0]) {
                     m.get_out() << "0";
                     return;
                 }
 
-                double res = sigs[i] * powf(2, exp[i]) * (sign[i] == 1 ? -1.f : 1.f);
-                m.get_out() << ", " << res;
-            }
+                double res = sigs[0] * powf(2, exp[0]) * (sign[0] == 1 ? -1.f : 1.f);
+                m.get_out() << std::setprecision(p.precision) << res;
 
-#if BITLENGTH != DATTYPE
-            m.get_out() << ")";
-#endif
+                for (size_t i = 1; i < SIZE_VEC; ++i) {
+                    if (nan[i]) {
+                        m.get_out() << "NaN";
+                        return;
+                    } else if (zero[i]) {
+                        m.get_out() << "0";
+                        return;
+                    }
+
+                    double res = sigs[i] * powf(2, exp[i]) * (sign[i] == 1 ? -1.f : 1.f);
+                    m.get_out() << ", " << res;
+                }
+
+    #if BITLENGTH != DATTYPE
+                m.get_out() << ")";
+    #endif
+            }
+            if (size > 1)
+                m.get_out() << "]";
             return;
         }
         case Opcode::BITCOMS: {
