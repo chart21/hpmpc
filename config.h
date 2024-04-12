@@ -122,6 +122,17 @@ int base_port = BASE_PORT; // temporary solution
 #define BANDWIDTH_OPTIMIZED 0
 #define ONLINE_OPTIMIZED 1
 #endif
+#elif FUNCTION_IDENTIFIER >= 500 || FUNCTION_IDENTIFIER < 550
+#if FUNCTION_IDENTIFIER == 507 || FUNCTION_IDENTIFIER == 513
+#define BANDWIDTH_OPTIMIZED 1
+#define ONLINE_OPTIMIZED 0
+#elif FUNCTION_IDENTIFIER == 508 || FUNCTION_IDENTIFIER == 514 //PPA
+#define BANDWIDTH_OPTIMIZED 0
+#define ONLINE_OPTIMIZED 0
+#elif FUNCTION_IDENTIFIER == 509 || FUNCTION_IDENTIFIER == 515 //PPA 4-Way
+#define BANDWIDTH_OPTIMIZED 0
+#define ONLINE_OPTIMIZED 1
+#endif
 #else
 #if FUNCTION_IDENTIFIER < 100  //RCA
 #define BANDWIDTH_OPTIMIZED 1 // 1 if bandwidth optimized (e.g. Ripple Carry Adder), 0 if Latency optimized (e.g. Multi-input AND gates, Parallel Prefix Adder)
