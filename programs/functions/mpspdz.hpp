@@ -31,6 +31,8 @@
 #define FUNCTION MP_MACHINE_MUL_BENCH
 #elif FUNCTION_IDENTIFIER == 507
 #define FUNCTION MP_MACHINE_COMP_BENCH
+#elif FUNCTION_IDENTIFIER == 508
+#define FUNCTION MP_MACHINE_DIV_BENCH
 #endif
 
 //Boilerplate
@@ -167,6 +169,24 @@ void MP_MACHINE_MUL_BENCH(DATATYPE* res)
 #elif FUNCTION_IDENTIFIER == 507
 template<typename Share>
 void MP_MACHINE_COMP_BENCH(DATATYPE* res)
+{
+    using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<64, S>;
+
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+
+    Share::communicate();
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("Int_Compare.sch");
+    m.run();
+}
+
+#elif FUNCTION_IDENTIFIER == 508
+template<typename Share>
+void MP_MACHINE_DIV_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
     using int_t = IR::Integer<int64_t, uint64_t>;
