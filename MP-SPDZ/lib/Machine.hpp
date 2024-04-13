@@ -224,9 +224,10 @@ void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::time() const {
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
-void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::run_tape_no_thread(const unsigned& tape, const int& arg) {
+void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::run_tape_no_thread(const unsigned& tape,
+                                                                              const int& arg) {
     auto& prog = progs[tape]; // no copy needed
-    prog.run(*this, arg, 1); // should always be thread 1
+    prog.run(*this, arg, 1);  // should always be thread 1
 }
 
 } // namespace IR

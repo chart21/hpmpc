@@ -84,8 +84,8 @@ class Program {
     bool
     load_program(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m); // parse bytecode file
     void setup();                                                          // parse bytecode file
-    void run(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m,
-             const int& arg, const int& t_num); // execute all instructions
+    void run(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m, const int& arg,
+             const int& t_num); // execute all instructions
 
     inline int get_argument() const { return arg; }
 
@@ -1054,13 +1054,13 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
         opc == 0x75 || opc == 0x76 || opc == 0x20e || opc == 0x244 || opc == 0x72 || opc == 0x9f ||
         opc == 0x80 || opc == 0x36 || opc == 0x2b || opc == 0x214 || opc == 0x24a || opc == 0x5b ||
         opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 || opc == 0x21e ||
-        opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 || opc == 0x242 || opc == 0x09 ||
-        opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 || opc == 0x70 || opc == 0x19 ||
-        opc == 0x243 || opc == 0x247 || opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc ||
-        opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x1a ||
-        opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0x07 ||
-        opc == 0x10 || opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e ||
-        opc == 0x93 || opc == 0x9b) {
+        opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 || opc == 0x242 ||
+        opc == 0x09 || opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0xa9 || opc == 0x70 ||
+        opc == 0x19 || opc == 0x243 || opc == 0x247 || opc == 0xaa || opc == 0xab || opc == 0x20c ||
+        opc == 0xbc || opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 ||
+        opc == 0x1a || opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 ||
+        opc == 0x21c || opc == 0x07 || opc == 0x10 || opc == 0xe9 || opc == 0x95 || opc == 0x9c ||
+        opc == 0x9d || opc == 0x9e || opc == 0x93 || opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
         op = Opcode::NONE;
@@ -1098,7 +1098,8 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::setup() {
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 void Program<int_t, cint, Share, sint, sbit, BitShare, N>::run(
-    Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m, const int& argi, const int& thread_number) {
+    Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m, const int& argi,
+    const int& thread_number) {
     arg = argi;
     thread_num = thread_number;
 
@@ -1320,7 +1321,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             p.s_register[regs[0] + vec] = p.s_register[regs[1] + vec] + sint(int(n));
             break;
         case Opcode::SUBSFI:
-            p.s_register[regs[0] + vec] = sint{UINT_TYPE(int(n))} - (p.s_register[regs[1] + vec]);
+            p.s_register[regs[0] + vec] = sint(int(n)) - (p.s_register[regs[1] + vec]);
             break;
         case Opcode::SUBCFI:
             p.c_register[regs[0] + vec] =
@@ -1364,15 +1365,18 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             return;
         case Opcode::SUBML:
             p.s_register[regs[0] + vec] =
-                p.s_register[regs[1] + vec] - sint{UINT_TYPE(p.c_register[regs[2] + vec].get())};
+                p.s_register[regs[1] + vec] - p.s_register[regs[1] + vec].get_share_from_public_dat(
+                                                  p.c_register[regs[2] + vec].get_type());
             break;
         case Opcode::SUBMR:
-            p.s_register[regs[0] + vec] =
-                sint{UINT_TYPE(p.c_register[regs[1] + vec].get())} - p.s_register[regs[2] + vec];
+            p.s_register[regs[0] + vec] = p.s_register[regs[2] + vec].get_share_from_public_dat(
+                                              p.c_register[regs[1] + vec].get_type()) -
+                                          p.s_register[regs[2] + vec];
             break;
         case Opcode::ADDM:
             p.s_register[regs[0] + vec] =
-                p.s_register[regs[1] + vec] + sint{UINT_TYPE(p.c_register[regs[2] + vec].get())};
+                p.s_register[regs[1] + vec] + p.s_register[regs[1] + vec].get_share_from_public_dat(
+                                                  p.c_register[regs[2] + vec].get_type());
             break;
         case Opcode::OPEN:
             p.popen(regs, get_size());
@@ -1672,11 +1676,11 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                 const auto& exp = p.c_register[regs[1] + vec].get_all();
                 const auto& zero = p.c_register[regs[2] + vec].get_all();
                 const auto& sign = p.c_register[regs[3] + vec].get_all();
-                const auto& nan = p.c_register[regs[4]+ vec].get_all();
+                const auto& nan = p.c_register[regs[4] + vec].get_all();
 
-    #if BITLENGTH != DATTYPE
+#if BITLENGTH != DATTYPE
                 m.get_out() << "(";
-    #endif
+#endif
 
                 if (nan[0]) {
                     m.get_out() << "NaN";
@@ -1702,9 +1706,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                     m.get_out() << ", " << res;
                 }
 
-    #if BITLENGTH != DATTYPE
+#if BITLENGTH != DATTYPE
                 m.get_out() << ")";
-    #endif
+#endif
             }
             if (size > 1)
                 m.get_out() << "]";
@@ -2017,7 +2021,8 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             // for (size_t i = 0; i < regs.size(); i += 3)
             //     m.run_tape(regs[i + 1], regs[i + 2], regs[i]);
             assert(regs.size() == 3); // start only one thread
-            assert(regs[1] != 0); // no copy needed (test) since only the main thread(0) has important data
+            assert(regs[1] !=
+                   0); // no copy needed (test) since only the main thread(0) has important data
             assert(regs[0] == 1); // assume it's the only thread running
             m.run_tape_no_thread(regs[1], regs[2]);
             return;
