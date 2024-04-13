@@ -36,6 +36,8 @@ enum class Opcode {
     STMS = 0x06,
     LDMSI = 0x08,
     STMSI = 0xa,
+    LDMCI = 0x7,
+    STMCI = 0x9,
 
     LTC = 0x95,
     GTC = 0x96,
