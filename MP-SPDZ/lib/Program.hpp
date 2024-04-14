@@ -1540,7 +1540,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
 
             return;
         case Opcode::STMSB:
-            m.sb_mem[n] = p.sb_register[regs[0]];
+            m.sb_mem[n + vec] = p.sb_register[regs[0] + vec];
             break;
         case Opcode::LDMSB:
             p.sb_register[regs[0]] = m.sb_mem[n];
