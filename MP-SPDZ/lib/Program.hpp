@@ -1643,10 +1643,10 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                     p.cb_register[regs[i + 1] + j] = ZERO;
                 for (int j = 0; j < regs[i]; ++j) {
                     p.cb_register[regs[i + 1] + j / BIT_LEN] |=
-                        int64_t(uint64_t(p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN]
-                             .complete_reveal_to_all() &
+                        (BitType(p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN]
+                             .complete_reveal_to_all()) &
                          1u)
-                        << (j % BIT_LEN));
+                        << int64_t(j % BIT_LEN);
                 }
                 for (size_t j = 0; j < 2; ++j) {
                     std::cout << "REVEAL: " << p.cb_register[regs[i + 1] + j].get() << "\n";
