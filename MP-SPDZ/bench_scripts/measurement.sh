@@ -85,7 +85,7 @@ case "$fun" in
         echo WARNING: "$fun": unkown function defaulting to Int_Multiplication
 esac
 
-echo "./compile.py $func $size"
+echo "./compile.py --budget 200000 -l $domain $bitlength -K LTZ,EQZ $func $size"
 ./compile.py --budget 200000 -l "$domain" "$bitlength" -K LTZ,EQZ "$func" "$size"
 mv "$REPO3_DIR"/Programs/Schedules/"$func"-"$size".sch "$SCHEDULE_PATH"/"$func".sch
 
