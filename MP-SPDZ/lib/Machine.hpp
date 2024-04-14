@@ -86,6 +86,9 @@ class Machine {
 
     Input public_input;
 
+    size_t get_random() { return rand_engine(); } // same for all parties (very insecure ^^)
+    size_t get_random_diff() { return rand_engine_diff(); } // different for all parties
+
   private:
     vector<Program<int_t, cint, Share, sint, sbit, BitShare, N>> progs; // all bytecode-files
     vector<thread> tapes; // all threads running the VM
@@ -93,12 +96,14 @@ class Machine {
     unsigned max_mem[REG_TYPES]; // save max value -> size of memory
     bool loaded;
     std::map<int, Timer> timer;
+    std::mt19937 rand_engine;      // creates the same random numbers for every party (testing)
+    std::mt19937 rand_engine_diff; // creates random numbers (different for every party)
 };
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 Machine<int_t, cint, Share, sint, sbit, BitShare, N>::Machine(std::string&& path)
-    : max_mem(), loaded(false) {
+    : max_mem(), loaded(false), rand_engine(21), rand_engine_diff(std::random_device()()) {
     load_schedule(std::move(path));
 }
 

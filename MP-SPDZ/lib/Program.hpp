@@ -129,9 +129,6 @@ class Program {
 
     std::stack<IntType> i_stack;
 
-    std::mt19937 rand_engine;      // creates the same random numbers for every party (testing)
-    std::mt19937 rand_engine_diff; // creates random numbers (different for every party)
-
     void update_max_reg(const Type& reg, const unsigned& sreg, const Opcode& op);
 };
 
@@ -1071,8 +1068,7 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 Program<int_t, cint, Share, sint, sbit, BitShare, N>::Program(const string&& path, size_t thread)
-    : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg(), rand_engine(21),
-      rand_engine_diff(std::random_device()()) {}
+    : precision(FRACTIONAL), path(std::move(path)), thread_id(thread), max_reg() {}
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
@@ -1298,7 +1294,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             p.i_register[regs[0] + vec] = p.i_register[regs[1] + vec] < 0;
             break;
         case Opcode::RAND: {
-            long rand = p.rand_engine();
+            long rand = m.get_random();
             rand = p.i_register[regs[1] + vec].get() >= 64
                        ? rand
                        : rand % (1 << p.i_register[regs[1] + vec].get());
@@ -1777,7 +1773,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                 p.i_register[regs[0] + i] = p.i_register[regs[1] + i];
 
             for (size_t i = 0; i < size; ++i) {
-                size_t j = p.rand_engine() % (size - i); // should be shared random value
+                size_t j = m.get_random() % (size - i); // should be shared random value
                 std::swap(p.i_register[regs[0] + i], p.i_register[regs[0] + i + j]);
             }
             return;
@@ -1804,7 +1800,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             bits3.resize(size);
 
             for (size_t vec = 0; vec < size; ++vec) { // every party creates <size> random bits
-                DATATYPE bit = PROMOTE(p.rand_engine_diff() & 1);
+                DATATYPE bit = PROMOTE(m.get_random_diff() & 1);
 
                 bits1[vec].template prepare_receive_from<P_0>(bit);
                 bits2[vec].template prepare_receive_from<P_1>(bit);
@@ -1829,7 +1825,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             return;
         }
         case Opcode::DABIT: { // TODO
-            unsigned bit = p.rand_engine() & 1;
+            unsigned bit = m.get_random() & 1;
             p.s_register[regs[0] + vec] = bit;
             p.sb_register[regs[1] + vec / BIT_LEN][vec % BIT_LEN] = BitShare(PROMOTE(bit));
             break;
