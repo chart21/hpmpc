@@ -56,11 +56,38 @@ mkdir -p "$SCHEDULE_PATH" "$BYTECODE_PATH"
 
 cd "$REPO3_DIR"
 
-for func in "${files[@]}"; do
-    echo "./compile.py $func $size"
-    ./compile.py -R 32 -K LTZ,EQZ "$func" "$size"
-    mv "$REPO3_DIR"/Programs/Schedules/"$func"-"$size".sch "$SCHEDULE_PATH"/"$func".sch
-done
+domain="-R"
+bitlength=32
+
+# map function number to function name
+case "$fun" in
+    501) func="tmp" ;;
+    506) func="Int_Multiplication" ;;
+    507|508|509) func="Int_Compare" ;;
+    510) func="Int_Division" ;;
+    511) func="Input" ;;
+    512) func="Reveal" ;;
+    513|514|515) func="SecureMax" ;;
+    516|517|518) func="SecureMin" ;;
+    519) func="SecureMean" ;;
+    520) func="PrivateSetIntersection" ;;
+    521|522|523) func="SecureAuction" ;;
+    524)
+        domain="-B"
+        bitlength=1
+        func="BIT_AND" ;;
+    525)
+        domain="-B"
+        bitlength=128
+        func="AES" ;;
+    *)
+        func="Int_Multiplication"
+        echo WARNING: "$fun": unkown function defaulting to Int_Multiplication
+esac
+
+echo "./compile.py $func $size"
+./compile.py --budget 200000 -l "$domain" "$bitlength" -K LTZ,EQZ "$func" "$size"
+mv "$REPO3_DIR"/Programs/Schedules/"$func"-"$size".sch "$SCHEDULE_PATH"/"$func".sch
 
 mv ./Programs/Bytecode/* "$BYTECODE_PATH"/
 

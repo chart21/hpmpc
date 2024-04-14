@@ -47,6 +47,10 @@
 #define FUNCTION MP_MACHINE_INTERSECTION_BENCH
 #elif FUNCTION_IDENTIFIER == 521 || FUNCTION_IDENTIFIER == 522 || FUNCTION_IDENTIFIER == 523
 #define FUNCTION MP_MACHINE_AUCTION_BENCH
+#elif FUNCTION_IDENTIFIER == 524
+#define FUNCTION MP_MACHINE_BIT_AND_BENCH
+#elif FUNCTION_IDENTIFIER == 525
+#define FUNCTION MP_MACHINE_AES_BENCH
 #endif
 
 //Boilerplate
@@ -330,6 +334,42 @@ void MP_MACHINE_AUCTION_BENCH(DATATYPE* res)
     using sint = sint_t<A>;
 
     IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("SecureAuction.sch");
+    m.run();
+}
+
+#elif FUNCTION_IDENTIFIER == 524
+template<typename Share>
+void MP_MACHINE_BIT_AND_BENCH(DATATYPE* res)
+{
+    using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<64, S>;
+
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+
+    Share::communicate();
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("BIT_AND.sch");
+    m.run();
+}
+
+#elif FUNCTION_IDENTIFIER == 525
+template<typename Share>
+void MP_MACHINE_AES_BENCH(DATATYPE* res)
+{
+    using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<64, S>;
+
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+
+    Share::communicate();
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("AES.sch");
     m.run();
 }
 
