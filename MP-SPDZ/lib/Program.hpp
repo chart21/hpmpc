@@ -2285,8 +2285,8 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmulsm(
     auto source1 = m.s_mem.begin() + i_register[regs[1]].get();
     auto source2 = m.s_mem.begin() + i_register[regs[2]].get();
 
-    int rows = regs[3]; // for 1st but also final
-    int cols = regs[5]; // for 2nd but also final
+    const int& rows = regs[3]; // for 1st but also final
+    const int& cols = regs[5]; // for 2nd but also final
 
     for (int i = 0; i < rows; ++i) {
         auto row_1 = i_register[regs[6] + i].get(); // rows to use what ever that means
@@ -2299,8 +2299,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::matmulsm(
     Share::communicate();
 
     for (int i = 0; i < rows; ++i) {
+        auto row_1 = i_register[regs[6] + i].get();
         for (int j = 0; j < cols; ++j) {
-            (res + i * cols + j)->complete_mult_without_trunc();
+            (res + row_1 * cols + j)->complete_mult_without_trunc();
         }
     }
 }
