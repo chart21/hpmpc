@@ -1159,12 +1159,14 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             m.c_mem[p.i_register[regs[1] + vec].get()] = p.c_register[regs[0] + vec];
             break;
         case Opcode::STMSBI:
-            if (p.i_register[regs[1] + vec].get() + 1 > m.sb_mem.size())
-                m.sb_mem.resize(p.i_register[regs[1] + vec].get() + 1);
-            m.sb_mem[p.i_register[regs[1] + vec].get()] = p.sb_register[regs[0] + vec];
-            break;
+            if (p.i_register[regs[1]].get() + get_size() > m.sb_mem.size())
+                m.sb_mem.resize(p.i_register[regs[1]].get() + get_size());
+
+            for (size_t i = 0; i < get_size(); ++i)
+                m.sb_mem[p.i_register[regs[1]].get() + i] = p.sb_register[regs[0] + i];
+            return;
         case Opcode::LDMSBI:
-            p.sb_register[regs[0] + vec] = m.sb_mem[p.i_register[regs[1] + vec].get()];
+            p.sb_register[regs[0] + vec] = m.sb_mem[p.i_register[regs[1]].get() + vec];
             break;
         case Opcode::STMINTI:
             if (p.i_register[regs[1] + vec].get() + 1 > m.ci_mem.size())
