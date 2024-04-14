@@ -26,6 +26,7 @@ enum class Opcode {
     JMPEQZ = 0x92,
     JMPI = 0x98,
     LDARG = 0x11,
+    STARG = 0x13,
     PICKS = 0x2e,
     // LOAD
     LDI = 0x01,

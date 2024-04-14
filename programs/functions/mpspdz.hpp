@@ -175,6 +175,7 @@ void MP_MACHINE_MUL_BENCH(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
     using sint = sint_t<A>;
 
+    Share::communicate();
     IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("Int_Multiplication.sch");
     m.run();
 }
