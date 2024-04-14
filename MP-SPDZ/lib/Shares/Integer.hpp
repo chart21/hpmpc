@@ -108,7 +108,7 @@ class Integer {
     size_t size() const { return nums.size(); }
 
   private:
-    alignas(DATATYPE) std::vector<IBase> nums;
+    std::vector<IBase> nums;
 
     IBase plus(const UBase& a, const UBase& other) const;
     IBase minus(const IBase& a, const IBase& other) const;
