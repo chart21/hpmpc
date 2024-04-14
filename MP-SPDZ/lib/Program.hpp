@@ -162,6 +162,7 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::RANDOMS:
         case Opcode::COND_PRINT_STRB:
         case Opcode::PRINTREG:
+        case Opcode::PRINTREGB:
         case Opcode::PRINT4COND: {
             unsigned sreg = inst.add_reg(read_int(fd));
             inst.set_immediate(read_int(fd));
@@ -927,6 +928,7 @@ Type Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::get_reg_
     case Opcode::SHLCBI:
     case Opcode::XORCBI:
     case Opcode::COND_PRINT_STRB:
+    case Opcode::PRINTREGB:
         return Type::CBIT;
     case Opcode::LDMINT:
     case Opcode::LDARG:
@@ -1056,8 +1058,8 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
         opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 ||
         opc == 0x21e || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 ||
         opc == 0x242 || opc == 0x09 || opc == 0x219 || opc == 0x21d || opc == 0x21a ||
-        opc == 0xa9 || opc == 0x70 || opc == 0x19 || opc == 0x243 || opc == 0x247 || opc == 0xaa ||
-        opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x21b || opc == 0x210 ||
+        opc == 0x221 || opc == 0xa9 || opc == 0x70 || opc == 0x19 || opc == 0x243 || opc == 0x247 ||
+        opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x21b || opc == 0x210 ||
         opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x1a || opc == 0x20f || opc == 0x213 ||
         opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0x07 || opc == 0x10 || opc == 0xe9 ||
         opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e || opc == 0x93 || opc == 0x9b) {
@@ -1426,6 +1428,16 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             m.get_out() << ")" << string((char*)&n, 4) << "\n";
 #endif
             break;
+        }
+        case Opcode::PRINTREGB: {
+            for (size_t i = 0; i < get_size(); ++i) {
+                const auto& reg = p.cb_register[regs[0] + i].get_all();
+                for (size_t bit = 0; bit < BIT_LEN; ++bit) {
+                    m.get_out() << ((reg[0] >> bit) & 1); // not for simd yet
+                }
+            }
+            m.get_out() << string((char*)&n, 4) << "\n";
+            return;
         }
         case Opcode::PRINT4COND:
             if (p.c_register[regs[0]].get() != 0)
