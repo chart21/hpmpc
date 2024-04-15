@@ -1554,7 +1554,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             m.sb_mem[n + vec] = p.sb_register[regs[0] + vec];
             break;
         case Opcode::LDMSB:
-            p.sb_register[regs[0]] = m.sb_mem[n];
+            p.sb_register[regs[0] + vec] = m.sb_mem[n + vec];
             break;
         case Opcode::XORS:
             for (size_t i = 0; i < regs.size(); i += 4) {
