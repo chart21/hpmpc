@@ -1431,9 +1431,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
         }
         case Opcode::PRINTREGB: {
             for (size_t i = 0; i < get_size(); ++i) {
-                const auto& reg = p.cb_register[regs[0] + i].get_all();
+                const auto& reg = p.cb_register[regs[0] + i].get();
                 for (size_t bit = 0; bit < BIT_LEN; ++bit) {
-                    m.get_out() << ((reg[0] >> bit) & 1); // not for simd yet
+                    m.get_out() << ((reg >> bit) & 1); // not for simd yet
                 }
             }
             m.get_out() << string((char*)&n, 4) << "\n";
