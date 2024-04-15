@@ -1430,13 +1430,12 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             break;
         }
         case Opcode::PRINTREGB: {
-            for (size_t i = 0; i < get_size(); ++i) {
-                const auto& reg = p.cb_register[regs[0] + i].get();
-                for (size_t bit = 0; bit < BIT_LEN; ++bit) {
-                    m.get_out() << ((reg >> bit) & 1); // not for simd yet
-                }
+            m.get_out() << "reg[" << regs[0] << "] = 0x";
+            for (int i = get_size() - 1; i >= 0; --i) {
+                const auto& reg = p.cb_register[regs[0] + i].get(); // TODO: support for SIMD
+                m.get_out() << std::hex << reg << std::dec;
             }
-            m.get_out() << string((char*)&n, 4) << "\n";
+            m.get_out() << " # " << string((char*)&n, 4) << "\n";
             return;
         }
         case Opcode::PRINT4COND:
