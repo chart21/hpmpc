@@ -123,10 +123,10 @@ int base_port = BASE_PORT; // temporary solution
 #define ONLINE_OPTIMIZED 0 // 1 if online optimized (e.g. MULTI_INPUT AND gates), 0 if optimized for total communication (e.g. no MULTI_INPUT AND gates)
 #elif FUNCTION_IDENTIFIER < 200 // PPA
 #define BANDWIDTH_OPTIMIZED 0 
-#define ONLINE_OPTIMIZED 1 
+#define ONLINE_OPTIMIZED 0 
 #elif FUNCTION_IDENTIFIER < 300 
 #define BANDWIDTH_OPTIMIZED 0 // PPA 4-Way
-#define ONLINE_OPTIMIZED 0 
+#define ONLINE_OPTIMIZED 1 
 #endif
 #endif
 
