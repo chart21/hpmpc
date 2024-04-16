@@ -31,6 +31,7 @@
 #include "programs/functions/cryptgpu_piranha_bench.hpp"
 #endif
 
+
 #include "utils/xorshift.h"
 
 #include "config.h"
@@ -491,7 +492,6 @@ double dummy_time = 0.00;
 #if LIVE == 1
     live_circuit();
 #endif
-
 }
 
 
