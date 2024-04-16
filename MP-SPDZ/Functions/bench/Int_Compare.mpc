@@ -1,5 +1,5 @@
 size = int(program.args[1])
-program.bit_length = 64
+program.bit_length = 32
 player = 3
 
 inputs=sint.Array(size)
