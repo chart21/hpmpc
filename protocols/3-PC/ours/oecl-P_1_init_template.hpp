@@ -315,6 +315,11 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     this->template complete_receive_from<P_0>(ADD, SUB);
 }
 
+template <typename func_add, typename func_sub, typename func_mul>
+static void GEMM(const OECL1_init* a, const OECL1_init* b, OECL1_init* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
+{
+
+}
 
 
 };

@@ -665,71 +665,191 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 }
 
 #if USE_CUDA_GEMM == 1
-template <typename func_add, typename func_sub, typename func_mul>
-static void GEMM(const OECL0_Share* a, const OECL0_Share* b, OECL0_Share* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
-{
-const int factor = DATTYPE/BITLENGTH;
-UINT_TYPE* p1_p2 = NEW(UINT_TYPE[factor][m*k]);
-UINT_TYPE* p1 = NEW(UINT_TYPE[factor][m*k]);
-UINT_TYPE* bp1_bp2 = NEW(UINT_TYPE[factor][k*n]);
-UINT_TYPE* bp1 = NEW(UINT_TYPE[factor][k*n]);
-UINT_TYPE* cp1_1 = NEW(UINT_TYPE[factor][m*n]);
-UINT_TYPE* cp1_2 = NEW(UINT_TYPE[factor][m*n]);
 
-for(int i = 0; i < m; i++)
+    template <typename func_add, typename func_sub, typename func_mul>
+static void GEMM(OECL0_Share* a, OECL0_Share* b, OECL0_Share* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
 {
-for(int j = 0; j < k; j++)
-{
-auto p1minp2 = SUB(a[i*k+j].p1,a[i*k+j].p2);
-alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-unorthogonalize_arithmetic(p1minp2, temp,1);
-for(int l = 0; l < factor; l++)
-    p1_p2[l][i*k+j] = temp[l];
-unorthogonalize_arithmetic(p1, temp,1);
-for(int l = 0; l < factor; l++)
-    p1[l][j] = temp[l];
-}
+    const int factor = DATTYPE/BITLENGTH;
+    const int mn = m * n;
+    const int mk = m * k;
+    const int nk = n * k;
+
+    UINT_TYPE* p1_p2 = NEW(UINT_TYPE[factor * mk]);
+    UINT_TYPE* p1 = NEW(UINT_TYPE[factor * mk]);
+    UINT_TYPE* bp1_bp2 = NEW(UINT_TYPE[factor * nk]);
+    UINT_TYPE* bp1 = NEW(UINT_TYPE[factor * nk]);
+    UINT_TYPE* cp1_1 = NEW(UINT_TYPE[factor * mn]);
+    UINT_TYPE* cp1_2 = NEW(UINT_TYPE[factor * mn]);
+    
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < k; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&a[i * k + j].p1, temp, 1);
+            for (int l = 0; l < factor; l++)
+                p1[l * mk + i * k + j] = temp[l];  // Access p1 like a 1D array
+            auto p1minp2 = SUB(a[i * k + j].p1, a[i * k + j].p2); // p1 - p2
+            unorthogonalize_arithmetic(&p1minp2, temp, 1);
+            for (int l = 0; l < factor; l++)
+                p1_p2[l * mk + i * k + j] = temp[l];  // Access p1_p2 like a 1D array
+        }
+    }
+
+    for (int i = 0; i < k; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&b[i * n + j].p1, temp, 1);
+            for (int l = 0; l < factor; l++)
+                bp1[l * nk + i * n + j] = temp[l];  // Access bp1 like a 1D array
+            auto bp1minbp2 = SUB(b[i * n + j].p1, b[i * n + j].p2); // bp1 - bp2 
+            unorthogonalize_arithmetic(&bp1minbp2, temp, 1);
+            for (int l = 0; l < factor; l++)
+                bp1_bp2[l * nk + i * n + j] = temp[l];  // Access bp1_bp2 like a 1D array
+        }
+    }
+
+    for (int i = 0; i < factor; i++)
+    {
+        gemm_cutlass(m,n,k,&p1[i * mk], &bp1[i * nk], &cp1_1[i * mn]);
+        gemm_cutlass(m,n,k,&p1_p2[i * mk], &bp1_bp2[i * nk], &cp1_2[i * mn]);
+
+        /* test_cuda(); */
+    }
+
+    for (int j = 0; j < mn; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for (int i = 0; i < factor; i++)
+            temp[i] = cp1_2[i * mn + j] - cp1_1[i * mn + j];
+        orthogonalize_arithmetic(temp, &c[j].p1, 1);
+    }
+
+
+    /* for(int i = 0; i < m; i++) */
+    /* { */
+    /*     for(int j = 0; j < k; j++) */
+    /*     { */
+    /*         auto p1minp2 = SUB(a[i*k+j].p1,a[i*k+j].p2); */
+    /*         alignas(sizeof(Datatype)) UINT_TYPE temp[factor]; */
+    /*         unorthogonalize_arithmetic(&p1minp2, temp, 1); */
+    /*         for(int l = 0; l < factor; l++) */
+    /*             p1_p2[l*mk + i*k + j] = temp[l]; */
+    /*         unorthogonalize_arithmetic(&a[i * k + j].p1, temp, 1); */
+    /*         for (int l = 0; l < factor; l++) */
+    /*             p1[l * mk + i * k + j] = temp[l];  // Access p1 like a 1D array */
+
+    /*     } */
+    /* } */
+
+    /* for(int i = 0; i < k; i++) */
+    /* { */
+    /*     for(int j = 0; j < n; j++) */
+    /*     { */
+    /*         auto bp1minbp2 = SUB(b[i*n+j].p1, b[i*n+j].p2); */
+    /*         alignas(sizeof(Datatype)) UINT_TYPE temp[factor]; */
+    /*         unorthogonalize_arithmetic(&bp1minbp2, temp, 1); */
+    /*         for(int l = 0; l < factor; l++) */
+    /*             bp1_bp2[l*kn + i*n + j] = temp[l]; */
+    /*         unorthogonalize_arithmetic(&b[i * n + j ].p1, temp, 1); */
+    /*         for (int l = 0; l < factor; l++) */
+    /*             bp1[l * kn + i * n + j] = temp[l];  // Access bp1 like a 1D array */
+    /*     } */
+    /* } */
+
+    /* for(int i = 0; i < factor; i++) */
+    /* { */
+    /*     gemm_cutlass(m,n,k,p1_p2 + i*mk, bp1_bp2 + i*kn, cp1_1 + i*mn); */
+    /*     gemm_cutlass(m,n,k,p1 + i*mk, bp1 + i*kn, cp1_2 + i*mn); */
+    /*     for(int j = 0; j < mn; j++) */
+    /*     { */
+    /*         cp1_1[i*mn + j] = cp1_1[i*mn + j] - cp1_2[i*mn + j]; */
+    /*     } */
+    /* } */
+
+    /* for(int j = 0; j < mn; j++) */
+    /* { */
+    /*     alignas(sizeof(Datatype)) UINT_TYPE temp[factor]; */
+    /*     for(int i = 0; i < factor; i++) */
+    /*         temp[i] = cp1_1[i*mn + j]; */
+    /*     orthogonalize_arithmetic(temp, &c[j].p1, 1); */
+    /* } */
+
+    delete[] p1_p2;
+    delete[] bp1_bp2;
+    delete[] p1;
+    delete[] bp1;
+    delete[] cp1_1;
+    delete[] cp1_2;
 }
 
-for(int i = 0; i < k; i++)
-{
-for(int j = 0; j < n; j++)
-{
-auto bp1minbp2 = SUB(b[i*n+j].p1,b[i*n+j].p2);
-alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-unorthogonalize_arithmetic(bp1minbp2, temp,1);
-for(int l = 0; l < factor; l++)
-    bp1_bp2[l][i*n+j] = temp[l];
-unorthogonalize_arithmetic(bp1, temp,1);
-for(int l = 0; l < factor; l++)
-    bp1[l][j] = temp[l];
-}
-}
+/* template <typename func_add, typename func_sub, typename func_mul> */
+/* static void GEMM(const OECL0_Share* a, const OECL0_Share* b, OECL0_Share* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT) */
+/* { */
+/* const int factor = DATTYPE/BITLENGTH; */
+/* UINT_TYPE* p1_p2 = NEW(UINT_TYPE[factor][m*k]); */
+/* UINT_TYPE* p1 = NEW(UINT_TYPE[factor][m*k]); */
+/* UINT_TYPE* bp1_bp2 = NEW(UINT_TYPE[factor][k*n]); */
+/* UINT_TYPE* bp1 = NEW(UINT_TYPE[factor][k*n]); */
+/* UINT_TYPE* cp1_1 = NEW(UINT_TYPE[factor][m*n]); */
+/* UINT_TYPE* cp1_2 = NEW(UINT_TYPE[factor][m*n]); */
 
-for(int i = 0; i < factor; i++)
-{
-CUDA_GEMM(p1_p2[i], bp1_bp2[i], cp1_1[i], m, n, k);
-CUDA_GEMM(p1[i], bp1[i], cp1_2[i], m, n, k);
-for(int j = 0; j < m*n; j++)
-{
-    cp1_1[i][j] = cp1_1[i][j] - cp1_2[i][j];
-}
-}
+/* for(int i = 0; i < m; i++) */
+/* { */
+/* for(int j = 0; j < k; j++) */
+/* { */
+/* auto p1minp2 = SUB(a[i*k+j].p1,a[i*k+j].p2); */
+/* alignas(sizeof(Datatype)) UINT_TYPE temp[factor]; */
+/* unorthogonalize_arithmetic(p1minp2, temp,1); */
+/* for(int l = 0; l < factor; l++) */
+/*     p1_p2[l][i*k+j] = temp[l]; */
+/* unorthogonalize_arithmetic(p1, temp,1); */
+/* for(int l = 0; l < factor; l++) */
+/*     p1[l][j] = temp[l]; */
+/* } */
+/* } */
 
-for(int j = 0; j < m*n; j++)
-{
-    alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-    for(int i = 0; i < factor; i++)
-        temp[i] = cp1_1[i][j];
-    orthogonalize_arithmetic(temp, c[j].p1,1);
-}
-delete p1_p2;    
-delete bp1_bp2;
-delete p1;
-delete bp1;
-delete cp1_1;
-delete cp1_2;
-}
+/* for(int i = 0; i < k; i++) */
+/* { */
+/* for(int j = 0; j < n; j++) */
+/* { */
+/* auto bp1minbp2 = SUB(b[i*n+j].p1,b[i*n+j].p2); */
+/* alignas(sizeof(Datatype)) UINT_TYPE temp[factor]; */
+/* unorthogonalize_arithmetic(bp1minbp2, temp,1); */
+/* for(int l = 0; l < factor; l++) */
+/*     bp1_bp2[l][i*n+j] = temp[l]; */
+/* unorthogonalize_arithmetic(bp1, temp,1); */
+/* for(int l = 0; l < factor; l++) */
+/*     bp1[l][j] = temp[l]; */
+/* } */
+/* } */
+
+/* for(int i = 0; i < factor; i++) */
+/* { */
+/* CUDA_GEMM(p1_p2[i], bp1_bp2[i], cp1_1[i], m, n, k); */
+/* CUDA_GEMM(p1[i], bp1[i], cp1_2[i], m, n, k); */
+/* for(int j = 0; j < m*n; j++) */
+/* { */
+/*     cp1_1[i][j] = cp1_1[i][j] - cp1_2[i][j]; */
+/* } */
+/* } */
+
+/* for(int j = 0; j < m*n; j++) */
+/* { */
+/*     alignas(sizeof(Datatype)) UINT_TYPE temp[factor]; */
+/*     for(int i = 0; i < factor; i++) */
+/*         temp[i] = cp1_1[i][j]; */
+/*     orthogonalize_arithmetic(temp, c[j].p1,1); */
+/* } */
+/* delete p1_p2; */    
+/* delete bp1_bp2; */
+/* delete p1; */
+/* delete bp1; */
+/* delete cp1_1; */
+/* delete cp1_2; */
+/* } */
 /* c.p1 = SUB( MULT( SUB(p1,p2), SUB(b.p1,b.p2)), MULT(p1,b.p1)  ); // -> e = (x1-x2)(y1-y2) - x2y2 = x1 y1 - x1 y2 - x2 y1 */
 /* c.p1 = SUB( MULT( SUB(p1,p2), SUB(b.p1,b.p2)), MULT(p1,b.p1)  ); // -> e = (x1-x2)(y1-y2) - x2y2 = x1 y1 - x1 y2 - x2 y1 */
 

@@ -255,6 +255,16 @@ public:
         #endif
     }
 
+    Share_Type get_share() const
+    {
+        return (Share_Type)*this;
+    }
+
+    void set_share(const Share_Type& s)
+    {
+        *this = Additive_Share(s);
+    }
+
 /* #if USE_CUDA_GEMM == 1 */
 /*         static void GEMM(const Additive_Share<Datatype, Share_Type>* a, const Additive_Share<Datatype, Share_Type>* b, Additive_Share<Datatype, Share_Type>* c, int m, int n, int k) */
 /*         { */

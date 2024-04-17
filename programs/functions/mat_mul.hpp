@@ -4535,21 +4535,41 @@ void mat_mul_test(DATATYPE *res)
     const int m = 3;
     const int k = 2;
     const int n = 1;
-    auto X = new A[m*k]{3,5,7,11,2,4}; //initialize shares with public values
-    auto W = new A[k*n]{2,4};
-    auto Y = new A[m*n]{0,0,0};
+    /* auto X = new A[m*k]{3,5,7,11,2,4}; //initialize shares with public values */
+    /* auto W = new A[k*n]{2,4}; */
+    /* auto Y = new A[m*n]{0,0,0}; */
+    auto X = new A[m*k]{A(3),A(5),A(7),A(11),A(2),A(4)}; //initialize shares with public values
+    auto W = new A[k*n]{A(2),A(4)}; 
+    auto Y = new A[m*n]{A(0),A(0),A(0)};
+    Share::communicate();
 
 #if USE_CUDA_GEMM == 1
+    /* auto XS = new Share[m*k]; */
+    /* auto WS = new Share[k*n]; */
+    /* auto YS = new Share[m*n]; */
+    /* for(int i = 0; i < m*k; i++) */
+    /*     XS[i] = X[i].get_share(); */
+    /* for(int i = 0; i < k*n; i++) */
+    /*     WS[i] = W[i].get_share(); */
+    /* for(int i = 0; i < m*n; i++) */
+    /*     YS[i] = Y[i].get_share(); */
+    /* A::GEMM(XS,WS,YS,m,n,k,OP_ADD,OP_SUB,OP_MULT); // RowX, ColW, ColX, X, W, Y */
     A::GEMM(X,W,Y,m,n,k,OP_ADD,OP_SUB,OP_MULT); // RowX, ColW, ColX, X, W, Y
+    /* for(int i = 0; i < m*n; i++) */
+    /*     Y[i].set_share(YS[i]); */
+    /* delete[] XS; */
+    /* delete[] WS; */
+    /* delete[] YS; */
+
 #else
     //Naive Mat Mul for correctness test
     for(int i = 0; i < m; i++)
     {
         for(int j = 0; j < n; j++)
         {
-            for(int k = 0; k < k; k++)
+            for(int q = 0; q < k; q++)
             {
-                Y[i*1+j] += X[i*2+k].prepare_dot(W[k*1+j]);
+                Y[i*n+j] = Y[i*n+j] + X[i*k+q] * W[q*n+j];
             }
         }
     }

@@ -574,7 +574,7 @@ static void GEMM(TTP_Share* a, TTP_Share* b, TTP_Share* c, int m, int n, int k, 
         for (int j = 0; j < k; j++)
         {
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&a[i * k * factor + j * factor].p1, temp, 1);
+            unorthogonalize_arithmetic(&a[i * k + j].p1, temp, 1);
             for (int l = 0; l < factor; l++)
                 p1[l * mk + i * k + j] = temp[l];  // Access p1 like a 1D array
         }
@@ -585,7 +585,7 @@ static void GEMM(TTP_Share* a, TTP_Share* b, TTP_Share* c, int m, int n, int k, 
         for (int j = 0; j < n; j++)
         {
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&b[i * n * factor + j * factor].p1, temp, 1);
+            unorthogonalize_arithmetic(&b[i * n + j].p1, temp, 1);
             for (int l = 0; l < factor; l++)
                 bp1[l * nk + i * n + j] = temp[l];  // Access bp1 like a 1D array
         }
