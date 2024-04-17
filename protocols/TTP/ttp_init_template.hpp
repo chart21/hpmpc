@@ -248,4 +248,12 @@ TTP_init relu() const
     return TTP_init();
 }
 
+#if USE_CUDA_GEMM == 1
+template <typename func_add, typename func_sub, typename func_mul>
+static void GEMM(TTP_init* a, TTP_init* b, TTP_init* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
+{
+
+}
+#endif 
+
 };

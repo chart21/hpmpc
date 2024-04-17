@@ -37,6 +37,20 @@ void RELU_range_in_place(Additive_Share<Datatype, Share>* val, int len)
 }
 
 
+template<int m, int k,typename Share, typename Datatype>
+void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
+{
+    for(int i = 0; i < len; i++)
+        val[i] = val[i].relu();
+}
+
+template<int m, int k,typename Share, typename Datatype>
+void RELU_range_in_place_exact(Additive_Share<Datatype, Share>* val, const int len)
+{
+    for(int i = 0; i < len; i++)
+        val[i] = val[i].relu();
+}
+
 #else
 
 #if TRUNC_APPROACH == 2

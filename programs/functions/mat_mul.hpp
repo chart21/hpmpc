@@ -19,7 +19,9 @@
 #include "ppa_msb_4_way.hpp"
 
 #include "../../utils/print.hpp"
-
+/* #if USE_CUDA_GEMM == 1 */
+/* #include "../../cuda/gemm_cutlass_int.h" */
+/* #endif */
 #include <cmath>
 
 /* #include "boolean_adder.hpp" */
@@ -57,9 +59,11 @@
 #define FUNCTION dot234_test
 #elif FUNCTION_IDENTIFIER == 35
 #define FUNCTION RELU_range_test
+/* #elif FUNCTION_IDENTIFIER == 39 */
+/* #include "comp_trunc.hpp" */
+/* #define FUNCTION test_comp_trunc */
 #elif FUNCTION_IDENTIFIER == 39
-#include "comp_trunc.hpp"
-#define FUNCTION test_comp_trunc
+#define FUNCTION mat_mul_test
 #elif FUNCTION_IDENTIFIER >= 37 && FUNCTION_IDENTIFIER <= 57
 #define USE_EIGEN 1
 #define FUNCTION conv2D_bench
@@ -4520,5 +4524,60 @@ for(int i = 0; i < NUM_INPUTS; i++)
 for(int i = 0; i < NUM_INPUTS; i++)
     if(current_phase == PHASE_LIVE)
     std::cout << "P" << PARTY << ": Result " << i << ": "<< result_arr[i][0] << std::endl;
+}
+#endif
+
+#if FUNCTION_IDENTIFIER == 39
+template<typename Share>
+void mat_mul_test(DATATYPE *res)
+{
+    using A = Additive_Share<DATATYPE, Share>;
+    const int m = 3;
+    const int k = 2;
+    const int n = 1;
+    auto X = new A[m*k]{3,5,7,11,2,4}; //initialize shares with public values
+    auto W = new A[k*n]{2,4};
+    auto Y = new A[m*n]{0,0,0};
+
+#if USE_CUDA_GEMM == 1
+    A::GEMM(X,W,Y,m,n,k,OP_ADD,OP_SUB,OP_MULT); // RowX, ColW, ColX, X, W, Y
+#else
+    //Naive Mat Mul for correctness test
+    for(int i = 0; i < m; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            for(int k = 0; k < k; k++)
+            {
+                Y[i*1+j] += X[i*2+k].prepare_dot(W[k*1+j]);
+            }
+        }
+    }
+#endif
+    for(int i = 0; i < m*n; i++)
+    {
+        Y[i].mask_and_send_dot_without_trunc(); //no truncation because values are not fixed point
+    }
+    Share::communicate();
+    for(int i = 0; i < m*n; i++)
+    {
+        Y[i].complete_mult_without_trunc();
+    }
+
+    for(int i = 0; i < m*n; i++)
+    {
+        Y[i].prepare_reveal_to_all();
+    }
+    Share::communicate();
+    UINT_TYPE result_arr[m*n][DATTYPE/BITLENGTH];
+    for(int i = 0; i < m*n; i++)
+    {
+        Y[i].complete_reveal_to_all(result_arr[i]);
+    }
+    for(int i = 0; i < m*n; i++)
+    {
+        if(current_phase == PHASE_LIVE)
+            std::cout << "P" << PARTY << ": Result " << i << ": "<< result_arr[i][0] << std::endl;
+    }
 }
 #endif

@@ -624,6 +624,57 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     r_msb.template complete_receive_from<P_0>(ADD, SUB);
 }
 
+#if USE_CUDA_GEMM == 1
+template <typename func_add, typename func_sub, typename func_mul>
+static void GEMM(OECL2_Share* a, OECL2_Share* b, OECL2_Share* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
+{
+const int factor = DATTYPE/BITLENGTH;
+UINT_TYPE* p1 = NEW(UINT_TYPE[factor][m*k]);
+UINT_TYPE* bp1 = NEW(UINT_TYPE[factor][k*n]);
+UINT_TYPE* cp1_1 = NEW(UINT_TYPE[factor][m*n]);
+
+for(int i = 0; i < m; i++)
+{
+for(int j = 0; j < k; j++)
+{
+alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+unorthogonalize_arithmetic(p1, temp,1);
+for(int l = 0; l < factor; l++)
+    p1[l][j] = temp[l];
+}
+}
+
+for(int i = 0; i < k; i++)
+{
+for(int j = 0; j < n; j++)
+{
+alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+unorthogonalize_arithmetic(bp1, temp,1);
+for(int l = 0; l < factor; l++)
+    bp1[l][j] = temp[l];
+}
+}
+
+for(int i = 0; i < factor; i++)
+{
+CUDA_GEMM(p1[i], bp1[i], cp1_1[i], m, n, k);
+}
+
+for(int j = 0; j < m*n; j++)
+{
+    alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+    for(int i = 0; i < factor; i++)
+        temp[i] = cp1_1[i][j];
+    orthogonalize_arithmetic(temp, c[j].p1,1);
+}
+delete p1;
+delete bp1;
+delete cp1_1;
+}
+
+
+
+#endif
 
 
 };

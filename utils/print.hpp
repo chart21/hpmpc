@@ -73,7 +73,7 @@ struct Layer_Timing
 std::vector<Layer_Timing> layer_stats;
 
 void start_layer_stats(std::string layer_name, int layer_id) {
-    if(current_phase == PHASE_INIT) {
+    if(current_phase == PHASE_INIT || PROTOCOL == 13) {
         layer_stats.push_back(Layer_Timing());
         layer_stats.back().layer_id = layer_id;
         layer_stats.back().layer_name = layer_name;

@@ -664,7 +664,78 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     r_msb.template complete_receive_from<PSELF>(ADD, SUB);
 }
 
+#if USE_CUDA_GEMM == 1
+template <typename func_add, typename func_sub, typename func_mul>
+static void GEMM(const OECL0_Share* a, const OECL0_Share* b, OECL0_Share* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
+{
+const int factor = DATTYPE/BITLENGTH;
+UINT_TYPE* p1_p2 = NEW(UINT_TYPE[factor][m*k]);
+UINT_TYPE* p1 = NEW(UINT_TYPE[factor][m*k]);
+UINT_TYPE* bp1_bp2 = NEW(UINT_TYPE[factor][k*n]);
+UINT_TYPE* bp1 = NEW(UINT_TYPE[factor][k*n]);
+UINT_TYPE* cp1_1 = NEW(UINT_TYPE[factor][m*n]);
+UINT_TYPE* cp1_2 = NEW(UINT_TYPE[factor][m*n]);
 
+for(int i = 0; i < m; i++)
+{
+for(int j = 0; j < k; j++)
+{
+auto p1minp2 = SUB(a[i*k+j].p1,a[i*k+j].p2);
+alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+unorthogonalize_arithmetic(p1minp2, temp,1);
+for(int l = 0; l < factor; l++)
+    p1_p2[l][i*k+j] = temp[l];
+unorthogonalize_arithmetic(p1, temp,1);
+for(int l = 0; l < factor; l++)
+    p1[l][j] = temp[l];
+}
+}
+
+for(int i = 0; i < k; i++)
+{
+for(int j = 0; j < n; j++)
+{
+auto bp1minbp2 = SUB(b[i*n+j].p1,b[i*n+j].p2);
+alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+unorthogonalize_arithmetic(bp1minbp2, temp,1);
+for(int l = 0; l < factor; l++)
+    bp1_bp2[l][i*n+j] = temp[l];
+unorthogonalize_arithmetic(bp1, temp,1);
+for(int l = 0; l < factor; l++)
+    bp1[l][j] = temp[l];
+}
+}
+
+for(int i = 0; i < factor; i++)
+{
+CUDA_GEMM(p1_p2[i], bp1_bp2[i], cp1_1[i], m, n, k);
+CUDA_GEMM(p1[i], bp1[i], cp1_2[i], m, n, k);
+for(int j = 0; j < m*n; j++)
+{
+    cp1_1[i][j] = cp1_1[i][j] - cp1_2[i][j];
+}
+}
+
+for(int j = 0; j < m*n; j++)
+{
+    alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+    for(int i = 0; i < factor; i++)
+        temp[i] = cp1_1[i][j];
+    orthogonalize_arithmetic(temp, c[j].p1,1);
+}
+delete p1_p2;    
+delete bp1_bp2;
+delete p1;
+delete bp1;
+delete cp1_1;
+delete cp1_2;
+}
+/* c.p1 = SUB( MULT( SUB(p1,p2), SUB(b.p1,b.p2)), MULT(p1,b.p1)  ); // -> e = (x1-x2)(y1-y2) - x2y2 = x1 y1 - x1 y2 - x2 y1 */
+/* c.p1 = SUB( MULT( SUB(p1,p2), SUB(b.p1,b.p2)), MULT(p1,b.p1)  ); // -> e = (x1-x2)(y1-y2) - x2y2 = x1 y1 - x1 y2 - x2 y1 */
+
+
+
+#endif
 
 };
 

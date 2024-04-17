@@ -555,5 +555,66 @@ TTP_Share relu() const
 #endif
 #endif
 }    
+
+#if USE_CUDA_GEMM == 1
+template <typename func_add, typename func_sub, typename func_mul>
+static void GEMM(TTP_Share* a, TTP_Share* b, TTP_Share* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
+{
+    const int factor = DATTYPE / BITLENGTH;
+    const int nk = k * n;  // Total elements in a 2D array of dimensions k x n
+    const int mn = m * n;  // Total elements in a 2D array of dimensions m x n
+    const int mk = m * k;  // Total elements in a 2D array of dimensions m x k
+    
+    UINT_TYPE* p1 = new UINT_TYPE[factor * mk];
+    UINT_TYPE* bp1 = new UINT_TYPE[factor * nk];
+    UINT_TYPE* cp1_1 = new UINT_TYPE[factor * mn];
+
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < k; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&a[i * k * factor + j * factor].p1, temp, 1);
+            for (int l = 0; l < factor; l++)
+                p1[l * mk + i * k + j] = temp[l];  // Access p1 like a 1D array
+        }
+    }
+
+    for (int i = 0; i < k; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&b[i * n * factor + j * factor].p1, temp, 1);
+            for (int l = 0; l < factor; l++)
+                bp1[l * nk + i * n + j] = temp[l];  // Access bp1 like a 1D array
+        }
+    }
+
+    for (int i = 0; i < factor; i++)
+    {
+        gemm_cutlass(m,n,k,&p1[i * mk], &bp1[i * nk], &cp1_1[i * mn]);
+        /* test_cuda(); */
+    }
+
+    for (int j = 0; j < mn; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for (int i = 0; i < factor; i++)
+            temp[i] = cp1_1[i * mn + j];
+        orthogonalize_arithmetic(temp, &c[j].p1, 1);
+    }
+
+    delete[] p1;
+    delete[] bp1;
+    delete[] cp1_1;
+}
+#endif
+
+
+
+
+
+
 };
 

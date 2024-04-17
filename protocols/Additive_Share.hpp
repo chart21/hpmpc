@@ -255,7 +255,12 @@ public:
         #endif
     }
 
-
+/* #if USE_CUDA_GEMM == 1 */
+/*         static void GEMM(const Additive_Share<Datatype, Share_Type>* a, const Additive_Share<Datatype, Share_Type>* b, Additive_Share<Datatype, Share_Type>* c, int m, int n, int k) */
+/*         { */
+/*             Share_Type::GEMM(a, b, c, m, n, k,OP_ADD, OP_SUB, OP_MULT); */
+/*         } */
+/* #endif */
 
 
 };

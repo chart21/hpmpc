@@ -21,7 +21,7 @@ JUNK=$(TARGETS) a.out
 all: $(TARGETS)
 
 %.o: %.cu
-	$(NVCC) $< $(NVCCOPTs)  $(OPTION) -o $@ -c
+	$(NVCC) $< $(NVCCOPTs)  $(OPTION) -o $@ -c -g
 
 clean:
 	rm -rf $(JUNK)
