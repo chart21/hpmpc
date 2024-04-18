@@ -14,7 +14,6 @@
 #include <vector>      // register
 
 #include "Constants.hpp"
-#include "Shares/CIntSet.hpp"
 #include "Shares/CInteger.hpp"
 #include "Shares/Integer.hpp"
 #include "help/Input.hpp"
