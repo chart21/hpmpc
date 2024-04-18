@@ -420,7 +420,7 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m256i *out, int k) {
 
 
 
-    void unorthogonalize_arithmetic(__m256i *in, UINT_TYPE *out, int k) {
+    void unorthogonalize_arithmetic(const __m256i *in, UINT_TYPE *out, int k) {
   for (int i = 0; i < k; i++)
     _mm256_store_si256 ((__m256i*)&(out[i*(DATTYPE/BITLENGTH)]), in[i]);
 }

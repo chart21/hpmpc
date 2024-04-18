@@ -513,7 +513,7 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m128i *out, int k) {
 #endif
 }
 
-void unorthogonalize_arithmetic(__m128i *in, UINT_TYPE *out, int k) {
+void unorthogonalize_arithmetic(const __m128i *in, UINT_TYPE *out, int k) {
   for (int i = 0; i < k; i++)
     _mm_store_si128 ((__m128i*)&(out[i*DATTYPE/BITLENGTH]), in[i]);
 }

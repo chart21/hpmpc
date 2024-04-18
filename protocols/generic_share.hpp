@@ -12,6 +12,8 @@
 #endif
 #if USE_CUDA_GEMM == 1
     #include "../cuda/gemm_cutlass_int.h"
+#elif USE_CUDA_GEMM == 2
+    #include "../cuda/conv_cutlass_int.h"
     /* #include "../cuda/test_gemm.hpp" */
 #endif
 

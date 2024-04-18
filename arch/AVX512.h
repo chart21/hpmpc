@@ -453,7 +453,7 @@ void orthogonalize_arithmetic(UINT_TYPE *in, __m512i *out, int k) {
 
 
 
-    void unorthogonalize_arithmetic(__m512i *in, UINT_TYPE *out, int k) {
+    void unorthogonalize_arithmetic(const __m512i *in, UINT_TYPE *out, int k) {
   for (int i = 0; i < k; i++)
     _mm512_store_si512 ((__m512i*)&(out[i*(DATTYPE/BITLENGTH)]), in[i]);
 }

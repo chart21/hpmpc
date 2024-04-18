@@ -108,7 +108,7 @@ void orthogonalize_arithmetic(UINT_TYPE* num, bool* out, int bitlength) {
   }
 }
 
-void unorthogonalize_arithmetic(bool *arr, UINT_TYPE *num, int bitlength) {
+void unorthogonalize_arithmetic(const bool *arr, UINT_TYPE *num, int bitlength) {
    UINT_TYPE tmp;
     for (int i = 0; i < bitlength; i++)
     {

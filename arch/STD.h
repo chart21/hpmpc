@@ -292,7 +292,7 @@ void orthogonalize_arithmetic(DATATYPE* data, DATATYPE* out, int k) {
     out[i] = data[i];
 }
 
-    void unorthogonalize_arithmetic(DATATYPE *in, DATATYPE* data, int k) {
+    void unorthogonalize_arithmetic(const DATATYPE *in, DATATYPE* data, int k) {
   for (int i = 0; i < k; i++)
     data[i] = in[i];
 }

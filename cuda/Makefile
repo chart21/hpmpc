@@ -5,7 +5,7 @@ CUTLASS_PATH=/home/christopher/workspace/cutlass# replace with your cutlass path
 CUDALIB=/opt/cuda/lib64 # replace with your cuda library path
 
 
-TARGETS= gemm_cutlass_int.o
+TARGETS= gemm_cutlass_int.o conv_cutlass_int.o
 
 CUTLASSINC=$(CUTLASS_PATH)/include
 CUTTOOLINC=$(CUTLASS_PATH)/tools/util/include

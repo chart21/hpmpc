@@ -254,6 +254,10 @@ static void GEMM(TTP_init* a, TTP_init* b, TTP_init* c, int m, int n, int k, fun
 {
 
 }
+#elif USE_CUDA_GEMM == 2    
+static void CONV_2D(const TTP_init* X, const TTP_init* W, TTP_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+}
+
 #endif 
 
 };
