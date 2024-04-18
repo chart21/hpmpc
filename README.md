@@ -87,3 +87,71 @@ To run all players locally on one machine, omit the IP addresses or set them to 
 > ./scripts/split-roles-3-execute.sh -p all
 
 
+# MP-SPDZ
+
+It is possible to run computation with bytecode compiled by [MP-SPDZ](https://github.com/data61/MP-SPDZ). As most of [MP-SPDZ](https://github.com/data61/MP-SPDZ/releases?page=1) 0.3.8 is supported.
+
+## 1. Setup
+
+1. Create two directories in `MP-SPDZ/`: `Schedules` for the schedule file and `Bytecodes` for the respective bytecode file
+```sh
+mkdir -p "./MP-SPDZ/Schedules" "./MP-SPDZ/Bytecodes"
+```
+
+2. Compile `.mpc` files in `MP-SPDZ/Functions`
+
+Assuming MP-SPDZ is installed in `$MPSPDZ` copy the desired `<file>.mpc` into `"$MPSPDZ"/Programs/Source` and compile them using their compiler with the bit length specified in `config.h`.
+
+```sh
+cp "./MP-SPDZ/Functions/<file.mpc>" "$MPSPDZ"/Programs/Source/
+cd "$MPSDZ" && ./compile.py -R "<BITLENGTH>" "<file>"
+```
+
+3. Move the bytecode/schedule file into the respective directory
+
+```sh
+mv "$MPSDZ/Programs/Schedules/<file>.sch" "./MP-SPDZ/Schedules/"
+mv "$MPSDZ/Programs/Bytecode/*" "./MP-SPDZ/Bytecodes/"
+```
+
+## 2. To run computation for 3 Players
+
+Make sure to use the correct `FUNCTION_IDENTIFIER` and `BITLENGTH`:
+```sh
+./scripts/config.sh -p all3 -f "<FUNTION_IDENTIFIER>" -a "<BITLENGTH>"
+./scripts/run-locall -n 3
+```
+
+## Run the example functions
+
+Currently there are multiple example functions in `MP-SPDZ/Functions`
+
+Mapping from `FUNCTION_IDENTIFIER` $\to$ `.mpc` file:
+
+`FUNCTION_IDENTIFIER` | `.mpc`
+----------------------|-------
+`500` | `tutorial.mpc`
+`501` | `custom.mpc` (can be used for your own functions)
+`505` | `int_test.mpc/int_test_32.mpc` (depending on `BITLENGTH` equal to  `64` or `32`)
+`506-525` | functions used for benchmarks (mapping can be found in `MP-SPDZ/bench_scripts/measurement.sh`)
+
+## Install MP-SPDZ compiler
+
+You need to install [MP-SPDZ](https://github.com/data61/MP-SPDZ/releases?page=1) 0.3.8 to compile your `<filename>.mpc`
+```sh
+wget https://github.com/data61/MP-SPDZ/releases/download/v0.3.8/mp-spdz-0.3.8.tar.xz
+tar xvf mp-spdz-0.3.8.tar.xz
+```
+
+## Run your own functions
+
+As mentioned in `1. setup` copy the bytecode file and schedule file into the correct Directory (`./MP-SPDZ/Schedules/`, `./MP-SPDZ/Bytecodes/` respectively)
+make sure that for both MP-SPDZ and this project you are using the same bit length for compilation.
+
+Using function `501`/`custom.mpc`
+
+Rename the schedule file `custom.sch` and compile with `FUNCTION_IDENTIFIER = 501`
+```sh
+mv "./MP-SPDZ/Schedules/<file>.sch" "./MP-SPDZ/Schedules/custom.sch"
+./scripts/config.sh -p all3 -f 501 -a "<BITLENGTH>"
+```

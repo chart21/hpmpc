@@ -88,7 +88,7 @@ void MP_MACHINE_TMP(DATATYPE* res)
     using sint = sint_t<A>;
 
     Share::communicate();
-    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("tmp.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("custom.sch");
     m.run();
 }
 
