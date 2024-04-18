@@ -11,7 +11,7 @@
 
 #include <utils.cuh>
 
-
+//#include <chrono>
 using RowMajor = cutlass::layout::RowMajor;
 using ColumnMajor = cutlass::layout::ColumnMajor;
 
@@ -67,6 +67,9 @@ namespace gpu{
             T const *A, bool transpose_a,
             T const *B, bool transpose_b,
             T *C, bool transpose_c) {
+        
+//        std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+//        cudaDeviceSynchronize();
 
         if (transpose_c) {
             if (transpose_a) {
@@ -98,6 +101,9 @@ namespace gpu{
             }
         }
         cudaDeviceSynchronize();
+//        std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+//        std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+//        std::cout << "cutlass gemm time: " << time_span.count() << "s" << std::endl;
     }
 
 }
