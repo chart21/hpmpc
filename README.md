@@ -119,7 +119,7 @@ mv "$MPSDZ/Programs/Bytecode/*" "./MP-SPDZ/Bytecodes/"
 Make sure to use the correct `FUNCTION_IDENTIFIER` and `BITLENGTH`:
 ```sh
 ./scripts/config.sh -p all3 -f "<FUNTION_IDENTIFIER>" -a "<BITLENGTH>"
-./scripts/run-locall -n 3
+./scripts/run_locally -n 3
 ```
 
 ## Run the example functions
