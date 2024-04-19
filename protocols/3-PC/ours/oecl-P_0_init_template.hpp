@@ -429,4 +429,15 @@ static void GEMM(const OECL0_init* a, const OECL0_init* b, OECL0_init* c, int m,
 
 }
 
+#if USE_CUDA_GEMM == 1
+static void GEMM(OECL0_init* a, OECL0_init* b, OECL0_init* c, int m, int n, int k, bool a_fixed)
+{
+
+}
+#elif USE_CUDA_GEMM == 2    
+static void CONV_2D(const OECL0_init* X, const OECL0_init* W, OECL0_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+}
+
+#endif 
+
 };

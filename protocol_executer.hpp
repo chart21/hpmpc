@@ -49,6 +49,8 @@
 #include "protocols/CircuitInfo.hpp"
 #endif
 
+
+
 struct timespec i1, p1, p2, l1, l2;
 
 int modulo(int x,int N){

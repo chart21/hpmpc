@@ -450,11 +450,16 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     this->template complete_receive_from<P_0>(ADD, SUB);
 }
 
-template <typename func_add, typename func_sub, typename func_mul>
-static void GEMM(const OECL2_init* a, const OECL2_init* b, OECL2_init* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
+#if USE_CUDA_GEMM == 1
+static void GEMM(OECL2_init* a, OECL2_init* b, OECL2_init* c, int m, int n, int k, bool a_fixed)
 {
 
 }
+#elif USE_CUDA_GEMM == 2    
+static void CONV_2D(const OECL2_init* X, const OECL2_init* W, OECL2_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+}
+
+#endif 
 
 
 };

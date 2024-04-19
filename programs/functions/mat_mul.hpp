@@ -4554,7 +4554,7 @@ void mat_mul_test(DATATYPE *res)
     /* for(int i = 0; i < m*n; i++) */
     /*     YS[i] = Y[i].get_share(); */
     /* A::GEMM(XS,WS,YS,m,n,k,OP_ADD,OP_SUB,OP_MULT); // RowX, ColW, ColX, X, W, Y */
-    A::GEMM(X,W,Y,m,n,k,OP_ADD,OP_SUB,OP_MULT); // RowX, ColW, ColX, X, W, Y
+    A::GEMM(X,W,Y,m,n,k); // RowX, ColW, ColX, X, W, Y
     /* for(int i = 0; i < m*n; i++) */
     /*     Y[i].set_share(YS[i]); */
     /* delete[] XS; */

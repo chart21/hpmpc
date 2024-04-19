@@ -563,7 +563,6 @@ static void CONV_2D(const TTP_Share* X, const TTP_Share* W, TTP_Share* Y, int ba
     const int xSize = inh * inw * din * batchSize;
     const int wSize = wh * ww * din * dout;
     const int ySize = inh * inw * dout * batchSize;
-    /* std::cout << "yDimesnsion (Conv) : " << "height: " << inh << " width: " << inw << " depth: " << dout << " batch: " << batchSize << "total: " << ySize << std::endl; */
     batchSize *= factor; 
 
     UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
@@ -598,52 +597,56 @@ static void CONV_2D(const TTP_Share* X, const TTP_Share* W, TTP_Share* Y, int ba
 }
 
 #elif USE_CUDA_GEMM == 1
+    
 
-    template <typename func_add, typename func_sub, typename func_mul>
-static void GEMM(TTP_Share* a, TTP_Share* b, TTP_Share* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
+static void GEMM(TTP_Share* a, TTP_Share* b, TTP_Share* c, int m, int n, int k, bool a_fixed = false)
 {
     const int factor = DATTYPE / BITLENGTH;
-    const int nk = k * n;  // Total elements in a 2D array of dimensions k x n
-    const int mn = m * n;  // Total elements in a 2D array of dimensions m x n
-    const int mk = m * k;  // Total elements in a 2D array of dimensions m x k
-    
-    UINT_TYPE* p1 = new UINT_TYPE[factor * mk];
-    UINT_TYPE* bp1 = new UINT_TYPE[factor * nk];
-    UINT_TYPE* cp1_1 = new UINT_TYPE[factor * mn];
+    const int a_size = m * k;    
+    const int b_size = k * n;
+    const int c_size = m * n;
+    UINT_TYPE* p1;
+    if(a_fixed)
+        p1 = new UINT_TYPE[a_size];
+    else
+        p1 = new UINT_TYPE[factor * a_size];
+    UINT_TYPE* bp1 = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* cp1_1 = new UINT_TYPE[factor * c_size];
 
-    for (int i = 0; i < m; i++)
+    for(int i = 0; i < a_size; i++)
     {
-        for (int j = 0; j < k; j++)
-        {
-            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&a[i * k + j].p1, temp, 1);
-            for (int l = 0; l < factor; l++)
-                p1[l * mk + i * k + j] = temp[l];  // Access p1 like a 1D array
-        }
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&a[i].p1, temp, 1);
+        if(a_fixed)
+            p1[i] = temp[0];
+        else
+            for(int j = 0; j < factor; j++)
+                p1[j*a_size + i] = temp[j];
     }
 
-    for (int i = 0; i < k; i++)
+    for(int i = 0; i < b_size; i++)
     {
-        for (int j = 0; j < n; j++)
-        {
-            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&b[i * n + j].p1, temp, 1);
-            for (int l = 0; l < factor; l++)
-                bp1[l * nk + i * n + j] = temp[l];  // Access bp1 like a 1D array
-        }
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i].p1, temp, 1);
+        for(int j = 0; j < factor; j++)
+            bp1[j * b_size + i] = temp[j];
     }
+
 
     for (int i = 0; i < factor; i++)
     {
-        gemm_cutlass(m,n,k,&p1[i * mk], &bp1[i * nk], &cp1_1[i * mn]);
+        if(a_fixed)
+            gemm_cutlass(m,n,k,p1, &bp1[i * b_size], &cp1_1[i * c_size]);
+        else
+            gemm_cutlass(m,n,k, &p1[i * a_size], &bp1[i * b_size], &cp1_1[i * c_size]);
         /* test_cuda(); */
     }
 
-    for (int j = 0; j < mn; j++)
+    for (int j = 0; j < c_size; j++)
     {
         alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
         for (int i = 0; i < factor; i++)
-            temp[i] = cp1_1[i * mn + j];
+            temp[i] = cp1_1[i * c_size + j];
         orthogonalize_arithmetic(temp, &c[j].p1, 1);
     }
 

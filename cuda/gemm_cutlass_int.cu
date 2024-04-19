@@ -31,8 +31,7 @@ void gemm_cutlass(int M, int N, int K, Type *X, Type *W, Type *Y) {
 }
 
 //forward declare the function for different integer Testtypes
-template void gemm_cutlass<int8_t>(int M, int N, int K, int8_t *X, int8_t *W, int8_t *Y);
-template void gemm_cutlass<int16_t>(int M, int N, int K, int16_t *X, int16_t *W, int16_t *Y);
-template void gemm_cutlass<int32_t>(int M, int N, int K, int32_t *X, int32_t *W, int32_t *Y);
-template void gemm_cutlass<int64_t>(int M, int N, int K, int64_t *X, int64_t *W, int64_t *Y);
-template void gemm_cutlass<unsigned int>(int M, int N, int K, unsigned int *X, unsigned int *W, unsigned int *Y);
+template void gemm_cutlass<uint8_t>(int M, int N, int K, uint8_t *X, uint8_t *W, uint8_t *Y);
+template void gemm_cutlass<uint16_t>(int M, int N, int K, uint16_t *X, uint16_t *W, uint16_t *Y);
+template void gemm_cutlass<uint32_t>(int M, int N, int K, uint32_t *X, uint32_t *W, uint32_t *Y);
+template void gemm_cutlass<uint64_t>(int M, int N, int K, uint64_t *X, uint64_t *W, uint64_t *Y);
