@@ -38,6 +38,11 @@ void conv2d_cutlass(const Type* X, const Type* W, Type* Y, int batchSize, int in
       //  int stride, int dilation) {
 
     cudaMemcpy(Y, y, ySize * sizeof(Type), cudaMemcpyDeviceToHost);
+
+    cudaFree(x);
+    cudaFree(w);
+    cudaFree(y);
+
 }
 
 template void conv2d_cutlass<uint8_t>(const uint8_t* X, const uint8_t* W, uint8_t* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation);
