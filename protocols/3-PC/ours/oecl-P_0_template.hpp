@@ -807,7 +807,8 @@ static void CONV_2D(const OECL0_Share* X, const OECL0_Share* W, OECL0_Share* Y, 
         unorthogonalize_arithmetic(&X[i].p1, temp, 1);
         for(int j = 0; j < factor; j++)
             x_p1[j * xSize + i] = temp[j];
-        unorthogonalize_arithmetic(&OP_SUB(X[i].p1,X[i].p2), temp, 1);
+        auto temp2 = OP_SUB(X[i].p1,X[i].p2);
+        unorthogonalize_arithmetic(&temp2, temp, 1);
         for(int j = 0; j < factor; j++)
             x_p1_x_p2[j * xSize + i] = temp[j];
     }
@@ -816,7 +817,8 @@ static void CONV_2D(const OECL0_Share* X, const OECL0_Share* W, OECL0_Share* Y, 
         alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
         unorthogonalize_arithmetic(&W[i].p1, temp, 1);
         w_p1[i] = temp[0];
-        unorthogonalize_arithmetic(&OP_SUB(W[i].p1,W[i].p2), temp, 1);
+        auto temp2 = OP_SUB(W[i].p1,W[i].p2);
+        unorthogonalize_arithmetic(&temp2, temp, 1);
         w_p1_w_p2[i] = temp[0];
     }
 
