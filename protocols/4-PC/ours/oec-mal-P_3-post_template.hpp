@@ -242,6 +242,17 @@ void complete_mult4(func_add ADD, func_sub SUB){
 
 #endif
 
+#if USE_CUDA_GEMM == 1
+static void GEMM(OEC_MAL3_POST_Share* a, OEC_MAL3_POST_Share* b, OEC_MAL3_POST_Share* c, int m, int n, int k, bool a_fixed)
+{
+
+}
+#elif USE_CUDA_GEMM == 2    
+static void CONV_2D(const OEC_MAL3_POST_Share* X, const OEC_MAL3_POST_Share* W, OEC_MAL3_POST_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+}
+
+#endif 
+
 };
     
 

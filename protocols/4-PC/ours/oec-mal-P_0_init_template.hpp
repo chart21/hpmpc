@@ -615,5 +615,16 @@ store_compare_view_init(P_1);
 store_compare_view_init(P_012);
 }
 
+#if USE_CUDA_GEMM == 1
+static void GEMM(OEC_MAL0_init* a, OEC_MAL0_init* b, OEC_MAL0_init* c, int m, int n, int k, bool a_fixed)
+{
+
+}
+#elif USE_CUDA_GEMM == 2    
+static void CONV_2D(const OEC_MAL0_init* X, const OEC_MAL0_init* W, OEC_MAL0_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+}
+
+#endif 
+
 
 };
