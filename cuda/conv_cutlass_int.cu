@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include <conv2d.cuh>
+#include <conv2d_NCHW.cuh>
 #include <cstdint>
 
 template <typename Type>
