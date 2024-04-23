@@ -2110,7 +2110,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputmixed(const vect
                                                                       const size_t& vec) {
     for (size_t i = 0; i < regs.size(); i += 3) {
         for (size_t offset = 0; offset < vec; ++offset) {
-            alignas(DATATYPE) UINT_TYPE input[DATTYPE / BITLENGTH];
+            alignas(DATATYPE) UINT_TYPE input[SIZE_VEC];
             int dest = regs[i + 1] + offset;
 
             int player = 0;
@@ -2119,7 +2119,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputmixed(const vect
             case 0: { // int
                 player = from_reg ? i_register[regs[i + 2]].get() : regs[i + 2];
 
-                auto res = next_input<SIZE_VEC>(player, thread_id);
+                std::array<int, SIZE_VEC> res = next_input<SIZE_VEC>(player, thread_id);
                 for (size_t j = 0; j < SIZE_VEC; ++j)
                     input[j] = res[j];
 
@@ -2220,10 +2220,10 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::popen(const vector<in
 
     for (size_t i = 0; i < regs.size(); i += 2)
         for (size_t vec = 0; vec < size; ++vec) {
-            std::vector<UINT_TYPE> res;
-            res.resize(DATTYPE / BITLENGTH); // TODO
-            s_register[regs[i + 1] + vec].complete_reveal_to_all(res.data());
-            c_register[regs[i] + vec] = res;
+            // std::vector<UINT_TYPE> res;
+            // res.resize(DATTYPE / BITLENGTH);
+            DATATYPE tmp = s_register[regs[i + 1] + vec].complete_reveal_to_all();
+            c_register[regs[i] + vec] = tmp;
         }
 }
 

@@ -109,9 +109,10 @@ class CInteger {
     std::vector<int_t> get_all() const {
         std::vector<int_t> res;
         res.resize(SIZE_VEC);
-
+        alignas(DATATYPE) UINT_TYPE tmp2[SIZE_VEC];
         DATATYPE tmp = nums;
-        unorthogonalize_arithmetic(&tmp, (uint_t*)(res.data()), 1);
+        unorthogonalize_arithmetic(&tmp, tmp2, 1);
+        for (size_t j = 0; j < SIZE_VEC; ++j) res[j] = tmp2[j]; 
         return res;
     }
 
