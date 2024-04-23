@@ -8,10 +8,11 @@ helpFunction()
    echo -e "\t-c IP address of player 2 (if ip matches player_id can be empty)"
    echo -e "\t-d IP address of player 3 (if ip matches player_id can be empty)"
    echo -e "\t-x Compiler (g++/clang++/..)"
+    echo -e "\t"-u "Comile with nvcc and cutlass GEMM (0/1)"
    exit 1 # Exit script after printing help
 }
 
-while getopts "p:a:b:c:d:x:" opt
+while getopts "p:a:b:c:d:x:u:" opt
 do
    case "$opt" in
       p ) O_PARTY="$OPTARG" ;;
@@ -19,7 +20,9 @@ do
       b ) IP2="$OPTARG" ;;
       c ) IP3="$OPTARG" ;;
       d ) IP4="$OPTARG" ;;
+      u ) USE_NVCC="$OPTARG" ;;
       x ) COMPILER="$OPTARG" ;;
+
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -32,6 +35,10 @@ fi
 
 flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -I SimpleNN -lstdc++fs"
 # flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+if [ "$USE_NVCC" = "1" ]
+then
+    flags=$flags" -c"
+fi
 
 O_IP1="127.0.0.1"
 O_IP2="127.0.0.1"

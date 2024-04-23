@@ -67,7 +67,7 @@ then
 comp="$COMPILER"
 fi
 
-ssl="1"
+ssl="0"
 if [ ! -z "$USE_SSL" ]
 then
 ssl="$USE_SSL"
@@ -80,7 +80,7 @@ then
 #g++\ -march=native\ -O3\ -std=c++20\ -pthread\ -lssl\ -lcrypto\ main.cpp\ -I\ SimpleNN\ -o\ nn.o
     # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -lssl -lcrypto"
     # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -lssl -lcrypto -I SimpleNN -lstdc++fs"
-    flags="-march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lssl -lcrypto -I SimpleNN -g"
+    flags="-march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lssl -lcrypto -I SimpleNN"
     #flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
 else
     # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread"

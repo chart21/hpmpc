@@ -856,16 +856,18 @@ static void CONV_2D(const OEC_MAL3_Share* X, const OEC_MAL3_Share* W, OEC_MAL3_S
     const int factor = DATTYPE/BITLENGTH;
     const int xSize = inh * inw * din * batchSize;
     const int wSize = wh * ww * din * dout;
-    const int ySize = inh * inw * dout * batchSize;
+    const int outh = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int outw = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = outh * outw * dout * batchSize;
     batchSize *= factor; 
     
     UINT_TYPE* r0 = new UINT_TYPE[factor*xSize];
     UINT_TYPE* r1 = new UINT_TYPE[factor*xSize];
     UINT_TYPE* b_r1 = new UINT_TYPE[wSize];
     UINT_TYPE* br1_br0 = new UINT_TYPE[wSize];
-    UINT_TYPE* r_br = new UINT_TYPE[factor*ySize];
-    UINT_TYPE* r_br1_br0 = new UINT_TYPE[factor*ySize];
-    UINT_TYPE* b_r_r0 = new UINT_TYPE[factor*ySize];
+    UINT_TYPE* r_br = new UINT_TYPE[factor * ySize];
+    UINT_TYPE* r_br1_br0 = new UINT_TYPE[factor * ySize];
+    UINT_TYPE* b_r_r0 = new UINT_TYPE[factor * ySize];
 
 
     for(int i = 0; i< xSize; i++){
@@ -890,6 +892,7 @@ static void CONV_2D(const OEC_MAL3_Share* X, const OEC_MAL3_Share* W, OEC_MAL3_S
     conv2d_cutlass(r1, b_r1, r_br, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
     conv2d_cutlass(r0, b_r1, b_r_r0, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
     conv2d_cutlass(r1, br1_br0, r_br1_br0, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+            
 
     for(int i = 0; i< ySize; i++){
         alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
