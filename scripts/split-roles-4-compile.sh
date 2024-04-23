@@ -40,6 +40,8 @@ then
     flags=$flags" -c"
 fi
 
+flags="$flags MP-SPDZ/lib/help/Util.cpp"
+
 O_IP1="127.0.0.1"
 O_IP2="127.0.0.1"
 O_IP3="127.0.0.1"
