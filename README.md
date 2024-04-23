@@ -166,5 +166,5 @@ Input will be read from the files in `MP-SPDZ/Input/`
     - `<vec>`: is always `0` 
         - except for SIMD circuits:
             - it is between [`0` - `DATTYPE/BITLENGTH`]
-            - all have to be provided otherwise there are not enough numbers to
-            store in a SIMD register
+            - for each number there must exist an input-file otherwise there are
+              not enough numbers to store in a SIMD register
