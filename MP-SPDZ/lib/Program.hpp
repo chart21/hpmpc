@@ -1816,6 +1816,10 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             bits1.resize(size);
             bits2.resize(size);
             bits3.resize(size);
+#if num_players > 3
+            vector<sint> bits4;
+            bits4.resize(size);
+#endif
 
             for (size_t vec = 0; vec < size; ++vec) { // every party creates <size> random bits
                 DATATYPE bit = PROMOTE(m.get_random_diff() & 1);
@@ -1823,6 +1827,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                 bits1[vec].template prepare_receive_from<P_0>(bit);
                 bits2[vec].template prepare_receive_from<P_1>(bit);
                 bits3[vec].template prepare_receive_from<P_2>(bit);
+#if num_players > 3
+                bits4[vec].template prepare_receive_from<P_3>(bit);
+#endif
             }
 
             Share::communicate();
@@ -1831,11 +1838,17 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                 bits1[vec].template complete_receive_from<P_0>();
                 bits2[vec].template complete_receive_from<P_1>();
                 bits3[vec].template complete_receive_from<P_2>();
+#if num_players > 3
+                bits4[vec].template complete_receive_from<P_3>();
+#endif
             }
             vector<sint> res;
             res.resize(size);
             p.xor_arith(bits1, bits2, res);
             p.xor_arith(res, bits3, res);
+#if num_players > 3
+            p.xor_arith(res, bits4, res);
+#endif
 
             for (size_t vec = 0; vec < size; ++vec) {
                 p.s_register[regs[0] + vec] = res[vec];
@@ -2077,6 +2090,11 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputbvec(const vecto
             case 2:
                 sb_register[regs[i + 3 + j]][0].template prepare_receive_from<P_2>(input);
                 break;
+#if num_players > 3
+            case 3:
+                sb_register[regs[i + 3 + j]][0].template prepare_receive_from<P_3>(input);
+                break;
+#endif
             }
         }
         i += bits;
@@ -2097,6 +2115,11 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputbvec(const vecto
             case 2:
                 sb_register[regs[i + 3 + j]][0].template complete_receive_from<P_2>();
                 break;
+#if num_players > 3
+            case 3:
+                sb_register[regs[i + 3 + j]][0].template complete_receive_from<P_3>();
+                break;
+#endif
             }
         }
         i += bits;
@@ -2150,6 +2173,11 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputmixed(const vect
             case 2:
                 s_register[dest].template prepare_receive_from<P_2>(in);
                 break;
+#if num_players > 3
+            case 3:
+                s_register[dest].template prepare_receive_from<P_3>(in);
+                break;
+#endif
             }
         }
         switch (regs[i]) {
@@ -2191,6 +2219,11 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputmixed(const vect
             case 2:
                 s_register[dest].template complete_receive_from<P_2>();
                 break;
+#if num_players > 3
+            case 3:
+                s_register[dest].template complete_receive_from<P_3>();
+                break;
+#endif
             }
         }
         switch (regs[i]) {
