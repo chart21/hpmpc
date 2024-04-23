@@ -103,7 +103,7 @@ then
     flags=$flags" "$GNU_OPTIONS
 fi
 
-flags="$flags MP-SPDZ/lib/help/Util.cpp -fsanitize=undefined"
+flags="$flags MP-SPDZ/lib/help/Util.cpp"
 # Print helpFunction in case parameters are empty
 # if [ -z "$parameterA" ] || [ -z "$parameterB" ] || [ -z "$parameterC" ]
 # then
