@@ -155,3 +155,16 @@ Rename the schedule file `custom.sch` and compile with `FUNCTION_IDENTIFIER = 50
 mv "./MP-SPDZ/Schedules/<file>.sch" "./MP-SPDZ/Schedules/custom.sch"
 ./scripts/config.sh -p all3 -f 501 -a "<BITLENGTH>"
 ```
+
+## Input
+
+Input will be read from the files in `MP-SPDZ/Input/`
+
+- public input will be read from `PUB_INPUT`
+- private input will be read from `INPUT-P<player_number>-0-<vec>`
+    - `<player_number>`: is the number associate with a specific player.
+    - `<vec>`: is always `0` 
+        - except for SIMD circuits:
+            - it is between [`0` - `DATTYPE/BITLENGTH`]
+            - all have to be provided otherwise there are not enough numbers to
+            store in a SIMD register
