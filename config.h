@@ -36,7 +36,7 @@
 #define USE_SSL 0
 
 // USE CUDA for matrix multiplication?
-#define USE_CUDA_GEMM 2
+#define USE_CUDA_GEMM 0
 
 // How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered
 #define SEND_BUFFER 10000
