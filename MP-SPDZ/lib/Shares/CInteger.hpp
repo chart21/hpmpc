@@ -175,12 +175,12 @@ CInteger<int_t, uint_t>::operator/(const CInteger<int_t, uint_t>& other) const {
     auto vec1 = get_all();
     auto vec2 = other.get_all();
 
-    std::vector<UINT_TYPE> res;
+    alignas(DATATYPE) UINT_TYPE res[SIZE_VEC];
     for (size_t i = 0; i < vec1.size(); ++i)
-        res.push_back(INT_TYPE(vec1[i]) / vec2[i]);
+        res[i] = (INT_TYPE(vec1[i]) / vec2[i]);
 
     DATATYPE dt;
-    orthogonalize_arithmetic(res.data(), &dt, 1);
+    orthogonalize_arithmetic(res, &dt, 1);
     // UBase ua = a;
     // return Integer{Base(ua / other.a)};
     return CInteger(dt);
@@ -192,16 +192,16 @@ CInteger<int_t, uint_t>::operator%(const CInteger<int_t, uint_t>& other) const {
     auto vec1 = get_all();
     auto vec2 = other.get_all();
 
-    std::vector<UINT_TYPE> res;
+    alignas(DATATYPE) UINT_TYPE res[SIZE_VEC];
     for (size_t i = 0; i < vec1.size(); ++i) {
         if (vec2[i] == 0)
-            res.push_back(0u);
+            res[i] = (0u);
         else
-            res.push_back(INT_TYPE(vec1[i]) % vec2[i]);
+            res[i] = (INT_TYPE(vec1[i]) % vec2[i]);
     }
 
     DATATYPE dt;
-    orthogonalize_arithmetic(res.data(), &dt, 1);
+    orthogonalize_arithmetic(res, &dt, 1);
     // UBase ua = a;
     // return Integer{Base(ua % other.a)};
     return CInteger(dt);
@@ -257,17 +257,16 @@ CInteger<int_t, uint_t>& CInteger<int_t, uint_t>::operator|=(const CInteger<int_
 template <class int_t, class uint_t>
 CInteger<int_t, uint_t>
 CInteger<int_t, uint_t>::operator<<(const CInteger<int_t, uint_t>& other) const {
-    // return CInteger{a << other.a};
     auto vec1 = get_all();
     auto vec2 = other.get_all();
 
-    std::vector<UINT_TYPE> res;
+    alignas(DATATYPE) UINT_TYPE res[SIZE_VEC];
     for (size_t i = 0; i < vec1.size(); ++i) {
-        res.push_back(UINT_TYPE(vec1[i]) << vec2[i]);
+        res[i] = (UINT_TYPE(vec1[i]) << vec2[i]);
     }
 
     DATATYPE dt;
-    orthogonalize_arithmetic(res.data(), &dt, 1);
+    orthogonalize_arithmetic(res, &dt, 1);
 
     return CInteger(dt);
 }
@@ -278,16 +277,16 @@ CInteger<int_t, uint_t>::operator>>(const CInteger<int_t, uint_t>& other) const 
     auto vec1 = get_all();
     auto vec2 = other.get_all();
 
-    std::vector<UINT_TYPE> res;
+    alignas(DATATYPE) UINT_TYPE res[SIZE_VEC];
     for (size_t i = 0; i < vec1.size(); ++i) {
         if (vec2[i] >= sizeof(UINT_TYPE) * 8)
-            res.push_back(0);
+            res[i] = 0;
         else
-            res.push_back(UINT_TYPE(vec1[i]) >> vec2[i]);
+            res[i] = (UINT_TYPE(vec1[i]) >> vec2[i]);
     }
 
     DATATYPE dt;
-    orthogonalize_arithmetic(res.data(), &dt, 1);
+    orthogonalize_arithmetic(res, &dt, 1);
     return CInteger(dt);
 }
 

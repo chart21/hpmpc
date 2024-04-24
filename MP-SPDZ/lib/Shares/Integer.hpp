@@ -22,11 +22,11 @@ class Integer {
     Integer() : nums{0} {}
     Integer(IBase a) : nums{a} {}
     Integer(DATATYPE a) : nums() {
-        std::vector<UINT_TYPE> tmp;
-        tmp.resize(SIZE_VEC);
-        unorthogonalize_arithmetic(&a, tmp.data(), 1);
-        for (const auto& ele : tmp)
-            nums.push_back(INT_TYPE(ele));
+        // std::vector<UINT_TYPE> tmp;
+        alignas(DATATYPE) UINT_TYPE vec[SIZE_VEC];
+        unorthogonalize_arithmetic(&a, vec, 1);
+        for (size_t i = 0; i < SIZE_VEC; ++i)
+            nums.push_back(INT_TYPE(vec[i]));
     }
     Integer(const std::vector<IBase>& a) : nums(a) {}
     Integer(const Integer& other) : nums(other.nums) {}                // copy
@@ -91,12 +91,13 @@ class Integer {
     }
     DATATYPE get_type() const {
         if (nums.size() == SIZE_VEC) {
-            std::vector<UINT_TYPE> vec;
-            for (const auto& ele : nums) {
-                vec.emplace_back(ele);
+            // std::vector<UINT_TYPE> vec;
+            alignas(DATATYPE) UINT_TYPE vec[SIZE_VEC];
+            for (size_t i = 0; i < nums.size(); ++i) {
+                vec[i] = nums[i];
             }
             DATATYPE a;
-            orthogonalize_arithmetic(vec.data(), &a, 1);
+            orthogonalize_arithmetic(vec, &a, 1);
             return a;
         } else {
             return PROMOTE(UINT_TYPE(nums[0]));
