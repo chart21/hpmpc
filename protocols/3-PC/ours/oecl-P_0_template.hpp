@@ -792,7 +792,9 @@ static void CONV_2D(const OECL0_Share* X, const OECL0_Share* W, OECL0_Share* Y, 
     const int factor = DATTYPE/BITLENGTH;
     const int xSize = inh * inw * din * batchSize;
     const int wSize = wh * ww * din * dout;
-    const int ySize = inh * inw * dout * batchSize;
+    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = out_h * out_w * dout * batchSize;
     batchSize *= factor; 
 
     UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
@@ -821,7 +823,6 @@ static void CONV_2D(const OECL0_Share* X, const OECL0_Share* W, OECL0_Share* Y, 
         unorthogonalize_arithmetic(&temp2, temp, 1);
         w_p1_w_p2[i] = temp[0];
     }
-
     conv2d_cutlass(x_p1, w_p1, y_p1, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
     conv2d_cutlass(x_p1_x_p2, w_p1_w_p2, y_p1_2, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
 

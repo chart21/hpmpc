@@ -1,7 +1,7 @@
 #SET YOUR OPTIONS HERE
 NVCC=/usr/local/cuda/bin/nvcc # replace with which nvcc
 NVCCOPTs= -arch=sm_89 --expt-relaxed-constexpr  -std=c++20 # replace with your architecture
-CUTLASS_PATH=/home/ec2-user/cutlass# replace with your cutlass path, set up with official CUTLASS quick start guide
+CUTLASS_PATH=/home/ubuntu/cutlass# replace with your cutlass path, set up with official CUTLASS quick start guide
 CUDALIB=/usr/local/cuda/lib64 # replace with your cuda library path
 
 # NVCC=/opt/cuda/bin/nvcc # replace with which nvcc

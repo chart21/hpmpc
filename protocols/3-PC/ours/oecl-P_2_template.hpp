@@ -778,7 +778,9 @@ static void CONV_2D(const OECL2_Share* X, const OECL2_Share* W, OECL2_Share* Y, 
     const int factor = DATTYPE/BITLENGTH;
     const int xSize = inh * inw * din * batchSize;
     const int wSize = wh * ww * din * dout;
-    const int ySize = inh * inw * dout * batchSize;
+    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = out_h * out_w * dout * batchSize;
     batchSize *= factor; 
 
     UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];

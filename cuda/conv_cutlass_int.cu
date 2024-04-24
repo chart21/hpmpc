@@ -16,6 +16,7 @@ void conv2d_cutlass(const Type* X, const Type* W, Type* Y, int batchSize, int in
     int outw = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
     int ySize = outh * outw * dout * batchSize;
 
+
     cudaMalloc((void **)&x, xSize * sizeof(Type));
     cudaMalloc((void **)&w, wSize * sizeof(Type));
     cudaMalloc((void **)&y, ySize * sizeof(Type));
