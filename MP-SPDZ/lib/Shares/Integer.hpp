@@ -112,7 +112,7 @@ class Integer {
     std::vector<IBase> nums;
 
     IBase plus(const UBase& a, const UBase& other) const;
-    IBase minus(const IBase& a, const IBase& other) const;
+    IBase minus(const UBase& a, const UBase& other) const;
 };
 
 template <class int_t, class uint_t>
@@ -136,17 +136,6 @@ Integer<int_t, uint_t>::operator+(const Integer<int_t, uint_t>& other) const {
 template <class int_t, class uint_t>
 Integer<int_t, uint_t>::IBase Integer<int_t, uint_t>::plus(const UBase& a,
                                                            const UBase& other) const {
-    if (a >= 0) {
-        IBase diff = std::numeric_limits<IBase>::max() - a;
-        if (diff < other) {
-            return std::numeric_limits<IBase>::min() + other - 1 - diff;
-        }
-    } else {
-        IBase diff = std::numeric_limits<IBase>::min() - a;
-        if (other < diff) {
-            return std::numeric_limits<IBase>::max() + other + 1 - diff;
-        }
-    }
     return a + other;
 }
 
@@ -176,18 +165,8 @@ Integer<int_t, uint_t>::operator-(const Integer<int_t, uint_t>& other) const {
 }
 
 template <class int_t, class uint_t>
-Integer<int_t, uint_t>::IBase Integer<int_t, uint_t>::minus(const IBase& a,
-                                                            const IBase& other) const {
-    if ((other > 0 && a < std::numeric_limits<IBase>::min() + other) ||
-        (other < 0 && a > std::numeric_limits<IBase>::max() + other)) {
-        if (other > 0) { // underflow
-            IBase diff = std::numeric_limits<IBase>::min() - a;
-            return std::numeric_limits<IBase>::max() - (other - 1 + diff);
-        } else { // overflow
-            IBase diff = std::numeric_limits<IBase>::max() - a;
-            return std::numeric_limits<IBase>::min() - (other + 1 + diff);
-        }
-    }
+Integer<int_t, uint_t>::IBase Integer<int_t, uint_t>::minus(const UBase& a,
+                                                            const UBase& other) const {
     return a - other;
 }
 
