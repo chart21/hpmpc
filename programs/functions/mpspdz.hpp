@@ -376,6 +376,7 @@ void MP_MACHINE_AES_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 526 || FUNCTION_IDENTIFIER == 527 || FUNCTION_IDENTIFIER == 528
+template<typename Share>
 void MP_MACHINE_REG_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -385,10 +386,8 @@ void MP_MACHINE_REG_BENCH(DATATYPE* res)
     using Bitset = sbitset_t<64, S>;
 
     using A = Additive_Share<DATATYPE, Share>;
-    using sint = sint_t<A>;
 
-    Share::communicate();
-    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("AES.sch");
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("LogReg.sch");
     m.run();
 }
 
