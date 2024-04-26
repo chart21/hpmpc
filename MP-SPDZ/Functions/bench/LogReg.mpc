@@ -1,0 +1,28 @@
+from Compiler import ml
+debug=False
+
+sfix.set_precision(7)
+cfix.set_precision(7)
+
+program.options_from_args()
+
+batch = int(program.args[1])
+dim = int(5)
+ml.Layer.back_batch_size=batch
+
+n_iterations = 100
+
+ml.set_n_threads(1)
+
+dense = ml.Dense(batch, dim, 1)
+sigmoid = ml.Output(batch, debug=debug, approx='approx')
+
+for x in dense.X, sigmoid.Y:
+   x.assign_all(0)
+#dense.X.assign(X_train)
+#sigmoid.Y.assign(y_train_t)
+
+sgd = ml.SGD([dense, sigmoid], n_iterations, debug=debug, report_loss=True)
+sgd.reset()
+
+sgd.run(batch_size=batch)

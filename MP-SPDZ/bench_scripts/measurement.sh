@@ -80,6 +80,7 @@ case "$fun" in
         domain="-B"
         bitlength=128
         func="AES" ;;
+    526|527|528) func="LogReg" ;;
     *)
         func="Int_Multiplication"
         echo WARNING: "$fun": unkown function defaulting to Int_Multiplication

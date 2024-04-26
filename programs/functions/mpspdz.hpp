@@ -51,6 +51,8 @@
 #define FUNCTION MP_MACHINE_BIT_AND_BENCH
 #elif FUNCTION_IDENTIFIER == 525
 #define FUNCTION MP_MACHINE_AES_BENCH
+#elif FUNCTION_IDENTIFIER == 526 || FUNCTION_IDENTIFIER == 527 || FUNCTION_IDENTIFIER == 528
+#define FUNCTION MP_MACHINE_REG_BENCH
 #endif
 
 //Boilerplate
@@ -358,6 +360,23 @@ void MP_MACHINE_BIT_AND_BENCH(DATATYPE* res)
 #elif FUNCTION_IDENTIFIER == 525
 template<typename Share>
 void MP_MACHINE_AES_BENCH(DATATYPE* res)
+{
+    using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<64, S>;
+
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+
+    Share::communicate();
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("AES.sch");
+    m.run();
+}
+
+#elif FUNCTION_IDENTIFIER == 526 || FUNCTION_IDENTIFIER == 527 || FUNCTION_IDENTIFIER == 528
+void FUNCTION MP_MACHINE_REG_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
     using int_t = IR::Integer<int64_t, uint64_t>;
