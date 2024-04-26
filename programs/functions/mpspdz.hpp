@@ -376,7 +376,7 @@ void MP_MACHINE_AES_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 526 || FUNCTION_IDENTIFIER == 527 || FUNCTION_IDENTIFIER == 528
-void FUNCTION MP_MACHINE_REG_BENCH(DATATYPE* res)
+void MP_MACHINE_REG_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
     using int_t = IR::Integer<int64_t, uint64_t>;
