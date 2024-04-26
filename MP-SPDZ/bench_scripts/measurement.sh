@@ -61,7 +61,7 @@ bitlength=32
 
 # map function number to function name
 case "$fun" in
-    501) func="tmp" ;;
+    501) func="custom" ;;
     506) func="Int_Multiplication" ;;
     507|508|509) func="Int_Compare" ;;
     510) func="Int_Division" ;;
