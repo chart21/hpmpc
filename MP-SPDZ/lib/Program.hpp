@@ -1643,7 +1643,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                     p.cb_register[regs[i + 1] + j / BIT_LEN] |=
                         (BitType(p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN]
                              .complete_reveal_to_all()) &
-                         1u)
+                         PROMOTE(1u))
                         << int64_t(j % BIT_LEN);
                 }
             }
