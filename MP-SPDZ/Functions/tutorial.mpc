@@ -26,131 +26,139 @@ def test(actual, expected):
 ############################### secret shares #################################
 
 # you can assign public values to sbit/sint
-# a = sint(6) # equals 1 Additive_Share
-# b = sint(10)
-# 
-# # private inputs are read (as strings) from a input-file:
-# # - MP-SPDZ/Input/Input-P<player-num>-<process-number>-<vectorization>
-# # where:
-# # - <process-number>: always zero but can be used to support parallel execution
-# #   of the same function
-# # - <vectorization> is from 0 - `DATTYPE`/`BITLENGTH`
-# 
-# # to share private input from player <player> with everyone:
-# # and use reveal() to reveal output to every player
-# for player in 0, 0:
-#     print_ln("got: %s from player %s", sint.get_input_from(player).reveal(), player)
-# 
-# test(a + b, 16)
-# test(a * b, 60)
-# test(a - b, -4)
-# 
-# # same as `FRACTIONAL` for fix point division
-# sfix.set_precision(7)
-# test(a / b, 6 / 10) # use fix point division for correct results (will use random secret bits)
-# 
-# # MP-SPDZ has int_div for integer division but this requires correct signed truncation
-# # therefore does not work for secure computations
-# # - a workaround for this is to remove the line 114 "@instructions_base.cisc" in
-# #   `Compiler/comparison` of the MP-SPDZ compiler before the `def Trunc`
-# #   function: this will prevent MP-SPDZ from using this instruction but instead
-# #   use the same approach as for a / b but with correct rounding to an integer
-# 
-# ################################# fix point ###################################
-# # should only be set true for programs with no division
-# # otherwise trunc with run-time parameters is needed
-# program.use_trunc_pr = False
-# 
-# 
-# # precision used to print fix-point numbers can be set arbitrarily
-# # default (if not set explicitly): `FRACTIONAL`
-# print_float_precision(10)
-# 
-# # you can assign public numbers to sfix
-# a = sfix(7)
-# b = sfix(0.5)
-# 
-# # will be read as float multiplied with [1u << (`FRACTIONAL`)] and converted
-# # to an integer
-# for i in 0, 0:
-#     print_ln('got %s from player %s', sfix.get_input_from(i).reveal(), i)
-# 
-# # arithmetic works as expected
-# test(a + b, 7.5)
-# test(a * b, 3.5)
-# test(a - b, 6.5)
-# test(a / b, 7/0.5)
-# 
-# ################################## Arrays #####################################
-# 
-# datatype = sint
-# n = 10
-# player = 0
-# 
-# # array of size <n> can be used with any <datatype>
-# # BUT: for secret shares (sint/sbit) not initialized otherwise 0 initialized
-# a = datatype.Array(n)
-# b = datatype.Array(n)
-# 
-# # to share private input from <player> with everyone
-# a.input_from(player)
-# 
-# # or assign public values
-# a.assign([i + 3 for i in range(n)])
-# b.assign([i for i in range(n)])
-# 
-# # simple operations
-# 
-# test(a + b, [3, 5, 7, 9, 11, 13, 15, 17, 19, 21])
-# test(a - b, [3 for i in range(n)])
-# test(a * b, [0, 4, 10, 18, 28, 40, 54, 70, 88, 108])
-# 
-# # dot product
-# test(datatype.dot_product(a,b), 420)
-# 
-# ################################# Matrices ####################################
-# 
-# rows = 3
-# cols = 2
-# 
-# a = datatype.Matrix(rows, cols)
-# b = datatype.Matrix(rows, cols)
-# 
-# # to read private secret matrix:
-# # - will read "row-wise"
-# # example:
-# #   input-file: 0 1 2 3 4 5
-# #   3x2 matrix: [[0 1],
-# #                [2 3],
-# #                [4 5]]
-# a.input_from(0) # will read a matrix from player 0's input-file
-# print_ln("Matrix: %s", a.reveal())
-# 
-# b = b.transpose() # matrix transpose
-# 
-# a.assign([[1,2], [3,4], [5,6]])
-# b.assign([[1,2,3], [4,5,6]])
-# 
-# vec = datatype.Array(cols)
-# vec.assign_all(3)
-# test(a * b, [[9, 12, 15], [19, 26, 33], [29, 40, 51]]) # matrix x matrix
-# test(a * vec, [9, 21, 33]) # matrix x vec
+a = sint(6) # equals 1 Additive_Share
+b = sint(10)
+
+# private inputs are read (as strings) from a input-file:
+# - MP-SPDZ/Input/Input-P<player-num>-<process-number>-<vectorization>
+# where:
+# - <process-number>: always zero but can be used to support parallel execution
+#   of the same function
+# - <vectorization> is from 0 - `DATTYPE`/`BITLENGTH`
+
+# to share private input from player <player> with everyone:
+# and use reveal() to reveal output to every player
+for player in 0, 0:
+    print_ln("got: %s from player %s", sint.get_input_from(player).reveal(), player)
+
+test(a + b, 16)
+test(a + 10, 16) # add by using `get_share_from_public_dat` as public val can also be SIMD
+
+test(a * b, 60)
+test(a * 10, 60) # public mult using `mult_public_dat`
+
+test(a - b, -4)
+test(a - 10, -4) # see public add
+test(6 - b, -4) # similar to public add
+
+# same as `FRACTIONAL` for fix point division
+sfix.set_precision(7)
+test(a / b, 6 / 10) # use fix point division for correct results (will use random secret bits)
+
+# MP-SPDZ has int_div for integer division but this requires correct signed truncation
+# therefore does not work for secure computations
+# - a workaround for this is to remove the line 114 "@instructions_base.cisc" in
+#   `Compiler/comparison` of the MP-SPDZ compiler before the `def Trunc`
+#   function: this will prevent MP-SPDZ from using this instruction but instead
+#   use the same approach as for a / b but with correct rounding to an integer
+
+################################# fix point ###################################
+# should only be set true for programs with no division
+# otherwise trunc with run-time parameters is needed
+program.use_trunc_pr = False
+
+
+# precision used to print fix-point numbers can be set arbitrarily
+# default (if not set explicitly): `FRACTIONAL`
+print_float_precision(10)
+
+# you can assign public numbers to sfix
+a = sfix(7)
+b = sfix(0.5)
+
+# will be read as float multiplied with [1u << (`FRACTIONAL`)] and converted
+# to an integer
+for i in 0, 0:
+    print_ln('got %s from player %s', sfix.get_input_from(i).reveal(), i)
+
+# arithmetic works as expected
+test(a + b, 7.5)
+test(a * b, 3.5)
+test(a - b, 6.5)
+test(a / b, 7/0.5)
+
+################################## Arrays #####################################
+
+datatype = sint
+n = 10
+player = 0
+
+# array of size <n> can be used with any <datatype>
+# BUT: for secret shares (sint/sbit) not initialized otherwise 0 initialized
+a = datatype.Array(n)
+b = datatype.Array(n)
+
+# to share private input from <player> with everyone
+a.input_from(player)
+
+# or assign public values
+a.assign([i + 3 for i in range(n)])
+b.assign([i for i in range(n)])
+
+# simple operations
+
+test(a + b, [3, 5, 7, 9, 11, 13, 15, 17, 19, 21])
+test(a - b, [3 for i in range(n)])
+test(a * b, [0, 4, 10, 18, 28, 40, 54, 70, 88, 108])
+
+# dot product
+test(datatype.dot_product(a,b), 420)
+
+################################# Matrices ####################################
+
+rows = 3
+cols = 2
+
+a = datatype.Matrix(rows, cols)
+b = datatype.Matrix(rows, cols)
+
+# to read private secret matrix:
+# - will read "row-wise"
+# example:
+#   input-file: 0 1 2 3 4 5
+#   3x2 matrix: [[0 1],
+#                [2 3],
+#                [4 5]]
+a.input_from(0) # will read a matrix from player 0's input-file
+print_ln("Matrix: %s", a.reveal())
+
+b = b.transpose() # matrix transpose
+
+a.assign([[1,2], [3,4], [5,6]])
+b.assign([[1,2,3], [4,5,6]])
+
+vec = datatype.Array(cols)
+vec.assign_all(3)
+test(a * b, [[9, 12, 15], [19, 26, 33], [29, 40, 51]]) # matrix x matrix
+test(a * vec, [9, 21, 33]) # matrix x vec
 
 ################################### sbits #####################################
 
-# for boolean gates uncomment and compile with -B 128
-
-sb128 = sbits.get_type(128)
-
-# to read bits as input use:
-a = sb128.get_input_from(0)
-# - as sb128 is 128 bit:
-#   - reads 128/`BITLENGTH' numbers from input-file
-# - will be read into 128 XOR_Shares
-
-a = sb128(20)
-b = sb128(30)
-
-test(a ^ b, 10)
-test(a & b, 20)
-test(~a, -21)
+# # for boolean gates uncomment and compile with -B 128
+#
+# sb128 = sbits.get_type(128)
+#
+# # to read bits as input use:
+# a = sb128.get_input_from(0)
+# # - as sb128 is 128 bit:
+# #   - reads 128/`BITLENGTH' numbers from input-file
+# # - will be read into 128 XOR_Shares
+#
+# a = sb128(20)
+# b = sb128(30)
+#
+# test(a ^ b, 10)
+# test(a ^ 30, 10) # public xor is split into multiple NOTS
+# test(a & b, 20)
+# test(a & 30, 20)
+# test(~a, -21)
