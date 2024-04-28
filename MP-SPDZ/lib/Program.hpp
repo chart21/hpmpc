@@ -2077,7 +2077,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputbvec(const vecto
         assert(bits == BITLENGTH and "BITLENGTH must equal -B <int>");
 
         for (size_t j = 0; j < bits; ++j) {
-            auto input = get_next_bit(regs[i + 2]);
+            auto input = get_next_bit<SIZE_VEC>(regs[i + 2]);
             if (j >= BIT_LEN)
                 log(Level::ERROR, "input is too big");
             switch (regs[i + 2]) {

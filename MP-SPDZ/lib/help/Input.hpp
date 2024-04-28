@@ -149,7 +149,7 @@ std::array<float, VEC_SIZE> next_input_f(const int& player_num, const int& threa
         return res;
 
     for (size_t cur = 0; cur < VEC_SIZE; ++cur) {
-        auto in = get_input_from(player_num, 0);
+        auto in = get_input_from(player_num, cur);
         if (in == inputs.end()) {
             inputs.emplace_back(INPUT_PATH + "Input-P" + std::to_string(player_num) + "-" +
                                     std::to_string(thread_id) + "-" + std::to_string(cur),
@@ -166,23 +166,22 @@ std::array<float, VEC_SIZE> next_input_f(const int& player_num, const int& threa
 
 static std::queue<DATATYPE> bit_queue;
 
+template <size_t VEC_SIZE>
 DATATYPE get_next_bit(const int& player_id) {
     if (current_phase == PHASE_INIT || player_id != PARTY)
         return ZERO;
 
+    alignas(DATATYPE) UINT_TYPE tmp[VEC_SIZE];
     if (bit_queue.empty()) {
-        auto input = next_input_f<SIZE_VEC>(player_id, 0);
-        std::vector<UINT_TYPE> tmp;
-        tmp.reserve(DATTYPE / BITLENGTH);
+        auto input = next_input_f<VEC_SIZE>(player_id, 0);
 
         for (size_t i = 0; i < BITLENGTH; i++) {
-            for (const auto& ele : input) {
-                tmp.push_back((UINT_TYPE(std::round(ele)) >> i) & 1u);
+            for (size_t j = 0; j < VEC_SIZE; ++j) {
+                tmp[j] = (UINT_TYPE(std::round(input[j])) >> i) & 1u;
             }
             DATATYPE dat;
-            orthogonalize_arithmetic((UINT_TYPE*)tmp.data(), &dat, 1);
+            orthogonalize_arithmetic(tmp, &dat, 1);
             bit_queue.push(dat);
-            tmp.clear();
         }
     }
 
