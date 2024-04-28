@@ -107,6 +107,7 @@ class Program {
 
     // sbit operations
     void inputbvec(const vector<int>& regs);
+    void inputb(const vector<int>& regs);
     void andrsvec(const vector<int>& regs);
 
   private:
@@ -444,6 +445,19 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
                 inst.add_reg(read_int(fd)); // input PLAYER (regint for ...REG)
 
                 i += 2;
+            }
+            break;
+        }
+        case Opcode::INPUTB: {
+            unsigned num = read_int(fd);
+            assert(num % 4 == 0);
+
+            for (size_t i = 0; i < num; i += 4) {
+                inst.add_reg(read_int(fd)); // player id
+                unsigned bits = inst.add_reg(read_int(fd)); // number of bits in output (int)
+                inst.add_reg(read_int(fd)); // exponent 2^n
+                unsigned dest = inst.add_reg(read_int(fd)); // dest
+                update_max_reg(Type::SBIT, dest + div_ceil(bits, BIT_LEN), inst.get_opcode());
             }
             break;
         }
@@ -913,6 +927,7 @@ Type Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::get_reg_
     case Opcode::STMSB:
     case Opcode::MOVSB:
     case Opcode::TRANSPOSE:
+    case Opcode::INPUTB:
     case Opcode::INPUTBVEC:
         return Type::SBIT;
     case Opcode::PRINT_REG_SIGNED:
@@ -1056,7 +1071,7 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
         opc == 0x9f || opc == 0x80 || opc == 0x36 || opc == 0x2b || opc == 0x214 || opc == 0x24a ||
         opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 ||
         opc == 0x21e || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 ||
-        opc == 0x242 || opc == 0x09 || opc == 0x219 || opc == 0x21d || opc == 0x21a ||
+        opc == 0x242 || opc == 0x09 || opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0x246 ||
         opc == 0x221 || opc == 0xa9 || opc == 0x70 || opc == 0x19 || opc == 0x243 || opc == 0x247 ||
         opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x21b || opc == 0x210 ||
         opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x1a || opc == 0x20f || opc == 0x213 ||
@@ -1783,6 +1798,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             for (size_t i = 0; i < div_ceil(n, BIT_LEN); ++i)
                 p.sb_register[i + regs[0]] = p.sb_register[i + regs[1]];
             break;
+        case Opcode::INPUTB:
+            p.inputb(regs);
+            return;
         case Opcode::INPUTBVEC:
             p.inputbvec(regs);
             return;
@@ -2065,6 +2083,60 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             break;
         default:
             log(Level::WARNING, "not implemented: ", static_cast<unsigned>(op));
+        }
+    }
+}
+
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
+          class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputb(const vector<int>& regs) {
+    for (size_t i = 0; i < regs.size(); i += 4) {
+        unsigned bits = regs[i + 1];
+        assert(regs[i + 2] == 0);
+
+        for (size_t j = 0; j < bits; ++j) {
+            auto input = get_next_bit<SIZE_VEC>(regs[i]);
+            switch (regs[i]) {
+            case 0:
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template prepare_receive_from<P_0>(input);
+                break;
+            case 1:
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template prepare_receive_from<P_1>(input);
+                break;
+            case 2:
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template prepare_receive_from<P_2>(input);
+                break;
+#if num_players > 3
+            case 3:
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template prepare_receive_from<P_3>(input);
+                break;
+#endif
+            }
+        }
+    }
+    bit_queue = std::queue<DATATYPE>();
+
+    Share::communicate();
+
+    for (size_t i = 0; i < regs.size(); i += 4) {
+        unsigned bits = regs[i + 1];
+        for (size_t j = 0; j < bits; ++j) {
+            switch (regs[i]) {
+            case 0:
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template complete_receive_from<P_0>();
+                break;
+            case 1:
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template complete_receive_from<P_1>();
+                break;
+            case 2:
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template complete_receive_from<P_2>();
+                break;
+#if num_players > 3
+            case 3:
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template complete_receive_from<P_3>();
+                break;
+#endif
+            }
         }
     }
 }

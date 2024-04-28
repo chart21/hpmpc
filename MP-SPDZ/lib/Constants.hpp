@@ -171,6 +171,7 @@ enum class Opcode {
     MOVSB = 0x244,
 
     PRINT_REG_SIGNED = 0x220,
+    INPUTB = 0x246,
     INPUTBVEC = 0x247,
 
     MATMULS = 0xaa,
