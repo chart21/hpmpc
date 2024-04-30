@@ -89,7 +89,7 @@ else
     #flags="-march=native -Ofast -std=c++2a -pthread"
 fi
 
-if [ "$USE_NVCC" = "1" ]
+if [ "$USE_NVCC" -gt "0" ]
 then
     flags=$flags" -c"
 fi

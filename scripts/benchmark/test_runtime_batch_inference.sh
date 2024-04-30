@@ -89,7 +89,7 @@ do
         sed -i -e "s/\(define FUNCTION \).*/\1$f/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
-            sed -i -e "s/\(define USE_NVCC \).*/\1$use_nv/" config.h
+            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
                 for rb in "${reduced_bitlength[@]}"
                 do
                     sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h

@@ -47,7 +47,7 @@ do
         sed -i -e "s/\(define FUNCTION \).*/\1$f/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
-            sed -i -e "s/\(define USE_NVCC \).*/\1$use_nv/" config.h
+            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
             for rb in "${reduced_bitlength[@]}"
             do
             if [[ "$O_PARTY" == *"all"* ]]
@@ -67,7 +67,7 @@ do
                 ./scripts/cuda_compile.sh
             fi
 
-            echo "Running protocol $pr, function $f, use_nvcc $use_nv" 
+            echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $rb"
             
                 #if pr > 6
             if [ "$pr" -gt "6" ]
