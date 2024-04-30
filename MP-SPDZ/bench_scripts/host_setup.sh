@@ -97,6 +97,10 @@ echo "wait" >> ./scripts/split-roles-3to4-execute.sh
 echo "wait" >> ./scripts/split-roles-4-execute.sh
 
 echo "global setup successful"
+
+for i in {0..15}; do
+    echo "$i" > ./MP-SPDZ/Input/Input-P0-0-"$i"
+done
  
 ################################## MP-SPDZ ####################################
 cd "$REPO3_DIR"
