@@ -1193,7 +1193,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             p.i_register[regs[0] + vec] = m.ci_mem[p.i_register[regs[1] + vec].get()];
             break;
         case Opcode::LDSI:
-            p.s_register[regs[0] + vec] = int(n);
+            p.s_register[regs[0] + vec] = sint(UINT_TYPE(INT_TYPE(int(n))));
             break;
         case Opcode::LDI:
             p.c_register[regs[0] + vec] = PROMOTE(int(n));
@@ -1658,7 +1658,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                     p.cb_register[regs[i + 1] + j / BIT_LEN] |=
                         (BitType(p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN]
                              .complete_reveal_to_all()) &
-                         PROMOTE(1u))
+                         UINT_TYPE(1))
                         << int64_t(j % BIT_LEN);
                 }
             }
