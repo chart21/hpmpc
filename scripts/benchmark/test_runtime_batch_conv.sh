@@ -2,15 +2,14 @@
 
 ##---Adjust these---
 protocols=(5 12) # 5: 3PC
-functions=(70 170 270 71 171 271 72 172 272 73 173 273 74 174 274 75 175 275 76 176 276 77 177 277 78 178 278 79 179 279 80 180 280 81 181 281 82 182 282 83 183 283)
 use_nvcc=(0 1 2) # 0: CPU-only, 1: GPU for matmul, 2: GPU for Convolution
-reduced_bitlength=(0 1) # 0: full bitlength, 1: reduced bitlength (8-bit by default)
-pre=(0 1) # 0: no pre-processing, 1: pre-processing
-
-num_inputs=64 # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 Dattype=512 # Careful, requires AVX512 support by your CPU architecture. In not supported use 256 (AVX2), 128 (SSE), or 32 (None) for vectorization
 num_processes_4PC=1 # Careful, multiplies by 24
+pre=(0 1) # 0: no pre-processing, 1: pre-processing
 ##---End of adjust---
+
+
+num_inputs=(32 64 128 256 512) # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 
 num_processes_3PC=4*$num_processes_4PC #do not change
 split_role_factor_3PC=6 #do not change -> multiplies with num_processes_3PC
@@ -93,9 +92,6 @@ do
                 for rb in "${reduced_bitlength[@]}"
                 do
                     sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h
-                for prep in "${pre[@]}"
-                do
-                    sed -i -e "s/\(define PRE \).*/\1$prep/" config.h
             if [ "$pr" -gt "6" ]
             then
 
@@ -111,16 +107,16 @@ do
     fi
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, pre $prep, batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP1 -b $O_IP2 -c $O_IP3 -d $O_IP4
     else
-    echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, pre $prep, batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP1 -b $O_IP2 -c $O_IP3
     fi
 done
 done
 done
 done
-done
+
 cp scripts/benchmark/base_config.h config.h
 
