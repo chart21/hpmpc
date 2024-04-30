@@ -7,7 +7,7 @@ helpFunction()
    echo -e "\t-b IP address of player 1 (if ip matches player_id can be empty)"
    echo -e "\t-c IP address of player 2 (if ip matches player_id can be empty)"
    echo -e "\t-x Compiler (g++/clang++/..)"
-    echo -e "\t"-u "Comile with nvcc and cutlass GEMM (0/1)"
+   echo -e "\t"-u "Comile with nvcc and cutlass GEMM (0/1)"
 
 
    exit 1 # Exit script after printing help
