@@ -26,7 +26,7 @@
 #define NUM_INPUTS 64
 
 // Number of parallel processes to use
-#define PROCESS_NUM 1*1
+#define PROCESS_NUM 1
 
 // 0 = xorshift, 1 = AES_BS, 2 = VAES/AES-NI. 0 is not secure.
 #define RANDOM_ALGORITHM 2

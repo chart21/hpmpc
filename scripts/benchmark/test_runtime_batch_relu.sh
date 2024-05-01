@@ -15,7 +15,7 @@ num_processes_4PC=1 # Careful, multiplies by 24
 
 functions=(404,405,406) # do not change, different ReLU approaches
 num_inputs=(10000 100000 1000000 10000000) # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
-num_processes_3PC=1*$num_processes_4PC #do not change
+num_processes_3PC=4*$num_processes_4PC #do not change
 split_role_factor_3PC=6 #do not change -> multiplies with num_processes_3PC
 split_role_factor_4PC=24 #do not change -> multiplies with num_processes_4PC
 bitlength=32 #if you change this, also change reduced bitlength in config.h
