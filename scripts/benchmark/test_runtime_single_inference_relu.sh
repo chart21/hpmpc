@@ -13,6 +13,7 @@ functions=(404,405,406) # do not change, different ReLU approaches
 num_inputs=(10000 100000 1000000 10000000) # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 
 
+use_nv=0
 helpFunction()
 {
    echo "Script to test the runtime of single inferences for different configurations"
@@ -41,6 +42,31 @@ do
    esac
 done
 
+O_IP0="127.0.0.1"
+O_IP1="127.0.0.1"
+O_IP2="127.0.0.1"
+O_IP3="127.0.0.1"
+
+if [ ! -z "$IP0" ];
+then
+O_IP0="$IP0"
+fi
+
+if [ ! -z "$IP1" ];
+then
+O_IP1="$IP1"
+fi
+
+if [ ! -z "$IP2" ];
+then
+O_IP2="$IP2"
+fi
+
+if [ ! -z "$IP3" ];
+then
+O_IP3="$IP3"
+fi
+
 
 
 cp scripts/benchmark/base_config.h config.h 
@@ -51,9 +77,6 @@ do
     for f in "${functions[@]}"
     do
         sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
-        for use_nv in "${use_nvcc[@]}"
-        do
-            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
             for rb in "${reduced_bitlength[@]}"
             do
             for prep in "${pre[@]}"
@@ -71,28 +94,24 @@ do
                 ./scripts/config.sh -f $f -p $O_PARTY -u $use_nv -c $rb
             fi
             
-            if [ "$use_nv" != "0" ]
-            then
-                ./scripts/cuda_compile.sh
-            fi
 
-            echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $rb, pre $prep"
+            echo "Running protocol $pr, function $f, reduced_bitlength $rb, pre $prep"
             
                 #if pr > 6
             if [ "$pr" -gt "6" ]
             then
                 if [ "$O_PARTY" == "0" ]
                 then
-                    ./run-P0.o $IP1 $IP2 $IP3
+                    ./run-P0.o $O_IP1 $O_IP2 $O_IP3
                 elif [ "$O_PARTY" == "1" ]
                 then
-                    ./run-P1.o $IP0 $IP2 $IP3
+                    ./run-P1.o $O_IP0 $O_IP2 $O_IP3
                 elif [ "$O_PARTY" == "2" ]
                 then
-                    ./run-P2.o $IP0 $IP1 $IP3
+                    ./run-P2.o $O_IP0 $O_IP1 $O_IP3
                 elif [ "$O_PARTY" == "3" ]
                 then
-                    ./run-P3.o $IP0 $IP1 $IP2
+                    ./run-P3.o $O_IP0 $O_IP1 $O_IP2
                 elif [ "$O_PARTY" == *"all"* ]
                 then
                     ./run-P0.o & 
@@ -113,9 +132,6 @@ do
                 elif [ "$O_PARTY" == "2" ]
                 then
                     ./run-P2.o $IP0 $IP1
-                elif [ "$O_PARTY" == "3" ]
-                then
-                    ./run-P3.o $IP0 $IP1
                 elif [[ "$O_PARTY" == *"all"* ]]
                 then
                     ./run-P0.o &
@@ -129,7 +145,6 @@ do
         done
         done
     done
-done
 done
 cp scripts/benchmark/base_config.h config.h 
 

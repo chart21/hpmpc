@@ -47,6 +47,27 @@ O_IP1="127.0.0.1"
 O_IP2="127.0.0.1"
 O_IP3="127.0.0.1"
 
+if [ ! -z "$IP0" ];
+then
+O_IP0="$IP0"
+fi
+
+if [ ! -z "$IP1" ];
+then
+O_IP1="$IP1"
+fi
+
+if [ ! -z "$IP2" ];
+then
+O_IP2="$IP2"
+fi
+
+if [ ! -z "$IP3" ];
+then
+O_IP3="$IP3"
+fi
+
+
 cp scripts/benchmark/base_config.h config.h 
 
 for pr in "${protocols[@]}"
