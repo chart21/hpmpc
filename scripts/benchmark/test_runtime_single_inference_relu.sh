@@ -50,7 +50,7 @@ do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
     for f in "${functions[@]}"
     do
-        sed -i -e "s/\(define FUNCTION \).*/\1$f/" config.h
+        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
             sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h

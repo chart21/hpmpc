@@ -92,7 +92,7 @@ sed -i -e "s/\(define DATTYPE \).*/\1$Dattype/" config.h
 for pr in "${protocols[@]}"
 do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
-        sed -i -e "s/\(define FUNCTION \).*/\1$functiona/" config.h
+        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
         for num_inputs in "${num_inputsa[@]}"
         do
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h

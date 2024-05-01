@@ -89,7 +89,7 @@ do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
     for f in "${functions[@]}"
     do
-        sed -i -e "s/\(define FUNCTION \).*/\1$f/" config.h
+        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
             for rb in "${reduced_bitlength[@]}"
                 do
                     sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h

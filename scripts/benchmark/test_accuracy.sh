@@ -16,7 +16,7 @@ sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
 
 for f in "${functions[@]}"
     do
-    sed -i -e "s/\(define FUNCTION \).*/\1$f/" config.h
+    sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
     for bitlength in "${bitlengths[@]}"
         do
         sed -i -e "s/\(define BITLENGTH \).*/\1$bitlength/" config.h
