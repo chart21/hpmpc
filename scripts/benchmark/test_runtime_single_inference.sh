@@ -1,7 +1,8 @@
 #!/bin/bash
 
 ##---Adjust these---
-protocols=(5 12) # 5: 3PC, 12: 4PC
+# protocols=(5 12) # 5: 3PC, 12: 4PC
+protocols=(5)
 functions=(70 170 270 71 171 271 72 172 272 73 173 273 74 174 274 75 175 275 76 176 276 77 177 277 78 178 278 79 179 279 80 180 280 81 181 281 82 182 282 83 183 283)
 # functions=(82)
 use_nvcc=(0 1 2) # 0: CPU-only, 1: GPU for matmul, 2: GPU for Convolution
@@ -17,6 +18,7 @@ helpFunction()
    echo -e "\t-a IP address of player 0 (if ip matches player_id can be empty)"
    echo -e "\t-b IP address of player 1 (if ip matches player_id can be empty)"
    echo -e "\t-c IP address of player 2 (if ip matches player_id can be empty)"
+   echo -e "\t-d IP address of player 3 (if ip matches player_id can be empty)"
    echo -e "\t-x Compiler (g++/clang++/..)"
    echo -e "\t"-u "Comile with nvcc and cutlass GEMM (0/1)"
 
@@ -24,17 +26,19 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "p:a:b:c:x:u:" opt
+while getopts "p:a:b:c:d:x:u:" opt
 do
    case "$opt" in
       p ) O_PARTY="$OPTARG" ;;
       a ) IP0="$OPTARG" ;;
       b ) IP1="$OPTARG" ;;
       c ) IP2="$OPTARG" ;;
+      d ) IP3="$OPTARG" ;;
       x ) COMPILER="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
+
 
 
 cp scripts/benchmark/base_config.h config.h 

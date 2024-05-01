@@ -73,7 +73,11 @@ then
 ssl="$USE_SSL"
 fi
 
-
+use_nvcc="0"
+if [ ! -z "$USE_NVCC" ]
+then
+use_nvcc="$USE_NVCC"
+fi
 
 if [ "$ssl" = "1" ]
 then
@@ -89,7 +93,7 @@ else
     #flags="-march=native -Ofast -std=c++2a -pthread"
 fi
 
-if [ "$USE_NVCC" -gt "0" ]
+if [ "$use_nvcc" -gt "0" ]
 then
     flags=$flags" -c"
 fi

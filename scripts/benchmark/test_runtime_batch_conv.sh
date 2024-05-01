@@ -95,10 +95,10 @@ do
             if [ "$pr" -gt "6" ]
             then
 
-                    sed -i -e "s/\(define NUM_PROCESSES \).*/\1$num_processes_4PC/" config.h
+                    sed -i -e "s/\(define PROCESS_NUM \).*/\1$num_processes_4PC/" config.h
                     ./scripts/split-roles-4-compile.sh -u $use_nv -p $O_PARTY 
             else
-                sed -i -e "s/\(define NUM_PROCESSES \).*/\1$num_processes_3PC/" config.h
+                sed -i -e "s/\(define PROCESS_NUM \).*/\1$num_processes_3PC/" config.h
                 ./scripts/split-roles-3-compile.sh -u $use_nv -p $O_PARTY 
             fi
     if [ "$use_nv" != "0" ]
