@@ -99,9 +99,6 @@ do
         for use_nv in "${use_nvcc[@]}"
         do
             sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
-                for rb in "${reduced_bitlength[@]}"
-                do
-                    sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h
             if [ "$pr" -gt "6" ]
             then
 
@@ -117,13 +114,12 @@ do
     fi
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $f, use_nvcc $use_nv, batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
     else
-    echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
-done
 done
 done
 done
@@ -138,9 +134,6 @@ do
         for use_nv in "${use_nvcc[@]}"
         do
             sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
-                for rb in "${reduced_bitlength[@]}"
-                do
-                    sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h
             if [ "$pr" -gt "6" ]
             then
 
@@ -156,13 +149,12 @@ do
     fi
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
     else
-    echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
-done
 done
 done
 done
@@ -176,9 +168,6 @@ do
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
-            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
-                for rb in "${reduced_bitlength[@]}"
-                do
                     sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h
             if [ "$pr" -gt "6" ]
             then
@@ -195,13 +184,12 @@ do
     fi
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
     else
-    echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
-done
 done
 done
 done
