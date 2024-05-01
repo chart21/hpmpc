@@ -4,7 +4,7 @@
 protocols=(5) # 5: 3PC
 #protocols=(12) # 12: 4PC
 use_nvcc=(0 1 2) # 0: CPU-only, 1: GPU for matmul, 2: GPU for Convolution
-Dattype=512 # Careful, requires AVX512 support by your CPU architecture. In not supported use 256 (AVX2), 128 (SSE), or 32 (None) for vectorization
+Dattype=256 # Careful, requires AVX512 support by your CPU architecture. In not supported use 256 (AVX2), 128 (SSE), or 32 (None) for vectorization
 num_processes_4PC=1 # Careful, multiplies by 24
 pre=(0 1) # 0: no pre-processing, 1: pre-processing
 ##---End of adjust---
@@ -19,7 +19,7 @@ functionb=401 # do not change
 functionc=402 # do not change
 
 
-num_processes_3PC=4*$num_processes_4PC #do not change
+num_processes_3PC=1*$num_processes_4PC #do not change
 split_role_factor_3PC=6 #do not change -> multiplies with num_processes_3PC
 split_role_factor_4PC=24 #do not change -> multiplies with num_processes_4PC
 bitlength=32 #if you change this, also changed reduced bitlength in config.h
