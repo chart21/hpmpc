@@ -113,6 +113,7 @@ void mat_mul_bench(DATATYPE* res)
     MatX<S> OM(NUM_INPUTS, NUM_INPUTS);
     MatX<S> AM(NUM_INPUTS, NUM_INPUTS);
     MatX<S> BM(NUM_INPUTS, NUM_INPUTS);
+#if USE_CUDA_GEMM == 0 // Use CPU GEMM
     const int TILE_SIZE = 64;
     for(int i = 0; i < BM.size(); ++i)
     OM(i) = S(0);
@@ -165,7 +166,34 @@ void mat_mul_bench(DATATYPE* res)
         }
     }
     }
-    S::communicate();
+
+#elif USE_CUDA_GEMM > 0 // Use CUDA GEMM
+auto A = AM.data();
+auto B = BM.data();
+auto C = OM.data();
+int mul_m = NUM_INPUTS;
+int mul_n = NUM_INPUTS;
+int mul_k = NUM_INPUTS;
+                    
+T::GEMM(A, B, C, mul_m, mul_n, mul_k, true);
+for(int j = 0; j < NUM_INPUTS*NUM_INPUTS; ++j)
+{
+#if PUBLIC_WEIGHTS == 0
+#if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+    C[j].mask_and_send_dot_without_trunc();
+#else
+    C[j].mask_and_send_dot();
+    #endif
+#else
+    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+#else
+    C[j].prepare_mult_public_fixed(1); //initiate truncation
+#endif
+#endif
+}
+#endif
+S::communicate();
+#if USE_CUDA_GEMM == 0
     for (int i = 0; i < m; i += TILE_SIZE) {
         int i_max = std::min(i + TILE_SIZE, m);
         for (int j = 0; j < p; j += TILE_SIZE) {
@@ -189,6 +217,25 @@ void mat_mul_bench(DATATYPE* res)
                 }
         }
     }
+#elif USE_CUDA_GEMM > 0
+    for(int i = 0; i <  NUM_INPUTS*NUM_INPUTS; ++i)
+    {
+#if PUBLIC_WEIGHTS == 0
+#if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+    C[i].complete_mult_without_trunc();
+#else
+    C[i].complete_mult();
+#endif
+#else
+    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+#else
+    C[i].complete_mult_public_fixed();
+#endif
+#endif
+    }
+
+
+#endif
     dummy_reveal<Share>();
     }
 }

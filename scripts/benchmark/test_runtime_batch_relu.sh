@@ -3,17 +3,18 @@
 ##---Adjust these---
 protocols=(5) # 5: 3PC
 #protocols=(12) # 12: 4PC
-functions=(70 170 270 71 171 271 72 172 272 73 173 273 74 174 274 80 180 280 81 181 281 82 182 282) #Cifar-10/MNIST
-#functions=(75 175 275 76 176 276 77 177 277 78 178 278 79 179 279 83 183 283) #ImageNet
-use_nvcc=(0 1 2) # 0: CPU-only, 1: GPU for matmul, 2: GPU for Convolution
 reduced_bitlength=(0 1) # 0: full bitlength, 1: reduced bitlength (8-bit by default)
 pre=(0 1) # 0: no pre-processing, 1: pre-processing
 
-num_inputs=64 # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 Dattype=512 # Careful, requires AVX512 support by your CPU architecture. In not supported use 256 (AVX2), 128 (SSE), or 32 (None) for vectorization
 num_processes_4PC=1 # Careful, multiplies by 24
 ##---End of adjust---
 
+
+
+
+functions=(404,405,406) # do not change, different ReLU approaches
+num_inputs=(10000 100000 1000000 10000000) # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 num_processes_3PC=4*$num_processes_4PC #do not change
 split_role_factor_3PC=6 #do not change -> multiplies with num_processes_3PC
 split_role_factor_4PC=24 #do not change -> multiplies with num_processes_4PC
@@ -89,10 +90,7 @@ do
     for f in "${functions[@]}"
     do
         sed -i -e "s/\(define FUNCTION \).*/\1$f/" config.h
-        for use_nv in "${use_nvcc[@]}"
-        do
-            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
-                for rb in "${reduced_bitlength[@]}"
+            for rb in "${reduced_bitlength[@]}"
                 do
                     sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h
                 for prep in "${pre[@]}"
@@ -119,7 +117,6 @@ do
     echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, pre $prep, batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
-done
 done
 done
 done

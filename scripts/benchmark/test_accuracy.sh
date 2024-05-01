@@ -3,7 +3,7 @@ cp scripts/benchmark/base_config_accuracy.h config.h
 #Scripts to locally test the accuracy of different networks, truncations approaches, fractional bits, and bitlengths
 
 # functions=(70 170 270 71 171 271 72 172 272 73 173 273 74 174 274 75 175 275 76 176 276 77 177 277 78 178 278 79 179 279 80 180 280 81 181 281 82 182 282 83 183 283)
-funcion=(74)
+funcion=(74) # You need a pretrained model and dataset in the respecive folders and specify it in config.txt
 protocol=5
 num_inputs=100 # How many test images?
 bitlengths=(32 64 16)
