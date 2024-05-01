@@ -92,7 +92,7 @@ sed -i -e "s/\(define DATTYPE \).*/\1$Dattype/" config.h
 for pr in "${protocols[@]}"
 do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
-        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$funciona/" config.h
+        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$functiona/" config.h
         for num_inputs in "${num_inputsa[@]}"
         do
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsa/" config.h
@@ -114,10 +114,10 @@ do
     fi
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $f, use_nvcc $use_nv, batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $functiona, use_nvcc $use_nv, batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
     else
-    echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $functiona, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
 done
@@ -149,10 +149,10 @@ do
     fi
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $functionb, use_nvcc $use_nv,  batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
     else
-    echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $functionb, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
 done
@@ -184,10 +184,10 @@ do
     fi
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $functionc, use_nvcc $use_nv,  batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
     else
-    echo "Running protocol $pr, function $f, use_nvcc $use_nv,  batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $functionc, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
 done
