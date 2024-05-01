@@ -105,10 +105,6 @@ do
                 sed -i -e "s/\(define PROCESS_NUM \).*/\1$num_processes_3PC/" config.h
                 ./scripts/split-roles-3-compile.sh -u $use_nv -p $O_PARTY 
             fi
-    if [ "$use_nv" != "0" ]
-    then
-        ./scripts/cuda_compile.sh 
-    fi
     if [ "$pr" -gt "6" ]
     then
         echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, pre $prep, batch_size $batch_size_4PC"
