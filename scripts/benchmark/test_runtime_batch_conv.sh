@@ -92,10 +92,10 @@ sed -i -e "s/\(define DATTYPE \).*/\1$Dattype/" config.h
 for pr in "${protocols[@]}"
 do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
-        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
+        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$funciona/" config.h
         for num_inputs in "${num_inputsa[@]}"
         do
-        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
+        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsa/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
             sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
@@ -127,10 +127,10 @@ done
 for pr in "${protocols[@]}"
 do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
-        sed -i -e "s/\(define FUNCTION \).*/\1$functionb/" config.h
+        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$functionb/" config.h
         for num_inputs in "${num_inputsb[@]}"
         do
-        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
+        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsb/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
             sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
@@ -162,10 +162,10 @@ done
 for pr in "${protocols[@]}"
 do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
-        sed -i -e "s/\(define FUNCTION \).*/\1$functionc/" config.h
+        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$functionc/" config.h
         for num_inputs in "${num_inputsc[@]}"
         do
-        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
+        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsc/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
                     sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h
