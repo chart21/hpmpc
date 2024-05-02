@@ -1,8 +1,6 @@
 from Compiler.types import sint, Array, MemValue
 from Compiler.library import print_ln, for_range
 
-cfix.set_precision(10, 31)
-
 program.bit_length = 32
 size = int(program.args[1])
 input_size=size
@@ -20,5 +18,6 @@ def _(i):
         sum_value[0]=(sum_value[0]+inputs[i])
 
 #Mean is calculated in clear since sum is revealed anyway
-sum_re = cfix(sum_value[0].reveal())
-mean_value = sum_re / total
+mean_value = sum_value[0] * cfix(1/total)
+
+mean_value.reveal()
