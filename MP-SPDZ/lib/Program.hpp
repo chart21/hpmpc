@@ -254,7 +254,7 @@ class Program {
      * @param reg type of register effected
      * @param sreg register address
      * @param op added for debugging
-    */
+     */
     void update_max_reg(const Type& reg, const unsigned& sreg, const Opcode& op);
 };
 
@@ -290,7 +290,7 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::PRINTREGB:
         case Opcode::PRINT4COND: {
             unsigned sreg = inst.add_reg(read_int(fd)); // source
-            inst.set_immediate(read_int(fd)); // additional constant
+            inst.set_immediate(read_int(fd));           // additional constant
 
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());

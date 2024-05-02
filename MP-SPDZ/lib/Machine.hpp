@@ -31,6 +31,12 @@ struct Timer {
         started = false;
         return res;
     }
+
+    /**
+     * @return:
+     * - @if started -> time passed since timer started (in seconds)
+     * - @else 0
+     */
     double get_time() const {
         if (started)
             return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - cur)
@@ -40,23 +46,41 @@ struct Timer {
     }
 
   private:
-    bool started = false;
+    bool started = false; // has the timer started measuring time
 
-    std::chrono::time_point<std::chrono::high_resolution_clock> cur;
+    std::chrono::time_point<std::chrono::high_resolution_clock>
+        cur; // time passed since timer started
 };
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N = 64>
 class Machine {
   public:
+    /**
+     * loads schedule-file and calls load_schedule to initialize programs
+     * @param path path to schedule-file
+     */
     explicit Machine(std::string&& path);
 
-    void load_schedule(std::string&& path); // parse schedule file
-    void setup();                           // allocate registers/memory
-    void run();                             // starts main thread and init memory
+    /**
+     * reads schedule-file and bytcode-files -> initializes <progs>
+     */
+    void load_schedule(std::string&& path);
+    void setup(); // allocate registers/memory
+    void run();   // starts main thread and init memory
 
+    /**
+     * start tape with no copy as this is a single thread program
+     * @param tape tape number defined by MP-SPDZ compiler
+     * @param arg thread argument as each thread has an argument
+     */
     void run_tape_no_thread(const unsigned& tape, const int& arg);
 
+    /**
+     * starts tape in a thread
+     * @warning should only be used for the main thread (tape == 0)
+     * @bug running the same tape twice directly after one another will fail
+     */
     thread& run_tape(const unsigned& tape, const int& arg);
 
     /* main method for each thread */
@@ -65,26 +89,45 @@ class Machine {
         p.run(m, arg, 0); // only 1st(0) thread is started here
     }
 
+    /**
+     * update greatest required memory address required for computation/storage
+     * @param type type of the memory cell addressed
+     * @param addr new address the MP-SPDZ-compiler tries to access
+     */
     void update_max_mem(const Type& type,
                         const unsigned& addr); // required while parsing to get memory size
 
-    vector<sint> s_mem;
-    vector<cint> c_mem;
-    vector<int_t> ci_mem;
-    vector<sbit<N, BitShare>> sb_mem;
+    vector<sint> s_mem;               // secret share memory
+    vector<cint> c_mem;               // clear int memory
+    vector<int_t> ci_mem;             // 64-bit int memory
+    vector<sbit<N, BitShare>> sb_mem; // sbit memory
 #if BITLENGTH == 64
-    vector<cint> cb_mem;
+    vector<cint> cb_mem; // clear bit memory
 #else
-    vector<int_t> cb_mem;
+    vector<int_t> cb_mem; // clear bit memory
 #endif
 
+    /**
+     * @return output stream used for printing results etc.
+     */
     std::ostream& get_out() const { return std::cout; }
 
+    /**
+     * start timer @param index
+     */
     void start(const int& index);
+
+    /**
+     * stop timer @param index and print the final time
+     */
     void stop(const int& index);
+
+    /**
+     * print the time passed since starting the main tape
+     */
     void time() const;
 
-    Input public_input;
+    Input public_input; // used to read public input from file
 
     size_t get_random() { return rand_engine(); } // same for all parties (very insecure ^^)
     size_t get_random_diff() { return rand_engine_diff(); } // different for all parties
@@ -94,7 +137,7 @@ class Machine {
     vector<thread> tapes; // all threads running the VM
 
     unsigned max_mem[REG_TYPES]; // save max value -> size of memory
-    bool loaded;
+    bool loaded;                 // true if schedule file has been loaded successfully
     std::map<int, Timer> timer;
     std::mt19937 rand_engine;      // creates the same random numbers for every party (testing)
     std::mt19937 rand_engine_diff; // creates random numbers (different for every party)
@@ -224,7 +267,7 @@ template <class int_t, class cint, class Share, class sint, template <int, class
           class BitShare, int N>
 void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::time() const {
     auto res = timer.at(0).get_time();
-    get_out() << "Elapsed time: " << res << "\n";
+    get_out() << "Elapsed time: " << res << "s\n";
 }
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
