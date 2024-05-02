@@ -113,10 +113,10 @@ do
     fi
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, pre $prep, batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $rb, pre $prep, batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
     else
-    echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $reduced_bitlength, pre $prep, batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $rb, pre $prep, batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
 done

@@ -35,7 +35,7 @@ fi
 flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -I SimpleNN -lstdc++fs"
 # flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
 
-if [ "$USE_NVCC" = "1" ]
+if [ "$USE_NVCC" -gt "0" ]
 then
     flags=$flags" -c"
 fi
