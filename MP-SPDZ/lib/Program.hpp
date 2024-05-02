@@ -39,15 +39,29 @@ class Program {
 #else
     using BitType = int_t;
 #endif
-    using IntType = int_t;
-    using ClearIntType = cint;
+    using IntType = int_t;     // 64-bit integer (always IR::Integer<int64_t, uint64_t>)
+    using ClearIntType = cint; // clear integer type with `BITLENGTH`-bit length (always
+                               // IR::CInteger<INT_TYPE, UINT_TYPE>)
 
-    static constexpr size_t BIT_LEN = N;
+    static constexpr size_t BIT_LEN = N; // size of boolean registers should always be 64
 
+    /**
+     * represents a MP-SPDZ instruction where parameters are stored in <regs>
+     */
     class Instruction {
       public:
+        /**
+         * @param op an integer that represents an instruction opcode as defined by MP-SPDZ
+         * @param vec vectorization mostly 1 except for instructions that support operations
+         */
         explicit Instruction(const uint32_t& op, const int& vec);
 
+        /**
+         * perform execution
+         * @param p program that provides the registers this instruction may use
+         * @param m machine provides memory cells instruction may use for execution
+         * @param pc program counter for instructions as JMP/JMPNZ etc.
+         */
         void execute(Program& p, Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m,
                      size_t& pc) const;
 
@@ -60,6 +74,12 @@ class Program {
         const int& add_reg(const int& reg) { return regs.emplace_back(reg); }
 
         bool is_gf2n() const { return (static_cast<unsigned>(op) & 0x100) != 0; }
+
+        /**
+         * @return returns the share type (sint,cint,int,...) this instructions operates on
+         * @warning might not be defined for all instructions or instructions that operate on
+         * multiple types
+         */
         Type get_reg_type(const Opcode& op) const;
 
         inline unsigned get_size() const { return size; }
@@ -68,7 +88,7 @@ class Program {
       private:
         Opcode op;        // opcode
         unsigned size;    // vectorized
-        size_t n;         // immediate
+        size_t n;         // immediate (some functions require a constant)
         vector<int> regs; // required addresses in order given
     };
 
@@ -80,56 +100,161 @@ class Program {
     Program& operator=(const Program& other) = delete;
     Program& operator=(Program&& other) = default;
 
+    /**
+     * read bytecode from <path> and store each instruction in <prog>
+     * - also updates the max. register size required for each type
+     * @param m reference to machine to update the maximum memory address required
+     */
     bool
     load_program(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m); // parse bytecode file
-    void setup();                                                          // parse bytecode file
+
+    /**
+     * allocate the registers required during execution
+     */
+    void setup(); // parse bytecode file
+
+    /**
+     * run the program by executing every instruction in <prog> and storing the results in the
+     * corresponding regiserts/memory cells
+     * @param m machine that started this program
+     * @param arg as defined by MP-SPDZ a thread might take an argument
+     * @param t_num thread number of this thread (0/1)
+     */
     void run(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m, const int& arg,
              const int& t_num); // execute all instructions
 
     inline int get_argument() const { return arg; }
     void set_argument(const int& a) { arg = a; }
 
-    // sint operations
+    /**
+     * reveal secret shares to all parties (moves secret shares into clear integer registers)
+     * @param regs parameters as defined by MP-SPDZ (alternatively see `load_program`)
+     * @param size to reaveal secret share vectors of size <size>
+     */
     void popen(const vector<int>& regs, const size_t& size);
+
+    /**
+     * `muls` as defined by MP-SPDZ -> secret share multiplication (arithm.)
+     * @param regs parameters as defined by MP-SPDZ (alternatively see `load_program`)
+     */
     void muls(const vector<int>& regs);
+
+    /**
+     * `mulm` as defined by MP-SPDZ -> secret share multiplication with public value (arithm.)
+     * @param regs parameters as defined by MP-SPDZ (alternatively see `load_program`)
+     * @param vec vector size
+     */
     void mulm(const vector<int>& regs, const size_t& vec);
+
+    /**
+     * perform XOR on a set of arithmetic shares
+     * @param x, y, res have the same size
+     * @param x first parameter
+     * @param y seconde parameter
+     * @param res result for arithmetic XOR on shares where result[i] = x[i] xor y[i]
+     */
     void xor_arith(const vector<sint>& x, const vector<sint>& y, vector<sint>& res);
-    void dotprods(const vector<int>& regs, const size_t& size); // TODO
+
+    /**
+     * performs dot product on secret arithmetic shares as defined by MP-SPDZ and stores result in
+     * the proper register
+     * @param regs parameters as defined by MP-SPDZ
+     * @param size vecotrization for multiple dot products
+     */
+    void dotprods(const vector<int>& regs, const size_t& size);
+
+    /**
+     * `inputmixed` as defined by MP-SPDZ reads input from <input-file> to secret registers
+     * @param regs paramters for `ìnputmixed` as defined by MP-SPDZ (alternatively see
+     * `load_program`)
+     * @param vec vectorization to load vector of size <vec> into secret registers
+     */
     void inputmixed(const vector<int>& regs, const bool from_reg, const size_t& vec);
 
+    /**
+     * `matmulsm` as defined by MP-SPDZ -> matrix multiplication on memory cells
+     * @param regs parameters for `matmulsm` as defined by MP-SPDZ (alternatively see
+     * `load_program`)
+     * @param m reference to machine that started this program
+     */
     void matmulsm(const vector<int>& regs, Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m);
+
+    /**
+     * matrix multiplication on local registers
+     * @param regs parameters as defined by MP-SPDZ
+     */
     void matmuls(const vector<int>& regs);
+
+    /**
+     * helper method for `matmulsm` basically performs dot product required for matrix
+     * multiplication
+     * @param regs parameters for `matmulsm` as defined by MP-SPDZ (alternatively see
+     * `load_program`)
+     * @param row_1 current row of first factor
+     * @param j current column of first factor/current row of second factor
+     * @param source1 first factor
+     * @param source2 second factor
+     */
     template <class iterator>
     void matmulsm_prepare(const vector<int>& regs, const int& row_1, const int& j, iterator source1,
                           iterator source2);
 
+    /**
+     * for MP-SPDZ complex instructions set (CISC)
+     * currently supported LTZ and EQZ
+     * @param regs parameters for the respective CISC instruction as defined by MP-SPDZ
+     * (alternatively see `load_program`)
+     * @param cisc name of the instruction
+     */
     void cisc(const vector<int>& regs, const std::string_view cisc);
 
     // sbit operations
+
+    /**
+     * `inputbvec` as defined by MP-SPDZ -> reads integers into secret boolean shares (XOR_Shares)
+     * @param regs parameters for `inputbvec` as defined by MP-SPDZ (alternatively see
+     * `load_program`)
+     */
     void inputbvec(const vector<int>& regs);
+
+    /**
+     * `inputb` as defined by MP-SPDZ -> reads bits into secret boolean shares (XOR_Shares)
+     * @param regs parameters for `inputb` as defined by MP-SPDZ (alternatively see `load_program`)
+     */
     void inputb(const vector<int>& regs);
+
+    /**
+     * `andrsvec` as defined by MP-SPDZ -> secret vector AND with a constant factor
+     * @param regs parameters for `inputb` as defined by MP-SPDZ (alternatively see `load_program`)
+     */
     void andrsvec(const vector<int>& regs);
 
   private:
-    int precision;
-    const string path;
+    int precision;     // used for printing
+    const string path; // path to bytecode file
 
-    size_t thread_id;
+    size_t thread_id; // should be 0/1 as multithreading is not supported
 
     int arg;                  // thread arg
-    int thread_num;           // thread num
+    int thread_num;           // same as thread_id I think // TODO
     vector<Instruction> prog; // all instructions
 
-    unsigned max_reg[REG_TYPES]; // to get required register size for all types
+    unsigned max_reg[REG_TYPES]; // stores max. register address for all types
 
     vector<sint> s_register;                    // secret share
     vector<ClearIntType> c_register;            // clear share
-    vector<IntType> i_register;                 // integer
+    vector<IntType> i_register;                 // 64-bit integer
     vector<sbitset_t<N, BitShare>> sb_register; // secret bit
     vector<BitType> cb_register;                // clear bit
 
-    std::stack<IntType> i_stack;
+    std::stack<IntType> i_stack; // stack MP-SPDZ declared obsolete
 
+    /**
+     * updates the maximum register (<max_reg>) address for a specific type
+     * @param reg type of register effected
+     * @param sreg register address
+     * @param op added for debugging
+    */
     void update_max_reg(const Type& reg, const unsigned& sreg, const Opcode& op);
 };
 
@@ -164,8 +289,8 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
         case Opcode::PRINTREG:
         case Opcode::PRINTREGB:
         case Opcode::PRINT4COND: {
-            unsigned sreg = inst.add_reg(read_int(fd));
-            inst.set_immediate(read_int(fd));
+            unsigned sreg = inst.add_reg(read_int(fd)); // source
+            inst.set_immediate(read_int(fd)); // additional constant
 
             update_max_reg(inst.get_reg_type(inst.get_opcode()), sreg + inst.get_size(),
                            inst.get_opcode());
@@ -453,9 +578,9 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             assert(num % 4 == 0);
 
             for (size_t i = 0; i < num; i += 4) {
-                inst.add_reg(read_int(fd)); // player id
+                inst.add_reg(read_int(fd));                 // player id
                 unsigned bits = inst.add_reg(read_int(fd)); // number of bits in output (int)
-                inst.add_reg(read_int(fd)); // exponent 2^n
+                inst.add_reg(read_int(fd));                 // exponent 2^n
                 unsigned dest = inst.add_reg(read_int(fd)); // dest
                 update_max_reg(Type::SBIT, dest + div_ceil(bits, BIT_LEN), inst.get_opcode());
             }
@@ -1071,12 +1196,13 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
         opc == 0x9f || opc == 0x80 || opc == 0x36 || opc == 0x2b || opc == 0x214 || opc == 0x24a ||
         opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 ||
         opc == 0x21e || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 ||
-        opc == 0x242 || opc == 0x09 || opc == 0x219 || opc == 0x21d || opc == 0x21a || opc == 0x246 ||
-        opc == 0x221 || opc == 0xa9 || opc == 0x70 || opc == 0x19 || opc == 0x243 || opc == 0x247 ||
-        opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x21b || opc == 0x210 ||
-        opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x1a || opc == 0x20f || opc == 0x213 ||
-        opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0x07 || opc == 0x10 || opc == 0xe9 ||
-        opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e || opc == 0x93 || opc == 0x9b) {
+        opc == 0x242 || opc == 0x09 || opc == 0x219 || opc == 0x21d || opc == 0x21a ||
+        opc == 0x246 || opc == 0x221 || opc == 0xa9 || opc == 0x70 || opc == 0x19 || opc == 0x243 ||
+        opc == 0x247 || opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x21b ||
+        opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x1a || opc == 0x20f ||
+        opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0x07 || opc == 0x10 ||
+        opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e || opc == 0x93 ||
+        opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
         op = Opcode::NONE;
@@ -1657,7 +1783,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                 for (int j = 0; j < regs[i]; ++j) {
                     p.cb_register[regs[i + 1] + j / BIT_LEN] |=
                         (BitType(p.sb_register[regs[i + 2] + j / BIT_LEN][j % BIT_LEN]
-                             .complete_reveal_to_all()) &
+                                     .complete_reveal_to_all()) &
                          UINT_TYPE(1))
                         << int64_t(j % BIT_LEN);
                 }
@@ -2098,17 +2224,21 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputb(const vector<i
             auto input = get_next_bit<SIZE_VEC>(regs[i]);
             switch (regs[i]) {
             case 0:
-                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template prepare_receive_from<P_0>(input);
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN]
+                    .template prepare_receive_from<P_0>(input);
                 break;
             case 1:
-                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template prepare_receive_from<P_1>(input);
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN]
+                    .template prepare_receive_from<P_1>(input);
                 break;
             case 2:
-                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template prepare_receive_from<P_2>(input);
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN]
+                    .template prepare_receive_from<P_2>(input);
                 break;
 #if num_players > 3
             case 3:
-                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template prepare_receive_from<P_3>(input);
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN]
+                    .template prepare_receive_from<P_3>(input);
                 break;
 #endif
             }
@@ -2123,17 +2253,21 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::inputb(const vector<i
         for (size_t j = 0; j < bits; ++j) {
             switch (regs[i]) {
             case 0:
-                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template complete_receive_from<P_0>();
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN]
+                    .template complete_receive_from<P_0>();
                 break;
             case 1:
-                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template complete_receive_from<P_1>();
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN]
+                    .template complete_receive_from<P_1>();
                 break;
             case 2:
-                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template complete_receive_from<P_2>();
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN]
+                    .template complete_receive_from<P_2>();
                 break;
 #if num_players > 3
             case 3:
-                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN].template complete_receive_from<P_3>();
+                sb_register[regs[i + 3] + j / BIT_LEN][j % BIT_LEN]
+                    .template complete_receive_from<P_3>();
                 break;
 #endif
             }
