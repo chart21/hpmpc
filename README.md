@@ -166,8 +166,19 @@ In `programs/functions/mpspdz.hpp` are all currently supported functions where y
 
 To add a new `FUNCTION_IDENTIFIER`
 
-1. Choose a number (`FUNCTION_IDENTFIER`) between 526-530
-    - if you want another function make sure that in [protocol_executer.hpp](protocol_executer.hpp)
+
+1. Create a new header file in [programs](programs/) you can use [programs/template.hpp](programs/template.hpp)
+2. Choose a number `<your-num>` (`FUNCTION_IDENTFIER`)
+    - make sure it does **NOT** exist yet (see [protocol_executer.hpp](protocol_executer.hpp))
+    - make sure that in [protocol_executer.hpp](protocol_executer.hpp) the correct header file is included
+    You can do so by adding the following after line 31
+```cpp
+#elif FUNCTION_IDENTIFIER >= 500 && FUNCTION_IDENTIFIER <= 530
+#include "programs/<your header file>.hpp"
+```
+
+3. Define the function for a given `FUNCTION_IDENTIFIER`:
+    - when using the template make sure to replace the `FUNCTION_IDENTIFIER`, function name and path to the `<schedule-path>`
 
 ## Input
 
