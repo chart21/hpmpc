@@ -7,8 +7,8 @@ using std::vector;
 namespace IR {
 
 /**
- * Same as <https://github.com/data61/MP-SPDZ/blob/master/Processor/Conv2dTuple.h> but adapted for
- * HPMPC
+ * Taken from <https://github.com/data61/MP-SPDZ/blob/master/Processor/Conv2dTuple.h> but adapted
+ * for HPMPC
  */
 template <class sint>
 class Conv2d {
