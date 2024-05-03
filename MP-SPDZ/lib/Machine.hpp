@@ -82,7 +82,7 @@ class Machine {
     void run_tape_no_thread(const unsigned& tape, const int& arg);
 
     /**
-     * Starts tape in a new thread
+     * Starts tape in a new thread. Is NOT used at the moment
      *
      * @warning
      * - Should only be used for the main thread (tape == 0).
@@ -232,8 +232,6 @@ void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::run() {
     setup();
 
     timer[0].start();
-    // thread& cur = run_tape(0, 0);
-    // cur.join();
     progs[0].run(*this, 0, 0);
 }
 
