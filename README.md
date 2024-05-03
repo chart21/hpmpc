@@ -162,7 +162,7 @@ mv "./MP-SPDZ/Schedules/<file>.sch" "./MP-SPDZ/Schedules/custom.sch"
 
 ### Adding a new function using mpspdz.hpp
 
-In `programs/functions/mpspdz.hpp` are all currently supported functions where you'll notice the only thing that changes is the path of the `<schedule-file>`
+In `programs/functions/mpspdz.hpp` are all currently supported functions you'll notice the only thing that changes is the path of the `<schedule-file>`
 
 To add a new `FUNCTION_IDENTIFIER`
 
