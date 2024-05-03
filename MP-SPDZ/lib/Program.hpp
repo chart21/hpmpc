@@ -16,6 +16,7 @@
 #include "Constants.hpp"
 #include "Shares/CInteger.hpp"
 #include "Shares/Integer.hpp"
+#include "help/Conv.hpp"
 #include "help/Input.hpp"
 #include "help/Util.hpp"
 
@@ -211,6 +212,14 @@ class Program {
     template <class iterator>
     void matmulsm_prepare(const vector<int>& regs, const int& row_1, const int& j, iterator source1,
                           iterator source2);
+
+    /**
+     * Same as <https://github.com/data61/MP-SPDZ/blob/master/Processor/Processor.hpp#L684> but not
+     * optimized for memory space
+     *
+     * @param regs parameters as defined by MP-SPDZ
+     */
+    void conv2ds(const vector<int>& regs);
 
     /**
      * For MP-SPDZ complex instructions set (CISC)
@@ -436,7 +445,7 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             if (ring > 0) {
                 log(Level::ERROR, "compiled for fields not rings");
             } else if (-ring != BITLENGTH) {
-                log(Level::ERROR, ring, ": compiled for rings 2^", BITLENGTH);
+                log(Level::ERROR, "Expected: ", -ring, " BUT compiled for rings 2^", BITLENGTH);
                 exit(EXIT_FAILURE);
             }
             break;
@@ -1028,6 +1037,16 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             }
             break;
         }
+        case Opcode::CONV2DS: {
+            unsigned args = inst.add_reg(read_int(fd)); // number of arguments
+
+            for (size_t i = 0; i < args; i += 15u) {
+                for (size_t j = 0; j < 15u; j++) {
+                    inst.add_reg(read_int(fd));
+                }
+            }
+            break;
+        }
         case Opcode::TIME:
             break;
         case Opcode::RUN_TAPE: {
@@ -1168,6 +1187,7 @@ Type Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::get_reg_
     case Opcode::ADDSI:
     case Opcode::RANDOMS:
     case Opcode::PREFIXSUMS:
+    case Opcode::CONV2DS:
         return Type::SINT;
     default:
         break;
@@ -1212,12 +1232,12 @@ Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::Instruction(c
         opc == 0x5b || opc == 0x248 || opc == 0x1f || opc == 0x71 || opc == 0xe0 || opc == 0x81 ||
         opc == 0x21e || opc == 0x240 || opc == 0x241 || opc == 0x200 || opc == 0x212 ||
         opc == 0x242 || opc == 0x09 || opc == 0x219 || opc == 0x21d || opc == 0x21a ||
-        opc == 0x246 || opc == 0x221 || opc == 0xa9 || opc == 0x70 || opc == 0x19 || opc == 0x243 ||
-        opc == 0x247 || opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc || opc == 0x21b ||
-        opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x1a || opc == 0x20f ||
-        opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c || opc == 0x07 || opc == 0x10 ||
-        opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d || opc == 0x9e || opc == 0x93 ||
-        opc == 0x9b) {
+        opc == 0xac || opc == 0x246 || opc == 0x221 || opc == 0xa9 || opc == 0x70 || opc == 0x19 ||
+        opc == 0x243 || opc == 0x247 || opc == 0xaa || opc == 0xab || opc == 0x20c || opc == 0xbc ||
+        opc == 0x21b || opc == 0x210 || opc == 0x20b || opc == 0xa8 || opc == 0x94 || opc == 0x1a ||
+        opc == 0x20f || opc == 0x213 || opc == 0x220 || opc == 0xd1 || opc == 0x21c ||
+        opc == 0x07 || opc == 0x10 || opc == 0xe9 || opc == 0x95 || opc == 0x9c || opc == 0x9d ||
+        opc == 0x9e || opc == 0x93 || opc == 0x9b) {
         op = static_cast<Opcode>(opc);
     } else {
         op = Opcode::NONE;
@@ -1374,6 +1394,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             return;
         case Opcode::MATMULS:
             p.matmuls(regs);
+            return;
+        case Opcode::CONV2DS:
+            p.conv2ds(regs);
             return;
         case Opcode::DOTPRODS:
             p.dotprods(regs, get_size());
@@ -2724,6 +2747,20 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::xor_arith(const vecto
         tmp[i].complete_mult_without_trunc();
         res[i] = x[i] + y[i] - tmp[i].mult_public(2);
     }
+}
+
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
+          class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::conv2ds(const vector<int>& args) {
+    vector<Conv2d<sint>> tuples;
+    for (size_t i = 0; i < args.size(); i += 15)
+        tuples.push_back(Conv2d<sint>(args, i));
+
+    for (size_t i = 0; i < tuples.size(); i++)
+        tuples[i].pre(s_register);
+    Share::communicate();
+    for (size_t done = 0; done < tuples.size(); done++)
+        tuples[done].post(s_register);
 }
 
 } // namespace IR
