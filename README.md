@@ -108,7 +108,7 @@ Assuming MP-SPDZ is installed in `$MPSPDZ` copy the desired `<file>.mpc` into `"
 
 ```sh
 cp "./MP-SPDZ/Functions/<file.mpc>" "$MPSPDZ"/Programs/Source/
-cd "$MPSDZ" && ./compile.py -R "<BITLENGTH>" "<file>"
+cd "$MPSDZ" && ./compile.py -K LTZ,EQZ -R "<BITLENGTH>" "<file>"
 ```
 
 3. Move the bytecode/schedule file into the respective directory
