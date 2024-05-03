@@ -26,6 +26,7 @@ struct Timer {
         started = true;
         cur = std::chrono::high_resolution_clock::now();
     }
+
     double stop() {
         double res = get_time();
         started = false;
@@ -33,9 +34,12 @@ struct Timer {
     }
 
     /**
-     * @return:
-     * - @if started -> time passed since timer started (in seconds)
-     * - @else 0
+     * The time passed since this timer started
+     *
+     * @return
+     * - if started -> time passed since timer started (in seconds)
+     * @return
+     * - else 0
      */
     double get_time() const {
         if (started)
@@ -46,7 +50,7 @@ struct Timer {
     }
 
   private:
-    bool started = false; // has the timer started measuring time
+    bool started = false; // true if the timer is measuring time
 
     std::chrono::time_point<std::chrono::high_resolution_clock>
         cur; // time passed since timer started
@@ -57,50 +61,55 @@ template <class int_t, class cint, class Share, class sint, template <int, class
 class Machine {
   public:
     /**
-     * loads schedule-file and calls load_schedule to initialize programs
+     * Loads schedule-file and calls `load_schedule` to initialize programs
      * @param path path to schedule-file
      */
     explicit Machine(std::string&& path);
 
     /**
-     * reads schedule-file and bytcode-files -> initializes <progs>
+     * Reads schedule-file and bytcode-files -> initializes `progs`
      */
     void load_schedule(std::string&& path);
-    void setup(); // allocate registers/memory
-    void run();   // starts main thread and init memory
+    void setup(); // Allocates registers/memory
+    void run();   // Starts main thread and inits memory
 
     /**
-     * start tape with no copy as this is a single thread program
+     * Start tape without copying the whole program/tape as this is a single thread program
+     *
      * @param tape tape number defined by MP-SPDZ compiler
      * @param arg thread argument as each thread has an argument
      */
     void run_tape_no_thread(const unsigned& tape, const int& arg);
 
     /**
-     * starts tape in a thread
-     * @warning should only be used for the main thread (tape == 0)
-     * @bug running the same tape twice directly after one another will fail
+     * Starts tape in a new thread
+     *
+     * @warning
+     * - Should only be used for the main thread (tape == 0).
+     * @warning
+     * - Running the same tape twice directly after one another will fail because the program is
+     * not copied therefore both threads would operate on the same registers
      */
     thread& run_tape(const unsigned& tape, const int& arg);
 
-    /* main method for each thread */
+    /* Main method for each thread */
     inline static void execute(Machine& m, Program<int_t, cint, Share, sint, sbit, BitShare, N>& p,
                                int arg) {
         p.run(m, arg, 0); // only 1st(0) thread is started here
     }
 
     /**
-     * update greatest required memory address required for computation/storage
+     * Update greatest required memory address required for computation/storage
+     *
      * @param type type of the memory cell addressed
      * @param addr new address the MP-SPDZ-compiler tries to access
      */
-    void update_max_mem(const Type& type,
-                        const unsigned& addr); // required while parsing to get memory size
+    void update_max_mem(const Type& type, const unsigned& addr);
 
-    vector<sint> s_mem;               // secret share memory
+    vector<sint> s_mem;               // secret share memory (`Additive_Shares`)
     vector<cint> c_mem;               // clear int memory
     vector<int_t> ci_mem;             // 64-bit int memory
-    vector<sbit<N, BitShare>> sb_mem; // sbit memory
+    vector<sbit<N, BitShare>> sb_mem; // sbit memory (`XOR_Shares`)
 #if BITLENGTH == 64
     vector<cint> cb_mem; // clear bit memory
 #else
@@ -108,37 +117,37 @@ class Machine {
 #endif
 
     /**
-     * @return output stream used for printing results etc.
+     * @return Output stream used for printing results etc.
      */
     std::ostream& get_out() const { return std::cout; }
 
     /**
-     * start timer @param index
+     * Start timer at `index`
      */
     void start(const int& index);
 
     /**
-     * stop timer @param index and print the final time
+     * Stop timer at `index` and print the final time
      */
     void stop(const int& index);
 
     /**
-     * print the time passed since starting the main tape
+     * Print the time that passed since starting the main tape
      */
     void time() const;
 
-    Input public_input; // used to read public input from file
+    Input public_input; // Used to read public-input from file
 
     size_t get_random() { return rand_engine(); } // same for all parties (very insecure ^^)
     size_t get_random_diff() { return rand_engine_diff(); } // different for all parties
 
   private:
     vector<Program<int_t, cint, Share, sint, sbit, BitShare, N>> progs; // all bytecode-files
-    vector<thread> tapes; // all threads running the VM
+    vector<thread> tapes; // all threads running in the VM (should only have one element)
 
-    unsigned max_mem[REG_TYPES]; // save max value -> size of memory
-    bool loaded;                 // true if schedule file has been loaded successfully
-    std::map<int, Timer> timer;
+    unsigned max_mem[REG_TYPES];   // save max value -> size of memory for all types
+    bool loaded;                   // true if schedule file has been loaded successfully
+    std::map<int, Timer> timer;    // map of timers (should not be used for benchmarks)
     std::mt19937 rand_engine;      // creates the same random numbers for every party (testing)
     std::mt19937 rand_engine_diff; // creates random numbers (different for every party)
 };

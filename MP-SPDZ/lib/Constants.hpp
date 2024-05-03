@@ -8,6 +8,22 @@ namespace IR {
 
 inline constexpr unsigned int REG_TYPES = 9;
 
+/**
+ * All supported integer types
+ * @note `NONE` is used for instructions that operate on different types but this is inconsistent
+ */
+enum class Type {
+    INT = 0,
+    SBIT = 1,
+    CBIT = 2,
+    DYN_SBIT = 3,
+    SINT = 4,
+    CINT = 5,
+    SGF2N = 6,
+    CGF2N = 7,
+    NONE = 8,
+};
+
 inline const std::string ROOT_DIR = "MP-SPDZ";
 inline const std::string SCHEDULES_PATH = ROOT_DIR + "/Schedules/";
 inline const std::string BYTECODE_PATH = ROOT_DIR + "/Bytecodes/";
@@ -15,6 +31,9 @@ inline const std::string INPUT_PATH = ROOT_DIR + "/Input/";
 
 constexpr size_t SIZE_VEC = DATTYPE / BITLENGTH;
 
+/**
+ * All supported Opcodes
+ */
 enum class Opcode {
     CISC = 0x0,
     // conf / ring size
@@ -214,18 +233,6 @@ enum class Opcode {
 
     PUSHINT = 0xce, // considered obsolete
     POPINT = 0xcf,  // considered obsolete
-};
-
-enum class Type {
-    INT = 0,
-    SBIT = 1,
-    CBIT = 2,
-    DYN_SBIT = 3,
-    SINT = 4,
-    CINT = 5,
-    SGF2N = 6,
-    CGF2N = 7,
-    NONE = 8,
 };
 
 } // namespace IR

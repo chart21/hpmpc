@@ -19,9 +19,8 @@
 namespace IR {
 
 /**
- * @class Input represents the input for a party
- * @note only for a single number. For SIMD use multiple Input classes and use <vec> to specify the
- * position
+ * @note Represents the input for one party. BUT Only for a single number. For SIMD use multiple
+ * Input classes and use <vec> to specify the position
  */
 class Input {
   public:
@@ -84,8 +83,8 @@ class Input {
     }
 
     /**
-     * reads the next characters from the file until there is whitespace and converts the string to
-     * type T using @param convert a number of type <T> (integer/float) from the input file
+     * Reads the next characters from the file until there is whitespace and converts the string to
+     * type T using `convert`
      *
      * @param convert takes a string and returns an object of type <T>
      * @note T should be a number type (int/float/...)
@@ -135,10 +134,10 @@ std::vector<Input>::iterator get_input_from(const int& player_num, const size_t&
 }
 
 /**
- * read VEC_SIZE integers from the <input-file>
+ * read `VEC_SIZE` integers from the <input-file>
  * @param player_num the party who privately wants to share their input
  * @param thread_id the thread trying to read the input (0/1)
- * @return VEC_SIZE integers from party @param player_id
+ * @return `VEC_SIZE` integers from party `player_id`
  */
 template <size_t VEC_SIZE>
 std::array<int, VEC_SIZE> next_input(const int& player_num, const int& thread_id) {
@@ -164,10 +163,10 @@ std::array<int, VEC_SIZE> next_input(const int& player_num, const int& thread_id
 }
 
 /**
- * read VEC_SIZE floats from <input-file>
+ * Read `VEC_SIZE` floats from <input-file>
  * @param player_num the party who privately wants to share their input
  * @param thread_id the thread trying to read the input (0/1)
- * @return VEC_SIZE floats from party @param player_num
+ * @return `VEC_SIZE` floats from party `player_num`
  */
 template <size_t VEC_SIZE>
 std::array<float, VEC_SIZE> next_input_f(const int& player_num, const int& thread_id) {
@@ -194,11 +193,10 @@ std::array<float, VEC_SIZE> next_input_f(const int& player_num, const int& threa
 static std::queue<DATATYPE> bit_queue;
 
 /**
- * @if <bit_queue> empty -> Reads a single float from <input-file> and stores BITENGTH bits in a
- * queue
- * @else pops queue and returns VEC_SIZE bits from party @param player_id
+ * If `bit_queue` is empty -> Reads a single float from <input-file> and stores BITENGTH bits in a
+ * queue otherwise pops queue and returns VEC_SIZE bits from party `player_id`
  * @param player_id party to share their private input
- * @return VEC_SIZE bits from party @param player_id
+ * @return `VEC_SIZE` bits from party `player_id`
  */
 template <size_t VEC_SIZE>
 DATATYPE get_next_bit(const int& player_id) {

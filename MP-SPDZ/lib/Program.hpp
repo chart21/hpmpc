@@ -39,14 +39,16 @@ class Program {
 #else
     using BitType = int_t;
 #endif
-    using IntType = int_t;     // 64-bit integer (always IR::Integer<int64_t, uint64_t>)
-    using ClearIntType = cint; // clear integer type with `BITLENGTH`-bit length (always
-                               // IR::CInteger<INT_TYPE, UINT_TYPE>)
+    using IntType = int_t; // 64-bit integer (always IR::Integer<int64_t, uint64_t>)
+    /**
+     * Clear integer type with `BITLENGTH`-bit length (always IR::CInteger<INT_TYPE, UINT_TYPE>)
+     */
+    using ClearIntType = cint;
 
     static constexpr size_t BIT_LEN = N; // size of boolean registers should always be 64
 
     /**
-     * represents a MP-SPDZ instruction where parameters are stored in <regs>
+     * Represents a MP-SPDZ instruction where parameters are stored in <regs>
      */
     class Instruction {
       public:
@@ -57,7 +59,7 @@ class Program {
         explicit Instruction(const uint32_t& op, const int& vec);
 
         /**
-         * perform execution
+         * Performs execution
          * @param p program that provides the registers this instruction may use
          * @param m machine provides memory cells instruction may use for execution
          * @param pc program counter for instructions as JMP/JMPNZ etc.
@@ -76,8 +78,8 @@ class Program {
         bool is_gf2n() const { return (static_cast<unsigned>(op) & 0x100) != 0; }
 
         /**
-         * @return returns the share type (sint,cint,int,...) this instructions operates on
-         * @warning might not be defined for all instructions or instructions that operate on
+         * @return Returns the share type (sint,cint,int,...) this instructions operates on
+         * @warning Might not be defined for all instructions or instructions that operate on
          * multiple types
          */
         Type get_reg_type(const Opcode& op) const;
@@ -101,21 +103,23 @@ class Program {
     Program& operator=(Program&& other) = default;
 
     /**
-     * read bytecode from <path> and store each instruction in <prog>
+     * Read bytecode from `path` and store each instruction in `prog`
      * - also updates the max. register size required for each type
+     *
      * @param m reference to machine to update the maximum memory address required
      */
     bool
     load_program(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m); // parse bytecode file
 
     /**
-     * allocate the registers required during execution
+     * Allocates the registers required during execution
      */
     void setup(); // parse bytecode file
 
     /**
-     * run the program by executing every instruction in <prog> and storing the results in the
+     * Runs the program by executing every instruction in <prog> and storing the results in the
      * corresponding regiserts/memory cells
+     *
      * @param m machine that started this program
      * @param arg as defined by MP-SPDZ a thread might take an argument
      * @param t_num thread number of this thread (0/1)
@@ -127,27 +131,31 @@ class Program {
     void set_argument(const int& a) { arg = a; }
 
     /**
-     * reveal secret shares to all parties (moves secret shares into clear integer registers)
+     * Reveals secret shares to all parties (moves secret shares into clear integer registers)
+     *
      * @param regs parameters as defined by MP-SPDZ (alternatively see `load_program`)
-     * @param size to reaveal secret share vectors of size <size>
+     * @param size to reaveal secret share vectors of size `size`
      */
     void popen(const vector<int>& regs, const size_t& size);
 
     /**
      * `muls` as defined by MP-SPDZ -> secret share multiplication (arithm.)
+     *
      * @param regs parameters as defined by MP-SPDZ (alternatively see `load_program`)
      */
     void muls(const vector<int>& regs);
 
     /**
      * `mulm` as defined by MP-SPDZ -> secret share multiplication with public value (arithm.)
+     *
      * @param regs parameters as defined by MP-SPDZ (alternatively see `load_program`)
      * @param vec vector size
      */
     void mulm(const vector<int>& regs, const size_t& vec);
 
     /**
-     * perform XOR on a set of arithmetic shares
+     * Performs XOR on a set of arithmetic shares
+     *
      * @param x, y, res have the same size
      * @param x first parameter
      * @param y seconde parameter
@@ -156,8 +164,9 @@ class Program {
     void xor_arith(const vector<sint>& x, const vector<sint>& y, vector<sint>& res);
 
     /**
-     * performs dot product on secret arithmetic shares as defined by MP-SPDZ and stores result in
+     * Performs dot product on secret arithmetic shares as defined by MP-SPDZ and stores result in
      * the proper register
+     *
      * @param regs parameters as defined by MP-SPDZ
      * @param size vecotrization for multiple dot products
      */
@@ -165,6 +174,7 @@ class Program {
 
     /**
      * `inputmixed` as defined by MP-SPDZ reads input from <input-file> to secret registers
+     *
      * @param regs paramters for `ìnputmixed` as defined by MP-SPDZ (alternatively see
      * `load_program`)
      * @param vec vectorization to load vector of size <vec> into secret registers
@@ -173,6 +183,7 @@ class Program {
 
     /**
      * `matmulsm` as defined by MP-SPDZ -> matrix multiplication on memory cells
+     *
      * @param regs parameters for `matmulsm` as defined by MP-SPDZ (alternatively see
      * `load_program`)
      * @param m reference to machine that started this program
@@ -180,14 +191,16 @@ class Program {
     void matmulsm(const vector<int>& regs, Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m);
 
     /**
-     * matrix multiplication on local registers
+     * Matrix multiplication on local registers
+     *
      * @param regs parameters as defined by MP-SPDZ
      */
     void matmuls(const vector<int>& regs);
 
     /**
-     * helper method for `matmulsm` basically performs dot product required for matrix
+     * Helper method for `matmulsm`: performs dot product required for matrix
      * multiplication
+     *
      * @param regs parameters for `matmulsm` as defined by MP-SPDZ (alternatively see
      * `load_program`)
      * @param row_1 current row of first factor
@@ -200,31 +213,32 @@ class Program {
                           iterator source2);
 
     /**
-     * for MP-SPDZ complex instructions set (CISC)
-     * currently supported LTZ and EQZ
+     * For MP-SPDZ complex instructions set (CISC)
+     * - currently supported LTZ and EQZ
+     *
      * @param regs parameters for the respective CISC instruction as defined by MP-SPDZ
      * (alternatively see `load_program`)
      * @param cisc name of the instruction
      */
     void cisc(const vector<int>& regs, const std::string_view cisc);
 
-    // sbit operations
-
     /**
-     * `inputbvec` as defined by MP-SPDZ -> reads integers into secret boolean shares (XOR_Shares)
+     * `inputbvec` as defined by MP-SPDZ -> reads integers into secret boolean shares (`XOR_Shares`)
+     *
      * @param regs parameters for `inputbvec` as defined by MP-SPDZ (alternatively see
      * `load_program`)
      */
     void inputbvec(const vector<int>& regs);
 
     /**
-     * `inputb` as defined by MP-SPDZ -> reads bits into secret boolean shares (XOR_Shares)
+     * `inputb` as defined by MP-SPDZ -> reads bits into secret boolean shares (`XOR_Shares`)
      * @param regs parameters for `inputb` as defined by MP-SPDZ (alternatively see `load_program`)
      */
     void inputb(const vector<int>& regs);
 
     /**
      * `andrsvec` as defined by MP-SPDZ -> secret vector AND with a constant factor
+     *
      * @param regs parameters for `inputb` as defined by MP-SPDZ (alternatively see `load_program`)
      */
     void andrsvec(const vector<int>& regs);
@@ -241,16 +255,17 @@ class Program {
 
     unsigned max_reg[REG_TYPES]; // stores max. register address for all types
 
-    vector<sint> s_register;                    // secret share
+    vector<sint> s_register;                    // secret shares (`Additive_Share`)
     vector<ClearIntType> c_register;            // clear share
     vector<IntType> i_register;                 // 64-bit integer
-    vector<sbitset_t<N, BitShare>> sb_register; // secret bit
+    vector<sbitset_t<N, BitShare>> sb_register; // secret bits (`XOR_Shares`)
     vector<BitType> cb_register;                // clear bit
 
     std::stack<IntType> i_stack; // stack MP-SPDZ declared obsolete
 
     /**
-     * updates the maximum register (<max_reg>) address for a specific type
+     * Updates the maximum register (`max_reg`) address for a specific type
+     *
      * @param reg type of register effected
      * @param sreg register address
      * @param op added for debugging
