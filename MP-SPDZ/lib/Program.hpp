@@ -108,6 +108,10 @@ class Program {
      * - also updates the max. register size required for each type
      *
      * @param m reference to machine to update the maximum memory address required
+     * @return
+     * - `true` if successful
+     * @return
+     * - otherwise `false`
      */
     bool
     load_program(Machine<int_t, cint, Share, sint, sbit, BitShare, N>& m); // parse bytecode file
@@ -183,7 +187,8 @@ class Program {
     void inputmixed(const vector<int>& regs, const bool from_reg, const size_t& vec);
 
     /**
-     * `fixinput` as defined by MP-SPDZ reads input from <input-file> to secret registers
+     * `fixinput` as defined by MP-SPDZ reads input from <input-file> to secret registers but reads
+     * input as a string opposed to bytes which is slower
      *
      * @param regs paramters for `ìnputmixed` as defined by MP-SPDZ (alternatively see
      * `load_program`)
