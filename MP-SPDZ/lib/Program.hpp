@@ -183,6 +183,15 @@ class Program {
     void inputmixed(const vector<int>& regs, const bool from_reg, const size_t& vec);
 
     /**
+     * `fixinput` as defined by MP-SPDZ reads input from <input-file> to secret registers
+     *
+     * @param regs paramters for `ìnputmixed` as defined by MP-SPDZ (alternatively see
+     * `load_program`)
+     * @param vec vectorization to load vector of size <vec> into secret registers
+     */
+    void fixinput(const vector<int>& regs, const size_t& vec);
+
+    /**
      * `matmulsm` as defined by MP-SPDZ -> matrix multiplication on memory cells
      *
      * @param regs parameters for `matmulsm` as defined by MP-SPDZ (alternatively see
@@ -572,6 +581,27 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             inst.add_reg(read_int(fd));
             inst.add_reg(read_int(fd));
             inst.set_immediate(read_long(fd));
+            break;
+        }
+        case Opcode::FIXINPUT: {
+            inst.add_reg(read_int(fd));                 // player-id
+            unsigned dest = inst.add_reg(read_int(fd)); // cint dest
+            inst.add_reg(read_int(fd));                 // exponent
+            inst.add_reg(read_int(fd)); // input type (0 - int, 1 - float, 2 - double)
+
+            update_max_reg(Type::CINT, dest + inst.get_size(), inst.get_opcode());
+            break;
+        }
+        case Opcode::INPUTPERSONAL: {
+            unsigned args = read_int(fd); // number of arguments
+
+            for (size_t i = 0; i < args; i += 4) {
+                unsigned vec = inst.add_reg(read_int(fd));  // vector size
+                inst.add_reg(read_int(fd));                 // player-id
+                unsigned dest = inst.add_reg(read_int(fd)); // destination (sint)
+                inst.add_reg(read_int(fd));                 // source (cint)
+                update_max_reg(Type::SINT, dest + vec, inst.get_opcode());
+            }
             break;
         }
         case Opcode::INPUTMIXEDREG:
@@ -1038,7 +1068,7 @@ bool Program<int_t, cint, Share, sint, sbit, BitShare, N>::load_program(
             break;
         }
         case Opcode::CONV2DS: {
-            unsigned args = inst.add_reg(read_int(fd)); // number of arguments
+            unsigned args = read_int(fd); // number of arguments
 
             for (size_t i = 0; i < args; i += 15u) {
                 for (size_t j = 0; j < 15u; j++) {
@@ -1168,6 +1198,7 @@ Type Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::get_reg_
     case Opcode::ANDCI:
     case Opcode::PRINTREG:
     case Opcode::PUBINPUT:
+    case Opcode::FIXINPUT:
         return Type::CINT;
     case Opcode::LDMS:
     case Opcode::INPUTMIXED:
@@ -1188,6 +1219,7 @@ Type Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::get_reg_
     case Opcode::RANDOMS:
     case Opcode::PREFIXSUMS:
     case Opcode::CONV2DS:
+    case Opcode::INPUTPERSONAL:
         return Type::SINT;
     default:
         break;
@@ -1652,6 +1684,59 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             return;
         case Opcode::INPUTMIXEDREG:
             p.inputmixed(regs, true, get_size());
+            return;
+        case Opcode::FIXINPUT:
+            if (regs[0] == PARTY)
+                p.fixinput(regs, get_size());
+            return;
+        case Opcode::INPUTPERSONAL:
+            for (size_t i = 0; i < regs.size(); i += 4) {
+                for (size_t vec = 0; vec < regs[i]; ++vec) {
+                    switch (regs[i + 1]) {
+                    case 0:
+                        p.s_register[regs[i + 2] + vec].template prepare_receive_from<P_0>(
+                            p.c_register[regs[i + 3] + vec].get_type());
+                        break;
+                    case 1:
+                        p.s_register[regs[i + 2] + vec].template prepare_receive_from<P_1>(
+                            p.c_register[regs[i + 3] + vec].get_type());
+                        break;
+                    case 2:
+                        p.s_register[regs[i + 2] + vec].template prepare_receive_from<P_2>(
+                            p.c_register[regs[i + 3] + vec].get_type());
+                        break;
+#if num_players > 3
+                    case 3:
+                        p.s_register[regs[i + 2] + vec].template prepare_receive_from<P_3>(
+                            p.c_register[regs[i + 3] + vec].get_type());
+                        break;
+#endif
+                    }
+                }
+            }
+
+            Share::communicate();
+
+            for (size_t i = 0; i < regs.size(); i += 4) {
+                for (size_t vec = 0; vec < regs[i]; ++vec) {
+                    switch (regs[i + 1]) {
+                    case 0:
+                        p.s_register[regs[i + 2] + vec].template complete_receive_from<P_0>();
+                        break;
+                    case 1:
+                        p.s_register[regs[i + 2] + vec].template complete_receive_from<P_1>();
+                        break;
+                    case 2:
+                        p.s_register[regs[i + 2] + vec].template complete_receive_from<P_2>();
+                        break;
+#if num_players > 3
+                    case 3:
+                        p.s_register[regs[i + 2] + vec].template complete_receive_from<P_3>();
+                        break;
+#endif
+                    }
+                }
+            }
             return;
         case Opcode::PUBINPUT:
             if (!m.public_input.is_open())
@@ -2735,6 +2820,36 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::conv2ds(const vector<
     Share::communicate();
     for (size_t done = 0; done < tuples.size(); done++)
         tuples[done].post(s_register);
+}
+
+template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
+          class BitShare, int N>
+void Program<int_t, cint, Share, sint, sbit, BitShare, N>::fixinput(const vector<int>& regs,
+                                                                    const size_t& size) {
+    alignas(DATATYPE) UINT_TYPE input[SIZE_VEC];
+
+    for (size_t vec = 0; vec < size; ++vec) {
+        switch (regs[3]) {
+        case 0: { // int
+            std::array<int, SIZE_VEC> res = next_input<SIZE_VEC>(PARTY, thread_id);
+            for (size_t j = 0; j < SIZE_VEC; ++j)
+                input[j] = res[j];
+            break;
+        }
+        case 1: { // fix
+            auto tmp = next_input_f<SIZE_VEC>(PARTY, thread_id);
+            for (size_t j = 0; j < SIZE_VEC; ++j)
+                input[j] = (static_cast<INT_TYPE>(tmp[j] * (1u << regs[2])));
+            break;
+        }
+        case 2:
+            log(Level::ERROR, "FIXINPUT: unsupported type");
+        }
+
+        DATATYPE in;
+        orthogonalize_arithmetic(input, &in, 1);
+        c_register[regs[1] + vec] = in;
+    }
 }
 
 } // namespace IR
