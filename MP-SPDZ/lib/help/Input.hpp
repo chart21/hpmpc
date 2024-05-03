@@ -18,6 +18,11 @@
 
 namespace IR {
 
+/**
+ * @class Input represents the input for a party
+ * @note only for a single number. For SIMD use multiple Input classes and use <vec> to specify the
+ * position
+ */
 class Input {
   public:
     explicit Input(const std::string& path, const int& player_num, const int& cur_vec)
@@ -48,6 +53,9 @@ class Input {
         return *this;
     }
 
+    /**
+     * creates a memory mapping of the file at <path> which is used to read input
+     */
     void open_input_file(const std::string& path) {
         int fd = open(path.c_str(), O_RDONLY);
         if (fd < 0) {
@@ -75,6 +83,13 @@ class Input {
         }
     }
 
+    /**
+     * reads the next characters from the file until there is whitespace and converts the string to
+     * type T using @param convert a number of type <T> (integer/float) from the input file
+     *
+     * @param convert takes a string and returns an object of type <T>
+     * @note T should be a number type (int/float/...)
+     */
     template <class T>
     T next(std::function<T(const std::string&)> convert);
 
@@ -83,11 +98,11 @@ class Input {
     inline bool is_open() const { return file; }
 
   private:
-    int player_num;
-    unsigned vec;
-    char* file;
-    size_t size;
-    size_t cur;
+    int player_num; // used to identify the party that is associated with this file
+    unsigned vec;   // position for SIMD values
+    char* file;     // mappping of the file
+    size_t size;    // number of bytes in the file
+    size_t cur;     // current position in the file
 };
 
 template <class T>
@@ -119,6 +134,12 @@ std::vector<Input>::iterator get_input_from(const int& player_num, const size_t&
     return it;
 }
 
+/**
+ * read VEC_SIZE integers from the <input-file>
+ * @param player_num the party who privately wants to share their input
+ * @param thread_id the thread trying to read the input (0/1)
+ * @return VEC_SIZE integers from party @param player_id
+ */
 template <size_t VEC_SIZE>
 std::array<int, VEC_SIZE> next_input(const int& player_num, const int& thread_id) {
     std::array<int, VEC_SIZE> res{};
@@ -142,6 +163,12 @@ std::array<int, VEC_SIZE> next_input(const int& player_num, const int& thread_id
     return res;
 }
 
+/**
+ * read VEC_SIZE floats from <input-file>
+ * @param player_num the party who privately wants to share their input
+ * @param thread_id the thread trying to read the input (0/1)
+ * @return VEC_SIZE floats from party @param player_num
+ */
 template <size_t VEC_SIZE>
 std::array<float, VEC_SIZE> next_input_f(const int& player_num, const int& thread_id) {
     std::array<float, VEC_SIZE> res{};
@@ -166,6 +193,13 @@ std::array<float, VEC_SIZE> next_input_f(const int& player_num, const int& threa
 
 static std::queue<DATATYPE> bit_queue;
 
+/**
+ * @if <bit_queue> empty -> Reads a single float from <input-file> and stores BITENGTH bits in a
+ * queue
+ * @else pops queue and returns VEC_SIZE bits from party @param player_id
+ * @param player_id party to share their private input
+ * @return VEC_SIZE bits from party @param player_id
+ */
 template <size_t VEC_SIZE>
 DATATYPE get_next_bit(const int& player_id) {
     if (current_phase == PHASE_INIT || player_id != PARTY)
