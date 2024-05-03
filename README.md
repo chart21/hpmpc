@@ -173,12 +173,12 @@ To add a new `FUNCTION_IDENTIFIER`
     - make sure that in [protocol_executer.hpp](protocol_executer.hpp) the correct header file is included
     You can do so by adding the following after line 31
 ```cpp
-#elif FUNCTION_IDENTIFIER >= 500 && FUNCTION_IDENTIFIER <= 530
+#elif FUNCTION_IDENTIFIER == `<your-identifier>`
 #include "programs/<your header file>.hpp"
 ```
 
 3. Define the function for a given `FUNCTION_IDENTIFIER`:
-    - when using the template make sure to replace the `FUNCTION_IDENTIFIER`, function name and path to the `<schedule-path>`
+    - when using the template make sure to replace the `FUNCTION_IDENTIFIER`, the function name and path to the `<schedule-file>`
 
 ## Input
 
