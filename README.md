@@ -167,11 +167,12 @@ In `programs/functions/mpspdz.hpp` are all currently supported functions you'll 
 To add a new `FUNCTION_IDENTIFIER`
 
 
-1. Create a new header file in [programs](programs/) you can use [programs/template.hpp](programs/template.hpp)
+1. Create a new header file in [programs](programs/) you may use [programs/template.hpp](programs/template.hpp)
 2. Choose a number `<your-num>` (`FUNCTION_IDENTFIER`)
     - make sure it does **NOT** exist yet (see [protocol_executer.hpp](protocol_executer.hpp))
     - make sure that in [protocol_executer.hpp](protocol_executer.hpp) the correct header file is included
-    You can do so by adding the following after line 31
+
+You can do so by adding the following after line 31
 ```cpp
 #elif FUNCTION_IDENTIFIER == `<your-identifier>`
 #include "programs/<your header file>.hpp"
