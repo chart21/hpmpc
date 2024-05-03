@@ -235,7 +235,6 @@ void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::run() {
     // thread& cur = run_tape(0, 0);
     // cur.join();
     progs[0].run(*this, 0, 0);
-    std::cout << timer[0].stop() << "\n";
 }
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
