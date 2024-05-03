@@ -32,7 +32,7 @@ then
 comp="$COMPILER"
 fi
 
-flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -I SimpleNN -lstdc++fs"
+flags="-w -march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -I SimpleNN -lstdc++fs"
 # flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
 
 if [ "$USE_NVCC" -gt "0" ]
