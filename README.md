@@ -97,14 +97,14 @@ git switch mp-spdz
 
 ## 1. Setup
 
-1. Create two directories in `MP-SPDZ/`: `Schedules` for the schedule file and `Bytecodes` for the respective bytecode file
+1. Create two directories in [MP-SPDZ/](MP-SPDZ/): `Schedules` for the schedule file and `Bytecodes` for the respective bytecode file
 ```sh
 mkdir -p "./MP-SPDZ/Schedules" "./MP-SPDZ/Bytecodes"
 ```
 
-2. Compile `.mpc` files in `MP-SPDZ/Functions`
+2. Compile the `.mpc` files in [MP-SPDZ/Functions](MP-SPDZ/Functions/)
 
-Assuming MP-SPDZ is installed in `$MPSPDZ` copy the desired `<file>.mpc` into `"$MPSPDZ"/Programs/Source` and compile them using their compiler with the bit length specified in `config.h`.
+Assuming MP-SPDZ is installed in `$MPSPDZ` copy the desired `<file>.mpc` into `"$MPSPDZ"/Programs/Source` and compile them using their compiler with the bit length specified in [config.h](config.h).
 
 ```sh
 cp "./MP-SPDZ/Functions/<file.mpc>" "$MPSPDZ"/Programs/Source/
@@ -128,7 +128,7 @@ Make sure to use the correct `FUNCTION_IDENTIFIER` and `BITLENGTH`:
 
 ## Run the example functions
 
-Currently there are multiple example functions in `MP-SPDZ/Functions`
+Currently there are multiple example functions in [MP-SPDZ/Functions/](MP-SPDZ/Functions/)
 
 Mapping from `FUNCTION_IDENTIFIER` $\to$ `.mpc` file:
 
@@ -137,7 +137,7 @@ Mapping from `FUNCTION_IDENTIFIER` $\to$ `.mpc` file:
 `500` | `tutorial.mpc`
 `501` | `custom.mpc` (can be used for your own functions)
 `505` | `int_test.mpc/int_test_32.mpc` (depending on `BITLENGTH` equal to  `64` or `32`)
-`506-525` | functions used for benchmarks (mapping can be found in `MP-SPDZ/bench_scripts/measurement.sh`)
+`506-525` | functions used for benchmarks (mapping can be found in [MP-SPDZ/bench_scripts/measurement.sh](MP-SPDZ/bench_scripts/measurement.sh))
 
 ## Install MP-SPDZ compiler
 
@@ -162,7 +162,7 @@ mv "./MP-SPDZ/Schedules/<file>.sch" "./MP-SPDZ/Schedules/custom.sch"
 
 ### Adding a new function using mpspdz.hpp
 
-In `programs/functions/mpspdz.hpp` are all currently supported functions you'll notice the only thing that changes is the path of the `<schedule-file>`
+In [programs/functions/mpspdz.hpp](programs/functions/mpspdz.hpp) are all currently supported functions you'll notice the only thing that changes is the path of the `<schedule-file>`
 
 To add a new `FUNCTION_IDENTIFIER`
 
@@ -183,9 +183,9 @@ You can do so by adding the following after line 31
 
 ## Input
 
-Input will be read from the files in `MP-SPDZ/Input/`
+Input will be read from the files in [MP-SPDZ/Input/](MP-SPDZ/Input/)
 
-- public input will be read from `PUB_INPUT`
+- public input will be read from [PUB-INPUT](MP-SPDZ/Input/PUB-INPUT)
 - private input will be read from `INPUT-P<player_number>-0-<vec>`
     - `<player_number>`: is the number associate with a specific player.
     - `<vec>`: is always `0` 
