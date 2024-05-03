@@ -89,7 +89,11 @@ To run all players locally on one machine, omit the IP addresses or set them to 
 
 # MP-SPDZ
 
-It is possible to run computation with bytecode compiled by [MP-SPDZ](https://github.com/data61/MP-SPDZ). As most of [MP-SPDZ](https://github.com/data61/MP-SPDZ/releases?page=1) 0.3.8 is supported.
+It is possible to run computation with bytecode compiled by [MP-SPDZ](https://github.com/data61/MP-SPDZ). As most of [MP-SPDZ](https://github.com/data61/MP-SPDZ/releases?page=1) 0.3.8 is supported. For this you have to checkout `mp-spdz`:
+
+```sh
+git switch mp-spdz
+```
 
 ## 1. Setup
 
@@ -148,13 +152,22 @@ tar xvf mp-spdz-0.3.8.tar.xz
 As mentioned in `1. setup` copy the bytecode file and schedule file into the correct Directory (`./MP-SPDZ/Schedules/`, `./MP-SPDZ/Bytecodes/` respectively)
 make sure that for both MP-SPDZ and this project you are using the same bit length for compilation.
 
-Using function `501`/`custom.mpc`
+### Using function `501`/`custom.mpc`
 
 Rename the schedule file `custom.sch` and compile with `FUNCTION_IDENTIFIER = 501`
 ```sh
 mv "./MP-SPDZ/Schedules/<file>.sch" "./MP-SPDZ/Schedules/custom.sch"
 ./scripts/config.sh -p all3 -f 501 -a "<BITLENGTH>"
 ```
+
+### Adding a new function using mpspdz.hpp
+
+In `programs/functions/mpspdz.hpp` are all currently supported functions where you'll notice the only thing that changes is the path of the `<schedule-file>`
+
+To add a new `FUNCTION_IDENTIFIER`
+
+1. Choose a number (`FUNCTION_IDENTFIER`) between 526-530
+    - if you want another function make sure that in <protocol_executer.hpp>
 
 ## Input
 
