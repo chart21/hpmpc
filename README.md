@@ -203,7 +203,7 @@ Input will be read from the files in [MP-SPDZ/Input/](MP-SPDZ/Input/)
     - `read_long(fd)` to read a 64-bit and Integer
     - `fd` (std::ifstream) if more/less bytes are required (keep in mind the bytcode uses big-endian)
 
-This program also expects this function to update the greatest compile-time address that the compiler tries to access. As the size of the registers is set once. And only a few instructions check if the register has enough memory. Use:
+This program also expects this function to update the greatest compile-time address that the compiler tries to access. Since the size of the registers is only set once and only a few instructions check if the registers have enough memory. Use:
 
 - `update_max_reg(<type>, <address>, <opcode>)`: to update the maximum register address
     - `<type>`: is the type of the register this instruction tries to access
@@ -218,9 +218,9 @@ This program also expects this function to update the greatest compile-time addr
 
 - for more complex instructions consider adding a new function to `IR::Program`
 - registers can be accessed via `p.<type>_register[<address>]`, where `<type>` is:
-    - `s` for secret Additive_Shares
+    - `s` for secret `Additive_Share`s
     - `c` for clear integeres of length `BITLENGTH`
     - `i` for 64-bit integers
     - `sb` for boolean registers (one cell holds 64-`XOR_Share`s)
     - `cb` clear bit registers, represented by 64-bit integers (one cell can hold 64-bits) (may be vectorized with SIMD but is not guaranteed depending on the `BITLENGTH`)
-- memory can be accessed via `m.<type>_mem[<address>]` where `<type>` is the same as for registers except clear integers use `ci` instead of `i` (i dont know why)
+- memory can be accessed via `m.<type>_mem[<address>]` where `<type>` is the same as for registers except 64-bit integers use `ci` instead of `i` (I dont know why I did this)
