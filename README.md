@@ -167,7 +167,7 @@ In `programs/functions/mpspdz.hpp` are all currently supported functions where y
 To add a new `FUNCTION_IDENTIFIER`
 
 1. Choose a number (`FUNCTION_IDENTFIER`) between 526-530
-    - if you want another function make sure that in <protocol_executer.hpp>
+    - if you want another function make sure that in [protocol_executer.hpp](protocol_executer.hpp)
 
 ## Input
 
