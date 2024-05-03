@@ -95,6 +95,14 @@ It is possible to run computation with bytecode compiled by [MP-SPDZ](https://gi
 git switch mp-spdz
 ```
 
+## Install the MP-SPDZ compiler
+
+You need to install [MP-SPDZ](https://github.com/data61/MP-SPDZ/releases?page=1) 0.3.8 to compile your `<filename>.mpc`
+```sh
+wget https://github.com/data61/MP-SPDZ/releases/download/v0.3.8/mp-spdz-0.3.8.tar.xz
+tar xvf mp-spdz-0.3.8.tar.xz
+```
+
 ## 1. Setup
 
 1. Create two directories in [MP-SPDZ/](MP-SPDZ/): `Schedules` for the schedule file and `Bytecodes` for the respective bytecode file
@@ -102,9 +110,9 @@ git switch mp-spdz
 mkdir -p "./MP-SPDZ/Schedules" "./MP-SPDZ/Bytecodes"
 ```
 
-2. Compile the `.mpc` files in [MP-SPDZ/Functions](MP-SPDZ/Functions/)
+2. Compile the `.mpc` files in [MP-SPDZ/Functions/](MP-SPDZ/Functions/)
 
-Assuming MP-SPDZ is installed in `$MPSPDZ` copy the desired `<file>.mpc` into `"$MPSPDZ"/Programs/Source` and compile them using their compiler with the bit length specified in [config.h](config.h).
+Assuming [MP-SPDZ](https://github.com/data61/MP-SPDZ) is installed at `$MPSPDZ` copy the desired `<file>.mpc` into `"$MPSPDZ"/Programs/Source` and compile them using their compiler with the bit length specified in [config.h](config.h).
 
 ```sh
 cp "./MP-SPDZ/Functions/<file.mpc>" "$MPSPDZ"/Programs/Source/
@@ -138,14 +146,6 @@ Mapping from `FUNCTION_IDENTIFIER` $\to$ `.mpc` file:
 `501` | `custom.mpc` (can be used for your own functions)
 `505` | `int_test.mpc/int_test_32.mpc` (depending on `BITLENGTH` equal to  `64` or `32`)
 `506-525` | functions used for benchmarks (mapping can be found in [MP-SPDZ/bench_scripts/measurement.sh](MP-SPDZ/bench_scripts/measurement.sh))
-
-## Install MP-SPDZ compiler
-
-You need to install [MP-SPDZ](https://github.com/data61/MP-SPDZ/releases?page=1) 0.3.8 to compile your `<filename>.mpc`
-```sh
-wget https://github.com/data61/MP-SPDZ/releases/download/v0.3.8/mp-spdz-0.3.8.tar.xz
-tar xvf mp-spdz-0.3.8.tar.xz
-```
 
 ## Run your own functions
 
