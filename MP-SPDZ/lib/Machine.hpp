@@ -232,9 +232,10 @@ void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::run() {
     setup();
 
     timer[0].start();
-    thread& cur = run_tape(0, 0);
-    cur.join();
-    // std::cout << timer[0].stop() << "\n";
+    // thread& cur = run_tape(0, 0);
+    // cur.join();
+    progs[0].run(*this, 0, 0);
+    std::cout << timer[0].stop() << "\n";
 }
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
