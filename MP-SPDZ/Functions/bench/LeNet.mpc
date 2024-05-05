@@ -1,0 +1,40 @@
+program.options_from_args()
+program.set_bit_length(32)
+from Compiler import ml
+import torch
+import torch.nn as nn
+import numpy as np
+sfix.set_precision(7)
+
+batch_size = int(program.args[1])
+
+#Generate the inputs
+help=np.ones((batch_size,28,28),np.float64)
+input=sfix.input_tensor_via(0, help,binary=True)
+help=np.ones((batch_size),np.int32)
+labels=sint.input_tensor_via(0,help,binary=True,one_hot=True)
+
+#Set the architecture of the model and determine the necessary layers
+net = nn.Sequential(
+    nn.Conv2d(1, 6, 5),
+    nn.ReLU(),
+    nn.AvgPool2d(2),
+    nn.Conv2d(6, 16, 5),
+    nn.ReLU(),
+    nn.AvgPool2d(2),
+    nn.Flatten(),
+    nn.Linear(16 * 4 * 4, 120),
+    nn.ReLU(),
+    nn.Linear(120, 84),
+    nn.ReLU(),
+    nn.Linear(84, 10)
+)
+
+ml.set_n_threads(1)
+
+#set the layers of the graph
+layers=ml.layers_from_torch(net,[batch_size,28,28],batch_size,input_via=0)
+graph=ml.Optimizer(layers)
+
+#Run the computation
+graph.eval(input,batch_size=batch_size)

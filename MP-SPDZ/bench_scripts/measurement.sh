@@ -81,6 +81,7 @@ case "$fun" in
         bitlength=128
         func="AES" ;;
     526|527|528) func="LogReg" ;;
+    529) func="LeNet" ;;
     *)
         func="Int_Multiplication"
         echo WARNING: "$fun": unkown function defaulting to Int_Multiplication
@@ -91,6 +92,13 @@ echo "./compile.py --budget 200000 -l $domain $bitlength -K LTZ,EQZ $func $size"
 mv "$REPO3_DIR"/Programs/Schedules/"$func"-"$size".sch "$SCHEDULE_PATH"/"$func".sch
 
 mv ./Programs/Bytecode/* "$BYTECODE_PATH"/
+
+binary_in="$REPO3_DIR"/Player-Data/Input-Binary-P0-0
+if [[ -e "$binary_in" ]]; then
+    for i in {0..15}; do
+        cp "$binary_in" "$REPO_DIR"/MP-SPDZ/Input/Input-Binary-P0-0-"$i"
+    done
+fi
 
 cd "$REPO_DIR"
 
