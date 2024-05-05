@@ -29,12 +29,13 @@ class Input {
         open_input_file(path);
     }
 
-    explicit Input(const std::string& path, const int& player_num, const int& cur_vec, const bool& binary)
+    explicit Input(const std::string& path, const int& player_num, const int& cur_vec,
+                   const bool& binary)
         : player_num(player_num), vec(cur_vec), cur(0), binary(binary) {
         open_input_file(path);
     }
 
-    Input() : player_num(0), vec(1), file(nullptr), cur(0), binary(false) {};
+    Input() : player_num(0), vec(1), file(nullptr), cur(0), binary(false){};
 
     Input(const Input& other) = delete;
     Input(Input&& other) noexcept
@@ -101,8 +102,9 @@ class Input {
     /**
      * Reads `bytes` characters from the file can be used for binary input files
      *
-     * @param convert takes a char* of guaranteed length of `bytes` and returns an object of type <T>
-     * @param 
+     * @param convert takes a char* of guaranteed length of `bytes` and returns an object of type
+     * <T>
+     * @param bytes amount of bytes to read (`bytes` < `size`)
      * @note T should be a number type (int/float/...)
      */
     template <class T>
@@ -135,7 +137,7 @@ T Input::next(std::function<T(const std::string&)> convert) {
     }
 
     cur += index + 1;
-    return convert(std::string(content.substr(0, index)));;
+    return convert(std::string(content.substr(0, index)));
 }
 
 template <class T>
@@ -154,10 +156,12 @@ T Input::next(std::function<T(char*)> convert, const size_t& bytes) {
 
 static std::vector<Input> inputs;
 
-std::vector<Input>::iterator get_input_from(const int& player_num, const size_t& cur_vec, const bool& binary) {
+std::vector<Input>::iterator get_input_from(const int& player_num, const size_t& cur_vec,
+                                            const bool& binary) {
     auto it = inputs.begin();
     for (; it != inputs.end(); ++it) {
-        if (it->get_player() == player_num && it->get_vec_num() == cur_vec && it->is_binary() == binary)
+        if (it->get_player() == player_num && it->get_vec_num() == cur_vec &&
+            it->is_binary() == binary)
             return it;
     }
 
@@ -184,7 +188,8 @@ std::array<int, VEC_SIZE> next_binary_input(const int& player_num, const int& th
                 int64_t a;
                 memcpy(&a, s, 8);
                 return a;
-            }, 8);
+            },
+            8);
 
         res[cur] = a;
     }
@@ -212,7 +217,8 @@ std::array<int, VEC_SIZE> next_binary_input_f(const int& player_num, const int& 
                 assert(sizeof(float) == 4);
                 memcpy(&a, s, 4);
                 return a;
-            }, 4);
+            },
+            4);
 
         res[cur] = a;
     }
