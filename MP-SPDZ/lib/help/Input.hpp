@@ -25,16 +25,21 @@ namespace IR {
 class Input {
   public:
     explicit Input(const std::string& path, const int& player_num, const int& cur_vec)
-        : player_num(player_num), vec(cur_vec), cur(0) {
+        : player_num(player_num), vec(cur_vec), cur(0), binary(false) {
         open_input_file(path);
     }
 
-    Input() : player_num(0), vec(1), file(nullptr), cur(0){};
+    explicit Input(const std::string& path, const int& player_num, const int& cur_vec, const bool& binary)
+        : player_num(player_num), vec(cur_vec), cur(0), binary(binary) {
+        open_input_file(path);
+    }
+
+    Input() : player_num(0), vec(1), file(nullptr), cur(0), binary(false) {};
 
     Input(const Input& other) = delete;
     Input(Input&& other) noexcept
         : player_num(std::move(other.player_num)), file(std::move(other.file)),
-          size(std::move(other.size)), cur(std::move(other.cur)) {
+          size(std::move(other.size)), cur(std::move(other.cur)), binary(other.binary) {
         other.file = nullptr;
     }
 
@@ -47,6 +52,7 @@ class Input {
         size = std::move(other.size);
         cur = std::move(other.cur);
         player_num = std::move(other.player_num);
+        binary = other.binary;
 
         other.file = nullptr;
         return *this;
@@ -92,9 +98,20 @@ class Input {
     template <class T>
     T next(std::function<T(const std::string&)> convert);
 
+    /**
+     * Reads `bytes` characters from the file can be used for binary input files
+     *
+     * @param convert takes a char* of guaranteed length of `bytes` and returns an object of type <T>
+     * @param 
+     * @note T should be a number type (int/float/...)
+     */
+    template <class T>
+    T next(std::function<T(char*)> convert, const size_t& bytes);
+
     inline int get_player() const { return player_num; };
     inline int get_vec_num() const { return vec; };
     inline bool is_open() const { return file; }
+    inline bool is_binary() const { return binary; }
 
   private:
     int player_num; // used to identify the party that is associated with this file
@@ -102,6 +119,7 @@ class Input {
     char* file;     // mappping of the file
     size_t size;    // number of bytes in the file
     size_t cur;     // current position in the file
+    bool binary;
 };
 
 template <class T>
@@ -117,20 +135,88 @@ T Input::next(std::function<T(const std::string&)> convert) {
     }
 
     cur += index + 1;
-    T res = convert(std::string(content.substr(0, index)));
-    return res;
+    return convert(std::string(content.substr(0, index)));;
+}
+
+template <class T>
+T Input::next(std::function<T(char*)> convert, const size_t& bytes) {
+    if (!is_open())
+        return 0;
+    assert(bytes <= size);
+    size_t start = cur;
+    cur += bytes;
+    if (cur > size) {
+        cur = 0;
+        start = 0;
+    }
+    return convert(file + start);
 }
 
 static std::vector<Input> inputs;
 
-std::vector<Input>::iterator get_input_from(const int& player_num, const size_t& cur_vec) {
+std::vector<Input>::iterator get_input_from(const int& player_num, const size_t& cur_vec, const bool& binary) {
     auto it = inputs.begin();
     for (; it != inputs.end(); ++it) {
-        if (it->get_player() == player_num && it->get_vec_num() == cur_vec)
+        if (it->get_player() == player_num && it->get_vec_num() == cur_vec && it->is_binary() == binary)
             return it;
     }
 
     return it;
+}
+
+template <size_t VEC_SIZE>
+std::array<int, VEC_SIZE> next_binary_input(const int& player_num, const int& thread_id) {
+    std::array<int, VEC_SIZE> res{};
+    if (current_phase == PHASE_INIT || player_num != PARTY)
+        return res;
+
+    for (size_t cur = 0; cur < VEC_SIZE; cur++) {
+        auto in = get_input_from(player_num, cur, true);
+        if (in == inputs.end()) {
+            inputs.emplace_back(INPUT_PATH + "Input-Binary-P" + std::to_string(player_num) + "-" +
+                                    std::to_string(thread_id) + "-" + std::to_string(cur),
+                                player_num, cur, true);
+            in = inputs.end() - 1;
+        }
+
+        int a = in->template next<int>(
+            [](char* s) -> int {
+                int64_t a;
+                memcpy(&a, s, 8);
+                return a;
+            }, 8);
+
+        res[cur] = a;
+    }
+    return res;
+}
+
+template <size_t VEC_SIZE>
+std::array<int, VEC_SIZE> next_binary_input_f(const int& player_num, const int& thread_id) {
+    std::array<int, VEC_SIZE> res{};
+    if (current_phase == PHASE_INIT || player_num != PARTY)
+        return res;
+
+    for (size_t cur = 0; cur < VEC_SIZE; cur++) {
+        auto in = get_input_from(player_num, cur, true);
+        if (in == inputs.end()) {
+            inputs.emplace_back(INPUT_PATH + "Input-Binary-P" + std::to_string(player_num) + "-" +
+                                    std::to_string(thread_id) + "-" + std::to_string(cur),
+                                player_num, cur, true);
+            in = inputs.end() - 1;
+        }
+
+        float a = in->template next<float>(
+            [](char* s) -> float {
+                float a;
+                assert(sizeof(float) == 4);
+                memcpy(&a, s, 4);
+                return a;
+            }, 4);
+
+        res[cur] = a;
+    }
+    return res;
 }
 
 /**
@@ -146,7 +232,7 @@ std::array<int, VEC_SIZE> next_input(const int& player_num, const int& thread_id
         return res;
 
     for (size_t cur = 0; cur < VEC_SIZE; cur++) {
-        auto in = get_input_from(player_num, cur);
+        auto in = get_input_from(player_num, cur, false);
         if (in == inputs.end()) {
             inputs.emplace_back(INPUT_PATH + "Input-P" + std::to_string(player_num) + "-" +
                                     std::to_string(thread_id) + "-" + std::to_string(cur),
@@ -175,7 +261,7 @@ std::array<float, VEC_SIZE> next_input_f(const int& player_num, const int& threa
         return res;
 
     for (size_t cur = 0; cur < VEC_SIZE; ++cur) {
-        auto in = get_input_from(player_num, cur);
+        auto in = get_input_from(player_num, cur, false);
         if (in == inputs.end()) {
             inputs.emplace_back(INPUT_PATH + "Input-P" + std::to_string(player_num) + "-" +
                                     std::to_string(thread_id) + "-" + std::to_string(cur),

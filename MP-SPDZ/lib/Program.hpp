@@ -2836,13 +2836,13 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::fixinput(const vector
     for (size_t vec = 0; vec < size; ++vec) {
         switch (regs[3]) {
         case 0: { // int
-            std::array<int, SIZE_VEC> res = next_input<SIZE_VEC>(PARTY, thread_id);
+            std::array<int, SIZE_VEC> res = next_binary_input<SIZE_VEC>(PARTY, thread_id);
             for (size_t j = 0; j < SIZE_VEC; ++j)
                 input[j] = res[j];
             break;
         }
         case 1: { // fix
-            auto tmp = next_input_f<SIZE_VEC>(PARTY, thread_id);
+            auto tmp = next_binary_input_f<SIZE_VEC>(PARTY, thread_id);
             for (size_t j = 0; j < SIZE_VEC; ++j)
                 input[j] = (static_cast<INT_TYPE>(tmp[j] * (1u << regs[2])));
             break;
