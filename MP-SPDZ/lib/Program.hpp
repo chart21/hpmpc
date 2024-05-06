@@ -2587,7 +2587,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::muls(const vector<int
         }
     }
 
-    sint::communicate();
+    Share::communicate();
 
     for (size_t i = 0; i < regs.size(); i += 4) {
         for (int j = 0; j < regs[i]; j++) {
