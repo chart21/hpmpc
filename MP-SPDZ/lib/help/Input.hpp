@@ -186,6 +186,7 @@ std::array<int, VEC_SIZE> next_binary_input(const int& player_num, const int& th
         int a = in->template next<int>(
             [](char* s) -> int {
                 int64_t a;
+                assert(sizeof(a) == 8);
                 memcpy(&a, s, 8);
                 return a;
             },

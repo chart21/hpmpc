@@ -35,7 +35,9 @@ class CInteger {
         } else {
             assert(all.size() == SIZE_VEC);
 
-            orthogonalize_arithmetic((uint_t*)all.data(), &nums, 1);
+            alignas(DATATYPE) UINT_TYPE tmp[SIZE_VEC];
+            for (size_t i = 0; i < SIZE_VEC; ++i) tmp[i] = all[i];
+            orthogonalize_arithmetic(tmp, &nums, 1);
         }
     }
     CInteger(const CInteger& other) : nums(other.nums) {}                // copy
@@ -77,7 +79,10 @@ class CInteger {
 
         assert(all.size() == SIZE_VEC);
 
-        orthogonalize_arithmetic((uint_t*)all.data(), &nums, 1);
+        alignas(DATATYPE) UINT_TYPE tmp[SIZE_VEC];
+        for (size_t i = 0; i < SIZE_VEC; ++i) tmp[i] = all[i];
+
+        orthogonalize_arithmetic(tmp, &nums, 1);
         return *this;
     }
 
