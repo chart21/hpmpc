@@ -1,0 +1,126 @@
+#This program loads a pre-trained model and performs inference on the test set.
+#The model is trained in clear by one party which then holds the weights.
+#The other party provides the inputs
+#It uses the VGG Architecture
+program.options_from_args()
+
+from Compiler import ml
+import numpy as np
+import torch
+import torch.nn as nn
+sfix.set_precision(7)
+
+batch_size = int(program.args[1])
+
+#Generate the inputs
+help=np.ones((batch_size,3,32,32),np.float64)
+input=sfix.input_tensor_via(0, help,binary=True)
+help=np.ones((batch_size),np.int32)
+labels=sint.input_tensor_via(0,help,binary=True,one_hot=True)
+
+#Set the architecture of the model and determine the necessary layers
+net = nn.Sequential(
+                nn.Conv2d(in_channels=3,
+                          out_channels=64,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.Conv2d(in_channels=64,
+                          out_channels=64,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=(2, 2),
+                             stride=(2, 2)),
+                nn.Conv2d(in_channels=64,
+                          out_channels=128,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.Conv2d(in_channels=128,
+                          out_channels=128,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=(2, 2),
+                             stride=(2, 2)),
+                nn.Conv2d(in_channels=128,
+                          out_channels=256,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.Conv2d(in_channels=256,
+                          out_channels=256,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.Conv2d(in_channels=256,
+                          out_channels=256,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=(2, 2),
+                             stride=(2, 2)),
+                nn.Conv2d(in_channels=256,
+                          out_channels=512,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.Conv2d(in_channels=512,
+                          out_channels=512,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.Conv2d(in_channels=512,
+                          out_channels=512,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=(2, 2),
+                             stride=(2, 2)),
+                nn.Conv2d(in_channels=512,
+                          out_channels=512,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.Conv2d(in_channels=512,
+                          out_channels=512,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.Conv2d(in_channels=512,
+                          out_channels=512,
+                          kernel_size=(3, 3),
+                          stride=(1, 1),
+                          padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=(2, 2),
+                             stride=(2, 2)),
+                nn.Linear(512, 4096),
+                nn.ReLU(True),
+                nn.Linear(4096, 4096),
+                nn.ReLU(True),
+                nn.Linear(4096, 10),
+        )
+
+ml.set_n_threads(1)
+ml.Layer.back_batch_size = batch_size
+
+#set the layers of the graph
+layers=ml.layers_from_torch(net,[batch_size,32,32,3],batch_size,input_via=0)
+graph=ml.Optimizer(layers)
+
+#Run the computation
+graph.eval(input,batch_size=batch_size)

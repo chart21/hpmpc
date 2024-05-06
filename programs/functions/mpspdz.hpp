@@ -53,8 +53,10 @@
 #define FUNCTION MP_MACHINE_AES_BENCH
 #elif FUNCTION_IDENTIFIER == 526 || FUNCTION_IDENTIFIER == 527 || FUNCTION_IDENTIFIER == 528
 #define FUNCTION MP_MACHINE_REG_BENCH
-#elif FUNCTION_IDENTIFIER == 529
+#elif FUNCTION_IDENTIFIER == 529 || FUNCTION_IDENTIFIER == 530 || FUNCTION_IDENTIFIER == 531 
 #define FUNCTION MP_MACHINE_LENET_BENCH
+#elif FUNCTION_IDENTIFIER == 532 || FUNCTION_IDENTIFIER == 533 || FUNCTION_IDENTIFIER == 534
+#define FUNCTION MP_MACHINE_VGG_BENCH
 #endif
 
 //Boilerplate
@@ -393,7 +395,7 @@ void MP_MACHINE_REG_BENCH(DATATYPE* res)
     m.run();
 }
 
-#elif FUNCTION_IDENTIFIER == 529
+#elif FUNCTION_IDENTIFIER == 529 || FUNCTION_IDENTIFIER == 530 || FUNCTION_IDENTIFIER == 531
 template<typename Share>
 void MP_MACHINE_LENET_BENCH(DATATYPE* res)
 {
@@ -406,6 +408,22 @@ void MP_MACHINE_LENET_BENCH(DATATYPE* res)
     using A = Additive_Share<DATATYPE, Share>;
 
     IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("LeNet.sch");
+    m.run();
+}
+
+#elif FUNCTION_IDENTIFIER == 530
+template<typename Share>
+void MP_MACHINE_VGG_BENCH(DATATYPE* res)
+{
+    using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
+    using int_t = IR::Integer<int64_t, uint64_t>;
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<64, S>;
+
+    using A = Additive_Share<DATATYPE, Share>;
+
+    IR::Machine<int_t, cint, Share, A, sbitset_t, S> m("VGG.sch");
     m.run();
 }
 

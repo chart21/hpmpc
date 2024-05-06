@@ -82,6 +82,7 @@ case "$fun" in
         func="AES" ;;
     526|527|528) func="LogReg" ;;
     529) func="LeNet" ;;
+    530) func="VGG" ;;
     *)
         func="Int_Multiplication"
         echo WARNING: "$fun": unkown function defaulting to Int_Multiplication
