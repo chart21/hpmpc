@@ -1643,7 +1643,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
 #if BITLENGTH == DATTYPE
             m.get_out() << p.i_register[regs[0]].get();
 #else
-            const auto& vec = p.i_register[regs[0]].get_all();
+            const auto& vec = p.i_register[regs[0]].get_all_64();
             m.get_out() << "(" << vec[0];
             for (size_t i = 1; i < vec.size(); ++i)
                 m.get_out() << ", " << vec[i];
