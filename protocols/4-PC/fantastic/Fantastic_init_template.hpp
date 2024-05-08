@@ -154,7 +154,7 @@ store_compare_view_init(P_2);
 }
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
     send_to_(PNEXT);
 }    
@@ -162,7 +162,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 receive_from_(PPREV);
 store_compare_view_init(P_0123);

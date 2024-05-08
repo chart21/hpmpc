@@ -76,14 +76,14 @@ void complete_mult(func_add ADD, func_sub SUB)
 mv = ADD(mv, receive_from_live(P_1)); 
 }
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 send_to_live(P_0,mv);
 }    
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PRE == 0
 return SUB(mv, receive_from_live(P_0));

@@ -132,13 +132,13 @@ mv = z_r;
 
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 }    
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 
 //receive lambda2 from P_3

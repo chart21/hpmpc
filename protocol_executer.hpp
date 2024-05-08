@@ -17,7 +17,7 @@
 #include "programs/search_init.hpp"
 #elif FUNCTION_IDENTIFIER == 11
 #include "programs/share_conversion_init.hpp"
-#elif FUNCTION_IDENTIFIER >= 1 && FUNCTION_IDENTIFIER <= 6
+#elif FUNCTION_IDENTIFIER >= 1 && FUNCTION_IDENTIFIER <= 2
 #include "programs/mult_init.hpp"
 #elif FUNCTION_IDENTIFIER >= 7 && FUNCTION_IDENTIFIER <= 9
 #include "programs/debug_init.hpp"

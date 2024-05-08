@@ -66,13 +66,13 @@ void complete_mult(func_add ADD, func_sub SUB)
 mv = ADD(mv, receive_from_live(P_2));
 }
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 }    
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 return SUB(mv, receive_from_live(P_0));
 }

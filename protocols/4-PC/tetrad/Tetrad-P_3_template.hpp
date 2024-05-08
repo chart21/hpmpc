@@ -125,7 +125,7 @@ send_to_live(P_2, l2);
 
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 #if PRE == 1
     pre_send_to_live(P_2, l1);
@@ -140,7 +140,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PRE == 0
 //receive lambda3 from P_3

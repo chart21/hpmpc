@@ -82,7 +82,6 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 #endif
 
 
-#if FUNCTION_IDENTIFIER > 10
 #if BITLENGTH == 8
 #define OP_ADD FUNC_ADD8
 #define OP_SUB FUNC_SUB8
@@ -115,7 +114,6 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 #define OP_SHIFT_LEFT SHIFT_LEFT64
 #define OP_SHIFT_RIGHT SHIFT_RIGHT64
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT64
-#endif
 #endif
 
 DATATYPE TRUNC2(DATATYPE x) {
@@ -154,6 +152,7 @@ DATATYPE TRUNC3(DATATYPE x) {
 /*     // Apply the mask using bitwise AND */
 /*     return FUNC_AND(x, mask); */
 /* } */
+
 
 #if DATTYPE == 1
     #if COMPRESS == 1

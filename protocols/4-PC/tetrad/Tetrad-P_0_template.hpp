@@ -127,7 +127,7 @@ mv = v; //Trick, can be set to zero later on
 
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 #if PRE == 0
     send_to_live(P_3, mv);
@@ -137,7 +137,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PRE == 0
     Datatype l3 = receive_from_live(P_3);

@@ -357,7 +357,7 @@ store_compare_view(P_2,verify_store0);
 #endif
 }
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 #if PARTY == 0
 send_to_live(P_1, v0);
@@ -372,7 +372,7 @@ send_to_live(P_0, v0);
 }    
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 Datatype result = ADD( ADD(v1,v2) ,ADD(v0, receive_from_live(PPREV)));
 store_compare_view(P_0123, result);

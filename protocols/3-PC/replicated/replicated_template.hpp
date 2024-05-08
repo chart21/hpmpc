@@ -140,7 +140,7 @@ a = SUB(SET_ALL_ZERO() ,ADD(ADD(r_prev, r_prev),  a)); // c_i = -2 r_{i-1} - r_i
 
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
     send_to_live(PNEXT, x);
 }    
@@ -155,7 +155,7 @@ void prepare_reveal_to_all()
 /* } */
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
     Datatype result;
     result = SUB(SET_ALL_ZERO(), SUB(a, receive_from_live(PPREV)));

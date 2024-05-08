@@ -11,9 +11,9 @@
 #define RESULTTYPE DATATYPE
 #define COMMUNICATION_ROUNDS 1000
 
-#if FUNCTION_IDENTIFIER < 4
+#if FUNCTION_IDENTIFIER == 1
 #define FUNCTION MULT_BENCH
-#else
+#elif FUNCTION_IDENTIFIER == 2
 #define FUNCTION MULT_BENCH_COMMUNICATION_ROUNDS
 #endif
 
@@ -27,7 +27,7 @@ void MULT_BENCH(DATATYPE* res)
     Share::communicate(); // dummy round
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-        c[i] = a[i] * b[i];
+        c[i] = a[i].prepare_mult(b[i]);
     }
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
@@ -58,7 +58,7 @@ for(int j = 0; j < COMMUNICATION_ROUNDS; j++) {
 
 for (int s = 0; s < loop_num; s++) {
     int i = s+j*loop_num;
-    c[i] = a[i] * b[i];
+    c[i] = a[i].prepare_mult(b[i]);
 }
 
 
