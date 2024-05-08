@@ -16,3 +16,5 @@ An example for formatting can be seen in [Input-P0-0-0](/MP-SPDZ/Input/Input-P0-
 - private input from party `0`
 - from main thread (thread `0`)
 - for the first number of the vectorization (`0`)
+
+> Next Section: [Run your own .mpc files with HPMPC](/MP-SPDZ/docs/add_new_functions.md)

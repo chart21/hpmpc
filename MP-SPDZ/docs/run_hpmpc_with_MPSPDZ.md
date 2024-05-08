@@ -72,3 +72,6 @@ Mapping from `FUNCTION_IDENTIFIER` $\to$ `.mpc` file:
 `502-504` | legacy (used to test simple secure share operations)
 `505` | `int_test.mpc/int_test_32.mpc` (depending on `BITLENGTH` (`64` or `32`)) can be used to test public integer operations
 `506-534` | functions used for benchmarks (mapping can be found in [MP-SPDZ/bench_scripts/measurement.sh](/MP-SPDZ/bench_scripts/measurement.sh))
+
+
+> Next Section [define private/public Input](/MP-SPDZ/docs/input.md)

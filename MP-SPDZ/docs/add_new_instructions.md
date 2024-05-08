@@ -4,8 +4,14 @@
 
 2. To read the parameters from the bytecode-file add a case to the switch statement in the `IR::Program::load_program([...]);` function in [MP-SPDZ/lib/Program.hpp](/MP-SPDZ/lib/Program.hpp). You may use:
     - `read_int(fd)` to read a 32-bit Integer
-    - `read_long(fd)` to read a 64-bit and Integer
+    - `read_long(fd)` to read a 64-bit Integer
     - `fd` (std::ifstream) if more/less bytes are required (keep in mind the bytcode uses big-endian)
+
+To add the parameters to the parameter list of the current instruction you may use `inst.add_reg(<num>)`, where:
+- `inst` is the current instruction (see the [`Instruction`](/MP-SPDZ/lib/Program.hpp) class)
+- `<num>` is of type `int`
+
+**OR** use `inst.add_immediate(<num>)` for a constant 64-bit integer some instructions may require.
 
 This program also expects this function to update the greatest compile-time address that the compiler tries to access. Since the size of the registers is only set once and only a few instructions check if the registers have enough memory. Use:
 
@@ -27,6 +33,6 @@ This program also expects this function to update the greatest compile-time addr
     - `i` for 64-bit integers
     - `sb` for boolean registers (one cell holds 64-`XOR_Share`s)
     - `cb` clear bit registers, represented by 64-bit integers (one cell can hold 64-bits) (may be vectorized with SIMD but is not guaranteed depending on the `BITLENGTH`)
-- memory can be accessed via `m.<type>_mem[<address>]` where `<type>` is the same as for registers except 64-bit integers use `ci` instead of `i` (I dont know why I did this)
+- memory can be accessed via `m.<type>_mem[<address>]` where `<type>` is the same as for registers except 64-bit integers use `ci` instead of `i` (I do not know why I did this)
 
-Also may also look at [https://github.com/aSlunk/hpmpc/commit/d7fd4ec47c58fac9344682701e9052bcf52ef95b] where I added INPUTPERSONAL and FIXINPUT
+Also may also look at [this commit](https://github.com/aSlunk/hpmpc/commit/d7fd4ec47c58fac9344682701e9052bcf52ef95b) where I added `INPUTPERSONAL` (`0xf5`) and `FIXINPUT` (`0xe8`)
