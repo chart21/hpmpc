@@ -1,12 +1,12 @@
 Setup required to run HPMPC with MP-SPDZ. This assumes you have already Installed [MP-SPDZ](https://github.com/data61/MP-SPDZ/releases?page=1) version 0.3.8.
 
-- If not installed yet see [installation guide](./install_mpspdz.md)
+- If not installed yet see [installation guide](/MP-SPDZ/docs/install_mpspdz.md)
 
 ## Setup
 
 ### 1. Create required Directories
 
-Create two directories in [MP-SPDZ/](../): `Schedules` for the schedule file and `Bytecodes` for the respective bytecode file
+Create two directories in [MP-SPDZ/](/MP-SPDZ/): `Schedules` for the schedule file and `Bytecodes` for the respective bytecode file
 
 ```sh
 mkdir -p "./MP-SPDZ/Schedules" "./MP-SPDZ/Bytecodes"
@@ -14,23 +14,23 @@ mkdir -p "./MP-SPDZ/Schedules" "./MP-SPDZ/Bytecodes"
 
 ### 2. Copy .mpc files and Compile them 
 
-In order to compile the `.mpc` files in [MP-SPDZ/Functions/](../Functions/) you have to:
+In order to compile the `.mpc` files in [MP-SPDZ/Functions/](/MP-SPDZ/Functions/) you have to:
 
-Assuming [MP-SPDZ](https://github.com/data61/MP-SPDZ) is installed at `$MPSPDZ`, copy the desired `<file>.mpc` into `"$MPSPDZ"/Programs/Source` and compile them using their compiler with the bit length specified in [config.h](../../config.h).
+Assuming [MP-SPDZ](https://github.com/data61/MP-SPDZ) is installed at `$MPSPDZ`, copy the desired `<file>.mpc` into `"$MPSPDZ"/Programs/Source` and compile them using their compiler with the bit length specified in [config.h](/config.h).
 
 ```sh
 cp "./MP-SPDZ/Functions/<file.mpc>" "$MPSPDZ"/Programs/Source/
 ```
 
-- For arithmetic programs using [Additive_Shares](../../protocols/Additive_Share.hpp) use:
+- For arithmetic programs using [Additive_Shares](/protocols/Additive_Share.hpp) use:
 
 ```sh
 cd "$MPSDZ" && ./compile.py -K LTZ,EQZ -R "<BITLENGTH>" "<file>"
 ```
 
-where `BITLENGTH` is the same as defined in [config.h](../../config.h)
+where `BITLENGTH` is the same as defined in [config.h](/config.h)
 
-- For boolean programs using [XOR_Shares](../../protocols/XOR_Share.hpp)
+- For boolean programs using [XOR_Shares](/protocols/XOR_Share.hpp)
 
 ```sh
 cd "$MPSDZ" && ./compile.py -K LTZ,EQZ -B "<bit-length>" "<file>"
@@ -61,7 +61,7 @@ Make sure to use the correct `FUNCTION_IDENTIFIER` and `BITLENGTH`:
 
 ## Run the example functions
 
-Currently there are multiple example functions in [MP-SPDZ/Functions/](../Functions/)
+Currently there are multiple example functions in [MP-SPDZ/Functions/](/MP-SPDZ/Functions/)
 
 Mapping from `FUNCTION_IDENTIFIER` $\to$ `.mpc` file:
 
@@ -69,6 +69,6 @@ Mapping from `FUNCTION_IDENTIFIER` $\to$ `.mpc` file:
 ----------------------|-------
 `500` | `tutorial.mpc`
 `501` | `custom.mpc` (can be used for your own functions)
-`502-504` | legacy
-`505` | `int_test.mpc/int_test_32.mpc` (depending on `BITLENGTH` (`64` or `32`))
-`506-525` | functions used for benchmarks (mapping can be found in [MP-SPDZ/bench_scripts/measurement.sh](../bench_scripts/measurement.sh))
+`502-504` | legacy (used to test simple secure share operations)
+`505` | `int_test.mpc/int_test_32.mpc` (depending on `BITLENGTH` (`64` or `32`)) can be used to test public integer operations
+`506-534` | functions used for benchmarks (mapping can be found in [MP-SPDZ/bench_scripts/measurement.sh](/MP-SPDZ/bench_scripts/measurement.sh))

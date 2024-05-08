@@ -99,20 +99,20 @@ git switch mp-spdz
 
 ### Setup and successful run HP-MPC with MP-SPDZ
 
-1. [Install MP-SPDZ](MP-SPDZ/docs/install_mpspdz.md)
-2. [Required setup to run HP-MPC with MP-SPDZ as frontend](MP-SPDZ/docs/run_hpmpc_with_MPSPDZ.md)
-3. [Add/Run your own functions (.mpc) files using HP-MPC](MP-SPDZ/docs/add_new_functions.md)
+1. [Install MP-SPDZ](/MP-SPDZ/docs/install_mpspdz.md)
+2. [Required setup to run HP-MPC with MP-SPDZ as frontend](/MP-SPDZ/docs/run_hpmpc_with_MPSPDZ.md)
+3. [Add/Run your own functions (.mpc) files using HP-MPC](/MP-SPDZ/docs/add_new_functions.md)
 
 ### For developers:
 
-1. [Add support for MP-SPDZ Instructions that are not yet implemented](MP-SPDZ/docs/add_new_instructions.md)
-2. [Formatting for source files](MP-SPDZ/docs/formatting.md)
+1. [Add support for MP-SPDZ Instructions that are not yet implemented](/MP-SPDZ/docs/add_new_instructions.md)
+2. [Formatting for source files](/MP-SPDZ/docs/formatting.md)
 
 ## Input
 
-Input will be read from the files in [MP-SPDZ/Input/](MP-SPDZ/Input/)
+Input will be read from the files in [MP-SPDZ/Input/](/MP-SPDZ/Input/)
 
-- public input will be read from [PUB-INPUT](MP-SPDZ/Input/PUB-INPUT)
+- public input will be read from [PUB-INPUT](/MP-SPDZ/Input/PUB-INPUT)
 - private input will be read from `INPUT-P<player_number>-0-<vec>`
     - `<player_number>`: is the number associate with a specific player.
     - `<vec>`: is always `0` 
