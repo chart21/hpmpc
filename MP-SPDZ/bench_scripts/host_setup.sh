@@ -57,7 +57,6 @@ apt install libeigen3-dev
 # echo 'export LD_LIBRARY_PATH="/usr/local/llvm-16/lib:$LD_LIBRARY_PATH"' >> ~/.bashrc
 # source ~/.bashrc
 
-pip3 install -U numpy
 checkConnection "github.com"
 
 git clone "$REPO" "$REPO_DIR" # hpmcp
@@ -101,6 +100,8 @@ echo "global setup successful"
 for i in {0..15}; do
     echo "$i" > ./MP-SPDZ/Input/Input-P0-0-"$i"
 done
+
+pip3 install -r .MP-SPDZ/requirements.txt
  
 ################################## MP-SPDZ ####################################
 cd "$REPO3_DIR"
