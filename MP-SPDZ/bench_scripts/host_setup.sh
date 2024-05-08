@@ -101,7 +101,7 @@ for i in {0..15}; do
     echo "$i" > ./MP-SPDZ/Input/Input-P0-0-"$i"
 done
 
-pip3 install -r .MP-SPDZ/requirements.txt
+pip3 install -U -r "$REPO_DIR"/MP-SPDZ/requirements.txt
  
 ################################## MP-SPDZ ####################################
 cd "$REPO3_DIR"
