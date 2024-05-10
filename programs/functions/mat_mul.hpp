@@ -410,7 +410,7 @@ void dot_prod_bench(DATATYPE* res)
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-            c[i].complete_mult();
+            c[i].complete_mult_without_trunc();
     
 }
 
