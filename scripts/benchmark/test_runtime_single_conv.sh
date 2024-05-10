@@ -5,6 +5,7 @@ protocols=(5) # 5: 3PC
 #protocols=(12) # 12: 4PC
 use_nvcc=(0 1 2) # 0: CPU-only, 1: GPU for matmul, 2: GPU for Convolution
 pre=(0 1) # 0: no pre-processing, 1: pre-processing
+num_repititions=10
 ##---End of adjust---
 
 functions=(400) # do not change
@@ -188,6 +189,8 @@ do
             echo "Running protocol $pr, function $f, num_inputs $n, use_nvcc $use_nv, pre $prep"
             
                 #if pr > 6
+            for i in $(seq 1 $num_repititions)
+            do
             if [ "$pr" -gt "6" ]
             then
                 if [ "$O_PARTY" == "0" ]
@@ -236,6 +239,7 @@ do
         done
     done
 done
-
+done
+done
 cp scripts/benchmark/base_config.h config.h 
 

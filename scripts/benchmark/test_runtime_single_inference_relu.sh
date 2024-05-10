@@ -11,7 +11,7 @@ pre=(0 1) # 0: no pre-processing, 1: pre-processing
 
 functions=(404,405,406) # do not change, different ReLU approaches
 num_inputs=(10000 100000 1000000 10000000) # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
-
+num_repititions=10
 
 use_nv=0
 helpFunction()
@@ -98,6 +98,8 @@ do
             echo "Running protocol $pr, function $f, reduced_bitlength $rb, pre $prep"
             
                 #if pr > 6
+            for i in $(seq 1 $num_repititions)
+            do
             if [ "$pr" -gt "6" ]
             then
                 if [ "$O_PARTY" == "0" ]
@@ -143,6 +145,7 @@ do
                 fi
             fi
         done
+    done
         done
     done
 done

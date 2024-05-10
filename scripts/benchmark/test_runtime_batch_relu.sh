@@ -8,6 +8,7 @@ pre=(0 1) # 0: no pre-processing, 1: pre-processing
 
 Dattype=256 # Careful, requires AVX512 support by your CPU architecture. In not supported use 256 (AVX2), 128 (SSE), or 32 (None) for vectorization
 num_processes_4PC=1 # Careful, multiplies by 24
+num_repititions=10
 ##---End of adjust---
 
 
@@ -105,6 +106,8 @@ do
                 sed -i -e "s/\(define PROCESS_NUM \).*/\1$num_processes_3PC/" config.h
                 ./scripts/split-roles-3-compile.sh -p $O_PARTY 
             fi
+for i in $(seq 1 $num_repititions)
+do
     if [ "$pr" -gt "6" ]
     then
         echo "Running protocol $pr, function $f, reduced_bitlength $rb, pre $prep, batch_size $batch_size_4PC"
@@ -113,6 +116,7 @@ do
     echo "Running protocol $pr, function $f, reduced_bitlength $rb, pre $prep, batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+done
 done
 done
 done

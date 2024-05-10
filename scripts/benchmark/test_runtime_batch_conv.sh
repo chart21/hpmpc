@@ -7,6 +7,7 @@ use_nvcc=(0 1 2) # 0: CPU-only, 1: GPU for matmul, 2: GPU for Convolution
 Dattype=256 # Careful, requires AVX512 support by your CPU architecture. In not supported use 256 (AVX2), 128 (SSE), or 32 (None) for vectorization
 num_processes_4PC=1 # Careful, multiplies by 24
 pre=(0 1) # 0: no pre-processing, 1: pre-processing
+num_repititions=10
 ##---End of adjust---
 
 
@@ -112,6 +113,8 @@ do
     then
         ./scripts/cuda_compile.sh 
     fi
+for i in $(seq 1 $num_repititions)
+do
     if [ "$pr" -gt "6" ]
     then
         echo "Running protocol $pr, function $functiona, use_nvcc $use_nv, batch_size $batch_size_4PC"
@@ -120,6 +123,7 @@ do
     echo "Running protocol $pr, function $functiona, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+done
 done
 done
 done
@@ -147,6 +151,8 @@ do
     then
         ./scripts/cuda_compile.sh 
     fi
+    for i in $(seq 1 $num_repititions)
+    do
     if [ "$pr" -gt "6" ]
     then
         echo "Running protocol $pr, function $functionb, use_nvcc $use_nv,  batch_size $batch_size_4PC"
@@ -155,6 +161,7 @@ do
     echo "Running protocol $pr, function $functionb, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+done
 done
 done
 done
@@ -182,6 +189,8 @@ do
     then
         ./scripts/cuda_compile.sh 
     fi
+    for i in $(seq 1 $num_repititions)
+    do
     if [ "$pr" -gt "6" ]
     then
         echo "Running protocol $pr, function $functionc, use_nvcc $use_nv,  batch_size $batch_size_4PC"
@@ -190,6 +199,7 @@ do
     echo "Running protocol $pr, function $functionc, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+done
 done
 done
 done
