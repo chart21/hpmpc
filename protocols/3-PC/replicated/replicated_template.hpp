@@ -121,7 +121,7 @@ return c;
 
 
     template <typename func_sub, typename func_mul>
-void mask_and_send_dot( func_sub SUB, func_mul MULT)
+void mask_and_send_dot_without_trunc( func_sub SUB, func_mul MULT)
 {
 a = SUB(a, getRandomVal(PPREV));
 a = SUB(a, getRandomVal(PNEXT));

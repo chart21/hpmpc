@@ -391,7 +391,8 @@ delete[] result_arr;
 void dot_prod_bench(DATATYPE* res)
 {
     Share::communicate(); // dummy round
-    using M = Matrix_Share<DATATYPE, Share>;
+    /* using M = Matrix_Share<DATATYPE, Share>; */
+    using M = Additive_Share<DATATYPE, Share>;
     auto a = new M[NUM_INPUTS];
     auto b = new M[NUM_INPUTS][NUM_INPUTS];
     auto c = new M[NUM_INPUTS];
@@ -401,10 +402,10 @@ void dot_prod_bench(DATATYPE* res)
 #if FUNCTION_IDENTIFIER == 14
         for(int j = 0; j < NUM_INPUTS; j++)
         {
-            c[i] += a[i] * b[i][j];
+            c[i] += a[i].prepare_dot(b[j][i]);
         }
 #endif
-        c[i].mask_and_send_dot();
+        c[i].mask_and_send_dot_without_trunc();
     }
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
