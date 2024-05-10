@@ -22,7 +22,7 @@ void MULT_BENCH(DATATYPE* res)
 {
 #if FUNCTION_IDENTIFIER == 1
     using S = Additive_Share<DATATYPE, Share>;
-#elif FUNCTION_IDENTIFIER == 2
+#else
     using S = XOR_Share<DATATYPE, Share>;
 #endif
     auto a = new S[NUM_INPUTS];
@@ -62,7 +62,7 @@ void MULT_BENCH_COMMUNICATION_ROUNDS (DATATYPE* res)
 int loop_num = NUM_INPUTS/COMMUNICATION_ROUNDS;
 #if FUNCTION_IDENTIFIER == 3
 using S = Additive_Share<DATATYPE, Share>;
-#elif FUNCTION_IDENTIFIER == 4
+#else
 using S = XOR_Share<DATATYPE, Share>;
 #endif
 auto a = new S[NUM_INPUTS];
