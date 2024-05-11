@@ -86,12 +86,12 @@ for pr in "${protocols[@]}"
 do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
     for f in "${functions[@]}"
+    do
         for n in "${num_inputs[@]}"
         do
 batch_size_4PC=$((n*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
 batch_size_3PC=$((n*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
 sed -i -e "s/\(define NUM_INPUTS \).*/\1$n/" config.h
-    do
         sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
             for rb in "${reduced_bitlength[@]}"
                 do
