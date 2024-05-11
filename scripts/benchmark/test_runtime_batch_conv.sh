@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##---Adjust these---
-protocols=(5) # 5: 3PC
+protocols=(12) # 5: 3PC
 #protocols=(12) # 12: 4PC
 use_nvcc=(0 1 2) # 0: CPU-only, 1: GPU for matmul, 2: GPU for Convolution
 Dattype=256 # Careful, requires AVX512 support by your CPU architecture. In not supported use 256 (AVX2), 128 (SSE), or 32 (None) for vectorization
