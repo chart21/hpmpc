@@ -90,6 +90,14 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
 #else
 store_compare_view_init(P_2);
 #endif
+
+#if PROTOCOL == 8
+#if PRE == 1
+    pre_send_to_(P_0);
+#else
+    send_to_(P_0);
+#endif
+#endif
 }
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)

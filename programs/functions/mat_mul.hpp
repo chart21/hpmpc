@@ -411,8 +411,7 @@ void dot_prod_bench(DATATYPE* res)
     for(int i = 0; i < NUM_INPUTS; i++)
     {
             c[i].complete_mult_without_trunc();
-    
-}
+    }
 
     Share::communicate();
     c[NUM_INPUTS-1].prepare_reveal_to_all();
