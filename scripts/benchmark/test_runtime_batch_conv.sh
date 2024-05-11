@@ -96,7 +96,7 @@ do
         do
         batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
         batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
-        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsa/" config.h
+        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
             sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
@@ -136,7 +136,7 @@ do
         do
         batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
         batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
-        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsb/" config.h
+        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
             sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
@@ -174,7 +174,7 @@ do
         sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$functionc/" config.h
         for num_inputs in "${num_inputsc[@]}"
         do
-        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsc/" config.h
+        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
         batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
         batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
         for use_nv in "${use_nvcc[@]}"
