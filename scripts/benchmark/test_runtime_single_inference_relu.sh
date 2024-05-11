@@ -9,7 +9,7 @@ reduced_bitlength=(0 1) # 0: full bitlength, 1: reduced bitlength (8-bit by defa
 pre=(0 1) # 0: no pre-processing, 1: pre-processing
 ##---End of adjust---
 
-functions=(404,405,406) # do not change, different ReLU approaches
+functions=(404 405 406) # do not change, different ReLU approaches
 num_inputs=(10000 100000 1000000 10000000) # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 num_repititions=10
 
@@ -77,6 +77,9 @@ do
     for f in "${functions[@]}"
     do
         sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
+        for n in "${num_inputs[@]}"
+            do
+            sed -i -e "s/\(define NUM_INPUTS \).*/\1$n/" config.h
             for rb in "${reduced_bitlength[@]}"
             do
             for prep in "${pre[@]}"
@@ -95,7 +98,7 @@ do
             fi
             
 
-            echo "Running protocol $pr, function $f, reduced_bitlength $rb, pre $prep"
+            echo "Running protocol $pr, function $f, reduced_bitlength $rb, pre $prep, num_inputs $n"
             
                 #if pr > 6
             for i in $(seq 1 $num_repititions)
@@ -148,6 +151,7 @@ do
     done
         done
     done
+done
 done
 cp scripts/benchmark/base_config.h config.h 
 

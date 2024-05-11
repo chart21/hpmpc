@@ -14,7 +14,7 @@ num_repititions=10
 
 
 
-functions=(404,405,406) # do not change, different ReLU approaches
+functions=(404 405 406) # do not change, different ReLU approaches
 num_inputs=(10000 100000 1000000 10000000) # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 num_processes_3PC=4*$num_processes_4PC #do not change
 split_role_factor_3PC=6 #do not change -> multiplies with num_processes_3PC
@@ -22,8 +22,6 @@ split_role_factor_4PC=24 #do not change -> multiplies with num_processes_4PC
 bitlength=32 #if you change this, also change reduced bitlength in config.h
 
 
-batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
-batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
 
 
 
@@ -83,12 +81,16 @@ fi
 
 
 cp scripts/benchmark/base_config.h config.h 
-sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
 sed -i -e "s/\(define DATTYPE \).*/\1$Dattype/" config.h
 for pr in "${protocols[@]}"
 do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
     for f in "${functions[@]}"
+        for n in "${num_inputs[@]}"
+        do
+batch_size_4PC=$((n*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
+batch_size_3PC=$((n*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
+sed -i -e "s/\(define NUM_INPUTS \).*/\1$n/" config.h
     do
         sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
             for rb in "${reduced_bitlength[@]}"
@@ -116,6 +118,7 @@ do
     echo "Running protocol $pr, function $f, reduced_bitlength $rb, pre $prep, batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+done
 done
 done
 done

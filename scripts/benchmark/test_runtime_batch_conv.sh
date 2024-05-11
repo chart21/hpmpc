@@ -26,8 +26,6 @@ split_role_factor_4PC=24 #do not change -> multiplies with num_processes_4PC
 bitlength=32 #if you change this, also changed reduced bitlength in config.h
 
 
-batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
-batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
 
 
 
@@ -96,6 +94,8 @@ do
         sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$functiona/" config.h
         for num_inputs in "${num_inputsa[@]}"
         do
+        batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
+        batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsa/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
@@ -134,6 +134,8 @@ do
         sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$functionb/" config.h
         for num_inputs in "${num_inputsb[@]}"
         do
+        batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
+        batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsb/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
@@ -173,6 +175,8 @@ do
         for num_inputs in "${num_inputsc[@]}"
         do
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputsc/" config.h
+        batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
+        batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
         for use_nv in "${use_nvcc[@]}"
         do
                     sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h
