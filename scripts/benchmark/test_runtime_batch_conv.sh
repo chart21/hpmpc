@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##---Adjust these---
-protocols=(12) # 5: 3PC
+protocols=(5) # 5: 3PC
 #protocols=(12) # 12: 4PC
 use_nvcc=(0 1 2) # 0: CPU-only, 1: GPU for matmul, 2: GPU for Convolution
 Dattype=256 # Careful, requires AVX512 support by your CPU architecture. In not supported use 256 (AVX2), 128 (SSE), or 32 (None) for vectorization
@@ -97,6 +97,9 @@ do
         batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
         batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
+        for prep in "${pre[@]}"
+        do
+            sed -i -e "s/\(define PRE \).*/\1$prep/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
             sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
@@ -117,13 +120,14 @@ for i in $(seq 1 $num_repititions)
 do
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $functiona, use_nvcc $use_nv, batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $functiona, use_nvcc $use_nv, pre $prep, batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
     else
-    echo "Running protocol $pr, function $functiona, use_nvcc $use_nv,  batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $functiona, use_nvcc $use_nv, pre $prep, batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
     sleep 1
+done
 done
 done
 done
@@ -140,6 +144,9 @@ do
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
+            for prep in "${pre[@]}"
+            do
+                sed -i -e "s/\(define PRE \).*/\1$prep/" config.h
             sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
             if [ "$pr" -gt "6" ]
             then
@@ -158,13 +165,14 @@ do
     do
     if [ "$pr" -gt "6" ]
     then
-        echo "Running protocol $pr, function $functionb, use_nvcc $use_nv,  batch_size $batch_size_4PC"
+        echo "Running protocol $pr, function $functionb, use_nvcc $use_nv,  pre $prep, batch_size $batch_size_4PC"
         ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
     else
-    echo "Running protocol $pr, function $functionb, use_nvcc $use_nv,  batch_size $batch_size_3PC"
+    echo "Running protocol $pr, function $functionb, use_nvcc $use_nv,  pre $prep, batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
     sleep 1
+done
 done
 done
 done
@@ -179,9 +187,12 @@ do
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
         batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
         batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
-        for use_nv in "${use_nvcc[@]}"
+        for prep in "${pre[@]}"
         do
-                    sed -i -e "s/\(define COMPRESS \).*/\1$rb/" config.h
+            sed -i -e "s/\(define PRE \).*/\1$prep/" config.h
+        for use_nv in "${use_nvcc[@]}"
+            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
+        do
             if [ "$pr" -gt "6" ]
             then
 
@@ -206,6 +217,7 @@ do
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
     sleep 1
+done
 done
 done
 done
