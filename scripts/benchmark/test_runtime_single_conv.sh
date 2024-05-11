@@ -81,7 +81,6 @@ do
         do
             for n in "${num_inputs[@]}"
             do
-            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
             for prep in "${pre[@]}"
             do
             sed -i -e "s/\(define PRE \).*/\1$pre/" config.h

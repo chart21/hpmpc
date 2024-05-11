@@ -123,6 +123,7 @@ do
     echo "Running protocol $pr, function $functiona, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+    sleep 1
 done
 done
 done
@@ -163,6 +164,7 @@ do
     echo "Running protocol $pr, function $functionb, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+    sleep 1
 done
 done
 done
@@ -203,6 +205,7 @@ do
     echo "Running protocol $pr, function $functionc, use_nvcc $use_nv,  batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+    sleep 1
 done
 done
 done
