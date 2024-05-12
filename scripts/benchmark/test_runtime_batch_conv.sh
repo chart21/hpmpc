@@ -191,8 +191,8 @@ do
         do
             sed -i -e "s/\(define PRE \).*/\1$prep/" config.h
         for use_nv in "${use_nvcc[@]}"
-            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
         do
+            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
             if [ "$pr" -gt "6" ]
             then
 
