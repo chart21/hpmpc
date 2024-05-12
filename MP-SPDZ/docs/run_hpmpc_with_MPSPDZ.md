@@ -4,6 +4,14 @@ Setup required to run HPMPC with MP-SPDZ. This assumes you have already Installe
 
 ## Setup
 
+### Dependencies
+
+For some MP-SPDZ programs one might require [PyTorch](https://pytorch.org/) or [numpy](https://numpy.org/) to install them you can use our [requirements.txt](/MP-SPDZ/requirements.txt)
+
+```sh
+pip install -r ./MP-SPDZ/requirements.txt
+```
+
 ### 1. Create required Directories
 
 Create two directories in [MP-SPDZ/](/MP-SPDZ/): `Schedules` for the schedule file and `Bytecodes` for the respective bytecode file
@@ -18,9 +26,7 @@ In order to compile the `.mpc` files in [MP-SPDZ/Functions/](/MP-SPDZ/Functions/
 
 Assuming [MP-SPDZ](https://github.com/data61/MP-SPDZ) is installed at `$MPSPDZ`, copy the desired `<file>.mpc` into `"$MPSPDZ"/Programs/Source` and compile them using their compiler with the bit length specified in [config.h](/config.h).
 
-```sh
-cp "./MP-SPDZ/Functions/<file.mpc>" "$MPSPDZ"/Programs/Source/
-```
+```sh cp "./MP-SPDZ/Functions/<file.mpc>" "$MPSPDZ"/Programs/Source/ ```
 
 - For arithmetic programs using [Additive_Shares](/protocols/Additive_Share.hpp) use:
 
