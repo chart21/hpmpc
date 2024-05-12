@@ -52,8 +52,10 @@ Adding:
 
 ### 3. Move the bytecode/schedule file into the respective directory
 
+Rename the schedule file `custom.sch` and use `FUNCTION_IDENTFIER = 501` **OR** alternatively see [here](/MP-SPDZ/docs/add_new_functions.md)
+
 ```sh
-mv "$MPSDZ/Programs/Schedules/<file>.sch" "./MP-SPDZ/Schedules/"
+mv "$MPSDZ/Programs/Schedules/<file>.sch" "./MP-SPDZ/Schedules/custom.sch"
 mv "$MPSDZ/Programs/Bytecode/*" "./MP-SPDZ/Bytecodes/"
 ```
 
@@ -73,11 +75,11 @@ Mapping from `FUNCTION_IDENTIFIER` $\to$ `.mpc` file:
 
 `FUNCTION_IDENTIFIER` | `.mpc`
 ----------------------|-------
-`500` | `tutorial.mpc`
+`500` | [tutorial.mpc](/MP-SPDZ/Functions/tutorial.mpc)
 `501` | `custom.mpc` (can be used for your own functions)
 `502-504` | legacy (used to test simple secure share operations)
-`505` | `int_test.mpc/int_test_32.mpc` (depending on `BITLENGTH` (`64` or `32`)) can be used to test public integer operations
-`506-534` | functions used for benchmarks (mapping can be found in [MP-SPDZ/bench_scripts/measurement.sh](/MP-SPDZ/bench_scripts/measurement.sh))
+`505` | [int_test.mpc](/MP-SPDZ/Functions/int_test.mpc)/[int_test_32.mpc](/MP-SPDZ/Functions/int_test_32.mpc) (depending on `BITLENGTH` (`64` or `32`)) can be used to test public integer operations
+`506-534` | functions used for benchmarks (see [here](/MP-SPDZ/Functions/bench)) mapping can be found in [MP-SPDZ/bench_scripts/measurement.sh](/MP-SPDZ/bench_scripts/measurement.sh)
 
 
 > Next Section [define private/public Input](/MP-SPDZ/docs/input.md)
