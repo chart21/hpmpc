@@ -77,7 +77,9 @@ Mapping from `FUNCTION_IDENTIFIER` $\to$ `.mpc` file:
 ----------------------|-------
 `500` | [tutorial.mpc](/MP-SPDZ/Functions/tutorial.mpc)
 `501` | `custom.mpc` (can be used for your own functions)
-`502-504` | legacy (used to test simple secure share operations)
+`502` | [add.mpc](/MP-SPDZ/Functions/add.mpc)
+`503` | [mul.mpc](/MP-SPDZ/Functions/mul.mpc)
+`504` | [mul_fix.mpc](/MP-SPDZ/Functions/mul_fix.mpc) (make sure that the precision is set correctly)
 `505` | [int_test.mpc](/MP-SPDZ/Functions/int_test.mpc)/[int_test_32.mpc](/MP-SPDZ/Functions/int_test_32.mpc) (depending on `BITLENGTH` (`64` or `32`)) can be used to test public integer operations
 `506-534` | functions used for benchmarks (see [here](/MP-SPDZ/Functions/bench)) mapping can be found in [MP-SPDZ/bench_scripts/measurement.sh](/MP-SPDZ/bench_scripts/measurement.sh)
 

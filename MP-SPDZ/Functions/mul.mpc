@@ -1,0 +1,12 @@
+size = int(program.args[1])
+a = sint.Array(size)
+b = sint.Array(size)
+c = sint.Array(size)
+
+a.input_from(0)
+b.input_from(1)
+c.input_from(2)
+
+result = a * b * c
+
+print_ln("%s", result.reveal())
