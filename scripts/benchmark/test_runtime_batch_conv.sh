@@ -15,9 +15,13 @@ num_inputsa=(32 64 128 256 512) # Careful, multiplies with split_role_factor*num
 num_inputsb=(1) # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 num_inputsc=(1 2 4 8 16 32 64) # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 
+num_inputsd=(10 30 50 100 300)
+
+
 functiona=400 # do not change
 functionb=401 # do not change
 functionc=402 # do not change
+functiond=403
 
 
 num_processes_3PC=4*$num_processes_4PC #do not change
@@ -183,6 +187,51 @@ do
     sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
         sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$functionc/" config.h
         for num_inputs in "${num_inputsc[@]}"
+        do
+        sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
+        batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))
+        batch_size_3PC=$((num_inputs*split_role_factor_3PC*num_processes_3PC*Dattype/bitlength))
+        for prep in "${pre[@]}"
+        do
+            sed -i -e "s/\(define PRE \).*/\1$prep/" config.h
+        for use_nv in "${use_nvcc[@]}"
+        do
+            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
+            if [ "$pr" -gt "6" ]
+            then
+
+                    sed -i -e "s/\(define PROCESS_NUM \).*/\1$num_processes_4PC/" config.h
+                    ./scripts/split-roles-4-compile.sh -u $use_nv -p $O_PARTY 
+            else
+                sed -i -e "s/\(define PROCESS_NUM \).*/\1$num_processes_3PC/" config.h
+                ./scripts/split-roles-3-compile.sh -u $use_nv -p $O_PARTY 
+            fi
+    if [ "$use_nv" != "0" ]
+    then
+        ./scripts/cuda_compile.sh 
+    fi
+    for i in $(seq 1 $num_repititions)
+    do
+    if [ "$pr" -gt "6" ]
+    then
+        echo "Running protocol $pr, function $functionc, use_nvcc $use_nv,  batch_size $batch_size_4PC"
+        ./scripts/split-roles-4-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2 -d $O_IP3
+    else
+    echo "Running protocol $pr, function $functionc, use_nvcc $use_nv,  batch_size $batch_size_3PC"
+    ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
+    fi
+    sleep 3
+done
+done
+done
+done
+done
+
+for pr in "${protocols[@]}"
+do
+    sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
+        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$functiond/" config.h
+        for num_inputs in "${num_inputsd[@]}"
         do
         sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
         batch_size_4PC=$((num_inputs*split_role_factor_4PC*num_processes_4PC*Dattype/bitlength))

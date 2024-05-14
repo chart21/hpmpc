@@ -12,6 +12,7 @@ pre=(0 1) # 0: no pre-processing, 1: pre-processing
 num_inputs=64 # Careful, multiplies with split_role_factor*num_processes*dattypes/bitlength
 Dattype=256 # Careful, requires AVX512 support by your CPU architecture. In not supported use 256 (AVX2), 128 (SSE), or 32 (None) for vectorization
 num_processes_4PC=1 # Careful, multiplies by 24
+num_repititions=10
 ##---End of adjust---
 
 num_processes_3PC=4*$num_processes_4PC #do not change
@@ -111,6 +112,8 @@ do
     then
         ./scripts/cuda_compile.sh 
     fi
+    for i in $(seq 1 $num_repititions)
+    do
     if [ "$pr" -gt "6" ]
     then
         echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $rb, pre $prep, batch_size $batch_size_4PC"
@@ -119,6 +122,8 @@ do
     echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $rb, pre $prep, batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+    sleep 3
+done
 done
 done
 done

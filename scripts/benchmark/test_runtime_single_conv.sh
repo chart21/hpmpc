@@ -14,6 +14,9 @@ num_inputs=(32 64 128 256 512)
 functions2=(402) # do not change
 num_inputs2=(1 2 4 8 16 32 64)
 
+function3=(403)
+num_inputs3=(10 30 50 100 300)
+
 helpFunction()
 {
    echo "Script to test the runtime of single inferences for different configurations"
@@ -100,7 +103,8 @@ do
             then
                 ./scripts/cuda_compile.sh
             fi
-
+            for i in $(seq 1 $num_repititions)
+            do
             echo "Running protocol $pr, function $f, num_inputs $n, use_nvcc $use_nv, pre $prep"
             
                 #if pr > 6
@@ -148,6 +152,8 @@ do
                     echo "Invalid party number"
                 fi
             fi
+            sleep 3
+        done
         done
         done
     done
@@ -234,11 +240,102 @@ do
                     echo "Invalid party number"
                 fi
             fi
+            sleep 3
         done
         done
     done
 done
 done
 done
+
+for pr in "${protocols[@]}"
+do
+    sed -i -e "s/\(define PROTOCOL \).*/\1$pr/" config.h
+    for f in "${functions3[@]}"
+    do
+        sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$f/" config.h
+        for n in "${num_inputs3[@]}"
+        do
+            for use_nv in "${use_nvcc[@]}"
+            do
+            sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
+            for prep in "${pre[@]}"
+            do
+                sed -i -e "s/\(define PRE \).*/\1$prep/" config.h
+            if [[ "$O_PARTY" == *"all"* ]]
+            then 
+                if [ "$pr" -gt "6" ]
+                then
+                    ./scripts/config.sh -f $f -p all4 -u $use_nv -n $n
+                else
+                    ./scripts/config.sh -f $f -p all3 -u $use_nv -n $n
+                fi
+            else
+                ./scripts/config.sh -f $f -p $O_PARTY -u $use_nv -n $n
+            fi
+            
+            if [ "$use_nv" != "0" ]
+            then
+                ./scripts/cuda_compile.sh
+            fi
+
+            for i in $(seq 1 $num_repititions)
+            do
+            echo "Running protocol $pr, function $f, num_inputs $n, use_nvcc $use_nv, pre $prep"
+            
+                #if pr > 6
+            if [ "$pr" -gt "6" ]
+            then
+                if [ "$O_PARTY" == "0" ]
+                then
+                    ./run-P0.o $O_IP1 $O_IP2 $O_IP3
+                elif [ "$O_PARTY" == "1" ]
+                then
+                    ./run-P1.o $O_IP0 $O_IP2 $O_IP3
+                elif [ "$O_PARTY" == "2" ]
+                then
+                    ./run-P2.o $O_IP0 $O_IP1 $O_IP3
+                elif [ "$O_PARTY" == "3" ]
+                then
+                    ./run-P3.o $O_IP0 $O_IP1 $O_IP2
+                elif [ "$O_PARTY" == *"all"* ]
+                then
+                    ./run-P0.o & 
+                    ./run-P1.o &
+                    ./run-P2.o &
+                    ./run-P3.o &
+                    wait
+                else
+                    echo "Invalid party number"
+                fi
+            else 
+                if [ "$O_PARTY" == "0" ]
+                then
+                    ./run-P0.o $O_IP1 $O_IP2
+                elif [ "$O_PARTY" == "1" ]
+                then
+                    ./run-P1.o $O_IP0 $O_IP2
+                elif [ "$O_PARTY" == "2" ]
+                then
+                    ./run-P2.o $O_IP0 $O_IP1
+                elif [[ "$O_PARTY" == *"all"* ]]
+                then
+                    ./run-P0.o &
+                    ./run-P1.o &
+                    ./run-P2.o &
+                    wait
+                else
+                    echo "Invalid party number"
+                fi
+            fi
+            sleep 3
+        done
+        done
+    done
+done
+done
+done
+
+
 cp scripts/benchmark/base_config.h config.h 
 

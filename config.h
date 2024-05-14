@@ -13,17 +13,17 @@
 //13,14: Dot product, 16,17 RELU, 20,21 Conv Forward (*10), Conv Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards (Different Sizes), 25,26 Forward Backwards (Different Sizes), 27 Mat Mul Eigen, 28 max/min/argmax/argmin, 29 mult3, 30 mult 4, 31-34 dot2/dot3/dot4/dotmixed, 
 // 40-65 Various benchmarks (Elementary operations such as mult, div. Statistical operations such as avg, max. Set Intersection, AES, Private Auction, Logistic Regression, etc. Refer to programs/functions/sevare.hpp
 // 70+ Neural network architectures (LeNet, AlexNet, VGG, ResNet, etc.) on different dataset sizes (MNIST, CIFAR-10, Imagenet). Refer to programs/functions/NN.hpp
-#define FUNCTION_IDENTIFIER 400
+#define FUNCTION_IDENTIFIER 404
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
 #define DATTYPE 32
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
-#define PRE 0
+#define PRE 1
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 32
+#define NUM_INPUTS 1000
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -52,6 +52,8 @@
 #define PRINT_IMPORTANT 1
 
 #define FRACTIONAL 5
+
+#define SRNG_SEED 0 // Seed for the random number generator.
 
 // Starting port for required port range of the sockets, must be multiple of 1000 for some applications
 #define BASE_PORT 10000
@@ -172,6 +174,8 @@ int base_port = BASE_PORT; // temporary solution
 #define TRUNC_DELAYED 0
 #define COMPUTE_ARGMAX 0 // 0: skip final argmax during inference, 1: Compute final argmax during inference
 #define PUBLIC_WEIGHTS 0 // 0: weights are secretly shared, 1: weights are public
+
+
 
 
 #define JIT_VEC 1 // 0: vectorize and share inputs from the beginning, 1: vectorize and share inputs just in time, load a batch of images, then vectorize

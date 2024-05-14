@@ -442,18 +442,18 @@ player_id = PARTY;
 /* init_srng(0,0); */
 /* init_srng(1,0); */
 /* init_srng(2,0); */
-init_srng(PPREV, modulo((player_id - 1),  num_players)*101011 + 5000);
-init_srng(PNEXT,player_id*101011 + 5000);
-init_srng(num_players-1, player_id * 291932 +6000); // used for sharing inputs
+init_srng(PPREV, modulo((player_id - 1),  num_players)*101011 + 5000 + SRNG_SEED);
+init_srng(PNEXT,player_id*101011 + 5000 + SRNG_SEED);
+init_srng(num_players-1, player_id * 291932 +6000 + SRNG_SEED); // used for sharing inputs
 #elif num_players == 4
-init_srng(0,0);
-init_srng(1,0);
-init_srng(2,0);
-init_srng(3,0);
-init_srng(4,0);
-init_srng(5,0);
-init_srng(6,0);
-init_srng(7,0);
+init_srng(0,SRNG_SEED);
+init_srng(1,SRNG_SEED);
+init_srng(2,SRNG_SEED);
+init_srng(3,SRNG_SEED);
+init_srng(4,SRNG_SEED);
+init_srng(5,SRNG_SEED);
+init_srng(6,SRNG_SEED);
+init_srng(7,SRNG_SEED);
 #endif
 
 

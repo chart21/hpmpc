@@ -2,12 +2,14 @@
 
 ##---Adjust these---
 # protocols=(5 12) # 5: 3PC, 12: 4PC
-protocols=(5)
+protocols=(5) # 5: 3PC
+#protocols=(12) # 12: 4PC
 functions=(70 170 270 71 171 271 72 172 272 73 173 273 74 174 274 75 175 275 76 176 276 77 177 277 78 178 278 79 179 279 80 180 280 81 181 281 82 182 282 83 183 283)
 # functions=(82)
 use_nvcc=(0 1 2) # 0: CPU-only, 1: GPU for matmul, 2: GPU for Convolution
 reduced_bitlength=(0 1) # 0: full bitlength, 1: reduced bitlength (8-bit by default)
 pre=(0 1) # 0: no pre-processing, 1: pre-processing
+num_repititions=10
 ##---End of adjust---
 
 
@@ -98,7 +100,8 @@ do
             then
                 ./scripts/cuda_compile.sh
             fi
-
+for i in $(seq 1 $num_repititions)
+do
             echo "Running protocol $pr, function $f, use_nvcc $use_nv, reduced_bitlength $rb, pre $prep"
             
                 #if pr > 6
@@ -149,6 +152,8 @@ do
                     echo "Invalid party number"
                 fi
             fi
+            sleep 3
+        done
         done
         done
     done

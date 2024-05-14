@@ -118,6 +118,7 @@ do
     echo "Running protocol $pr, function $f, reduced_bitlength $rb, pre $prep, batch_size $batch_size_3PC"
     ./scripts/split-roles-3-execute.sh -p $O_PARTY -a $O_IP0 -b $O_IP1 -c $O_IP2
     fi
+    sleep 3
 done
 done
 done

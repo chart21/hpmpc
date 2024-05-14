@@ -147,6 +147,7 @@ do
                     echo "Invalid party number"
                 fi
             fi
+            sleep 3
         done
     done
         done

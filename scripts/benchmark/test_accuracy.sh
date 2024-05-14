@@ -10,6 +10,8 @@ bitlengths=(32 64 16)
 trunc_apporach=(0 1 2) # 0: Probabilistic, 1: Probabilistic with reduced slack, 2: Deterministic
 trunc_delayed=(0 1) # delay truncation until RELU
 trunc_then_mult=(0 1) # truncate before or after multiplication
+num_repititions=10
+
 
 sed -i -e "s/\(define PROTOCOL \).*/\1$protocol/" config.h
 sed -i -e "s/\(define NUM_INPUTS \).*/\1$num_inputs/" config.h
@@ -35,6 +37,8 @@ for f in "${functions[@]}"
                         do
                         sed -i -e "s/\(define TRUNC_THEN_MULT \).*/\1$mt/" config.h
                         ./scripts/config.sh -f $f -p all3 
+                        for((i=0;i<num_repititions;i++)); do
+                                sed -i -e "s/\(define SRNG_SEED \).*/\1$i/" config.h
                         echo "Running function $f with bitlength $bitlength, fractional $b, trunc_approach $ta, trunc_delayed $td, trunc_then_mult $mt"
                         ./scripts/run_locally.sh -n 3
                     done
