@@ -67,10 +67,13 @@ template <class sint>
 void Conv2d<sint>::pre(vector<sint>& S) {
     for (int i_batch = 0; i_batch < batch_size; i_batch++) {
         size_t base = r1 + i_batch * inputs_w * inputs_h * n_channels_in;
-        assert(base + inputs_w * inputs_h * n_channels_in <= S.size());
         sint* input_base = &S[base];
 
         size_t output = r0 + i_batch * output_h * output_w;
+
+        if (output + (output_h - 1) * output_w + (output_w - 1) >= S.size()) { // greatest address
+            S.resize(output + (output_h - 1) * output_w + (output_w - 1));
+        }
 
         for (int out_y = 0; out_y < output_h; out_y++)
             for (int out_x = 0; out_x < output_w; out_x++) {
@@ -105,7 +108,6 @@ template <class sint>
 void Conv2d<sint>::post(vector<sint>& S) const {
     for (int i_batch = 0; i_batch < batch_size; i_batch++) {
         size_t base = r0 + i_batch * output_h * output_w;
-        assert(base + output_h * output_w <= S.size());
         sint* output_base = &S[base];
         for (int out_y = 0; out_y < output_h; out_y++)
             for (int out_x = 0; out_x < output_w; out_x++) {
