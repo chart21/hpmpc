@@ -89,10 +89,8 @@ class Integer {
             res.push_back(ele);
         return res;
     }
-    
-    std::vector<IBase> get_all_64() const {
-        return nums;
-    }
+
+    std::vector<IBase> get_all_64() const { return nums; }
 
     DATATYPE get_type() const {
         if (nums.size() == SIZE_VEC) {

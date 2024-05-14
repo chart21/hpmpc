@@ -36,7 +36,8 @@ class CInteger {
             assert(all.size() == SIZE_VEC);
 
             alignas(DATATYPE) UINT_TYPE tmp[SIZE_VEC];
-            for (size_t i = 0; i < SIZE_VEC; ++i) tmp[i] = all[i];
+            for (size_t i = 0; i < SIZE_VEC; ++i)
+                tmp[i] = all[i];
             orthogonalize_arithmetic(tmp, &nums, 1);
         }
     }
@@ -80,7 +81,8 @@ class CInteger {
         assert(all.size() == SIZE_VEC);
 
         alignas(DATATYPE) UINT_TYPE tmp[SIZE_VEC];
-        for (size_t i = 0; i < SIZE_VEC; ++i) tmp[i] = all[i];
+        for (size_t i = 0; i < SIZE_VEC; ++i)
+            tmp[i] = all[i];
 
         orthogonalize_arithmetic(tmp, &nums, 1);
         return *this;

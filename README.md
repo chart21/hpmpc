@@ -97,7 +97,7 @@ git switch mp-spdz
 
 ## Documentation files
 
-### Setup and successful run HP-MPC with MP-SPDZ
+### Setup and successfully run HP-MPC with MP-SPDZ
 
 1. [Install MP-SPDZ](/MP-SPDZ/docs/install_mpspdz.md)
 2. [Required setup to run HP-MPC with MP-SPDZ as frontend](/MP-SPDZ/docs/run_hpmpc_with_MPSPDZ.md)
