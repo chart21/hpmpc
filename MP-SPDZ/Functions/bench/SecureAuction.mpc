@@ -3,7 +3,7 @@ from Compiler import types
 
 import math
 n_inputs = int(program.args[1])
-priceRange= int(10)
+priceRange= int(100)
 
 n_bits = 32
 value_type = sint
