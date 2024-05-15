@@ -279,30 +279,31 @@ void dot_prod_round_bench(DATATYPE* res)
 {
     using M = Additive_Share<DATATYPE, Share>;
     Share::communicate(); // dummy round
-    const int sequential_rounds = 10; // low number of rounds due to high computational complexity
-    auto a = new M[NUM_INPUTS];
-    auto b = new M[NUM_INPUTS][NUM_INPUTS];
-    auto c = new M[NUM_INPUTS];
+    const int sequential_rounds = NUM_INPUTS; // low number of rounds due to high computational complexity
+    const int dot_prod_size = 20000;
+    auto a = new M[dot_prod_size];
+    auto b = new M[dot_prod_size][dot_prod_size];
+    auto c = new M[dot_prod_size];
   for(int rounds = 0; rounds < sequential_rounds; rounds++)
   {
-    for(int i = 0; i < NUM_INPUTS; i++)
+    for(int i = 0; i < dot_prod_size; i++)
     {
-        for(int j = 0; j < NUM_INPUTS; j++)
+        for(int j = 0; j < dot_prod_size; j++)
         {
             c[i] += a[i].prepare_dot(b[j][i]);
         }
         c[i].mask_and_send_dot_without_trunc();
     }
     Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
+    for(int i = 0; i < dot_prod_size; i++)
     {
             c[i].complete_mult_without_trunc();
     }
     Share::communicate();
   }
-    c[NUM_INPUTS-1].prepare_reveal_to_all();
+    c[dot_prod_size-1].prepare_reveal_to_all();
     Share::communicate();
-    *res = c[NUM_INPUTS-1].complete_reveal_to_all();
+    *res = c[dot_prod_size-1].complete_reveal_to_all();
 
 delete[] a;
 delete[] b;
