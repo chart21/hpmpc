@@ -24,7 +24,7 @@ OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 #endif
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
     store_compare_view(P_2, val);
 #else
 #if PRE == 1
@@ -89,7 +89,7 @@ c.v = ADD( MULT(v,b.r), MULT(b.v,r));
 /* Datatype m3_flat = AND(a.v,b.v); */
 
 /* c.m = XOR(x1y1, XOR( XOR(AND(a.v,b.v), AND( XOR(a.v, a.r), XOR(b.v, b.r))), c.r)); */
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 store_compare_view(P_2,o1);
 #else
     #if PRE == 1
@@ -121,7 +121,7 @@ void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
 v = ADD(v,r);
 r = TRUNC(SUB(ADD(getRandomVal(P_013), getRandomVal(P_023)), r)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 store_compare_view(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
 #else
 #if PRE == 1
@@ -144,7 +144,7 @@ Datatype o1 = ADD(cr,ADD( r, getRandomVal(P_013))); // x0 y0 + z_0 + r_0,1,3_2
 v = SUB(v,cr); // au y_0 + bv x_0 - z_0
 #endif
 r = cr; //zo
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 store_compare_view(P_2,o1);
 #else
     #if PRE == 1
@@ -347,7 +347,7 @@ static void prepare_A2B_S2(int m, int k, OEC_MAL0_Share in[], OEC_MAL0_Share out
     {
             out[i-m].r = temp[i]; 
             out[i-m].v = temp[i];  // set both shares to -x0
-        #if PROTOCOL == 12
+        #if PROTOCOL == 12 || PRE == 1
             store_compare_view(P_2, FUNC_XOR(temp[i],getRandomVal(P_013))); //  - x_0 + r013
         #else
             #if PRE == 1
@@ -391,7 +391,7 @@ void prepare_opt_bit_injection(OEC_MAL0_Share x[], OEC_MAL0_Share out[])
         Datatype r013_2 = getRandomVal(P_013);
         Datatype m00 = OP_SUB(y0[i], r013);
         Datatype m01 = OP_SUB(OP_MULT(x[i].r, y0[i]), r013_2);
-#if PROTOCOL != 12
+#if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
         pre_send_to_live(P_2, m00);
         pre_send_to_live(P_2, m01);
@@ -446,7 +446,7 @@ void prepare_bit2a(OEC_MAL0_Share out[])
     {
         Datatype r013 = getRandomVal(P_013);
         Datatype m0 = OP_SUB(y0[i], r013);
-#if PROTOCOL != 12
+#if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
         pre_send_to_live(P_2, m0);
 #else
@@ -497,7 +497,7 @@ void prepare_bit_injection_S2(OEC_MAL0_Share out[])
     {
         out[i].v = temp[i]; //c_w = x_0
         out[i].r = OP_SUB(SET_ALL_ZERO(), temp[i]) ; // z_0 = - x_0
-        #if PROTOCOL == 12
+        #if PROTOCOL == 12 || PRE == 1
             store_compare_view(P_2, OP_ADD(temp[i],getRandomVal(P_013))); //  - x_0 + r013
         #else
         #if PRE == 1
@@ -534,7 +534,7 @@ Datatype mxz = SUB(MULT(r,c.r),getRandomVal(P_013));
 Datatype myz = SUB(MULT(b.r,c.r),getRandomVal(P_013));
 Datatype mxyz = MULT(MULT(r,b.r),c.r);
 mxyz = SUB( SET_ALL_ZERO(), mxyz); // trick to be compatible with dot2
-#if PRE == 1 && PROTOCOL == 12
+#if PRE == 1
 Datatype rxy = pre_receive_from_live(P_3);
 Datatype rxz = pre_receive_from_live(P_3);
 Datatype ryz = pre_receive_from_live(P_3);
@@ -547,7 +547,7 @@ Datatype ryz = receive_from_live(P_3);
 /* pre_send_to_live(P_2, myz); */
 /* pre_send_to_live(P_2, mxyz); */
 #endif
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 store_compare_view(P_2, mxy);
 store_compare_view(P_2, mxz);
 store_compare_view(P_2, myz);
@@ -576,7 +576,7 @@ Datatype mxy = SUB(MULT(r,b.r),getRandomVal(P_013));
 Datatype mxz = SUB(MULT(r,c.r),getRandomVal(P_013));
 Datatype myz = SUB(MULT(b.r,c.r),getRandomVal(P_013));
 Datatype mxyz = SUB(MULT(MULT(r,b.r),c.r),getRandomVal(P_013));
-#if PRE == 1 && PROTOCOL == 12
+#if PRE == 1
 Datatype rxy = pre_receive_from_live(P_3);
 Datatype rxz = pre_receive_from_live(P_3);
 Datatype ryz = pre_receive_from_live(P_3);
@@ -591,7 +591,7 @@ Datatype rxyz = receive_from_live(P_3);
 /* pre_send_to_live(P_2, myz); */
 /* pre_send_to_live(P_2, mxyz); */
 #endif
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 store_compare_view(P_2, mxy);
 store_compare_view(P_2, mxz);
 store_compare_view(P_2, myz);
@@ -636,7 +636,7 @@ Datatype mxyw = SUB(MULT(MULT(r,b.r),d.r),getRandomVal(P_013));
 Datatype mxzw = SUB(MULT(MULT(r,c.r),d.r),getRandomVal(P_013));
 Datatype myzw = SUB(MULT(MULT(b.r,c.r),d.r),getRandomVal(P_013));
 Datatype mxyzw = MULT(MULT(r,b.r),MULT(c.r,d.r));
-#if PRE == 1 && PROTOCOL == 12
+#if PRE == 1
 /* pre_send_to_live(P_2, mxy); */
 /* pre_send_to_live(P_2, mxz); */
 /* pre_send_to_live(P_2, mxw); */
@@ -670,7 +670,7 @@ Datatype rxyw = receive_from_live(P_3);
 Datatype rxzw = receive_from_live(P_3);
 Datatype ryzw = receive_from_live(P_3);
 #endif
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 store_compare_view(P_2, mxy);
 store_compare_view(P_2, mxz);
 store_compare_view(P_2, mxw);
@@ -734,7 +734,7 @@ Datatype mxyw = SUB(MULT(MULT(r,b.r),d.r),getRandomVal(P_013));
 Datatype mxzw = SUB(MULT(MULT(r,c.r),d.r),getRandomVal(P_013));
 Datatype myzw = SUB(MULT(MULT(b.r,c.r),d.r),getRandomVal(P_013));
 Datatype mxyzw = SUB(MULT(MULT(r,b.r),MULT(c.r,d.r)),getRandomVal(P_013));
-#if PRE == 1 && PROTOCOL == 12
+#if PRE == 1
 /* pre_send_to_live(P_2, mxy); */
 /* pre_send_to_live(P_2, mxz); */
 /* pre_send_to_live(P_2, mxw); */
@@ -770,7 +770,7 @@ Datatype rxzw = receive_from_live(P_3);
 Datatype ryzw = receive_from_live(P_3);
 Datatype rxyzw = receive_from_live(P_3);
 #endif
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 store_compare_view(P_2, mxy);
 store_compare_view(P_2, mxz);
 store_compare_view(P_2, mxw);
@@ -839,7 +839,7 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     r_mk2.r = SUB(SET_ALL_ZERO(), rmk2);
     r_msb.v = rmsb;
     r_msb.r = SUB(SET_ALL_ZERO(), rmsb);
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
     store_compare_view(P_2, SUB(r_mk2.r, getRandomVal(P_013)));
     store_compare_view(P_2, SUB(r_msb.r, getRandomVal(P_013)));
 #else

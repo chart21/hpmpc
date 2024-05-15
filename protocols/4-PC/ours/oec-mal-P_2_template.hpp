@@ -61,7 +61,7 @@ OEC_MAL2_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
     r = pre_receive_from_live(P_3);
 #else
@@ -115,7 +115,7 @@ template <typename func_add, typename func_sub, typename func_mul>
        getRandomVal(P_123); // Probably sufficient to only generate with P_3 ->
                            // Probably not because of verification
 /* c.r = getRandomVal(P_3); */
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
    Datatype o1 = pre_receive_from_live(P_3);
 #else
@@ -188,7 +188,7 @@ send_to_live(P_0,ADD(v, m)); // c_0 + w
 send_to_live(P_0,ADD(v, getRandomVal(P_123))); // c_0 + w
 #endif
 
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 r = pre_receive_from_live(P_3); // z_2 = m0
 #else
@@ -220,7 +220,7 @@ Datatype cr = getRandomVal(P_023);
        getRandomVal(P_123); // Probably sufficient to only generate with P_3 ->
                            // Probably not because of verification
 /* c.r = getRandomVal(P_3); */
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1 
 #if PRE == 1
    Datatype o1 = pre_receive_from_live(P_3);
 #else
@@ -275,7 +275,7 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL2_Share& r_mk2, OEC_MAL2_Share& r_msb, OEC_MAL2_Share& c, OEC_MAL2_Share& c_prime) const{
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
     r_mk2.r = pre_receive_from_live(P_3);
     r_msb.r = pre_receive_from_live(P_3);
@@ -484,7 +484,7 @@ static void complete_A2B_S2(int k, OEC_MAL2_Share out[])
 {
     for(int i = 0; i < k; i++)
     {
-    #if PROTOCOL != 12
+    #if PROTOCOL != 12 && PRE == 0
         #if PRE == 0
         Datatype m0 = receive_from_live(P_0);
         #else
@@ -518,7 +518,7 @@ void prepare_bit2a(OEC_MAL2_Share out[])
     orthogonalize_arithmetic(temp2, b0v);
     for(int i = 0; i < BITLENGTH; i++)
     {
-#if PROTOCOL != 12
+#if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
         Datatype m00 = pre_receive_from_live(P_0);
 #else
@@ -569,7 +569,7 @@ void prepare_opt_bit_injection(OEC_MAL2_Share a[], OEC_MAL2_Share out[])
     orthogonalize_arithmetic(temp2, b0v);
     for(int i = 0; i < BITLENGTH; i++)
     {
-#if PROTOCOL != 12
+#if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
         Datatype m00 = pre_receive_from_live(P_0);
         Datatype m01 = pre_receive_from_live(P_0);
@@ -661,7 +661,7 @@ static void complete_bit_injection_S2(OEC_MAL2_Share out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-        #if PROTOCOL != 12
+        #if PROTOCOL != 12 && PRE == 0
         #if PRE == 0
         Datatype m0 = receive_from_live(P_0);
         #else
@@ -685,7 +685,7 @@ static void complete_bit_injection_S2(OEC_MAL2_Share out[])
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_Share prepare_dot3(const OEC_MAL2_Share b, const OEC_MAL2_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 Datatype mxy = pre_receive_from_live(P_3);
 Datatype mxz = pre_receive_from_live(P_3);
@@ -751,7 +751,7 @@ return d;
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_Share prepare_mult3(const OEC_MAL2_Share b, const OEC_MAL2_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 Datatype mxy = pre_receive_from_live(P_3);
 Datatype mxz = pre_receive_from_live(P_3);
@@ -835,7 +835,7 @@ store_compare_view(P_012, ADD(v,m)); //compare d_0 s
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_Share prepare_dot4(const OEC_MAL2_Share b, const OEC_MAL2_Share c, const OEC_MAL2_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 Datatype mxy = pre_receive_from_live(P_3);
 Datatype mxz = pre_receive_from_live(P_3);
@@ -1018,7 +1018,7 @@ return e;
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_Share prepare_mult4(const OEC_MAL2_Share b, const OEC_MAL2_Share c, const OEC_MAL2_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 Datatype mxy = pre_receive_from_live(P_3);
 Datatype mxz = pre_receive_from_live(P_3);

@@ -30,7 +30,7 @@ OEC_MAL2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_ad
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_receive_from_(P_3);
 #else
@@ -55,7 +55,7 @@ send_to_(P_0);
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL2_init& r_mk2, OEC_MAL2_init& r_msb, OEC_MAL2_init& c, OEC_MAL2_init& c_prime){
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_receive_from_(P_3);
 pre_receive_from_(P_3);
@@ -100,7 +100,7 @@ OEC_MAL2_init prepare_dot(const OEC_MAL2_init b, func_add ADD, func_sub SUB, fun
     template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
-#if PROTOCOL == 12 || PROTOCOL == 8
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 store_compare_view_init(P_0);
 #if PRE == 1
 pre_receive_from_(P_3);
@@ -141,7 +141,7 @@ send_to_(P_0);
 #else
 store_compare_view_init(P_012);
 #endif
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_receive_from_(P_3); // z_2 = m0
 #else
@@ -161,7 +161,7 @@ store_compare_view_init(P_3); // compare view of m0
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_init prepare_mult(OEC_MAL2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12 || PROTOCOL == 8
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 store_compare_view_init(P_0);
 #if PRE == 1
 pre_receive_from_(P_3);
@@ -314,7 +314,7 @@ static void complete_A2B_S2(int k, OEC_MAL2_init out[])
 {
     for(int i = 0; i < k; i++)
     {
-#if PROTOCOL != 12
+#if PROTOCOL != 12 && PRE == 0
         #if PRE == 0
         receive_from_(P_0);
         #else
@@ -337,7 +337,7 @@ void prepare_bit2a( OEC_MAL2_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-#if PROTOCOL != 12
+#if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
         pre_receive_from_(P_0);
 #else
@@ -368,7 +368,7 @@ void prepare_opt_bit_injection(OEC_MAL2_init a[], OEC_MAL2_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-#if PROTOCOL != 12
+#if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
         pre_receive_from_(P_0);
         pre_receive_from_(P_0);
@@ -422,7 +422,7 @@ static void complete_bit_injection_S2(OEC_MAL2_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-#if PROTOCOL != 12
+#if PROTOCOL != 12 && PRE == 0
         #if PRE == 0
         receive_from_(P_0);
         #else
@@ -443,7 +443,7 @@ static void complete_bit_injection_S2(OEC_MAL2_init out[])
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_init prepare_dot3(OEC_MAL2_init b, OEC_MAL2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_receive_from_(P_3);
 pre_receive_from_(P_3);
@@ -471,7 +471,7 @@ return d;
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_init prepare_mult3(OEC_MAL2_init b, OEC_MAL2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_receive_from_(P_3);
 pre_receive_from_(P_3);
@@ -512,7 +512,7 @@ store_compare_view_init(P_012);
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_init prepare_dot4(OEC_MAL2_init b, OEC_MAL2_init c, OEC_MAL2_init d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_receive_from_(P_3);
 pre_receive_from_(P_3);
@@ -575,7 +575,7 @@ return e;
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL2_init prepare_mult4(OEC_MAL2_init b, OEC_MAL2_init c, OEC_MAL2_init d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_receive_from_(P_3);
 pre_receive_from_(P_3);

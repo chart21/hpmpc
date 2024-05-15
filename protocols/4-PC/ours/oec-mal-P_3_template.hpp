@@ -37,7 +37,7 @@ OEC_MAL3_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 #endif
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
     pre_send_to_live(P_2, val);
 #else
@@ -91,7 +91,7 @@ Datatype o4 = ADD(SUB(MULT(r1, SUB(b.r1,b.r0)) ,MULT(b.r1,r0)),getRandomVal(P_12
 c.r0 = o4;
 /* Datatype o4 = ADD( SUB( MULT(a.r0,b.r1) ,MULT(a.r1,b.r0)),getRandomVal(P_123)); */
 /* o4 = XOR(o4,o1); //computationally easier to let P_3 do it here instead of P_0 later */
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 pre_send_to_live(P_2, o1);
 #else
@@ -120,7 +120,7 @@ Datatype r0123 = ADD(getRandomVal(P_013),getRandomVal(P_023));
 r1 = TRUNC(SUB(r0123, r1)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
 r0 = SUB(r0, r0123);
 
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1 
 #if PRE == 1
 pre_send_to_live(P_2, SUB(r1,getRandomVal(P_013))); // compare m^0 - z_1
 #else
@@ -162,7 +162,7 @@ Datatype o4 = ADD(r0,getRandomVal(P_123)); // - w + r123
 r0 = o4;
 r1 = rc1;
 
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 pre_send_to_live(P_2, o1);
 #else
@@ -209,7 +209,7 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     r_mk2.r1 = SUB(SET_ALL_ZERO(), rmk2);
     r_msb.r0 = SET_ALL_ZERO();
     r_msb.r1 = SUB(SET_ALL_ZERO(), rmsb);
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
     pre_send_to_live(P_2, SUB(r_mk2.r1, getRandomVal(P_013)));
     pre_send_to_live(P_2, SUB(r_msb.r1, getRandomVal(P_013)));
@@ -370,7 +370,7 @@ static void prepare_A2B_S2(int m, int k ,OEC_MAL3_Share in[], OEC_MAL3_Share out
     {
             out[i-m].r0 = SET_ALL_ZERO(); 
             out[i-m].r1 = temp[i]; 
-            #if PROTOCOL != 12
+            #if PROTOCOL != 12 && PRE == 0
             store_compare_view(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // compare -x0 xor r0,1 with $P_2
             #else
             #if PRE == 1
@@ -406,7 +406,7 @@ void prepare_bit2a(OEC_MAL3_Share out[])
     {
         Datatype r013 = getRandomVal(P_013);
         Datatype m00 = OP_SUB(y0[i], r013);
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
         pre_send_to_live(P_2, m00);
 #else
@@ -451,7 +451,7 @@ void prepare_opt_bit_injection(OEC_MAL3_Share x[], OEC_MAL3_Share out[])
         Datatype r013_2 = getRandomVal(P_013);
         Datatype m00 = OP_SUB(y0[i], r013);
         Datatype m01 = OP_SUB(OP_MULT(x[i].r1, y0[i]), r013_2);
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
         pre_send_to_live(P_2, m00);
         pre_send_to_live(P_2, m01);
@@ -509,7 +509,7 @@ void prepare_bit_injection_S2(OEC_MAL3_Share out[])
     {
         out[i].r0 = SET_ALL_ZERO(); //w = 0
         out[i].r1 = OP_SUB(SET_ALL_ZERO(), temp[i]) ; // z_0 = - x_0
-            #if PROTOCOL != 12
+            #if PROTOCOL != 12 && PRE == 0
             store_compare_view(P_2, OP_ADD(temp[i], getRandomVal(P_013))); // compare -x0 xor r0,1 with $P_2
             #else
             #if PRE == 1
@@ -549,7 +549,7 @@ Datatype m3xz = SUB(MULT(ax,cz),getRandomVal(P_123));
 Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123));
 Datatype m3xyz = MULT(MULT(ax,by),cz);
 /* m3xyz = SUB( SET_ALL_ZERO(), m3xyz); // trick to be compatible with dot2 */
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 pre_send_to_live(P_0, m3xy);
 pre_send_to_live(P_0, m3xz);
@@ -593,7 +593,7 @@ Datatype m3xy = SUB(MULT(ax,by),getRandomVal(P_123));
 Datatype m3xz = SUB(MULT(ax,cz),getRandomVal(P_123));
 Datatype m3yz = SUB(MULT(by,cz),getRandomVal(P_123));
 Datatype m3xyz = SUB(MULT(MULT(ax,by),cz),getRandomVal(P_123));
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 pre_send_to_live(P_0, m3xy);
 pre_send_to_live(P_0, m3xz);
@@ -663,7 +663,7 @@ Datatype m3xzw = SUB(MULT(MULT(ax,cz),dw),getRandomVal(P_123));
 Datatype m3yzw = SUB(MULT(MULT(by,cz),dw),getRandomVal(P_123));
 Datatype m3xyzw = MULT(MULT(ax,by),MULT(cz,dw));
 m3xyzw = SUB( SET_ALL_ZERO(), m3xyzw); // trick to be compatible with dot2
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 pre_send_to_live(P_0, m3xy);
 pre_send_to_live(P_0, m3xz);
@@ -765,7 +765,7 @@ Datatype m3xyw = SUB(MULT(MULT(ax,by),dw),getRandomVal(P_123));
 Datatype m3xzw = SUB(MULT(MULT(ax,cz),dw),getRandomVal(P_123));
 Datatype m3yzw = SUB(MULT(MULT(by,cz),dw),getRandomVal(P_123));
 Datatype m3xyzw = SUB(MULT(MULT(ax,by),MULT(cz,dw)),getRandomVal(P_123));
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
 pre_send_to_live(P_0, m3xy);
 pre_send_to_live(P_0, m3xz);

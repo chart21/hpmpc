@@ -21,7 +21,7 @@ OEC_MAL3_init mult_public(const Datatype b, func_mul MULT) const
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime){
-#if PROTOCOL == 12 || PROTOCOL == 8
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
     pre_send_to_(P_2);
     pre_send_to_(P_2);
@@ -43,7 +43,7 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
-#if PROTOCOL == 12 || PROTOCOL == 8
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
     pre_send_to_(P_2);
 #else
@@ -81,7 +81,7 @@ OEC_MAL3_init prepare_dot(const OEC_MAL3_init b, func_add ADD, func_sub SUB, fun
     template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
-#if PROTOCOL == 12 || PROTOCOL == 8
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
     pre_send_to_(P_2);
 #else
@@ -102,7 +102,7 @@ store_compare_view_init(P_2);
     template <typename func_add, typename func_sub, typename func_trunc>
 void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
-#if PROTOCOL == 12 || PROTOCOL == 8
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_send_to_(P_2);
 #else
@@ -140,7 +140,7 @@ template <typename func_add, typename func_sub, typename func_mul>
 #endif
 #endif
 
-#if PROTOCOL == 12 || PROTOCOL == 8
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
     pre_send_to_(P_2);
 #else
@@ -279,7 +279,7 @@ static void prepare_A2B_S2(int m, int k, OEC_MAL3_init in[], OEC_MAL3_init out[]
 {
     for(int i = m; i < k; i++)
     {
-        #if PROTOCOL != 12
+        #if PROTOCOL != 12 && PRE == 0
             store_compare_view_init(P_2);
         #else
             #if PRE == 1
@@ -304,7 +304,7 @@ void prepare_bit2a( OEC_MAL3_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PRE == 1
 #if PRE == 1
         pre_send_to_(P_2);
 #else
@@ -331,7 +331,7 @@ void prepare_opt_bit_injection(OEC_MAL3_init x[], OEC_MAL3_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
         pre_send_to_(P_2);
         pre_send_to_(P_2);
@@ -366,7 +366,7 @@ void prepare_bit_injection_S2(OEC_MAL3_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-        #if PROTOCOL != 12
+        #if PROTOCOL != 12 && PRE == 0
             store_compare_view_init(P_2);
         #else
             #if PRE == 1
@@ -389,7 +389,7 @@ static void complete_bit_injection_S2(OEC_MAL3_init out[])
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL3_init prepare_dot3(OEC_MAL3_init b, OEC_MAL3_init c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_send_to_(P_0);
 pre_send_to_(P_0);
@@ -419,7 +419,7 @@ return d;
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL3_init prepare_mult3(OEC_MAL3_init b, OEC_MAL3_init c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_send_to_(P_0);
 pre_send_to_(P_0);
@@ -460,7 +460,7 @@ void complete_mult3(func_add ADD, func_sub SUB){
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL3_init prepare_dot4(OEC_MAL3_init b, OEC_MAL3_init c, OEC_MAL3_init d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_send_to_(P_0);
 pre_send_to_(P_0);
@@ -534,7 +534,7 @@ return e;
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL3_init prepare_mult4(OEC_MAL3_init b, OEC_MAL3_init c, OEC_MAL3_init d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-#if PROTOCOL == 12
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
 pre_send_to_(P_0);
 pre_send_to_(P_0);

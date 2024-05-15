@@ -9,6 +9,9 @@
 
 
 
+
+
+
 void compare(DATATYPE var[num_players][BITLENGTH], std::string test_func)
 {
 if (current_phase != PHASE_LIVE)
