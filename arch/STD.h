@@ -272,6 +272,7 @@ void real_ortho(UINT_TYPE data[]) {
   }
 }
 
+#if FUNCTION_IDENTIFIER != 2 //workaround to test function without adjusting Bitlength
 
 void orthogonalize_boolean(UINT_TYPE* data, DATATYPE* out) {
   for (int i = 0; i < BITLENGTH; i++)
@@ -284,6 +285,7 @@ void unorthogonalize_boolean(DATATYPE *in, UINT_TYPE* data) {
     data[i] = ((UINT_TYPE*) in)[i];
   real_ortho(data);
 }
+
 
 // STD does not allow arithmetic of packed integers -> only allow DATATYPE in/out
 
@@ -316,4 +318,6 @@ UINT_TYPE relu_epi(UINT_TYPE v) {
     else
         return v;
 }
+
+#endif
 
