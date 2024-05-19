@@ -13,34 +13,6 @@ static OEC_MAL1_init public_val(Datatype a)
     return OEC_MAL1_init();
 }
 
-template <typename func_mul>
-OEC_MAL1_init mult_public(const Datatype b, func_mul MULT) const
-{
-    return OEC_MAL1_init();
-}
-
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_init& r_mk2, OEC_MAL1_init& r_msb, OEC_MAL1_init& c, OEC_MAL1_init& c_prime){
-    store_compare_view_init(P_0);
-    store_compare_view_init(P_0);
-}
-
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_init& r_mk2, OEC_MAL1_init& r_msb, OEC_MAL1_init& c, OEC_MAL1_init& c_prime){
-}
-
-template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OEC_MAL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
-{
-    store_compare_view_init(P_0);
-    return OEC_MAL1_init();
-} 
-
-    template <typename func_add, typename func_sub>
-void complete_public_mult_fixed( func_add ADD, func_sub SUB)
-{
-}
-
 
 
 OEC_MAL1_init Not() const
@@ -68,23 +40,6 @@ send_to_(P_2);
 store_compare_view_init(P_0); // compare a1b1 + r123_2 with P_0
 #endif
 }
-    template <typename func_add, typename func_sub, typename func_trunc>
-void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-send_to_(P_2); 
-}
-    template <typename func_add, typename func_sub, typename func_trunc>
-void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-receive_from_(P_2); // v^1,2 = m^1 + m^2
-#if PROTOCOL == 11
-store_compare_view_init(P_0); // compare m1 + m2 + r123 with P_0
-#else
-store_compare_view_init(P_012); // v^1,2 + r_1,2,3
-#endif
-store_compare_view_init(P_0);
-}
-
 
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL1_init prepare_mult(OEC_MAL1_init b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -200,6 +155,54 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
 {
     finalize_(ips, ra, sa);
 }
+
+#if FUNCTION_IDENTIFIER > 14
+
+template <typename func_mul>
+OEC_MAL1_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return OEC_MAL1_init();
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_init& r_mk2, OEC_MAL1_init& r_msb, OEC_MAL1_init& c, OEC_MAL1_init& c_prime){
+    store_compare_view_init(P_0);
+    store_compare_view_init(P_0);
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_init& r_mk2, OEC_MAL1_init& r_msb, OEC_MAL1_init& c, OEC_MAL1_init& c_prime){
+}
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    store_compare_view_init(P_0);
+    return OEC_MAL1_init();
+} 
+
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+send_to_(P_2); 
+}
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+receive_from_(P_2); // v^1,2 = m^1 + m^2
+#if PROTOCOL == 11
+store_compare_view_init(P_0); // compare m1 + m2 + r123 with P_0
+#else
+store_compare_view_init(P_012); // v^1,2 + r_1,2,3
+#endif
+store_compare_view_init(P_0);
+}
+
 
 static void prepare_A2B_S1(int m, int k,OEC_MAL1_init in[], OEC_MAL1_init out[])
 {
@@ -330,5 +333,6 @@ static void CONV_2D(const OEC_MAL1_init* X, const OEC_MAL1_init* W, OEC_MAL1_ini
 
 #endif 
 
+#endif
 
 };

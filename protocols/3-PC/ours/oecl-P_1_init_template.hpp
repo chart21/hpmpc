@@ -11,12 +11,6 @@ static OECL1_init public_val(Datatype a)
     return OECL1_init();
 }
     
-    template <typename func_mul>
-OECL1_init mult_public(const Datatype b, func_mul MULT) const
-{
-    return OECL1_init();
-}
-
 
 
 OECL1_init Not() const
@@ -29,46 +23,15 @@ OECL1_init Add(OECL1_init b, func_add ADD) const
 {
    return OECL1_init();
 }
-
-template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
-{
-    return OECL1_init();
-} 
-    template <typename func_add, typename func_sub>
-void complete_public_mult_fixed( func_add ADD, func_sub SUB)
-{
-}
-
+    
     template <typename func_add, typename func_sub, typename func_mul>
 OECL1_init prepare_dot(const OECL1_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
     return OECL1_init();
 }
 
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-OECL1_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const{
-    send_to_(P_2);
-    return OECL1_init();
-}
-
-template <typename func_add, typename func_sub>
-void complete_trunc_2k(func_add ADD, func_sub SUB){
-    receive_from_(P_2);
-}
-
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
-{
-send_to_(P_2);
-}
-
-    template <typename func_add, typename func_sub, typename func_mul>
-void prepare_dot_add(OECL1_init a, OECL1_init b , OECL1_init &c, func_add ADD, func_sub SUB, func_mul MULT)
-{
-}
-    template <typename func_add, typename func_sub, typename func_trunc>
-void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
 send_to_(P_2);
 }
@@ -81,12 +44,6 @@ return OECL1_init();
 
 //return u[player_id] * v[player_id];
 }
-    template <typename func_add, typename func_sub, typename func_trunc>
-void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-    receive_from_(P_2);
-}
-
 template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {
@@ -171,6 +128,55 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
 {
     finalize_(ips, ra, sa);
 }
+
+
+#if FUNCTION_IDENTIFIER > 14
+
+template <typename func_mul>
+OECL1_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return OECL1_init();
+}
+
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    return OECL1_init();
+} 
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+}
+
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+OECL1_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const{
+    send_to_(P_2);
+    return OECL1_init();
+}
+
+template <typename func_add, typename func_sub>
+void complete_trunc_2k(func_add ADD, func_sub SUB){
+    receive_from_(P_2);
+}
+
+    template <typename func_add, typename func_sub, typename func_mul>
+void prepare_dot_add(OECL1_init a, OECL1_init b , OECL1_init &c, func_add ADD, func_sub SUB, func_mul MULT)
+{
+}
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+send_to_(P_2);
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+    receive_from_(P_2);
+}
+
 
 static void prepare_A2B_S1(int m, int k, OECL1_init in[], OECL1_init out[])
 {
@@ -332,5 +338,6 @@ static void CONV_2D(const OECL1_init* X, const OECL1_init* W, OECL1_init* Y, int
 
 #endif 
 
+#endif
 
 };

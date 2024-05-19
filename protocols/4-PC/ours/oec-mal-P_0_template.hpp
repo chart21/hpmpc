@@ -14,52 +14,13 @@ OEC_MAL0_Share(Datatype v, Datatype r) : v(v), r(r) {}
 OEC_MAL0_Share(Datatype v) : v(v) {}
 
 
-    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
-{
-#if TRUNC_THEN_MULT == 1
-    auto result = MULT(TRUNC(r),b);
-#else
-    auto result = TRUNC(MULT(r,b));
-#endif
-    auto rand_val = getRandomVal(P_013);
-    auto val = SUB(result,rand_val);
-#if PROTOCOL == 12 || PRE == 1
-    store_compare_view(P_2, val);
-#else
-#if PRE == 1
-    pre_send_to_live(P_2, val);
-#else
-    send_to_live(P_2, val);
-#endif
-#endif
-    return OEC_MAL0_Share(SET_ALL_ZERO(),result);
-} 
-    
-template <typename func_add, typename func_sub>
-void complete_public_mult_fixed( func_add ADD, func_sub SUB)
-{
-    v = receive_from_live(P_2);
-    store_compare_view(P_1, v);
-    /* store_compare_view(P_012, v); */
-    v = SUB(v,r);
-    /* v = ADD(v,val); */
-}
-
-
     
 
 static OEC_MAL0_Share public_val(Datatype a)
 {
     return OEC_MAL0_Share(a,SET_ALL_ZERO());
 }
-
-template <typename func_mul>
-OEC_MAL0_Share mult_public(const Datatype b, func_mul MULT) const
-{
-    return OEC_MAL0_Share(MULT(v,b),MULT(r,b));
-}
-
+    
 OEC_MAL0_Share Not() const
 {
    return OEC_MAL0_Share(NOT(v),r);
@@ -115,23 +76,7 @@ c.v = ADD( MULT(v,b.r), MULT(b.v,r)); // au y_0 + bv x_0
 /* #endif */
 return c;
 }
-    
-    template <typename func_add, typename func_sub, typename func_trunc>
-void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-v = ADD(v,r);
-r = TRUNC(SUB(ADD(getRandomVal(P_013), getRandomVal(P_023)), r)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
-#if PROTOCOL == 12 || PRE == 1
-store_compare_view(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
-#else
-#if PRE == 1
-pre_send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
-#else
-send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
-#endif
 
-#endif
-}
 template <typename func_add, typename func_sub>
 void mask_and_send_dot(func_add ADD, func_sub SUB)
 {
@@ -154,26 +99,6 @@ store_compare_view(P_2,o1);
     #endif
 #endif
 
-}
-
-    template <typename func_add, typename func_sub, typename func_trunc>
-void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-#if PROTOCOL == 11
-Datatype m1m2 = receive_from_live(P_2); // m1 + m2 + r123
-store_compare_view(P_1,m1m2); 
-store_compare_view(P_3,SUB(m1m2,v)); // m2,2 - cw' 
-#else
-#if PRE == 1
-Datatype m3 = pre_receive_from_live(P_3); // (e + r0,1 + r0,2)^T - r_0,1
-#else
-Datatype m3 = receive_from_live(P_3); // (e + r0,1 + r0,2)^T - r_0,1
-#endif
-store_compare_view(P_012,ADD(v,m3)); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
-#endif
-Datatype c0w = receive_from_live(P_2);
-store_compare_view(P_1,c0w); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
-v = SUB(c0w,r); // c_0,w - z_0
 }
 
 
@@ -319,6 +244,87 @@ static void communicate()
     communicate_live();
 /* #endif */
 }
+
+#if FUNCTION_IDENTIFIER > 14
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if TRUNC_THEN_MULT == 1
+    auto result = MULT(TRUNC(r),b);
+#else
+    auto result = TRUNC(MULT(r,b));
+#endif
+    auto rand_val = getRandomVal(P_013);
+    auto val = SUB(result,rand_val);
+#if PROTOCOL == 12 || PRE == 1
+    store_compare_view(P_2, val);
+#else
+#if PRE == 1
+    pre_send_to_live(P_2, val);
+#else
+    send_to_live(P_2, val);
+#endif
+#endif
+    return OEC_MAL0_Share(SET_ALL_ZERO(),result);
+} 
+    
+template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+    v = receive_from_live(P_2);
+    store_compare_view(P_1, v);
+    /* store_compare_view(P_012, v); */
+    v = SUB(v,r);
+    /* v = ADD(v,val); */
+}
+
+
+
+template <typename func_mul>
+OEC_MAL0_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return OEC_MAL0_Share(MULT(v,b),MULT(r,b));
+}
+
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+v = ADD(v,r);
+r = TRUNC(SUB(ADD(getRandomVal(P_013), getRandomVal(P_023)), r)); // z_0 = [r_0,1,3 + r_0,2,3 - x_0 y_0]^t
+#if PROTOCOL == 12 || PRE == 1
+store_compare_view(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
+#else
+#if PRE == 1
+pre_send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
+#else
+send_to_live(P_2, SUB(r, getRandomVal(P_013))); // z_0 - z_1
+#endif
+
+#endif
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PROTOCOL == 11
+Datatype m1m2 = receive_from_live(P_2); // m1 + m2 + r123
+store_compare_view(P_1,m1m2); 
+store_compare_view(P_3,SUB(m1m2,v)); // m2,2 - cw' 
+#else
+#if PRE == 1
+Datatype m3 = pre_receive_from_live(P_3); // (e + r0,1 + r0,2)^T - r_0,1
+#else
+Datatype m3 = receive_from_live(P_3); // (e + r0,1 + r0,2)^T - r_0,1
+#endif
+store_compare_view(P_012,ADD(v,m3)); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
+#endif
+Datatype c0w = receive_from_live(P_2);
+store_compare_view(P_1,c0w); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
+v = SUB(c0w,r); // c_0,w - z_0
+}
+
 
 static void prepare_A2B_S1(int m, int k, OEC_MAL0_Share in[], OEC_MAL0_Share out[])
 {
@@ -1025,5 +1031,6 @@ static void GEMM(OEC_MAL0_Share* a, OEC_MAL0_Share* b, OEC_MAL0_Share* c, int m,
 }
 #endif
 
+#endif
 
 };

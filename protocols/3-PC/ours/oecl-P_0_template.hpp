@@ -26,35 +26,6 @@ private:
 
 
 
-    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
-{
-#if TRUNC_THEN_MULT == 1
-    auto result = MULT(TRUNC(ADD(p1,p2)),b);
-#else
-    auto result = MULT(ADD(p1,p2),b);
-#endif
-    OECL0_Share res;
-    res.p2 = getRandomVal(P_1);
-#if TRUNC_THEN_MULT == 1
-    res.p1 = SUB(result,res.p2);
-#else
-    res.p1 = SUB(TRUNC(result),res.p2);
-#endif
-
-#if PRE == 1
-    pre_send_to_live(P_2, res.p1);
-#else
-    send_to_live(P_2, res.p1);
-#endif
-    return res;
-} 
-
-    template <typename func_add, typename func_sub>
-void complete_public_mult_fixed(func_add ADD, func_sub SUB)
-{
-}
-
 OECL0_Share Not() const
 {
    return OECL0_Share(p1,p2);
@@ -65,13 +36,7 @@ OECL0_Share Add(OECL0_Share b, func_add ADD) const
 {
    return OECL0_Share(ADD(p1,b.p1),ADD(p2,b.p2));
 }
-
-template <typename func_add, typename func_sub, typename func_mul>
-void prepare_dot_add(OECL0_Share a, OECL0_Share b , OECL0_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
-{
-c.p1 = ADD(c.p1, SUB( MULT(a.p1,b.p1), MULT( SUB(a.p1,a.p2), SUB(b.p1,b.p2)  )) );
-}
-
+    
 template <typename func_add, typename func_sub, typename func_mul>
 OECL0_Share prepare_dot(const OECL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
@@ -100,48 +65,6 @@ send_to_live(P_2, SUB(r01,p1));
     p1 = z2;
     p2 = z1;
 }
-    template <typename func_add, typename func_sub, typename func_trunc>
-void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-}
-
-    /* template <typename func_add, typename func_sub, typename func_trunc> */
-/* void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
-/* { */
-/* Datatype maskP_1 = getRandomVal(P_1); */
-/* Datatype maskP_1_2 = getRandomVal(P_1); */
-/* Datatype maskP_2 = getRandomVal(P_2); */
-
-/* p1 = ADD( TRUNC(ADD(ADD(p1,maskP_1),maskP_2)), maskP_1_2); // (e + r0,1 + r0,2)^t + r0,1_2 */
-/* p2 = SUB(SET_ALL_ZERO(),maskP_1_2); // - r0,1_2 */
-
-
-/* #if PRE == 1 */
-/* pre_send_to_live(P_2, p1); */
-/* #else */
-/* send_to_live(P_2, p1); */
-/* #endif */
-/* } */
-    
-    template <typename func_add, typename func_sub, typename func_trunc>
-void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-Datatype maskP_1 = getRandomVal(P_1);
-Datatype maskP_1_2 = getRandomVal(P_1);
-Datatype maskP_2 = getRandomVal(P_2);
-
-p1 = SUB( TRUNC(ADD(ADD(p1,maskP_1),maskP_2)), maskP_1_2); // (e + r0,1 + r0,2)^t - z_1
-p2 = maskP_1_2; // z_1
-
-
-#if PRE == 1
-pre_send_to_live(P_2, p1);
-#else
-send_to_live(P_2, p1);
-#endif
-}
-
-
 
 template <typename func_add, typename func_sub, typename func_mul>
     OECL0_Share prepare_mult(OECL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -239,12 +162,6 @@ void complete_receive_from(func_add ADD, func_sub SUB)
 {
 }
 
-template <typename func_mul>
-OECL0_Share mult_public(const Datatype b, func_mul MULT) const
-{
-    return OECL0_Share(MULT(p1,b),MULT(p2,b));
-}
-
 
 
 static void send()
@@ -263,6 +180,96 @@ static void communicate()
     communicate_live();
 #endif
 }
+
+#if FUNCTION_IDENTIFIER > 14
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if TRUNC_THEN_MULT == 1
+    auto result = MULT(TRUNC(ADD(p1,p2)),b);
+#else
+    auto result = MULT(ADD(p1,p2),b);
+#endif
+    OECL0_Share res;
+    res.p2 = getRandomVal(P_1);
+#if TRUNC_THEN_MULT == 1
+    res.p1 = SUB(result,res.p2);
+#else
+    res.p1 = SUB(TRUNC(result),res.p2);
+#endif
+
+#if PRE == 1
+    pre_send_to_live(P_2, res.p1);
+#else
+    send_to_live(P_2, res.p1);
+#endif
+    return res;
+} 
+
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed(func_add ADD, func_sub SUB)
+{
+}
+
+
+template <typename func_add, typename func_sub, typename func_mul>
+void prepare_dot_add(OECL0_Share a, OECL0_Share b , OECL0_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+{
+c.p1 = ADD(c.p1, SUB( MULT(a.p1,b.p1), MULT( SUB(a.p1,a.p2), SUB(b.p1,b.p2)  )) );
+}
+
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+Datatype maskP_1 = getRandomVal(P_1);
+Datatype maskP_1_2 = getRandomVal(P_1);
+Datatype maskP_2 = getRandomVal(P_2);
+
+p1 = SUB( TRUNC(ADD(ADD(p1,maskP_1),maskP_2)), maskP_1_2); // (e + r0,1 + r0,2)^t - z_1
+p2 = maskP_1_2; // z_1
+
+
+#if PRE == 1
+pre_send_to_live(P_2, p1);
+#else
+send_to_live(P_2, p1);
+#endif
+}
+
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+}
+
+    /* template <typename func_add, typename func_sub, typename func_trunc> */
+/* void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
+/* { */
+/* Datatype maskP_1 = getRandomVal(P_1); */
+/* Datatype maskP_1_2 = getRandomVal(P_1); */
+/* Datatype maskP_2 = getRandomVal(P_2); */
+
+/* p1 = ADD( TRUNC(ADD(ADD(p1,maskP_1),maskP_2)), maskP_1_2); // (e + r0,1 + r0,2)^t + r0,1_2 */
+/* p2 = SUB(SET_ALL_ZERO(),maskP_1_2); // - r0,1_2 */
+
+
+/* #if PRE == 1 */
+/* pre_send_to_live(P_2, p1); */
+/* #else */
+/* send_to_live(P_2, p1); */
+/* #endif */
+/* } */
+
+
+
+template <typename func_mul>
+OECL0_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return OECL0_Share(MULT(p1,b),MULT(p2,b));
+}
+
 
 void get_random_B2A()
 {
@@ -1006,7 +1013,7 @@ static void GEMM(OECL0_Share* a, OECL0_Share* b, OECL0_Share* c, int m, int n, i
 /* c.p1 = SUB( MULT( SUB(p1,p2), SUB(b.p1,b.p2)), MULT(p1,b.p1)  ); // -> e = (x1-x2)(y1-y2) - x2y2 = x1 y1 - x1 y2 - x2 y1 */
 /* c.p1 = SUB( MULT( SUB(p1,p2), SUB(b.p1,b.p2)), MULT(p1,b.p1)  ); // -> e = (x1-x2)(y1-y2) - x2y2 = x1 y1 - x1 y2 - x2 y1 */
 
-
+#endif
 
 
 };
