@@ -184,6 +184,11 @@ static void finalize(std::string* ips)
     finalize_(ips);
 }
 
+static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
+{
+    finalize_(ips, ra, sa);
+}
+
 #if FUNCTION_IDENTIFIER > 14
 
 template <typename func_mul>
@@ -291,10 +296,6 @@ store_compare_view_init(P_3); // compare view of m0
 }
 
 
-static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
-{
-    finalize_(ips, ra, sa);
-}
 
 static void prepare_A2B_S1(int m, int k, OEC_MAL2_init in[], OEC_MAL2_init out[])
 {
