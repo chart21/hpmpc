@@ -189,6 +189,12 @@ static void finalize(std::string* ips)
     finalize_(ips);
 }
 
+static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
+{
+    finalize_(ips, ra, sa);
+}
+
+
 #if FUNCTION_IDENTIFIER > 14
 
 template <typename func_mul>
@@ -267,11 +273,6 @@ send_to_(P_0);
 #endif
 }
 
-
-static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
-{
-    finalize_(ips, ra, sa);
-}
 
 static void prepare_A2B_S1(int m, int k, OEC_MAL3_init in[], OEC_MAL3_init out[])
 {

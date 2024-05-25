@@ -601,7 +601,7 @@ void dot_prod_bench(DATATYPE* res)
 #if FUNCTION_IDENTIFIER == 14
         for(int j = 0; j < NUM_INPUTS; j++)
         {
-            c[i] += a[i].prepare_dot(b[j][i]);
+            c[i] += a[i].prepare_dot(b[i][j]);
         }
 #endif
         c[i].mask_and_send_dot_without_trunc();

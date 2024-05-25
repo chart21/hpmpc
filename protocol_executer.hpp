@@ -426,7 +426,9 @@ int ret;
     print("Time measured to perform computation getTime: %fs \n", accum);
     print("Time measured to perform computation chrono: %fs \n", time / 1000000);
     // Join threads to ensure closing of sockets
+#if FUNCTION_IDENTIFIER >= 70
     print_layer_stats();
+#endif
 
 }
 #endif

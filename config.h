@@ -20,10 +20,10 @@
 #define DATTYPE 32
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
-#define PRE 1
+#define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 10
+#define NUM_INPUTS 20000
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -39,13 +39,13 @@
 #define USE_CUDA_GEMM 0
 
 // How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered
-#define SEND_BUFFER 10000
+#define SEND_BUFFER 1000
 
 // How many reciving messages should be buffered until the main thread is signaled that data is ready? 0 means that all data of a communication round needs to be ready before the main thread is signaled.
-#define RECV_BUFFER 10000
+#define RECV_BUFFER 1000
 
 // How many messages should be buffered until a combined hash is performed? 0 means all hashes are calculated at the very end of the protocol.
-#define VERIFY_BUFFER 16
+#define VERIFY_BUFFER 0
 // Print additional info?
 #define PRINT 0
 #define PRINT_TIMINGS 1
@@ -108,7 +108,11 @@ int base_port = BASE_PORT; // temporary solution
 /* #if BANDWIDTH_OPTIMIZED == 0 || ONLINE_OPTIMIZED == 1 //if BANDWIDTH_OPTIMIZED and not ONLINE_OPTIMIZED we don't need MULTI_INPUT_AND gates */
 /* #define MULTI_INPUT 1 // activate multi input Multiplication gates? */
 /* #else */
+#if FUNCTION_IDENTIFIER >= 70
 #define MULTI_INPUT 1
+#else
+#define MULTI_INPUT 0
+#endif
 /* #endif */
 
 #if FUNCTION_IDENTIFIER < 65

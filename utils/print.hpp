@@ -56,6 +56,7 @@ void print_result(T* var)
     printf("\n");
 }
 
+#if FUNCTION_IDENTIFIER >= 70
 struct Layer_Timing
 {
     int layer_id;
@@ -71,6 +72,7 @@ struct Layer_Timing
 };    
 
 std::vector<Layer_Timing> layer_stats;
+
 
 void start_layer_stats(std::string layer_name, int layer_id) {
     if(current_phase == PHASE_INIT || PROTOCOL == 13) {
@@ -165,6 +167,7 @@ for(auto& layer_pair : layer_stats_map) {
 #else
     std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(total_live_time_duration) /1000 << std::endl;
 #endif
-}
-}
 
+}
+}
+#endif
