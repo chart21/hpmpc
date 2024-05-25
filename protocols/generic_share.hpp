@@ -10,7 +10,7 @@
 #if LIVE == 1
     #include "live_protocol_base.hpp"
 #endif
-#if USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM == 1 || USE_CUDA_GEMM == 3
     #include "../cuda/gemm_cutlass_int.h"
 #elif USE_CUDA_GEMM == 2
     #include "../cuda/conv_cutlass_int.h"

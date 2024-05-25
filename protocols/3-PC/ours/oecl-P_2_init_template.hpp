@@ -453,7 +453,7 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     this->template complete_receive_from<P_0>(ADD, SUB);
 }
 
-#if USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM == 1 || USE_CUDA_GEMM == 3
 static void GEMM(OECL2_init* a, OECL2_init* b, OECL2_init* c, int m, int n, int k, bool a_fixed)
 {
 

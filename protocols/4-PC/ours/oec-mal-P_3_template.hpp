@@ -852,7 +852,6 @@ return e;
 template <typename func_add, typename func_sub>
 void complete_mult4(func_add ADD, func_sub SUB){
 }
-
 #endif
 
 #if USE_CUDA_GEMM == 2
@@ -929,19 +928,19 @@ static void GEMM(OEC_MAL3_Share* a, OEC_MAL3_Share* b, OEC_MAL3_Share* c, int m,
     const int b_size = k * n;
     const int c_size = m * n;
     
-    UINT_TYPE* r0 = new UINT_TYPE[factor * a_size];
-    UINT_TYPE* r1 = new UINT_TYPE[factor * a_size];
-    UINT_TYPE* br1;
-    UINT_TYPE* br1_br0;
+    UINT_TYPE* br1 = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* br1_br0 = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* r0;
+    UINT_TYPE* r1;
     if(a_fixed)
     {
-        br1 = new UINT_TYPE[b_size];
-        br1_br0 = new UINT_TYPE[b_size];
+        r0 = new UINT_TYPE[a_size];
+        r1 = new UINT_TYPE[a_size];
     }
     else
     {
-        br1 = new UINT_TYPE[factor * b_size];
-        br1_br0 = new UINT_TYPE[factor * b_size];
+        r0 = new UINT_TYPE[factor * a_size];
+        r1 = new UINT_TYPE[factor * a_size];
     }
     UINT_TYPE* r_br = new UINT_TYPE[factor * c_size];
     UINT_TYPE* r_br1_br0 = new UINT_TYPE[factor * c_size];
@@ -1019,8 +1018,143 @@ static void GEMM(OEC_MAL3_Share* a, OEC_MAL3_Share* b, OEC_MAL3_Share* c, int m,
     delete[] b_r_r0;
 
 }
+#elif USE_CUDA_GEMM == 3
+    
+
+static void GEMM(OEC_MAL3_Share* a, OEC_MAL3_Share* b, OEC_MAL3_Share* c, int m, int n, int k, bool a_fixed = false)
+{
+    const int factor = DATTYPE / BITLENGTH;
+    const int a_size = m * k;    
+    const int b_size = k * n;
+    const int c_size = m * n;
+    UINT_TYPE* br1 = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* br1_br0 = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* r0;
+    UINT_TYPE* r1;
+    if(a_fixed)
+    {
+        r0 = new UINT_TYPE[a_size];
+        r1 = new UINT_TYPE[a_size];
+    }
+    else
+    {
+        r0 = new UINT_TYPE[factor * a_size];
+        r1 = new UINT_TYPE[factor * a_size];
+    }
+    
+    UINT_TYPE* r_br = new UINT_TYPE[factor * c_size];
+    UINT_TYPE* r_br1_br0 = new UINT_TYPE[factor * c_size];
+    UINT_TYPE* b_r_r0 = new UINT_TYPE[factor * c_size];
+
+
+    for(int i = 0; i < a_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&a[i].r0, temp, 1);
+        if(a_fixed)
+        {
+            r0[i] = temp[0];
+        }
+        else
+            for(int j = 0; j < factor; j++)
+                r0[j*a_size + i] = temp[j];
+        
+        unorthogonalize_arithmetic(&a[i].r1, temp, 1);
+        if(a_fixed)
+        {
+            r1[i] = temp[0];
+        }
+        else
+            for(int j = 0; j < factor; j++)
+                r1[j*a_size + i] = temp[j];
+    }
+
+if(a_fixed)
+{
+    for(int i = 0; i < k; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&b[i * n + j].r1, temp, 1);
+            for(int l = 0; l < factor; l++)
+                br1[i*n*factor+l*n+j] = temp[l];
+            auto temp2 = OP_SUB(b[i * n + j].r1, b[i * n + j].r0);
+            unorthogonalize_arithmetic(&temp2, temp, 1);
+            for(int l = 0; l < factor; l++)
+                br1_br0[i*n*factor+l*n+j] = temp[l];
+        }
+    }
+
+    gemm_cutlass(m,n*factor,k, r1, br1, r_br);
+    gemm_cutlass(m,n*factor,k, r1, br1_br0, r_br1_br0);
+    gemm_cutlass(m,n*factor,k, r0, br1, b_r_r0);
+
+    for(int i = 0; i < m; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            for(int l = 0; l < factor; l++)
+                temp[l] = r_br1_br0[i*n*factor+l*n+j] + b_r_r0[i*n*factor+l*n+j];
+            orthogonalize_arithmetic(temp, &c[i * n + j].r0, 1);
+            for(int l = 0; l < factor; l++)
+                temp[l] = r_br[i*n*factor+l*n+j];
+            orthogonalize_arithmetic(temp, &c[i * n + j].r1, 1);
+        }
+    }
+    
+
+
+
+}
+else{
+
+
+    for(int i = 0; i < b_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i].r1, temp, 1);
+        for(int j = 0; j < factor; j++)
+            br1[j * b_size + i] = temp[j];
+        auto temp2 = OP_SUB(b[i].r1, b[i].r0);
+        unorthogonalize_arithmetic(&temp2, temp, 1);
+        for(int j = 0; j < factor; j++)
+            br1_br0[j * b_size + i] = temp[j];
+    }
+
+
+    for (int i = 0; i < factor; i++)
+    {
+            gemm_cutlass(m,n,k, &r1[i * a_size], &br1[i * b_size], &r_br[i * c_size]);
+            gemm_cutlass(m,n,k, &r1[i * a_size], &br1_br0[i * b_size], &r_br1_br0[i * c_size]);
+            gemm_cutlass(m,n,k, &r0[i * a_size], &br1[i * b_size], &b_r_r0[i * c_size]);
+    }
+
+    for (int j = 0; j < c_size; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for (int i = 0; i < factor; i++)
+            temp[i] = r_br1_br0[i * c_size + j] + b_r_r0[i * c_size + j];
+        orthogonalize_arithmetic(temp, &c[j].r0, 1);
+        for (int i = 0; i < factor; i++)
+            temp[i] = r_br[i * c_size + j];
+        orthogonalize_arithmetic(temp, &c[j].r1, 1);
+    }
+}
+
+    delete[] r0;
+    delete[] r1;
+    delete[] br1;
+    delete[] br1_br0;
+    delete[] r_br;
+    delete[] r_br1_br0;
+    delete[] b_r_r0;
+
+}
 #endif
 
 #endif
+
 
 };

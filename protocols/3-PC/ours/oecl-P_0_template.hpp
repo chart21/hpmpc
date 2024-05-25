@@ -850,7 +850,6 @@ static void CONV_2D(const OECL0_Share* X, const OECL0_Share* W, OECL0_Share* Y, 
 }
 
 #elif USE_CUDA_GEMM == 1
-    
 
 static void GEMM(OECL0_Share* a, OECL0_Share* b, OECL0_Share* c, int m, int n, int k, bool a_fixed = false)
 {
@@ -935,6 +934,131 @@ static void GEMM(OECL0_Share* a, OECL0_Share* b, OECL0_Share* c, int m, int n, i
             temp[i] = cp1_2[i * c_size + j] - cp1_1[i * c_size + j];
         orthogonalize_arithmetic(temp, &c[j].p1, 1);
     }
+
+    delete[] p1;
+    delete[] p1_p2;
+    delete[] bp1;
+    delete[] bp1_bp2;
+    delete[] cp1_1;
+    delete[] cp1_2;
+}
+#endif
+    
+#if USE_CUDA_GEMM == 3
+// If matrix A is fixed, then this method converts l kxn matrices B_1,B_2,...B_l to a matrix B of size kx(l*n) and computes A*B.
+static void GEMM(OECL0_Share* a, OECL0_Share* b, OECL0_Share* c, int m, int n, int k, bool a_fixed = false)
+{
+    const int factor = DATTYPE / BITLENGTH;
+    const int a_size = m * k;    
+    const int b_size = k * n;
+    const int c_size = m * n;
+    UINT_TYPE* p1;
+    UINT_TYPE* p1_p2;
+    if(a_fixed)
+    {
+        p1 = new UINT_TYPE[a_size];
+        p1_p2 = new UINT_TYPE[a_size];
+    }
+    else
+    {
+        p1 = new UINT_TYPE[factor * a_size];
+        p1_p2 = new UINT_TYPE[factor * a_size];
+    }
+    UINT_TYPE* bp1 = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* bp1_bp2 = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* cp1_1 = new UINT_TYPE[factor * c_size];
+    UINT_TYPE* cp1_2 = new UINT_TYPE[factor * c_size];
+
+
+    for(int i = 0; i < a_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&a[i].p1, temp, 1);
+        if(a_fixed)
+        {
+            p1[i] = temp[0];
+
+        }
+        else
+            for(int j = 0; j < factor; j++)
+                p1[j*a_size + i] = temp[j];
+        auto p1minp2 = OP_SUB(a[i].p1,a[i].p2);
+        unorthogonalize_arithmetic(&p1minp2, temp, 1);
+        if(a_fixed)
+        {
+            p1_p2[i] = temp[0];
+        }
+        else
+            for(int j = 0; j < factor; j++)
+                p1_p2[j*a_size + i] = temp[j];
+    }
+
+if(a_fixed)
+{
+
+    for(int i = 0; i < k; i++)
+    {
+    for(int j = 0; j < n; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i*n+j].p1, temp, 1);
+        for(int l = 0; l < factor; l++)
+            bp1[i*n*factor + l * n + j] = temp[l];
+        auto bp1minbp2 = OP_SUB(b[i*n+j].p1,b[i*n+j].p2);
+        unorthogonalize_arithmetic(&bp1minbp2, temp, 1);
+        for(int l = 0; l < factor; l++)
+            bp1_bp2[i*n*factor + l * n + j] = temp[l];
+    }
+    }
+
+
+            gemm_cutlass(m,n*factor,k,p1, bp1, cp1_1);
+            gemm_cutlass(m,n*factor,k,p1_p2, bp1_bp2, cp1_2);
+    
+
+        for (int i = 0; i < m; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+                for (int l = 0; l < factor; l++)
+                    temp[l] = cp1_2[i*n*factor + j + l*n] - cp1_1[i*n*factor + j + l*n];
+                orthogonalize_arithmetic(temp, &c[j + i * n].p1, 1);
+            }
+        }
+
+}
+else
+{
+    for(int i = 0; i < b_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i].p1, temp, 1);
+        for(int j = 0; j < factor; j++)
+            bp1[j * b_size + i] = temp[j];
+        auto bp1minbp2 = OP_SUB(b[i].p1,b[i].p2);
+        unorthogonalize_arithmetic(&bp1minbp2, temp, 1);
+        for(int j = 0; j < factor; j++)
+            bp1_bp2[j * b_size + i] = temp[j];
+    }
+
+
+    for (int i = 0; i < factor; i++)
+    {
+            gemm_cutlass(m,n,k, &p1[i * a_size], &bp1[i * b_size], &cp1_1[i * c_size]);
+            gemm_cutlass(m,n,k, &p1_p2[i * a_size], &bp1_bp2[i * b_size], &cp1_2[i * c_size]);
+    }
+
+    for (int j = 0; j < c_size; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for (int i = 0; i < factor; i++)
+            temp[i] = cp1_2[i * c_size + j] - cp1_1[i * c_size + j];
+        orthogonalize_arithmetic(temp, &c[j].p1, 1);
+    }
+
+
+}
 
     delete[] p1;
     delete[] p1_p2;

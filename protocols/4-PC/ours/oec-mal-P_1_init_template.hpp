@@ -322,7 +322,7 @@ receive_from_(P_2);
 store_compare_view_init(P_012); 
 }
 
-#if USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM == 1 || USE_CUDA_GEMM == 3
 static void GEMM(OEC_MAL1_init* a, OEC_MAL1_init* b, OEC_MAL1_init* c, int m, int n, int k, bool a_fixed)
 {
 

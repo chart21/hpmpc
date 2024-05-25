@@ -863,7 +863,6 @@ static void GEMM(OECL2_Share* a, OECL2_Share* b, OECL2_Share* c, int m, int n, i
             gemm_cutlass(m,n,k,p1, &bp1[i * b_size], &cp1_1[i * c_size]);
         else
             gemm_cutlass(m,n,k, &p1[i * a_size], &bp1[i * b_size], &cp1_1[i * c_size]);
-        /* test_cuda(); */
     }
 
     for (int j = 0; j < c_size; j++)
@@ -873,6 +872,90 @@ static void GEMM(OECL2_Share* a, OECL2_Share* b, OECL2_Share* c, int m, int n, i
             temp[i] = cp1_1[i * c_size + j];
         orthogonalize_arithmetic(temp, &c[j].p1, 1);
     }
+
+    delete[] p1;
+    delete[] bp1;
+    delete[] cp1_1;
+}
+#elif USE_CUDA_GEMM == 3
+    
+
+static void GEMM(OECL2_Share* a, OECL2_Share* b, OECL2_Share* c, int m, int n, int k, bool a_fixed = false)
+{
+    const int factor = DATTYPE / BITLENGTH;
+    const int a_size = m * k;    
+    const int b_size = k * n;
+    const int c_size = m * n;
+    UINT_TYPE* p1;
+    if(a_fixed)
+        p1 = new UINT_TYPE[a_size];
+    else
+        p1 = new UINT_TYPE[factor * a_size];
+    UINT_TYPE* bp1 = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* cp1_1 = new UINT_TYPE[factor * c_size];
+
+    for(int i = 0; i < a_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&a[i].p1, temp, 1);
+        if(a_fixed)
+            p1[i] = temp[0];
+        else
+            for(int j = 0; j < factor; j++)
+                p1[j*a_size + i] = temp[j];
+    }
+
+if(a_fixed)
+{
+    for(int i = 0; i < k; i++)
+    {
+    for(int j = 0; j < n; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i * n + j].p1, temp, 1);
+        for(int l = 0; l < factor; l++)
+            bp1[i*n*factor+l*n+j] = temp[l];
+    }
+    }
+    gemm_cutlass(m,n*factor,k,p1, bp1, cp1_1);
+
+    
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            for (int l = 0; l < factor; l++)
+                temp[l] = cp1_1[i*n*factor+l*n+j];
+            orthogonalize_arithmetic(temp, &c[i * n + j].p1, 1);
+        }
+    }
+}
+else
+{
+    for(int i = 0; i < b_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i].p1, temp, 1);
+        for(int j = 0; j < factor; j++)
+            bp1[j * b_size + i] = temp[j];
+    }
+
+
+    for (int i = 0; i < factor; i++)
+    {
+            gemm_cutlass(m,n,k, &p1[i * a_size], &bp1[i * b_size], &cp1_1[i * c_size]);
+    }
+
+    for (int j = 0; j < c_size; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for (int i = 0; i < factor; i++)
+            temp[i] = cp1_1[i * c_size + j];
+        orthogonalize_arithmetic(temp, &c[j].p1, 1);
+    }
+
+}
 
     delete[] p1;
     delete[] bp1;

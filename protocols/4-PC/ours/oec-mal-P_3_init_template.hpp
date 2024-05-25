@@ -619,7 +619,7 @@ void complete_mult4(func_add ADD, func_sub SUB){
 }
 
 
-#if USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM == 1 || USE_CUDA_GEMM == 3
 static void GEMM(OEC_MAL3_init* a, OEC_MAL3_init* b, OEC_MAL3_init* c, int m, int n, int k, bool a_fixed)
 {
 

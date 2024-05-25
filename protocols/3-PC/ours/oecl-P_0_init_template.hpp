@@ -433,7 +433,7 @@ static void GEMM(const OECL0_init* a, const OECL0_init* b, OECL0_init* c, int m,
 
 }
 
-#if USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM == 1 || USE_CUDA_GEMM == 3
 static void GEMM(OECL0_init* a, OECL0_init* b, OECL0_init* c, int m, int n, int k, bool a_fixed)
 {
 
