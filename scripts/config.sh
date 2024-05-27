@@ -81,16 +81,9 @@ fi
 
 if [ "$ssl" = "1" ]
 then
-#g++\ -march=native\ -O3\ -std=c++20\ -pthread\ -lssl\ -lcrypto\ main.cpp\ -I\ SimpleNN\ -o\ nn.o
-    # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -lssl -lcrypto"
-    # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -lssl -lcrypto -I SimpleNN -lstdc++fs"
-    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lssl -lcrypto -I SimpleNN"
-    #flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lssl -lcrypto -I SimpleNN" # -lstdc++fs might be needed on some systems
 else
-    # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread"
-    # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -I SimpleNN -lstdc++fs"
-    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -I SimpleNN"
-    #flags="-march=native -Ofast -std=c++2a -pthread"
+    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -I SimpleNN" # -lstdc++fs might be needed on some systems
 fi
 
 if [ "$use_nvcc" -gt "0" ]
@@ -102,12 +95,6 @@ if [ ! -z "$GNU_OPTIONS" ]
 then
     flags=$flags" "$GNU_OPTIONS
 fi
-# Print helpFunction in case parameters are empty
-# if [ -z "$parameterA" ] || [ -z "$parameterB" ] || [ -z "$parameterC" ]
-# then
-#    echo "Some or all of the parameters are empty";
-#    helpFunction
-# fi
 
 # Begin script in case all parameters are correct
 
