@@ -126,6 +126,9 @@ store_compare_view_init(P_0123);
 #endif
 
 #if PRE == 1 && HAS_POST_PROTOCOL == 1
+#if PROTOCOL == 8
+store_output_share_();
+#endif
 store_output_share_();
 store_output_share_();
 #endif
