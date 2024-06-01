@@ -75,7 +75,6 @@ void prepare_reveal_to_all() const
 template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
-receive_from_(P_0);
 #if PROTOCOL == 8
     #if PRE == 1 
     pre_receive_from_(P_3);
@@ -87,6 +86,7 @@ receive_from_(P_0);
     store_compare_view_init(P_3);
     store_compare_view_init(P_0);
 #else
+    receive_from_(P_0);
     store_compare_view_init(P_123);
     store_compare_view_init(P_0123);
 #endif

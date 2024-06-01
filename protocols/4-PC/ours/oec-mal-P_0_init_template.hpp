@@ -86,8 +86,10 @@ store_compare_view_init(P_3);
 
 void prepare_reveal_to_all() const
 {
+#if PROTOCOL != 8
 send_to_(P_1);
 send_to_(P_2);
+#endif
 
 send_to_(P_3);
 }    
