@@ -94,15 +94,16 @@ store_compare_view_init(P_0);
 void prepare_reveal_to_all() const
 {
     #if PROTOCOL == 8
-    for(int t = 0; t < 3; t++) 
-    {
         #if PRE == 1 
-    pre_send_to_(t);
+    pre_send_to_(P_0);
+    pre_send_to_(P_1);
+    pre_send_to_(P_2);
     #else
-    send_to_(t);
+    send_to_(P_0);
+    send_to_(P_1);
+    send_to_(P_2);
     #endif
 
-    }
  #else
 #if PRE == 1
     pre_send_to_(P_0);
