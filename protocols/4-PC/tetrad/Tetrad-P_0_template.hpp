@@ -129,9 +129,7 @@ mv = v; //Trick, can be set to zero later on
 
 void prepare_reveal_to_all() const
 {
-#if PRE == 0
     send_to_live(P_3, mv);
-#endif
 }    
 
 

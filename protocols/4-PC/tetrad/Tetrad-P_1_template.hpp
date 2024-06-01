@@ -144,8 +144,11 @@ Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 //receive lambda2 from P_3
 store_compare_view(P_0, l1); //help P_0 verifying
 store_compare_view(P_3, mv); //help P_3 verifying
-                              
+#if PRE == 0                              
 Datatype lambda2 = receive_from_live(P_3);
+#else
+Datatype lambda2 = pre_receive_from_live(P_3);
+#endif
 store_compare_view(P_0, lambda2); //get help from P_0 to veriy
 Datatype result = SUB(mv, lambda2);
 result = SUB(result, l0);
