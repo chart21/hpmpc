@@ -82,6 +82,7 @@ do
         sed -i -e "s/\(define FUNCTION_IDENTIFIER \).*/\1$funciona/" config.h
         for use_nv in "${use_nvcc[@]}"
         do
+        sed -i -e "s/\(define USE_CUDA_GEMM \).*/\1$use_nv/" config.h
             for n in "${num_inputs[@]}"
             do
             for prep in "${pre[@]}"

@@ -1,6 +1,7 @@
 #include <cstdlib>
-#include <conv2d_NCHW.cuh>
-//#include <conv2d_CHWN.cuh> // not implemented yet
+//#include <conv2d_NCHW.cuh>
+#include <conv2d_NHWC.cuh> 
+#include <transform.cuh>
 #include <cstdint>
 
 template <typename Type>
@@ -8,26 +9,40 @@ void conv2d_cutlass(const Type* X, const Type* W, Type* Y, int batchSize, int in
     Type* x;
     Type* w;
     Type* y;
-//    printf("X-Dimensions-- BatchSize: %d, Height: %d, Width: %d, Channels: %d\n", batchSize, inh, inw, din);
-//    printf("W-Dimensions-- Height: %d, Width: %d, Channels: %d, Filters: %d\n", wh, ww, din, dout);
-//    printf("Y-Dimensions-- BatchSize: %d, Height: %d, Width: %d, Channels: %d\n", batchSize, inh, inw, dout);
+    Type* xt;
+    Type* wt;
+    Type* yt;
     int xSize = inh * inw * din * batchSize;
     int wSize = wh * ww * din * dout;
     int outh = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
     int outw = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
     int ySize = outh * outw * dout * batchSize;
-
-
     cudaMalloc((void **)&x, xSize * sizeof(Type));
+    cudaMemcpy(x, X, xSize * sizeof(Type), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&xt, xSize * sizeof(Type));
+    printf("XDimesions: %d, %d, %d, %d\n", batchSize, inh, inw, din);
+    chwn_to_nhwc_(xt, x, batchSize, inh, inw, din);
+    cudaFree(x);
+    
     cudaMalloc((void **)&w, wSize * sizeof(Type));
+    cudaMemcpy(w, W, wSize * sizeof(Type), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&wt, wSize * sizeof(Type));
+    nchw_to_nhwc_(wt, w, dout, wh, ww, din);
+    cudaFree(w);
+//    printf("X-Dimensions-- BatchSize: %d, Height: %d, Width: %d, Channels: %d\n", batchSize, inh, inw, din);
+//    printf("W-Dimensions-- Height: %d, Width: %d, Channels: %d, Filters: %d\n", wh, ww, din, dout);
+//    printf("Y-Dimensions-- BatchSize: %d, Height: %d, Width: %d, Channels: %d\n", batchSize, inh, inw, dout);
+
+
+
+    //chwn_to_nhwc_(wt, w, dout, din, wh, ww);
+ //   printf("b: %d, ih: %d, iw: %d, din: %d, dout: %d, wh: %d, ww: %d, padding: %d, stride: %d, dilation: %d\n", batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+
+
     cudaMalloc((void **)&y, ySize * sizeof(Type));
 
-    cudaMemcpy(x, X, xSize * sizeof(Type), cudaMemcpyHostToDevice);
-    cudaMemcpy(w, W, wSize * sizeof(Type), cudaMemcpyHostToDevice);
-
- //   printf("b: %d, ih: %d, iw: %d, din: %d, dout: %d, wh: %d, ww: %d, padding: %d, stride: %d, dilation: %d\n", batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
     gpu::conv_fprop<Type>(
-        x, w, y,
+        xt, wt, y,
         batchSize, inh, inw, din, dout,
         wh, ww, padding, padding, stride, dilation
     );
@@ -39,11 +54,15 @@ void conv2d_cutlass(const Type* X, const Type* W, Type* Y, int batchSize, int in
      //   int paddingHeight, int paddingWidth,
       //  int stride, int dilation) {
 
-    cudaMemcpy(Y, y, ySize * sizeof(Type), cudaMemcpyDeviceToHost);
+    cudaFree(xt);
+    cudaFree(wt);
+    
+    cudaMalloc((void **)&yt, ySize * sizeof(Type));
+    nhwc_to_chwn_(yt, y, batchSize, outh, outw, dout);
 
-    cudaFree(x);
-    cudaFree(w);
-    cudaFree(y);
+    cudaMemcpy(Y, yt, ySize * sizeof(Type), cudaMemcpyDeviceToHost);
+
+    cudaFree(yt);
 
 }
 

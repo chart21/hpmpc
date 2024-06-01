@@ -39,7 +39,7 @@ O_NUM_GPUS=1
 if [ ! -z "$NUM_GPUS" ]; then O_NUM_GPUS="$NUM_GPUS"; fi
 
 # Run executables with GPU support
-if [ ! -z "$NUM_GPUS" ]; then
+if [ $O_NUM_GPUS -gt 1 ]; then
     if [ "$O_PARTY" = "0" ] || [ "$O_PARTY" = "all" ]; then
         CUDA_VISIBLE_DEVICES=$((0 % O_NUM_GPUS)) ./run-P0--1-2-3-4.o $O_IP2 $O_IP3 $O_IP4 &
         CUDA_VISIBLE_DEVICES=$((1 % O_NUM_GPUS)) ./run-P0--1-3-2-4.o $O_IP3 $O_IP2 $O_IP4 &

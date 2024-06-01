@@ -12,7 +12,7 @@
 #endif
 #if USE_CUDA_GEMM == 1 || USE_CUDA_GEMM == 3
     #include "../cuda/gemm_cutlass_int.h"
-#elif USE_CUDA_GEMM == 2
+#elif USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
     #include "../cuda/conv_cutlass_int.h"
     /* #include "../cuda/test_gemm.hpp" */
 #endif

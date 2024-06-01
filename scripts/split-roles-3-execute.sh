@@ -34,6 +34,7 @@ if [ ! -z "$IP2" ]; then O_IP2="$IP2"; fi
 O_NUM_GPUS=1
 if [ ! -z "$NUM_GPUS" ]; then O_NUM_GPUS="$NUM_GPUS"; fi
 
+if [ $O_NUM_GPUS -gt 1 ]; then
 # Run executables with GPU support
 if [ "$O_PARTY" = "0" ] || [ "$O_PARTY" = "all" ]; then
     CUDA_VISIBLE_DEVICES=$((0 % O_NUM_GPUS)) ./run-P0--0-1-2.o $O_IP1 $O_IP2 &
@@ -61,7 +62,7 @@ if [ "$O_PARTY" = "2" ] || [ "$O_PARTY" = "all" ]; then
 fi
 
 # Run executables without GPU support
-if [ -z "$NUM_GPUS" ]; then
+else
     if [ "$O_PARTY" = "0" ] || [ "$O_PARTY" = "all" ]; then
         ./run-P0--0-1-2.o $O_IP1 $O_IP2 &
         ./run-P0--0-2-1.o $O_IP2 $O_IP1 &
@@ -87,6 +88,7 @@ if [ -z "$NUM_GPUS" ]; then
         ./run-P2--2-1-0.o $O_IP1 $O_IP0 &
     fi
 fi
+
 
 FAIL=0
 for job in $(jobs -p); do

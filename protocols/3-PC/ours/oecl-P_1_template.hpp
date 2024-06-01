@@ -698,7 +698,6 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 
 
 #if USE_CUDA_GEMM == 2
-
 static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
     const int factor = DATTYPE/BITLENGTH;
     const int xSize = inh * inw * din * batchSize;
@@ -740,6 +739,56 @@ static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, 
         alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
         for(int j = 0; j < factor; j++)
             temp[j] = y_p1[j * ySize + i] + y_p1_2[j * ySize + i];
+        orthogonalize_arithmetic(temp, &Y[i].p1, 1);
+    }
+
+    delete[] x_p1;
+    delete[] x_p2;
+    delete[] w_p1;
+    delete[] w_p2;
+    delete[] y_p1;
+    delete[] y_p1_2;
+
+}
+
+#elif USE_CUDA_GEMM == 4
+
+static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+    const int factor = DATTYPE/BITLENGTH;
+    const int xSize = inh * inw * din * batchSize;
+    const int wSize = wh * ww * din * dout;
+    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = out_h * out_w * dout * batchSize;
+    batchSize *= factor; 
+
+    alignas(sizeof(Datatype)) UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
+    alignas(sizeof(Datatype)) UINT_TYPE* x_p2 = new UINT_TYPE[factor * xSize];
+    alignas(sizeof(Datatype)) UINT_TYPE* w_p1 = new UINT_TYPE[wSize]; // W is always constant
+    alignas(sizeof(Datatype)) UINT_TYPE* w_p2 = new UINT_TYPE[wSize];
+    alignas(sizeof(Datatype)) UINT_TYPE* y_p1 = new UINT_TYPE[factor * ySize];
+    alignas(sizeof(Datatype)) UINT_TYPE* y_p1_2 = new UINT_TYPE[factor * ySize];
+
+    for(int i = 0; i< xSize; i++){
+        unorthogonalize_arithmetic(&X[i].p1, x_p1 + i * factor, 1);
+        unorthogonalize_arithmetic(&X[i].p2, x_p2 + i * factor, 1);
+    }
+
+    for(int i = 0; i< wSize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&W[i].p1, temp, 1);
+        w_p1[i] = temp[0];
+        unorthogonalize_arithmetic(&W[i].p2, temp, 1);
+        w_p2[i] = temp[0];
+    }
+
+    conv2d_cutlass(x_p1, w_p2, y_p1, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+    conv2d_cutlass(x_p2, w_p1, y_p1_2, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+
+    for(int i = 0; i< ySize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for(int j = 0; j < factor; j++)
+            temp[j] = y_p1[i * factor + j] + y_p1_2[i * factor + j];
         orthogonalize_arithmetic(temp, &Y[i].p1, 1);
     }
 
