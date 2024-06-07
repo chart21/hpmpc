@@ -2,10 +2,10 @@
 
 #define MODELOWNER -1 //Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing)
 #define DATAOWNER -1 //Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing)
-#define PROTOCOL 8
+#define PROTOCOL 5
 
 // Party ID (starting from 0)
-#define PARTY 3
+#define PARTY 2
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
@@ -17,13 +17,13 @@
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
-#define DATTYPE 32
+#define DATTYPE 64
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 32
+#define NUM_INPUTS 10
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -90,15 +90,15 @@ int base_port = BASE_PORT; // temporary solution
 #define INPUT 'r'
 
 // Bitlength of integers 
-#define BITLENGTH 32
+#define BITLENGTH 64
 // Reduced Bitlength that might be used for RELU, etc
 #define SIMULATE_QUANT 0 // Simulate 8-bit quantization
 #if COMPRESS == 0
-#define REDUCED_BITLENGTH_k 32
+#define REDUCED_BITLENGTH_k 64
 #define REDUCED_BITLENGTH_m 0
 /* #define SIMULATE_QUANT 0 // Simulate 8-bit quantization */
 #else
-#define REDUCED_BITLENGTH_k 20
+#define REDUCED_BITLENGTH_k 64
 #define REDUCED_BITLENGTH_m 12
 // Temporarily placed here
 /* #define SIMULATE_QUANT 1 // Simulate 8-bit quantization */
