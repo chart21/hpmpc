@@ -13,7 +13,7 @@
 //13,14: Dot product, 16,17 RELU, 20,21 Conv Forward (*10), Conv Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards (Different Sizes), 25,26 Forward Backwards (Different Sizes), 27 Mat Mul Eigen, 28 max/min/argmax/argmin, 29 mult3, 30 mult 4, 31-34 dot2/dot3/dot4/dotmixed, 
 // 40-65 Various benchmarks (Elementary operations such as mult, div. Statistical operations such as avg, max. Set Intersection, AES, Private Auction, Logistic Regression, etc. Refer to programs/functions/sevare.hpp
 // 70+ Neural network architectures (LeNet, AlexNet, VGG, ResNet, etc.) on different dataset sizes (MNIST, CIFAR-10, Imagenet). Refer to programs/functions/NN.hpp
-#define FUNCTION_IDENTIFIER 14
+#define FUNCTION_IDENTIFIER 2
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
@@ -23,7 +23,7 @@
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 10
+#define NUM_INPUTS 224
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -138,13 +138,13 @@ int base_port = BASE_PORT; // temporary solution
 #define ONLINE_OPTIMIZED 1 
 #endif
 #else
-#if FUNCTION_IDENTIFIER == 404 || FUNCTION_IDENTIFIER == 407 //RCA
+#if FUNCTION_IDENTIFIER == 404 || FUNCTION_IDENTIFIER == 407 || FUNCTION_IDENTIFIER == 412 //RCA
 #define BANDWIDTH_OPTIMIZED 1
 #define ONLINE_OPTIMIZED 0
-#elif FUNCTION_IDENTIFIER == 405 || FUNCTION_IDENTIFIER == 408 //PPA
+#elif FUNCTION_IDENTIFIER == 405 || FUNCTION_IDENTIFIER == 408 || FUNCTION_IDENTIFIER == 413 //PPA
 #define BANDWIDTH_OPTIMIZED 0
 #define ONLINE_OPTIMIZED 0
-#elif FUNCTION_IDENTIFIER == 406 || FUNCTION_IDENTIFIER == 409 //PPA 4-way
+#elif FUNCTION_IDENTIFIER == 406 || FUNCTION_IDENTIFIER == 409 || FUNCTION_IDENTIFIER == 414 //PPA 4-Way
 #define BANDWIDTH_OPTIMIZED 0
 #define ONLINE_OPTIMIZED 1
 #endif

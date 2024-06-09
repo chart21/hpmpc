@@ -27,8 +27,10 @@
 #include "programs/functions/sevare.hpp"
 #elif FUNCTION_IDENTIFIER < 400
 #include "programs/functions/NN.hpp"
-#else 
+#elif FUNCTION_IDENTIFIER < 416
 #include "programs/functions/cryptgpu_piranha_bench.hpp"
+#else
+#include "programs/functions/eigen_nn_test.hpp"
 #endif
 
 

@@ -28,7 +28,16 @@
 #define FUNCTION ReLU_bench
 #elif FUNCTION_IDENTIFIER == 407 || FUNCTION_IDENTIFIER == 408 || FUNCTION_IDENTIFIER == 409
 #define FUNCTION ReLU_sint_bench
+#elif FUNCTION_IDENTIFIER == 410
+#define FUNCTION avg_pool_bench
+#elif FUNCTION_IDENTIFIER == 411
+#define FUNCTION batch_norm_bench
+#elif FUNCTION_IDENTIFIER == 412 || FUNCTION_IDENTIFIER == 413 || FUNCTION_IDENTIFIER == 414
+#define FUNCTION boolean_adder_bench
+#elif FUNCTION_IDENTIFIER == 415 || FUNCTION_IDENTIFIER == 416 || FUNCTION_IDENTIFIER == 417
+#define FUNCTION conv_2D_bench
 #endif
+
 
 
 #define RESULTTYPE DATATYPE
@@ -262,3 +271,102 @@ void ReLU_sint_bench(DATATYPE* res)
     dummy_reveal<Share>();
 }
 #endif
+
+#if FUNCTION_IDENTIFIER == 410
+template<typename Share>
+void avg_pool_bench(DATATYPE* res)
+{
+    using S = Additive_Share<DATATYPE, Share>;
+    Share::communicate(); // dummy round
+    auto layer = new AvgPool2d<S>(2,2);
+    const int batch = 1;
+    vector<int> input_shape = {batch, 3, NUM_INPUTS, NUM_INPUTS};
+    MatX<S> input(batch, 3 * NUM_INPUTS * NUM_INPUTS);
+    layer->set_layer(input_shape);
+    layer->forward(input, false);
+    dummy_reveal<Share>();
+}
+#endif
+
+#if FUNCTION_IDENTIFIER == 411
+template<typename Share>
+void batch_norm_bench(DATATYPE* res)
+{
+    using S = Additive_Share<DATATYPE, Share>;
+    Share::communicate(); // dummy round
+    const int batch = 1;
+    const int num_channels = 64;
+    auto batch_norm = new BatchNorm2d<S>();
+    vector<int> input_shape = {batch, num_channels, NUM_INPUTS, NUM_INPUTS};
+    MatX<S> input(batch * num_channels, NUM_INPUTS * NUM_INPUTS);
+    batch_norm->set_layer(input_shape);
+    batch_norm->forward(input, false);
+    dummy_reveal<Share>();
+}
+#endif
+
+#if FUNCTION_IDENTIFIER == 412 || FUNCTION_IDENTIFIER == 413 || FUNCTION_IDENTIFIER == 414
+template<typename Share>
+void boolean_adder_bench(DATATYPE* res)
+{
+    const int m = REDUCED_BITLENGTH_m;
+    const int k = REDUCED_BITLENGTH_k;
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<k-m, S>;
+
+    Share::communicate(); // dummy round
+    S *y = new S[NUM_INPUTS];
+    Bitset *s1 = new Bitset[NUM_INPUTS];
+    Bitset *s2 = new Bitset[NUM_INPUTS];
+    /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+    std::vector<BooleanAdder_MSB<k-m,S>> adders;
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
+    std::vector<PPA_MSB_4Way<k-m,S>> adders;
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+    /* std::vector<PPA_MSB<k-m,S>> adders; */
+    std::vector<PPA_MSB_Unsafe<k-m,S>> adders;
+#endif
+    /* std::vector<PPA_MSB_4Way<k,S>> adders; */
+    adders.reserve(NUM_INPUTS);
+    for(int i = 0; i < NUM_INPUTS; i++)
+    {
+        /* adder[i].set_values(s1[i], s2[i], y[i]); */
+        adders.emplace_back(s1[i], s2[i], y[i]);
+    }
+
+    while(!adders[0].is_done())
+    {
+        for(int i = 0; i < NUM_INPUTS; i++)
+        {
+            adders[i].step();
+        }
+        /* std::cout << "Adder step ..." << std::endl; */
+        Share::communicate();
+    }
+    delete[] s1;
+    delete[] s2;
+    adders.clear();
+    adders.shrink_to_fit();
+    
+}
+#endif
+
+#if FUNCTION_IDENTIFIER == 415
+
+template<typename Share>
+void conv_2D_bench(DATATYPE* res)
+{
+    using S = Additive_Share<DATATYPE, Share>;
+    Share::communicate(); // dummy round
+    const int batch = 1;
+    auto conv = new Conv2d<S>(64,64,3,1,1);
+    vector<int> input_shape = {batch, 64, NUM_INPUTS, NUM_INPUTS};
+    MatX<S> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
+    conv->set_layer(input_shape);
+    conv->forward(input, false);
+    dummy_reveal<Share>();
+}
+#endif
+
+
