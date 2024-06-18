@@ -1,8 +1,9 @@
 #include <cstdlib>
-//#include <conv2d_NCHW.cuh>
 #include <conv2d_NHWC.cuh> 
 #include <transform.cuh>
 #include <cstdint>
+#include <string>
+constexpr const char* PIGEON_LAYOUT = "CHWN";
 
 template <typename Type>
 void conv2d_cutlass(const Type* X, const Type* W, Type* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1) {
@@ -20,14 +21,20 @@ void conv2d_cutlass(const Type* X, const Type* W, Type* Y, int batchSize, int in
     cudaMalloc((void **)&x, xSize * sizeof(Type));
     cudaMemcpy(x, X, xSize * sizeof(Type), cudaMemcpyHostToDevice);
     cudaMalloc((void **)&xt, xSize * sizeof(Type));
-    printf("XDimesions: %d, %d, %d, %d\n", batchSize, inh, inw, din);
+    //printf("XDimesions: %d, %d, %d, %d\n", batchSize, inh, inw, din);
+if constexpr(PIGEON_LAYOUT == "CHWN") {
     chwn_to_nhwc_(xt, x, batchSize, inh, inw, din);
+} else if constexpr(PIGEON_LAYOUT == "NCHW") {
+    nchw_to_nhwc_(xt, x, batchSize, inh, inw, din);
+}
     cudaFree(x);
     
     cudaMalloc((void **)&w, wSize * sizeof(Type));
     cudaMemcpy(w, W, wSize * sizeof(Type), cudaMemcpyHostToDevice);
     cudaMalloc((void **)&wt, wSize * sizeof(Type));
+if constexpr(PIGEON_LAYOUT != "NHWC") {
     nchw_to_nhwc_(wt, w, dout, wh, ww, din);
+}
     cudaFree(w);
 //    printf("X-Dimensions-- BatchSize: %d, Height: %d, Width: %d, Channels: %d\n", batchSize, inh, inw, din);
 //    printf("W-Dimensions-- Height: %d, Width: %d, Channels: %d, Filters: %d\n", wh, ww, din, dout);
@@ -58,7 +65,11 @@ void conv2d_cutlass(const Type* X, const Type* W, Type* Y, int batchSize, int in
     cudaFree(wt);
     
     cudaMalloc((void **)&yt, ySize * sizeof(Type));
-    nhwc_to_chwn_(yt, y, batchSize, outh, outw, dout);
+    if constexpr(PIGEON_LAYOUT == "CHWN") {
+        nhwc_to_chwn_(yt, y, batchSize, outh, outw, dout);
+    } else if constexpr(PIGEON_LAYOUT == "NCHW") {
+        nhwc_to_nchw_(yt, y, batchSize, outh, outw, dout);
+    }
 
     cudaMemcpy(Y, yt, ySize * sizeof(Type), cudaMemcpyDeviceToHost);
 
