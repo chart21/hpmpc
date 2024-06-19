@@ -629,7 +629,7 @@ static void GEMM(OEC_MAL3_init* a, OEC_MAL3_init* b, OEC_MAL3_init* c, int m, in
 {
 
 }
-#elif USE_CUDA_GEMM == 2    
+#elif USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
 static void CONV_2D(const OEC_MAL3_init* X, const OEC_MAL3_init* W, OEC_MAL3_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
 }
 

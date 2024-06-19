@@ -242,12 +242,12 @@ void complete_mult4(func_add ADD, func_sub SUB){
 
 #endif
 
-#if USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM == 1 || USE_CUDA_GEMM == 3
 static void GEMM(OECL_MAL3_POST_Share* a, OECL_MAL3_POST_Share* b, OECL_MAL3_POST_Share* c, int m, int n, int k, bool a_fixed)
 {
 
 }
-#elif USE_CUDA_GEMM == 2    
+#elif USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4 
 static void CONV_2D(const OECL_MAL3_POST_Share* X, const OECL_MAL3_POST_Share* W, OECL_MAL3_POST_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
 }
 

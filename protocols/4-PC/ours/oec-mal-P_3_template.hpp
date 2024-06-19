@@ -917,6 +917,67 @@ static void CONV_2D(const OEC_MAL3_Share* X, const OEC_MAL3_Share* W, OEC_MAL3_S
     delete[] b_r_r0;
 
 }
+#elif USE_CUDA_GEMM == 4
+
+static void CONV_2D(const OEC_MAL3_Share* X, const OEC_MAL3_Share* W, OEC_MAL3_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+    const int factor = DATTYPE/BITLENGTH;
+    const int xSize = inh * inw * din * batchSize;
+    const int wSize = wh * ww * din * dout;
+    const int outh = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int outw = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = outh * outw * dout * batchSize;
+    batchSize *= factor; 
+    
+    UINT_TYPE* r0 = new UINT_TYPE[factor*xSize];
+    UINT_TYPE* r1 = new UINT_TYPE[factor*xSize];
+    UINT_TYPE* b_r1 = new UINT_TYPE[wSize];
+    UINT_TYPE* br1_br0 = new UINT_TYPE[wSize];
+    UINT_TYPE* r_br = new UINT_TYPE[factor * ySize];
+    UINT_TYPE* r_br1_br0 = new UINT_TYPE[factor * ySize];
+    UINT_TYPE* b_r_r0 = new UINT_TYPE[factor * ySize];
+
+
+    for(int i = 0; i< xSize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&X[i].r0, r0 + i * factor, 1);
+        unorthogonalize_arithmetic(&X[i].r1, r1 + i * factor, 1);
+    }
+
+    for(int i = 0; i< wSize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&W[i].r1, temp, 1);
+        b_r1[i] = temp[0];
+        auto temp2 = OP_SUB(W[i].r1, W[i].r0);
+        unorthogonalize_arithmetic(&temp2, temp, 1);
+        br1_br0[i] = temp[0];
+    }
+    
+    conv2d_cutlass(r1, b_r1, r_br, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+    conv2d_cutlass(r0, b_r1, b_r_r0, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+    conv2d_cutlass(r1, br1_br0, r_br1_br0, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+            
+
+    for(int i = 0; i< ySize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for(int j = 0; j < factor; j++)
+            temp[j] = r_br1_br0[i * factor + j] + b_r_r0[i * factor + j];
+        orthogonalize_arithmetic(temp, &Y[i].r0, 1);
+        for(int j = 0; j < factor; j++)
+            temp[j] = r_br[i * factor + j];
+        orthogonalize_arithmetic(temp, &Y[i].r1, 1);
+    }
+
+    delete[] r0;
+    delete[] r1;
+    delete[] b_r1;
+    delete[] br1_br0;
+    delete[] r_br;
+    delete[] r_br1_br0;
+    delete[] b_r_r0;
+
+}
+
+#elif USE_CUDA_GEMM == 1
 
 #elif USE_CUDA_GEMM == 1
     

@@ -3,7 +3,8 @@
 #include <transform.cuh>
 #include <cstdint>
 #include <string>
-constexpr const char* PIGEON_LAYOUT = "CHWN";
+constexpr const char* PIGEON_LAYOUT = "NCHW"; // USE_CUDA_GEMM 2
+//constexpr const char* PIGEON_LAYOUT = "CHWN"; // USE_CUDA_GEMM 4
 
 template <typename Type>
 void conv2d_cutlass(const Type* X, const Type* W, Type* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1) {

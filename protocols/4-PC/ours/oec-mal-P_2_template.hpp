@@ -1282,6 +1282,62 @@ static void CONV_2D(const OEC_MAL2_Share* X, const OEC_MAL2_Share* W, OEC_MAL2_S
     delete[] v_bv;
 
 }
+#elif USE_CUDA_GEMM == 4
+
+static void CONV_2D(const OEC_MAL2_Share* X, const OEC_MAL2_Share* W, OEC_MAL2_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+    const int factor = DATTYPE/BITLENGTH;
+    const int xSize = inh * inw * din * batchSize;
+    const int wSize = wh * ww * din * dout;
+    const int outh = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int outw = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = outh * outw * dout * batchSize;
+    batchSize *= factor; 
+    
+    UINT_TYPE* r = new UINT_TYPE[factor*xSize];
+    UINT_TYPE* v = new UINT_TYPE[factor*xSize];
+    UINT_TYPE* b_r = new UINT_TYPE[wSize];
+    UINT_TYPE* b_v = new UINT_TYPE[wSize];
+    UINT_TYPE* v_br = new UINT_TYPE[factor*ySize];
+    UINT_TYPE* bv_r = new UINT_TYPE[factor*ySize];
+    UINT_TYPE* v_bv = new UINT_TYPE[factor*ySize];
+
+
+    for(int i = 0; i< xSize; i++){
+        unorthogonalize_arithmetic(&X[i].r, r + i * factor, 1);
+        unorthogonalize_arithmetic(&X[i].v, v + i * factor, 1);
+    }
+
+    for(int i = 0; i< wSize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&W[i].r, temp, 1);
+        b_r[i] = temp[0];
+        unorthogonalize_arithmetic(&W[i].v, temp, 1);
+        b_v[i] = temp[0];
+    }
+   
+    conv2d_cutlass(v, b_v, v_bv, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+    conv2d_cutlass(v, b_r, v_br, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+    conv2d_cutlass(r, b_v, bv_r, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+
+    for(int i = 0; i< ySize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for(int j = 0; j < factor; j++)
+            temp[j] = v_br[i * factor + j] + bv_r[i * factor + j];
+        orthogonalize_arithmetic(temp, &Y[i].r, 1);
+        for(int j = 0; j < factor; j++)
+            temp[j] = v_bv[i * factor + j];
+        orthogonalize_arithmetic(temp, &Y[i].v, 1);
+    }
+
+    delete[] r;
+    delete[] v;
+    delete[] b_r;
+    delete[] b_v;
+    delete[] v_br;
+    delete[] bv_r;
+    delete[] v_bv;
+
+}
 
 #elif USE_CUDA_GEMM == 1
     

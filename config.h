@@ -5,7 +5,7 @@
 #define PROTOCOL 5
 
 // Party ID (starting from 0)
-#define PARTY 2
+#define PARTY 3
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
@@ -13,7 +13,7 @@
 //13,14: Dot product, 16,17 RELU, 20,21 Conv Forward (*10), Conv Backwards (*10), 22 MatMul (*10), 23,24 Forward Backwards (Different Sizes), 25,26 Forward Backwards (Different Sizes), 27 Mat Mul Eigen, 28 max/min/argmax/argmin, 29 mult3, 30 mult 4, 31-34 dot2/dot3/dot4/dotmixed, 
 // 40-65 Various benchmarks (Elementary operations such as mult, div. Statistical operations such as avg, max. Set Intersection, AES, Private Auction, Logistic Regression, etc. Refer to programs/functions/sevare.hpp
 // 70+ Neural network architectures (LeNet, AlexNet, VGG, ResNet, etc.) on different dataset sizes (MNIST, CIFAR-10, Imagenet). Refer to programs/functions/NN.hpp
-#define FUNCTION_IDENTIFIER 74
+#define FUNCTION_IDENTIFIER 70
 
 // Registersize to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 //Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
@@ -36,7 +36,7 @@
 #define USE_SSL 0
 
 // USE CUDA for matrix multiplication?
-#define USE_CUDA_GEMM 4
+#define USE_CUDA_GEMM 2
 
 // How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered
 #define SEND_BUFFER 10000
