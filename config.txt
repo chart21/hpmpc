@@ -69,7 +69,7 @@ $pretrained=pretrained_models/cifar10_SGD_001/AlexNet_32_CIFAR-10_custom_best.bi
 
 #VGG16
 
-pretrained=pretrained_models/old_models_hpmpc/vgg16_cifar.bin
+#pretrained=pretrained_models/old_models_hpmpc/vgg16_cifar.bin
 #100 31 (Frac 5)
 #pretrained=pretrained_models/old_models/og_vgg16_cifar10.bin
 #100 93 (Frac 5)
@@ -97,7 +97,7 @@ ResNet18
 #100 39 (Frac 5)
 #pretrained=pretrained_models/cifar10_ADAM_005/ResNet18_avg_CIFAR-10_standard_best.bin
 #100 36 (Frac 5)
-#pretrained=pretrained_models/cifar10_SGD_001/ResNet18_avg_CIFAR-10_standard_best.bin
+pretrained=pretrained_models/cifar10_SGD_001/ResNet18_avg_CIFAR-10_standard_best.bin
 #100 40 (Frac 5)
 
 #pretrained=pretrained_models/cifar10_ADAM_001/ResNet18_avg_CIFAR-10_custom_best.bin

@@ -5,7 +5,7 @@
 #define PROTOCOL 5
 
 // Party ID (starting from 0)
-#define PARTY 3
+#define PARTY 2
 
 //0: Search 
 //1-6: Multiplicatios: 1,2,3: 1-bit,32-bit,64-bit with 1 communication round, 4,5,6: 1-bit,32-bit,64-bit with 1000 communication rounds
@@ -23,7 +23,7 @@
 #define PRE 0
 
 // Number of inputs (depends on the problem)
-#define NUM_INPUTS 1
+#define NUM_INPUTS 10
 
 // Number of parallel processes to use
 #define PROCESS_NUM 1
@@ -36,7 +36,7 @@
 #define USE_SSL 0
 
 // USE CUDA for matrix multiplication?
-#define USE_CUDA_GEMM 2
+#define USE_CUDA_GEMM 0
 
 // How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered
 #define SEND_BUFFER 10000
