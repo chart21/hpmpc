@@ -30,7 +30,8 @@
     exit(1);
 #endif
 
-#if FUNCTION_IDENTIFIER !=2 //workaround to test function 2 easier
+#if FUNCTION_IDENTIFIER !=2 && FUNCTION_IDENTIFIER != 412 && FUNCTION_IDENTIFIER != 413 && FUNCTION_IDENTIFIER != 414
+                            //workaround to benchmark some functions easier
 
 void orthogonalize_arithmetic(UINT_TYPE *in, DATATYPE *out)
 {
@@ -52,6 +53,23 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
     unorthogonalize_arithmetic(in, out, DATTYPE);
 }
 
+#else //Workarounds for easier benchmarking of some functions that don't need these 
+template<typename a, typename b>
+void orthogonalize_arithmetic(a *in, b *out)
+{
+}
+template<typename a, typename b>
+void unorthogonalize_arithmetic(a *in, b *out)
+{
+}
+template<typename a, typename b>
+void orthogonalize_boolean(a *in, b *out)
+{
+}
+template<typename a, typename b>
+void unorthogonalize_boolean(a *in, b *out)
+{
+}
 #endif
 
 #if FUNCTION_IDENTIFIER == 1 || FUNCTION_IDENTIFIER == 4
