@@ -179,6 +179,7 @@ class Conv2d : public Layer<T>
 		int ohw;
 		int kh;
 		int kw;
+        int stride;
 		int pad;
 		string option;
 		MatX<T> dkernel;
@@ -187,7 +188,7 @@ class Conv2d : public Layer<T>
 	public:
 		MatX<T> kernel;
 		VecX<T> bias;
-		Conv2d(int in_channels, int out_channels, int kernel_size, int padding,
+		Conv2d(int in_channels, int out_channels, int kernel_size, int stride, int padding,
 			string option);
 		void set_layer(const vector<int>& input_shape) override;
 		void forward(const MatX<T>& prev_out, bool is_training) override;
@@ -238,6 +239,7 @@ class Conv2d : public Layer<T>
 		int in_channels,
 		int out_channels,
 		int kernel_size,
+        int stride,
 		int padding,
 		string option
 	) :
@@ -253,6 +255,7 @@ class Conv2d : public Layer<T>
 		ohw(0),
 		kh(kernel_size),
 		kw(kernel_size),
+        stride(stride),
 		pad(padding),
 		option(option) {}
 
@@ -264,8 +267,8 @@ class Conv2d : public Layer<T>
 		ih = input_shape[2];
 		iw = input_shape[3];
 		ihw = ih * iw;
-		oh = calc_outsize(ih, kh, 1, pad);
-		ow = calc_outsize(iw, kw, 1, pad);
+		oh = calc_outsize(ih, kh, stride, pad);
+		ow = calc_outsize(iw, kw, stride, pad);
 		ohw = oh * ow;
 
 		this->output.resize(batch * oc, ohw);
@@ -289,7 +292,7 @@ int TILE_SIZE = 64;
 	{
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
 			this->output.block(oc * n, 0, oc, ohw).noalias() = kernel * im_col;
 			this->output.block(oc * n, 0, oc, ohw).colwise() += bias;
 		}
@@ -303,7 +306,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
 			this->output.block(oc*n,0, oc, ohw).noalias() = kernel * im_col;
         }
             for (int i = 0; i < this->output.size(); i++) {
@@ -326,7 +329,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             for(int i = 0; i < oc; ++i) {
         for(int k = 0; k < kernel.cols(); ++k) {
             T temp = kernel(i, k);
@@ -358,7 +361,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
         for(int k = 0; k < kernel.cols(); ++k) {
             for(int i = 0; i < oc; ++i) {
                 for(int j = 0; j < ohw; ++j) {
@@ -387,7 +390,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             for(int i = 0; i < oc; ++i) {
                 T sum = T(0);
                 for(int j = 0; j < ohw; ++j) {
@@ -416,7 +419,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
     auto A = kernel;
     auto B = im_col;
     auto C = this->output;
@@ -458,7 +461,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
     auto A = kernel;
     auto B = im_col;
     auto C = this->output;
@@ -504,7 +507,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
     auto A = kernel;
     auto B = im_col;
     auto C = this->output;
@@ -555,7 +558,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -616,7 +619,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -679,7 +682,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -743,7 +746,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -811,7 +814,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -867,7 +870,7 @@ int TILE_SIZE = 64;
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -932,7 +935,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -995,7 +998,7 @@ for (int i = 0; i < m; ++i) {
 	{
 		for (int n = 0; n < batch; n++) {
         const T* im = prev_out.data() + (ic * ihw) * n;
-        im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+        im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
         const int M = oc;
         const int N = ohw; 
         const int K = kernel.cols(); 
@@ -1044,7 +1047,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1112,7 +1115,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1175,7 +1178,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1242,7 +1245,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1337,7 +1340,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1408,7 +1411,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1468,7 +1471,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1546,7 +1549,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1609,7 +1612,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1676,7 +1679,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1745,7 +1748,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1812,7 +1815,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1878,7 +1881,7 @@ for (int i = 0; i < m; ++i) {
         std::cout << "output: " << this->output.size() << std::endl;
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -1947,7 +1950,7 @@ for (int i = 0; i < m; ++i) {
         }
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -2014,7 +2017,7 @@ for (int i = 0; i < m; ++i) {
         }
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -2081,7 +2084,7 @@ for (int i = 0; i < m; ++i) {
         }
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -2148,7 +2151,7 @@ for (int i = 0; i < m; ++i) {
         }
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -2216,7 +2219,7 @@ for (int i = 0; i < m; ++i) {
         }
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
             /* auto A = kernel; */
             /* auto B = im_col; */
             /* auto C = this->output; */
@@ -2278,7 +2281,7 @@ for (int i = 0; i < m; ++i) {
 	{
 		for (int n = 0; n < batch; n++) {
 			const T* im = prev_out.data() + (ic * ihw) * n;
-			im2col(im, ic, ih, iw, kh, 1, pad, im_col.data());
+			im2col(im, ic, ih, iw, kh, stride, pad, im_col.data());
 			dkernel += this->delta.block(oc * n, 0, oc, ohw) * im_col.transpose();
 			dbias += this->delta.block(oc * n, 0, oc, ohw).rowwise().sum();
 		}
@@ -2287,7 +2290,7 @@ for (int i = 0; i < m; ++i) {
 			for (int n = 0; n < batch; n++) {
 				T* begin = prev_delta.data() + ic * ihw * n;
 				im_col = kernel.transpose() * this->delta.block(oc * n, 0, oc, ohw);
-				col2im(im_col.data(), ic, ih, iw, kh, 1, pad, begin);
+				col2im(im_col.data(), ic, ih, iw, kh, stride, pad, begin);
 			}
 		}
 	}
@@ -3124,7 +3127,8 @@ void conv_alt_bench(DATATYPE* res)
     using S = Additive_Share<DATATYPE, Share>;
     Share::communicate(); // dummy round
     const int batch = 1;
-    auto conv = new Conv2d<S>(64,64,3,1,"xavier_normal");
+    /* auto conv = new Conv2d<S>(64,64,3,1,"xavier_normal"); */
+    auto conv = new Conv2d<S>(3,64,11,4,2,"xavier_normal");
     vector<int> input_shape = {batch, 64, NUM_INPUTS, NUM_INPUTS};
     MatX<S> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
     conv->set_layer(input_shape);

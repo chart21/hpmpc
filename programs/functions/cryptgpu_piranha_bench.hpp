@@ -360,7 +360,8 @@ void conv_2D_bench(DATATYPE* res)
     using S = Additive_Share<DATATYPE, Share>;
     Share::communicate(); // dummy round
     const int batch = 1;
-    auto conv = new Conv2d<S>(64,64,3,1,1);
+    /* auto conv = new Conv2d<S>(64,64,3,1,1); */
+    auto conv = new Conv2d<S>(3,64,11,4,2);
     vector<int> input_shape = {batch, 64, NUM_INPUTS, NUM_INPUTS};
     MatX<S> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
     conv->set_layer(input_shape);
