@@ -34,7 +34,7 @@
 #define FUNCTION batch_norm_bench
 #elif FUNCTION_IDENTIFIER == 412 || FUNCTION_IDENTIFIER == 413 || FUNCTION_IDENTIFIER == 414
 #define FUNCTION boolean_adder_bench
-#elif FUNCTION_IDENTIFIER == 415 || FUNCTION_IDENTIFIER == 416 || FUNCTION_IDENTIFIER == 417
+#elif FUNCTION_IDENTIFIER == 415 || FUNCTION_IDENTIFIER == 416 || FUNCTION_IDENTIFIER == 417 || FUNCTION_IDENTIFIER == 418 || FUNCTION_IDENTIFIER == 419 || FUNCTION_IDENTIFIER == 420 || FUNCTION_IDENTIFIER == 421
 #define FUNCTION conv_2D_bench
 #endif
 
@@ -352,7 +352,7 @@ void boolean_adder_bench(DATATYPE* res)
 }
 #endif
 
-#if FUNCTION_IDENTIFIER == 415
+#if FUNCTION_IDENTIFIER == 415 || FUNCTION_IDENTIFIER == 418 || FUNCTION_IDENTIFIER == 421
 
 template<typename Share>
 void conv_2D_bench(DATATYPE* res)
@@ -360,8 +360,13 @@ void conv_2D_bench(DATATYPE* res)
     using S = Additive_Share<DATATYPE, Share>;
     Share::communicate(); // dummy round
     const int batch = 1;
-    /* auto conv = new Conv2d<S>(64,64,3,1,1); */
+#if FUNCTION_IDENTIFIER == 415
     auto conv = new Conv2d<S>(3,64,11,4,2);
+#elif FUNCTION_IDENTIFIER == 418
+    auto conv = new Conv2d<S>(3,64,3,1,1);
+#elif FUNCTION_IDENTIFIER == 421
+    auto conv = new Conv2d<S>(64,64,3,1,1);
+#endif
     vector<int> input_shape = {batch, 64, NUM_INPUTS, NUM_INPUTS};
     MatX<S> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
     conv->set_layer(input_shape);

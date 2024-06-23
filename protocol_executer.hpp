@@ -27,7 +27,7 @@
 #include "programs/functions/sevare.hpp"
 #elif FUNCTION_IDENTIFIER < 400
 #include "programs/functions/NN.hpp"
-#elif FUNCTION_IDENTIFIER < 416
+#elif FUNCTION_IDENTIFIER == 415 || FUNCTION_IDENTIFIER == 418 || FUNCTION_IDENTIFIER == 421
 #include "programs/functions/cryptgpu_piranha_bench.hpp"
 #else
 #include "programs/functions/eigen_nn_test.hpp"

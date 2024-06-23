@@ -24,7 +24,7 @@ void dummy_reveal()
 
 
 #define USE_EIGEN 1
-#if FUNCTION_IDENTIFIER == 416 || FUNCTION_IDENTIFIER == 417
+#if FUNCTION_IDENTIFIER > 415
 #define FUNCTION conv_alt_bench
 #else
 #define FUNCTION conv2D_bench
@@ -1003,7 +1003,7 @@ for (int i = 0; i < m; ++i) {
         const int N = ohw; 
         const int K = kernel.cols(); 
             auto A = kernel.data();
-#if FUNCTION_IDENTIFIER == 416
+#if FUNCTION_IDENTIFIER == 416 || FUNCTION_IDENTIFIER == 419 || FUNCTION_IDENTIFIER == 422
             auto B = im_col.data();
 #else
             auto BM = im_col.transpose();
@@ -1014,7 +1014,7 @@ for (int i = 0; i < m; ++i) {
                 for (int j = 0; j < N; j++) {
                     T temp = 0;
                     for (int k = 0; k < K; k++) {
-#if FUNCTION_IDENTIFIER == 416
+#if FUNCTION_IDENTIFIER == 416 || FUNCTION_IDENTIFIER == 419 || FUNCTION_IDENTIFIER == 422
                         temp += A[i * K + k].prepare_dot(B[k * N + j]);
 #else
                         temp += A[i * K + k].prepare_dot(B[j * K + k]);
@@ -3128,7 +3128,16 @@ void conv_alt_bench(DATATYPE* res)
     Share::communicate(); // dummy round
     const int batch = 1;
     /* auto conv = new Conv2d<S>(64,64,3,1,"xavier_normal"); */
+    /* auto conv = new Conv2d<S>(3,64,11,4,2,"xavier_normal"); */
+#if FUNCTION_IDENTIFIER == 416 || FUNCTION_IDENTIFIER == 417
     auto conv = new Conv2d<S>(3,64,11,4,2,"xavier_normal");
+#elif FUNCTION_IDENTIFIER == 419 || FUNCTION_IDENTIFIER == 420
+    auto conv = new Conv2d<S>(3,64,3,1,1,"xavier_normal");
+#elif FUNCTION_IDENTIFIER == 422 || FUNCTION_IDENTIFIER == 423
+    auto conv = new Conv2d<S>(64,64,3,1,1,"xavier_normal");
+#endif
+    
+
     vector<int> input_shape = {batch, 64, NUM_INPUTS, NUM_INPUTS};
     MatX<S> input(batch, 64 * NUM_INPUTS * NUM_INPUTS);
     conv->set_layer(input_shape);
