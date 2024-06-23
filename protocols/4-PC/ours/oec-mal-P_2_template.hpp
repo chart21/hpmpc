@@ -294,6 +294,22 @@ OEC_MAL2_Share mult_public(const Datatype b, func_mul MULT) const
     return OEC_MAL2_Share(MULT(v,b),MULT(r,b));
 #endif
 }
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL2_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = v;
+    for(int i = 2; i <= b; i*=2)
+        result = OP_TRUNC2(result);
+
+    OEC_MAL2_Share c(result);
+#if MULTI_INPUT == 1
+    c.m = getRandomVal(P_123);
+    send_to_live(P_0, ADD(c.v,c.m));
+#else
+    send_to_live(P_0,ADD(c.v,getRandomVal(P_123))); // compare v*b + r123 with P_0
+#endif
+    return c;
+} 
 
 
 

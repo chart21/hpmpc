@@ -113,6 +113,10 @@ void unorthogonalize_boolean(a *in, b *out)
 #define OP_SHIFT_LEFT SHIFT_LEFT8
 #define OP_SHIFT_RIGHT SHIFT_RIGHT8
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT8
+#define OP_TRUNC2 SHIFT_RIGHT8<1>
+/* #define OP_TRUNC4 SHIFT_RIGHT8<3> */
+/* #define OP_TRUNC8 SHIFT_RIGHT8<4> */
+/* #define OP_TRUNC16 SHIFT_RIGHT8<5> */
 #elif BITLENGTH == 16
 #define OP_ADD FUNC_ADD16
 #define OP_SUB FUNC_SUB16
@@ -121,6 +125,10 @@ void unorthogonalize_boolean(a *in, b *out)
 #define OP_SHIFT_LEFT SHIFT_LEFT16
 #define OP_SHIFT_RIGHT SHIFT_RIGHT16
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT16
+#define OP_TRUNC2 SHIFT_RIGHT16<1>
+/* #define OP_TRUNC4 SHIFT_RIGHT16<3> */
+/* #define OP_TRUNC8 SHIFT_RIGHT16<4> */
+/* #define OP_TRUNC16 SHIFT_RIGHT16<5> */
 #elif BITLENGTH == 32
 #define OP_ADD FUNC_ADD32
 #define OP_SUB FUNC_SUB32
@@ -129,6 +137,10 @@ void unorthogonalize_boolean(a *in, b *out)
 #define OP_SHIFT_LEFT SHIFT_LEFT32
 #define OP_SHIFT_RIGHT SHIFT_RIGHT32
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT32
+#define OP_TRUNC2 SHIFT_RIGHT32<1>
+/* #define OP_TRUNC4 SHIFT_RIGHT32<3> */
+/* #define OP_TRUNC8 SHIFT_RIGHT32<4> */
+/* #define OP_TRUNC16 SHIFT_RIGHT32<5> */
 #elif BITLENGTH == 64
 #define OP_ADD FUNC_ADD64
 #define OP_SUB FUNC_SUB64
@@ -137,6 +149,10 @@ void unorthogonalize_boolean(a *in, b *out)
 #define OP_SHIFT_LEFT SHIFT_LEFT64
 #define OP_SHIFT_RIGHT SHIFT_RIGHT64
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT64
+#define OP_TRUNC2 SHIFT_RIGHT64<1>
+/* #define OP_TRUNC4 SHIFT_RIGHT64<3> */
+/* #define OP_TRUNC8 SHIFT_RIGHT64<4> */
+/* #define OP_TRUNC16 SHIFT_RIGHT64<5> */
 #endif
 
 DATATYPE TRUNC2(DATATYPE x) {

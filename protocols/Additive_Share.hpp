@@ -69,6 +69,11 @@ public:
     {
         *this = Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
     }
+    
+    Additive_Share prepare_div_exp2(const int b)
+    {
+        return Additive_Share(Share_Type::prepare_div_exp2(b, OP_MULT, OP_ADD, OP_SUB, OP_TRUNC2));
+    }
 
     void prepare_mult_public_fixed_dat(const Datatype b)
     {

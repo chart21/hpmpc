@@ -95,9 +95,9 @@ ResNet18
 
 #pretrained=pretrained_models/cifar10_ADAM_001/ResNet18_avg_CIFAR-10_standard_best.bin
 #100 39 (Frac 5)
-#pretrained=pretrained_models/cifar10_ADAM_005/ResNet18_avg_CIFAR-10_standard_best.bin
+pretrained=pretrained_models/cifar10_ADAM_005/ResNet18_avg_CIFAR-10_standard_best.bin
 #100 36 (Frac 5)
-pretrained=pretrained_models/cifar10_SGD_001/ResNet18_avg_CIFAR-10_standard_best.bin
+#pretrained=pretrained_models/cifar10_SGD_001/ResNet18_avg_CIFAR-10_standard_best.bin
 #100 40 (Frac 5)
 
 #pretrained=pretrained_models/cifar10_ADAM_001/ResNet18_avg_CIFAR-10_custom_best.bin
@@ -132,7 +132,7 @@ pretrained=pretrained_models/cifar10_SGD_001/ResNet18_avg_CIFAR-10_standard_best
 #pretrained=pretrained_models/cifar10_ADAM_005/ResNet50_avg_CIFAR-10_custom_best.bin
 #100 88 (Frac 5)
 #pretrained=pretrained_models/cifar10_SGD_001/ResNet50_avg_CIFAR-10_custom_best.bin
-100 80 (Frac 5)
+#100 80 (Frac 5)
 
 #pretrained=pretrained_models/old_models_hpmpc/resnet50_cifar100.bin
 #does not match

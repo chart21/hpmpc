@@ -248,6 +248,27 @@ static void communicate()
 #if FUNCTION_IDENTIFIER > 14
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL0_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = r;
+    for(int i = 2; i <= b; i*=2)
+        result = OP_TRUNC2(result);
+
+    auto rand_val = getRandomVal(P_013);
+    auto val = SUB(result,rand_val);
+#if PROTOCOL == 12 || PRE == 1
+    store_compare_view(P_2, val);
+#else
+#if PRE == 1
+    pre_send_to_live(P_2, val);
+#else
+    send_to_live(P_2, val);
+#endif
+#endif
+    return OEC_MAL0_Share(SET_ALL_ZERO(),result);
+} 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
 #if TRUNC_THEN_MULT == 1

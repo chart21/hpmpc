@@ -266,6 +266,27 @@ OEC_MAL3_Share mult_public(const Datatype b, func_mul MULT) const
 {
     return OEC_MAL3_Share(MULT(r0,b),MULT(r1,b));
 }
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL3_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = r1;
+    for(int i = 2; i <= b; i*=2)
+        result = OP_TRUNC2(result);
+    auto rand_val = getRandomVal(P_013);
+    auto val = SUB(result,rand_val);
+#if PROTOCOL == 12 || PRE == 1
+#if PRE == 1
+    pre_send_to_live(P_2, val);
+#else
+    send_to_live(P_2, val);
+#endif
+#else
+    store_compare_view(P_2, val);
+#endif
+    
+    return OEC_MAL3_Share(getRandomVal(P_123),result);
+} 
     
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OEC_MAL3_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const

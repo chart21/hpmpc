@@ -144,6 +144,20 @@ static void communicate()
 
 #if FUNCTION_IDENTIFIER > 14
 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL1_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = ADD(p1,p2);
+    for(int i = 2; i <= b; i*=2)
+        result = OP_TRUNC2(result);
+
+    OECL1_Share res;
+    res.p2 = getRandomVal(P_0);
+    res.p1 = SUB(result,res.p2);
+    return res;
+} 
+
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OECL1_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {

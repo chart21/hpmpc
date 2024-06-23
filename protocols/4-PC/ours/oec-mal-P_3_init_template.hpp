@@ -243,6 +243,13 @@ OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_ad
     return OEC_MAL3_init();
 } 
 
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL3_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    Datatype dummy;
+    return prepare_mult_public_fixed(dummy, MULT, ADD, SUB, TRUNC);
+}
+
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
