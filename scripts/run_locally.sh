@@ -29,7 +29,7 @@ fi
 
 for (( i=0; i<$NUM_PLAYERS; i++ ))
 do
-    ./"$FUNCTION"-P"$i".o &
+    ./executables/"$FUNCTION"-P"$i".o &
 done
 
 wait

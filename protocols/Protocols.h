@@ -1,9 +1,9 @@
 #pragma once
 #include "../config.h"
-#include "../arch/DATATYPE.h"
-#include "../networking/sockethelper.h"
-#include "../networking/buffers.h"
-#include "../utils/randomizer.h"
+#include "../core/arch/DATATYPE.h"
+#include "../core/networking/sockethelper.h"
+#include "../core/networking/buffers.h"
+#include "../core/utils/randomizer.h"
 
 #if INIT == 1
     #include "init_protocol_base.hpp"

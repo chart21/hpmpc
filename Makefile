@@ -4,14 +4,14 @@ NVCC ?= nvcc
 
 
 # Base flags
-CXXFLAGS := -w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -I SimpleNN
+CXXFLAGS := -w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -I nn/SimpleNN
 NVCCFLAGS := -Xptxas -O3
 
 # Additional flags for overwriting macros
 MACRO_FLAGS :=
 
 # Precompiled header and config file
-PCH := include/pch.h
+PCH := core/include/pch.h
 PCH_OBJ := $(PCH:.h=.gch)
 CONFIG := config.h
 
@@ -77,30 +77,31 @@ do_compile_player_%:
 	$(eval LPARTY := $(shell echo '$(PARTY_ARGS)' | cut -d',' -f1))
 	$(eval SPLIT_ROLES_OFFSET := $(shell echo '$(PARTY_ARGS)' | cut -d',' -f2))
 	$(eval EXEC_NAME := $(shell echo '$(PARTY_ARGS)' | cut -d',' -f3-))
+	$(eval NEXEC_NAME := executables/$(EXEC_NAME))
 	$(update_config)
-	@PREV_MACRO_FLAGS_FILE=./flags/$(EXEC_NAME).macro_flags; \
+	@PREV_MACRO_FLAGS_FILE=./executables/flags/$(EXEC_NAME).macro_flags; \
 	CURRENT_FLAGS="$(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET)"; \
-	if [ -f ./$(EXEC_NAME).o ] && [ -f $$PREV_MACRO_FLAGS_FILE ] && cmp -s <(echo "$$CURRENT_FLAGS") $$PREV_MACRO_FLAGS_FILE && [ ./$(EXEC_NAME).o -nt main.cpp ] && [ ./$(EXEC_NAME).o -nt $(PCH) ] && [ ./$(EXEC_NAME).o -nt $(CONFIG) ] && [ ./$(EXEC_NAME).o -nt $(PCH_OBJ) ]; then \
+	if [ -f ./$(NEXEC_NAME).o ] && [ -f $$PREV_MACRO_FLAGS_FILE ] && cmp -s <(echo "$$CURRENT_FLAGS") $$PREV_MACRO_FLAGS_FILE && [ ./$(NEXEC_NAME).o -nt main.cpp ] && [ ./$(NEXEC_NAME).o -nt $(PCH) ] && [ ./$(EXEC_NAME).o -nt $(CONFIG) ] && [ ./$(EXEC_NAME).o -nt $(PCH_OBJ) ]; then \
 		echo "Nothing to do for $(EXEC_NAME)"; \
 	else \
 		echo "Compiling executable $(EXEC_NAME)" ; \
 		if [ $(USE_CUDA_GEMM) -gt 0 ]; then \
-			$(COMPILER) main.cpp -include $(PCH) $(CXXFLAGS) $(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET) -c -o ./$(EXEC_NAME)-cuda.o; \
+			$(COMPILER) main.cpp -include $(PCH) $(CXXFLAGS) $(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET) -c -o ./$(NEXEC_NAME)-cuda.o; \
 			echo "Linking CUDA executable $(EXEC_NAME)" ; \
 			case "$(USE_CUDA_GEMM)" in \
 			1|3) \
-				$(NVCC) ./$(EXEC_NAME)-cuda.o $(NVCCFLAGS) ./cuda/gemm_cutlass_int.o -o ./$(EXEC_NAME).o;; \
+				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o -o ./$(NEXEC_NAME).o;; \
 			2) \
-				$(NVCC) ./$(EXEC_NAME)-cuda.o $(NVCCFLAGS) ./cuda/conv_cutlass_int_NCHW.o -o ./$(EXEC_NAME).o;; \
+				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/conv_cutlass_int_NCHW.o -o ./$(NEXEC_NAME).o;; \
 			4) \
-				$(NVCC) ./$(EXEC_NAME)-cuda.o $(NVCCFLAGS) ./cuda/conv_cutlass_int_CHWN.o -o ./$(EXEC_NAME).o;; \
+				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/conv_cutlass_int_CHWN.o -o ./$(NEXEC_NAME).o;; \
 			esac; \
-			rm -f ./$(EXEC_NAME)-cuda.o; \
+			rm -f ./$(NEXEC_NAME)-cuda.o; \
 		else \
-			$(COMPILER) main.cpp -include $(PCH) $(CXXFLAGS) $(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET) -o ./$(EXEC_NAME).o; \
+			$(COMPILER) main.cpp -include $(PCH) $(CXXFLAGS) $(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET) -o ./$(NEXEC_NAME).o; \
 		fi; \
 		echo "$$CURRENT_FLAGS" > $$PREV_MACRO_FLAGS_FILE; \
-		echo "Compilation for xecutable $(EXEC_NAME) completed."; \
+		echo "Compilation for executable $(EXEC_NAME) completed."; \
 	fi
 
 

@@ -1,6 +1,6 @@
 #pragma once
-#include "include/pch.h"
-#include "arch/DATATYPE.h"
+#include "core/include/pch.h"
+#include "core/arch/DATATYPE.h"
 #include "protocols/init_protocol_base.hpp"
 #include "protocols/live_protocol_base.hpp"
 
@@ -9,7 +9,7 @@
 #elif FUNCTION_IDENTIFIER == 11
 #include "programs/share_conversion_init.hpp"
 #elif FUNCTION_IDENTIFIER >= 1 && FUNCTION_IDENTIFIER <= 4
-#include "programs/mult_init.hpp"
+#include "programs/benchmarks/mult_benchmark.hpp"
 #elif FUNCTION_IDENTIFIER >= 7 && FUNCTION_IDENTIFIER <= 9
 #include "programs/debug_init.hpp"
 #elif FUNCTION_IDENTIFIER > 11 && FUNCTION_IDENTIFIER <= 39
@@ -17,7 +17,7 @@
 #elif FUNCTION_IDENTIFIER >= 40 && FUNCTION_IDENTIFIER <= 65
 #include "programs/functions/sevare.hpp"
 #elif FUNCTION_IDENTIFIER < 400
-#include "programs/functions/NN.hpp"
+#include "programs/NN.hpp"
 #elif FUNCTION_IDENTIFIER == 415 || FUNCTION_IDENTIFIER == 418 || FUNCTION_IDENTIFIER == 421
 #include "programs/functions/cryptgpu_piranha_bench.hpp"
 #else
@@ -25,21 +25,21 @@
 #endif
 
 
-#include "utils/xorshift.h"
+/* #include "utils/xorshift.h" */
 
 #include "config.h"
 #include "protocols/Protocols.h"
 
-#include "utils/randomizer.h"
-#include "utils/timing.hpp"
-#include "utils/print.hpp"
-#include "networking/client.hpp"
-#include "networking/server.hpp"
+#include "core/utils/randomizer.h"
+/* #include "core/utils/timing.hpp" */
+#include "core/utils/print.hpp"
+#include "core/networking/client.hpp"
+#include "core/networking/server.hpp"
 
-#include "networking/sockethelper.h"
-#include "networking/buffers.h"
+#include "core/networking/sockethelper.h"
+#include "core/networking/buffers.h"
 #if LIVE == 1 && INIT == 0 && NO_INI == 0
-#include "protocols/CircuitInfo.hpp"
+#include "core/utils/CircuitInfo.hpp"
 #endif
 
 
@@ -470,7 +470,7 @@ for(int i=0; i < num_players -1; i++)
 init_muetexes();
 
 
-generateElements();
+/* generateElements(); */
 
 init_circuit(ips);
 

@@ -14,7 +14,7 @@
 
 // Party ID (starting from 0)
 #ifndef PARTY
-#define PARTY 1
+#define PARTY 2
 #endif
 
 // 0: Search 
@@ -24,7 +24,7 @@
 // 40-65 Various benchmarks (Elementary operations such as mult, div. Statistical operations such as avg, max. Set Intersection, AES, Private Auction, Logistic Regression, etc. Refer to programs/functions/sevare.hpp
 // 70+ Neural network architectures (LeNet, AlexNet, VGG, ResNet, etc.) on different dataset sizes (MNIST, CIFAR-10, Imagenet). Refer to programs/functions/NN.hpp
 #ifndef FUNCTION_IDENTIFIER
-#define FUNCTION_IDENTIFIER 2
+#define FUNCTION_IDENTIFIER 70
 #endif
 
 // Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)

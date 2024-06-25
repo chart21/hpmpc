@@ -1,6 +1,6 @@
 #pragma once
-#include "../include/pch.h"
-#include "../networking/buffers.h"
+#include "../core/include/pch.h"
+#include "../core/networking/buffers.h"
 
 #if MAL == 1
 #ifdef __SHA__

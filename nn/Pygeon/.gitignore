@@ -1,0 +1,8 @@
+models/
+deepreduce_models/
+data/
+__pycache__/
+*.pth
+*.bin
+*.tar.gz
+*.pyc

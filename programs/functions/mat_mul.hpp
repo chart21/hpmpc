@@ -534,13 +534,6 @@ void fixed_test(DATATYPE* res)
         for(int j = 0; j < NUM_INPUTS; j++)
         {
             c[i][j].complete_reveal_to_all(result_arr[NUM_INPUTS*i+j]);
-            /* if(current_phase == 1) */
-            /* { */
-            /* #if FRACTIONAL > 0 */
-            /* std::cout << fixedToFloat<float, UINT_TYPE, FRACTIONAL>(result_arr[i][j][0]) << std::endl; */
-            /* #else */
-            /* std::cout << result_arr[2+i+j][0] << std::endl; */
-            /* #endif */
             }
         }
             if(current_phase == PHASE_LIVE)
