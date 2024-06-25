@@ -58,7 +58,6 @@ compile_executables:
 	fi
 
 compile_parties:
-	$(update_config)
 	@if [ "$(PARTY)" = "all" ]; then \
 		if [ $(PROTOCOL) -gt 6 ]; then \
 			$(MAKE) compile_player_0,1,run-P0 compile_player_1,1,run-P1 compile_player_2,1,run-P2 compile_player_3,1,run-P3; \
@@ -79,16 +78,15 @@ do_compile_player_%:
 	$(eval SPLIT_ROLES_OFFSET := $(shell echo '$(PARTY_ARGS)' | cut -d',' -f2))
 	$(eval EXEC_NAME := $(shell echo '$(PARTY_ARGS)' | cut -d',' -f3-))
 	$(update_config)
-	@echo "Checking compilation status for P-$(LPARTY) with SPLIT_ROLES_OFFSET $(SPLIT_ROLES_OFFSET) and executable $(EXEC_NAME) ..."
 	@PREV_MACRO_FLAGS_FILE=./flags/$(EXEC_NAME).macro_flags; \
 	CURRENT_FLAGS="$(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET)"; \
 	if [ -f ./$(EXEC_NAME).o ] && [ -f $$PREV_MACRO_FLAGS_FILE ] && cmp -s <(echo "$$CURRENT_FLAGS") $$PREV_MACRO_FLAGS_FILE && [ ./$(EXEC_NAME).o -nt main.cpp ] && [ ./$(EXEC_NAME).o -nt $(PCH) ] && [ ./$(EXEC_NAME).o -nt $(CONFIG) ] && [ ./$(EXEC_NAME).o -nt $(PCH_OBJ) ]; then \
 		echo "Nothing to do for $(EXEC_NAME)"; \
 	else \
-		echo "Compiling executable $(EXEC_NAME) for P-$(LPARTY) with SPLIT_ROLES_OFFSET $(SPLIT_ROLES_OFFSET) ..."; \
+		echo "Compiling executable $(EXEC_NAME)" ; \
 		if [ $(USE_CUDA_GEMM) -gt 0 ]; then \
 			$(COMPILER) main.cpp -include $(PCH) $(CXXFLAGS) $(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET) -c -o ./$(EXEC_NAME)-cuda.o; \
-			echo "Linking CUDA executable $(EXEC_NAME) for P-$(LPARTY) ..."; \
+			echo "Linking CUDA executable $(EXEC_NAME)" ; \
 			case "$(USE_CUDA_GEMM)" in \
 			1|3) \
 				$(NVCC) ./$(EXEC_NAME)-cuda.o $(NVCCFLAGS) ./cuda/gemm_cutlass_int.o -o ./$(EXEC_NAME).o;; \
@@ -102,13 +100,12 @@ do_compile_player_%:
 			$(COMPILER) main.cpp -include $(PCH) $(CXXFLAGS) $(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET) -o ./$(EXEC_NAME).o; \
 		fi; \
 		echo "$$CURRENT_FLAGS" > $$PREV_MACRO_FLAGS_FILE; \
-		echo "Compilation for P-$(LPARTY) with SPLIT_ROLES_OFFSET $(SPLIT_ROLES_OFFSET) and executable $(EXEC_NAME) completed."; \
+		echo "Compilation for xecutable $(EXEC_NAME) completed."; \
 	fi
 
 
 
 compile_splitroles_3:
-	$(update_config)
 	@if [ "$(PARTY)" = "0" ]; then \
 		$(MAKE) compile_player_0,0,run-P0--0-1-2 compile_player_0,1,run-P0--0-2-1 compile_player_1,2,run-P0--1-0-2 compile_player_2,3,run-P0--1-2-0 compile_player_1,4,run-P0--2-0-1 compile_player_2,5,run-P0--2-1-0; \
 	elif [ "$(PARTY)" = "1" ]; then \
@@ -122,7 +119,6 @@ compile_splitroles_3:
 
 
 compile_splitroles_3to4:
-	$(update_config)
 	@if [ "$(PARTY)" = "0" ] || [ "$(PARTY)" = "all" ]; then \
 		$(MAKE) compile_player_0,0,run-P1--1-2-3 compile_player_0,1,run-P1--1-3-2 compile_player_1,2,run-P1--2-1-3 compile_player_2,3,run-P1--2-3-1 compile_player_1,4,run-P1--3-1-2 compile_player_2,5,run-P1--3-2-1 compile_player_0,6,run-P1--1-2-4 compile_player_0,7,run-P1--1-4-2 compile_player_1,8,run-P1--2-1-4 compile_player_2,9,run-P1--2-4-1 compile_player_1,10,run-P1--4-1-2 compile_player_2,11,run-P1--4-2-1 compile_player_0,12,run-P1--1-3-4 compile_player_0,13,run-P1--1-4-3 compile_player_1,14,run-P1--3-1-4 compile_player_2,15,run-P1--3-4-1 compile_player_1,16,run-P1--4-1-3 compile_player_2,17,run-P1--4-3-1; \
 	fi
@@ -139,7 +135,6 @@ compile_splitroles_3to4:
 
 
 compile_splitroles_4:
-	$(update_config)
 	@if [ "$(PARTY)" = "0" ] || [ "$(PARTY)" = "all" ]; then \
 		$(MAKE) compile_player_0,0,run-P1--1-2-3-4 compile_player_0,1,run-P1--1-3-2-4 compile_player_1,2,run-P1--2-1-3-4 compile_player_2,3,run-P1--2-3-1-4 compile_player_1,4,run-P1--3-1-2-4 compile_player_2,5,run-P1--3-2-1-4 compile_player_0,6,run-P1--1-2-4-3 compile_player_0,7,run-P1--1-4-2-3 compile_player_1,8,run-P1--2-1-4-3 compile_player_2,9,run-P1--2-4-1-3 compile_player_1,10,run-P1--4-1-2-3 compile_player_2,11,run-P1--4-2-1-3 compile_player_0,12,run-P1--1-3-4-2 compile_player_0,13,run-P1--1-4-3-2 compile_player_1,14,run-P1--3-1-4-2 compile_player_2,15,run-P1--3-4-1-2 compile_player_1,16,run-P1--4-1-3-2 compile_player_2,17,run-P1--4-3-1-2 compile_player_3,18,run-P1--2-3-4-1 compile_player_3,19,run-P1--2-4-3-1 compile_player_3,20,run-P1--3-2-4-1 compile_player_3,21,run-P1--3-4-2-1 compile_player_3,22,run-P1--4-2-3-1 compile_player_3,23,run-P1--4-3-2-1; \
 	fi

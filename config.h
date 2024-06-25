@@ -9,7 +9,7 @@
 #endif
 
 #ifndef PROTOCOL
-#define PROTOCOL 12
+#define PROTOCOL 5
 #endif
 
 // Party ID (starting from 0)
@@ -40,7 +40,7 @@
 
 // Number of inputs (depends on the problem)
 #ifndef NUM_INPUTS
-#define NUM_INPUTS 10
+#define NUM_INPUTS 5
 #endif
 
 // Number of parallel processes to use
