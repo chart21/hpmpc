@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include "../protocols/XOR_Share.hpp"
 #include "../protocols/Additive_Share.hpp"
 #include "../datatypes/k_sint.hpp"

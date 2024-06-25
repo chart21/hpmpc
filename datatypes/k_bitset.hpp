@@ -1,6 +1,4 @@
 #pragma once
-#include <array>
-#include <stdexcept>
 #include "../protocols/Protocols.h"
 template<int k, typename Share>
 class sbitset_t {

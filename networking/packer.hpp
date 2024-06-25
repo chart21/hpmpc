@@ -1,7 +1,5 @@
 #pragma once
-#include <cstddef>
-#include <inttypes.h>
-#include <memory.h>
+#include "../include/pch.h"
 
 #ifdef __BMI2__
 #include <immintrin.h>

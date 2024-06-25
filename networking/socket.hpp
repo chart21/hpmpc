@@ -1,15 +1,5 @@
 #pragma once
-#include <cstdint>
-#include <iostream>
-#include <string>
-#include <cstring>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <chrono>
-#include <thread>
-#include <signal.h>
+#include "../include/pch.h"
 #include "../config.h"
 #if USE_SSL == 1
 #include <openssl/ssl.h>

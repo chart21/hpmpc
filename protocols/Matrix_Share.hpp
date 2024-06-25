@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include "../arch/DATATYPE.h"
 
 template <typename Datatype, typename Share_Type>

@@ -1,32 +1,34 @@
-#SET YOUR OPTIONS HERE
-# NVCC=/usr/local/cuda/bin/nvcc # replace with which nvcc
-# NVCCOPTs= -arch=sm_89 --expt-relaxed-constexpr  -std=c++20 # replace with your architecture
-# CUTLASS_PATH=/home/ubuntu/cutlass# replace with your cutlass path, set up with official CUTLASS quick start guide
-# CUDALIB=/usr/local/cuda/lib64 # replace with your cuda library path
+# User-specified options
+arch ?= sm_89
+CUDA_PATH ?= /home/usr/local/cuda
+CUTLASS_PATH ?= /home/ubuntu/cutlass
+#replace with e.g. make arch=sm_52 CUDA_PATH=/opt/cuda CUDA_PATH=/home/christopher/workspace/cutlass
 
-NVCC=/opt/cuda/bin/nvcc # replace with which nvcc
-NVCCOPTs= -arch=sm_52 --expt-relaxed-constexpr  -std=c++20 # replace with your architecture
-CUTLASS_PATH=/home/christopher/workspace/cutlass# replace with your cutlass path, set up with official CUTLASS quick start guide
-CUDALIB=/opt/cuda/lib64 # replace with your cuda library path
+# Derived variables
+NVCC=$(CUDA_PATH)/bin/nvcc
+NVCCOPTs= -arch=$(arch) --expt-relaxed-constexpr -std=c++20
+CUDALIB=$(CUDA_PATH)/lib64
 
+TARGETS= gemm_cutlass_int.o conv_cutlass_int_NCHW.o conv_cutlass_int_CHWN.o
 
-TARGETS= gemm_cutlass_int.o conv_cutlass_int.o
+CUTLASSINC=$(CUDA_PATH)/include
+CUTTOOLINC=$(CUDA_PATH)/tools/util/include
+CUTLASSLIB=$(CUDA_PATH)/build/tools/library/
 
-CUTLASSINC=$(CUTLASS_PATH)/include
-CUTTOOLINC=$(CUTLASS_PATH)/tools/util/include
-CUTLASSLIB=$(CUTLASS_PATH)/build/tools/library/
-
-
-# OPTION= -L$(CUDALIB)  -Iinclude/  -I$(CUTLASSINC) -I$(CUTTOOLINC) -L$(CUTLASSLIB)
-OPTION= -Iinclude/  -I$(CUTLASSINC) -I$(CUTTOOLINC) 
+OPTION= -Iinclude/ -I$(CUTLASSINC) -I$(CUTTOOLINC)
 
 JUNK=$(TARGETS) a.out
 
-
 all: $(TARGETS)
 
-%.o: %.cu
-	$(NVCC) $< $(NVCCOPTs)  $(OPTION) -o $@ -c -Xptxas -O3
+gemm_cutlass_int.o: gemm_cutlass_int.cu
+	$(NVCC) $< $(NVCCOPTs) $(OPTION) -o $@ -c -Xptxas -O3
+
+conv_cutlass_int_NCHW.o: conv_cutlass_int.cu
+	$(NVCC) $< $(NVCCOPTs) $(OPTION) -o $@ -c -Xptxas -O3 -DPIGEON_LAYOUT=\"NCHW\"
+
+conv_cutlass_int_CHWN.o: conv_cutlass_int.cu
+	$(NVCC) $< $(NVCCOPTs) $(OPTION) -o $@ -c -Xptxas -O3 -DPIGEON_LAYOUT=\"CHWN\"
 
 clean:
 	rm -rf $(JUNK)

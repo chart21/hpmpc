@@ -1,8 +1,6 @@
 #pragma once
 #include "../../protocols/Protocols.h"
 #include "../../datatypes/k_bitset.hpp"
-#include <cstring>
-#include <iostream>
 
 template<int k, typename Share>
 class BooleanAdder_MSB {

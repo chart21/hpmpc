@@ -1,8 +1,5 @@
 #pragma once
-#include <cstdint>
-#include <pthread.h>
-#include <string>
-#include <vector>
+#include "../include/pch.h"
 #include "../arch/DATATYPE.h"
 
 pthread_mutex_t mtx_connection_established;

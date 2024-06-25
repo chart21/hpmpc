@@ -1,6 +1,4 @@
 #pragma once
-#include <array>
-#include <stdexcept>
 #include "../protocols/Protocols.h"
 template<typename Datatype>
 class clear_t {

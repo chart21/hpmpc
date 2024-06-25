@@ -7,10 +7,9 @@
 
 /* Including headers */
 #pragma once
+#include "../include/pch.h"
 #include <immintrin.h>
-#include <stdlib.h>
 #include <x86intrin.h>
-#include <stdint.h>
 #include <wmmintrin.h>
 #include "../config.h"
 

@@ -1,6 +1,6 @@
 #pragma once
+#include "../include/pch.h"
 #include "Share.hpp"
-#include <functional>
 
 template <typename Datatype, typename Share_Type>
 class XOR_Share : public Share_Type

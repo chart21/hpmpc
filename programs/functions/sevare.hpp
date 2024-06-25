@@ -1,8 +1,4 @@
 #pragma once
-#include <cstdint>
-#include <cstring>
-#include <iostream>
-#include <cmath>
 #include "../../protocols/Protocols.h"
 #include "../../protocols/XOR_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"

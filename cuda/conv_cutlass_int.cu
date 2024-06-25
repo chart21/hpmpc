@@ -3,7 +3,7 @@
 #include <transform.cuh>
 #include <cstdint>
 #include <string>
-constexpr const char* PIGEON_LAYOUT = "NCHW"; // USE_CUDA_GEMM 2
+//constexpr const char* PIGEON_LAYOUT = "NCHW"; // USE_CUDA_GEMM 2
 //constexpr const char* PIGEON_LAYOUT = "CHWN"; // USE_CUDA_GEMM 4
 
 template <typename Type>

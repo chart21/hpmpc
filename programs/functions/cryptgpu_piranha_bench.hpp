@@ -1,10 +1,4 @@
 #pragma once
-#include <cstdint>
-#include <cstring>
-#include <iostream>
-#include <bitset>
-#include <cmath>
-#include <sys/types.h>
 #include "../../protocols/Protocols.h"
 #include "../../protocols/XOR_Share.hpp"
 #include "../../protocols/Additive_Share.hpp"

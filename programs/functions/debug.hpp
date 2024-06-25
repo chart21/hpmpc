@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 #include "../../protocols/Protocols.h"
 #include "../../protocols/XOR_Share.hpp"
 #include "../../protocols/Additive_Share.hpp"

@@ -4,7 +4,6 @@
 #include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
-#include <chrono>
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
 #include "boolean_adder_msb.hpp"
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1

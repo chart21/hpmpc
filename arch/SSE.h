@@ -7,10 +7,8 @@
 
 /* Including headers */
 #pragma once
-#include <cstdint>
-#include <stdlib.h>
+#include "../include/pch.h"
 #include <x86intrin.h>
-#include <stdint.h>
 #include <wmmintrin.h>
 #include "../config.h"
 #ifndef SSE

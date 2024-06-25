@@ -8,10 +8,7 @@
 
 /* Including headers */
 #pragma once
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include "../include/pch.h"
 #include "../config.h"
 
 #ifndef BOOL

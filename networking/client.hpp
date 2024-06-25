@@ -1,12 +1,5 @@
 #pragma once
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-
+#include "../include/pch.h"
 
 #ifndef BOOL_COMPRESS
 #define DTYPE DATATYPE

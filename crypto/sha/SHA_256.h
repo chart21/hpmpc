@@ -4,10 +4,7 @@
 /* xlc -DTEST_MAIN sha256.c -o sha256.exe           */
 /* gcc -DTEST_MAIN -std=c99 sha256.c -o sha256.exe  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-
+#include "../../include/pch.h"
 static const uint32_t K256[] =
 {
     0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,

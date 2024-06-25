@@ -1,14 +1,5 @@
 #pragma once
-#include <cstddef>
-#include <cstdint>
-#include <ctime>
-#include <iostream>
-#include <cstring>
-#include <pthread.h>
-#include <random>
-#include <bitset>
-#include <new>
-#include <memory>
+#include "include/pch.h"
 #include "arch/DATATYPE.h"
 #include "protocols/init_protocol_base.hpp"
 #include "protocols/live_protocol_base.hpp"

@@ -1,8 +1,6 @@
 #pragma once
 #include "functions/mat_mul.hpp"
 #include "../utils/print.hpp"
-#include <cstdlib>
-#include <ctime>
 
 void generateElements()
 {

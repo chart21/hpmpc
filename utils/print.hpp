@@ -1,13 +1,5 @@
 #pragma once
-#include <bitset>
-#include <cstring>
-#include <iostream>
-#include <stdint.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <chrono>
-#include <vector>
-#include <unordered_map>
+#include "../include/pch.h"
 #include "../config.h"
 
 #if PRINT_TIMINGS == 1

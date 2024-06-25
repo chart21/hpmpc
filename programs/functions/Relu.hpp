@@ -4,7 +4,6 @@
 #include "../../protocols/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
-#include <chrono>
 
 /* #include "boolean_adder_bandwidth.hpp" */
 #if TRUNC_APPROACH == 2

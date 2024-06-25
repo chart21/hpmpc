@@ -1,6 +1,6 @@
 #pragma once
+#include "../include/pch.h"
 #include "../networking/buffers.h"
-#include <stdint.h>
 #if RANDOM_ALGORITHM == 0
 #include "../utils/xorshift.h"
 #elif RANDOM_ALGORITHM == 1

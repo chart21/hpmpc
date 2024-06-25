@@ -1,9 +1,6 @@
 #pragma once
 #include "../../protocols/Protocols.h"
 #include "../../datatypes/k_bitset.hpp"
-#include <cmath>
-#include <cstring>
-#include <iostream>
 
 template<int k,typename Share>
 class PPA {
