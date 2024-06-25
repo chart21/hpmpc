@@ -1,8 +1,9 @@
 #pragma once
 #include "../../protocols/Protocols.h"
-#include "../../protocols/XOR_Share.hpp"
+#include "../../datatypes/XOR_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
-#include "../../utils/print.hpp"
+#include "../functions/share_conversion.hpp"
+#include "../functions/max_min.hpp"
 //Each circuit will be evaluated in parallel, specified by NUM_PROCESSES. And additionally the Split-Roles mulitplier and vectorization multiplier.
 //Split-roles multipliers: 
 //1 (3-PC): 6
@@ -49,21 +50,21 @@
 #include "AES_BS_SHORT.hpp"
 #define FUNCTION AES_Bench
 #elif FUNCTION_IDENTIFIER == 59 || FUNCTION_IDENTIFIER == 60 || FUNCTION_IDENTIFIER == 61
-#include "log_reg.hpp" 
+#include "../functions/log_reg.hpp" 
 //Important: Using vectorization, split-roles and multiprocessing will train independent models. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will train a single model without any optimizations.
 #define FUNCTION Logistic_Regression_Bench // Logistic Regression, n NUM_INPUTS = n samples, DATTYPE/BITLENGTH independent models, number of features and training iterations can be adjusted.  
 #elif FUNCTION_IDENTIFIER == 62 || FUNCTION_IDENTIFIER == 63 || FUNCTION_IDENTIFIER == 64
 #define FUNCTION Private_Auction_Bench // Private Auction, n NUM_INPUTS = n bids/offers, DATTYPE/BITLENGTH independent auctions, price_range is the number of possible distinct prices, can be adjusted.
 //Important: Using vectorization, split-roles and multiprocessing will conduct multiple independent auctions. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will train a single model without any optimizations.
 #elif FUNCTION_IDENTIFIER == 65
-#include "intersect_bool.hpp"
+#include "../functions/intersect_bool.hpp"
 #define FUNCTION Naive_Intersection_Bench // Naive intersection of two sets of secret numbers. n NUM_INPUTS = 1 intersection of input a and input b, both having length n. Setting DATTYPE = BITLENGTH, Threads = 1 and not using Split-roles will perform a single intersection without the tiling optimization from function 57.
 #endif
 
 
 #if DATTYPE > 1
-#include "sevare_helper.hpp"
-#include "../../protocols/Additive_Share.hpp"
+#include "../functions/sevare_helper.hpp"
+#include "../../datatypes/Additive_Share.hpp"
 #include "../../datatypes/k_sint.hpp"
 #endif
 

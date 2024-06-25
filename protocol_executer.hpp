@@ -7,21 +7,21 @@
 #if FUNCTION_IDENTIFIER == 0
 #include "programs/search_init.hpp"
 #elif FUNCTION_IDENTIFIER == 11
-#include "programs/share_conversion_init.hpp"
+/* #include "programs/share_conversion_init.hpp" */
 #elif FUNCTION_IDENTIFIER >= 1 && FUNCTION_IDENTIFIER <= 4
 #include "programs/benchmarks/mult_benchmark.hpp"
 #elif FUNCTION_IDENTIFIER >= 7 && FUNCTION_IDENTIFIER <= 9
-#include "programs/debug_init.hpp"
+/* #include "programs/debug_init.hpp" */
 #elif FUNCTION_IDENTIFIER > 11 && FUNCTION_IDENTIFIER <= 39
-#include "programs/mat_mul_init.hpp"
+#include "programs/functions/mat_mul.hpp"
 #elif FUNCTION_IDENTIFIER >= 40 && FUNCTION_IDENTIFIER <= 65
-#include "programs/functions/sevare.hpp"
+#include "programs/benchmarks/sevare.hpp"
 #elif FUNCTION_IDENTIFIER < 400
 #include "programs/NN.hpp"
 #elif FUNCTION_IDENTIFIER == 415 || FUNCTION_IDENTIFIER == 418 || FUNCTION_IDENTIFIER == 421
-#include "programs/functions/cryptgpu_piranha_bench.hpp"
+#include "programs/benchmarks/cryptgpu_piranha_bench.hpp"
 #else
-#include "programs/functions/eigen_nn_test.hpp"
+#include "programs/benchmarks/eigen_nn_test.hpp"
 #endif
 
 

@@ -217,6 +217,10 @@ void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 }
 
 
+void get_random_B2A()
+{
+}
+
 
 
 static void prepare_B2A( OECL2_init z[], OECL2_init random_mask[], OECL2_init out[])

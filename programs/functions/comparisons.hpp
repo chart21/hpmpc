@@ -6,12 +6,12 @@
 template<int m, int k,typename Share, typename Datatype>
 void LTZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Datatype, Share>>* result, const int len)
 {
-    using S = XOR_Share<DATATYPE, Share>;
-    using A = Additive_Share<DATATYPE, Share>;
+    using S = XOR_Share<Datatype, Share>;
+    using A = Additive_Share<Datatype, Share>;
     using Bitset = sbitset_t<k-m, S>;
     using sint = sint_t<A>;
     S* y = new S[len]; 
-    A2bit_range<0, k-m, Share, DATATYPE>(val, y, len);
+    get_msb_range<0, k-m, Datatype, Share>(val, y, len);
 
     
     for(int i = 0; i < len; i++)

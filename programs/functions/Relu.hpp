@@ -1,5 +1,6 @@
 #pragma once
 #include "share_conversion.hpp"
+#include "truncation.hpp"
 /* #include "boolean_adder_bandwidth.hpp" */
 
 #if TTP_PROTOCOL == 0 || SIMULATE_MPC_FUNCTIONS == 1
@@ -11,7 +12,7 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
 {
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<k-m, S>;
+    using Bitset = sbitset_t<bk-bm, S>;
     using sint = sint_t<A>;
    
     Bitset *y = new Bitset[len];
@@ -20,7 +21,7 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
     for(int i = 0; i < len; i++)
     {
         auto msb = ~ y[i][0];
-        for(int j = 0; j < k-m; j++)
+        for(int j = 0; j < bk-bm; j++)
         {
             y[i][j] = y[i][j] & msb;
         }
@@ -28,7 +29,7 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        for(int j = 0; j < k-m; j++)
+        for(int j = 0; j < bk-bm; j++)
             y[i][j].complete_and();
     #if TRUNC_DELAYED == 1
     for(int j = BITLENGTH - 1; j >= FRACTIONAL; j--)

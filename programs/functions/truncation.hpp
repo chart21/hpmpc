@@ -1,4 +1,4 @@
-
+#pragma once
 template<typename T>
 static void trunc_2k_in_place(T*  val, const int len){
     
@@ -43,7 +43,7 @@ template<typename T>
 static void trunc_pr_in_place(T*  val, const int len){
     for(int i = 0; i < len; i++)
     {
-        val[i] = val[i].prepare_mult_public_fixed(UINT_TYPE(1)); //multiply by 1 to trigeger truncation
+        val[i] *= UINT_TYPE(1);
     }
     T::communicate();
     for(int i = 0; i < len; i++)

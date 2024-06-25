@@ -1,16 +1,8 @@
 #pragma once
-#include "../../protocols/Protocols.h"
-#include "../../protocols/XOR_Share.hpp"
-#include "../../protocols/Additive_Share.hpp"
-#include "../../protocols/Matrix_Share.hpp"
+#include "../../datatypes/XOR_Share.hpp"
+#include "../../datatypes/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
-#include "boolean_adder_bandwidth.hpp"
-#include "../../utils/print.hpp"
-#include "boolean_adder_msb.hpp"
-#include "ppa_msb.hpp"
-#include "ppa_msb_unsafe.hpp"
-#include "ppa_msb_4_way.hpp"
 
 
     

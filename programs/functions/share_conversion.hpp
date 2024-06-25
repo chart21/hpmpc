@@ -1,3 +1,4 @@
+#pragma once
 #include "../../protocols/Protocols.h"
 #include "../../datatypes/XOR_Share.hpp"
 #include "../../datatypes/Additive_Share.hpp"

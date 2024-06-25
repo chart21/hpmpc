@@ -1,7 +1,8 @@
-#include "../protocols/XOR_Share.hpp"
-#include "../protocols/Additive_Share.hpp"
-#include "../datatypes/k_sint.hpp"
-#include "comp_trunc.hpp"
+#pragma once
+#include "../../datatypes/XOR_Share.hpp"
+#include "../../datatypes/Additive_Share.hpp"
+#include "../../datatypes/k_sint.hpp"
+#include "comparisons.hpp"
 #include "../../protocols/Protocols.h"
 
 const int NUM_FEATURES = 5;

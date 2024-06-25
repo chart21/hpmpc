@@ -11,7 +11,8 @@ do
         do
             for pr in "${pre[@]}"
             do
-                    ./scripts/config.sh -f $f -p all4 -c $pa -e $pr -s $pro
+                    ./scripts/config.sh -f $f -c $pa -e $pr -s $pro
+                    make PARTY=all
                     echo "Running function $f with protocol, $pro, and packbool, $pa, and pre, $pr"
                     ./scripts/run_locally.sh -n 4
             done
