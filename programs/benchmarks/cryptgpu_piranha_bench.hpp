@@ -152,7 +152,7 @@ void mat_mul_bench(DATATYPE* res)
                     #else
                         #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
                         #else
-                            C[row + jj].prepare_mult_public_fixed(1); //initiate truncation
+                            C[row + jj] = C[row + jj].prepare_mult_public_fixed(1); //initiate truncation
                         #endif
                     #endif
             }
@@ -180,7 +180,7 @@ for(int j = 0; j < NUM_INPUTS*NUM_INPUTS; ++j)
 #else
     #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
 #else
-    C[j].prepare_mult_public_fixed(1); //initiate truncation
+    C[j] = C[j].prepare_mult_public_fixed(1); //initiate truncation
 #endif
 #endif
 }

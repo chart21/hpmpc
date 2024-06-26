@@ -11,6 +11,7 @@
 #define FUNCTION MULT_BENCH_COMMUNICATION_ROUNDS
 #endif
 
+
 template<typename Share>
 void MULT_BENCH(DATATYPE* res)
 {

@@ -1,11 +1,11 @@
 #pragma once
 
 #ifndef MODELOWNER
-#define MODELOWNER P_0 // Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
+#define MODELOWNER -1 // Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
 #endif
 
 #ifndef DATAOWNER
-#define DATAOWNER P_0 // Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
+#define DATAOWNER -1 // Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
 #endif
 
 #ifndef PROTOCOL
@@ -24,13 +24,13 @@
 // 40-65 Various benchmarks (Elementary operations such as mult, div. Statistical operations such as avg, max. Set Intersection, AES, Private Auction, Logistic Regression, etc. Refer to programs/functions/sevare.hpp
 // 70+ Neural network architectures (LeNet, AlexNet, VGG, ResNet, etc.) on different dataset sizes (MNIST, CIFAR-10, Imagenet). Refer to programs/functions/NN.hpp
 #ifndef FUNCTION_IDENTIFIER
-#define FUNCTION_IDENTIFIER 74
+#define FUNCTION_IDENTIFIER 20
 #endif
 
 // Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 // Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
 #ifndef DATTYPE
-#define DATTYPE 32
+#define DATTYPE 128
 #endif
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
@@ -40,7 +40,7 @@
 
 // Number of inputs (depends on the problem)
 #ifndef NUM_INPUTS
-#define NUM_INPUTS 10
+#define NUM_INPUTS 11
 #endif
 
 // Number of parallel processes to use

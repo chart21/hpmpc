@@ -44,7 +44,7 @@ public:
 
         void operator*=(const UINT_TYPE other) 
         {
-        prepare_mult_public_fixed(other);
+        *this = this->prepare_mult_public_fixed(other);
         }
 
         void operator*=(const Additive_Share<Datatype, Share_Type>& other) 
@@ -62,9 +62,9 @@ public:
         return Additive_Share(Share_Type::mult_public(b, OP_MULT));
     }
 
-    void prepare_mult_public_fixed(const UINT_TYPE b)
+    Additive_Share prepare_mult_public_fixed(const UINT_TYPE b)
     {
-        *this = Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
+        return Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
     }
     
     Additive_Share prepare_div_exp2(const int b)
@@ -72,9 +72,9 @@ public:
         return Additive_Share(Share_Type::prepare_div_exp2(b, OP_MULT, OP_ADD, OP_SUB, OP_TRUNC2));
     }
 
-    void prepare_mult_public_fixed_dat(const Datatype b)
+    Additive_Share prepare_mult_public_fixed_dat(const Datatype b)
     {
-        *this = Share_Type::prepare_mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
+        return Share_Type::prepare_mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
     }
 
     void complete_public_mult_fixed()
@@ -133,15 +133,6 @@ public:
         Share_Type::complete_trunc_2k_inputs(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, FUNC_TRUNC, rmk2, rmsb, c, c_prime);
     }
 
-    /* Additive_Share prepare_trunc_2k() const */
-    /* { */
-    /*     return Additive_Share(Share_Type::prepare_trunc_2k(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, FUNC_TRUNC)); */
-    /* } */
-
-    /* void complete_trunc_2k() */
-    /* { */
-    /*     return Share_Type::complete_trunc_2k(OP_ADD, OP_SUB); */
-    /* } */
 
     Datatype complete_reveal_to_all() const
     {

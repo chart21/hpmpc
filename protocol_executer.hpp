@@ -10,7 +10,12 @@
 /* #include "programs/share_conversion_init.hpp" */
 #elif FUNCTION_IDENTIFIER >= 1 && FUNCTION_IDENTIFIER <= 4
 #include "programs/benchmarks/mult_benchmark.hpp"
-#elif FUNCTION_IDENTIFIER >= 7 && FUNCTION_IDENTIFIER <= 9
+#elif FUNCTION_IDENTIFIER == 20
+#include "programs/tests/basic_primitives.hpp"
+#elif FUNCTION_IDENTIFIER == 21
+#include "programs/tests/fixed_point_arithmetic.hpp"
+#elif FUNCTION_IDENTIFIER == 22
+#include "programs/tests/truncation.hpp"
 /* #include "programs/debug_init.hpp" */
 #elif FUNCTION_IDENTIFIER > 11 && FUNCTION_IDENTIFIER <= 39
 #include "programs/functions/mat_mul.hpp"

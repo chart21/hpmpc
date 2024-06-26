@@ -1,6 +1,6 @@
 #pragma once
 #include "../../config.h"
-#include "truncation.hpp"
+#include "prob_truncation.hpp"
 #include "../../datatypes/float_fixed_converter.hpp"
 
     template<typename T>                    

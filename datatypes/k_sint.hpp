@@ -181,15 +181,17 @@ public:
         return result;
         }
 
-        void prepare_mult_public_fixed(const UINT_TYPE other) {
+        sint_t prepare_mult_public_fixed(const UINT_TYPE other) {
+            sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i].prepare_mult_public_fixed(other);
+            result[i] = shares[i].prepare_mult_public_fixed(other);
         }
+        return result;
         }
 
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i].prepare_mult_public_fixed(other);
+            shares[i] = shares[i].prepare_mult_public_fixed(other);
         }
         }
 
@@ -409,7 +411,7 @@ public:
                 shares[i].complete_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i]);
         }
 
-#if TRUNC_APPROACH == 2
+/* #if TRUNC_APPROACH == 2 */
         template<typename X, typename A>
         static void prepare_B2A(X z[], X r[], A out[])
         {
@@ -421,7 +423,7 @@ public:
         {
             Share::complete_B2A(z, out); 
         }
-#endif
+/* #endif */
 };
 
 

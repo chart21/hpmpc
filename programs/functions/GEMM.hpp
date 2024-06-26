@@ -1,5 +1,5 @@
 #pragma once
-#include "truncation.hpp"
+#include "prob_truncation.hpp"
 #include "../../config.h"
 #include <algorithm>
 
@@ -27,7 +27,7 @@ void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_row
 #else
     #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
     #else
-            sum.prepare_mult_public_fixed(1); //initiate truncation
+            sum = sum.prepare_mult_public_fixed(1); //initiate truncation
     #endif
 #endif
 
@@ -78,7 +78,7 @@ for (int i = 0; i < m; i += TILE_SIZE) {
 #else
     #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
     #else
-                    C[row + jj].prepare_mult_public_fixed(1); //initiate truncation
+                    C[row + jj] = C[row + jj].prepare_mult_public_fixed(1); //initiate truncation
     #endif
 #endif
                 }
@@ -133,7 +133,7 @@ void send_GEMM_GPU(T* C, const int m, const int p) {
 #else
     #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
 #else
-    C[j].prepare_mult_public_fixed(1); //initiate truncation
+    C[j] = C[j].prepare_mult_public_fixed(1); //initiate truncation
 #endif
 #endif
 }
