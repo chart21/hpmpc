@@ -1,11 +1,11 @@
 #pragma once
 
 #ifndef MODELOWNER
-#define MODELOWNER -1 // Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
+#define MODELOWNER P_0 // Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
 #endif
 
 #ifndef DATAOWNER
-#define DATAOWNER -1 // Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
+#define DATAOWNER P_0 // Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
 #endif
 
 #ifndef PROTOCOL
@@ -24,7 +24,7 @@
 // 40-65 Various benchmarks (Elementary operations such as mult, div. Statistical operations such as avg, max. Set Intersection, AES, Private Auction, Logistic Regression, etc. Refer to programs/functions/sevare.hpp
 // 70+ Neural network architectures (LeNet, AlexNet, VGG, ResNet, etc.) on different dataset sizes (MNIST, CIFAR-10, Imagenet). Refer to programs/functions/NN.hpp
 #ifndef FUNCTION_IDENTIFIER
-#define FUNCTION_IDENTIFIER 70
+#define FUNCTION_IDENTIFIER 74
 #endif
 
 // Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
@@ -40,7 +40,7 @@
 
 // Number of inputs (depends on the problem)
 #ifndef NUM_INPUTS
-#define NUM_INPUTS 5
+#define NUM_INPUTS 10
 #endif
 
 // Number of parallel processes to use
@@ -168,11 +168,8 @@ int base_port = BASE_PORT; // temporary solution
 #define BITLENGTH 32
 #endif
 
-// Reduced Bitlength that might be used for RELU, etc
-#ifndef SIMULATE_QUANT
-#define SIMULATE_QUANT 0 // Simulate 8-bit quantization
-#endif
 
+// Reduced Bitlength that might be used for RELU, etc
 #if COMPRESS == 0
 #ifndef REDUCED_BITLENGTH_k
 #define REDUCED_BITLENGTH_k 32

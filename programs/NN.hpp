@@ -1,36 +1,14 @@
 #pragma once
-/* #include "../../include/pch.h" */
-/* #include "../../protocols/Protocols.h" */
-/* #include "../../protocols/XOR_Share.hpp" */
-/* #include "../../protocols/Additive_Share.hpp" */
-/* #include "../../protocols/Matrix_Share.hpp" */
-/* #include "../../datatypes/k_bitset.hpp" */
-/* #include "../../datatypes/k_sint.hpp" */
-/* #include "../../datatypes/k_clear.hpp" */
-/* /1* #include "boolean_adder.hpp" *1/ */
-/* #include "boolean_adder_bandwidth.hpp" */
-
-/* #include "boolean_adder_msb.hpp" */
-/* #include "ppa_msb.hpp" */
-/* #include "ppa.hpp" */
-/* #include "ppa_msb_unsafe.hpp" */
-/* #include "ppa_msb_4_way.hpp" */
-
-
-
-/* #include "../../utils/print.hpp" */
-
-
-
-
+#include "functions/Relu.hpp"
+#include "functions/max_min.hpp"
+#include "functions/GEMM.hpp"
+#include "functions/prob_div.hpp"
 #include "headers/simple_nn.h"
 #include "architectures/CNNs.hpp"
 #include "architectures/ResNet.hpp"
 #include "architectures/DeepReduce.hpp"
 #include "headers/config.h"
 
-#include "functions/Relu.hpp"
-#include "functions/max_min.hpp"
 #define FUNCTION inference
 #define RESULTTYPE DATATYPE
 using namespace std;
@@ -48,7 +26,6 @@ void generateElements()
 void inference(DATATYPE* res)
 {
     using FLOATTYPE = float;
-    using SHARETYPE = Wrapper<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL, DATATYPE>;
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<BITLENGTH, S>;
