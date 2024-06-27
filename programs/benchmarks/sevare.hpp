@@ -2,6 +2,7 @@
 #include "../../protocols/Protocols.h"
 #include "../../datatypes/XOR_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
+#include "../../datatypes/float_fixed_converter.hpp"
 #include "../functions/share_conversion.hpp"
 #include "../functions/max_min.hpp"
 //Each circuit will be evaluated in parallel, specified by NUM_PROCESSES. And additionally the Split-Roles mulitplier and vectorization multiplier.
@@ -160,7 +161,7 @@ void DIV_BENCH(DATATYPE* res)
 
     //y0(x) = 3e^(0.5−x) + 0.003 -> initial guess
     for(int i = 0; i < NUM_INPUTS; i++)
-        c[i] = 3*exp(0.5) + 0.003; //TODO: convert to fixed point, value is valid for a large input domain of b
+        c[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(3*exp(0.5) + 0.003);
     // Newpthon Raphson formula 1/x = limn→∞ yn = y_n−1(2 − xyn−1)
    
     for(int j = 0; j < n; j++)

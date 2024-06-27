@@ -230,7 +230,8 @@ delete[] t2;
 
 template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype, typename FUNC_OP>
 static void pack_additive(const Additive_Share<Datatype, Share>*  input, Additive_Share<Datatype, Share>*  output, const int len, FUNC_OP op){
-    using sint = sint_t<Additive_Share<Datatype, Share>>;
+    using A = Additive_Share<Datatype, Share>;
+    using sint = sint_t<A>;
     int m = len;
     sint* tmp = new sint[(m-1)/BITLENGTH+1];
     sint* tmp_output = new sint[(m-1)/BITLENGTH+1];

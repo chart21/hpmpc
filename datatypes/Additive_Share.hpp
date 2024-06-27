@@ -12,7 +12,7 @@ public:
         *this = Share_Type::public_val(PROMOTE(a));
     }
 
-    Additive_Share get_share_from_public_dat(Datatype a) {
+    static Additive_Share get_share_from_public_dat(Datatype a) {
         return Share_Type::public_val(a);
     }
 

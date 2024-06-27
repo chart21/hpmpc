@@ -6,12 +6,13 @@
 #include "../functions/exact_truncation.hpp"
 
 #define RESULTTYPE DATATYPE
+#ifndef FUNCTION
 #define FUNCTION test_truncation
+#endif
 #define TEST_PROB_TRUNC 1 // [a] -> [a]^t
 #define TEST_PROB_TRUNC_REDUCED_SLACK 1 // [a] -> [a]^t
 #define TEST_EXACT_TRUNC 1 // [a] -> [a]^t
 
-const float epsilon = 0.7; // error tolerance
 #if TEST_PROB_TRUNC == 1
 template<typename Share>
 bool test_prob_truncation()
@@ -147,7 +148,7 @@ bool test_exact_truncation()
     share_a.template complete_receive_from<P_0>();
 
     //truncation
-                                                                                                    pack_additive_inplace(&share_a,1,trunc_exact_in_place<DATATYPE, Share>);
+    pack_additive_inplace<0,BITLENGTH>(&share_a,1,trunc_exact_in_place<DATATYPE,Share>);
     //reveal
     DATATYPE vecotrized_output;
     share_a.prepare_reveal_to_all();
@@ -180,7 +181,7 @@ bool test_exact_truncation()
 
 
 template<typename Share>
-void test_truncation(DATATYPE *res)
+bool test_truncation(DATATYPE *res)
 {
     int num_tests = 0;
     int num_passed = 0;
@@ -198,4 +199,9 @@ void test_truncation(DATATYPE *res)
 #endif
     
     print_stats(num_tests, num_passed);
+    if(num_tests == num_passed)
+    {
+        return true;
+    }
+    return false;
 }

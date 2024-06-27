@@ -1,5 +1,6 @@
 #pragma once
 #include "../../datatypes/Additive_Share.hpp"
+const float epsilon = 0.8;
 template<typename FUNC>
 void test_function(int &num_tests, int &num_passed, std::string name, FUNC f)
 {
@@ -31,3 +32,15 @@ void print_compare(float expected, float got, float epsilon)
     print_online("Expected: " + std::to_string(expected) + " Got: " + std::to_string(got) + " Epsilon: " + std::to_string(epsilon));
 }
 
+template<typename T>
+void reveal_and_store(T share[], UINT_TYPE output[][DATTYPE/BITLENGTH], const int len)
+{
+    for(int i = 0; i < len; i++)
+    {
+        DATATYPE temp;
+        share[i].prepare_reveal_to_all();
+        T::communicate();
+        temp = share[i].complete_reveal_to_all();
+        unorthogonalize_arithmetic(&temp, &output[i][0], 1);
+    }
+}

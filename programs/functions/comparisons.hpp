@@ -3,7 +3,7 @@
 
 
 
-template<int m, int k,typename Share, typename Datatype>
+template<int m=0, int k=BITLENGTH,typename Share, typename Datatype>
 void LTZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Datatype, Share>>* result, const int len)
 {
     using S = XOR_Share<Datatype, Share>;
@@ -27,7 +27,7 @@ void LTZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     
 }
 
-template<int m, int k,typename Share, typename Datatype>
+template<int m=0, int k=BITLENGTH,typename Share, typename Datatype>
 void EQZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Datatype, Share>>* result, const int len)
 {
     using S = XOR_Share<DATATYPE, Share>;
@@ -44,8 +44,8 @@ void EQZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     {
         val_check[i] = val[i] - sint(1);
     }
-    A2B_range<m, k, Share, DATATYPE>(val, y, len);
-    A2B_range<m, k, Share, DATATYPE>(val_check, y_check, len);
+    get_msb_range<m, k, Datatype, Share>(val, y, len);
+    get_msb_range<m, k, Datatype, Share>(val_check, y_check, len);
     for(int i = 0; i < len; i++)
     {
         y[i] = y[i] ^ y_check[i];

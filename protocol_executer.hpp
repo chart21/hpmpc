@@ -16,6 +16,23 @@
 #include "programs/tests/fixed_point_arithmetic.hpp"
 #elif FUNCTION_IDENTIFIER == 22
 #include "programs/tests/truncation.hpp"
+#elif FUNCTION_IDENTIFIER == 23
+#include "programs/tests/comparisons.hpp"
+#elif FUNCTION_IDENTIFIER == 24
+#include "programs/tests/mat_mul.hpp"
+#elif FUNCTION_IDENTIFIER == 25
+#include "programs/tests/multi_input.hpp"
+#elif FUNCTION_IDENTIFIER == 26
+#include "programs/tests/test_all.hpp"
+#elif FUNCTION_IDENTIFIER == 27
+#include "programs/tutorials/basic_tutorial.hpp"
+#elif FUNCTION_IDENTIFIER == 28
+#include "programs/tutorials/fixed_point_tutorial.hpp"
+#elif FUNCTION_IDENTIFIER == 29
+#include "programs/tutorials/mixed_circuits_tutorial.hpp"
+#elif FUNCTION_IDENTIFIER == 30
+#include "programs/tutorials/matrix_operations_tutorial.hpp"
+
 /* #include "programs/debug_init.hpp" */
 #elif FUNCTION_IDENTIFIER > 11 && FUNCTION_IDENTIFIER <= 39
 #include "programs/functions/mat_mul.hpp"

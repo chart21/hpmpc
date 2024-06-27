@@ -191,9 +191,9 @@ template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype>
 static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_Share<Datatype, Share>* end, Additive_Share<Datatype, Share>*  output){
     const int len = end - begin;
 #if TRUNC_APPROACH == 2
-    pack_additive<rm, rk>(begin, output, len, RELU_range_in_place_exact<rm,rk,Share, Datatype>);
+    pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_exact<rm,rk,Share, Datatype>);
 #else
-    pack_additive<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm,rk,Share, Datatype>);
+    pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm,rk,Share, Datatype>);
 #endif
 }
 

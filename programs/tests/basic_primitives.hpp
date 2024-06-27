@@ -1,6 +1,9 @@
 #pragma once
 #include "../../datatypes/Additive_Share.hpp"
 #include "test_helper.hpp"
+#ifndef FUNCTION
+#define FUNCTION test_basic_primitives
+#endif
 #define RESULTTYPE DATATYPE
 #define TEST_SECRET_SHARING 1 // a -> [a]
 #define TEST_ADD_MULT_CONSTANTS 1 // b -> [b], [a] + [b], [a] * c
@@ -75,8 +78,8 @@ bool test_add_mult_consants()
     share.template complete_receive_from<P_0>();
 
     //constant addition
-    share += A(PROMOTE(constant));
-    share = share.mult_public(PROMOTE(constant));
+    share += A(constant);
+    share = share.mult_public(constant);
 
     //reveal
     DATATYPE vecotrized_output;
@@ -162,7 +165,7 @@ bool test_multiplication()
 
 
 template<typename Share>
-void test_basic_primitives(DATATYPE *res)
+bool test_basic_primitives(DATATYPE *res)
 {
     int num_tests = 0;
     int num_passed = 0;
@@ -186,4 +189,9 @@ void test_basic_primitives(DATATYPE *res)
     #endif
     
     print_stats(num_tests, num_passed);
+    if(num_tests == num_passed)
+    {
+        return true;
+    }
+    return false;
 }

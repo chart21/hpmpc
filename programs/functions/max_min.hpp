@@ -4,6 +4,7 @@
 #include "../../datatypes/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
+#include "share_conversion.hpp"
 
 
 
@@ -206,7 +207,7 @@ using A = Additive_Share<Datatype, Share>;
 using sint = sint_t<A>;
 auto tmp_output = new S[batch_size*len];
 argmax_argmin<bm,bk>(begin, len, tmp_output, batch_size, want_max);
-bit2A(tmp_output, len*batch_size, output); //TODO: remove this overhead somehow?
+bit2A_range(tmp_output, len*batch_size, output); //TODO: remove this overhead somehow?
 delete[] tmp_output;
 }
     

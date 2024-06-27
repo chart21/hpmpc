@@ -1,3 +1,4 @@
+#pragma once
 #include "../core/include/pch.h"
 #include "../config.h"
 #define DEBUG_MODE
