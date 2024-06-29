@@ -328,7 +328,8 @@ void prepare_bit2a(OEC_MAL0_init out[])
     {
 #if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
-        pre_send_to_(P_2);
+        store_compare_view_init(P_2);
+        /* pre_send_to_(P_2); */
 #else
         send_to_(P_2);
 #endif

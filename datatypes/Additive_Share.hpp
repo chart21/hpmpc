@@ -18,7 +18,11 @@ public:
 
     Additive_Share operator+(const Additive_Share<Datatype,Share_Type>& b) const
     {
+#if PROTOCOL == 2
+        return Additive_Share(Share_Type::Add(b, OP_SUB)); //Replicated needs substraction
+#else
         return Additive_Share(Share_Type::Add(b, OP_ADD));
+#endif
     }
 
     void operator+=(const Additive_Share<Datatype,Share_Type>& b)
@@ -28,7 +32,11 @@ public:
     
     Additive_Share operator-(const Additive_Share<Datatype,Share_Type>& b) const
     {
+#if PROTOCOL == 2
+        return Additive_Share(Share_Type::Add(b, OP_ADD)); //Replicated needs addition
+#else
         return Additive_Share(Share_Type::Add(b, OP_SUB));
+#endif
     }
 
     Additive_Share operator*(const Additive_Share<Datatype, Share_Type>& b) const

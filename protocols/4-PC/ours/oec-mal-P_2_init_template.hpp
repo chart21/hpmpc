@@ -351,11 +351,12 @@ void prepare_bit2a( OEC_MAL2_init out[])
     {
 #if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
-        pre_receive_from_(P_0);
+        pre_receive_from_(P_3);
+        store_compare_view_init(P_0);
 #else
         receive_from_(P_0);
-#endif
         store_compare_view_init(P_3);
+#endif
 #else
 #if PRE == 1
         pre_receive_from_(P_3);

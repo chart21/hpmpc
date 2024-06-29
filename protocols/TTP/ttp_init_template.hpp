@@ -119,7 +119,7 @@ return SET_ALL_ZERO();
 }
 
 template <int id,typename func_add, typename func_sub>
-void prepare_receive_from(DATATYPE val, func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 #if PROTOCOL != 13 && PARTY != 2
 if constexpr(id == PSELF)

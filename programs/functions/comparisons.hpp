@@ -12,7 +12,6 @@ void LTZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     using sint = sint_t<A>;
     S* y = new S[len]; 
     get_msb_range<0, k-m, Datatype, Share>(val, y, len);
-
     
     for(int i = 0; i < len; i++)
     {

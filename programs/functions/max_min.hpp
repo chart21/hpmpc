@@ -17,6 +17,9 @@ using sint = sint_t<A>;
 
        int len = (m+1)/2;
        sint* max_val = new sint[batch_size*len];
+       /* for(int b = 0; b < batch_size*len; b++) */
+       /*     max_val[b] = UINT_TYPE(0); */
+       /* sint* min_val = new sint[batch_size*len]{UINT_TYPE(0)}; */
        int offset = m % 2; // if m is odd, offset is 1
        int counter = 0;
        for(int b = 0; b < batch_size; b++)
@@ -30,6 +33,8 @@ using sint = sint_t<A>;
                 max_val[counter+b*len] = val[j-1 +b*og_len] - val[j + b*og_len];
             counter++;
        }
+       if(offset == 1)
+           max_val[counter+b*len] = UINT_TYPE(0); // last uneven element is always pairwise max, override later
        }
 
        get_msb_range<bm,bk>(max_val, msb, len*batch_size);
@@ -100,6 +105,9 @@ for(int i = 0; i < log2m; i++)
     int offset = m % 2; // if m is odd, offset is 1
     int q = (m+1)/2;
     S* msb = new S[batch_size*q];
+    /* for(int b = 0; b < og_len*batch_size; b++) */
+    /*     val[b] = UINT_TYPE(0); */
+    
     max_min_msb_range<bm,bk>(val,msb,og_len,m,batch_size,want_max); //get msb and max of 0 -> counter
 
     delete[] msb;
@@ -248,6 +256,7 @@ max_min_sint<bm,bk>(tmp_begin, len, tmp_output,(batch_size-1)/BITLENGTH+1, want_
     for(int j = 0; j < batch_size; j++)
     {
         output[j] = tmp_output[c][k++]; //load result into output
+        /* output[j] = tmp_begin[c][k++]; //load result into output */
         if(k == BITLENGTH)
         {
             k = 0;

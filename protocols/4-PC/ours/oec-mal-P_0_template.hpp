@@ -362,6 +362,7 @@ static void prepare_A2B_S2(int m, int k, OEC_MAL0_Share in[], OEC_MAL0_Share out
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
+            /* in[j].r = SET_ALL_ZERO(); */ 
             temp[j] = OP_SUB(SET_ALL_ZERO(), in[j].r); // set share to -x0
         }
     alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
@@ -376,6 +377,7 @@ static void prepare_A2B_S2(int m, int k, OEC_MAL0_Share in[], OEC_MAL0_Share out
             out[i-m].v = temp[i];  // set both shares to -x0
         #if PROTOCOL == 12 || PRE == 1
             store_compare_view(P_2, FUNC_XOR(temp[i],getRandomVal(P_013))); //  - x_0 + r013
+            /* std::cout << "in[i].r: " << in[i].r << std::endl; */
         #else
             #if PRE == 1
                 pre_send_to_live(P_2, FUNC_XOR(temp[i], getRandomVal(P_013))); // -x0 xor r0,1 to P_2
@@ -475,7 +477,8 @@ void prepare_bit2a(OEC_MAL0_Share out[])
         Datatype m0 = OP_SUB(y0[i], r013);
 #if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
-        pre_send_to_live(P_2, m0);
+        /* pre_send_to_live(P_2, m0); */
+        store_compare_view(P_2, m0);
 #else
         send_to_live(P_2, m0);
 #endif

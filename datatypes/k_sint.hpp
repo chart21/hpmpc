@@ -21,10 +21,10 @@ public:
         init(temp_u);
         }
 
-    sint_t(DATATYPE value[BITLENGTH]) {
-        for (int i = 0; i < BITLENGTH; i++) 
-          shares[i] = Share::public_val(value[i]);
-        }
+    /* sint_t(DATATYPE value[BITLENGTH]) { */
+    /*     for (int i = 0; i < BITLENGTH; i++) */ 
+    /*       shares[i] = Share::public_val(value[i]); */
+    /*     } */
 
     template<int id>
     sint_t(UINT_TYPE value[DATTYPE]) {

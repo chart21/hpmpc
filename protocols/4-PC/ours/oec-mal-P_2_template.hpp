@@ -541,11 +541,12 @@ void prepare_bit2a(OEC_MAL2_Share out[])
     {
 #if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
-        Datatype m00 = pre_receive_from_live(P_0);
+        Datatype m00 = pre_receive_from_live(P_3);
+        store_compare_view(P_0, m00);
 #else
         Datatype m00 = receive_from_live(P_0);
-#endif
         store_compare_view(P_3, m00);
+#endif
 #else
 #if PRE == 1
         Datatype m00 = pre_receive_from_live(P_3);

@@ -30,7 +30,7 @@
 // Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 // Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
 #ifndef DATTYPE
-#define DATTYPE 32
+#define DATTYPE 128
 #endif
 
 // Use a preprocessing phase? Currently only supported by Protocols 4,5,12
@@ -197,7 +197,7 @@ int base_port = BASE_PORT; // temporary solution
 /* #if BANDWIDTH_OPTIMIZED == 0 || ONLINE_OPTIMIZED == 1 // if BANDWIDTH_OPTIMIZED and not ONLINE_OPTIMIZED we don't need MULTI_INPUT_AND gates */
 /* #define MULTI_INPUT 1 // activate multi input Multiplication gates? */
 /* #else */
-#if FUNCTION_IDENTIFIER >= 70
+#if FUNCTION_IDENTIFIER > 5
 #ifndef MULTI_INPUT
 #define MULTI_INPUT 1
 #endif

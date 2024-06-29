@@ -384,6 +384,7 @@ static void prepare_A2B_S2(int m, int k ,OEC_MAL3_Share in[], OEC_MAL3_Share out
     Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
+            /* in[j].r1 = SET_ALL_ZERO(); */ 
             temp[j] = OP_SUB(SET_ALL_ZERO(), in[j].r1); // set share to -x0
         }
     alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];

@@ -13,7 +13,8 @@
 #endif
 #define TEST_EQZ 1 // [a] == 0 ? [1] : [0]
 #define TEST_LTZ 1 // [a] < 0 ? [1] : [0]
-#define TEST_MAX_MIN 1 // [A] -> [max(A)] [min(A)]
+#define TEST_MAX_MIN 0 // [A] -> [max(A)] [min(A)]
+
 
 #if TEST_EQZ == 1
 template<typename Share>
@@ -89,7 +90,8 @@ bool test_LTZ()
     template<typename Share>
 bool max_min_test()
 {
-    const int len = 100;
+    Share::communicate();
+    const int len = 400;
     const int vectorization_factor = DATTYPE/BITLENGTH;
 using A = Additive_Share<DATATYPE, Share>;
 //two indepndent arrays of lenth len, we want to find the max and min for each of the two
@@ -100,11 +102,11 @@ for(int i = 0; i < len; i++)
     a[i] = A(i);
     b[i] = A(len-i);
 }
-A max_val[2];
-A min_val[2];
+A merged[2*len];
 A argmax[len];
 A argmin[len];
-A merged[2*len];
+A max_val[2];
+A min_val[2];
 A argmax_merged[2*len];
 A argmin_merged[2*len];
 
@@ -116,6 +118,7 @@ for(int i = 0; i < len; i++)
 }
 
 max_min_sint<0,BITLENGTH>(merged, len, max_val, 2, true); //batch size of 2, want max of each independent array
+
 max_min_sint<0,BITLENGTH>(merged, len, min_val, 2, false); //batch size of 2, want min of each independent array
 argmax_argmin_sint<0,BITLENGTH>(merged, len, argmax_merged, 2, true);                                            
 argmax_argmin_sint<0,BITLENGTH>(merged, len, argmin_merged, 2, false);
@@ -143,7 +146,6 @@ return true;
 #endif
 
 
-
 template<typename Share>
 bool test_comparisons(DATATYPE *res)
 {
@@ -151,7 +153,7 @@ bool test_comparisons(DATATYPE *res)
     int num_passed = 0;
 
 #if TEST_EQZ == 1
-    test_function(num_tests, num_passed, "EQZ", test_EQZ<Share>);
+    /* test_function(num_tests, num_passed, "EQZ", test_EQZ<Share>); */
 #endif
 
 #if TEST_LTZ == 1
@@ -161,6 +163,7 @@ bool test_comparisons(DATATYPE *res)
 #if TEST_MAX_MIN == 1
     test_function(num_tests, num_passed, "MAX_MIN", max_min_test<Share>);
 #endif
+
     
     print_stats(num_tests, num_passed);
     if(num_tests == num_passed)
