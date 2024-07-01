@@ -1,20 +1,29 @@
 #pragma once
 
-#ifndef MODELOWNER
-#define MODELOWNER -1 // Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
-#endif
-
-#ifndef DATAOWNER
-#define DATAOWNER -1 // Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
-#endif
+// === Basic Settings ===
 
 #ifndef PROTOCOL
 #define PROTOCOL 5
 #endif
 
+// Use a preprocessing phase? Only supported by Protocols 3,5,8,11,12
+#ifndef PRE
+#define PRE 0
+#endif
+
 // Party ID (starting from 0)
 #ifndef PARTY
 #define PARTY 2
+#endif
+
+// Bitlength of integers 
+#ifndef BITLENGTH
+#define BITLENGTH 32
+#endif
+
+// Fractional bits to use for fixed point arithmetic
+#ifndef FRACTIONAL
+#define FRACTIONAL 5
 #endif
 
 // 0: Search 
@@ -27,20 +36,18 @@
 #define FUNCTION_IDENTIFIER 20
 #endif
 
+// Number of inputs (mostly used by Benchmarking functions or Neural Networks)
+#ifndef NUM_INPUTS
+#define NUM_INPUTS 11
+#endif
+
+
+// === Concurrency Settings ===
+
 // Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 // Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
 #ifndef DATTYPE
 #define DATTYPE 128
-#endif
-
-// Use a preprocessing phase? Currently only supported by Protocols 4,5,12
-#ifndef PRE
-#define PRE 0
-#endif
-
-// Number of inputs (depends on the problem)
-#ifndef NUM_INPUTS
-#define NUM_INPUTS 11
 #endif
 
 // Number of parallel processes to use
@@ -48,24 +55,29 @@
 #define PROCESS_NUM 1
 #endif
 
+// === Hardware Acceleration Settings ===
+
 // 0 = xorshift, 1 = AES_BS, 2 = VAES/AES-NI. 0 is not secure.
 #ifndef RANDOM_ALGORITHM
 #define RANDOM_ALGORITHM 2
 #endif
 
-#ifndef USE_SSL_AES
+#ifndef USE_SSL_AES // USE SSl's AES implementation instead
 #define USE_SSL_AES 0
 #endif
 
-// Use SSL encrypted communication?
-#ifndef USE_SSL
-#define USE_SSL 0
+#ifndef ARM
+#define ARM 0 // 1 if ARM processor, 0 otherwise. Can speed up Sha hashing.
 #endif
+
 
 // USE CUDA for matrix multiplication?
 #ifndef USE_CUDA_GEMM
 #define USE_CUDA_GEMM 0
 #endif
+
+
+// === Tweaks ===
 
 // How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered
 #ifndef SEND_BUFFER
@@ -82,6 +94,80 @@
 #define VERIFY_BUFFER 0
 #endif
 
+
+// === Network Settings ===
+
+// Use SSL encrypted communication?
+#ifndef USE_SSL
+#define USE_SSL 0
+#endif
+
+
+// === Neural Network Settings ===
+
+#ifndef MODELOWNER
+#define MODELOWNER -1 // Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
+#endif
+
+#ifndef DATAOWNER
+#define DATAOWNER -1 // Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
+#endif
+
+#ifndef TRUNC_THEN_MULT
+#define TRUNC_THEN_MULT 0 // 0: Truncate after multiplication, 1: Truncate before multiplication
+#endif
+
+#ifndef TRUNC_APPROACH
+#define TRUNC_APPROACH 0 // 0: Probabilistic truncation, 1: Reduced Slack Truncation, 2: Exact Truncation
+#endif
+
+#ifndef TRUNC_DELAYED
+#define TRUNC_DELAYED 0 // Delay CONV truncation until next ReLU 
+#endif
+
+#ifndef COMPUTE_ARGMAX
+#define COMPUTE_ARGMAX 0 // 0: skip final argmax during inference, 1: Compute final argmax during inference
+#endif
+
+#ifndef PUBLIC_WEIGHTS
+#define PUBLIC_WEIGHTS 0 // 0: weights are secretly shared, 1: weights are public
+#endif
+
+
+#ifndef COMPRESS
+#define COMPRESS 0 // See below
+#endif
+
+
+// Reduced Bitlength that might be used for RELU, etc
+#if COMPRESS == 0
+#ifndef REDUCED_BITLENGTH_k
+#define REDUCED_BITLENGTH_k BITLENGTH
+#endif
+
+#ifndef REDUCED_BITLENGTH_m
+#define REDUCED_BITLENGTH_m 0
+#endif
+
+#else
+#ifndef REDUCED_BITLENGTH_k
+#define REDUCED_BITLENGTH_k 20
+#endif
+
+#ifndef REDUCED_BITLENGTH_m
+#define REDUCED_BITLENGTH_m 12
+#endif
+
+#endif
+
+#ifndef IS_TRAINING
+#define IS_TRAINING 0 // Training or inference phase? Training is not supported yet.
+#endif
+
+
+
+// === Debugging Settings ===
+
 // Print additional info?
 #ifndef PRINT
 #define PRINT 0
@@ -95,9 +181,9 @@
 #define PRINT_IMPORTANT 1
 #endif
 
-#ifndef FRACTIONAL
-#define FRACTIONAL 5
-#endif
+
+// === Other Settings ===
+
 
 #ifndef SRNG_SEED
 #define SRNG_SEED 0 // Seed for the random number generator.
@@ -124,19 +210,14 @@ int base_port = BASE_PORT; // temporary solution
 #define CONNECTION_RETRY 5
 #endif
 
-#ifndef ARM
-#define ARM 0 // 1 if ARM processor, 0 otherwise. Can speed up Sha hashing.
-#endif
+
+// === Legacy Settings ===
 
 // Allow sharing of inputs in offline phase
 #ifndef SHARE_PREP
 #define SHARE_PREP 1
 #endif
 
-// Compress binary data into chars before sending them over the network? Only relevant for DATTYPE = 1
-#ifndef COMPRESS
-#define COMPRESS 0
-#endif
 
 // Use optimized secret sharing? Often utilizes SRNG instead of secret sharing with communication
 #ifndef OPT_SHARE
@@ -158,40 +239,14 @@ int base_port = BASE_PORT; // temporary solution
 #define LIVE 1
 #endif
 
-// Use random inputs or inputs from a file? TODO: File inputs to be implemented
+// Use random inputs or inputs from a file? 
 #ifndef INPUT
 #define INPUT 'r'
 #endif
 
-// Bitlength of integers 
-#ifndef BITLENGTH
-#define BITLENGTH 32
-#endif
 
+// === Internal Settings, do not change ===
 
-// Reduced Bitlength that might be used for RELU, etc
-#if COMPRESS == 0
-#ifndef REDUCED_BITLENGTH_k
-#define REDUCED_BITLENGTH_k 32
-#endif
-
-#ifndef REDUCED_BITLENGTH_m
-#define REDUCED_BITLENGTH_m 0
-#endif
-
-/* #define SIMULATE_QUANT 0 // Simulate 8-bit quantization */
-#else
-#ifndef REDUCED_BITLENGTH_k
-#define REDUCED_BITLENGTH_k 20
-#endif
-
-#ifndef REDUCED_BITLENGTH_m
-#define REDUCED_BITLENGTH_m 12
-#endif
-
-// Temporarily placed here
-/* #define SIMULATE_QUANT 1 // Simulate 8-bit quantization */
-#endif
 
 /* #define MULTI_INPUT 1 // activate multi input Multiplication gates? */
 /* #if BANDWIDTH_OPTIMIZED == 0 || ONLINE_OPTIMIZED == 1 // if BANDWIDTH_OPTIMIZED and not ONLINE_OPTIMIZED we don't need MULTI_INPUT_AND gates */
@@ -374,25 +429,6 @@ int base_port = BASE_PORT; // temporary solution
 #endif
 #endif
 
-#ifndef TRUNC_THEN_MULT
-#define TRUNC_THEN_MULT 0
-#endif
-
-#ifndef TRUNC_APPROACH
-#define TRUNC_APPROACH 0
-#endif
-
-#ifndef TRUNC_DELAYED
-#define TRUNC_DELAYED 0
-#endif
-
-#ifndef COMPUTE_ARGMAX
-#define COMPUTE_ARGMAX 0 // 0: skip final argmax during inference, 1: Compute final argmax during inference
-#endif
-
-#ifndef PUBLIC_WEIGHTS
-#define PUBLIC_WEIGHTS 0 // 0: weights are secretly shared, 1: weights are public
-#endif
 
 #ifndef JIT_VEC
 #define JIT_VEC 1 // 0: vectorize and share inputs from the beginning, 1: vectorize and share inputs just in time, load a batch of images, then vectorize
@@ -418,9 +454,6 @@ int base_port = BASE_PORT; // temporary solution
 #endif
 #endif
 
-#ifndef IS_TRAINING
-#define IS_TRAINING 0
-#endif
 
 #ifndef PHASE_LIVE
 #define PHASE_LIVE 1
