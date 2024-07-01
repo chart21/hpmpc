@@ -2,6 +2,8 @@
 COMPILER ?= g++
 NVCC ?= nvcc
 
+#make executable and flags directories if they don't exist
+$(shell mkdir -p executables/flags)
 
 # Base flags
 CXXFLAGS := -w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -I nn/SimpleNN
@@ -14,6 +16,8 @@ MACRO_FLAGS :=
 PCH := core/include/pch.h
 PCH_OBJ := $(PCH:.h=.gch)
 CONFIG := config.h
+
+HEADER_FILES := $(shell find . -name '*.h' -o -name '*.hpp')
 
 # Check if USE_CUDA_GEMM is defined, otherwise take from config.h
 USE_CUDA_GEMM := $(shell grep -oP '(?<=define USE_CUDA_GEMM )\d+' $(CONFIG))
@@ -81,7 +85,14 @@ do_compile_player_%:
 	$(update_config)
 	@PREV_MACRO_FLAGS_FILE=./executables/flags/$(EXEC_NAME).macro_flags; \
 	CURRENT_FLAGS="$(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET)"; \
-	if [ -f ./$(NEXEC_NAME).o ] && [ -f $$PREV_MACRO_FLAGS_FILE ] && cmp -s <(echo "$$CURRENT_FLAGS") $$PREV_MACRO_FLAGS_FILE && [ ./$(NEXEC_NAME).o -nt main.cpp ] && [ ./$(NEXEC_NAME).o -nt $(PCH) ] && [ ./$(NEXEC_NAME).o -nt $(CONFIG) ] && [ ./$(NEXEC_NAME).o -nt $(PCH_OBJ) ]; then \
+	if [ -f ./$(NEXEC_NAME).o ] && \
+   [ -f $$PREV_MACRO_FLAGS_FILE ] && \
+   cmp -s <(echo "$$CURRENT_FLAGS") $$PREV_MACRO_FLAGS_FILE && \
+   [ ./$(NEXEC_NAME).o -nt main.cpp ] && \
+   [ ./$(NEXEC_NAME).o -nt $(PCH) ] && \
+   [ ./$(NEXEC_NAME).o -nt $(CONFIG) ] && \
+   [ ./$(NEXEC_NAME).o -nt $(PCH_OBJ) ] && \
+   $(foreach header,$(HEADER_FILES),[ ./$(NEXEC_NAME).o -nt $(header) ] &&) true; then \
 		echo "Nothing to do for $(EXEC_NAME)"; \
 	else \
 		echo "Compiling executable $(EXEC_NAME)" ; \
@@ -92,9 +103,9 @@ do_compile_player_%:
 			1|3) \
 				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o -o ./$(NEXEC_NAME).o;; \
 			2) \
-				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/conv_cutlass_int_NCHW.o -o ./$(NEXEC_NAME).o;; \
+				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o ./core/cuda/bin/conv_cutlass_int_NCHW.o -o ./$(NEXEC_NAME).o;; \
 			4) \
-				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/conv_cutlass_int_CHWN.o -o ./$(NEXEC_NAME).o;; \
+				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o ./core/cuda/bin/conv_cutlass_int_CHWN.o -o ./$(NEXEC_NAME).o;; \
 			esac; \
 			rm -f ./$(NEXEC_NAME)-cuda.o; \
 		else \

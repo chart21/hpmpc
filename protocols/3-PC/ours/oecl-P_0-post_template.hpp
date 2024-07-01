@@ -260,9 +260,12 @@ template <typename func_add, typename func_sub, typename func_xor, typename func
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL0_POST_Share& r_mk2, OECL0_POST_Share& r_msb, OECL0_POST_Share& c, OECL0_POST_Share& c_prime) const{
 }
 
+#if USE_CUDA_GEMM > 0
 static void CONV_2D(const OECL0_POST_Share* X, const OECL0_POST_Share* W, OECL0_POST_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){}
+#endif
+#if USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
 static void GEMM(OECL0_POST_Share* a, OECL0_POST_Share* b, OECL0_POST_Share* c, int m, int n, int k, bool a_fixed = false){}
-
+#endif
 
 };
 

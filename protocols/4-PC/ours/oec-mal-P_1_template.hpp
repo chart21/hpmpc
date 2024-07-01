@@ -1121,8 +1121,10 @@ static void CONV_2D(const OEC_MAL1_Share* X, const OEC_MAL1_Share* W, OEC_MAL1_S
 
 }
 
+#endif
+#if USE_CUDA_GEMM > 0
+#if USE_CUDA_GEMM == 1
 
-#elif USE_CUDA_GEMM == 1
     
 
 static void GEMM(OEC_MAL1_Share* a, OEC_MAL1_Share* b, OEC_MAL1_Share* c, int m, int n, int k, bool a_fixed = false)
@@ -1220,7 +1222,7 @@ static void GEMM(OEC_MAL1_Share* a, OEC_MAL1_Share* b, OEC_MAL1_Share* c, int m,
     delete[] bv_r;
 
 }
-#elif USE_CUDA_GEMM == 3
+#else
     
 
 static void GEMM(OEC_MAL1_Share* a, OEC_MAL1_Share* b, OEC_MAL1_Share* c, int m, int n, int k, bool a_fixed = false)
@@ -1347,6 +1349,7 @@ else{
     delete[] bv_r;
 
 }
+#endif
 #endif
 
 #endif

@@ -918,8 +918,10 @@ static void CONV_2D(const OECL0_Share* X, const OECL0_Share* W, OECL0_Share* Y, 
     delete[] y_p1_2;
 
 }
+#endif
+#if USE_CUDA_GEMM > 0
 
-#elif USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM == 1
 
 static void GEMM(OECL0_Share* a, OECL0_Share* b, OECL0_Share* c, int m, int n, int k, bool a_fixed = false)
 {
@@ -1012,9 +1014,8 @@ static void GEMM(OECL0_Share* a, OECL0_Share* b, OECL0_Share* c, int m, int n, i
     delete[] cp1_1;
     delete[] cp1_2;
 }
-#endif
     
-#if USE_CUDA_GEMM == 3
+#else
 // If matrix A is fixed, then this method converts l kxn matrices B_1,B_2,...B_l to a matrix B of size kx(l*n) and computes A*B.
 static void GEMM(OECL0_Share* a, OECL0_Share* b, OECL0_Share* c, int m, int n, int k, bool a_fixed = false)
 {
@@ -1138,7 +1139,7 @@ else
     delete[] cp1_2;
 }
 #endif
-
+#endif
 /* template <typename func_add, typename func_sub, typename func_mul> */
 /* static void GEMM(const OECL0_Share* a, const OECL0_Share* b, OECL0_Share* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT) */
 /* { */

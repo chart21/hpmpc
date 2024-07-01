@@ -631,16 +631,16 @@ void complete_mult4(func_add ADD, func_sub SUB){
 }
 
 
-#if USE_CUDA_GEMM == 1 || USE_CUDA_GEMM == 3
+#if USE_CUDA_GEMM > 0
 static void GEMM(OEC_MAL3_init* a, OEC_MAL3_init* b, OEC_MAL3_init* c, int m, int n, int k, bool a_fixed)
 {
 
 }
-#elif USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
+#endif
+#if USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
 static void CONV_2D(const OEC_MAL3_init* X, const OEC_MAL3_init* W, OEC_MAL3_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
 }
-
-#endif 
+#endif
 
 #endif
 
