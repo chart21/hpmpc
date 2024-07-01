@@ -16,16 +16,13 @@ void client_signal_connection_established(int player_count)
     num_successful_connections += 1; 
     if(num_successful_connections == 2 * (player_count -1)) {
         pthread_cond_signal(&cond_successful_connection); //signal main thread that all threads have connected
-        /* printf("client %i \n",num_successful_connections); */
     }
     pthread_mutex_unlock(&mtx_connection_established);
 
     pthread_mutex_lock(&mtx_start_communicating); 
     while (num_successful_connections != -1) { // wait for start signal from main thread
-        /* printf("Player: Unlocking conn and waiting for signal \n"); */ 
         pthread_cond_wait(&cond_start_signal, &mtx_start_communicating);
     }
-        /* printf("Player: Done waiting, unlocking \n"); */
         pthread_mutex_unlock(&mtx_start_communicating);
 }
 
@@ -56,13 +53,10 @@ void *receiver(void* threadParameters)
 
         
     int rounds = 0;
-        /* pthread_mutex_lock(&mtx_receive_next); */
-        /* while(receiving_rounds != -1) */
         while(rounds < ((receiver_args*) threadParameters)->rec_rounds)
         {
             // Allocate new memory for received data, check correctness
             ((receiver_args*) threadParameters)->received_elements[rounds] = NEW(DATATYPE[((receiver_args*) threadParameters)->elements_to_rec[rounds]]);
-            /* printf("start rec \n"); */
         
 if(((receiver_args*) threadParameters)->elements_to_rec[rounds] > 0) //should data be received in this round?
 {

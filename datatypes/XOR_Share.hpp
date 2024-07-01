@@ -9,12 +9,11 @@ public:
 
     XOR_Share(const Share_Type& s) : Share_Type(s) {}
 
-/* #if FUNCTION_IDENTIFIER == 28 */
     XOR_Share(const Datatype& d)
     {
         *this = Share_Type::public_val(d);
     }
-/* #endif */
+
     XOR_Share operator~() const
     {
         return XOR_Share(Share_Type::Not());
@@ -84,7 +83,6 @@ public:
 
             int get_p1()
         {
-            /* return shares[0].get_p1(); */
             return 0;
         }
     

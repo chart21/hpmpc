@@ -51,9 +51,6 @@ public:
 // Bind the socket to a local address
 void Bind(int port) {
 // reuse the address
-    #if PRINT == 1
-    /* std::cout << "binding to port" << " " << port << std::endl; */
-    #endif
     int yes = 1;
     if (setsockopt(sock_, SOL_SOCKET, SO_REUSEADDR, &yes,
 				sizeof(int)) == -1) {

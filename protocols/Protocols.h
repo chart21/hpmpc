@@ -2,7 +2,6 @@
 #include "../config.h"
 #include "../core/arch/DATATYPE.h"
 #include "../core/networking/sockethelper.h"
-#include "../core/networking/buffers.h"
 #include "../core/utils/randomizer.h"
 
 #if INIT == 1

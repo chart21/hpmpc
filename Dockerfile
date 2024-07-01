@@ -12,7 +12,6 @@ RUN apt-get update && \
 RUN git clone --branch NN --depth 1 https://github.com/chart21/hpmpc && \
     cd hpmpc && \
     git submodule update --init --recursive
-    # git clone --branch hpmpc --depth 1 https://github.com/chart21/flexNN SimpleNN
 
 WORKDIR /hpmpc
 

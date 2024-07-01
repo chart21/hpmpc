@@ -21,10 +21,6 @@ public:
         init(temp_u);
         }
 
-    /* sint_t(DATATYPE value[BITLENGTH]) { */
-    /*     for (int i = 0; i < BITLENGTH; i++) */ 
-    /*       shares[i] = Share::public_val(value[i]); */
-    /*     } */
 
     template<int id>
     sint_t(UINT_TYPE value[DATTYPE]) {
@@ -47,9 +43,6 @@ public:
     void prepare_receive_and_replicate(UINT_TYPE value) {
         if constexpr (id == PSELF || PROTOCOL == 13) {
           if (current_phase != PHASE_INIT) { //TODO: Should only happen either in PRE or in live phase
-            /* alignas(sizeof(DATATYPE)) UINT_TYPE temp_u[DATTYPE] = {value}; */
-            /* orthogonalize_arithmetic(temp_u, (DATATYPE*) temp_u); */
-            /* prepare_receive_from<id>((DATATYPE*) temp_u); */
             DATATYPE temp_u[BITLENGTH];
             for (int i = 0; i < BITLENGTH; i++)
                 shares[i].template prepare_receive_from<id>(PROMOTE(value));
@@ -380,10 +373,6 @@ public:
             Share::complete_bit_injection_S2(shares);
         }
 
-        /* UINT_TYPE get_p1() */
-        /* { */
-        /*     return shares[0].get_p1(); */
-        /* } */
 
         static void communicate()
         {

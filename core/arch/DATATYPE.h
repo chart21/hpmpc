@@ -138,9 +138,6 @@ void unorthogonalize_boolean(a *in, b *out)
 #define OP_SHIFT_RIGHT SHIFT_RIGHT32
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT32
 #define OP_TRUNC2 SHIFT_RIGHT32<1>
-/* #define OP_TRUNC4 SHIFT_RIGHT32<3> */
-/* #define OP_TRUNC8 SHIFT_RIGHT32<4> */
-/* #define OP_TRUNC16 SHIFT_RIGHT32<5> */
 #elif BITLENGTH == 64
 #define OP_ADD FUNC_ADD64
 #define OP_SUB FUNC_SUB64
@@ -168,45 +165,12 @@ DATATYPE TRUNC2(DATATYPE x) {
 DATATYPE TRUNC3(DATATYPE x) {
     // Create a mask with lower k bits set to 1
 
-    /* return OP_SUB(SET_ALL_ZERO(), TRUNC2(OP_SUB(SET_ALL_ZERO(), x))); */
-    /* x = OP_SUB(SET_ALL_ZERO(),OP_TRUNC(OP_SUB(SET_ALL_ZERO(),x))); */
     x = OP_SUB(SET_ALL_ZERO(),OP_TRUNC(x));
     UINT_TYPE maskValue = (UINT_TYPE(1) << (BITLENGTH-FRACTIONAL)) - 1; 
     DATATYPE mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
     return OP_SUB(SET_ALL_ZERO(), FUNC_AND(x, mask));
 }
-
-
-
-
-#define FUNC_TRUNC OP_TRUNC
-
-/* DATATYPE mod_power_of_2(DATATYPE x, int k) { */
-/*     // Create a mask with lower k bits set to 1 */
-    
-/*     x = OP_TRUNC(x, k); */
-/*     UINT_TYPE maskValue = (1 << k) - 1; */ 
-/*     DATATYPE mask = PROMOTE(maskValue); // Set all elements to maskValue */
-/*     // Apply the mask using bitwise AND */
-/*     return FUNC_AND(x, mask); */
-/* } */
-
-
-#if DATTYPE == 1
-    #if COMPRESS == 1
-        #define BOOL_COMPRESS
-        #define NEW(var) new (std::align_val_t(sizeof(uint64_t))) var; //align variables for packing/unpacking
-    #else
-        #define NEW(var) new var;
-    #endif
-#endif
-
-
-
-
-
-
 
 #if num_players == 3
     #define PSELF 2
@@ -280,4 +244,14 @@ DATATYPE TRUNC3(DATATYPE x) {
 #elif (PROTOCOL == 8 || PROTOCOL == 11 || PROTOCOL == 12) && PARTY == 3
 #define HAS_POST_PROTOCOL 1
 #endif
+
+#if DATTYPE == 1
+    #if COMPRESS == 1
+        #define BOOL_COMPRESS
+        #define NEW(var) new (std::align_val_t(sizeof(uint64_t))) var; //align variables for packing/unpacking
+    #else
+        #define NEW(var) new var;
+    #endif
+#endif
+
 

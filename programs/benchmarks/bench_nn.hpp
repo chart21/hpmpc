@@ -1,34 +1,24 @@
 #pragma once
-#include "../../protocols/Protocols.h"
-#include "../../protocols/XOR_Share.hpp"
-#include "../../protocols/Additive_Share.hpp"
-#include "../../protocols/Matrix_Share.hpp"
-#include "../../datatypes/k_bitset.hpp"
-#include "../../datatypes/k_sint.hpp"
-#include "boolean_adder_msb.hpp"
-#include "ppa_msb.hpp"
-#include "ppa_msb_unsafe.hpp"
-#include "ppa_msb_4_way.hpp"
-#include "../../utils/print.hpp"
+#include "bench_helper.hpp"
+#include "../../datatypes/XOR_Share.hpp"
+#include "../../datatypes/Additive_Share.hpp"
 #include "headers/simple_nn.h"
 #include "headers/config.h"
 #include "Relu.hpp"
 
-#if FUNCTION_IDENTIFIER == 400 || FUNCTION_IDENTIFIER == 401 || FUNCTION_IDENTIFIER == 402
+#if FUNCTION_IDENTIFIER == 33 || FUNCTION_IDENTIFIER == 34 || FUNCTION_IDENTIFIER == 35
 #define FUNCTION conv_2D_bench
-#elif FUNCTION_IDENTIFIER == 403
+#elif FUNCTION_IDENTIFIER == 36
 #define FUNCTION mat_mul_bench
-#elif FUNCTION_IDENTIFIER == 404 || FUNCTION_IDENTIFIER == 405 || FUNCTION_IDENTIFIER == 406
+#elif FUNCTION_IDENTIFIER == 37 || FUNCTION_IDENTIFIER == 38 || FUNCTION_IDENTIFIER == 39
 #define FUNCTION ReLU_bench
-#elif FUNCTION_IDENTIFIER == 407 || FUNCTION_IDENTIFIER == 408 || FUNCTION_IDENTIFIER == 409
-#define FUNCTION ReLU_sint_bench
-#elif FUNCTION_IDENTIFIER == 410
+#elif FUNCTION_IDENTIFIER == 40
 #define FUNCTION avg_pool_bench
-#elif FUNCTION_IDENTIFIER == 411
+#elif FUNCTION_IDENTIFIER == 41
 #define FUNCTION batch_norm_bench
-#elif FUNCTION_IDENTIFIER == 412 || FUNCTION_IDENTIFIER == 413 || FUNCTION_IDENTIFIER == 414
+#elif FUNCTION_IDENTIFIER == 42 || FUNCTION_IDENTIFIER == 43 || FUNCTION_IDENTIFIER == 44
 #define FUNCTION boolean_adder_bench
-#elif FUNCTION_IDENTIFIER == 415 || FUNCTION_IDENTIFIER == 416 || FUNCTION_IDENTIFIER == 417 || FUNCTION_IDENTIFIER == 418 || FUNCTION_IDENTIFIER == 419 || FUNCTION_IDENTIFIER == 420 || FUNCTION_IDENTIFIER == 421
+#elif FUNCTION_IDENTIFIER == 45 || FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47
 #define FUNCTION conv_2D_bench
 #endif
 
@@ -46,18 +36,8 @@ void generateElements()
 
 }
 
-//if placed after a function, gurantees that all parties have finished computation and communication
-template<typename Share>
-void dummy_reveal()
-{
-    using S = XOR_Share<DATATYPE, Share>;
-    S dummy;
-    dummy.prepare_reveal_to_all();
-    Share::communicate();
-    dummy.complete_reveal_to_all();
-}
 
-#if FUNCTION_IDENTIFIER == 400 || FUNCTION_IDENTIFIER == 401 || FUNCTION_IDENTIFIER == 402
+#if FUNCTION_IDENTIFIER == 33 || FUNCTION_IDENTIFIER == 34 || FUNCTION_IDENTIFIER == 35
 template<typename Share>
 void conv_2D_bench(DATATYPE* res)
 {
@@ -93,7 +73,7 @@ dummy_reveal<Share>();
 }
 #endif
 
-#if FUNCTION_IDENTIFIER == 403
+#if FUNCTION_IDENTIFIER == 36
 // Piranha figure 4: NxN matrix multiplication
 template<typename Share>
 void mat_mul_bench(DATATYPE* res)
@@ -234,7 +214,7 @@ S::communicate();
 }
 #endif
 
-#if FUNCTION_IDENTIFIER == 404 || FUNCTION_IDENTIFIER == 405 || FUNCTION_IDENTIFIER == 406  
+#if FUNCTION_IDENTIFIER == 37 || FUNCTION_IDENTIFIER == 38 || FUNCTION_IDENTIFIER == 39
 template<typename Share>
 void ReLU_bench(DATATYPE* res)
 {
@@ -249,24 +229,8 @@ void ReLU_bench(DATATYPE* res)
 }
 #endif
 
-#if FUNCTION_IDENTIFIER == 407 || FUNCTION_IDENTIFIER == 408 || FUNCTION_IDENTIFIER == 409
-// sint uses massive batch size
-template<typename Share>
-void ReLU_sint_bench(DATATYPE* res)
-{
-    using A = Additive_Share<DATATYPE, Share>;
-    using sint = sint_t<A>;
-    auto prev_out = new sint[NUM_INPUTS];
-    auto out = new sint[NUM_INPUTS];
-    const int m = REDUCED_BITLENGTH_m;
-    const int k = REDUCED_BITLENGTH_k;
-    Share::communicate(); // dummy round
-    RELU<m,k>(prev_out, prev_out + NUM_INPUTS, out);
-    dummy_reveal<Share>();
-}
-#endif
 
-#if FUNCTION_IDENTIFIER == 410
+#if FUNCTION_IDENTIFIER == 40
 template<typename Share>
 void avg_pool_bench(DATATYPE* res)
 {
@@ -282,7 +246,7 @@ void avg_pool_bench(DATATYPE* res)
 }
 #endif
 
-#if FUNCTION_IDENTIFIER == 411
+#if FUNCTION_IDENTIFIER == 41
 template<typename Share>
 void batch_norm_bench(DATATYPE* res)
 {
@@ -299,7 +263,7 @@ void batch_norm_bench(DATATYPE* res)
 }
 #endif
 
-#if FUNCTION_IDENTIFIER == 412 || FUNCTION_IDENTIFIER == 413 || FUNCTION_IDENTIFIER == 414
+#if FUNCTION_IDENTIFIER == 42 || FUNCTION_IDENTIFIER == 43 || FUNCTION_IDENTIFIER == 44
 template<typename Share>
 void boolean_adder_bench(DATATYPE* res)
 {
@@ -312,7 +276,6 @@ void boolean_adder_bench(DATATYPE* res)
     S *y = new S[NUM_INPUTS];
     Bitset *s1 = new Bitset[NUM_INPUTS];
     Bitset *s2 = new Bitset[NUM_INPUTS];
-    /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     std::vector<BooleanAdder_MSB<k-m,S>> adders;
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
@@ -335,7 +298,6 @@ void boolean_adder_bench(DATATYPE* res)
         {
             adders[i].step();
         }
-        /* std::cout << "Adder step ..." << std::endl; */
         Share::communicate();
     }
     delete[] s1;
@@ -346,7 +308,7 @@ void boolean_adder_bench(DATATYPE* res)
 }
 #endif
 
-#if FUNCTION_IDENTIFIER == 415 || FUNCTION_IDENTIFIER == 418 || FUNCTION_IDENTIFIER == 421
+#if FUNCTION_IDENTIFIER == 45 || FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47
 
 template<typename Share>
 void conv_2D_bench(DATATYPE* res)
@@ -354,11 +316,11 @@ void conv_2D_bench(DATATYPE* res)
     using S = Additive_Share<DATATYPE, Share>;
     Share::communicate(); // dummy round
     const int batch = 1;
-#if FUNCTION_IDENTIFIER == 415
+#if FUNCTION_IDENTIFIER == 45
     auto conv = new Conv2d<S>(3,64,11,4,2);
-#elif FUNCTION_IDENTIFIER == 418
+#elif FUNCTION_IDENTIFIER == 46
     auto conv = new Conv2d<S>(3,64,3,1,1);
-#elif FUNCTION_IDENTIFIER == 421
+#elif FUNCTION_IDENTIFIER == 47
     auto conv = new Conv2d<S>(64,64,3,1,1);
 #endif
     vector<int> input_shape = {batch, 64, NUM_INPUTS, NUM_INPUTS};

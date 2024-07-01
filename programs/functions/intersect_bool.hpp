@@ -55,4 +55,6 @@ void intersect_bool(const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* a
         for (int k = 0; k < BITLENGTH; k++)
             result[i][k].complete_and();
 
+    delete[] tmp;
+    delete[] intersect;
 }

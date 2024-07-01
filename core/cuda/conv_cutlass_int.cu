@@ -22,7 +22,6 @@ void conv2d_cutlass(const Type* X, const Type* W, Type* Y, int batchSize, int in
     cudaMalloc((void **)&x, xSize * sizeof(Type));
     cudaMemcpy(x, X, xSize * sizeof(Type), cudaMemcpyHostToDevice);
     cudaMalloc((void **)&xt, xSize * sizeof(Type));
-    //printf("XDimesions: %d, %d, %d, %d\n", batchSize, inh, inw, din);
 if constexpr(PIGEON_LAYOUT == "CHWN") {
     chwn_to_nhwc_(xt, x, batchSize, inh, inw, din);
 } else if constexpr(PIGEON_LAYOUT == "NCHW") {
@@ -37,15 +36,6 @@ if constexpr(PIGEON_LAYOUT != "NHWC") {
     nchw_to_nhwc_(wt, w, dout, wh, ww, din);
 }
     cudaFree(w);
-//    printf("X-Dimensions-- BatchSize: %d, Height: %d, Width: %d, Channels: %d\n", batchSize, inh, inw, din);
-//    printf("W-Dimensions-- Height: %d, Width: %d, Channels: %d, Filters: %d\n", wh, ww, din, dout);
-//    printf("Y-Dimensions-- BatchSize: %d, Height: %d, Width: %d, Channels: %d\n", batchSize, inh, inw, dout);
-
-
-
-    //chwn_to_nhwc_(wt, w, dout, din, wh, ww);
- //   printf("b: %d, ih: %d, iw: %d, din: %d, dout: %d, wh: %d, ww: %d, padding: %d, stride: %d, dilation: %d\n", batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
-
 
     cudaMalloc((void **)&y, ySize * sizeof(Type));
 
@@ -54,13 +44,6 @@ if constexpr(PIGEON_LAYOUT != "NHWC") {
         batchSize, inh, inw, din, dout,
         wh, ww, padding, padding, stride, dilation
     );
-//        cutlass::TensorRef<T, cutlass::layout::TensorNHWC> A,
- //       cutlass::TensorRef<T, cutlass::layout::TensorNHWC> B,
-  //      cutlass::TensorRef<T, cutlass::layout::TensorNHWC> C,
-   //     int b, int imageHeight, int imageWidth, int Din,
-    //    int Dout, int filterHeight, int filterWidth,
-     //   int paddingHeight, int paddingWidth,
-      //  int stride, int dilation) {
 
     cudaFree(xt);
     cudaFree(wt);
@@ -78,6 +61,7 @@ if constexpr(PIGEON_LAYOUT != "NHWC") {
 
 }
 
+// UINT8 and UINT16 are not supported by all architectures
 //template void conv2d_cutlass<uint8_t>(const uint8_t* X, const uint8_t* W, uint8_t* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation);
 //template void conv2d_cutlass<uint16_t>(const uint16_t* X, const uint16_t* W, uint16_t* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation); // INT8 and INT16 are not supported by all architectures
 template void conv2d_cutlass<uint32_t>(const uint32_t* X, const uint32_t* W, uint32_t* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation);

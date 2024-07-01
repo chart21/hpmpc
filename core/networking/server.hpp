@@ -26,10 +26,8 @@ void server_signal_connection_established(int player_count)
     pthread_mutex_lock(&mtx_start_communicating); 
 
     while (num_successful_connections != -1) { // wait for start signal from main thread
-        /* printf("Player: Unlocking conn and waiting for signal \n"); */ 
         pthread_cond_wait(&cond_start_signal, &mtx_start_communicating);
     }
-        /* printf("Player: Done waiting, unlocking \n"); */
         pthread_mutex_unlock(&mtx_start_communicating);
 
 }
@@ -54,9 +52,6 @@ void *sender(void* threadParameters)
             while(rounds >= sending_rounds)
                     pthread_cond_wait(&cond_send_next, &mtx_send_next); //make sure that there is new data to send, singaled by main
             pthread_mutex_unlock(&mtx_send_next);
-            //char buf[1024] = { 0 };
-            //recv(new_fd, buf, 32, MSG_WAITALL);
-            /* printf("sending round %i out of %i \n", rounds, ((sender_args*) threadParameters)->send_rounds); */
             if(((sender_args*) threadParameters)->elements_to_send[rounds] > 0)
             {
 #ifndef BOOL_COMPRESS
@@ -73,11 +68,9 @@ client.Send_all( ((char*) ((sender_args*) threadParameters)->sent_elements[round
 printf("P%i: Sent %li bytes to player %i in round %i out of %i \n", PARTY, elements_to_send , ((sender_args*) threadParameters)->connected_to, rounds + 1, ((sender_args*) threadParameters)->send_rounds);
 #endif
             }
-                //Delete sent data
            free(((sender_args*) threadParameters)->sent_elements[rounds]);
 
             rounds += 1;
-            /* printf("Next sending round \n"); */
         
 
         }

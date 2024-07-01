@@ -34,7 +34,6 @@
 #define MM_AES_ENC_LAST(a,b) _mm_aesenclast_si128(a,b)
 #define MM_AES_STORE(a,b) _mm_store_si128(a,b)
 #endif
-
 //macros
 #define DO_ENC_BLOCK(m,k) \
 	do{\

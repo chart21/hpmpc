@@ -9,20 +9,10 @@
 int main(int argc, char *argv[])
 {
 
-    /* alignas(16) UINT_TYPE in[2] = {0, 1}; */
-    /* std::cout << std::to_string(in[0]) << std::to_string(in[1]) << std::endl; */
-    /* DATATYPE intrin = _mm_set_epi64x (in[0], in[1]); */
-    /* _mm_store_si128 ((__m128i*)&(in[0]), intrin); */
-    /* std::cout << std::to_string(in[0]) << std::to_string(in[1]) << std::endl; */
-
-
     UINT_TYPE* data = NEW(UINT_TYPE[DATTYPE]);
     for (int i = 0; i < DATTYPE; i++) {
         data[i] = i;
     }
-    
-
-    
 
     DATATYPE* arithmetic_data = NEW(DATATYPE[BITLENGTH]);
     orthogonalize_arithmetic(data, arithmetic_data); 
@@ -34,8 +24,6 @@ int main(int argc, char *argv[])
             /* return 1; */
         }
     }
-    
-   
     
     DATATYPE* bool_data = NEW(DATATYPE[BITLENGTH]);
 
@@ -97,13 +85,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    /* //transpose data_array into data_array_2 */
-    /* for (int i = 0; i < 3; i++) { */
-    /*     for (UINT_TYPE j = 0; j < DATTYPE; j++) { */
-    /*         data_array_2[j][i] = data_array[i][j]; */
-    /*     } */
-    /* } */
-
 
     auto bool_data_array2 = NEW(DATATYPE[BITLENGTH][3]);
     for (int i = 0; i < 3; i++)
@@ -114,17 +95,10 @@ int main(int argc, char *argv[])
         unorthogonalize_boolean( (DATATYPE*) (bool_data_array2)+i*BITLENGTH, (UINT_TYPE*) (data_array_2)+i*DATTYPE);
     }
 
-    /* //transpose data_array_2 back into data_array */
-    /* for (int i = 0; i < 3; i++) { */
-    /*     for (UINT_TYPE j = 0; j < DATTYPE; j++) { */
-    /*         data_array[i][j] = data_array_2[j][i]; */
-    /*     } */
-    /* } */
     for (int i = 0; i < 3; i++) {
         for (UINT_TYPE j = 0; j < DATTYPE; j++) {
             if (data_array[i][j] != i * DATTYPE + j) {
                 std::cout << "BOOLEAN ERROR: " << i << " " << j << " " << std::to_string(data_array[i][j]) << std::endl;
-                /* return 1; */
             }
         }
     }
