@@ -153,3 +153,12 @@ Similarly, out of SSE, AVX-2, and AVX-512, only AVX-512 supports vectorization w
 - Does your GPU support CUDA? If not, compile without CUDA by setting `USE_CUDA_GEMM=0` in `config.h` or setting the respective flag when compiling. In case your CUDA-enabled GPU does not support datatypes such as UINT8, you can comment out the respective forward declaration in `core/cuda/conv_cutlass_int.cu` and `core/cuda/gemm_cutlass_int.cu`.
 - Do you get low accuracy for Neural Network inference? To achieve high accuracy you may need to increase the `BITLENGTH`, increase of reduce the number of `FRACTIONAL` bits, or adjust the truncation strategy to `TRUNC_APPROACH=1` (REDUCED Slack`) or `TRUNC_APPROACH=2` (Exact Truncation), along with `TRUNC_THEN_MULT=1` and `TRUNC_DELAYED=1`. Note that truncation approaches 1 and 2 require setting `TRUNC_DELAYED=1`. Also check if `REDUCED_BITLENGTH_m` and `REDUCED_BITLENGTH_k` are set to 0 and `BITLENGTH` respectively. 
 Also inspect the terminal output for any errors regarding reading the model or dataset. PIGEON uses dummy data or model parameters if the files are not found.
+
+## References
+
+Our framework utilizes the following third-party implementations.
+- Architecture specific headers for vectorization and Bitslicing adapted from [USUBA](https://github.com/usubalang/usuba), [MIT LICENSE](https://raw.githubusercontent.com/usubalang/usuba/main/LICENSE).
+- AES-NI implementation adapted from [AES-Brute-Force](https://github.com/sebastien-riou/aes-brute-force), [Apache 2.0 LICENSE](https://raw.githubusercontent.com/sebastien-riou/aes-brute-force/master/LICENSE)
+- SHA-256 implementation adapted from [SHA-Intrinsics](https://github.com/noloader/SHA-Intrinsics/tree/master), No License.
+- CUDA GEMM and Convolution implementation adapted from [Cutlass](https://github.com/NVIDIA/cutlass), [LICENSE](https://raw.githubusercontent.com/NVIDIA/cutlass/main/LICENSE.txt) and [Piranha](https://github.com/ucbrise/piranha/tree/main), [MIT LICENSE](https://raw.githubusercontent.com/ucbrise/piranha/main/LICENSE).
+- Neural Network Inference engine adapted from [SimpleNN](https://github.com/stnamjef/SimpleNN), [MIT LICENSE](https://raw.githubusercontent.com/stnamjef/SimpleNN/master/LICENSE).
