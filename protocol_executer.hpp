@@ -25,15 +25,19 @@
 #elif FUNCTION_IDENTIFIER == 58
 #include "programs/tests/test_multi_input.hpp"
 #elif FUNCTION_IDENTIFIER == 59
-#include "programs/tests/test_test_all.hpp"
+#include "programs/tests/test_comparison.hpp"
 #elif FUNCTION_IDENTIFIER == 60
-#include "programs/tutorials/basic_tutorial.hpp"
+#include "programs/tests/test_test_all.hpp"
 #elif FUNCTION_IDENTIFIER == 61
-#include "programs/tutorials/fixed_point_tutorial.hpp"
+#include "programs/tutorials/basic_tutorial.hpp"
 #elif FUNCTION_IDENTIFIER == 62
-#include "programs/tutorials/mixed_circuits_tutorial.hpp"
+#include "programs/tutorials/fixed_point_tutorial.hpp"
 #elif FUNCTION_IDENTIFIER == 63
+#include "programs/tutorials/mixed_circuits_tutorial.hpp"
+#elif FUNCTION_IDENTIFIER == 64
 #include "programs/tutorials/matrix_operations_tutorial.hpp"
+#elif FUNCTION_IDENTIFIER == 65
+#include "programs/tutorials/YourFirstProgram.hpp"
 #elif FUNCTION_IDENTIFIER < 400
 #include "programs/NN.hpp"
 #endif
