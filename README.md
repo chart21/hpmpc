@@ -74,6 +74,7 @@ make -j PARTY=<node_id> FUNCTION_IDENTIFIER=<function_id> PROTOCOL=12 DATTYPE=51
 The following protocols currently have full support for all implemented primitives and functions.
 - 3PC (semi-honest): Trio (Protocol 5), Trusted Third Party (Protocol 6)
 - 4PC Quad (malicious): (Protocol 12), Trusted Third Party (Protocol 7)
+
 The following protocols currently have full support for all basic primitives.
 - 3PC (semi-honest): Sharemind (Protocol 1), Replicated (Protocol 2), ASTRA (Protocol 3)
 - 4PC (malicious): Tetrad (Protocol 8), Fantastic Four (Protocol 9)
