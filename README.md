@@ -29,6 +29,7 @@ cd ../..
 # Compile and run MPC executables with GPU acceleration
 make -j PARTY=all FUNCTION_IDENTIFIER=57 PROTOCOL=12 USE_CUDA_GEMM=2 # Compile executables for protocol Quad (12) for all parties and a unit tests for matrix multiplication (function 54) with GPU acceleration (USE_CUDA_GEMM=2)
 scripts/run_locally.sh -n 4 # Run four parties locally
+```
 
 After setting up the framework on each node of a distributed setup, you can run the following commands to run the MPC protocol on a distributed setup.
 ```bash
