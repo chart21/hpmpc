@@ -64,7 +64,7 @@ The framework offers multiple tweaks to accelerate MPC computation. The followin
 - Preprocessing (`PRE`): Some protocols support a preprocessing phase that can be enabled to accelerate the online phase. 
 - SPLITROLES (`SPLITROLES`): By using the SPLITROLES flag when compiling, the framework compiles n! excutables for a n-PC protocol where each executable has a different player assignment. This allows load balance the communication and computation between the nodes. SPLITROLES 1 compiles all executables for a 3PC protocol, SPLITROLES 2 compiles all executables for a 3PC protocol in a setting with four nodes, and SPLITROLES 3 compiles all executables for a 4PC protocol.
 
-For nodes equipped with a 32-core AVX-512 CPU, a CUDA-enabled GPU, the following example may compile an optimized executables in a distributed setup. Note that this example inherently vectorizes the computation `PROCESS_NUM * DATTYPE/BITLENGTH * SPLITROLES_Factor` times. 
+For nodes equipped with a 32-core AVX-512 CPU, a CUDA-enabled GPU, the following example may compile an optimized executables in a distributed setup. Note that this example inherently vectorizes the computation `PROCESS_NUM x DATTYPE/BITLENGTH x SPLITROLES_Factor` times. 
 ```bash
 make -j PARTY=<node_id> FUNCTION_IDENTIFIER=<function_id> PROTOCOL=12 DATTYPE=512 PROCESS_NUM=32 RANDOM_ALGORITHM=2 USE_SSL_AES=0 ARM=0 USE_CUDA_GEMM=2 SEND_BUFFER=10000 RECV_BUFFER=10000 VERIFY_BUFFER=1 PRE=1 SPLITROLES=3.
 ```
@@ -99,11 +99,11 @@ Scaling MPC requires a high degree of parallelism to overcome network latency bo
 HPMPC's architecture is designed to utilize hardware resources proportionally to the degree of parallelism required by the MPC workload. 
 By increasing load balancing, registersizes, or number of processes, the framework executes multiple instances of the same function in parallel.
 For instance, an arithmetic program that computes a function on 32-bit integers is executed 512 times in parallel by using 32 processes and 512-bit registers.
-Similarly, a boolean program that computes a single boolean function is executed 512*32=16384 times in parallel due to Bitslicing.
+Similarly, a boolean program that computes a single boolean function is executed 512x32=16384 times in parallel due to Bitslicing.
 For mixed circuits, HPMPC automatically groups blocks of arithmetic shares before share conversion to handle these different degrees of parallelism.
-The degree of parallelism for arithmetic and mixed circuits can be calculated as `PROCESS_NUM * DATTYPE/BITLENGTH * SPLITROLES_Factor` while for boolean circuits it is `PROCESS_NUM * DATTYPE * SPLITROLES_Factor`.
+The degree of parallelism for arithmetic and mixed circuits can be calculated as `PROCESS_NUM x DATTYPE/BITLENGTH x SPLITROLES_Factor` while for boolean circuits it is `PROCESS_NUM x DATTYPE x SPLITROLES_Factor`.
 
-Thus, setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing 10 AES blocks (boolean circuit) will actually compute $6*4*256*10=61440$ AES blocks in parallel by fully utilizing the available hardware resources, while setting DATTYPE=1, SplitRoles=0, and PROCESS_NUM=1 will compute 10 AES blocks on a single core without vectorization. Setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing a single neural network inference (mixed circuit) will compute 6*4*256/32=192 samples in parallel, thus effictively using a batch size of 192.
+Thus, setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing 10 AES blocks (boolean circuit) will actually compute 6x4x56x10=61440 AES blocks in parallel by fully utilizing the available hardware resources, while setting DATTYPE=1, SplitRoles=0, and PROCESS_NUM=1 will compute 10 AES blocks on a single core without vectorization. Setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing a single neural network inference (mixed circuit) will compute 6x4x256/32=192 samples in parallel, thus effictively using a batch size of 192.
 
 ## Executing MP-SPDZ Bytecode (Experimental)
 
