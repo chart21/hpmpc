@@ -103,7 +103,7 @@ Similarly, a boolean program that computes a single boolean function is executed
 For mixed circuits, HPMPC automatically groups blocks of arithmetic shares before share conversion to handle these different degrees of parallelism.
 The degree of parallelism for arithmetic and mixed circuits can be calculated as `PROCESS_NUM x DATTYPE/BITLENGTH x SPLITROLES_Factor` while for boolean circuits it is `PROCESS_NUM x DATTYPE x SPLITROLES_Factor`.
 
-Thus, setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing 10 AES blocks (boolean circuit) will actually compute 6x4x56x10=61440 AES blocks in parallel by fully utilizing the available hardware resources, while setting DATTYPE=1, SplitRoles=0, and PROCESS_NUM=1 will compute 10 AES blocks on a single core without vectorization. Setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing a single neural network inference (mixed circuit) will compute 6x4x256/32=192 samples in parallel, thus effictively using a batch size of 192.
+Thus, setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing 10 AES blocks (boolean circuit) will actually compute 6x4x256x10=61440 AES blocks in parallel by fully utilizing the available hardware resources, while setting DATTYPE=1, SplitRoles=0, and PROCESS_NUM=1 will compute 10 AES blocks on a single core without vectorization. Setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing a single neural network inference (mixed circuit) will compute 6x4x256/32=192 samples in parallel, thus effictively using a batch size of 192.
 
 ## Executing MP-SPDZ Bytecode (Experimental)
 
