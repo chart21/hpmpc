@@ -106,7 +106,7 @@ void inference(DATATYPE* res)
 
 #if MODELOWNER != -1 || DATAOWNER != -1 // If actual data is used, load paths from config file
     const std::string filename = "config.txt";
-    load_config(&cfg,filename); //load config from config.txt
+    load_config(cfg,filename); //load config from config.txt
     // Print out the loaded configuration values
     print_online("Mode: " + cfg.mode);
     print_online("Save Directory: " + cfg.save_dir);

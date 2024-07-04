@@ -47,9 +47,8 @@ void init_circuit(std::string ips[]) {
 #if PRINT == 1
   print("Initializing circuit ...\n");
 #endif
-  /* //replace with vector soon !! */
   sockets_received.push_back(0);
-  for (int t = 0; t < (num_players - 1); t++) { // ???
+  for (int t = 0; t < (num_players - 1); t++) { 
 #if LIVE == 1
     receiving_args[t].elements_to_rec.push_back(0);
     sending_args[t].elements_to_send.push_back(0);
@@ -305,8 +304,10 @@ void executeProgram(int argc, char *argv[], int process_id, int process_num) {
   clock_gettime(CLOCK_REALTIME, &i1);
 
   player_id = PARTY;
-
-#if num_players == 3
+#if num_players == 2
+init_srng(PPREV, 0);
+init_srng(PSELF, PARTY+1);
+#elif num_players == 3
   init_srng(PPREV,
             modulo((player_id - 1), num_players) * 101011 + 5000 + SRNG_SEED);
   init_srng(PNEXT, player_id * 101011 + 5000 + SRNG_SEED);

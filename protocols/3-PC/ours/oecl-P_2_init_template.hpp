@@ -476,6 +476,5 @@ static void CONV_2D(const OECL2_init* X, const OECL2_init* W, OECL2_init* Y, int
 #endif
 #endif 
 
-#endif
 
 };

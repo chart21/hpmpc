@@ -17,7 +17,7 @@ PCH := core/include/pch.h
 PCH_OBJ := $(PCH:.h=.gch)
 CONFIG := config.h
 
-HEADER_FILES := $(shell find . -name '*.h' -o -name '*.hpp')
+HEADER_FILES := $(shell find . -path ./nn/Pygeon -prune -o -name '*.h' -o -name '*.hpp')
 
 # Check if USE_CUDA_GEMM is defined, otherwise take from config.h
 USE_CUDA_GEMM := $(shell grep -oP '(?<=define USE_CUDA_GEMM )\d+' $(CONFIG))
@@ -69,7 +69,9 @@ compile_executables:
 
 compile_parties:
 	@if [ "$(PARTY)" = "all" ]; then \
-		if [ $(PROTOCOL) -gt 6 ]; then \
+		if [ $(PROTOCOL) -eq 4 ]; then \
+			$(MAKE) compile_player_0,1,run-P0 compile_player_1,1,run-P1; \
+		elif [ $(PROTOCOL) -gt 6 ]; then \
 			$(MAKE) compile_player_0,1,run-P0 compile_player_1,1,run-P1 compile_player_2,1,run-P2 compile_player_3,1,run-P3; \
 		else \
 			$(MAKE) compile_player_0,1,run-P0 compile_player_1,1,run-P1 compile_player_2,1,run-P2; \
@@ -94,6 +96,7 @@ do_compile_player_%:
 	if [ -f ./$(NEXEC_NAME).o ] && \
    [ -f $$PREV_MACRO_FLAGS_FILE ] && \
    cmp -s <(echo "$$CURRENT_FLAGS") $$PREV_MACRO_FLAGS_FILE && \
+   [ ./$(NEXEC_NAME).o -nt Makefile ] && \
    [ ./$(NEXEC_NAME).o -nt main.cpp ] && \
    [ ./$(NEXEC_NAME).o -nt $(PCH) ] && \
    [ ./$(NEXEC_NAME).o -nt $(CONFIG) ] && \
@@ -169,6 +172,7 @@ compile_splitroles_4:
 
 clean:
 	@echo "Cleaning up compiled files..."
-	rm -f *.o *.gch run-P*.o run-P*.macro_flags include/*.gch
+	rm -rf executables/*
+	rm -rf core/include/*.gch
 	@echo "Cleanup completed."
 

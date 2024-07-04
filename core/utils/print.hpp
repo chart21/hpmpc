@@ -171,7 +171,10 @@ void print_communication()
 //set decimal precision
 std::cout.precision(4);
 #if PRE == 1
-#if num_players == 3
+#if num_players == 2
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": " << "Sending to other players:" << total_send_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;
+#elif num_players == 3
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": " << "Sending to other players:" << total_send_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send_pre[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv_pre[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;
 #elif num_players == 4
@@ -179,8 +182,10 @@ std::cout.precision(4);
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv_pre[PMIDDLE]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv_pre[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;
 #endif
 #endif
-
-#if num_players == 3
+#if num_players == 2
+    std::cout << "P" << PARTY << ", ONLINE, PID" << process_offset <<  ": " << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;
+    std::cout << "P" << PARTY << ", ONLINE PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;
+#elif num_players == 3
     std::cout << "P" << PARTY << ", ONLINE, PID" << process_offset <<  ": " << "Sending to other players:" << total_send[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_send[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;
     std::cout << "P" << PARTY << ", ONLINE PID" << process_offset <<  ": "  << "Receiving from other players:" << total_recv[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB, " << total_recv[PNEXT]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;
 #elif num_players == 4

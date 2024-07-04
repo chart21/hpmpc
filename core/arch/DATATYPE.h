@@ -30,8 +30,6 @@
     exit(1);
 #endif
 
-#if FUNCTION_IDENTIFIER !=2 && FUNCTION_IDENTIFIER != 412 && FUNCTION_IDENTIFIER != 413 && FUNCTION_IDENTIFIER != 414
-                            //workaround to benchmark some functions easier
 
 void orthogonalize_arithmetic(UINT_TYPE *in, DATATYPE *out)
 {
@@ -53,56 +51,8 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
     unorthogonalize_arithmetic(in, out, DATTYPE);
 }
 
-#else //Workarounds for easier benchmarking of some functions that don't need these 
-template<typename a, typename b>
-void orthogonalize_arithmetic(a *in, b *out)
-{
-}
-template<typename a, typename b>
-void unorthogonalize_arithmetic(a *in, b *out)
-{
-}
-template<typename a, typename b>
-void orthogonalize_boolean(a *in, b *out)
-{
-}
-template<typename a, typename b>
-void unorthogonalize_boolean(a *in, b *out)
-{
-}
-#endif
 
-#if FUNCTION_IDENTIFIER == 1 || FUNCTION_IDENTIFIER == 4
-#define OP_ADD FUNC_XOR
-#define OP_SUB FUNC_XOR
-#define OP_MULT FUNC_AND
-#elif FUNCTION_IDENTIFIER == 2 || FUNCTION_IDENTIFIER == 5
-#define OP_ADD FUNC_ADD32
-#define OP_SUB FUNC_SUB32
-#define OP_MULT FUNC_MUL32
-#define OP_TRUNC SHIFT_RIGHT32<FRACTIONAL>
-#elif FUNCTION_IDENTIFIER == 3 || FUNCTION_IDENTIFIER == 6
-#define OP_ADD FUNC_ADD64
-#define OP_SUB FUNC_SUB64
-#define OP_MULT FUNC_MUL64
-#define OP_TRUNC SHIFT_RIGHT64<FRACTIONAL>
-#endif
 
-#if FUNCTION_IDENTIFIER == 7
-#define OP_ADD FUNC_XOR
-#define OP_SUB FUNC_XOR
-#define OP_MULT FUNC_AND
-#elif FUNCTION_IDENTIFIER == 8
-#define OP_ADD FUNC_ADD32
-#define OP_SUB FUNC_SUB32
-#define OP_MULT FUNC_MUL32
-#define OP_TRUNC SHIFT_RIGHT32<FRACTIONAL>
-#elif FUNCTION_IDENTIFIER == 9
-#define OP_ADD FUNC_ADD64
-#define OP_SUB FUNC_SUB64
-#define OP_MULT FUNC_MUL64
-#define OP_TRUNC SHIFT_RIGHT64<FRACTIONAL>
-#endif
 
 
 #if BITLENGTH == 8
@@ -114,9 +64,6 @@ void unorthogonalize_boolean(a *in, b *out)
 #define OP_SHIFT_RIGHT SHIFT_RIGHT8
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT8
 #define OP_TRUNC2 SHIFT_RIGHT8<1>
-/* #define OP_TRUNC4 SHIFT_RIGHT8<3> */
-/* #define OP_TRUNC8 SHIFT_RIGHT8<4> */
-/* #define OP_TRUNC16 SHIFT_RIGHT8<5> */
 #elif BITLENGTH == 16
 #define OP_ADD FUNC_ADD16
 #define OP_SUB FUNC_SUB16
@@ -126,9 +73,6 @@ void unorthogonalize_boolean(a *in, b *out)
 #define OP_SHIFT_RIGHT SHIFT_RIGHT16
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT16
 #define OP_TRUNC2 SHIFT_RIGHT16<1>
-/* #define OP_TRUNC4 SHIFT_RIGHT16<3> */
-/* #define OP_TRUNC8 SHIFT_RIGHT16<4> */
-/* #define OP_TRUNC16 SHIFT_RIGHT16<5> */
 #elif BITLENGTH == 32
 #define OP_ADD FUNC_ADD32
 #define OP_SUB FUNC_SUB32
@@ -171,8 +115,18 @@ DATATYPE TRUNC3(DATATYPE x) {
     // Apply the mask using bitwise AND
     return OP_SUB(SET_ALL_ZERO(), FUNC_AND(x, mask));
 }
-
-#if num_players == 3
+#if num_players == 2
+#define PNEXT 0
+#define PPREV 0
+#define PSELF 1
+#if PARTY == 0
+#define P_0 1
+#define P_1 0
+#elif PARTY == 1
+#define P_0 0
+#define P_1 1
+#endif
+#elif num_players == 3
     #define PSELF 2
     #if PARTY == 0
         #define P_0 2
@@ -237,9 +191,13 @@ DATATYPE TRUNC3(DATATYPE x) {
     #endif
 #endif
 
+#define FUNC_TRUNC OP_TRUNC
+
 
     //temporary solution
-#if (PROTOCOL == 3 || PROTOCOL == 4 || PROTOCOL == 5) && PARTY == 0
+#if PROTOCOL == 4
+#define HAS_POST_PROTOCOL 1
+#elif (PROTOCOL == 3 || PROTOCOL == 5) && PARTY == 0
 #define HAS_POST_PROTOCOL 1
 #elif (PROTOCOL == 8 || PROTOCOL == 11 || PROTOCOL == 12) && PARTY == 3
 #define HAS_POST_PROTOCOL 1

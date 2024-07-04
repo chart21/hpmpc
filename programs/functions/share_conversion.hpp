@@ -268,6 +268,43 @@ static void pack_additive(const Additive_Share<Datatype, Share>*  input, Additiv
 }
 
 template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype, typename FUNC_OP>
+static void pack_additive_inplace(const Additive_Share<Datatype, Share>*  input, Additive_Share<Datatype, Share>*  output, const int len, FUNC_OP op){
+    using A = Additive_Share<Datatype, Share>;
+    using sint = sint_t<A>;
+    int m = len;
+    sint* tmp = new sint[(m-1)/BITLENGTH+1];
+    int counter = 0;
+    while(m > (BITLENGTH-1))
+    {
+       tmp[counter++] = sint::load_shares(input+counter*BITLENGTH);
+       m -= BITLENGTH;
+    }
+    if(m > 0)
+        tmp[counter++] = sint::load_shares(m, input+counter*BITLENGTH);
+    op(tmp, counter);
+    counter = 0;
+    m = len;
+    while(m > (BITLENGTH-1))
+    {
+        for(int j = 0; j < BITLENGTH; j++)
+        {
+            output[counter*BITLENGTH+j] = tmp[counter].get_share(j);
+        }
+        counter++;
+        m -= BITLENGTH;
+    }
+    if(m > 0)
+    {
+        for(int j = 0; j < m; j++)
+        {
+            output[counter*BITLENGTH+j] = tmp[counter].get_share_pointer()[j];
+        }
+    }
+    delete[] tmp;
+}
+
+
+template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype, typename FUNC_OP>
 static void pack_additive_inplace(Additive_Share<Datatype, Share>*  val, const int len, FUNC_OP op){
     using sint = sint_t<Additive_Share<Datatype, Share>>;
     int m = len;
