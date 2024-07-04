@@ -25,7 +25,7 @@
 #elif FUNCTION_IDENTIFIER == 58
 #include "programs/tests/test_multi_input.hpp"
 #elif FUNCTION_IDENTIFIER == 59
-#include "programs/tests/test_comparison.hpp"
+#include "programs/tests/test_comparisons.hpp"
 #elif FUNCTION_IDENTIFIER == 60
 #include "programs/tests/test_test_all.hpp"
 #elif FUNCTION_IDENTIFIER == 61

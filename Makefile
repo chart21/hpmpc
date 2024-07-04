@@ -70,11 +70,11 @@ compile_executables:
 compile_parties:
 	@if [ "$(PARTY)" = "all" ]; then \
 		if [ $(PROTOCOL) -eq 4 ]; then \
-			$(MAKE) compile_player_0,1,run-P0 compile_player_1,1,run-P1; \
+			$(MAKE) compile_player_0,0,run-P0 compile_player_1,0,run-P1; \
 		elif [ $(PROTOCOL) -gt 6 ]; then \
-			$(MAKE) compile_player_0,1,run-P0 compile_player_1,1,run-P1 compile_player_2,1,run-P2 compile_player_3,1,run-P3; \
+			$(MAKE) compile_player_0,0,run-P0 compile_player_1,0,run-P1 compile_player_2,0,run-P2 compile_player_3,0,run-P3; \
 		else \
-			$(MAKE) compile_player_0,1,run-P0 compile_player_1,1,run-P1 compile_player_2,1,run-P2; \
+			$(MAKE) compile_player_0,0,run-P0 compile_player_1,0,run-P1 compile_player_2,0,run-P2; \
 		fi; \
 	else \
 		$(MAKE) compile_player_$(PARTY),1,run-P$(PARTY); \

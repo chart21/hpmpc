@@ -199,12 +199,18 @@ ResNet18
 #label_file=CIFAR-10_standard_test_labels.bin
 #image_file=CIFAR-10_custom_test_images.bin
 
-pretrained=AlexNet.bin
+#pretrained=AlexNet.bin
 #pretrained=pretrained/vgg16_cifar_standard.bin
 #pretrained=ResNet18_avg_CIFAR-10_standard_best.bin
+#pretrained=ResNet18_avg.bin
 #pretrained=LeNet_MNIST_standard_best.bin
 #image_file=datasets/CIFAR-10_standard_test_images.bin
 #label_file=datasets/CIFAR-10_standard_test_labels.bin
+pretrained=pretrained/Cifar_adam_005/ResNet18_avg_CIFAR-10_standard_best.bin
+#pretrained=pretrained/Cifar_adam_005/AlexNet_CryptGPU_CIFAR-10_standard_best.bin
+#image_file = datasets/CIFAR-10_custom_test_images.bin
+#label_file = datasets/CIFAR-10_custom_test_labels.bin
+#pretrained=AlexNetC.bin
 image_file=CIFAR-10_test_images.bin
 label_file=CIFAR-10_test_labels.bin
 #pretrained=lenet5.bin

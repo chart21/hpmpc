@@ -193,9 +193,9 @@ void add_bias(T &C, const T &bias)
 #else
         // multiply each bias by 2^FRACTIONAL
 #if PUBLIC_WEIGHTS == 0
-            c+=bias.mult_public(UINT_TYPE(1) << FRACTIONAL);
+            C+=bias.mult_public(UINT_TYPE(1) << FRACTIONAL);
 #else
-            c+= bias << FRACTIONAL;
+            C+= bias << FRACTIONAL;
 #endif
 #endif
 }

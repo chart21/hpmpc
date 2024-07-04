@@ -5,15 +5,17 @@
 #include "../functions/prob_truncation.hpp"
 #include "../functions/exact_truncation.hpp"
 #include "../functions/comparisons.hpp"
+#include "../functions/Relu.hpp"
 #pragma once
 #include "../functions/max_min.hpp"
 #define RESULTTYPE DATATYPE
 #ifndef FUNCTION
 #define FUNCTION test_comparisons
 #endif
-#define TEST_EQZ 1 // [a] == 0 ? [1] : [0]
-#define TEST_LTZ 1 // [a] < 0 ? [1] : [0]
+#define TEST_EQZ 0 // [a] == 0 ? [1] : [0]
+#define TEST_LTZ 0 // [a] < 0 ? [1] : [0]
 #define TEST_MAX_MIN 0 // [A] -> [max(A)] [min(A)]
+#define TEST_RELU 1 // [a] > 0 ? [a] : 0
 #if TEST_EQZ == 1
 template<typename Share>
 bool test_EQZ()
@@ -143,6 +145,38 @@ return true;
 }
 #endif
 
+#if TEST_RELU == 1
+    template<typename Share>
+bool test_RELU()
+{
+    const int vectorization_factor = DATTYPE/BITLENGTH;
+    using A = Additive_Share<DATATYPE, Share>;
+   
+    //set shares from public values
+    A relu_output[3];
+    A relu_input[] = {A(100), A(11), A(-12)};
+  
+    //ReLU
+    RELU<0, BITLENGTH, Share, DATATYPE>(relu_input, relu_input+3, relu_output);
+    //reveal
+    alignas(sizeof(DATATYPE)) UINT_TYPE output[3][vectorization_factor];
+    reveal_and_store(relu_output, output, 3);
+
+    //compare
+    for(int i = 0; i < vectorization_factor; i++)
+    {
+        print_compare(100, output[0][i]);
+        print_compare(11, output[1][i]);
+        print_compare(0, output[2][i]);
+
+        if(output[0][i] != 100 || output[1][i] != 11 || output[2][i] != 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+#endif
 
 template<typename Share>
 bool test_comparisons(DATATYPE *res)
@@ -151,7 +185,7 @@ bool test_comparisons(DATATYPE *res)
     int num_passed = 0;
 
 #if TEST_EQZ == 1
-    /* test_function(num_tests, num_passed, "EQZ", test_EQZ<Share>); */
+    test_function(num_tests, num_passed, "EQZ", test_EQZ<Share>);
 #endif
 
 #if TEST_LTZ == 1
@@ -160,6 +194,10 @@ bool test_comparisons(DATATYPE *res)
 
 #if TEST_MAX_MIN == 1
     test_function(num_tests, num_passed, "MAX_MIN", max_min_test<Share>);
+#endif
+
+#if TEST_RELU == 1
+    test_function(num_tests, num_passed, "RELU", test_RELU<Share>);
 #endif
 
     

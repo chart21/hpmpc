@@ -28,12 +28,12 @@
 
 // 70+ Neural network architectures (LeNet, AlexNet, VGG, ResNet, etc.) on different dataset sizes (MNIST, CIFAR-10, Imagenet). Refer to programs/functions/NN.hpp
 #ifndef FUNCTION_IDENTIFIER
-#define FUNCTION_IDENTIFIER 20
+#define FUNCTION_IDENTIFIER 81
 #endif
 
 // Number of inputs (mostly used by Benchmarking functions or Neural Networks)
 #ifndef NUM_INPUTS
-#define NUM_INPUTS 11
+#define NUM_INPUTS 20
 #endif
 
 
@@ -101,11 +101,11 @@
 // === Neural Network Settings ===
 
 #ifndef MODELOWNER
-#define MODELOWNER -1 // Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
+#define MODELOWNER P_0 // Who holds the model parameters? (-1: Dummy model parameters, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
 #endif
 
 #ifndef DATAOWNER
-#define DATAOWNER -1 // Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
+#define DATAOWNER P_1 // Who holds the data? (-1: Dummy dataset, P_0/P_1/P_2/P_3: Read locally from P_0/P_1/P_2/P_3 followed by secret sharing). Important: Use "P_0" not "0"!
 #endif
 
 #ifndef TRUNC_THEN_MULT
@@ -130,7 +130,7 @@
 
 
 #ifndef COMPRESS
-#define COMPRESS 0 // See below
+#define COMPRESS 0
 #endif
 
 
@@ -190,7 +190,7 @@
 #endif
 
 #ifndef SPLIT_ROLES_OFFSET
-#define SPLIT_ROLES_OFFSET 1
+#define SPLIT_ROLES_OFFSET 0
 #endif
 
 int base_port = BASE_PORT; // temporary solution
