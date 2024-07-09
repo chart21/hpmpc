@@ -134,7 +134,7 @@ A full end-to-end example can be executed as follows.
 If the correct test accuracy should be calculated, all parties should have the test labels.
 2. If it does not exist yet, add your model architecture to `nn/FlexNN/architectures/`.
 3. If it does not exist yet, add a `FUNCTION_IDENTIFIER` for your model architecture and dataset dimensions in `Programs/functions/NN.hpp`.
-4. Specify the path of your model, images, and labels in `config.txt`.
+4. Specify the path of your model, images, and labels by exporting the environment variables `MODEL_DIR`, `DATA_DIR`, `MODEL_FILE`, `SAMPLES_FILE`, and `LABELS_FILE`.
 5. Run the following commands to compile the MPC protocol and run the model inference in a distributed setting.
 ```
 make -j PARTY=<party_id> FUNCTION_IDENTIFIER=<function_id> DATAOWNER=P_0 MODELOWNER=P_1 #execute on each node
