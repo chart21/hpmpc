@@ -13,7 +13,7 @@ void prepare_prob_div(T &out, const int denominator)
         #if TRUNC_THEN_MULT == 0
         out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator))); 
         #else
-            continue;
+            return;
         #endif
     #endif
     else 
@@ -23,7 +23,7 @@ void prepare_prob_div(T &out, const int denominator)
         #if TRUNC_THEN_MULT == 0
         out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator))); 
         #else
-            continue;
+            return;
         #endif
     #endif
 }

@@ -12,8 +12,8 @@
 #ifndef FUNCTION
 #define FUNCTION test_comparisons
 #endif
-#define TEST_EQZ 0 // [a] == 0 ? [1] : [0]
-#define TEST_LTZ 0 // [a] < 0 ? [1] : [0]
+#define TEST_EQZ 1 // [a] == 0 ? [1] : [0]
+#define TEST_LTZ 1 // [a] < 0 ? [1] : [0]
 #define TEST_MAX_MIN 0 // [A] -> [max(A)] [min(A)]
 #define TEST_RELU 1 // [a] > 0 ? [a] : 0
 #if TEST_EQZ == 1

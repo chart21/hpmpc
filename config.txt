@@ -1,6 +1,6 @@
-mode=test
-save_dir=nn/Pygeon/models
-data_dir=nn/Pygeon/data
+!mode=test
+!save_dir=nn/Pygeon/models
+!data_dir=nn/Pygeon/data
 
 #LeNet5
 #pretrained=pretrained_models/LeNet5/LeNet5_MNIST_standard_best.bin
@@ -206,13 +206,13 @@ ResNet18
 #pretrained=LeNet_MNIST_standard_best.bin
 #image_file=datasets/CIFAR-10_standard_test_images.bin
 #label_file=datasets/CIFAR-10_standard_test_labels.bin
-pretrained=pretrained/Cifar_adam_005/ResNet18_avg_CIFAR-10_standard_best.bin
+!pretrained=pretrained/Cifar_adam_005/ResNet18_avg_CIFAR-10_standard_best.bin
 #pretrained=pretrained/Cifar_adam_005/AlexNet_CryptGPU_CIFAR-10_standard_best.bin
 #image_file = datasets/CIFAR-10_custom_test_images.bin
 #label_file = datasets/CIFAR-10_custom_test_labels.bin
 #pretrained=AlexNetC.bin
-image_file=CIFAR-10_test_images.bin
-label_file=CIFAR-10_test_labels.bin
+!image_file=CIFAR-10_test_images.bin
+!label_file=CIFAR-10_test_labels.bin
 #pretrained=lenet5.bin
 #image_file=MNIST_test_images.bin
 #label_file=MNIST_test_labels.bin

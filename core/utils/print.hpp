@@ -27,6 +27,10 @@ std::chrono::microseconds time_duration;
     if(current_phase == PHASE_LIVE && PRINT_IMPORTANT) { \
         std::cout << "P" << PARTY << ", PID" << process_offset << ": " << x << std::endl; \
     }
+#define print_init(x) \
+    if(current_phase == PHASE_INIT && PRINT_IMPORTANT) { \
+        std::cout << "P" << PARTY << ", PID" << process_offset << ": " << x << std::endl; \
+    }
 
 void print(const char* format, ...) {
     va_list args;

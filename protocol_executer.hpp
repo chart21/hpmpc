@@ -27,7 +27,7 @@
 #elif FUNCTION_IDENTIFIER == 59
 #include "programs/tests/test_comparisons.hpp"
 #elif FUNCTION_IDENTIFIER == 60
-#include "programs/tests/test_test_all.hpp"
+#include "programs/tests/test_all.hpp"
 #elif FUNCTION_IDENTIFIER == 61
 #include "programs/tutorials/basic_tutorial.hpp"
 #elif FUNCTION_IDENTIFIER == 62
@@ -305,9 +305,12 @@ void executeProgram(int argc, char *argv[], int process_id, int process_num) {
 
   player_id = PARTY;
 #if num_players == 2
-init_srng(PPREV, 0);
-init_srng(PSELF, PARTY+1);
+init_srng(PPREV, SRNG_SEED);
+init_srng(PSELF, PARTY+1+SRNG_SEED);
 #elif num_players == 3
+/* init_srng(PPREV,SRNG_SEED); */
+/* init_srng(PNEXT,SRNG_SEED); */
+/* init_srng(PSELF,PARTY+1+SRNG_SEED); */
   init_srng(PPREV,
             modulo((player_id - 1), num_players) * 101011 + 5000 + SRNG_SEED);
   init_srng(PNEXT, player_id * 101011 + 5000 + SRNG_SEED);

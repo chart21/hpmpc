@@ -7,7 +7,7 @@
 #include "architectures/CNNs.hpp" // includes common CNN architectures
 #include "architectures/ResNet.hpp" // includes ResNet architectures
 #include "architectures/DeepReduce.hpp" // includes DeepReduce architectures
-#include "nn_helper.hpp"
+#include "headers/config.h" // NN configuration
 
 #define FUNCTION inference
 #define RESULTTYPE DATATYPE
@@ -102,19 +102,26 @@ void inference(DATATYPE* res)
 
 	Config cfg;
     cfg.mode = "test"; // Training is not supported yet
-  
+    cfg.save_dir = "nn/Pygeon/models"; 
+    cfg.data_dir = "nn/Pygeon/data";
+    cfg.pretrained = "dummy";
+    cfg.image_file = "all_zero";
+    cfg.label_file = "all_zero";
 
-#if MODELOWNER != -1 || DATAOWNER != -1 // If actual data is used, load paths from config file
-    const std::string filename = "config.txt";
-    load_config(cfg,filename); //load config from config.txt
+#if MODELOWNER != -1 || DATAOWNER != -1 // If actual data is used, load paths from environment variables
+    cfg.save_dir = std::getenv("MODEL_DIR") != NULL ? std::getenv("MODEL_DIR") : cfg.save_dir;
+    cfg.data_dir = std::getenv("DATA_DIR") != NULL ? std::getenv("DATA_DIR") : cfg.data_dir;
+    cfg.pretrained = std::getenv("MODEL_FILE") != NULL ? std::getenv("MODEL_FILE") : cfg.pretrained;
+    cfg.image_file = std::getenv("SAMPLES_FILE") != NULL ? std::getenv("SAMPLES_FILE") : cfg.image_file;
+    cfg.label_file = std::getenv("LABELS_FILE") != NULL ? std::getenv("LABELS_FILE") : cfg.label_file;
+
     // Print out the loaded configuration values
-    print_online("Mode: " + cfg.mode);
-    print_online("Save Directory: " + cfg.save_dir);
-    print_online("Data Directory: " + cfg.data_dir);
-    print_online("Pretrained Model: " + cfg.pretrained);
-    print_online("Image File: " + cfg.image_file);
-    print_online("Label File: " + cfg.label_file);
-
+    print_init("Mode: " + cfg.mode);
+    print_init("Save Directory: " + cfg.save_dir);
+    print_init("Data Directory: " + cfg.data_dir);
+    print_init("Pretrained Model: " + cfg.pretrained);
+    print_init("Image File: " + cfg.image_file);
+    print_init("Label File: " + cfg.label_file);
 #endif
 
     cfg.batch = NUM_INPUTS*(BASE_DIV);

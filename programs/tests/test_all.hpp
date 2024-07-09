@@ -1,11 +1,11 @@
 #pragma once
 #define FUNCTION test_all
-#include "basic_primitives.hpp"
-#include "comparisons.hpp"
-#include "fixed_point_arithmetic.hpp"
-#include "mat_mul.hpp"
-#include "multi_input.hpp"
-#include "truncation.hpp"
+#include "test_basic_primitives.hpp"
+#include "test_comparisons.hpp"
+#include "test_fixed_point_arithmetic.hpp"
+#include "test_mat_mul.hpp"
+#include "test_multi_input.hpp"
+#include "test_truncation.hpp"
 
 template<typename Share>
 void test_all(DATATYPE *res)

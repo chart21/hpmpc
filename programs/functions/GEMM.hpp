@@ -181,7 +181,7 @@ void complete_GEMM(T* C, const int m, const int p)
     complete_GEMM(C, m*p);
 #endif
     #if TRUNC_DELAYED == 0 && TRUNC_APPROACH == 1
-        trunc_2k_in_place(this->output.data(), this->output.size());
+        trunc_2k_in_place(C,m*p);
 #endif
 }
 

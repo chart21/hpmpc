@@ -12,9 +12,9 @@ CUDALIB=$(CUDA_PATH)/lib64
 BIN_DIR=bin
 TARGETS= $(BIN_DIR)/gemm_cutlass_int.o $(BIN_DIR)/conv_cutlass_int_NCHW.o $(BIN_DIR)/conv_cutlass_int_CHWN.o
 
-CUTLASSINC=$(CUDA_PATH)/include
-CUTTOOLINC=$(CUDA_PATH)/tools/util/include
-CUTLASSLIB=$(CUDA_PATH)/build/tools/library/
+CUTLASSINC=$(CUTLASS_PATH)/include
+CUTTOOLINC=$(CUTLASS_PATH)/tools/util/include
+CUTLASSLIB=$(CUTLASS_PATH)/build/tools/library/
 
 OPTION= -Iinclude/ -I$(CUTLASSINC) -I$(CUTTOOLINC)
 
