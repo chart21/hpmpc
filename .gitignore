@@ -12,3 +12,6 @@
 *.gch
 # macroflags
 *macro_flags
+# log and csv files
+*.log
+*.csv
