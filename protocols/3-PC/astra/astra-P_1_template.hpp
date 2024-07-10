@@ -25,7 +25,7 @@ ASTRA1_Share Not() const
 template <typename func_add>
 ASTRA1_Share Add( ASTRA1_Share b, func_add ADD) const
 {
-   return ASTRA1_Share(ADD(mv,b.mv),ADD(lv,b.lv));
+   return ASTRA1_Share(ADD(mv,b.mv),lv);
 }
 
 
@@ -66,13 +66,13 @@ void complete_mult(func_add ADD, func_sub SUB)
 mv = ADD(mv, receive_from_live(P_2));
 }
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 }    
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 return SUB(mv, receive_from_live(P_0));
 }
@@ -83,7 +83,7 @@ return SUB(mv, receive_from_live(P_0));
 
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == P_0)
 {
@@ -92,10 +92,17 @@ if constexpr(id == P_0)
 else if constexpr(id == P_1) // -> lv = lv2, lv1=0
 {
     lv = getRandomVal(P_0);
-    mv = ADD(get_input_live(),lv);
+    mv = ADD(val,lv);
     send_to_live(P_2,mv);
 }
 }
+
+template <typename func_mul>
+ASTRA1_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return ASTRA1_Share(MULT(mv,b),MULT(lv,b));
+}
+
 
 
 template <int id, typename func_add, typename func_sub>

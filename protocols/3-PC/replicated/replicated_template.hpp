@@ -29,16 +29,21 @@ send_to_live(PNEXT, s[PNEXT].a);
 return s[2];
 }
 
+template <typename func_mul>
+Replicated_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return Replicated_Share(MULT(x,b),MULT(a,b));
+}
 
 
 
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
     if constexpr(id == PSELF)
     {
-        *this = share_SRNG(get_input_live(), ADD, SUB);
+        *this = share_SRNG(val, ADD, SUB);
     }
     else
         x = getRandomVal(id);
@@ -54,7 +59,7 @@ if constexpr(id != PSELF)
 template <typename func_add>
 Replicated_Share Add( Replicated_Share b, func_add ADD) const
 {
-    return Replicated_Share(ADD(x,b.x),ADD(a,b.a));
+    return Replicated_Share(x,ADD(a,b.a));
 }
 
 
@@ -140,22 +145,14 @@ a = SUB(SET_ALL_ZERO() ,ADD(ADD(r_prev, r_prev),  a)); // c_i = -2 r_{i-1} - r_i
 
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
     send_to_live(PNEXT, x);
 }    
 
 
-/* void prepare_reveal_to(Datatype a, int id) */
-/* { */
-/*     if(PSELF != id) */
-/*     { */
-/*         send_to_live(id, a); */
-/* } */
-/* } */
-
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
     Datatype result;
     result = SUB(SET_ALL_ZERO(), SUB(a, receive_from_live(PPREV)));

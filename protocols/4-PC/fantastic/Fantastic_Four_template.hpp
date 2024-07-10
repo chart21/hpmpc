@@ -16,6 +16,12 @@ public:
 Fantastic_Four_Share() {}
 Fantastic_Four_Share(Datatype v0, Datatype v1, Datatype v2) : v0(v0), v1(v1), v2(v2) {}
 
+template <typename func_mul>
+Fantastic_Four_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return Fantastic_Four_Share(MULT(v0,b),MULT(v1,b),MULT(v2,b));
+}
+
 Fantastic_Four_Share public_val(Datatype a)
 {
     #if PARTY == 0
@@ -357,7 +363,7 @@ store_compare_view(P_2,verify_store0);
 #endif
 }
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 #if PARTY == 0
 send_to_live(P_1, v0);
@@ -372,7 +378,7 @@ send_to_live(P_0, v0);
 }    
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 Datatype result = ADD( ADD(v1,v2) ,ADD(v0, receive_from_live(PPREV)));
 store_compare_view(P_0123, result);
@@ -383,7 +389,7 @@ return result;
 
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == PSELF)
 {
@@ -392,7 +398,7 @@ if constexpr(id == PSELF)
     v1 = getRandomVal(P_013);
     
     
-    v2 = get_input_live();
+    v2 = val;
     v2 = SUB(v2 , (ADD(v0, v1)));
 
     send_to_live(P_1, v2);
@@ -400,19 +406,19 @@ if constexpr(id == PSELF)
 #elif PARTY == 1
     v0 = getRandomVal(P_123);
     v1 = getRandomVal(P_013);
-    v2 = SUB(get_input_live() , (ADD(v0, v1)));
+    v2 = SUB(val , (ADD(v0, v1)));
     send_to_live(P_0, v2);
     send_to_live(P_2, v2);
 #elif PARTY == 2
     v0 = getRandomVal(P_123);
     v1 = getRandomVal(P_023);
-    v2 = SUB(get_input_live() , (ADD(v0, v1)));
+    v2 = SUB(val , (ADD(v0, v1)));
     send_to_live(P_0, v2);
     send_to_live(P_1, v2);
 #else // PARTY == 3
     v0 = getRandomVal(P_123);
     v1 = getRandomVal(P_023);
-    v2 = SUB(get_input_live() , (ADD(v0, v1)));
+    v2 = SUB(val , (ADD(v0, v1)));
     send_to_live(P_0, v2);
     send_to_live(P_1, v2);
 #endif

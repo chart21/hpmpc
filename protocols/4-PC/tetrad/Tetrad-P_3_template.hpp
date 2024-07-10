@@ -125,7 +125,7 @@ send_to_live(P_2, l2);
 
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 #if PRE == 1
     pre_send_to_live(P_2, l1);
@@ -140,7 +140,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PRE == 0
 //receive lambda3 from P_3
@@ -158,14 +158,19 @@ Datatype result = SET_ALL_ZERO();
 return result;
 }
 
+template <typename func_mul>
+Tetrad3_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return Tetrad3_Share(MULT(l1,b),MULT(l2,b),MULT(l3,b));
+}
 
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == PSELF)
 {
-    Datatype mv = get_input_live();
+    Datatype mv = val;
     l1 = getRandomVal(P_013); //l1
     l2 = getRandomVal(P_023);
     l3 = getRandomVal(P_123);

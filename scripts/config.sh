@@ -15,7 +15,6 @@ helpFunction()
    echo -e "\t-l Include the Online Phase in this executable  (0/1)?"
    echo -e "\t-e Compile circuit with Preprocessing phase before online phase  (0/1)?"
    echo -e "\t-o Use additional assumptions to optimize the sharing phase? (0/1)"
-   echo -e "\t-u Number of players in total"
    echo -e "\t-g Compile flags (other than standard)"
    echo -e "\t-x Compiler (g++/clang++/..)"
    echo -e "\t-h USE SSL? (0/1)"
@@ -28,10 +27,11 @@ helpFunction()
 "
    echo -e "\t-z RECV_BUFFER: How many reciving messages should be buffered until the main thread is signaled that data is ready? 0 means that all data of a communication round needs to be ready before the main thread is signaled.
 "
+echo -e "\t"-u "Comile with nvcc and cutlass GEMM (0/1)"
    exit 1 # Exit script after printing help
 }
 
-while getopts "b:a:d:c:f:n:s:i:l:p:o:u:g:x:e:h:j:v:t:m:k:y:z:" opt
+while getopts "b:a:d:c:f:n:s:i:l:p:o:g:x:e:h:j:v:t:m:k:y:z:u:" opt
 do
    case "$opt" in
       b ) BASE_PORT="$OPTARG" ;;
@@ -45,7 +45,6 @@ do
       l ) LIVE="$OPTARG" ;;
       p ) PARTY="$OPTARG" ;;
       o ) OPT_SHARE="$OPTARG" ;;
-      u ) NUM_PLAYERS="$OPTARG" ;;
       g ) GNU_OPTIONS="$OPTARG" ;;
       x ) COMPILER="$OPTARG" ;;
       e ) PREPROCESSING="$OPTARG" ;;
@@ -57,6 +56,7 @@ do
       k ) CONNECTION_RETRY="$OPTARG" ;;
       y ) SEND_BUFFER="$OPTARG" ;;
       z ) RECV_BUFFER="$OPTARG" ;;
+      u ) USE_NVCC="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -67,31 +67,34 @@ then
 comp="$COMPILER"
 fi
 
-ssl="1"
+ssl="0"
 if [ ! -z "$USE_SSL" ]
 then
 ssl="$USE_SSL"
 fi
 
-
+use_nvcc="0"
+if [ ! -z "$USE_NVCC" ]
+then
+use_nvcc="$USE_NVCC"
+fi
 
 if [ "$ssl" = "1" ]
 then
-    flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lssl -lcrypto -I SimpleNN" # -lstdc++fs might be needed on some systems
 else
-    flags="-march=native -Ofast -std=c++2a -pthread"
+    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -I SimpleNN" # -lstdc++fs might be needed on some systems
+fi
+
+if [ "$use_nvcc" -gt "0" ]
+then
+    flags=$flags" -c"
 fi
 
 if [ ! -z "$GNU_OPTIONS" ]
 then
-flags="$GNU_OPTIONS"
+    flags=$flags" "$GNU_OPTIONS
 fi
-# Print helpFunction in case parameters are empty
-# if [ -z "$parameterA" ] || [ -z "$parameterB" ] || [ -z "$parameterC" ]
-# then
-#    echo "Some or all of the parameters are empty";
-#    helpFunction
-# fi
 
 # Begin script in case all parameters are correct
 

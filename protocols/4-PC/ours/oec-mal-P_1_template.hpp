@@ -21,7 +21,7 @@ OEC_MAL1_Share(Datatype v, Datatype r, Datatype m) : v(v), r(r), m(m) {}
 OEC_MAL1_Share(Datatype v) : v(v) {}
 
 
-OEC_MAL1_Share public_val(Datatype a)
+static OEC_MAL1_Share public_val(Datatype a)
 {
     #if MULTI_INPUT == 1
     return OEC_MAL1_Share(a,SET_ALL_ZERO(),SET_ALL_ZERO());
@@ -29,6 +29,19 @@ OEC_MAL1_Share public_val(Datatype a)
     return OEC_MAL1_Share(a,SET_ALL_ZERO());
     #endif
 }
+
+template <typename func_mul>
+OEC_MAL1_Share mult_public(const Datatype b, func_mul MULT) const
+{
+#if MULTI_INPUT == 1
+    return OEC_MAL1_Share(MULT(v,b),MULT(r,b),MULT(m,b));
+#else
+    return OEC_MAL1_Share(MULT(v,b),MULT(r,b));
+#endif
+
+}
+
+
 
 OEC_MAL1_Share Not() const
 {
@@ -90,36 +103,6 @@ c.v = MULT(v, b.v); // a0b0
 return c;
 }
 
-#if FRACTIONAL > 0
-
-    template <typename func_add, typename func_sub, typename func_trunc>
-void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-m = SUB(r, getRandomVal(P_013));// a_0 y_1 + b_0 x_1 - r_0,1,3   
-r = getRandomVal(P_013); // z_1
-send_to_live(P_2, m); 
-
-}
-
-    template <typename func_add, typename func_sub, typename func_trunc>
-void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-m = ADD(m, receive_from_live(P_2)); // v^1,2 = m^1 + m^2
-v = TRUNC(SUB(v, m)); // [a_0 b_0 - v^1,2]^t
-#if PROTOCOL == 11
-store_compare_view(P_0, ADD(m,getRandomVal(P_123))); // compare m1 + m2 + r123 with P_0
-#else
-store_compare_view(P_012,ADD(m, getRandomVal(P_123))); // v^1,2 + r_1,2,3
-#endif
-#if MULTI_INPUT == 1
-m = getRandomVal(P_123); // w
-store_compare_view(P_0,ADD(v,m)); // compare c0w with P_0
-#else
-store_compare_view(P_0,ADD(v, getRandomVal(P_123))); // c_0 + w
-#endif
-}
-
-#endif
 
 template <typename func_add, typename func_sub>
 void mask_and_send_dot(func_add ADD, func_sub SUB)
@@ -170,13 +153,13 @@ store_compare_view(P_012,ADD(v,getRandomVal(P_123))); //compare ab + c1 + r234_1
 }
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
 return;
 }    
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 Datatype r = receive_from_live(P_0);
 Datatype result = SUB(v, r);
@@ -188,7 +171,7 @@ return result;
 
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == PSELF)
 {
@@ -196,7 +179,7 @@ if constexpr(id == PSELF)
     Datatype x_0 = getRandomVal(P_013);
     Datatype u = getRandomVal(P_123);
     r = x_0; //  = x_1, x_2 = 0
-    v = ADD(get_input_live(),x_0);
+    v = ADD(val,x_0);
     send_to_live(P_0,ADD(v,u));
     send_to_live(P_2,ADD(v,u));
     #if MULTI_INPUT == 1
@@ -234,6 +217,15 @@ else if constexpr(id == P_3)
     #endif
 
 }
+}
+    
+    template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
+{
+    if constexpr(id == PSELF)
+        prepare_receive_from<id>(get_input_live(), ADD, SUB);
+    else
+        prepare_receive_from<id>(SET_ALL_ZERO(), ADD, SUB);
 }
 
 template <int id, typename func_add, typename func_sub>
@@ -274,38 +266,151 @@ static void communicate()
     communicate_live();
 }
 
-static void prepare_A2B_S1(int k, OEC_MAL1_Share in[], OEC_MAL1_Share out[])
+#if FUNCTION_IDENTIFIER > 14
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL1_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = v;
+    for(int i = 2; i <= b; i*=2)
+        result = OP_TRUNC2(result);
+
+    OEC_MAL1_Share res(result);
+#if MULTI_INPUT == 1
+    res.m = getRandomVal(P_123);
+    store_compare_view(P_0,ADD(res.v,res.m)); // compare v*b + r123 with P_0
+#else
+    store_compare_view(P_0,ADD(res.v,getRandomVal(P_123))); // compare v*b + r123 with P_0
+#endif
+    res.r = getRandomVal(P_013);
+    return res;
+} 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL1_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    OEC_MAL1_Share res;
+#if TRUNC_THEN_MULT == 1
+    res.v = MULT(TRUNC(v),b);
+#else
+    res.v = TRUNC(MULT(v,b));
+#endif
+#if MULTI_INPUT == 1
+    res.m = getRandomVal(P_123);
+    store_compare_view(P_0,ADD(res.v,res.m)); // compare v*b + r123 with P_0
+#else
+    store_compare_view(P_0,ADD(res.v,getRandomVal(P_123))); // compare v*b + r123 with P_0
+#endif
+    res.r = getRandomVal(P_013);
+    return res;
+} 
+    
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_Share& r_mk2, OEC_MAL1_Share& r_msb, OEC_MAL1_Share& c, OEC_MAL1_Share& c_prime) const{
+    Datatype c_dat_prime = trunc(v);
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (BITLENGTH-FRACTIONAL-1)) - 1;
+    Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
+    c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1
+    Datatype c_dat = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(v);
+    c = OEC_MAL1_Share(c_dat, SET_ALL_ZERO());
+    c_prime = OEC_MAL1_Share(c_dat_prime, SET_ALL_ZERO());
+   
+#if MULTI_INPUT == 1
+    r_mk2.m = SET_ALL_ZERO();
+    r_msb.m = SET_ALL_ZERO();
+    c.m = getRandomVal(P_123);
+    c_prime.m = getRandomVal(P_123);
+    store_compare_view(P_0, ADD(c_dat,c.m));
+    store_compare_view(P_0, ADD(c_dat_prime,c_prime.m));
+#else
+    store_compare_view(P_0, ADD(c_dat,getRandomVal(P_123)));
+    store_compare_view(P_0, ADD(c_dat_prime,getRandomVal(P_123)));
+#endif
+
+    r_mk2.v = SET_ALL_ZERO();
+    r_mk2.r = getRandomVal(P_013);
+    r_msb.v = SET_ALL_ZERO(); 
+    r_msb.r = getRandomVal(P_013);
+}
+
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_Share& r_mk2, OEC_MAL1_Share& r_msb, OEC_MAL1_Share& c, OEC_MAL1_Share& c_prime) const{
+
+}
+
+
+#if FRACTIONAL > 0
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+m = SUB(r, getRandomVal(P_013));// a_0 y_1 + b_0 x_1 - r_0,1,3   
+r = getRandomVal(P_013); // z_1
+send_to_live(P_2, m); 
+
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+m = ADD(m, receive_from_live(P_2)); // v^1,2 = m^1 + m^2
+v = TRUNC(SUB(v, m)); // [a_0 b_0 - v^1,2]^t
+#if PROTOCOL == 11
+store_compare_view(P_0, ADD(m,getRandomVal(P_123))); // compare m1 + m2 + r123 with P_0
+#else
+store_compare_view(P_012,ADD(m, getRandomVal(P_123))); // v^1,2 + r_1,2,3
+#endif
+#if MULTI_INPUT == 1
+m = getRandomVal(P_123); // w
+store_compare_view(P_0,ADD(v,m)); // compare c0w with P_0
+#else
+store_compare_view(P_0,ADD(v, getRandomVal(P_123))); // c_0 + w
+#endif
+}
+
+#endif
+
+static void prepare_A2B_S1(int m, int k, OEC_MAL1_Share in[], OEC_MAL1_Share out[])
 {
         Datatype temp[BITLENGTH];
         for (int j = 0; j < BITLENGTH; j++)
         {
             temp[j] = in[j].v; //a0 
         }
-    unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp);
-    orthogonalize_boolean((UINT_TYPE*) temp, temp);
-    for (int j = 0; j < k; j++)
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_arithmetic(temp, temp2);
+    orthogonalize_boolean(temp2, temp);
+    /* unorthogonalize_arithmetic(temp, (UINT_TYPE*) temp); */
+    /* orthogonalize_boolean((UINT_TYPE*) temp, temp); */
+    for (int j = m; j < k; j++)
     {
-        out[j].r = SET_ALL_ZERO(); // set share to 0
-        out[j].v = temp[j];
+        out[j-m].r = SET_ALL_ZERO(); // set share to 0
+        out[j-m].v = temp[j];
     #if MULTI_INPUT == 1
-    out[j].m = getRandomVal(P_123);
-    store_compare_view(P_0, FUNC_XOR(out[j].v, out[j].m));
+    out[j-m].m = getRandomVal(P_123);
+    store_compare_view(P_0, FUNC_XOR(out[j-m].v, out[j-m].m));
     #else
-    store_compare_view(P_0, FUNC_XOR(out[j].v, getRandomVal(P_123))); 
+    store_compare_view(P_0, FUNC_XOR(out[j-m].v, getRandomVal(P_123))); 
     #endif
     }
 
 }
 
 
-static void prepare_A2B_S2(int k, OEC_MAL1_Share in[], OEC_MAL1_Share out[])
+static void prepare_A2B_S2(int m, int k, OEC_MAL1_Share in[], OEC_MAL1_Share out[])
 {
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
-        out[i].r = getRandomVal(P_013);
-        out[i].v = SET_ALL_ZERO();
+        out[i-m].r = getRandomVal(P_013);
+        out[i-m].v = SET_ALL_ZERO();
         #if MULTI_INPUT == 1
-        out[i].m = SET_ALL_ZERO();
+        out[i-m].m = SET_ALL_ZERO();
         #endif
     }
 }
@@ -319,12 +424,101 @@ static void complete_A2B_S2(int k, OEC_MAL1_Share out[])
 
 }
 
+void prepare_bit2a(OEC_MAL1_Share out[])
+{
+    Datatype b0[BITLENGTH]{0};
+    b0[BITLENGTH - 1] = v; //convert b0 to an arithemtic value
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(b0, temp2);
+    orthogonalize_arithmetic(temp2, b0);
+    Datatype b0v[BITLENGTH]{0};
+    b0v[BITLENGTH - 1] = FUNC_XOR(v,m); //convert b0v to an arithemtic value
+    unorthogonalize_boolean(b0v, temp2);
+    orthogonalize_arithmetic(temp2, b0v);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        Datatype r013 = getRandomVal(P_013);
+         
+        Datatype tmp = OP_SUB(r013, OP_MULT(OP_ADD(b0[i], b0[i]), r013));
+        Datatype out_r = getRandomVal(P_013);
+        Datatype m1 = OP_ADD(out_r, tmp);
+        send_to_live(P_2, m1); //m1
+       
+        Datatype r123 = getRandomVal(P_123);
+        
+        tmp = OP_SUB(r123, OP_MULT(OP_ADD(b0v[i], b0v[i]), r123));
+        out[i].m = getRandomVal(P_123);
+        store_compare_view(P_0, OP_ADD(out[i].m, tmp)); //m20
+        
+        out[i].r = out_r;
+        out[i].v = OP_ADD(b0[i], m1);
+        
+    }
+}
+
+void complete_bit2a()
+{
+        Datatype m21 = receive_from_live(P_2);
+        v = OP_ADD(v, m21);
+        store_compare_view(P_012, OP_ADD(v, m));
+}
+
+
+void prepare_opt_bit_injection(OEC_MAL1_Share a[], OEC_MAL1_Share out[])
+{
+    Datatype b0[BITLENGTH]{0};
+    b0[BITLENGTH - 1] = v; //convert b0 to an arithemtic value
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(b0, temp2);
+    orthogonalize_arithmetic(temp2, b0);
+    Datatype b0v[BITLENGTH]{0};
+    b0v[BITLENGTH - 1] = FUNC_XOR(v,m); //convert b0v to an arithemtic value
+    unorthogonalize_boolean(b0v, temp2);
+    orthogonalize_arithmetic(temp2, b0v);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        Datatype r013 = getRandomVal(P_013);
+        Datatype r013_2 = getRandomVal(P_013);
+         
+        Datatype tmp = OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1));
+        tmp = OP_MULT(tmp, OP_SUB(r013_2, OP_MULT(a[i].v, r013)));
+        tmp = OP_SUB(tmp, OP_MULT(b0[i], a[i].r));
+        Datatype out_r = getRandomVal(P_013);
+        Datatype m1 = OP_ADD(out_r, tmp);
+        send_to_live(P_2, m1); //m1
+       
+        Datatype r123 = getRandomVal(P_123);
+        Datatype r123_2 = getRandomVal(P_123);
+        Datatype a0u = OP_ADD(a[i].v, a[i].m); // set share to a_0 + u
+        
+        tmp = OP_SUB(OP_ADD(b0v[i], b0v[i]), PROMOTE(1));
+        tmp = OP_MULT(tmp, OP_SUB(r123_2, OP_MULT(a0u, r123)));
+        tmp = OP_SUB(tmp, OP_MULT(b0v[i], a[i].m));
+        out[i].m = getRandomVal(P_123);
+        store_compare_view(P_0, OP_ADD(out[i].m, tmp)); //m20
+        
+        out[i].r = out_r;
+        out[i].v = OP_ADD(OP_MULT(a[i].v, b0[i]), m1);
+        
+    }
+}
+
+void complete_opt_bit_injection()
+{
+        Datatype m21 = receive_from_live(P_2);
+        v = OP_ADD(v, m21);
+        store_compare_view(P_012, OP_ADD(v, m));
+}
+
 void prepare_bit_injection_S1(OEC_MAL1_Share out[])
 {
     Datatype temp[BITLENGTH]{0};
     temp[BITLENGTH - 1] = v;
-    unorthogonalize_boolean(temp, (UINT_TYPE*) temp);
-    orthogonalize_arithmetic((UINT_TYPE*) temp, temp);
+    /* unorthogonalize_boolean(temp, (UINT_TYPE*) temp); */
+    /* orthogonalize_arithmetic((UINT_TYPE*) temp, temp); */
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
     for (int j = 0; j < BITLENGTH; j++)
     {
         out[j].v = temp[j]; 
@@ -808,5 +1002,356 @@ store_compare_view(P_012, ADD(v,m)); //compare d_0 s
 
 #endif
 
+#if USE_CUDA_GEMM == 2
+
+static void CONV_2D(const OEC_MAL1_Share* X, const OEC_MAL1_Share* W, OEC_MAL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+    const int factor = DATTYPE/BITLENGTH;
+    const int xSize = inh * inw * din * batchSize;
+    const int wSize = wh * ww * din * dout;
+    const int outh = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int outw = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = outh * outw * dout * batchSize;
+    batchSize *= factor; 
+    
+    UINT_TYPE* r = new UINT_TYPE[factor*xSize];
+    UINT_TYPE* v = new UINT_TYPE[factor*xSize];
+    UINT_TYPE* b_r = new UINT_TYPE[wSize];
+    UINT_TYPE* b_v = new UINT_TYPE[wSize];
+    UINT_TYPE* v_br = new UINT_TYPE[factor*ySize];
+    UINT_TYPE* bv_r = new UINT_TYPE[factor*ySize];
+    UINT_TYPE* v_bv = new UINT_TYPE[factor*ySize];
+
+
+    for(int i = 0; i< xSize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&X[i].r, temp, 1);
+        for(int j = 0; j < factor; j++)
+            r[j*xSize + i] = temp[j];
+        unorthogonalize_arithmetic(&X[i].v, temp, 1);
+        for(int j = 0; j < factor; j++)
+            v[j*xSize + i] = temp[j];
+    }
+
+    for(int i = 0; i< wSize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&W[i].r, temp, 1);
+        b_r[i] = temp[0];
+        unorthogonalize_arithmetic(&W[i].v, temp, 1);
+        b_v[i] = temp[0];
+    }
+   
+    conv2d_cutlass(v, b_v, v_bv, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+    conv2d_cutlass(v, b_r, v_br, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+    conv2d_cutlass(r, b_v, bv_r, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+
+    for(int i = 0; i< ySize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for(int j = 0; j < factor; j++)
+            temp[j] = v_br[j*ySize + i] + bv_r[j*ySize + i];
+        orthogonalize_arithmetic(temp, &Y[i].r, 1);
+        for(int j = 0; j < factor; j++)
+            temp[j] = v_bv[j*ySize + i];
+        orthogonalize_arithmetic(temp, &Y[i].v, 1);
+    }
+
+    delete[] r;
+    delete[] v;
+    delete[] b_r;
+    delete[] b_v;
+    delete[] v_br;
+    delete[] bv_r;
+    delete[] v_bv;
+
+}
+#elif USE_CUDA_GEMM == 4
+
+static void CONV_2D(const OEC_MAL1_Share* X, const OEC_MAL1_Share* W, OEC_MAL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+    const int factor = DATTYPE/BITLENGTH;
+    const int xSize = inh * inw * din * batchSize;
+    const int wSize = wh * ww * din * dout;
+    const int outh = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int outw = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = outh * outw * dout * batchSize;
+    batchSize *= factor; 
+    
+    UINT_TYPE* r = new UINT_TYPE[factor*xSize];
+    UINT_TYPE* v = new UINT_TYPE[factor*xSize];
+    UINT_TYPE* b_r = new UINT_TYPE[wSize];
+    UINT_TYPE* b_v = new UINT_TYPE[wSize];
+    UINT_TYPE* v_br = new UINT_TYPE[factor*ySize];
+    UINT_TYPE* bv_r = new UINT_TYPE[factor*ySize];
+    UINT_TYPE* v_bv = new UINT_TYPE[factor*ySize];
+
+
+    for(int i = 0; i< xSize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&X[i].r, r + i * factor, 1);
+        unorthogonalize_arithmetic(&X[i].v, v + i * factor, 1);
+    }
+
+    for(int i = 0; i< wSize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&W[i].r, temp, 1);
+        b_r[i] = temp[0];
+        unorthogonalize_arithmetic(&W[i].v, temp, 1);
+        b_v[i] = temp[0];
+    }
+   
+    conv2d_cutlass(v, b_v, v_bv, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+    conv2d_cutlass(v, b_r, v_br, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+    conv2d_cutlass(r, b_v, bv_r, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+
+    for(int i = 0; i< ySize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for(int j = 0; j < factor; j++)
+            temp[j] = v_br[i * factor + j] + bv_r[i * factor + j];
+        orthogonalize_arithmetic(temp, &Y[i].r, 1);
+        for(int j = 0; j < factor; j++)
+            temp[j] = v_bv[i * factor + j];
+        orthogonalize_arithmetic(temp, &Y[i].v, 1);
+    }
+
+    delete[] r;
+    delete[] v;
+    delete[] b_r;
+    delete[] b_v;
+    delete[] v_br;
+    delete[] bv_r;
+    delete[] v_bv;
+
+}
+
+#endif
+#if USE_CUDA_GEMM > 0
+#if USE_CUDA_GEMM == 1
+
+    
+
+static void GEMM(OEC_MAL1_Share* a, OEC_MAL1_Share* b, OEC_MAL1_Share* c, int m, int n, int k, bool a_fixed = false)
+{
+    const int factor = DATTYPE / BITLENGTH;
+    const int a_size = m * k;    
+    const int b_size = k * n;
+    const int c_size = m * n;
+    
+    UINT_TYPE* b_r = new UINT_TYPE[factor * b_size]; 
+    UINT_TYPE* b_v = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* r;
+    UINT_TYPE* v;
+    if(a_fixed)
+    {
+        r = new UINT_TYPE[a_size];
+        v = new UINT_TYPE[a_size];
+    }
+    else
+    {
+        r = new UINT_TYPE[factor * a_size];
+        v = new UINT_TYPE[factor * a_size];
+    }
+    UINT_TYPE* v_bv = new UINT_TYPE[factor * c_size];
+    UINT_TYPE* v_br = new UINT_TYPE[factor * c_size];
+    UINT_TYPE* bv_r = new UINT_TYPE[factor * c_size];
+
+
+    for(int i = 0; i < a_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&a[i].r, temp, 1);
+        if(a_fixed)
+        {
+            r[i] = temp[0];
+        }
+        else
+            for(int j = 0; j < factor; j++)
+                r[j*a_size + i] = temp[j];
+        unorthogonalize_arithmetic(&a[i].v, temp, 1);
+        if(a_fixed)
+        {
+            v[i] = temp[0];
+        }
+        else
+            for(int j = 0; j < factor; j++)
+                v[j*a_size + i] = temp[j];
+    }
+    for(int i = 0; i < b_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i].r, temp, 1);
+        for(int j = 0; j < factor; j++)
+            b_r[j * b_size + i] = temp[j];
+        unorthogonalize_arithmetic(&b[i].v, temp, 1);
+        for(int j = 0; j < factor; j++)
+            b_v[j * b_size + i] = temp[j];
+    }
+
+
+    for (int i = 0; i < factor; i++)
+    {
+        if(a_fixed)
+        {
+            gemm_cutlass(m,n,k, v, &b_v[i * b_size], &v_bv[i * c_size]);
+            gemm_cutlass(m,n,k, v, &b_r[i * b_size], &v_br[i * c_size]);
+            gemm_cutlass(m,n,k, r, &b_v[i * b_size], &bv_r[i * c_size]);
+        }
+    
+        else
+        {
+            gemm_cutlass(m,n,k, &v[i * a_size], &b_v[i * b_size], &v_bv[i * c_size]);
+            gemm_cutlass(m,n,k, &v[i * a_size], &b_r[i * b_size], &v_br[i * c_size]);
+            gemm_cutlass(m,n,k, &r[i * a_size], &b_v[i * b_size], &bv_r[i * c_size]);
+        }
+    }
+
+    for (int j = 0; j < c_size; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for (int i = 0; i < factor; i++)
+            temp[i] = v_br[i * c_size + j] + bv_r[i * c_size + j];
+        orthogonalize_arithmetic(temp, &c[j].r, 1);
+        for (int i = 0; i < factor; i++)
+            temp[i] = v_bv[i * c_size + j];
+        orthogonalize_arithmetic(temp, &c[j].v, 1);
+    }
+
+    delete[] r;
+    delete[] v;
+    delete[] b_r;
+    delete[] b_v;
+    delete[] v_bv;
+    delete[] v_br;
+    delete[] bv_r;
+
+}
+#else
+    
+
+static void GEMM(OEC_MAL1_Share* a, OEC_MAL1_Share* b, OEC_MAL1_Share* c, int m, int n, int k, bool a_fixed = false)
+{
+    const int factor = DATTYPE / BITLENGTH;
+    const int a_size = m * k;    
+    const int b_size = k * n;
+    const int c_size = m * n;
+    
+    UINT_TYPE* b_r = new UINT_TYPE[factor * b_size]; 
+    UINT_TYPE* b_v = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* r;
+    UINT_TYPE* v;
+    if(a_fixed)
+    {
+        r = new UINT_TYPE[a_size];
+        v = new UINT_TYPE[a_size];
+    }
+    else
+    {
+        r = new UINT_TYPE[factor * a_size];
+        v = new UINT_TYPE[factor * a_size];
+    }
+    
+    UINT_TYPE* v_bv = new UINT_TYPE[factor * c_size];
+    UINT_TYPE* v_br = new UINT_TYPE[factor * c_size];
+    UINT_TYPE* bv_r = new UINT_TYPE[factor * c_size];
+
+
+    for(int i = 0; i < a_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&a[i].r, temp, 1);
+        if(a_fixed)
+        {
+            r[i] = temp[0];
+        }
+        else
+            for(int j = 0; j < factor; j++)
+                r[j*a_size + i] = temp[j];
+        unorthogonalize_arithmetic(&a[i].v, temp, 1);
+        if(a_fixed)
+        {
+            v[i] = temp[0];
+        }
+        else
+            for(int j = 0; j < factor; j++)
+                v[j*a_size + i] = temp[j];
+    }
+if (a_fixed)
+{
+    for(int i = 0; i < k; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&b[i * n + j].r, temp, 1);
+            for(int l = 0; l < factor; l++)
+                b_r[i*n*factor+l*n+j] = temp[l];
+            unorthogonalize_arithmetic(&b[i * n + j].v, temp, 1);
+            for(int l = 0; l < factor; l++)
+                b_v[i*n*factor+l*n+j] = temp[l];
+        }
+    }
+
+        gemm_cutlass(m,n*factor,k, v, b_v, v_bv);
+        gemm_cutlass(m,n*factor,k, v, b_r, v_br);
+        gemm_cutlass(m,n*factor,k, r, b_v, bv_r);
+
+    for(int i = 0; i < m; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            for(int l = 0; l < factor; l++)
+                temp[l] = v_br[i*n*factor+l*n+j] + bv_r[i*n*factor+l*n+j];
+            orthogonalize_arithmetic(temp, &c[i * n + j].r, 1);
+            for(int l = 0; l < factor; l++)
+                temp[l] = v_bv[i*n*factor+l*n+j];
+            orthogonalize_arithmetic(temp, &c[i * n + j].v, 1);
+        }
+    }
+
+
+}
+else{
+    for(int i = 0; i < b_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i].r, temp, 1);
+        for(int j = 0; j < factor; j++)
+            b_r[j * b_size + i] = temp[j];
+        unorthogonalize_arithmetic(&b[i].v, temp, 1);
+        for(int j = 0; j < factor; j++)
+            b_v[j * b_size + i] = temp[j];
+    }
+
+
+    for (int i = 0; i < factor; i++)
+    {
+            gemm_cutlass(m,n,k, &v[i * a_size], &b_v[i * b_size], &v_bv[i * c_size]);
+            gemm_cutlass(m,n,k, &v[i * a_size], &b_r[i * b_size], &v_br[i * c_size]);
+            gemm_cutlass(m,n,k, &r[i * a_size], &b_v[i * b_size], &bv_r[i * c_size]);
+    }
+
+    for (int j = 0; j < c_size; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for (int i = 0; i < factor; i++)
+            temp[i] = v_br[i * c_size + j] + bv_r[i * c_size + j];
+        orthogonalize_arithmetic(temp, &c[j].r, 1);
+        for (int i = 0; i < factor; i++)
+            temp[i] = v_bv[i * c_size + j];
+        orthogonalize_arithmetic(temp, &c[j].v, 1);
+    }
+}
+
+    delete[] r;
+    delete[] v;
+    delete[] b_r;
+    delete[] b_v;
+    delete[] v_bv;
+    delete[] v_br;
+    delete[] bv_r;
+
+}
+#endif
+#endif
+
+#endif
 };
 

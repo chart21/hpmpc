@@ -1,124 +1,188 @@
-# High-Throughput Implementation of Secure Multiparty Computation (MPC) protocols
+# HPMPC: High-Performance Implementation of Secure Multiparty Computation (MPC) Protocols
 
-This project implements multiple MPC protocols in the honest majority setting.
-The following protocols are currently supported.
-
-3-PC: Sharemind, Astra, Replicated, OECL (Ours), TTP
-
-4-PC: Fantastic Four, Tetrad, OEC-MAL (Ours), TTP
+HPMPC implements multiple MPC protocols and provides a high-level C++ interface to define functions and use cases.
+Out of the Box, the framework supports computation in the boolean and arithmetic domain, mixed circuits, and fixed point arithmetic. 
+Neural networks models can be imported from PyTorch as part of PIGEON (Private Inference of Neural Networks).
 
 ## Getting Started
 
-The only dependency is OpenSSL. Install on your target system, for instance via ```apt install libssl-dev```
-You can select a protocol and function in the file `config.h`.
-The following commands are a quick way to compile the current configuration for a 3-PC protocol and run all executables locally. This compiles all player executables using g++ with -Ofast and runs all executables on localhost on the same machine.
-> ./scripts/config.sh -p all3
+You can use the provided Dockerfile or set up the project manually. The only dependencies is OpenSSL. Neural Networks and other functions with matrix operations also require the Eigen library. Install on your target system, for instance via ```apt install libssl-dev libeigen3-dev```. 
 
-> ./scripts/run_loally.sh -n 3
-
-For a 4-PC protocol, you can run.
-
-> ./scripts/config.sh -p all4
-
-> ./scripts/run_loally.sh -n 4
-
-## Configuration and Compilation
-
-Most configuration is contained in the file `config.h`. Here is an overview of the most important settings.
-
-- PROTOCOL: Select the protocol to be used. Options are: 1: Sharemind, 2: Replicated, 3: Astra, 4: ODUP, 5: OECL (3-PC), 6: TTP (3-PC), 7: TTP (4-PC), 8: Tetrad, 9: FantasticFour, 10: OEC-MAL - Base (4-PC), 11: OEC-MAL - Het (4-PC), 12: OEC-MAL: Off/On (4-PC). 
-- PARTY: Define the party ID for the current node, starting from 0. 
-- FUNCTION_IDENTIFIER: Select the function for computation. Currently includes running secure search (0), AND/Multiplication gates (1-6). Also includes a debug function for boolean/arithemtic circuit to check if all basic functions of a protocol are working correctly (7-9). Matrix Operators require the Eigen library. Dot Products can be tested with function 14.
-- DATTYPE: Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported sizes are 0,8,32,64,128(SSE),256(AVX-2),512(AVX-512).
-- PRE: Option to use a preprocessing phase. The following protocols support a preprocessing phase: 3,5,8,12
-- NUM_INPUTS: Define the number of inputs.
-- PROCESS_NUM: Number of parallel processes to use.
-- USE_SSL: Use SSL encrypted communication? 
-- SEND_BUFFER: Define how many gates should be buffered until sending them to the receiving party. 
-- RECV_BUFFER: Define how many receiving messages should be buffered until the main thread is signaled that data is ready.
-- VERIFY_BUFFER: Define how many messages should be buffered until a combined hash is calculated. 
-- PRINT: Print additional info?
-
-Changes can be applied either directly in the file or via running ```scripts/config.sh```. The script does not assume any default options but always uses the current configuration stored in `config.h` as a basis. In a distributed setup, ensure all configurations are the same (except PARTY).
-
-```
-  Script to configure and compile executables for a run.
-  Only arguments you want to change have to be set.
-   -n Number of elements"
-   -b base_port: Needs to be the same for all players for successful networking (e.g. 6000)"
-   -d Datatype used for slicing: 1(bool),8(uint8), 16 (uint16), 32(uint32), 64(uint64),128(SSE),256(AVX),512(AVX512)"
-   -p Player ID (0/1/2/3). Use all3 or all4 for compiling for all players"
-   -f Function Idenftifier (0: search, 1: AND, ...)"
-   -c Pack Bool in Char before sending? (0/1). Only used with -d 1"
-   -s MPC Protocol (1(Sharemind),2(Replicated),3(Astra),4(OEC DUP),5(OECL),6(TTP),...)"
-   -i Initialize circuit separately (0) or at runtime (1)?"
-   -l Include the Online Phase in this executable  (0/1)?"
-   -e Compile circuit with Preprocessing phase before online phase  (0/1)?"
-   -o Use additional assumptions to optimize the sharing phase? (0/1)"
-   -u Number of players in total"
-   -g Compile flags (other than standard)"
-   -x Compiler (g++/clang++/..)"
-   -h USE SSL? (0/1)"
-   -j Number of parallel processes to use"
-   -v Random Number Generator (0: XOR_Shift (insecure)/1 AES Bitsliced/2: AES_NI)"
-   -t Total Timeout in seconds for attempting to connect to a player"
-   -m VERIFY_BUFFER: How many gates should be buffered until verifying them? 0 means the data of an entire communication round is buffered "
-   -k Timeout in milliseconds before attempting to connect again to a socket "
-   -y SEND_BUFFER: How many gates should be buffered until sending them to the receiving party? 0 means the data of an entire communication round is buffered"
-   -z RECV_BUFFER: How many receiving messages should be buffered until the main thread is signaled that data is ready? 0 means that all data of a communication round needs to be ready before the main thread is signaled.
+To use GPU acceleration for matrix multiplication and convolutions, you need an NVIDIA GPU and the nvcc compiler. You also need a copy of the [CUTLASS](https://github.com/NVIDIA/cutlass) library. You can then set up the project as follows.
+```bash
+git clone https://github.com/chart21/hpmpc.git
+sudo apt install libssl-dev libeigen3-dev # Install dependencies 
+cd hpmpc
+make -j PARTY=all FUNCTION_IDENTIFIER=54 PROTOCOL=5 # Compile executables for protocol Trio (5) for all parties and a unit tests for basic primitives (function 54)
+scripts/run.sh -p all -n 3 # Run three parties locally
 ```
 
-The following configuration compiles an executable for P2, 1024 inputs, sliced 256 times in AVX-2 variables, using Protocol Replicated. All other configuarations are fetched from `config.h`.
-> ./scripts/config.sh -p 2 -n 1024 -d 256 -s 2 
+To use GPU acceleration, you also need to execute the following commands. To find out your GPU architecture, refer to [this oerview](https://developer.nvidia.com/cuda-gpus).
+```bash
+# Dependencies for GPU acceleration
+git clone https://github.com/NVIDIA/cutlass.git
+# Compile standalone executable for GPU acceleration
+cd core/cuda
+make -j arch=sm_89 CUDA_PATH=/usr/local/cuda CUTLASS_PATH=/home/user/cutlass # Replace with you architecture, nvcc path and CUTLASS path
+cd ../..
+# Compile and run MPC executables with GPU acceleration
+make -j PARTY=all FUNCTION_IDENTIFIER=57 PROTOCOL=12 USE_CUDA_GEMM=2 # Compile executables for protocol Quad (12) for all parties and a unit tests for matrix multiplication (function 54) with GPU acceleration (USE_CUDA_GEMM=2)
+scripts/run.sh -p all -n 4 # Run four parties locally
+```
 
-The following configuration uses the previous configuration but compiles an executable for all players. This is useful when running the parties on the same host.
-> ./scripts/config.sh -p all3
+After setting up the framework on each node of a distributed setup, you can run the following commands to run the MPC protocol on a distributed setup.
+```bash
+make -j PARTY=<party_id>
+scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> # Run the MPC protocol on a distributed setup. For 3PC protocols, the -d flag has no effect.
+```
 
-The Split-Roles scripts transform a protocol into a homogeneous protocol by running multiple executables with different player assignments in parallel.
+SplitRoles compiles multiple executables per player to perform load balancing. Running a protocol with Split-Roles can be done by running the following commands. More information on Split-Roles can be found in the section "Scaling MPC to Billions of Gates per Second".
+```bash
+make -j PARTY=<party_id> SPLITROLES=1 # Compile multiple executables for a 3PC protocol with Split-Roles
+scripts/run.sh -s 1 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> 
+``` 
 
-The following script compiles six executables of a 3-PC protocol for player 2 (all player combinations) to run a homogeneous 3-PC protocol on three nodes using Split-Roles.
-> ./scripts/split-roles-3-compile.sh -p 2
+SplitRoles supports multi-GPU setups. To run a protocol with multiple GPUs, you can run the following commands.
+```bash 
+make -j USE_CUDA_GEMM=2
+scripts/run.sh -p <party_id> -s 1 -g 6 # Utilize 6 GPUs for the computation
+```
 
-The following script compiles 18 executables of a 3-PC protocol for player 3 to run a homogeneous 3-PC protocol on four nodes using Split-Roles.
-> ./scripts/split-roles-3to4-compile.sh -p 3
+## Project Structure
+The framework uses a modular architecture with the following components.
+- Core: Implements communication between parties, cryptographic primitives, and techniques for hardware acceleration. Uses Bitslicing, Vectorization, GPU acceleration, and hardware instruction for cryptographic primtitives to accelerate local computation required by the MPC protocols.
+- Protocols: Implements MPC protocols and protocol-specific primitives. Each protocol utilizes high-level operations provided by `Core` for commonly used operations such as sampling shared random numbers or exchanging messages.
+- Datatypes: Implements different datatypes that serve as a high-level templated interface to compute on MPC shares in a generic manner with overloaded operators.
+- Programs: Implements high-level functions, routines and use cases using the custom `datatypes`. Implements several MPC-generic functions such as matrix multiplication and comparisons.
+- NN: Implements a templated neural network inference engine that performs the forward pass of a CNN by relying on high-level MPC-generic functions provided by `Programs`. Models and datasets can be exported from PyTorch.
 
-The following script compiles 24 executables of a 4-PC protocol for player 0 to run a homogeneous 4-PC protocol on four nodes using Split-Roles.
-> ./scripts/split-roles-4-compile.sh -p 0
+New MPC protocol can be added to `protocols/` by using the operations provided by `Core`.
+New functions can be added to `programs/` by using the operations supported by `Datatypes`.
+New Model architectures can be added to `nn/FlexNN/architectures/` by using our high-level interface to define model architectures provided by `nn/FlexNN`.
+
+## Scaling MPC to Billions of Gates per Second
+
+The framework offers multiple tweaks to accelerate MPC computation. The following are the most important settings that can be adjusted in `config.h` or by setting the respective flags when compiling.
+- Concurrency (`DATTYPE`, `PROCESS_NUM`): `DATTYPE` sets the registersize to use for Bitslicing and Vectorization. Bitslicing and vectorization is supported by the framework on various archiectures (SSE,AVX-2,AVX-512). If your CPU supports AVX-512, seeting `DATTYPE` to 512 vectorize all integers and boolean variables to fully utilize the wide registers. `PROCESS_NUM` sets the number of processes to use for parallel computation.
+- Hardware Acceleration (`RANDOM_ALGORITHM`, `USE_SSL_AES`, `ARM`, `USE_CUDA_GEMM`): Different approaches for efficiently implementing cryptographic primitives on various hardware architectures. Matrix operations can be accelerated using CUDA.
+- Tweaks (`SEND_BUFFER`, `RECV_BUFFER`, `VERIFY_BUFFER`): Setting buffer sizes for communication and sha hashing to verify messages can accelerate workloads. The default settings should provide a good starting point for most settings.
+- Preprocessing (`PRE`): Some protocols support a preprocessing phase that can be enabled to accelerate the online phase. 
+- SPLITROLES (`SPLITROLES`): By using the SPLITROLES flag when compiling, the framework compiles n! excutables for a n-PC protocol where each executable has a different player assignment. This allows load balance the communication and computation between the nodes. SPLITROLES 1 compiles all executables for a 3PC protocol, SPLITROLES 2 compiles all executables for a 3PC protocol in a setting with four nodes, and SPLITROLES 3 compiles all executables for a 4PC protocol.
+
+For nodes equipped with a 32-core AVX-512 CPU, a CUDA-enabled GPU, the following example may compile an optimized executables in a distributed setup. Note that this example inherently vectorizes the computation `PROCESS_NUM x DATTYPE/BITLENGTH x SPLITROLES_Factor` times. 
+```bash
+make -j PARTY=<node_id> FUNCTION_IDENTIFIER=<function_id> PROTOCOL=12 DATTYPE=512 PROCESS_NUM=32 RANDOM_ALGORITHM=2 USE_SSL_AES=0 ARM=0 USE_CUDA_GEMM=2 SEND_BUFFER=10000 RECV_BUFFER=10000 VERIFY_BUFFER=1 PRE=1 SPLITROLES=3.
+```
+
+## Protocols
+
+The following protocols currently have full support for all implemented primitives and functions.
+- 3PC (semi-honest): Trio (Protocol 5), Trusted Third Party (Protocol 6)
+- 4PC Quad (malicious): (Protocol 12), Trusted Third Party (Protocol 7)
+
+The following protocols currently have full support for all basic primitives.
+- 3PC (semi-honest): Sharemind (Protocol 1), Replicated (Protocol 2), ASTRA (Protocol 3)
+- 4PC (malicious): Tetrad (Protocol 8), Fantastic Four (Protocol 9)
+
+Trio, ASTRA, Quad, and Tetrad support a Preprocessing phase. The preprocessing phase can be enabled in `config.h` or by setting `PRE=1` when compiling. New protocols can be added to `protocols/`and adding a protocol ID to `protocols/Protocols.h`. 
+
+## Functions
+
+Out of the box, the framework provides multiple high-level functions that operate on either Additive or Boolean shares. `programs/functions/` contains unit tests and benchmarks for these functions. An overview of which id corresponds to which function can be found in `protocol_executer.hpp`. In the following, we provide a brief overview of the functions that are currently implemented.
+ - Basic Primitives: Secret Sharing, Reconstruction, Addition, Multiplication, Division, etc. 
+ - Fixed Point Arithmetic: Fixed Point Addition, Multiplication, Truncation Division, etc.
+ - Matrix Operations: Matrix Multiplication, Dot Product, etc.
+ - Multi-input Operations: Multi-input Multiplication, Multi-input Scalar Products
+ - Comparisons: EQZ, LTZ, MAX, MIN, Argmax, Argmin
+ - Use Cases (Benchmarking): Set Intersection, Auction, AES, Logistic Regression, etc.
+ - Neural Networks: Forward Pass of CNN, ReLU, Softmax, Pooling, etc.
+
+To implement a custom function, these functions can be used as building blocks. In `programs/tutorials/`, we provide tutorials on how to use different functions. New functions can be added by first implementing the function in `programs/functions/` and then adding a FUNCTION_IDENTIFIER to `protocol_executer.hpp`. The tutorial `programs/tutorials/YourFirstProgram.hpp` should get you started after following the other tutorials.
 
 
-### Execution
+## The Vectorized Programming Model
+Scaling MPC requires a high degree of parallelism to overcome network latency bottlenecks.
+HPMPC's architecture is designed to utilize hardware resources proportionally to the degree of parallelism required by the MPC workload. 
+By increasing load balancing, registersizes, or number of processes, the framework executes multiple instances of the same function in parallel.
+For instance, an arithmetic program that computes a function on 32-bit integers is executed 512 times in parallel by using 32 processes and 512-bit registers.
+Similarly, a boolean program that computes a single boolean function is executed 512x32=16384 times in parallel due to Bitslicing.
+For mixed circuits, HPMPC automatically groups blocks of arithmetic shares before share conversion to handle these different degrees of parallelism.
+The degree of parallelism for arithmetic and mixed circuits can be calculated as `PROCESS_NUM x DATTYPE/BITLENGTH x SPLITROLES_Factor` while for boolean circuits it is `PROCESS_NUM x DATTYPE x SPLITROLES_Factor`.
 
-In a distributed setup, you need to specify the IP addresses for each party and run one executable on each node.
+Thus, setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing 10 AES blocks (boolean circuit) will actually compute 6x4x256x10=61440 AES blocks in parallel by fully utilizing the available hardware resources, while setting DATTYPE=1, SplitRoles=0, and PROCESS_NUM=1 will compute 10 AES blocks on a single core without vectorization. Setting SPLITROLES=1, PROCESS_NUM=4, and DATTYPE=256 to a program computing a single neural network inference (mixed circuit) will compute 6x4x256/32=192 samples in parallel, thus effictively using a batch size of 192.
 
-Execute P0 executable.
-> ./run-P0.o IP_P1 IP_P2
+## Executing MP-SPDZ Bytecode (Experimental)
 
-Execute P1 executable.
-> ./run-P1.o IP_P0 IP_P2
-
-Execute P2 executable.
-> ./run-P2.o IP_P0 IP_P1
-
-
-Run Split-Roles (3) executables for Player 0.
-> ./scripts/split-roles-3-execute.sh -p 0 -a IP_P0 -b IP_P1 -c IP_P2 -d IP_P3
-
-To run all players locally on one machine, omit the IP addresses or set them to 127.0.0.1, and use -p all
-> ./scripts/split-roles-3-execute.sh -p all
+HPMPC can execute bytecode generated by the MP-SPDZ compiler.
 
 
-### Measuring Throughput
+## PIGEON: Private Inference of Neural Networks
 
-To measure the throughput of a specific function such as 64-bit mult, AND, or secure search, first, specify the function in `config.h`. Each process prints a time for running the computation and initialization. The initialization time measures setup costs, such as establishing a connection. When choosing multiple processes or Split-Roles, we recommend timing the whole script or executable with libraries such as /bin/time. To get accurate measurements with this approach, all nodes should connect simultaneously.
+This project adds support for private inference of neural networks. The following components are part of PIGEON.
 
-The throughput in AND gates per second for instance, can then be calculated as:
+* [FlexNN](https://github.com/chart21/flexNN/tree/hpmpc): A templated neural network inference engine that performs the forward pass of a CNN generically.
+* `Programs/functions` contains MPC-generic implementations of functions such as ReLU.
+* `Protocols` Implements the MPC protocols and primitives that are required by `Programs/functions`.
+* [Pygeon](https://github.com/chart21/Pygeon): Python scripts for exporting models and datsets from PyTorch to the inference engine. 
 
-(NUM_INPUTS * DATTYPE * PROCESS_NUM * Split_Roles_Multiplier) / Total time measured.
+All protocols that are fully supported by HPMPC can be used with PIGEON. To get started with PIGEON, initialize the submodules to set up FlexNN and Pygeon. 
+> git submodule update --init --recursive
 
-When using the Split-Roles, Split_Roles_Multiplier is 6 for three-node settings and 24 for four-node settings. Otherwise, the multiplier is 1.
+A full end-to-end example can be executed as follows. 
+1. Use Pygeon to train a model in PyTorch and export its test labels, test images, and model parameters to `.bin` files using the provided scripts. Save the exported files to `nn/FlexNN/dataset` and `nn/FlexNN/model_zoo` respectively. At least one party (say P0) should have the dataset and at least one party (say P1) should have the model parameters. 
+If the correct test accuracy should be calculated, all parties should have the test labels.
+2. If it does not exist yet, add your model architecture to `nn/FlexNN/architectures/`.
+3. If it does not exist yet, add a `FUNCTION_IDENTIFIER` for your model architecture and dataset dimensions in `Programs/functions/NN.hpp`.
+4. Specify the path of your model, images, and labels by exporting the environment variables `MODEL_DIR`, `DATA_DIR`, `MODEL_FILE`, `SAMPLES_FILE`, and `LABELS_FILE`.
+5. Run the following commands to compile the MPC protocol and run the model inference in a distributed setting.
+```
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=<function_id> DATAOWNER=P_0 MODELOWNER=P_1 #execute on each node
+scripts/run_distributed.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> 
+```
+
+PIGEON provides several options to modify the inference. The following are the most important settings that can be adjusted in `config.h` or by setting the respective flags when compiling.
+- Bits (`BITLENGTH`, `FRACTIONAL`): The number of bits used for the total bitlength and the fractional part respectively.
+- Truncation (`TRUNC_APPROACH`,`TRUNC_THEN_MULT`,`TRUNC_DELAYED`): There are multiple approaches to truncation. The default approach is to truncate Probabilistically after each multiplication. The different approaches allow switching between several truncation strategies.
+- ReLU (`REDUCED_BITLENGTH_m, REDUCED_BITLENGTH_k`): ReLU can be evaluated probabilistically by reducing its bitwidth to save communciation and computation. The default setting is to evaluate ReLU with the same bitwidth as the rest of the computation. 
+- Secrecy (`PUBLIC_WEIGHTS`, `COMPUTE_ARGMAX`): The weights can be public or private. The final argmax computation may not be required if parties should learn the probabilities of each class.
+- Optimizations ('ONLINE_OPTIMIZED', 'BANDWIDTH_OPTIMIZED'): All layers requiring sign bit extraction such as ReLU, Maxpooling, and Argmax can be evaluated with different types of adders. These have different trade-offs in terms of online/preprocessing communication as well as round complexity and communication complexity.
+- Other Optimizations: All default optimizations of HPMPC such as `SPLITROLES`, different buffers, and vectorization can be used with PIGEON. The parties automatically utilze the concurrency to perform inference on multiple independent samples from the dataset in parallel. To benchmark the inference without real data, `MODELOWNER` and `DATAOWNER` can be set to `-1`.
+
+## Measurements
+
+To automate benchmarks and tests of various function and protocols users can define `.conf` files in the `measurements/configs` directory. The following is an example of a configuration file runs a function with different number of inputs and different protocols.
+```
+PROTOCOL=8,9,12
+NUM_INPUTS=10000,100000,1000000
+FUNCTION_IDENTIFIER=1
+DATTYPE=32
+BITLENGTH=32
+```
+
+The config can then be executed with 
+> measurements/run_config.sh -p <party_id> measurements/configs/<config_file>.conf
+
+The outputs are stored in the `measurements/logs/` directory. The results can be parsed with the `measurements/parse_logs.py` script. The script can be executed as follows. The parsed result contains information such as communication, runtime, throughput, and if applicable unit test passed or accuracy achieved.
+> python3 measurements/parse_logs.py measurements/logs/<log_file>.log
 
 
-### Debugging
+## Troubleshooting
+HPMPC utilizes different hardware acceleration techniques for a range of hardware architectures. 
+In case of compile errors, please check the following:
+- Does your CPU support the AES-NI or VAES instruction set? If not, set `USE_SSL_AES=1` or `RANDOM_ALGORITHM=1` in `config.h`.
+- Does your CPU support the `SHA` instruction set? If not, setting `ARM=1` in `config.h` may improe performance.
+- Does your CPU support SSE (128-bit registers), AVX-2 (256-bit registers), or AVX-512 (512-bit registers)? If not, the maximum supported `DATTYPE` by your architecture is 64.
+- Is your `BITLENGTH` compatible with the chosen DATTYPE? UINT64 (DATTYPE 64) does not allow any vectorization of integers with smaller `BITLENGTH`. 
+Similarly, out of SSE, AVX-2, and AVX-512, only AVX-512 supports vectorization with a `BITLENGTH` 64. Setting BITLENGTH=DATTYPE for 32-bit or 64-bit inputs should work on all architectures.
+- Does your GPU support CUDA? If not, compile without CUDA by setting `USE_CUDA_GEMM=0` in `config.h` or setting the respective flag when compiling. In case your CUDA-enabled GPU does not support datatypes such as UINT8, you can comment out the respective forward declaration in `core/cuda/conv_cutlass_int.cu` and `core/cuda/gemm_cutlass_int.cu`.
+- Do you get low accuracy for Neural Network inference? To achieve high accuracy you may need to increase the `BITLENGTH`, increase of reduce the number of `FRACTIONAL` bits, or adjust the truncation strategy to `TRUNC_APPROACH=1` (REDUCED Slack`) or `TRUNC_APPROACH=2` (Exact Truncation), along with `TRUNC_THEN_MULT=1` and `TRUNC_DELAYED=1`. Note that truncation approaches 1 and 2 require setting `TRUNC_DELAYED=1`. Also check if `REDUCED_BITLENGTH_m` and `REDUCED_BITLENGTH_k` are set to 0 and `BITLENGTH` respectively. 
+Also inspect the terminal output for any errors regarding reading the model or dataset. PIGEON uses dummy data or model parameters if the files are not found.
 
-To check the correctness of a protocol, the debug function (function 7) checks the correctness of all basic gates in the boolean domain. Function 8-9 do the same in the arithmetic domain using a ring size of $2^{32}$ or $2^{64}$, respectively. Note that BITLENGTH and DATTYPE specified in `config.h` must be compatible with the computation domain. DATTYPE = 128 requires support for SSE, DATTYPE = 256 for AVX-2, and DATTYPE = 512, for AVX-512. The following combinations are valid for 32-bit computation: BITLENGTH = 32, DATTYPE = 32/128/256/512. The following combinations are valid for 64-bit computation: BITLENGTH = 64, DATTYPE = 64//256 (requires AVX-512)/512.
+## References
 
+Our framework utilizes the following third-party implementations.
+- Architecture specific headers for vectorization and Bitslicing adapted from [USUBA](https://github.com/usubalang/usuba), [MIT LICENSE](https://raw.githubusercontent.com/usubalang/usuba/main/LICENSE).
+- AES-NI implementation adapted from [AES-Brute-Force](https://github.com/sebastien-riou/aes-brute-force), [Apache 2.0 LICENSE](https://raw.githubusercontent.com/sebastien-riou/aes-brute-force/master/LICENSE)
+- SHA-256 implementation adapted from [SHA-Intrinsics](https://github.com/noloader/SHA-Intrinsics/tree/master), No License.
+- CUDA GEMM and Convolution implementation adapted from [Cutlass](https://github.com/NVIDIA/cutlass), [LICENSE](https://raw.githubusercontent.com/NVIDIA/cutlass/main/LICENSE.txt) and [Piranha](https://github.com/ucbrise/piranha/tree/main), [MIT LICENSE](https://raw.githubusercontent.com/ucbrise/piranha/main/LICENSE).
+- Neural Network Inference engine adapted from [SimpleNN](https://github.com/stnamjef/SimpleNN), [MIT LICENSE](https://raw.githubusercontent.com/stnamjef/SimpleNN/master/LICENSE).

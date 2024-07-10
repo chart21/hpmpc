@@ -1,6 +1,4 @@
 #pragma once
-#include <array>
-#include <stdexcept>
 #include "../protocols/Protocols.h"
 template<int k, typename Share>
 class sbitset_t {
@@ -16,6 +14,14 @@ public:
     sbitset_t(UINT_TYPE value) {
         UINT_TYPE temp_u[DATTYPE] = {value};
         init(temp_u);
+        }
+
+    sbitset_t(UINT_TYPE value[DATTYPE]) {
+        DATATYPE temp_d[BITLENGTH];
+        
+        orthogonalize_boolean(value, temp_d);
+        for (int i = 0; i < k; i++) 
+          shares[i] = Share(temp_d[i]);
         }
 
     template<int id>
@@ -37,7 +43,7 @@ public:
 
     template <int id> void init(UINT_TYPE value[DATTYPE]) {
         if constexpr (id == PSELF) {
-          if (current_phase == 1) {
+          if (current_phase != PHASE_INIT) { //TODO: Should only happen either in PRE or in live pahse
 
             DATATYPE temp_d[BITLENGTH];
             orthogonalize_boolean(value, temp_d);
@@ -83,6 +89,22 @@ public:
         return result;
     }
 
+        sbitset_t prepare_and(const sbitset_t & other) const {
+        sbitset_t result;
+        for(int i = 0; i < k; ++i) {
+            result[i] = shares[i].prepare_and(other[i]);
+        }
+        return result;
+        }
+
+        sbitset_t and_public(const UINT_TYPE other) const {
+        sbitset_t result;
+        for(int i = 0; i < k; ++i) {
+            result[i] = shares[i].and_public(other);
+        }
+        return result;
+        }
+
         void complete_and() {
         for(int i = 0; i < k; ++i) {
             shares[i].complete_and();
@@ -123,19 +145,40 @@ public:
             return result;
         }
 
-        static sbitset_t prepare_A2B_S1(Share s[k])
+        static sbitset_t prepare_A2B_S1(int m, Share s[k])
         {
             sbitset_t<k, Share> result;
-            Share::prepare_A2B_S1(k, s,result.get_share_pointer());
+            Share::prepare_A2B_S1(m,k+m, s,result.get_share_pointer());
             return result;
+        }
+
+        static sbitset_t prepare_A2B_S2(int m, Share s[k])
+        {
+            sbitset_t<k, Share> result;
+            Share::prepare_A2B_S2(m, k+m, s,result.get_share_pointer());
+            return result;
+        }
+        
+        static sbitset_t prepare_A2B_S1(Share s[k])
+        {
+            return prepare_A2B_S1(0, s);
         }
 
         static sbitset_t prepare_A2B_S2(Share s[k])
         {
-            sbitset_t<k, Share> result;
-            Share::prepare_A2B_S2(k, s,result.get_share_pointer());
-            return result;
+            return prepare_A2B_S2(0, s); 
         }
+        
+        void complete_A2B_S1(int m)
+        {
+            Share::complete_A2B_S1(k+m, shares);
+        }
+
+        void complete_A2B_S2(int m)
+        {
+            Share::complete_A2B_S2(k+m, shares);
+        }
+
         
         void complete_A2B_S1()
         {
@@ -157,6 +200,8 @@ public:
         {
             Share::complete_bit_injection_S2(shares);
         }
+
+
 
   static constexpr int get_bitlength() {
         return k; 

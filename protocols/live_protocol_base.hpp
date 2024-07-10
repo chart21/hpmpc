@@ -1,14 +1,14 @@
 #pragma once
-#include "../networking/buffers.h"
-#include <cstdint>
+#include "../core/include/pch.h"
+#include "../core/networking/buffers.h"
 
 #if MAL == 1
 #ifdef __SHA__
-#include "../crypto/sha/SHA_256_x86.h"
+#include "../core/crypto/sha/SHA_256_x86.h"
 #elif ARM == 1
-#include "../cryptosha/SHA_256_arm.h"
+#include "../core/cryptosha/SHA_256_arm.h"
 #else
-#include "../crypto/sha/SHA_256.h"
+#include "../core/crypto/sha/SHA_256.h"
 #endif
 #endif
 
@@ -50,8 +50,15 @@ rounds+=1;
 /*                      .count(); */
       /* printf("finished waiting for receive in round %i \n", rounds - 1); */
       pthread_mutex_unlock(&mtx_receive_next);
+      for(int t = 0; t < (num_players-1); t++)
+      {
+          if(rounds > 2)
+              if(receiving_args[t].rec_rounds > 1)
+                  /* if(receiving_args[t].received_elements[rounds - 2] != NULL) */ 
+                    delete[] receiving_args[t].received_elements[rounds - 2]; // delete memory of last round
 /* printf("Time spent waiting for data chrono: %fs \n", time / 1000000); */
-rb = 0;
+      }
+      rb = 0;
 }
 
 void communicate_live()

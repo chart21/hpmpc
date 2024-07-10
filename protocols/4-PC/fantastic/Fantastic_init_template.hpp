@@ -154,7 +154,7 @@ store_compare_view_init(P_2);
 }
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
     send_to_(PNEXT);
 }    
@@ -162,7 +162,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 receive_from_(PPREV);
 store_compare_view_init(P_0123);
@@ -170,8 +170,14 @@ Datatype dummy;
 return dummy;
 }
 
+template <typename func_mul>
+Fantastic_Four_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return Fantastic_Four_init();
+}
+
 template <int id,typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == PSELF)
 {

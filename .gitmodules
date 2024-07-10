@@ -1,0 +1,7 @@
+[submodule "nn/Pygeon"]
+	path = nn/Pygeon
+	url = git@github.com:chart21/pygeon.git
+[submodule "nn/PIGEON"]
+	path = nn/PIGEON
+	url = git@github.com:chart21/flexNN.git
+	branch = hpmpc

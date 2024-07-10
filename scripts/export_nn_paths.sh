@@ -1,0 +1,5 @@
+export MODEL_DIR="."
+export DATA_DIR="."
+export MODEL_FILE="nn/Pygeon/models/pretrained/vgg16_cifar_standard.bin"
+export SAMPLES_FILE="nn/Pygeon/data/datasets/CIFAR-10_standard_test_images.bin"
+export LABELS_FILE="nn/Pygeon/data/datasets/CIFAR-10_standard_test_labels.bin"

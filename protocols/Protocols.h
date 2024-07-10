@@ -1,9 +1,8 @@
 #pragma once
 #include "../config.h"
-#include "../arch/DATATYPE.h"
-#include "../networking/sockethelper.h"
-#include "../networking/buffers.h"
-#include "../utils/randomizer.h"
+#include "../core/arch/DATATYPE.h"
+#include "../core/networking/sockethelper.h"
+#include "../core/utils/randomizer.h"
 
 #if INIT == 1
     #include "init_protocol_base.hpp"
@@ -14,15 +13,15 @@
 #define sharemind 1
 #define rep3 2
 #define astra 3
-#define odup 4
-#define orep 5
+#define aby2_dummy 4
+#define trio 5
 #define ttp3 6
 #define ttp4 7
 #define Tetrad 8
 #define FantasticFour 9
-#define OEC_mal 10
-#define OEC_mal_het 11
-#define OEC_mal_OffOn 12
+#define Quad 10
+#define Quad_het 11
+#define Quad_OffOn 12
 #define Simulate 13
 #if PROTOCOL == rep3 
     #define PROTOCOL_LIVE Replicated_Share
@@ -88,54 +87,26 @@
             #include "3-PC/astra/astra-P_2_template.hpp"
         #endif
     #endif
-#elif PROTOCOL == odup
+#elif PROTOCOL == aby2_dummy
     #if PRE == 1
-        #if PARTY == 0
-            #define PROTOCOL_PRE OEC0
-            #include "3-PC/oec/oec-P_0_template.hpp"
-        #endif
-        #if PARTY == 1
-            #define PROTOCOL_PRE -1
-        #endif
-        #if PARTY == 2
-            #define PROTOCOL_PRE -1
-        #endif
+            #define PROTOCOL_PRE ABY2_Share
+            #include "2-PC/aby2_dummy/aby2.hpp"
     #endif
     #if INIT == 1
-        #if PARTY == 0
-            #define PROTOCOL_INIT OEC0_init
-            #include "3-PC/oec/oec-P_0_init_template.hpp"
-        #endif
-        #if PARTY == 1
-            #define PROTOCOL_INIT OEC1_init
-            #include "3-PC/oec/oec-P_1_init_template.hpp"
-        #endif
-        #if PARTY == 2
-            #define PROTOCOL_INIT OEC2_init
-            #include "3-PC/oec/oec-P_2_init_template.hpp"
-        #endif
+            #define PROTOCOL_INIT ABY2_init
+            #include "2-PC/aby2_dummy/aby2_init.hpp"
     #endif
     #if LIVE == 1 
-        #if PARTY == 0
             #if PRE == 1
-                #define PROTOCOL_LIVE OEC0_POST
+                #define PROTOCOL_LIVE ABY2_POST_Share
                 /* #define HAS_POST_PROTOCOL 1 */
-                #include "3-PC/oec/oec-P_0-post_template.hpp"
+                #include "2-PC/aby2_dummy/aby2_post.hpp"
             #else
-                #define PROTOCOL_LIVE OEC0
-                #include "3-PC/oec/oec-P_0_template.hpp"
+                #define PROTOCOL_LIVE ABY2_Share
+                #include "2-PC/aby2_dummy/aby2.hpp"
             #endif
-        #endif
-        #if PARTY == 1
-            #define PROTOCOL_LIVE OEC1
-            #include "3-PC/oec/oec-P_1_template.hpp"
-        #endif
-        #if PARTY == 2 
-            #define PROTOCOL_LIVE OEC2
-            #include "3-PC/oec/oec-P_2_template.hpp"
-        #endif
     #endif
-#elif PROTOCOL == orep 
+#elif PROTOCOL == trio 
     #if PRE == 1
         #if PARTY == 0
             #define PROTOCOL_PRE OECL0_Share
@@ -185,13 +156,14 @@
 #elif PROTOCOL == ttp3 || PROTOCOL == ttp4 || PROTOCOL == Simulate
         #define PROTOCOL_LIVE TTP_Share
         #define PROTOCOL_INIT TTP_init
+        #define TTP_PROTOCOL 1
         #if INIT == 1 
             #include "TTP/ttp_init_template.hpp"
         #endif
         #if LIVE == 1
             #include "TTP/ttp_template.hpp"
         #endif
-#elif PROTOCOL == OEC_mal || PROTOCOL == OEC_mal_het || PROTOCOL == OEC_mal_OffOn
+#elif PROTOCOL == Quad || PROTOCOL == Quad_het || PROTOCOL == Quad_OffOn
     #if PRE == 1
         #if PARTY == 0
             #define PROTOCOL_PRE -1
