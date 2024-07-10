@@ -4,7 +4,6 @@ HPMPC implements multiple MPC protocols and provides a high-level C++ interface 
 Out of the Box, the framework supports computation in the boolean and arithmetic domain, mixed circuits, and fixed point arithmetic. 
 Neural networks models can be imported from PyTorch as part of PIGEON (Private Inference of Neural Networks).
 
-
 ## Getting Started
 
 You can use the provided Dockerfile or set up the project manually. The only dependencies is OpenSSL. Neural Networks and other functions with matrix operations also require the Eigen library. Install on your target system, for instance via ```apt install libssl-dev libeigen3-dev```. 
