@@ -33,6 +33,7 @@
 #define FUNCTION REVEAL_BENCH // Reveal of inputs, n NUM_INPUTS = n*(DATTYPE/BITLENGTH) Inputs revealed to all parties
 #elif FUNCTION_IDENTIFIER == 7
 #define FUNCTION dot_prod_bench // Matrix Vector Product n NUM_INPUTS = n*(DATTYPE/BITLENGTH) product output size
+#endif
 
 #if DATTYPE > 1
 #include "../../datatypes/Additive_Share.hpp"

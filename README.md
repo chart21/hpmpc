@@ -6,28 +6,19 @@ Neural networks models can be imported from PyTorch as part of PIGEON (Private I
 
 ## Getting Started
 
-You can use the provided Dockerfile or set up the project manually. The only dependencies is OpenSSL. Neural Networks and other functions with matrix operations also require the Eigen library. Install on your target system, for instance via ```apt install libssl-dev libeigen3-dev```. 
-
-To use GPU acceleration for matrix multiplication and convolutions, you need an NVIDIA GPU and the nvcc compiler. You also need a copy of the [CUTLASS](https://github.com/NVIDIA/cutlass) library. You can then set up the project as follows.
+You can use the provided Dockerfile or set up the project manually. The only dependencies is OpenSSL. Neural Networks and other functions with matrix operations also require the Eigen library. 
 ```bash
+#Install Dependencies:
+sudo apt install libssl-dev libeigen3-dev
+
 git clone https://github.com/chart21/hpmpc.git
-sudo apt install libssl-dev libeigen3-dev # Install dependencies 
 cd hpmpc
-make -j PARTY=all FUNCTION_IDENTIFIER=54 PROTOCOL=5 # Compile executables for protocol Trio (5) for all parties and a unit tests for basic primitives (function 54)
-scripts/run.sh -p all -n 3 # Run three parties locally
-```
 
-To use GPU acceleration, you also need to execute the following commands. To find out your GPU architecture, refer to [this oerview](https://developer.nvidia.com/cuda-gpus).
-```bash
-# Dependencies for GPU acceleration
-git clone https://github.com/NVIDIA/cutlass.git
-# Compile standalone executable for GPU acceleration
-cd core/cuda
-make -j arch=sm_89 CUDA_PATH=/usr/local/cuda CUTLASS_PATH=/home/user/cutlass # Replace with you architecture, nvcc path and CUTLASS path
-cd ../..
-# Compile and run MPC executables with GPU acceleration
-make -j PARTY=all FUNCTION_IDENTIFIER=57 PROTOCOL=12 USE_CUDA_GEMM=2 # Compile executables for protocol Quad (12) for all parties and a unit tests for matrix multiplication (function 54) with GPU acceleration (USE_CUDA_GEMM=2)
-scripts/run.sh -p all -n 4 # Run four parties locally
+# Compile executables for protocol Trio (5) for all parties and a unit tests for basic primitives (function 54)
+make -j PARTY=all FUNCTION_IDENTIFIER=54 PROTOCOL=5 
+
+# Run the MPC protocol locally
+scripts/run.sh -p all -n 3 # Run three parties locally
 ```
 
 After setting up the framework on each node of a distributed setup, you can run the following commands to run the MPC protocol on a distributed setup.
@@ -35,6 +26,28 @@ After setting up the framework on each node of a distributed setup, you can run 
 make -j PARTY=<party_id>
 scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> # Run the MPC protocol on a distributed setup. For 3PC protocols, the -d flag has no effect.
 ```
+
+### GPU Acceleration
+
+To use GPU acceleration for matrix multiplication and convolutions, you need an NVIDIA GPU and the nvcc compiler. You also need a copy of the [CUTLASS](https://github.com/NVIDIA/cutlass) library. You can then set up the project as follows.
+
+To use GPU acceleration, you also need to execute the following commands. To find out your GPU architecture, refer to [this oerview](https://developer.nvidia.com/cuda-gpus).
+```bash
+# Dependencies for GPU acceleration
+git clone https://github.com/NVIDIA/cutlass.git
+
+# Compile standalone executable for GPU acceleration
+cd core/cuda
+# Replace with your GPU architecture, nvcc path and CUTLASS path:
+make -j arch=sm_89 CUDA_PATH=/usr/local/cuda CUTLASS_PATH=/home/user/cutlass 
+
+cd ../..
+# Compile executables for protocol Quad (12) for all parties and a unit tests for matrix multiplication (function 54) with GPU acceleration (USE_CUDA_GEMM=2)
+make -j PARTY=all FUNCTION_IDENTIFIER=57 PROTOCOL=12 USE_CUDA_GEMM=2 
+scripts/run.sh -p all -n 4 # Run four parties locally
+```
+
+### Split-Roles
 
 SplitRoles compiles multiple executables per player to perform load balancing. Running a protocol with Split-Roles can be done by running the following commands. More information on Split-Roles can be found in the section "Scaling MPC to Billions of Gates per Second".
 ```bash
@@ -50,11 +63,14 @@ scripts/run.sh -p <party_id> -s 1 -g 6 # Utilize 6 GPUs for the computation
 
 ## Project Structure
 The framework uses a modular architecture with the following components.
-- Core: Implements communication between parties, cryptographic primitives, and techniques for hardware acceleration. Uses Bitslicing, Vectorization, GPU acceleration, and hardware instruction for cryptographic primtitives to accelerate local computation required by the MPC protocols.
-- Protocols: Implements MPC protocols and protocol-specific primitives. Each protocol utilizes high-level operations provided by `Core` for commonly used operations such as sampling shared random numbers or exchanging messages.
-- Datatypes: Implements different datatypes that serve as a high-level templated interface to compute on MPC shares in a generic manner with overloaded operators.
-- Programs: Implements high-level functions, routines and use cases using the custom `datatypes`. Implements several MPC-generic functions such as matrix multiplication and comparisons.
-- NN: Implements a templated neural network inference engine that performs the forward pass of a CNN by relying on high-level MPC-generic functions provided by `Programs`. Models and datasets can be exported from PyTorch.
+
+| Software Component | Description |
+| --- | --- |
+| Core | Implements communication between parties, cryptographic primitives, and techniques for hardware acceleration. Uses Bitslicing, Vectorization, GPU acceleration, and hardware instruction for cryptographic primtitives to accelerate local computation required by the MPC protocols. |
+| Protocols | Implements MPC protocols and protocol-specific primitives. Each protocol utilizes high-level operations provided by `Core` for commonly used operations such as sampling shared random numbers or exchanging messages. |
+| Datatypes | Implements different datatypes that serve as a high-level templated interface to compute on MPC shares in a generic manner with overloaded operators. |
+| Programs | Implements high-level functions, routines and use cases using the custom `datatypes`. Implements several MPC-generic functions such as matrix multiplication and comparisons. |
+| NN | Implements a templated neural network inference engine that performs the forward pass of a CNN by relying on high-level MPC-generic functions provided by `Programs`. Models and datasets can be exported from PyTorch. |
 
 New MPC protocol can be added to `protocols/` by using the operations provided by `Core`.
 New functions can be added to `programs/` by using the operations supported by `Datatypes`.
@@ -63,11 +79,13 @@ New Model architectures can be added to `nn/FlexNN/architectures/` by using our 
 ## Scaling MPC to Billions of Gates per Second
 
 The framework offers multiple tweaks to accelerate MPC computation. The following are the most important settings that can be adjusted in `config.h` or by setting the respective flags when compiling.
-- Concurrency (`DATTYPE`, `PROCESS_NUM`): `DATTYPE` sets the registersize to use for Bitslicing and Vectorization. Bitslicing and vectorization is supported by the framework on various archiectures (SSE,AVX-2,AVX-512). If your CPU supports AVX-512, seeting `DATTYPE` to 512 vectorize all integers and boolean variables to fully utilize the wide registers. `PROCESS_NUM` sets the number of processes to use for parallel computation.
-- Hardware Acceleration (`RANDOM_ALGORITHM`, `USE_SSL_AES`, `ARM`, `USE_CUDA_GEMM`): Different approaches for efficiently implementing cryptographic primitives on various hardware architectures. Matrix operations can be accelerated using CUDA.
-- Tweaks (`SEND_BUFFER`, `RECV_BUFFER`, `VERIFY_BUFFER`): Setting buffer sizes for communication and sha hashing to verify messages can accelerate workloads. The default settings should provide a good starting point for most settings.
-- Preprocessing (`PRE`): Some protocols support a preprocessing phase that can be enabled to accelerate the online phase. 
-- SPLITROLES (`SPLITROLES`): By using the SPLITROLES flag when compiling, the framework compiles n! excutables for a n-PC protocol where each executable has a different player assignment. This allows load balance the communication and computation between the nodes. SPLITROLES 1 compiles all executables for a 3PC protocol, SPLITROLES 2 compiles all executables for a 3PC protocol in a setting with four nodes, and SPLITROLES 3 compiles all executables for a 4PC protocol.
+| Configuration Type | Options | Description |
+| --- | --- | --- |
+| Concurrency | `DATTYPE`, `PROCESS_NUM` | Vectorize all integers and boolean variables to fully utilize the wide registers. Set the number of processes to use for parallel computation. 
+| Hardware Acceleration | `RANDOM_ALGORITHM`, `USE_SSL_AES`, `ARM`, `USE_CUDA_GEMM` | Different approaches for efficiently implementing cryptographic primitives on various hardware architectures. Matrix operations can be accelerated using CUDA. |
+| Tweaks | `SEND_BUFFER`, `RECV_BUFFER`, `VERIFY_BUFFER` | Setting buffer sizes for communication and sha hashing to verify messages can accelerate workloads. The default settings should provide a good starting point for most settings. |
+| Preprocessing | `PRE` | Some protocols support a preprocessing phase that can be enabled to accelerate the online phase. |
+| SplitRoles | `SPLITROLES` | By using the SPLITROLES flag when compiling, the framework compiles n! excutables for a n-PC protocol where each executable has a different player assignment. This allows load balance the communication and computation between the nodes. SPLITROLES 1 compiles all executables for a 3PC protocol, SPLITROLES 2 compiles all executables for a 3PC protocol in a setting with four nodes, and SPLITROLES 3 compiles all executables for a 4PC protocol. |
 
 For nodes equipped with a 32-core AVX-512 CPU, a CUDA-enabled GPU, the following example may compile an optimized executables in a distributed setup. Note that this example inherently vectorizes the computation `PROCESS_NUM x DATTYPE/BITLENGTH x SPLITROLES_Factor` times. 
 ```bash

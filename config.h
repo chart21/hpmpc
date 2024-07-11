@@ -86,7 +86,7 @@
 
 // How many messages should be buffered until a combined hash is performed? 0 means all hashes are calculated at the very end of the protocol.
 #ifndef VERIFY_BUFFER
-#define VERIFY_BUFFER 16
+#define VERIFY_BUFFER 512/DATTYPE
 #endif
 
 

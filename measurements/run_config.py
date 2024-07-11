@@ -53,7 +53,7 @@ def main():
     parser.add_argument('-b', type=str, default='127.0.0.1', help='IP address for b')
     parser.add_argument('-c', type=str, default='127.0.0.1', help='IP address for c')
     parser.add_argument('-d', type=str, default='127.0.0.1', help='IP address for d')
-    parser.add_argument('-g', type=int, default=0, help='IP address for g')
+    parser.add_argument('-g', type=int, default=0, help='Numbers of GPUs to use (0 for CPU only)')
     parser.add_argument('--override', nargs='*', help='Override config options (key=value)')
     parser.add_argument('-i', type=int, default=1, help='Number of iterations per run')
 
