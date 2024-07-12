@@ -9,6 +9,86 @@ Neural network models can be imported from PyTorch as part of [PIGEON (Private I
 
 More extensive documentation can be found [here](https://c.harth-kitzerow.com/mkdocs-hpmpc/).
 
+## TLDR
+
+### Setup (CPU only)
+```bash
+sudo apt install libssl-dev libeigen3-dev
+git submodule update --init --recursive
+pip install torch torchvision gdown # if not already installed
+```
+
+### Unit Tests
+
+#### Run all unit tests locally
+```bash
+python3 measurements/run_config.py measurements/configs/unit_tests/  
+```
+#### Run all unit tests on a distributed setup
+```bash
+python3 measurements/run_config.py measurements/configs/unit_tests/ -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
+```
+#### Parse the results
+```bash
+python3 measurements/parse_logs.py measurements/logs/ # results are stored as `.csv` in measurements/logs/
+```
+
+### End to End neural network training and secure inference
+
+#### Prepare neural network inference with a pre-trained model
+```bash
+cd nn/Pygeon
+python download_pretrained.py single_model datasets
+export MODEL_DIR=models/pretrained
+export MODEL_FILE=VGG16_CIFAR-10_standard.bit
+export DATA_DIR=data/datasets
+export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
+export LABELS_FILE=CIFAR-10_standard_test_labels.bin
+cd ../..
+```
+
+#### Compile and run the neural network inference locally
+
+```bash
+make -j PARTY=all FUNCTION_IDENTIFIER=74 PROTOCOL=5 MODELOWNER=P_0 DATAOWNER=P_1
+scripts/run.sh -p all -n 3
+```
+
+#### Compile and run the neural network inference on a distributed setup
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=74 PROTOCOL=5 MODELOWNER=P_0 DATAOWNER=P_1
+scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
+```
+
+### Benchmarks
+
+#### Run AND gate benchmark with different protocols and number of processes on a distributed setup
+```bash
+## use --override DATTYYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
+python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000
+```
+
+#### Run LeNet5 on MNIST locally with batch size 24 using SPLITROLES
+```bash
+# 3PC
+python3 measurements/run_config.py -s 1 -p all measurements/configs/benchmarks/lenet5.conf --override PROTOCOL=5 PROCESS_NUM=4
+# 4PC
+python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/lenet5.conf --override PROTOCOL=12 PROCESS_NUM=1
+```
+
+#### Run various neural network models on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)
+```bash
+# 3PC
+python3 measurements/run_config.py -s 1 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=5 PROCESS_NUM=4 # 4PC
+python3 measurements/run_config.py -s 3 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=12 PROCESS_NUM=12 
+```
+
+#### Parse the results
+```bash
+python3 measurements/parse_logs.py measurements/logs/ # results are stored as `.csv` in measurements/logs/
+```
+
 ## Getting Started
 
 You can use the provided Dockerfile or set up the project manually. The only dependency is OpenSSL. Neural networks and other functions with matrix operations also require the Eigen library. 
@@ -263,7 +343,7 @@ BITLENGTH=32
 ### Running Measurements
 The `run_config.py` script runs compiles and executes all combinations in `.conf`. Outputs are stored as `.log` files in the `measurements/logs/` directory. 
 ```bash
-measurements/run_config.py -p <party_id> measurements/configs/<config_file>.conf
+python3 measurements/run_config.py -p <party_id> measurements/configs/<config_file>.conf
 ```
 
 
@@ -276,6 +356,7 @@ python3 measurements/parse_logs.py measurements/logs/<log_file>.log
 
 ## Troubleshooting
 The framework utilizes different hardware acceleration techniques for a range of hardware architectures. 
+In case of timeouts, change the `BASE_PORT` or make sure that all previous executions have been terminated by executing `pkill -9 -f run-P` on all nodes.
 In case of compile errors, please note the following requirements and supported bitlengths for different `DATTYPE` values.
 
 ### Register Size and Hardware Requirements
@@ -308,6 +389,12 @@ If you encounter issues regarding the accuracy of neural network inference, the 
 - Increase or reduce the number of `FRACTIONAL` bits.
 - Adjust the truncation strategy to `TRUNC_APPROACH=1` (REDUCED Slack) or `TRUNC_APPROACH=2` (Exact Truncation), along with `TRUNC_THEN_MULT=1` and `TRUNC_DELAYED=1`. Note that truncation approaches 1 and 2 require setting `TRUNC_DELAYED=1`.
 - Inspect the terminal output for any errors regarding reading the model or dataset. PIGEON uses dummy data or model parameters if the files are not found. Make sure that `MODELOWNER` and `DATAOWNER` are set during compilation and that the respective environment variables point to existing files.
+
+
+
+
+
+
 
 ## References
 
