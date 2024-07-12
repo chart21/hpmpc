@@ -7,7 +7,7 @@ Neural networks models can be imported from PyTorch as part of PIGEON (Private I
 
 ## Documentation
 
-More extensive documentation can be found [here](https://c.harth-kitzerw.com/mkdocs-hpmpc/).
+More extensive documentation can be found [here](https://c.harth-kitzerow.com/mkdocs-hpmpc/).
 
 ## Getting Started
 
