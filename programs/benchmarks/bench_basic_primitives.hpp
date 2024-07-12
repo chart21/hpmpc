@@ -35,7 +35,7 @@
 #define FUNCTION dot_prod_bench // Matrix Vector Product n NUM_INPUTS = n*(DATTYPE/BITLENGTH) product output size
 #endif
 
-#if DATTYPE > 1
+#if BITLENGTH > 1
 #include "../../datatypes/Additive_Share.hpp"
 #endif
 

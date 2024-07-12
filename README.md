@@ -294,7 +294,7 @@ In case of compile errors, please note the following requirements and supported 
 | 32   | None                    | 32                              | `DATTYPE=32`                 |
 | 16   | None                    | 16                              | `DATTYPE=16`                 |
 | 8    | None                    | 8 (Does not support all arithmetic instructions) | `DATTYPE=8`                  |
-| 1    | None                    | 1 (Use only for boolean circuits)                               | `DATTYPE=1`                  |
+| 1    | None                    | 16,32,64 (Use only for boolean circuits)                               | `DATTYPE=1`                  |
 
 ### Hardware Acceleration Requirements
 
@@ -369,10 +369,14 @@ scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c 
 
 ### Benchmarks
 
-#### Run AND gate benchmark with different protocols and number of processes on a distributed setup
+#### Run AND gate benchmark with different protocols and number of processes on a local/distributed setup
 ```bash
 # use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
+#Local Setup
+python3 measurements/run_config.py -p all measurements/configs/benchmarks/AND.conf
+
+#Distributed Setup
 python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512
 ```
 
@@ -387,7 +391,7 @@ python3 measurements/run_config.py -s 1 -p all measurements/configs/benchmarks/l
 python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/lenet5.conf --override PROTOCOL=12 PROCESS_NUM=1
 ```
 
-#### Run various neural network models on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)
+#### Run various neural network models in a distributed stting on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)
 ```bash
 # use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
