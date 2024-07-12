@@ -346,7 +346,7 @@ python3 measurements/parse_logs.py measurements/logs/ # results are stored as `.
 cd nn/Pygeon
 python download_pretrained.py single_model datasets
 export MODEL_DIR=models/pretrained
-export MODEL_FILE=VGG16_CIFAR-10_standard.bit
+export MODEL_FILE=VGG16_CIFAR-10_standard.bin
 export DATA_DIR=data/datasets
 export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
 export LABELS_FILE=CIFAR-10_standard_test_labels.bin
@@ -356,7 +356,7 @@ cd ../..
 #### Compile and run the neural network inference locally
 
 ```bash
-make -j PARTY=all FUNCTION_IDENTIFIER=74 PROTOCOL=5 MODELOWNER=P_0 DATAOWNER=P_1
+make -j PARTY=all FUNCTION_IDENTIFIER=74 PROTOCOL=5 MODELOWNER=P_0 DATAOWNER=P_1 NUM_INPUTS=40 BITLENGTH=32 DATTYPE=32
 scripts/run.sh -p all -n 3
 ```
 
