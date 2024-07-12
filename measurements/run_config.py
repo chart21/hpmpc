@@ -95,7 +95,7 @@ def main():
 
         timestamp = int(time.time())
         log_file = f"measurements/logs/{os.path.basename(config_file).split('.')[0]}_{timestamp}.log"
-        config_log_file = f"measurements/logs/{os.path.basename(config_file).split('.')[0]}_{timestamp}-config.log"
+        config_log_file = f"measurements/logs/{os.path.basename(config_file).split('.')[0]}_{timestamp}.log-config"
         
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         

@@ -374,7 +374,7 @@ scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c 
 # use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
 #Local Setup
-python3 measurements/run_config.py -p all measurements/configs/benchmarks/AND.conf
+python3 measurements/run_config.py -p all measurements/configs/benchmarks/AND.conf --override NUM_INPUTS=1000000 DATTYPE=512
 
 #Distributed Setup
 python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512
@@ -385,10 +385,10 @@ python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_
 # use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
 # 3PC
-python3 measurements/run_config.py -s 1 -p all measurements/configs/benchmarks/lenet5.conf --override PROTOCOL=5 PROCESS_NUM=4
+python3 measurements/run_config.py -s 1 -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=5 PROCESS_NUM=4
 
 # 4PC
-python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/lenet5.conf --override PROTOCOL=12 PROCESS_NUM=1
+python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=12 PROCESS_NUM=1
 ```
 
 #### Run various neural network models in a distributed stting on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)

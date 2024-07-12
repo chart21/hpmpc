@@ -57,11 +57,11 @@ endef
 
 
 compile_executables:
-	@if [ "$(SPLITROLES)" -eq 3 ]; then \
+	@if [ "$(SPLITROLES)" -eq 1 ]; then \
 		$(MAKE) compile_splitroles_3; \
-	elif [ "$(SPLITROLES)" -eq 34 ]; then \
+	elif [ "$(SPLITROLES)" -eq 2 ]; then \
 		$(MAKE) compile_splitroles_3to4; \
-	elif [ "$(SPLITROLES)" -eq 4 ]; then \
+	elif [ "$(SPLITROLES)" -eq 3 ]; then \
 		$(MAKE) compile_splitroles_4; \
 	else \
 		$(MAKE) compile_parties; \
