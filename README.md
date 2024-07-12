@@ -5,15 +5,9 @@ HPMPC implements multiple MPC protocols and provides a high-level C++ interface 
 Out of the Box, the framework supports computation in the boolean and arithmetic domain, mixed circuits, and fixed point arithmetic. 
 Neural networks models can be imported from PyTorch as part of PIGEON (Private Inference of Neural Networks).
 
-<div style="padding: 20px; border-radius: 5px; border: 1px solid #e1e4e8; background-color: #f6f8fa; margin-bottom: 20px;">
-  <div style="border-bottom: 1px solid #e1e4e8; padding-bottom: 10px; margin-bottom: 10px;">
-    <strong style="font-size: 1.1em; color: #0366d6;">📚 Documentation</strong>
-  </div>
-  <ul style="list-style-type: disc; margin-top: 8px; padding-left: 20px;">
-    <li> More extensive documentation can be found [here](https://c.harth-kitzerw.com/mkdocs-hpmpc/). </li>
-  </ul>
-</div>
+## Documentation
 
+More extensive documentation can be found [here](https://c.harth-kitzerw.com/mkdocs-hpmpc/).
 
 ## Getting Started
 
