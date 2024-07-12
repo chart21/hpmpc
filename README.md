@@ -14,6 +14,7 @@ More extensive documentation can be found [here](https://c.harth-kitzerow.com/mk
 ## Getting Started
 
 TLDR instructions can be found [here](#tldr).
+
 You can use the provided Dockerfile or set up the project manually. The only dependency is OpenSSL. Neural networks and other functions with matrix operations also require the Eigen library. 
 ```bash
 #Install Dependencies:
