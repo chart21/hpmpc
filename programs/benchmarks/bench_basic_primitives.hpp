@@ -42,7 +42,7 @@
 //Boilerplate
 #define RESULTTYPE DATATYPE
 
-#if FUNCTION_IDENTIFIER == 40
+#if FUNCTION_IDENTIFIER == 1
 template<typename Share>
 void AND_BENCH(DATATYPE* res)
 {
@@ -69,7 +69,7 @@ void AND_BENCH(DATATYPE* res)
 }
 #endif
 
-#if FUNCTION_IDENTIFIER == 41 || FUNCTION_IDENTIFIER == 42
+#if FUNCTION_IDENTIFIER == 2 || FUNCTION_IDENTIFIER == 3
 template<typename Share>
 void MULT_BENCH(DATATYPE* res)
 {
@@ -80,9 +80,9 @@ void MULT_BENCH(DATATYPE* res)
     Share::communicate(); // dummy round
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-    #if FUNCTION_IDENTIFIER == 41 // int
+    #if FUNCTION_IDENTIFIER == 2 // int
         c[i] = a[i].prepare_mult(b[i]);
-    #elif FUNCTION_IDENTIFIER == 42 // fixed
+    #elif FUNCTION_IDENTIFIER == 3 // fixed
         c[i] = a[i].prepare_dot(b[i]);
         c[i].mask_and_send_dot();
     #endif
@@ -91,9 +91,9 @@ void MULT_BENCH(DATATYPE* res)
     Share::communicate();
     for(int i = 0; i < NUM_INPUTS; i++)
     {
-    #if FUNCTION_IDENTIFIER == 41 // int
+    #if FUNCTION_IDENTIFIER == 2 // int
         c[i].complete_mult_without_trunc();
-    #elif FUNCTION_IDENTIFIER == 42 // fixed
+    #elif FUNCTION_IDENTIFIER == 3 // fixed
         c[i].complete_mult();
     #endif
     }
@@ -104,7 +104,7 @@ void MULT_BENCH(DATATYPE* res)
 #endif
 
 
-#if FUNCTION_IDENTIFIER == 43
+#if FUNCTION_IDENTIFIER == 4
 template<typename Share>
 void DIV_BENCH(DATATYPE* res)
 {
@@ -145,7 +145,7 @@ void DIV_BENCH(DATATYPE* res)
 #endif
 
 
-#if FUNCTION_IDENTIFIER == 44
+#if FUNCTION_IDENTIFIER == 5
 template<typename Share>
 void SHARE_BENCH(DATATYPE* res)
 {
@@ -165,7 +165,7 @@ void SHARE_BENCH(DATATYPE* res)
 }
 #endif
 
-#if FUNCTION_IDENTIFIER == 45
+#if FUNCTION_IDENTIFIER == 6
 template<typename Share>
 void REVEAL_BENCH(DATATYPE* res)
 {

@@ -371,27 +371,30 @@ scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c 
 
 #### Run AND gate benchmark with different protocols and number of processes on a distributed setup
 ```bash
-# use DATTYYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
+# use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
-python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYYPE=512
+python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512
 ```
 
 #### Run LeNet5 on MNIST locally with batch size 24 using SPLITROLES
 ```bash
-# use DATTYYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
+# use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
 # 3PC
 python3 measurements/run_config.py -s 1 -p all measurements/configs/benchmarks/lenet5.conf --override PROTOCOL=5 PROCESS_NUM=4
+
 # 4PC
 python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/lenet5.conf --override PROTOCOL=12 PROCESS_NUM=1
 ```
 
 #### Run various neural network models on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)
 ```bash
-# use DATTYYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
+# use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
 # 3PC
 python3 measurements/run_config.py -s 1 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=5 PROCESS_NUM=4 # 4PC
+
+# 4PC
 python3 measurements/run_config.py -s 3 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=12 PROCESS_NUM=12 
 ```
 
