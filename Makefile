@@ -1,7 +1,7 @@
+SHELL := /bin/bash
 # Compiler
 COMPILER ?= g++
 NVCC ?= nvcc
-Shell := /bin/bash
 
 #make executable and flags directories if they don't exist
 $(shell mkdir -p executables/flags)
