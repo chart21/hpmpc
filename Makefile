@@ -93,15 +93,17 @@ do_compile_player_%:
 	$(update_config)
 	@PREV_MACRO_FLAGS_FILE=./executables/flags/$(EXEC_NAME).macro_flags; \
 	CURRENT_FLAGS="$(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET)"; \
-	if [ -f ./$(NEXEC_NAME).o ] && \
-   [ -f "$$PREV_MACRO_FLAGS_FILE" ] && \
-   [ "$$CURRENT_FLAGS" = "$(cat $$PREV_MACRO_FLAGS_FILE)" ] && \
-   [ ./$(NEXEC_NAME).o -nt Makefile ] && \
-   [ ./$(NEXEC_NAME).o -nt main.cpp ] && \
-   [ ./$(NEXEC_NAME).o -nt $(PCH) ] && \
-   [ ./$(NEXEC_NAME).o -nt $(CONFIG) ] && \
-   [ ./$(NEXEC_NAME).o -nt $(PCH_OBJ) ] && \
-   $(foreach header,$(HEADER_FILES),[ ./$(NEXEC_NAME).o -nt $(header) ] &&) true; then \
+if [ -f ./$(NEXEC_NAME).o ] && \
+   [ -f "$$PREV_MACRO_FLAGS_FILE" ]; then \
+     CURRENT_FLAGS_CONTENT="$$CURRENT_FLAGS"; \
+     PREV_FLAGS_CONTENT="`cat $$PREV_MACRO_FLAGS_FILE`"; \
+     if [ "$$CURRENT_FLAGS_CONTENT" = "$$PREV_FLAGS_CONTENT" ] && \
+        [ ./$(NEXEC_NAME).o -nt Makefile ] && \
+        [ ./$(NEXEC_NAME).o -nt main.cpp ] && \
+        [ ./$(NEXEC_NAME).o -nt $(PCH) ] && \
+        [ ./$(NEXEC_NAME).o -nt $(CONFIG) ] && \
+        [ ./$(NEXEC_NAME).o -nt $(PCH_OBJ) ] && \
+        $(foreach header,$(HEADER_FILES),[ ./$(NEXEC_NAME).o -nt $(header) ] &&) true; then \
 		echo "Nothing to do for $(EXEC_NAME)"; \
 	else \
 		echo "Compiling executable $(EXEC_NAME)" ; \
@@ -122,7 +124,9 @@ do_compile_player_%:
 		fi; \
 		echo "$$CURRENT_FLAGS" > $$PREV_MACRO_FLAGS_FILE; \
 		echo "Compilation for executable $(EXEC_NAME) completed."; \
-	fi
+	fi; \
+fi
+
 
 
 
