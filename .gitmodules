@@ -3,5 +3,5 @@
     url = https://github.com/chart21/pygeon.git
 [submodule "nn/PIGEON"]
 	path = nn/PIGEON
-    url = https://github.com:chart21/flexNN.git
+    url = https://github.com/chart21/flexNN.git
 	branch = hpmpc
