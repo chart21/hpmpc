@@ -53,14 +53,14 @@ fi
 
 if [ "$O_PARTY" = "0" ] 
 then
-    ./run-P0.o $O_IP2 $O_IP3 $O_IP4 
+    ./executables/run-P0.o $O_IP2 $O_IP3 $O_IP4 
 elif [ "$O_PARTY" = "1" ]
 then
-    ./run-P1.o $O_IP1 $O_IP3 $O_IP4 
+    ./executables/run-P1.o $O_IP1 $O_IP3 $O_IP4 
 elif [ "$O_PARTY" = "2" ]
 then
-    ./run-P2.o $O_IP1 $O_IP2 $O_IP4 
+    ./executables/run-P2.o $O_IP1 $O_IP2 $O_IP4 
 elif [ "$O_PARTY" = "3" ]
 then
-    ./run-P3.o $O_IP1 $O_IP2 $O_IP3 
+    ./executables/run-P3.o $O_IP1 $O_IP2 $O_IP3 
 fi
