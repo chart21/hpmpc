@@ -5,6 +5,7 @@
 #include "../../datatypes/float_fixed_converter.hpp"
 #include "../functions/share_conversion.hpp"
 #include "../functions/max_min.hpp"
+#include "bench_helper.hpp"
 //Each circuit will be evaluated in parallel, specified by NUM_PROCESSES. And additionally the Split-Roles mulitplier and vectorization multiplier.
 //Split-roles multipliers: 
 //1 (3-PC): 6
