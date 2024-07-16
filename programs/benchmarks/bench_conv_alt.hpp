@@ -6,6 +6,7 @@
 
 #define USE_EIGEN 1
 #define FUNCTION conv_alt_bench
+#define RESULTTYPE DATATYPE
 
 
 template<typename T>
@@ -127,9 +128,9 @@ public:
     MatX<T> delta;
 public:
     Layer(LayerType type) : type(type), is_first(false), is_last(false) {}
-    virtual void set_layer(const vector<int>& input_shape) = 0;
-    virtual void forward(const MatX<T>& prev_out, bool is_training = true) = 0;
-    virtual void backward(const MatX<T>& prev_out, MatX<T>& prev_delta) = 0;
+    /* virtual void set_layer(const vector<int>& input_shape); */
+    /* virtual void forward(const MatX<T>& prev_out, bool is_training = true); */
+    /* virtual void backward(const MatX<T>& prev_out, MatX<T>& prev_delta); */
 };
 
 
@@ -159,9 +160,9 @@ class Conv2d : public Layer<T>
 		VecX<T> bias;
 		Conv2d(int in_channels, int out_channels, int kernel_size, int stride, int padding,
 			string option);
-		void set_layer(const vector<int>& input_shape) override;
+		void set_layer(const vector<int>& input_shape);
         void forward_alt(const MatX<T>& prev_out, bool is_training);
-		void backward(const MatX<T>& prev_out, MatX<T>& prev_delta) override;
+		void backward(const MatX<T>& prev_out, MatX<T>& prev_delta);
 	};
 
     template<typename T>

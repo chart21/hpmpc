@@ -2,21 +2,26 @@
 #include "bench_helper.hpp"
 #include "../../datatypes/XOR_Share.hpp"
 #include "../../datatypes/Additive_Share.hpp"
+#include "../../datatypes/float_fixed_converter.hpp"
 #include "headers/simple_nn.h"
 #include "headers/config.h"
-#include "Relu.hpp"
+#include "../functions/GEMM.hpp"
 
 #if FUNCTION_IDENTIFIER == 33 || FUNCTION_IDENTIFIER == 34 || FUNCTION_IDENTIFIER == 35
 #define FUNCTION conv_2D_bench
 #elif FUNCTION_IDENTIFIER == 36
 #define FUNCTION mat_mul_bench
 #elif FUNCTION_IDENTIFIER == 37 || FUNCTION_IDENTIFIER == 38 || FUNCTION_IDENTIFIER == 39
+#include "../functions/Relu.hpp"
 #define FUNCTION ReLU_bench
 #elif FUNCTION_IDENTIFIER == 40
 #define FUNCTION avg_pool_bench
 #elif FUNCTION_IDENTIFIER == 41
 #define FUNCTION batch_norm_bench
 #elif FUNCTION_IDENTIFIER == 42 || FUNCTION_IDENTIFIER == 43 || FUNCTION_IDENTIFIER == 44
+#include "../functions/adders/ppa_msb_unsafe.hpp"
+#include "../functions/adders/ppa_msb_4way.hpp"
+#include "../functions/adders/rca_msb.hpp"
 #define FUNCTION boolean_adder_bench
 #elif FUNCTION_IDENTIFIER == 45 || FUNCTION_IDENTIFIER == 46 || FUNCTION_IDENTIFIER == 47
 #define FUNCTION conv_2D_bench
@@ -45,20 +50,20 @@ for(int i = 0; i < num_repeat; ++i)
 {
 using S = Additive_Share<DATATYPE, Share>;
 Share::communicate(); // dummy round
-#if FUNCTION_IDENTIFIER == 400
+#if FUNCTION_IDENTIFIER == 33
     // CryptGPU figure 1 a: Conv2D layer: nxnx3 input, 11x11 kernel, 64 output channels, stride 4, padding 2
 using A = Additive_Share<DATATYPE, Share>;
 const int batch = 1;
 Conv2d<S> conv(3, 64, 11, 4, 2);
 vector<int> input_shape = {batch, 3, NUM_INPUTS, NUM_INPUTS};
 MatX<S> input(batch, 3 * NUM_INPUTS * NUM_INPUTS);
-#elif FUNCTION_IDENTIFIER == 401
+#elif FUNCTION_IDENTIFIER == 34
     // CryptGPU figure 1 b: Conv2D layer: 32x32x3 input, 11x11 kernel, 64 output channels, stride 4, padding 2, batch size k
 const int batch = NUM_INPUTS;
 Conv2d<S> conv(3, 64, 11, 4, 2);
 vector<int> input_shape = {batch, 3, 32, 32};
 MatX<S> input(batch, 3 * 32 * 32);
-#elif FUNCTION_IDENTIFIER == 402
+#elif FUNCTION_IDENTIFIER == 35
     // CryptGPU figure 1 c: Conv2D layer: nxnx512 input, 3x3 kernel, 512 output channels, stride 1, padding 1, batch size k
 const int batch = 1;
 Conv2d<S> conv(512, 512, 3, 1, 1);

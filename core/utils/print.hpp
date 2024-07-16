@@ -53,7 +53,7 @@ void print_result(T* var)
     printf("\n");
 }
 
-#if FUNCTION_IDENTIFIER >= 70
+#if FUNCTION_IDENTIFIER >= 35
 struct Layer_Timing
 {
     int layer_id;
