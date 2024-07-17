@@ -13,6 +13,59 @@
 #elif ARM == 1
 #include "../crypto/sha/SHA_256_arm.h"
 #endif
+
+int array_size = 1000000000;
+double factor = (double) 1000000000 / array_size;
+
+std::vector<double> process_benchmark(int process_id) {
+    UINT_TYPE* data = NEW(UINT_TYPE[1000000000]);
+    DATATYPE* ortho_data = NEW (DATATYPE[1000000000/(DATTYPE/BITLENGTH)]);
+    
+    auto finish21 = std::chrono::high_resolution_clock::now();
+    int counter = 0;
+    for (int i = 0; i < 1000000000/(DATTYPE/BITLENGTH); i+=DATTYPE) 
+    {
+        orthogonalize_boolean(data+i,ortho_data+counter);
+        counter+=BITLENGTH;
+    }
+    auto finish22 = std::chrono::high_resolution_clock::now();
+    counter = 0;
+    for (int i = 0; i < 1000000000/DATTYPE; i+=2)
+    {
+       ortho_data[i] = FUNC_XOR(ortho_data[i],ortho_data[i+1]);
+    }
+    for (int i = 0; i < 1000000000/(DATTYPE/BITLENGTH); i+=DATTYPE) 
+    {
+        unorthogonalize_boolean(ortho_data+counter,data+i);
+        counter+=BITLENGTH;
+    }
+    auto finish23 = std::chrono::high_resolution_clock::now();
+    auto finish24 = std::chrono::high_resolution_clock::now();
+    orthogonalize_arithmetic(data,ortho_data,1000000000/(DATTYPE/BITLENGTH));
+    auto finish25 = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 1000000000/(DATTYPE/BITLENGTH); i+=2)
+    {
+        ortho_data[i] = OP_ADD(ortho_data[i],ortho_data[i+1]);
+    }
+    auto finish26 = std::chrono::high_resolution_clock::now();
+    unorthogonalize_arithmetic(ortho_data,data,1000000000/(DATTYPE/BITLENGTH));
+    auto finish27 = std::chrono::high_resolution_clock::now();
+
+    std::cout << "Process " << process_id << " - First element: " << data[0] << std::endl;
+
+    delete[] data;
+    delete[] ortho_data;
+
+    std::vector<double> results;
+    results.push_back(BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish22 - finish21).count() * factor)  / 1000));
+    results.push_back(BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish23 - finish22).count() * factor)  / 1000));
+    results.push_back(BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish25 - finish24).count() * factor)  / 1000));
+    results.push_back(BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish27 - finish26).count() * factor)  / 1000));
+
+    return results;
+}
+
+
 int main() {
 
 #ifdef __AES__
@@ -254,8 +307,6 @@ std::cout << "32-bit AND Throughput in Gbps: " << 32 / ( (double) std::chrono::d
 
 /* auto d = new DATATYPE[1000000000]; */
 
-int array_size = 1000000000;
-double factor = (double) 1000000000 / array_size;
 
 auto e = new DATATYPE[array_size];
 auto f= new DATATYPE[array_size];
@@ -378,6 +429,45 @@ std::cout << "Orthogonalize Boolean Throughput in Gbps: " << BITLENGTH / (((doub
 std::cout << "Unorthogonalize Boolean Throughput in Gbps: " << BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish23 - finish22).count() * factor)  / 1000) << std::endl;
 std::cout << "Orthogonalize Arithmetic Throughput in Gbps: " << BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish25 - finish24).count() * factor)  / 1000) << std::endl;
 std::cout << "Unorthogonalize Arithmetic Throughput in Gbps: " << BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish27 - finish26).count() * factor)  / 1000) << std::endl;
+
+
+#define NUM_PROCESSES 4
+
+
+// Main code (replace the original benchmark code with this)
+std::vector<std::thread> threads;
+std::vector<std::vector<double>> all_results(NUM_PROCESSES);
+
+for (int i = 0; i < NUM_PROCESSES; ++i) {
+    threads.emplace_back([i, &all_results]() {
+        all_results[i] = process_benchmark(i);
+    });
+}
+
+for (auto& thread : threads) {
+    thread.join();
+}
+
+// Calculate average results
+std::vector<double> avg_results(4, 0.0);
+for (const auto& result : all_results) {
+    for (int i = 0; i < 4; ++i) {
+        avg_results[i] += result[i];
+    }
+}
+for (auto& avg : avg_results) {
+    avg /= NUM_PROCESSES;
+}
+
+// Print average results
+std::cout << "Orthogonalize Boolean Throughput (MT) in Gbps: " << avg_results[0] << std::endl;
+std::cout << "Unorthogonalize Boolean Throughput (MT) in Gbps: " << avg_results[1] << std::endl;
+std::cout << "Orthogonalize Arithmetic Throughput (MT) in Gbps: " << avg_results[2] << std::endl;
+std::cout << "Unorthogonalize Arithmetic Throughput (MT) in Gbps: " << avg_results[3] << std::endl;
+
+
+
+
 
 std::cout << m[0] << std::endl;
 std::cout << plain__[0][0] << std::endl;
