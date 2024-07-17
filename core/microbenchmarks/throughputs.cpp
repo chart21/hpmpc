@@ -180,9 +180,9 @@ std::cout << "SHA256: " << std::chrono::duration_cast<std::chrono::milliseconds>
 std::cout << "SHA256 Throughput: " << 1.024 / ((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish4 - finish3).count() / 1000) << "GBit/s"<< std::endl;
 /* std::cout << "Tested with 16384MB for AES, 1024MB for SHA256" << std::endl; */
 
-/* auto a = new uint64_t[1000000000]; */
-auto b = new uint64_t[1000000000];
-auto c= new uint64_t[1000000000];
+/* auto a = new UINT_TYPE[1000000000]; */
+auto b = new UINT_TYPE[1000000000];
+auto c= new UINT_TYPE[1000000000];
 finish6 = std::chrono::high_resolution_clock::now();
 
 
@@ -327,7 +327,7 @@ delete[] e;
 delete[] f;
 
 
-uint64_t* data = NEW(uint64_t[1000000000]);
+UINT_TYPE* data = NEW(UINT_TYPE[1000000000]);
 int multiplier = DATTYPE / 64;
 DATATYPE* ortho_data = NEW (DATATYPE[1000000000]);
 finish21 = std::chrono::high_resolution_clock::now();
@@ -336,12 +336,18 @@ for (int i = 0; i < 1000000000/DATTYPE; i+=DATTYPE)
     orthogonalize_boolean(data+i,ortho_data+i);
 }
 finish22 = std::chrono::high_resolution_clock::now();
+for (int i = 0; i < 1000000000/DATTYPE; i+=2
+{
+   ortho_data[i] = FUNC_XOR(ortho_data[i],ortho_data[i+1]);
+}
+
 for (int i = 0; i < 1000000000/DATTYPE; i+=DATTYPE) 
 {
     unorthogonalize_boolean(ortho_data+i,data+i);
 }
 finish23 = std::chrono::high_resolution_clock::now();
 
+std::cout << data[0] << std::endl;
 delete[] data;
 delete[] ortho_data;
 
