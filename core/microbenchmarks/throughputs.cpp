@@ -328,14 +328,17 @@ delete[] f;
 
 
 UINT_TYPE* data = NEW(UINT_TYPE[1000000000]);
-int multiplier = DATTYPE / 64;
-DATATYPE* ortho_data = NEW (DATATYPE[1000000000]);
+/* int multiplier = DATTYPE / 64; */
+DATATYPE* ortho_data = NEW (DATATYPE[1000000000/DATTYPE]);
 finish21 = std::chrono::high_resolution_clock::now();
+int counter = 0;
 for (int i = 0; i < 1000000000/DATTYPE; i+=DATTYPE) 
 {
-    orthogonalize_boolean(data+i,ortho_data+i);
+    orthogonalize_boolean(data+i,ortho_data+counter);
+    counter++;
 }
 finish22 = std::chrono::high_resolution_clock::now();
+counter = 0;
 for (int i = 0; i < 1000000000/DATTYPE; i+=2)
 {
    ortho_data[i] = FUNC_XOR(ortho_data[i],ortho_data[i+1]);
@@ -343,7 +346,8 @@ for (int i = 0; i < 1000000000/DATTYPE; i+=2)
 
 for (int i = 0; i < 1000000000/DATTYPE; i+=DATTYPE) 
 {
-    unorthogonalize_boolean(ortho_data+i,data+i);
+    unorthogonalize_boolean(ortho_data+counter,data+i);
+    counter++;
 }
 finish23 = std::chrono::high_resolution_clock::now();
 
