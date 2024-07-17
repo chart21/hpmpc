@@ -103,6 +103,9 @@ std::chrono::system_clock::time_point finish22;
 std::chrono::system_clock::time_point finish23;
 std::chrono::system_clock::time_point finish24;
 std::chrono::system_clock::time_point finish25;
+std::chrono::system_clock::time_point finish26;
+std::chrono::system_clock::time_point finish27;
+
 // Warmup
     for (int i = 0; i < 1000; i++) {
     for (int j = 0; j < 128; j++) {
@@ -351,14 +354,30 @@ for (int i = 0; i < 1000000000/DATTYPE; i+=DATTYPE)
 }
 finish23 = std::chrono::high_resolution_clock::now();
 
+
+finish24 = std::chrono::high_resolution_clock::now();
+orthogonalize_arithmetic(data,ortho_data,1000000000/(DATTYPE/BITLENGTH));
+finish25 = std::chrono::high_resolution_clock::now();
+for (int i = 0; i < 1000000000/(DATTYPE/BITLENGTH); i+=2)
+{
+    ortho_data[i] = OP_ADD(ortho_data[i],ortho_data[i+1]);
+}
+finish26 = std::chrono::high_resolution_clock::now();
+unorthogonalize_arithmetic(ortho_data,data,1000000000/(DATTYPE/BITLENGTH));
+finish27 = std::chrono::high_resolution_clock::now();
+
+
 std::cout << data[0] << std::endl;
+
 delete[] data;
 delete[] ortho_data;
 
 
 
-std::cout << "Orthogonalize Throughput in Gbps: " << DATTYPE / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish22 - finish21).count() * factor)  / 1000) << std::endl;
-std::cout << "Unorthogonalize Throughput in Gbps: " << DATTYPE / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish23 - finish22).count() * factor)  / 1000) << std::endl;
+std::cout << "Orthogonalize Boolean Throughput in Gbps: " << BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish22 - finish21).count() * factor)  / 1000) << std::endl;
+std::cout << "Unorthogonalize Boolean Throughput in Gbps: " << BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish23 - finish22).count() * factor)  / 1000) << std::endl;
+std::cout << "Orthogonalize Arithmetic Throughput in Gbps: " << BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish25 - finish24).count() * factor)  / 1000) << std::endl;
+std::cout << "Unorthogonalize Arithmetic Throughput in Gbps: " << BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish27 - finish26).count() * factor)  / 1000) << std::endl;
 
 std::cout << m[0] << std::endl;
 std::cout << plain__[0][0] << std::endl;
