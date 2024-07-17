@@ -431,14 +431,13 @@ std::cout << "Orthogonalize Arithmetic Throughput in Gbps: " << BITLENGTH / (((d
 std::cout << "Unorthogonalize Arithmetic Throughput in Gbps: " << BITLENGTH / (((double) std::chrono::duration_cast<std::chrono::milliseconds>(finish27 - finish26).count() * factor)  / 1000) << std::endl;
 
 
-#define NUM_PROCESSES 4
 
 
 // Main code (replace the original benchmark code with this)
 std::vector<std::thread> threads;
-std::vector<std::vector<double>> all_results(NUM_PROCESSES);
+std::vector<std::vector<double>> all_results(PROCESS_NUM);
 
-for (int i = 0; i < NUM_PROCESSES; ++i) {
+for (int i = 0; i < PROCESS_NUM; ++i) {
     threads.emplace_back([i, &all_results]() {
         all_results[i] = process_benchmark(i);
     });
@@ -456,14 +455,14 @@ for (const auto& result : all_results) {
     }
 }
 for (auto& avg : avg_results) {
-    avg /= NUM_PROCESSES;
+    avg /= PROCESS_NUM;
 }
 
 // Print average results
-std::cout << "Orthogonalize Boolean Throughput (MT) in Gbps: " << avg_results[0] << std::endl;
-std::cout << "Unorthogonalize Boolean Throughput (MT) in Gbps: " << avg_results[1] << std::endl;
-std::cout << "Orthogonalize Arithmetic Throughput (MT) in Gbps: " << avg_results[2] << std::endl;
-std::cout << "Unorthogonalize Arithmetic Throughput (MT) in Gbps: " << avg_results[3] << std::endl;
+std::cout << "Orthogonalize Boolean Throughput (MT) in Gbps: " << avg_results[0]*PROCESS_NUM << std::endl;
+std::cout << "Unorthogonalize Boolean Throughput (MT) in Gbps: " << avg_results[1]*PROCESS_NUM << std::endl;
+std::cout << "Orthogonalize Arithmetic Throughput (MT) in Gbps: " << avg_results[2]*PROCESS_NUM << std::endl;
+std::cout << "Unorthogonalize Arithmetic Throughput (MT) in Gbps: " << avg_results[3]*PROCESS_NUM << std::endl;
 
 
 
