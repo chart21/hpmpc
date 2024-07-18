@@ -4,6 +4,8 @@ import os
 import sys
 import argparse
 from collections import defaultdict
+            
+bool_functions=[1,13,14,15,25,32,42,43,44] # List of function identifiers that are boolean-only functions
 
 def parse_size(size_str):
     values = [s.strip().rstrip('MB') for s in size_str.split(',')]
@@ -112,16 +114,25 @@ def parse_log_file(file_path, debug=False):
             run_data['TESTS_PASSED'] = f"{tests_passed}/{tests_total}"
 
         # Calculate Ops/s if applicable
-        if all(key in run_data for key in ['BITLENGTH', 'DATTYPE', 'NUM_INPUTS']):
+        if all(key in run_data for key in ['BITLENGTH', 'DATTYPE', 'NUM_INPUTS','FUNCTION_IDENTIFIER']):
             bitlength = float(run_data['BITLENGTH'])
             dattype = float(run_data['DATTYPE'])
             num_inputs = float(run_data['NUM_INPUTS'])
-            run_data.update({
-                'TP_PRE_AVG(Ops/s)': (num_inputs * (dattype / bitlength)) / pre_avg if pre_avg else 0,
-                'TP_PRE_MAX(Ops/s)': (num_inputs * (dattype / bitlength)) / pre_max if pre_max else 0,
-                'TP_ONLINE_AVG(Ops/s)': (num_inputs * (dattype / bitlength)) / online_avg if online_avg else 0,
-                'TP_ONLINE_MAX(Ops/s)': (num_inputs * (dattype / bitlength)) / online_max if online_max else 0,
-            })
+            function_identifier = int(run_data['FUNCTION_IDENTIFIER'])
+            if function_identifier in bool_functions:
+                run_data.update({
+                    'TP_PRE_AVG(Ops/s)': (num_inputs * dattype) / pre_avg if pre_avg else 0,
+                    'TP_PRE_MAX(Ops/s)': (num_inputs * dattype) / pre_max if pre_max else 0,
+                    'TP_ONLINE_AVG(Ops/s)': (num_inputs * dattype) / online_avg if online_avg else 0,
+                    'TP_ONLINE_MAX(Ops/s)': (num_inputs * dattype) / online_max if online_max else 0,
+                })
+            else:
+                run_data.update({
+                    'TP_PRE_AVG(Ops/s)': (num_inputs * (dattype / bitlength)) / pre_avg if pre_avg else 0,
+                    'TP_PRE_MAX(Ops/s)': (num_inputs * (dattype / bitlength)) / pre_max if pre_max else 0,
+                    'TP_ONLINE_AVG(Ops/s)': (num_inputs * (dattype / bitlength)) / online_avg if online_avg else 0,
+                    'TP_ONLINE_MAX(Ops/s)': (num_inputs * (dattype / bitlength)) / online_max if online_max else 0,
+                })
 
         if debug:
             print(f"Parsed data for Run {run_index}: {dict(run_data)}")

@@ -42,7 +42,7 @@
 // Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 // Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
 #ifndef DATTYPE
-#define DATTYPE 32
+#define DATTYPE 128
 #endif
 
 // Number of parallel processes to use
