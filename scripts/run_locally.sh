@@ -2,7 +2,7 @@
 helpFunction()
 {
    echo "Script to run n players locally after compiling."
-   echo -e "\t-f Function to run"
+   echo -e "\t-f Executable to run"
    echo -e "\t-n num_players"
    exit 1 # Exit script after printing help
 }
@@ -29,7 +29,7 @@ fi
 
 for (( i=0; i<$NUM_PLAYERS; i++ ))
 do
-    ./"$FUNCTION"-P"$i".o &
+    ./executables/"$FUNCTION"-P"$i".o &
 done
 
 wait

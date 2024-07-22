@@ -1,110 +1,58 @@
 #pragma once
 #include "../../protocols/Protocols.h"
-#include <cstdint>
-#include <cstring>
-#include <iostream>
-#include <bitset>
-#include "../../protocols/XOR_Share.hpp"
-#include "../../protocols/Additive_Share.hpp"
+#include "../../datatypes/XOR_Share.hpp"
+#include "../../datatypes/Additive_Share.hpp"
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
-/* #include "boolean_adder.hpp" */
-#include "boolean_adder_bandwidth.hpp"
+#include "adders/rca.hpp"
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+#include "adders/rca_msb.hpp"
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
+#include "adders/ppa_msb_4_way.hpp"
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+#include "adders/ppa_msb_unsafe.hpp"
+#endif
 
-#include "boolean_adder_msb.hpp"
-#include "ppa_msb.hpp"
-#include "ppa.hpp"
-#include "ppa_msb_unsafe.hpp"
-
-/* #include "boolean_adder.hpp" */
-/* #include "ppa.hpp" */
-#define FUNCTION convert_share
-#define RESULTTYPE DATATYPE
-    template<typename Share>
-void adder(DATATYPE* res)
+// compute msbs of a range of arithemtic shares
+template<int bm, int bk, typename Datatype, typename Share>
+void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int len)
 {
-    using S = XOR_Share<DATATYPE, Share>;
-    using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<BITLENGTH,S>;
-    using sint = sint_t<A>;
-    
-    Bitset x;
-    Bitset y;
-    x.template prepare_receive_from<P_0>();
-    y.template prepare_receive_from<P_0>();
-    Share::communicate();
-    x.template complete_receive_from<P_0>();
-    y.template complete_receive_from<P_0>();
-    Share::communicate();
-    Bitset z;
-    BooleanAdder<BITLENGTH,S> adder(x, y, z);
-    while(!adder.is_done())
+using S = XOR_Share<Datatype, Share>;
+using A = Additive_Share<Datatype, Share>;
+using Bitset = sbitset_t<bk-bm,S>;
+using sint = sint_t<A>;
+Bitset *s1 = new Bitset[len];
+Bitset *s2 = new Bitset[len];
+    for(int i = 0; i < len; i++)
     {
-        adder.step();
-        Share::communicate();
-    }
-    z.prepare_reveal_to_all();
-    Share::communicate();
-    uint64_t result_arr[DATTYPE];
-
-    z.complete_reveal_to_all(result_arr);
-    if(current_phase == PHASE_LIVE)
-    {
-        std::cout << "P" << PARTY << ": Result: ";
-    for(int i = 0; i < DATTYPE; i++)
-    {
-        /* std::cout << std::bitset<sizeof(uint64_t)*8>(s1_arr[i] + s2_arr[i]); */
-    /* std::cout << std::endl; */
-        std::cout << std::bitset<sizeof(uint64_t)*8>(result_arr[i]);
-    std::cout << std::endl;
-    }
-
-}
-}
-    template<typename Share>
-void RELU(DATATYPE* res)
-{
-    using S = XOR_Share<DATATYPE, Share>;
-    using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<BITLENGTH,S>;
-    using sint = sint_t<A>;
-    
-    sint* val = new sint[NUM_INPUTS];
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        val[i].template prepare_receive_from<P_0>();
+        s1[i] = Bitset::prepare_A2B_S1(bm, (S*) val[i].get_share_pointer());
+        s2[i] = Bitset::prepare_A2B_S2(bm, (S*) val[i].get_share_pointer());
     }
     Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        val[i].template complete_receive_from<P_0>();
-    }
-    Share::communicate();
-    Bitset *s1 = new Bitset[NUM_INPUTS];
-    Bitset *s2 = new Bitset[NUM_INPUTS];
-    for(int i = 0; i < NUM_INPUTS; i++)
-    {
-        s1[i] = sbitset_t<BITLENGTH, S>::prepare_A2B_S1((S*) val[i].get_share_pointer());
-        s2[i] = sbitset_t<BITLENGTH, S>::prepare_A2B_S2((S*) val[i].get_share_pointer());
-    }
-    Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
+    for(int i = 0; i < len; i++)
     {
         s1[i].complete_A2B_S1();
         s2[i].complete_A2B_S2();
     }
-    Bitset* y = new Bitset[NUM_INPUTS];
-    /* BooleanAdder<S> *adder = new BooleanAdder<S>[NUM_INPUTS]; */
-    std::vector<PPA_MSB_Unsafe<BITLENGTH,S>> adders;
-    adders.reserve(NUM_INPUTS);
-    for(int i = 0; i < NUM_INPUTS; i++)
+
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+    std::vector<BooleanAdder_MSB<bk-bm,S>> adders;
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+    /* std::vector<PPA_MSB<bk-bm,S>> adders; */
+    std::vector<PPA_MSB_Unsafe<bk-bm,S>> adders;
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
+    std::vector<PPA_MSB_4Way<bk-bm,S>> adders;
+#endif
+    
+    adders.reserve(len);
+    for(int i = 0; i < len; i++)
     {
         /* adder[i].set_values(s1[i], s2[i], y[i]); */
-        adders.emplace_back(s1[i], s2[i], y[i][0]);
+        adders.emplace_back(s1[i], s2[i], msb[i]);
     }
     while(!adders[0].is_done())
     {
-        for(int i = 0; i < NUM_INPUTS; i++)
+        for(int i = 0; i < len; i++)
         {
             adders[i].step();
         }
@@ -115,154 +63,281 @@ void RELU(DATATYPE* res)
     adders.clear();
     adders.shrink_to_fit();
     
-    S *msb = new S[NUM_INPUTS];
-    for(int i = 0; i < NUM_INPUTS; i++)
+    
+
+}
+
+
+template<int bm, int bk, typename Datatype, typename Share>
+void A2B_range(sint_t<Additive_Share<Datatype, Share>>* val, sbitset_t<bk-bm,XOR_Share<Datatype, Share>>* y, int len)
+{
+    using S = XOR_Share<Datatype, Share>;
+    using A = Additive_Share<Datatype, Share>;
+    using Bitset = sbitset_t<bk-bm,S>;
+    using sint = sint_t<A>;
+    Share::communicate();
+    Bitset *s1 = new Bitset[len];
+    Bitset *s2 = new Bitset[len];
+    for(int i = 0; i < len; i++)
     {
-        msb[i] = ~ y[i][0];
+        s1[i] = Bitset::prepare_A2B_S1(bm, (S*) val[i].get_share_pointer());
+        s2[i] = Bitset::prepare_A2B_S2(bm, (S*) val[i].get_share_pointer());
     }
-    for(int i = 0; i < NUM_INPUTS; i++)
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        s1[i].complete_A2B_S1();
+        s2[i].complete_A2B_S2();
+    }
+    
+    Share::communicate();
+
+    std::vector<BooleanAdder<bk-bm,S>> adders;
+   
+    adders.reserve(len);
+    for(int i = 0; i < len; i++)
+    {
+        adders.emplace_back(s1[i], s2[i], y[i]);
+    }
+
+    while(!adders[0].is_done())
+    {
+        for(int i = 0; i < len; i++)
+        {
+            adders[i].step();
+        }
+        /* std::cout << "Adder step ..." << std::endl; */
+        Share::communicate();
+    }
+    delete[] s1;
+    delete[] s2;
+    adders.clear();
+    adders.shrink_to_fit();
+}
+
+
+template<int bm, int bk, typename Datatype, typename Share>
+void B2A_range(sbitset_t<bk-bm,XOR_Share<Datatype, Share>>* y, sint_t<Additive_Share<Datatype, Share>>* val, int len)
+{
+    using S = XOR_Share<Datatype, Share>;
+    using A = Additive_Share<Datatype, Share>;
+    using Bitset = sbitset_t<bk-bm,S>;
+    using sint = sint_t<A>;
+    Bitset* random_mask = new Bitset[len];
+    for(int i = 0; i < len; i++)
+    {
+        for(int j = 0; j < bk-bm; j++)
+        {
+            random_mask[i][j].get_random_B2A();
+        }
+    }
+    
+    Bitset *z = new Bitset[len];
+    std::vector<BooleanAdder<bk-bm,S>> adders2;
+
+    adders2.reserve(len);
+    for(int i = 0; i < len; i++)
+    {
+        adders2.emplace_back(y[i], random_mask[i], z[i]);
+    }
+
+    while(!adders2[0].is_done())
+    {
+        for(int i = 0; i < len; i++)
+        {
+            adders2[i].step();
+        }
+        Share::communicate();
+    }
+    adders2.clear();
+    adders2.shrink_to_fit();
+    delete[] y;
+    for(int i = 0; i < len; i++)
+    {
+        sint::prepare_B2A( z[i].get_share_pointer(), random_mask[i].get_share_pointer(), val[i].get_share_pointer());
+    }
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        sint::complete_B2A(z[i].get_share_pointer(), val[i].get_share_pointer());
+    }
+    delete[] z;
+    delete[] random_mask;
+}
+
+template<typename Datatype, typename Share>
+void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Share<Datatype, Share>>* val, const int len)
+{
+    for(int i = 0; i < len; i++)
     {
         y[i].prepare_opt_bit_injection(val[i].get_share_pointer(),val[i].get_share_pointer());
     }
-    delete[] y;
     Share::communicate();
-    for(int i = 0; i < NUM_INPUTS; i++)
+    for(int i = 0; i < len; i++)
     {
         val[i].complete_opt_bit_injection();
     }
-    
-    for(int i = 0; i < NUM_INPUTS; i++)
+}
+
+template<typename Share, typename Datatype>
+void bit2A_range(XOR_Share<Datatype, Share>* bit_val, int len, sint_t<Additive_Share<Datatype, Share>>* output)
+{
+using S = XOR_Share<Datatype, Share>;
+using A = Additive_Share<Datatype, Share>;
+using sint = sint_t<A>;
+for (int i = 0; i < len; i++)
+{
+    bit_val[i].prepare_bit2a(output[i].get_share_pointer());
+}
+Share::communicate();
+for (int i = 0; i < len; i++)
+{
+    output[i].complete_bit2a();
+}
+}
+
+template<typename Share, typename Datatype>
+void bitinj_range(XOR_Share<Datatype, Share>* bit_val, int len, sint_t<Additive_Share<Datatype, Share>>* output)
+{
+using S = XOR_Share<Datatype, Share>;
+using A = Additive_Share<Datatype, Share>;
+using sint = sint_t<A>;
+sint* t1 = new sint[len];
+sint* t2 = new sint[len];
+for (int i = 0; i < len; i++)
+{
+    bit_val[i].prepare_bit_injection_S1(t1[i].get_share_pointer());
+    bit_val[i].prepare_bit_injection_S2(t2[i].get_share_pointer());
+}
+Share::communicate();
+for (int i = 0; i < len; i++)
+{
+    t1[i].complete_bit_injection_S1();
+    t2[i].complete_bit_injection_S2();
+}
+for (int i = 0; i < len; i++)
+{
+    output[i].prepare_XOR(t1[i], t2[i]);
+}
+Share::communicate();
+for (int i = 0; i < len; i++)
+{
+    output[i].complete_XOR(t1[i], t2[i]);
+}
+delete[] t1;
+delete[] t2;
+
+}
+
+template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype, typename FUNC_OP>
+static void pack_additive(const Additive_Share<Datatype, Share>*  input, Additive_Share<Datatype, Share>*  output, const int len, FUNC_OP op){
+    using A = Additive_Share<Datatype, Share>;
+    using sint = sint_t<A>;
+    int m = len;
+    sint* tmp = new sint[(m-1)/BITLENGTH+1];
+    sint* tmp_output = new sint[(m-1)/BITLENGTH+1];
+    int counter = 0;
+    while(m > (BITLENGTH-1))
     {
-        val[i].prepare_reveal_to_all();
+       tmp[counter++] = sint::load_shares(input+counter*BITLENGTH);
+       m -= BITLENGTH;
     }
-    Share::communicate();
-    auto result_arr = new UINT_TYPE[NUM_INPUTS][DATTYPE];
-    for(int i = 0; i < NUM_INPUTS; i++)
+    if(m > 0)
+        tmp[counter++] = sint::load_shares(m, input+counter*BITLENGTH);
+    op(tmp, tmp_output, counter);
+    counter = 0;
+    m = len;
+    while(m > (BITLENGTH-1))
     {
-        val[i].complete_reveal_to_all(result_arr[i]);
-    }
-#if PRINT == 1
-    if(current_phase == PHASE_LIVE)
-    {
-        std::cout << "P" << PARTY << ": Result: ";
-        for(int i = 0; i < NUM_INPUTS; i++)
+        for(int j = 0; j < BITLENGTH; j++)
         {
-    for(int j = 0; j < DATTYPE; j++)
-    {
-        std::cout << std::bitset<sizeof(uint64_t)*8>(result_arr[i][j]);
-    std::cout << std::endl;
+            output[counter*BITLENGTH+j] = tmp_output[counter].get_share(j);
+        }
+        counter++;
+        m -= BITLENGTH;
     }
-    std::cout << std::endl;
+    if(m > 0)
+    {
+        for(int j = 0; j < m; j++)
+        {
+            output[counter*BITLENGTH+j] = tmp_output[counter].get_share_pointer()[j];
         }
     }
-#endif
-
+    delete[] tmp;
+    delete[] tmp_output;
 }
 
-
-    template<typename Share>
-void bit_injection(DATATYPE* res)
-{
-    using S = XOR_Share<DATATYPE, Share>;
-    using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<BITLENGTH,S>;
+template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype, typename FUNC_OP>
+static void pack_additive_inplace(const Additive_Share<Datatype, Share>*  input, Additive_Share<Datatype, Share>*  output, const int len, FUNC_OP op){
+    using A = Additive_Share<Datatype, Share>;
     using sint = sint_t<A>;
-
-    Bitset val;
-    val.template prepare_receive_from<P_0>();
-    Share::communicate();
-    val.template complete_receive_from<P_0>();
-    Share::communicate();
-    S s = val[0];
-    
-    sint s1;
-    sint s2;
-    s.prepare_bit_injection_S1(s1.get_share_pointer());
-    s.prepare_bit_injection_S2(s2.get_share_pointer());
-    Share::communicate();
-    s1.complete_bit_injection_S1();
-    s2.complete_bit_injection_S2();
-    sint result;
-    result.prepare_XOR(s1,s2);
-    Share::communicate();
-    result.complete_XOR(s1,s2);
-
-    /* Bitset result = val; */
-    result.prepare_reveal_to_all();
-    Share::communicate();
-    uint64_t result_arr[DATTYPE];
-    result.complete_reveal_to_all(result_arr);
-    if(current_phase == PHASE_LIVE)
+    int m = len;
+    sint* tmp = new sint[(m-1)/BITLENGTH+1];
+    int counter = 0;
+    while(m > (BITLENGTH-1))
     {
-        std::cout << "P" << PARTY << ": Result: ";
-    for(int i = 0; i < DATTYPE; i++)
-    {
-        /* std::cout << std::bitset<sizeof(uint64_t)*8>(s1_arr[i] + s2_arr[i]); */
-    /* std::cout << std::endl; */
-        std::cout << std::bitset<sizeof(uint64_t)*8>(result_arr[i]);
-    std::cout << std::endl;
+       tmp[counter++] = sint::load_shares(input+counter*BITLENGTH);
+       m -= BITLENGTH;
     }
-
-}
-
-}
-template<typename Share>
-void convert_share(/*outputs*/ DATATYPE *result)
-{
-    using S = XOR_Share<DATATYPE, Share>;
-    using A = Additive_Share<DATATYPE, Share>;
-    using Bitset = sbitset_t<BITLENGTH,S>;
-    using sint = sint_t<A>;
-
-    sint val;
-    Bitset y;
-    /* Bitset val; */
-    /* sint y; */
-    val.template prepare_receive_from<P_0>();
-    Share::communicate();
-    val.template complete_receive_from<P_0>();
-    Share::communicate();
-    Bitset s1 = Bitset::prepare_A2B_S1( (S*) val.get_share_pointer());
-    Bitset s2 = Bitset::prepare_A2B_S2( (S*) val.get_share_pointer());
-    Share::communicate();
-    s1.complete_A2B_S1();
-    s2.complete_A2B_S2();
-    BooleanAdder<BITLENGTH,S> adder(s1, s2,y);
-    while(!adder.is_done())
+    if(m > 0)
+        tmp[counter++] = sint::load_shares(m, input+counter*BITLENGTH);
+    op(tmp, counter);
+    counter = 0;
+    m = len;
+    while(m > (BITLENGTH-1))
     {
-        adder.step();
-        Share::communicate();
+        for(int j = 0; j < BITLENGTH; j++)
+        {
+            output[counter*BITLENGTH+j] = tmp[counter].get_share(j);
+        }
+        counter++;
+        m -= BITLENGTH;
     }
-    /* val = val + val; */
-    
-    /* y = val; */
-    y.prepare_reveal_to_all();
-    /* s1.prepare_reveal_to_all(); */
-    /* s2.prepare_reveal_to_all(); */
-    Share::communicate();
-    auto result_arr = NEW(UINT_TYPE[DATTYPE]);
-    /* uint64_t s1_arr[DATTYPE]; */
-    /* uint64_t s2_arr[DATTYPE]; */
-    /* s1.complete_reveal_to_all(s1_arr); */
-    /* s2.complete_reveal_to_all(s2_arr); */
-
-    y.complete_reveal_to_all(result_arr);
-    /* DATATYPE temp[DATTYPE]; */
-    /* orthogonalize_boolean(result_arr, temp); */
-    /* temp[0] = ~ temp[0]; */
-    /* temp[0] = NOT(temp[0]); */
-    /* unorthogonalize_boolean(  temp, result_arr); */
-    if(current_phase == PHASE_LIVE)
+    if(m > 0)
     {
-        std::cout << "P" << PARTY << ": Result: ";
-    for(int i = 0; i < DATTYPE; i++)
-    {
-        /* std::cout << std::bitset<sizeof(uint64_t)*8>(s1_arr[i] + s2_arr[i]); */
-    /* std::cout << std::endl; */
-        std::cout << std::bitset<sizeof(UINT_TYPE)*8>(result_arr[i]);
-    std::cout << std::endl;
+        for(int j = 0; j < m; j++)
+        {
+            output[counter*BITLENGTH+j] = tmp[counter].get_share_pointer()[j];
+        }
     }
-    
+    delete[] tmp;
+}
 
+
+template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype, typename FUNC_OP>
+static void pack_additive_inplace(Additive_Share<Datatype, Share>*  val, const int len, FUNC_OP op){
+    using sint = sint_t<Additive_Share<Datatype, Share>>;
+    int m = len;
+    sint* tmp = new sint[(m-1)/BITLENGTH+1];
+    int counter = 0;
+    while(m > BITLENGTH-1)
+    {
+       tmp[counter++] = sint::load_shares(val+counter*BITLENGTH);
+       m -= BITLENGTH;
+    }
+    if(m > 0)
+        tmp[counter++] = sint::load_shares(m, val+counter*BITLENGTH);
+    /* RELU_range_in_place<rm,rk,Share>(tmp, counter); */
+    op(tmp, counter);
+    counter = 0;
+    m = len;
+    while(m > BITLENGTH-1)
+    {
+        for(int j = 0; j < BITLENGTH; j++)
+        {
+            val[counter*BITLENGTH+j] = tmp[counter].get_share(j);
+        }
+        counter++;
+        m -= BITLENGTH;
+    }
+    if(m > 0)
+    {
+        for(int j = 0; j < m; j++)
+        {
+            val[counter*BITLENGTH+j] = tmp[counter].get_share_pointer()[j];
+        }
+    }
+    delete[] tmp;
 }
-}
+
+

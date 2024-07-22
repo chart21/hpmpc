@@ -20,7 +20,7 @@
 #include "help/Input.hpp"
 #include "help/Util.hpp"
 
-#include "../../programs/functions/comp_trunc.hpp"
+#include "../../programs/functions/comparisons.hpp"
 
 using std::string;
 using std::vector;
@@ -1588,7 +1588,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                 idxs.push_back(regs[i]); // dest
             }
             sint* res = new sint[input.size()];
-            trunc_pr<sint>(input.data(), res, input.size());
+            // trunc_pr<sint>(input.data(), res, input.size());
 
             for (size_t i = 0; i < idxs.size(); ++i) {
                 for (size_t j = 0; j < get_size(); ++j)

@@ -35,7 +35,7 @@ setQuota() {
 
     # set up dynamic cgroup via systemd
     quota=$(pos_get_variable quotas --from-loop)
-    environ+=" systemd-run --scope -p CPUQuota=${quota}%"    
+    environ+=" systemd-run --scope -p CPUQuota=${quota}%"
     return 0
 }
 
@@ -259,9 +259,9 @@ resetTrafficControl() {
     # skip when code 7 -> do not manipulate any link
     [ "$nodemanipulate" -eq 7 ] && return 0
 
-    
 
-    
+
+
     # three interconnected nodes
     if [ "$partysize" -eq 3 ]; then
         # the code to active NIC0 is 0 and 2, exclude 1 to match

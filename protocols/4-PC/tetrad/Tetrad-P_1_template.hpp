@@ -144,8 +144,11 @@ Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 //receive lambda2 from P_3
 store_compare_view(P_0, l1); //help P_0 verifying
 store_compare_view(P_3, mv); //help P_3 verifying
-                              
+#if PRE == 0                              
 Datatype lambda2 = receive_from_live(P_3);
+#else
+Datatype lambda2 = pre_receive_from_live(P_3);
+#endif
 store_compare_view(P_0, lambda2); //get help from P_0 to veriy
 Datatype result = SUB(mv, lambda2);
 result = SUB(result, l0);
@@ -153,14 +156,21 @@ result = SUB(result, l1);
 return result;
 }
 
+template <typename func_mul>
+Tetrad1_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return Tetrad1_Share(MULT(mv,b),MULT(l0,b),MULT(l1,b));
+}
+
+
 
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == PSELF)
 {
-    mv = get_input_live();
+    mv = val;
     l0 = getRandomVal(P_013); //l1
     l1 = getRandomVal(P_123); //l3
     Datatype l2 = SET_ALL_ZERO();

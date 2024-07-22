@@ -13,60 +13,6 @@ static OEC_MAL0_init public_val(Datatype a)
     return OEC_MAL0_init();
 }
     
-template <typename func_mul>
-OEC_MAL0_init mult_public(const Datatype b, func_mul MULT) const
-{
-    return OEC_MAL0_init();
-}
-
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_init& r_mk2, OEC_MAL0_init& r_msb, OEC_MAL0_init& c, OEC_MAL0_init& c_prime){
-#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
-    store_compare_view_init(P_2);
-    store_compare_view_init(P_2);
-#else
-#if PRE == 1
-    pre_send_to_(P_2);
-    pre_send_to_(P_2);
-#else
-    send_to_(P_2);
-    send_to_(P_2);
-#endif
-#endif
-}
-
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_init& r_mk2, OEC_MAL0_init& r_msb, OEC_MAL0_init& c, OEC_MAL0_init& c_prime){
-    receive_from_(P_2);
-    receive_from_(P_2);
-    store_compare_view_init(P_1);
-    store_compare_view_init(P_1);
-}
-
-
-
-template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OEC_MAL0_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
-{
-#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
-    store_compare_view_init(P_2);
-#else
-#if PRE == 1
-    pre_send_to_(P_2);
-#else
-    send_to_(P_2);
-#endif
-#endif
-    return OEC_MAL0_init();
-} 
-
-template <typename func_add, typename func_sub>
-void complete_public_mult_fixed( func_add ADD, func_sub SUB)
-{
-    receive_from_(P_2);
-    store_compare_view_init(P_1);
-}
-
 
 OEC_MAL0_init Not() const
 {
@@ -97,40 +43,6 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     send_to_(P_2);
 #endif
 #endif
-}
-
-
-    template <typename func_add, typename func_sub, typename func_trunc>
-void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
-store_compare_view_init(P_2);
-#else
-#if PRE == 1
-pre_send_to_(P_2);
-#else
-send_to_(P_2);
-#endif
-#endif
-}
-    
-template <typename func_add, typename func_sub, typename func_trunc>
-void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-#if PROTOCOL == 11
-receive_from_(P_2); // m1 + m2 + r123
-store_compare_view_init(P_1);
-store_compare_view_init(P_3);
-#else
-#if PRE == 1
-pre_receive_from_(P_3); // (e + r0,1 + r0,2)^T - r_0,1
-#else
-receive_from_(P_3); // (e + r0,1 + r0,2)^T - r_0,1
-#endif
-store_compare_view_init(P_012);
-#endif
-receive_from_(P_2);
-store_compare_view_init(P_1); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
@@ -174,8 +86,10 @@ store_compare_view_init(P_3);
 
 void prepare_reveal_to_all() const
 {
+#if PROTOCOL != 8
 send_to_(P_1);
 send_to_(P_2);
+#endif
 
 send_to_(P_3);
 }    
@@ -200,6 +114,8 @@ receive_from_(P_3);
 Datatype dummy;
 return dummy;
 }
+
+
 
 
 
@@ -270,6 +186,107 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
+#if FUNCTION_IDENTIFIER > 14
+
+template <typename func_mul>
+OEC_MAL0_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return OEC_MAL0_init();
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_init& r_mk2, OEC_MAL0_init& r_msb, OEC_MAL0_init& c, OEC_MAL0_init& c_prime){
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
+    store_compare_view_init(P_2);
+    store_compare_view_init(P_2);
+#else
+#if PRE == 1
+    pre_send_to_(P_2);
+    pre_send_to_(P_2);
+#else
+    send_to_(P_2);
+    send_to_(P_2);
+#endif
+#endif
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL0_init& r_mk2, OEC_MAL0_init& r_msb, OEC_MAL0_init& c, OEC_MAL0_init& c_prime){
+    receive_from_(P_2);
+    receive_from_(P_2);
+    store_compare_view_init(P_1);
+    store_compare_view_init(P_1);
+}
+
+
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL0_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
+    store_compare_view_init(P_2);
+#else
+#if PRE == 1
+    pre_send_to_(P_2);
+#else
+    send_to_(P_2);
+#endif
+#endif
+    return OEC_MAL0_init();
+} 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL0_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    Datatype dummy;
+    return prepare_mult_public_fixed(dummy, MULT, ADD, SUB, TRUNC);
+}
+
+template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+    receive_from_(P_2);
+    store_compare_view_init(P_1);
+}
+
+
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
+store_compare_view_init(P_2);
+#else
+#if PRE == 1
+pre_send_to_(P_2);
+#else
+send_to_(P_2);
+#endif
+#endif
+}
+    
+template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PROTOCOL == 11
+receive_from_(P_2); // m1 + m2 + r123
+store_compare_view_init(P_1);
+store_compare_view_init(P_3);
+#else
+#if PRE == 1
+pre_receive_from_(P_3); // (e + r0,1 + r0,2)^T - r_0,1
+#else
+receive_from_(P_3); // (e + r0,1 + r0,2)^T - r_0,1
+#endif
+store_compare_view_init(P_012);
+#endif
+receive_from_(P_2);
+store_compare_view_init(P_1); // v^1,2 = a_u y_0 + b_v x_0 + x_0 y_0 + m^3 
+}
+
+
+
+
 static void prepare_A2B_S1(int m, int k,OEC_MAL0_init in[], OEC_MAL0_init out[])
 {
 }
@@ -311,7 +328,8 @@ void prepare_bit2a(OEC_MAL0_init out[])
     {
 #if PROTOCOL != 12 && PRE == 0
 #if PRE == 1
-        pre_send_to_(P_2);
+        store_compare_view_init(P_2);
+        /* pre_send_to_(P_2); */
 #else
         send_to_(P_2);
 #endif
@@ -615,16 +633,17 @@ store_compare_view_init(P_1);
 store_compare_view_init(P_012);
 }
 
-#if USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM > 0
 static void GEMM(OEC_MAL0_init* a, OEC_MAL0_init* b, OEC_MAL0_init* c, int m, int n, int k, bool a_fixed)
 {
 
 }
-#elif USE_CUDA_GEMM == 2    
+#endif
+#if USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
 static void CONV_2D(const OEC_MAL0_init* X, const OEC_MAL0_init* W, OEC_MAL0_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
 }
+#endif
 
-#endif 
-
+#endif
 
 };

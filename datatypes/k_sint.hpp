@@ -1,6 +1,4 @@
 #pragma once
-#include <array>
-#include <stdexcept>
 #include "../protocols/Protocols.h"
 template<typename Share>
 class sint_t {
@@ -23,10 +21,6 @@ public:
         init(temp_u);
         }
 
-    sint_t(DATATYPE value[BITLENGTH]) {
-        for (int i = 0; i < BITLENGTH; i++) 
-          shares[i] = Share::public_val(value[i]);
-        }
 
     template<int id>
     sint_t(UINT_TYPE value[DATTYPE]) {
@@ -49,9 +43,6 @@ public:
     void prepare_receive_and_replicate(UINT_TYPE value) {
         if constexpr (id == PSELF || PROTOCOL == 13) {
           if (current_phase != PHASE_INIT) { //TODO: Should only happen either in PRE or in live phase
-            /* alignas(sizeof(DATATYPE)) UINT_TYPE temp_u[DATTYPE] = {value}; */
-            /* orthogonalize_arithmetic(temp_u, (DATATYPE*) temp_u); */
-            /* prepare_receive_from<id>((DATATYPE*) temp_u); */
             DATATYPE temp_u[BITLENGTH];
             for (int i = 0; i < BITLENGTH; i++)
                 shares[i].template prepare_receive_from<id>(PROMOTE(value));
@@ -183,15 +174,17 @@ public:
         return result;
         }
 
-        void prepare_mult_public_fixed(const UINT_TYPE other) {
+        sint_t prepare_mult_public_fixed(const UINT_TYPE other) {
+            sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i].prepare_mult_public_fixed(other);
+            result[i] = shares[i].prepare_mult_public_fixed(other);
         }
+        return result;
         }
 
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {
-            shares[i].prepare_mult_public_fixed(other);
+            shares[i] = shares[i].prepare_mult_public_fixed(other);
         }
         }
 
@@ -380,10 +373,6 @@ public:
             Share::complete_bit_injection_S2(shares);
         }
 
-        /* UINT_TYPE get_p1() */
-        /* { */
-        /*     return shares[0].get_p1(); */
-        /* } */
 
         static void communicate()
         {
@@ -411,7 +400,7 @@ public:
                 shares[i].complete_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i]);
         }
 
-#if TRUNC_APPROACH == 2
+/* #if TRUNC_APPROACH == 2 */
         template<typename X, typename A>
         static void prepare_B2A(X z[], X r[], A out[])
         {
@@ -423,7 +412,7 @@ public:
         {
             Share::complete_B2A(z, out); 
         }
-#endif
+/* #endif */
 };
 
 

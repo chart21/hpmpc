@@ -18,6 +18,11 @@ Sharemind_Share Add( Sharemind_Share b, func_add ADD) const
     return Sharemind_Share(ADD(val,b.val),ADD(helper,b.helper));
 }
 
+template <typename func_mul>
+Sharemind_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return Sharemind_Share(MULT(val,b),MULT(helper,b));
+}
 
 Sharemind_Share public_val(Datatype a)
 {
@@ -38,9 +43,9 @@ Sharemind_Share Not() const
 Datatype reshare(Datatype a, func_add ADD, func_sub SUB) const
 {
 Datatype u[3];
-u[pprev] = getRandomVal(pprev);
-u[pnext] = getRandomVal(pnext);
-u[2] = SUB(u[pprev],u[pnext]);
+u[PPREV] = getRandomVal(PPREV);
+u[PNEXT] = getRandomVal(PNEXT);
+u[2] = SUB(u[PPREV],u[PNEXT]);
 u[2] = ADD(a,u[2]);
 return u[2];
 }
@@ -50,8 +55,8 @@ template <typename func_add, typename func_sub, typename func_mul>
 {
 Datatype u = reshare(val, ADD, SUB);
 Datatype v = reshare(b.val, ADD, SUB);
-send_to_live(pnext, u);
-send_to_live(pprev, v);
+send_to_live(PNEXT, u);
+send_to_live(PPREV, v);
 Sharemind_Share c;
 c.val = MULT(u,v);
 c.helper = v;
@@ -62,14 +67,14 @@ return c;
 void complete_mult(func_add ADD, func_sub SUB, func_mul MULT)
 {
 
-Datatype u_p = receive_from_live(pprev);
-Datatype v_n = receive_from_live(pnext);
+Datatype u_p = receive_from_live(PPREV);
+Datatype v_n = receive_from_live(PNEXT);
 Datatype v_i = helper;
 val = ADD (val,   ADD ( MULT(u_p,v_i) , MULT(u_p,v_n) ));
 }
 
 
-void prepare_reveal_to_all()
+void prepare_reveal_to_all() const
 {
     for(int t = 0; t < num_players-1; t++) 
         send_to_live(t, val);
@@ -77,7 +82,7 @@ void prepare_reveal_to_all()
 
 
 template <typename func_add, typename func_sub>
-Datatype complete_Reveal(func_add ADD, func_sub SUB)
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 Datatype result = val;
 for(int t = 0; t < num_players-1; t++) 
@@ -87,16 +92,16 @@ return result;
 
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype v, func_add ADD, func_sub SUB) 
 {
     if constexpr(id == PSELF)
-        val = SUB( get_input_live(), ADD(getRandomVal(PPREV),getRandomVal(PNEXT)) );
+        val = SUB( v, ADD(getRandomVal(PPREV),getRandomVal(PNEXT)) );
     else
         val = getRandomVal(id);
 }
 
     template <int id, typename func_add, typename func_sub>
-void complete_receive_from(func_add ADD, func_sub SUB)
+void complete_receive_from(func_add ADD, func_sub SUB) const
 {
 }
 

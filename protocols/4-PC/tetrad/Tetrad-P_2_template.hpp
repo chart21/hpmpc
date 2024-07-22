@@ -165,14 +165,20 @@ result = SUB(result, l1);
 return result;
 }
 
+template <typename func_mul>
+Tetrad2_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return Tetrad2_Share(MULT(mv,b),MULT(l0,b),MULT(l1,b));
+}
+
 
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == PSELF)
 {
-    mv = get_input_live();
+    mv = val;
     l0 = getRandomVal(P_023); //l2
     l1 = getRandomVal(P_123); //l3
     Datatype l2 = SET_ALL_ZERO();

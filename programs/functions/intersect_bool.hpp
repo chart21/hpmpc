@@ -1,7 +1,6 @@
 #pragma once
 #include "../../datatypes/k_bitset.hpp"
-#include "../../protocols/XOR_Share.hpp"
-#include <cassert>
+#include "../../datatypes/XOR_Share.hpp"
     template<typename Protocol>
 void intersect_bool(const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* a, const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* b, sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* result, const int len_a, const int len_b)
 {
@@ -56,4 +55,6 @@ void intersect_bool(const sbitset_t<BITLENGTH, XOR_Share<DATATYPE, Protocol>>* a
         for (int k = 0; k < BITLENGTH; k++)
             result[i][k].complete_and();
 
+    delete[] tmp;
+    delete[] intersect;
 }

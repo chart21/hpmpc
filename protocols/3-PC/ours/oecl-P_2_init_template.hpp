@@ -13,11 +13,6 @@ static OECL2_init public_val(Datatype a)
     return OECL2_init();
 }
     
-    template <typename func_mul>
-OECL2_init mult_public(const Datatype b, func_mul MULT) const
-{
-    return OECL2_init();
-}
 
 OECL2_init Not() const
 {
@@ -39,38 +34,7 @@ OECL2_init prepare_dot(const OECL2_init b, func_add ADD, func_sub SUB, func_mul 
 {
     return OECL2_init();
 }
-
-template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
-{
-    return OECL2_init();
-}
-    template <typename func_add, typename func_sub>
-void complete_public_mult_fixed( func_add ADD, func_sub SUB)
-{
-#if PRE == 1
-    pre_receive_from_(P_0);
-#else
-    receive_from_(P_0);
-#endif
-}
-
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-OECL2_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const{
-#if PRE == 0
-    receive_from_(P_0); //send share of bit decomposition of x_0 to P_2
-#else
-    pre_receive_from_(P_0);
-#endif
-    send_to_(P_1);
-    return OECL2_init();
-}
-
-template <typename func_add, typename func_sub>
-void complete_trunc_2k(func_add ADD, func_sub SUB){
-    receive_from_(P_1);
-}
-
+    
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
@@ -81,24 +45,6 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
 #endif
     send_to_(P_1);
 }
-
-    template <typename func_add, typename func_sub, typename func_trunc>
-void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-    send_to_(P_1);
-}
-    
-    template <typename func_add, typename func_sub, typename func_trunc>
-void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-#if PRE == 1
-    pre_receive_from_(P_0);
-#else
-    receive_from_(P_0);
-#endif
-    receive_from_(P_1);
-}
-
 
 
 template <typename func_add, typename func_sub, typename func_mul>
@@ -183,10 +129,99 @@ else if constexpr(id == P_0)
 }
 
 
+static void send()
+{
+send_();
+}
+static void receive()
+{
+    receive_();
+}
+static void communicate()
+{
+communicate_();
+}
+
+static void finalize(std::string* ips)
+{
+    finalize_(ips);
+}
+
+static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
+{
+    finalize_(ips, ra, sa);
+}
+
+#if FUNCTION_IDENTIFIER > 14
+
+template <typename func_mul>
+OECL2_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return OECL2_init();
+}
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    return OECL2_init();
+}
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+#if PRE == 1
+    pre_receive_from_(P_0);
+#else
+    receive_from_(P_0);
+#endif
+}
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL2_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    Datatype dummy;
+    return prepare_mult_public_fixed(dummy, MULT, ADD, SUB, TRUNC);
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+OECL2_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const{
+#if PRE == 0
+    receive_from_(P_0); //send share of bit decomposition of x_0 to P_2
+#else
+    pre_receive_from_(P_0);
+#endif
+    send_to_(P_1);
+    return OECL2_init();
+}
+
+template <typename func_add, typename func_sub>
+void complete_trunc_2k(func_add ADD, func_sub SUB){
+    receive_from_(P_1);
+}
+
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+    send_to_(P_1);
+}
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PRE == 1
+    pre_receive_from_(P_0);
+#else
+    receive_from_(P_0);
+#endif
+    receive_from_(P_1);
+}
+
+
 void get_random_B2A()
 {
-
 }
+
+
 
 static void prepare_B2A( OECL2_init z[], OECL2_init random_mask[], OECL2_init out[])
 {
@@ -215,28 +250,7 @@ static void complete_B2A(OECL2_init out[], OECL2_init z[])
 }
 
 
-static void send()
-{
-send_();
-}
-static void receive()
-{
-    receive_();
-}
-static void communicate()
-{
-communicate_();
-}
 
-static void finalize(std::string* ips)
-{
-    finalize_(ips);
-}
-
-static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
-{
-    finalize_(ips, ra, sa);
-}
 
 static void prepare_A2B_S1(int m, int k, OECL2_init in[], OECL2_init out[])
 {
@@ -450,15 +464,16 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     this->template complete_receive_from<P_0>(ADD, SUB);
 }
 
-#if USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM > 0
 static void GEMM(OECL2_init* a, OECL2_init* b, OECL2_init* c, int m, int n, int k, bool a_fixed)
 {
 
 }
-#elif USE_CUDA_GEMM == 2    
+#endif
+#if USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
 static void CONV_2D(const OECL2_init* X, const OECL2_init* W, OECL2_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
 }
-
+#endif
 #endif 
 
 

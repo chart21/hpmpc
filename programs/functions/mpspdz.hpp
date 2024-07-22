@@ -5,11 +5,11 @@
 #include <iostream>
 #include <cmath>
 #include "../../protocols/Protocols.h"
-#include "../../protocols/XOR_Share.hpp"
-#include "../../protocols/Additive_Share.hpp"
+#include "../../datatypes/XOR_Share.hpp"
+#include "../../datatypes/Additive_Share.hpp"
 #include "../../datatypes/k_sint.hpp"
 #include "../../datatypes/k_bitset.hpp"
-#include "../../utils/print.hpp"
+#include "../../core/utils/print.hpp"
 
 #include "../../MP-SPDZ/lib/Machine.hpp"
 #include "../../MP-SPDZ/lib/Shares/CInteger.hpp"
@@ -53,7 +53,7 @@
 #define FUNCTION MP_MACHINE_AES_BENCH
 #elif FUNCTION_IDENTIFIER == 526 || FUNCTION_IDENTIFIER == 527 || FUNCTION_IDENTIFIER == 528
 #define FUNCTION MP_MACHINE_REG_BENCH
-#elif FUNCTION_IDENTIFIER == 529 || FUNCTION_IDENTIFIER == 530 || FUNCTION_IDENTIFIER == 531 
+#elif FUNCTION_IDENTIFIER == 529 || FUNCTION_IDENTIFIER == 530 || FUNCTION_IDENTIFIER == 531
 #define FUNCTION MP_MACHINE_LENET_BENCH
 #elif FUNCTION_IDENTIFIER == 532 || FUNCTION_IDENTIFIER == 533 || FUNCTION_IDENTIFIER == 534
 #define FUNCTION MP_MACHINE_VGG_BENCH
@@ -428,4 +428,3 @@ void MP_MACHINE_VGG_BENCH(DATATYPE* res)
 }
 
 #endif
-

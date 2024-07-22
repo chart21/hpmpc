@@ -1,14 +1,14 @@
 #pragma once
-#include "../networking/buffers.h"
-#include <cstdint>
+#include "../core/include/pch.h"
+#include "../core/networking/buffers.h"
 
 #if MAL == 1
 #ifdef __SHA__
-#include "../crypto/sha/SHA_256_x86.h"
+#include "../core/crypto/sha/SHA_256_x86.h"
 #elif ARM == 1
-#include "../cryptosha/SHA_256_arm.h"
+#include "../core/cryptosha/SHA_256_arm.h"
 #else
-#include "../crypto/sha/SHA_256.h"
+#include "../core/crypto/sha/SHA_256.h"
 #endif
 #endif
 

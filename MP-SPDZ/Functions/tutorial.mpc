@@ -1,6 +1,6 @@
 # compile with either -R 32 or -R 64 for arithmetic circuits
 # or -B <bit-length> where <bit-length> can be chosen arbitrarily independent
-# - except a integer is read as private input: <bit-length> has to equal `BITLENGTH` 
+# - except a integer is read as private input: <bit-length> has to equal `BITLENGTH`
 # of `BITLENGTH`/`DATTYPE` for boolean circuits
 # add -k LTZ,EQZ for arithmetic circuits to include LTZ,EQZ operations
 
@@ -9,7 +9,7 @@
 # - sfix: will be stored as `Additive_Share` but left shifted by `FRACTIONAL`
 # - cfix: clear fix point
 # - regint: will always be a 64bit int
-# - cint: same bit length ask 
+# - cint: same bit length ask
 # - sbit: unfortunately each bit will be stored in exactly ONE `XOR_SHARE`
 # - cbit: will be handled efficiently as opposed to sbit
 

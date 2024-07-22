@@ -1,20 +1,20 @@
 #!/bin/bash
 
-# Global setup-script running locally on experiment server. 
+# Global setup-script running locally on experiment server.
 # Initializing the experiment server
 
 # exit on error
-set -e             
+set -e
 # log every command
-set -x                         
+set -x
 
 REPO=$(pos_get_variable repo_hpmpc --from-global)
-REPO_COMMIT=$(pos_get_variable repo_hpmpc_commit --from-global)       
+REPO_COMMIT=$(pos_get_variable repo_hpmpc_commit --from-global)
 REPO_DIR=$(pos_get_variable repo_hpmpc_dir --from-global)
 REPO2=$(pos_get_variable repo --from-global)
 REPO2_DIR=$(pos_get_variable repo_dir --from-global)
 REPO3=$(pos_get_variable repo_mpspdz --from-global)
-#REPO_COMMIT=$(pos_get_variable repo_commit --from-global)       
+#REPO_COMMIT=$(pos_get_variable repo_commit --from-global)
 REPO3_DIR=$(pos_get_variable repo_mpspdz_dir --from-global)
 
 # check WAN connection, waiting helps in most cases
@@ -62,7 +62,7 @@ checkConnection "github.com"
 git clone "$REPO" "$REPO_DIR" # hpmcp
 git clone "$REPO2" "$REPO2_DIR" # mpcbench
 wget https://github.com/data61/MP-SPDZ/releases/download/v0.3.8/mp-spdz-0.3.8.tar.xz
-tar -xf mp-spdz-0.3.8.tar.xz 
+tar -xf mp-spdz-0.3.8.tar.xz
 mv mp-spdz-0.3.8 "$REPO3_DIR" # MP-SPDZ
 
 
@@ -102,7 +102,7 @@ for i in {0..15}; do
 done
 
 pip3 install -U -r "$REPO_DIR"/MP-SPDZ/requirements.txt
- 
+
 ################################## MP-SPDZ ####################################
 cd "$REPO3_DIR"
 

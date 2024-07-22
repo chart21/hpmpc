@@ -7,5 +7,5 @@ datatype = sint
 inputs=datatype.Array(size)
 inputs=inputs.assign_all(1).get_vector()
 inputs=datatype.bit_and(inputs,inputs)
-#verification 
+#verification
 inputs[-1].reveal()

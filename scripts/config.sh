@@ -81,16 +81,9 @@ fi
 
 if [ "$ssl" = "1" ]
 then
-#g++\ -march=native\ -O3\ -std=c++20\ -pthread\ -lssl\ -lcrypto\ main.cpp\ -I\ SimpleNN\ -o\ nn.o
-    # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -lssl -lcrypto"
-    # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -lssl -lcrypto -I SimpleNN -lstdc++fs"
-    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lssl -lcrypto -I SimpleNN"
-    #flags="-march=native -Ofast -std=c++2a -pthread -lssl -lcrypto"
+    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lssl -lcrypto -I SimpleNN" # -lstdc++fs might be needed on some systems
 else
-    # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread"
-    # flags="-march=native -Ofast -fno-finite-math-only -std=c++2a -pthread -I SimpleNN -lstdc++fs"
-    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -I SimpleNN"
-    #flags="-march=native -Ofast -std=c++2a -pthread"
+    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -I SimpleNN" # -lstdc++fs might be needed on some systems
 fi
 
 if [ "$use_nvcc" -gt "0" ]
@@ -104,12 +97,6 @@ then
 fi
 
 flags="$flags MP-SPDZ/lib/help/Util.cpp -DNDEBUG"
-# Print helpFunction in case parameters are empty
-# if [ -z "$parameterA" ] || [ -z "$parameterB" ] || [ -z "$parameterC" ]
-# then
-#    echo "Some or all of the parameters are empty";
-#    helpFunction
-# fi
 
 # Begin script in case all parameters are correct
 
@@ -209,10 +196,10 @@ do
     if [ "$i" = "$PARTY" ] || [ "$PARTY" = "all3" ] || [ "$PARTY" = "all4" ];
     then
         if [ "$PARTY" = "all3" ] || [ "$PARTY" = "all4" ];
-        then        
+        then
             sed -i -e "s/\(define PARTY \).*/\1"$i"/" config.h
         fi
-        if [ "$LIVE" = "0" ] && [ "$INIT" = "1" ]; 
+        if [ "$LIVE" = "0" ] && [ "$INIT" = "1" ];
         then
             sed -i -e "s/\(LIVE \).*/\10/" config.h
             sed -i -e "s/\(INIT \).*/\11/" config.h
@@ -230,7 +217,7 @@ done
 if [ "$PARTY" = "all4" ] || [ "$PARTY" = "3" ];
 then
         sed -i -e "s/\(define PARTY \).*/\1"3"/" config.h
-        if [ "$LIVE" = "0" ] && [ "$INIT" = "1" ]; 
+        if [ "$LIVE" = "0" ] && [ "$INIT" = "1" ];
         then
             sed -i -e "s/\(LIVE \).*/\10/" config.h
             sed -i -e "s/\(INIT \).*/\11/" config.h

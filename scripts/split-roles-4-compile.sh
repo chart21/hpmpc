@@ -78,7 +78,7 @@ then
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"0"/" config.h
     "$comp" main.cpp -o ./run-P1--1-2-3-4.o $flags
-    
+
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"1"/" config.h
     "$comp" main.cpp -o ./run-P1--1-3-2-4.o $flags
@@ -99,7 +99,7 @@ then
     sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"5"/" config.h
     "$comp" main.cpp -o ./run-P1--3-2-1-4.o $flags
 
-    
+
 
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"6"/" config.h
@@ -206,7 +206,7 @@ then
     "$comp" main.cpp -o ./run-P2--3-2-1-4.o $flags
 
 
-    
+
     sed -i -e "s/\(PARTY \).*/\1"1"/" config.h
     sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"6"/" config.h
     "$comp" main.cpp -o ./run-P2--1-2-4-3.o $flags

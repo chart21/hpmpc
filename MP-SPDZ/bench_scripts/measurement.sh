@@ -138,11 +138,11 @@ fi
             -s "$protocol" -e "$preprocess" -c "$packbool" -o "$optshare" -h "$ssl" -b 25000 \
             -j "$threads" -f "$fun" -y "$txbuffer" -z "$rxbuffer" -m "$verifybuffer"
     fi
-    
+
     [ "$splitroles" -eq 1 ] && ./scripts/split-roles-3-compile.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -x "$comp"
     [ "$splitroles" -eq 2 ] && ./scripts/split-roles-3to4-compile.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD" -x "$comp"
     [ "$splitroles" -eq 3 ] && ./scripts/split-roles-4-compile.sh -p "$player" -a "$ipA" -b "$ipB" -c "$ipC" -d "$ipD" -x "$comp"
-    
+
     echo "$(du -BM run-P* | cut -d 'M' -f 1 | head -n 1) (Binary file size in MiB)"
 
 } |& tee testresults
@@ -177,7 +177,7 @@ case " ${types[*]} " in
                     setAllParameters "$partysize";;
                 *)
                 setLatencyBandwidth;;
-            esac;;                 
+            esac;;
             *" PACKETDROPS "*) # a.k.a. packet loss
                 setBandwidthPacketdrop;;
             *)
@@ -202,7 +202,7 @@ pos_sync --timeout 600
 
 # run the SMC protocol
                               # skip 4th node here
-if [ "$splitroles" -eq 0 ]; then 
+if [ "$splitroles" -eq 0 ]; then
     if [ "$protocol" -lt 7 ]; then
         if [ "$player" -lt 3 ]; then
             /bin/time -f "$timerf" timeout 1000s ./run-P"$player".o "$ipA" "$ipB" &>> testresults || success=false
@@ -229,7 +229,7 @@ fi
 #default divisor
 divisor=1
 divisorExt=1
-    
+
     [ "$splitroles" -eq 0 ] && divisor=$((threads*threads)) && divisorExt=$((threads))
     [ "$splitroles" -eq 1 ] && divisor=$((6*6*threads*threads)) && divisorExt=$((6*threads))
     [ "$splitroles" -eq 2 ] && divisor=$((24*24*threads*threads)) && divisorExt=$((24*threads))
@@ -238,7 +238,7 @@ divisorExt=1
     # sum=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | paste -s -d+ | bc)
     # average=$(echo "scale=6;$sum / $divisor" | bc -l)
     # echo "Time measured to initialize program: ${average}s" &>> testresults
-       max=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | sort -nr | head -1) 
+       max=$(grep "measured to initialize program" testresults | cut -d 's' -f 2 | awk '{print $5}' | sort -nr | head -1)
     average=$(echo "scale=6;$max / $divisorExt" | bc -l)
     echo "Time measured to initialize program: ${average}s" &>> testresults
 
@@ -246,7 +246,7 @@ divisorExt=1
         # sum=$(grep "preprocessing chrono" testresults | cut -d 's' -f 4 | awk '{print $3}' | paste -s -d+ | bc)
         # average=$(echo "scale=6;$sum / $divisor" | bc -l)
     # echo "Time measured to perform preprocessing chrono: ${average}s" &>> testresults
-    max=$(grep "preprocessing chrono" testresults | cut -d 's' -f 4 | awk '{print $3}' | sort -nr | head -1) 
+    max=$(grep "preprocessing chrono" testresults | cut -d 's' -f 4 | awk '{print $3}' | sort -nr | head -1)
         average=$(echo "scale=6;$max / $divisorExt" | bc -l)
     echo "Time measured to perform preprocessing chrono: ${average}s" &>> testresults
     fi
@@ -284,7 +284,7 @@ case " ${types[*]} " in
     *" RAM "*)
         unlimitRAM;;&
     *" BANDWIDTHS "*|*" LATENCIES "*|*" PACKETDROPS "*)
-    	resetTrafficControl "$partysize";;&
+        resetTrafficControl "$partysize";;&
     *" CPUS "*)
         unlimitCPUs
 esac

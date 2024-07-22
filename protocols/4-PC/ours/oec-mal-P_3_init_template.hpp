@@ -13,54 +13,6 @@ static OEC_MAL3_init public_val(Datatype a)
     return OEC_MAL3_init();
 }
 
-template <typename func_mul>
-OEC_MAL3_init mult_public(const Datatype b, func_mul MULT) const
-{
-    return OEC_MAL3_init();
-}
-
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime){
-#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
-#if PRE == 1
-    pre_send_to_(P_2);
-    pre_send_to_(P_2);
-#else
-    send_to_(P_2);
-    send_to_(P_2);
-#endif
-#else
-    store_compare_view_init(P_2);
-    store_compare_view_init(P_2);
-#endif
-}
-
-template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime){
-}
-
-
-template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
-{
-#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
-#if PRE == 1
-    pre_send_to_(P_2);
-#else
-    send_to_(P_2);
-#endif
-#else
-    store_compare_view_init(P_2);
-#endif
-    return OEC_MAL3_init();
-} 
-
-    template <typename func_add, typename func_sub>
-void complete_public_mult_fixed( func_add ADD, func_sub SUB)
-{
-}
-
-
 OEC_MAL3_init Not() const
 {
     return OEC_MAL3_init();
@@ -99,34 +51,6 @@ store_compare_view_init(P_2);
 #endif
 #endif
 }
-    template <typename func_add, typename func_sub, typename func_trunc>
-void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
-#if PRE == 1
-pre_send_to_(P_2);
-#else
-send_to_(P_2);
-#endif
-#else
-store_compare_view_init(P_2);
-#endif
-}
-
-    template <typename func_add, typename func_sub, typename func_trunc>
-void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-#if PROTOCOL == 11
-store_compare_view_init(P_0);
-#else
-#if PRE == 1
-pre_send_to_(P_0);
-#else
-send_to_(P_0);
-#endif
-#endif
-}
-
 
 template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL3_init prepare_mult(OEC_MAL3_init b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -170,15 +94,16 @@ store_compare_view_init(P_0);
 void prepare_reveal_to_all() const
 {
     #if PROTOCOL == 8
-    for(int t = 0; t < 3; t++) 
-    {
         #if PRE == 1 
-    pre_send_to_(t);
+    pre_send_to_(P_0);
+    pre_send_to_(P_1);
+    pre_send_to_(P_2);
     #else
-    send_to_(t);
+    send_to_(P_0);
+    send_to_(P_1);
+    send_to_(P_2);
     #endif
 
-    }
  #else
 #if PRE == 1
     pre_send_to_(P_0);
@@ -201,6 +126,9 @@ store_compare_view_init(P_0123);
 #endif
 
 #if PRE == 1 && HAS_POST_PROTOCOL == 1
+#if PROTOCOL == 8
+store_output_share_();
+#endif
 store_output_share_();
 store_output_share_();
 #endif
@@ -269,6 +197,93 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
 {
     finalize_(ips, ra, sa);
 }
+
+
+#if FUNCTION_IDENTIFIER > 14
+
+template <typename func_mul>
+OEC_MAL3_init mult_public(const Datatype b, func_mul MULT) const
+{
+    return OEC_MAL3_init();
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime){
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
+#if PRE == 1
+    pre_send_to_(P_2);
+    pre_send_to_(P_2);
+#else
+    send_to_(P_2);
+    send_to_(P_2);
+#endif
+#else
+    store_compare_view_init(P_2);
+    store_compare_view_init(P_2);
+#endif
+}
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
+void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime){
+}
+
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
+#if PRE == 1
+    pre_send_to_(P_2);
+#else
+    send_to_(P_2);
+#endif
+#else
+    store_compare_view_init(P_2);
+#endif
+    return OEC_MAL3_init();
+} 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL3_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    Datatype dummy;
+    return prepare_mult_public_fixed(dummy, MULT, ADD, SUB, TRUNC);
+}
+
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+}
+
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
+#if PRE == 1
+pre_send_to_(P_2);
+#else
+send_to_(P_2);
+#endif
+#else
+store_compare_view_init(P_2);
+#endif
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PROTOCOL == 11
+store_compare_view_init(P_0);
+#else
+#if PRE == 1
+pre_send_to_(P_0);
+#else
+send_to_(P_0);
+#endif
+#endif
+}
+
 
 static void prepare_A2B_S1(int m, int k, OEC_MAL3_init in[], OEC_MAL3_init out[])
 {
@@ -616,17 +631,17 @@ void complete_mult4(func_add ADD, func_sub SUB){
 }
 
 
-#if USE_CUDA_GEMM == 1
+#if USE_CUDA_GEMM > 0
 static void GEMM(OEC_MAL3_init* a, OEC_MAL3_init* b, OEC_MAL3_init* c, int m, int n, int k, bool a_fixed)
 {
 
 }
-#elif USE_CUDA_GEMM == 2    
+#endif
+#if USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
 static void CONV_2D(const OEC_MAL3_init* X, const OEC_MAL3_init* W, OEC_MAL3_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
 }
+#endif
 
-#endif 
-
-
+#endif
 
 };

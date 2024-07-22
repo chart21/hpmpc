@@ -68,7 +68,7 @@ then
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"0"/" config.h
     "$comp" main.cpp -o ./run-P0--0-1-2.o $flags
-    
+
     sed -i -e "s/\(PARTY \).*/\1"0"/" config.h
     sed -i -e "s/\(SPLIT_ROLES_OFFSET \).*/\1"1"/" config.h
     "$comp" main.cpp -o ./run-P0--0-2-1.o $flags

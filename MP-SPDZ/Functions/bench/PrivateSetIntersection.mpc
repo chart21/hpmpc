@@ -1,5 +1,5 @@
 from util import if_else
-	
+
 
 size = int(program.args[1])
 program.bit_length = 32
@@ -20,6 +20,6 @@ def _(i):
 	@for_range_opt(n)
 	def _(j):
 		match = a[i] == b[j]
-		intersection[i] = if_else(match, a[i], intersection[i]) 
-	
+		intersection[i] = if_else(match, a[i], intersection[i])
+
 intersection.reveal()

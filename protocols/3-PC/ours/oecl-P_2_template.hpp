@@ -28,41 +28,6 @@ OECL2_Share Add(OECL2_Share b, func_add ADD) const
     return OECL2_Share(ADD(p1,b.p1),ADD(p2,b.p2));
 }
 
-template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL2_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
-{
-    OECL2_Share res;
-#if TRUNC_THEN_MULT == 1
-    res.p1 = MULT(TRUNC(ADD(p1,p2)),b);
-#else
-    res.p1 = TRUNC(MULT(ADD(p1,p2),b));
-#endif
-    return res;
-} 
-    
-    template <typename func_add, typename func_sub>
-void complete_public_mult_fixed( func_add ADD, func_sub SUB)
-{
-#if PRE == 1
-    p2 = pre_receive_from_live(P_0);
-#else
-    p2 = receive_from_live(P_0);
-#endif
-    p1 = SUB(p1,p2);
-}
-    
-    template <typename func_mul>
-OECL2_Share mult_public(const Datatype b, func_mul MULT) const
-{
-    return OECL2_Share(MULT(p1,b),MULT(p2,b));
-}
-
-
-    template <typename func_add, typename func_sub, typename func_mul>
-void prepare_dot_add(OECL2_Share a, OECL2_Share b , OECL2_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
-{
-c.p1 = ADD(c.p1, MULT(a.p1,b.p1));
-}    
     template <typename func_add, typename func_sub, typename func_mul>
 OECL2_Share prepare_dot( const OECL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
@@ -82,44 +47,7 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
     p2 = getRandomVal(P_0);
     send_to_live(P_1,ADD(p1,p2));
 }
-    template <typename func_add, typename func_sub, typename func_trunc>
-void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
 
-p1 = ADD(p1, getRandomVal(P_0)); // a1b1 + r_0,2
-send_to_live(P_1, p1); 
-}
-
-    template <typename func_add, typename func_sub, typename func_trunc>
-void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
-{
-#if PRE == 1
-p2 = pre_receive_from_live(P_0); // (e + r0,1 + r0,2)^T - r_0,1
-#else
-p2 = receive_from_live(P_0); // (e + r0,1 + r0,2)^T - r_0,1
-#endif
-p1 = SUB(TRUNC( SUB(p1,receive_from_live(P_1))),p2); // [m2 -m1]^t - m^0
-}
-    
-    /* template <typename func_add, typename func_sub, typename func_trunc> */
-/* void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
-/* { */
-
-/* p1 = ADD(p1, getRandomVal(P_0)); // ab_2 + e_2 + r0,2 */
-/* send_to_live(P_1, p1); // ab_2 + e_2 + r0,2 */
-/* } */
-
-    /* template <typename func_add, typename func_sub, typename func_trunc> */
-/* void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
-/* { */
-/* #if PRE == 1 */
-/* p2 = pre_receive_from_live(P_0); // (e + r0,1 + r0,2)^T + r0,1_2 */
-/* #else */
-/* p2 = receive_from_live(P_0); // (e + r0,1 + r0,2)^T + r0,1_2 */
-/* #endif */
-/* p1 = TRUNC( SUB(p1,receive_from_live(P_1))); // (ab + e + r0,1 + r0,2)^T */ 
-/* p1 = SUB(p1, p2); // - [ ( (e + r0,1 + r0,2)^T + r0,1_2 ) ] */
-/* } */
 template <typename func_add, typename func_sub, typename func_mul>
     OECL2_Share prepare_mult(OECL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
@@ -215,6 +143,95 @@ static void communicate()
 {
     communicate_live();
 }
+
+#if FUNCTION_IDENTIFIER > 14
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL2_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = ADD(p1,p2);
+    for(int i = 2; i <= b; i*=2)
+        result = OP_TRUNC2(result);
+
+    OECL2_Share res(result);
+    return res;
+} 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL2_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    OECL2_Share res;
+#if TRUNC_THEN_MULT == 1
+    res.p1 = MULT(TRUNC(ADD(p1,p2)),b);
+#else
+    res.p1 = TRUNC(MULT(ADD(p1,p2),b));
+#endif
+    return res;
+} 
+    
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed( func_add ADD, func_sub SUB)
+{
+#if PRE == 1
+    p2 = pre_receive_from_live(P_0);
+#else
+    p2 = receive_from_live(P_0);
+#endif
+    p1 = SUB(p1,p2);
+}
+    
+    template <typename func_mul>
+OECL2_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return OECL2_Share(MULT(p1,b),MULT(p2,b));
+}
+
+
+    template <typename func_add, typename func_sub, typename func_mul>
+void prepare_dot_add(OECL2_Share a, OECL2_Share b , OECL2_Share &c, func_add ADD, func_sub SUB, func_mul MULT)
+{
+c.p1 = ADD(c.p1, MULT(a.p1,b.p1));
+}    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+
+p1 = ADD(p1, getRandomVal(P_0)); // a1b1 + r_0,2
+send_to_live(P_1, p1); 
+}
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+#if PRE == 1
+p2 = pre_receive_from_live(P_0); // (e + r0,1 + r0,2)^T - r_0,1
+#else
+p2 = receive_from_live(P_0); // (e + r0,1 + r0,2)^T - r_0,1
+#endif
+p1 = SUB(TRUNC( SUB(p1,receive_from_live(P_1))),p2); // [m2 -m1]^t - m^0
+}
+    
+    /* template <typename func_add, typename func_sub, typename func_trunc> */
+/* void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
+/* { */
+
+/* p1 = ADD(p1, getRandomVal(P_0)); // ab_2 + e_2 + r0,2 */
+/* send_to_live(P_1, p1); // ab_2 + e_2 + r0,2 */
+/* } */
+
+    /* template <typename func_add, typename func_sub, typename func_trunc> */
+/* void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC) */
+/* { */
+/* #if PRE == 1 */
+/* p2 = pre_receive_from_live(P_0); // (e + r0,1 + r0,2)^T + r0,1_2 */
+/* #else */
+/* p2 = receive_from_live(P_0); // (e + r0,1 + r0,2)^T + r0,1_2 */
+/* #endif */
+/* p1 = TRUNC( SUB(p1,receive_from_live(P_1))); // (ab + e + r0,1 + r0,2)^T */ 
+/* p1 = SUB(p1, p2); // - [ ( (e + r0,1 + r0,2)^T + r0,1_2 ) ] */
+/* } */
+
+
 
 void get_random_B2A()
 {
@@ -773,7 +790,6 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 
 /* #endif */
 #if USE_CUDA_GEMM == 2
-
 static void CONV_2D(const OECL2_Share* X, const OECL2_Share* W, OECL2_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
     const int factor = DATTYPE/BITLENGTH;
     const int xSize = inh * inw * din * batchSize;
@@ -814,7 +830,47 @@ static void CONV_2D(const OECL2_Share* X, const OECL2_Share* W, OECL2_Share* Y, 
     delete[] y_p1;
 }
 
-#elif USE_CUDA_GEMM == 1
+#elif USE_CUDA_GEMM == 4
+static void CONV_2D(const OECL2_Share* X, const OECL2_Share* W, OECL2_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+    const int factor = DATTYPE/BITLENGTH;
+    const int xSize = inh * inw * din * batchSize;
+    const int wSize = wh * ww * din * dout;
+    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = out_h * out_w * dout * batchSize;
+    batchSize *= factor; 
+
+    alignas(sizeof(Datatype)) UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
+    alignas(sizeof(Datatype)) UINT_TYPE* w_p1 = new UINT_TYPE[wSize]; // W is always constant
+    alignas(sizeof(Datatype)) UINT_TYPE* y_p1 = new UINT_TYPE[factor * ySize];
+
+    for(int i = 0; i< xSize; i++){
+        unorthogonalize_arithmetic(&X[i].p1, x_p1 + i * factor, 1);
+    }
+
+    for(int i = 0; i< wSize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&W[i].p1, temp, 1);
+        w_p1[i] = temp[0];
+    }
+
+    conv2d_cutlass(x_p1, w_p1, y_p1, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+
+    for(int i = 0; i< ySize; i++){
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for(int j = 0; j < factor; j++)
+            temp[j] = y_p1[i * factor + j];
+        orthogonalize_arithmetic(temp, &Y[i].p1, 1);
+    }
+
+    delete[] x_p1;
+    delete[] w_p1;
+    delete[] y_p1;
+}
+#endif
+#if USE_CUDA_GEMM > 0
+#if USE_CUDA_GEMM == 1
+
     
 
 static void GEMM(OECL2_Share* a, OECL2_Share* b, OECL2_Share* c, int m, int n, int k, bool a_fixed = false)
@@ -857,7 +913,6 @@ static void GEMM(OECL2_Share* a, OECL2_Share* b, OECL2_Share* c, int m, int n, i
             gemm_cutlass(m,n,k,p1, &bp1[i * b_size], &cp1_1[i * c_size]);
         else
             gemm_cutlass(m,n,k, &p1[i * a_size], &bp1[i * b_size], &cp1_1[i * c_size]);
-        /* test_cuda(); */
     }
 
     for (int j = 0; j < c_size; j++)
@@ -872,8 +927,94 @@ static void GEMM(OECL2_Share* a, OECL2_Share* b, OECL2_Share* c, int m, int n, i
     delete[] bp1;
     delete[] cp1_1;
 }
+#else 
+    
+
+static void GEMM(OECL2_Share* a, OECL2_Share* b, OECL2_Share* c, int m, int n, int k, bool a_fixed = false)
+{
+    const int factor = DATTYPE / BITLENGTH;
+    const int a_size = m * k;    
+    const int b_size = k * n;
+    const int c_size = m * n;
+    UINT_TYPE* p1;
+    if(a_fixed)
+        p1 = new UINT_TYPE[a_size];
+    else
+        p1 = new UINT_TYPE[factor * a_size];
+    UINT_TYPE* bp1 = new UINT_TYPE[factor * b_size];
+    UINT_TYPE* cp1_1 = new UINT_TYPE[factor * c_size];
+
+    for(int i = 0; i < a_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&a[i].p1, temp, 1);
+        if(a_fixed)
+            p1[i] = temp[0];
+        else
+            for(int j = 0; j < factor; j++)
+                p1[j*a_size + i] = temp[j];
+    }
+
+if(a_fixed)
+{
+    for(int i = 0; i < k; i++)
+    {
+    for(int j = 0; j < n; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i * n + j].p1, temp, 1);
+        for(int l = 0; l < factor; l++)
+            bp1[i*n*factor+l*n+j] = temp[l];
+    }
+    }
+    gemm_cutlass(m,n*factor,k,p1, bp1, cp1_1);
+
+    
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            for (int l = 0; l < factor; l++)
+                temp[l] = cp1_1[i*n*factor+l*n+j];
+            orthogonalize_arithmetic(temp, &c[i * n + j].p1, 1);
+        }
+    }
+}
+else
+{
+    for(int i = 0; i < b_size; i++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        unorthogonalize_arithmetic(&b[i].p1, temp, 1);
+        for(int j = 0; j < factor; j++)
+            bp1[j * b_size + i] = temp[j];
+    }
+
+
+    for (int i = 0; i < factor; i++)
+    {
+            gemm_cutlass(m,n,k, &p1[i * a_size], &bp1[i * b_size], &cp1_1[i * c_size]);
+    }
+
+    for (int j = 0; j < c_size; j++)
+    {
+        alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        for (int i = 0; i < factor; i++)
+            temp[i] = cp1_1[i * c_size + j];
+        orthogonalize_arithmetic(temp, &c[j].p1, 1);
+    }
+
+}
+
+    delete[] p1;
+    delete[] bp1;
+    delete[] cp1_1;
+}
+#endif
 #endif
 
+#endif
 
 };
 

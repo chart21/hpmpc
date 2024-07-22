@@ -4,6 +4,6 @@ sfix.set_precision(7)
 inputs=sint.Array(size)
 inputs=inputs.assign_all(1).get_vector()
 inputs=inputs/inputs
-#verification 
+#verification
 
 inputs[-1].reveal() # dummy reveal

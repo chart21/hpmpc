@@ -11,7 +11,7 @@ public:
 ASTRA0_Share()  {}
 ASTRA0_Share(Datatype a) { v = a; }
 
-ASTRA0_Share public_val(DATATYPE a)
+ASTRA0_Share public_val(Datatype a)
 {
     return ASTRA0_Share(a);
 }
@@ -24,7 +24,7 @@ ASTRA0_Share Not() const
 template <typename func_add>
 ASTRA0_Share Add( ASTRA0_Share b, func_add ADD) const
 {
-   return ASTRA0_Share(ADD(v,b.v));
+   return ASTRA0_Share(v);
 }
 
 
@@ -33,9 +33,9 @@ template <typename func_add, typename func_sub, typename func_mul>
     ASTRA0_Share prepare_mult(ASTRA0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 ASTRA0_Share c;
-DATATYPE yxy = MULT(v,b.v);
+Datatype yxy = MULT(v,b.v);
 c.v = ADD(getRandomVal(P_1),getRandomVal(P_2)); //yz
-DATATYPE yxy2 = SUB(yxy,getRandomVal(P_1)); //yxy,2
+Datatype yxy2 = SUB(yxy,getRandomVal(P_1)); //yxy,2
 #if PRE == 0
 send_to_live(P_2, yxy2);
 #else
@@ -58,7 +58,7 @@ void mask_and_send_dot( func_add ADD, func_sub SUB)
 {
 Datatype yxy = v;
 v = ADD(getRandomVal(P_1),getRandomVal(P_2)); //yz
-DATATYPE yxy2 = SUB(yxy,getRandomVal(P_1)); //yxy,2
+Datatype yxy2 = SUB(yxy,getRandomVal(P_1)); //yxy,2
 #if PRE == 0
 send_to_live(P_2, yxy2);
 #else
@@ -82,7 +82,7 @@ void prepare_reveal_to_all() const
 
 
 template <typename func_add, typename func_sub>
-DATATYPE complete_Reveal(func_add ADD, func_sub SUB) const
+Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
 #if PRE == 0 
 return SUB(receive_from_live(P_2),v);
@@ -92,28 +92,33 @@ return SET_ALL_ZERO();
 #endif
 }
 
+template <typename func_mul>
+ASTRA0_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return ASTRA0_Share(MULT(v,b));
+}
 
 
 
 template <int id,typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
 if constexpr(id == P_0)
 {
 #if OPT_SHARE == 1
-    v = get_input_live(); 
-    DATATYPE lx1 = getRandomVal(P_1);
+    
 #if PRE == 0
-    send_to_live(P_2, ADD(v,lx1));
+    send_to_live(P_2, SUB(SET_ALL_ZERO(), ADD(val, getRandomVal(P_1))));
 #else
-    pre_send_to_live(P_2, ADD(v,lx1));
+    pre_send_to_live(P_2, SUB(SET_ALL_ZERO(), ADD(val, getRandomVal(P_1))));
 #endif
+    v = SUB(SET_ALL_ZERO(), val);
 
 #else
-    DATATYPE lv1 = getRandomVal(P_1); 
-    DATATYPE lv2 = getRandomVal(P_2);
+    Datatype lv1 = getRandomVal(P_1); 
+    Datatype lv2 = getRandomVal(P_2);
     v = ADD(lv1,lv2);// lv
-    DATATYPE mv = ADD(v,get_input_live());
+    Datatype mv = ADD(v,val);
 #if PRE == 0
     send_to_live(P_1, mv);
     send_to_live(P_2, mv);

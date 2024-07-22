@@ -1,6 +1,4 @@
 #pragma once
-#include <array>
-#include <stdexcept>
 #include "../protocols/Protocols.h"
 template<int k, typename Share>
 class sbitset_t {
@@ -20,6 +18,7 @@ public:
 
     sbitset_t(UINT_TYPE value[DATTYPE]) {
         DATATYPE temp_d[BITLENGTH];
+        
         orthogonalize_boolean(value, temp_d);
         for (int i = 0; i < k; i++) 
           shares[i] = Share(temp_d[i]);

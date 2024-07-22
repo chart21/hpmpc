@@ -9,7 +9,7 @@ Replicated_init()  {}
 
 
 template <int id,typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
     if constexpr(id == PSELF)
     {
@@ -26,6 +26,12 @@ if constexpr(id != PSELF)
     receive_from_(id);
 }
 Replicated_init public_val(Datatype a)
+{
+    return Replicated_init();
+}
+
+template <typename func_mul>
+Replicated_init mult_public(const Datatype b, func_mul MULT) const
 {
     return Replicated_init();
 }

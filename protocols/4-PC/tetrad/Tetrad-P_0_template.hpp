@@ -25,6 +25,12 @@ Tetrad0_Share public_val(Datatype a)
     return Tetrad0_Share(a,SET_ALL_ZERO(),SET_ALL_ZERO());
 }
 
+template <typename func_mul>
+Tetrad0_Share mult_public(const Datatype b, func_mul MULT) const
+{
+    return Tetrad0_Share(MULT(mv,b),MULT(l0,b),MULT(l1,b));
+}
+
 Tetrad0_Share Not() const
 {
    return Tetrad0_Share(NOT(mv),l0,l1);
@@ -129,9 +135,7 @@ mv = v; //Trick, can be set to zero later on
 
 void prepare_reveal_to_all() const
 {
-#if PRE == 0
     send_to_live(P_3, mv);
-#endif
 }    
 
 
@@ -155,12 +159,12 @@ Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 }
 
 template <int id, typename func_add, typename func_sub>
-void prepare_receive_from(func_add ADD, func_sub SUB)
+void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
 {
     // l0 -> lamda1, l1 -> lambda2
 if constexpr(id == PSELF)
 {
-    mv = get_input_live();
+    mv = val;
     l0 = getRandomVal(P_013); //l1
     l1 = getRandomVal(P_023); //l2
     Datatype l3 = SET_ALL_ZERO();
