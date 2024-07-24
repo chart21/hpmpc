@@ -21,6 +21,15 @@
 #include "help/Util.hpp"
 
 #include "../../programs/functions/comparisons.hpp"
+#include "../../programs/functions/prob_truncation.hpp"
+
+#ifndef S_TRUNC_PR
+#if TRUNC_APPROACH == 1
+#define S_TRUNC_PR trunc_2k_in_place
+#else
+#define S_TRUNC_PR trunc_pr_in_place
+#endif
+#endif
 
 using std::string;
 using std::vector;
@@ -1587,15 +1596,13 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                     input.push_back(p.s_register[regs[i + 1] + j]);
                 idxs.push_back(regs[i]); // dest
             }
-            sint* res = new sint[input.size()];
-            // trunc_pr<sint>(input.data(), res, input.size());
+            S_TRUNC_PR<sint>(input.data(), input.size());
 
             for (size_t i = 0; i < idxs.size(); ++i) {
                 for (size_t j = 0; j < get_size(); ++j)
-                    p.s_register[idxs[i] + j] = res[i * get_size() + j];
+                    p.s_register[idxs[i] + j] = input[i * get_size() + j];
             }
 
-            delete[] res;
             return;
         }
         case Opcode::STMS:
