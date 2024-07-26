@@ -204,13 +204,13 @@ do
             sed -i -e "s/\(LIVE \).*/\10/" config.h
             sed -i -e "s/\(INIT \).*/\11/" config.h
             echo "Compiling INIT executable for P-$i ..."
-            "$comp" main.cpp -o ./run-P"$i"-INIT.o $flags
-            ./run-P"$i"-INIT.o
+            "$comp" main.cpp -o ./executables/run-P"$i"-INIT.o $flags
+            ./executables/run-P"$i"-INIT.o
             sed -i -e "s/\(LIVE \).*/\11/" config.h
             sed -i -e "s/\(INIT \).*/\10/" config.h
         fi
             echo "Compiling executable for P-$i ..."
-            "$comp" main.cpp -o ./run-P"$i".o $flags
+            "$comp" main.cpp -o ./executables/run-P"$i".o $flags
     fi
 done
 
@@ -222,13 +222,13 @@ then
             sed -i -e "s/\(LIVE \).*/\10/" config.h
             sed -i -e "s/\(INIT \).*/\11/" config.h
             echo "Compiling INIT executable for P-3 ..."
-            "$comp" main.cpp -o ./run-P3-INIT.o $flags
-            ./run-P"$i"-INIT.o
+            "$comp" main.cpp -o ./executables/run-P3-INIT.o $flags
+            ./executables/run-P"$i"-INIT.o
             sed -i -e "s/\(LIVE \).*/\11/" config.h
             sed -i -e "s/\(INIT \).*/\10/" config.h
         fi
             echo "Compiling executable for P-3 ..."
-            "$comp" main.cpp -o ./run-P3.o $flags
+            "$comp" main.cpp -o ./executables/run-P3.o $flags
     fi
 
 echo "Finished compiling"
