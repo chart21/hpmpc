@@ -47,13 +47,21 @@ void log(Level level, Args... args) {
  * read 64-bit int from bytecode file (Big Endian)
  * @param fd input stream to read from
  */
-int64_t read_long(std::istream& fd);
+static int64_t read_long(std::istream& fd) {
+    int64_t res = 0;
+    fd.read((char*)&res, 8);
+    return be64toh(res);
+}
 
 /**
  * read 32-bit int from bytecode file (Big Endian)
  * @param fd input stream to read from
  */
-int32_t read_int(std::istream& fd);
+static int32_t read_int(std::istream& fd) {
+    int32_t res = 0;
+    fd.read((char*)&res, 4);
+    return be32toh(res);
+}
 
 /**
  * return first <bits> bits from num
@@ -61,7 +69,9 @@ int32_t read_int(std::istream& fd);
  * @param bits number of bits to keep
  * @return returns first `bits` bits from `num`
  */
-uint64_t mask(const uint64_t& num, const uint64_t& bits);
+inline uint64_t mask(const uint64_t& num, const uint64_t& bits) {
+    return bits < (64) ? (num & ((1lu << bits) - 1)) : num;
+}
 
 inline uint64_t div_ceil(const uint64_t& a, const uint64_t& b) {
     return a == 0lu ? 0lu : 1lu + ((a - 1lu) / b);

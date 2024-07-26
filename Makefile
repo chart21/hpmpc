@@ -18,11 +18,6 @@ PCH := core/include/pch.h
 PCH_OBJ := $(PCH:.h=.gch)
 CONFIG := config.h
 
-FUNC_ID := $(shell grep -oP '(?<=define FUNCTION_IDENTIFIER )\d+' $(CONFIG))
-ifeq ($(shell expr $(FUNC_ID) \>= 500), 1)
-	CXXFLAGS += MP-SPDZ/lib/help/Util.cpp
-endif
-
 HEADER_FILES := $(shell find . -path ./nn/Pygeon -prune -o -name '*.h' -o -name '*.hpp')
 
 # Check if USE_CUDA_GEMM is defined, otherwise take from config.h
