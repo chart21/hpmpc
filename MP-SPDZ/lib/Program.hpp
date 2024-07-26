@@ -303,6 +303,26 @@ class Program {
      * @param op added for debugging
      */
     void update_max_reg(const Type& reg, const unsigned& sreg, const Opcode& op);
+
+    /**
+     * read 64-bit int from bytecode file (Big Endian)
+     * @param fd input stream to read from
+     */
+    int64_t read_long(std::istream& fd) {
+        int64_t res = 0;
+        fd.read((char*)&res, 8);
+        return be64toh(res);
+    }
+
+    /**
+     * read 32-bit int from bytecode file (Big Endian)
+     * @param fd input stream to read from
+     */
+    int32_t read_int(std::istream& fd) {
+        int32_t res = 0;
+        fd.read((char*)&res, 4);
+        return be32toh(res);
+    }
 };
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,

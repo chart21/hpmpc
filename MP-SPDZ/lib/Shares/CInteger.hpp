@@ -9,7 +9,6 @@
 
 #include "../Constants.hpp"
 #include "../Shares/Integer.hpp"
-#include "../help/Input.hpp"
 #include "../help/Util.hpp"
 
 namespace IR {

@@ -14,7 +14,6 @@
 #include "Program.hpp"
 #include "Shares/CInteger.hpp"
 #include "Shares/Integer.hpp"
-#include "help/Util.hpp"
 
 using std::thread;
 using std::vector;

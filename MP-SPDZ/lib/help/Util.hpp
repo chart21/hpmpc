@@ -1,11 +1,7 @@
 #pragma once
-#include <cmath> // std::round
-#include <cstddef>
+
 #include <cstdint>
-#include <cstdlib>
 #include <iostream>
-#include <istream>
-#include <queue>
 
 namespace IR {
 
@@ -41,26 +37,6 @@ void log(Level level, Args... args) {
         exit(EXIT_FAILURE);
         break;
     }
-}
-
-/**
- * read 64-bit int from bytecode file (Big Endian)
- * @param fd input stream to read from
- */
-static int64_t read_long(std::istream& fd) {
-    int64_t res = 0;
-    fd.read((char*)&res, 8);
-    return be64toh(res);
-}
-
-/**
- * read 32-bit int from bytecode file (Big Endian)
- * @param fd input stream to read from
- */
-static int32_t read_int(std::istream& fd) {
-    int32_t res = 0;
-    fd.read((char*)&res, 4);
-    return be32toh(res);
 }
 
 /**

@@ -6,10 +6,10 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <queue>
 #include <vector>
 
 #include "../Constants.hpp"
-#include "Util.hpp"
 
 #include <fcntl.h>
 #include <sys/mman.h>
