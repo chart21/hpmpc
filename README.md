@@ -308,7 +308,7 @@ An example for formatting can be seen in [Input-P0-0-0](/MP-SPDZ/Input/Input-P0-
 
 ### Run your own functions
 
-As mentioned in [Setup](/MP-SPDZ/docs/run_hpmpc_with_MPSPDZ.md#setup) copy the bytecode file and schedule file into the correct Directory (`./MP-SPDZ/Schedules/`, `./MP-SPDZ/Bytecodes/` respectively).
+As with other `.mpc` files, copy the bytecode file and schedule file into the correct Directory (`./MP-SPDZ/Schedules/`, `./MP-SPDZ/Bytecodes/` respectively).
 Make sure that for both MP-SPDZ and HPMPC you are using the same bitlength for compilation.
 
 #### Using function `501`/`custom.mpc`
