@@ -14,7 +14,12 @@
 *macro_flags
 # log and csv files
 *.log
+*.log-config
 *.csv
 # MP-SPDZ directories
 Bytecodes
 Schedules
+#measurements
+measurements/logs/
+#executables
+executables/
