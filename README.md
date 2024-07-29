@@ -585,10 +585,13 @@ scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c 
 # use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
 #Local Setup
-python3 measurements/run_config.py -p all measurements/configs/benchmarks/AND.conf --override NUM_INPUTS=1000000 DATTYPE=512
+python3 measurements/run_config.py -p all measurements/configs/benchmarks/Multiprocessing.conf --override NUM_INPUTS=1000000 DATTYPE=512
 
-#Distributed Setup
-python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512
+#Distributed Setup, 3PC
+python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512 PROTOCOL=1,3,4,5,6
+
+#Distributed Setup, 4PC
+python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512 PROTOCOL=7,8,9,10,11,12
 ```
 
 #### Run LeNet5 on MNIST locally with batch size 24 using SPLITROLES
