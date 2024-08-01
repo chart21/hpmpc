@@ -605,7 +605,7 @@ python3 measurements/run_config.py -s 1 -p all measurements/configs/benchmarks/l
 python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=12 PROCESS_NUM=1
 ```
 
-#### Run various neural network models in a distributed stting on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)
+#### Run various neural network models in a distributed setting on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)
 ```bash
 # use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 

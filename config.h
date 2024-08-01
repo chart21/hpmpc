@@ -28,12 +28,12 @@
 
 // 70+ Neural network architectures (LeNet, AlexNet, VGG, ResNet, etc.) on different dataset sizes (MNIST, CIFAR-10, Imagenet). Refer to programs/functions/NN.hpp
 #ifndef FUNCTION_IDENTIFIER
-#define FUNCTION_IDENTIFIER 500
+#define FUNCTION_IDENTIFIER 1
 #endif
 
 // Number of inputs (mostly used by Benchmarking functions or Neural Networks)
 #ifndef NUM_INPUTS
-#define NUM_INPUTS 1
+#define NUM_INPUTS 20
 #endif
 
 
@@ -42,7 +42,7 @@
 // Register size to use for SIMD parallelization (Bitslicing/vectorization). Supported: 1,8,16,32,64,128(SSE),256(AVX-2),512(AVX-512)
 // Info: MULT64 is supported by DATTYPE 64 and 512. MULT32 is supported for DATTYPE 32 and all DATATYPEs >= 128
 #ifndef DATTYPE
-#define DATTYPE 128
+#define DATTYPE 32
 #endif
 
 // Number of parallel processes to use
