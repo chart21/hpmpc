@@ -31,6 +31,8 @@
 #endif
 #endif
 
+#define IS_ONLINE (current_phase == PHASE_LIVE && PRINT_IMPORTANT)
+
 using std::string;
 using std::vector;
 
@@ -1629,9 +1631,12 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             m.s_mem[n + vec] = p.s_register[regs[0] + vec];
             break;
         case Opcode::PRINT4:
-            m.get_out() << string((char*)&n, 4);
+            if (IS_ONLINE)
+                m.get_out() << string((char*)&n, 4);
             break;
         case Opcode::PRINTREG: {
+            if (!IS_ONLINE)
+                break;
             const auto& reg = p.c_register[regs[0] + vec].get_all();
 #if DATTYPE == BITLENGTH
             m.get_out() << "Reg[" << regs[0] + vec << "] = " << reg[0] << string((char*)&n, 4)
@@ -1646,6 +1651,8 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             break;
         }
         case Opcode::PRINTREGB: {
+            if (!IS_ONLINE)
+                return;
             m.get_out() << "reg[" << regs[0] << "] = 0x";
             for (int i = get_size() - 1; i >= 0; --i) {
                 const auto& reg = p.cb_register[regs[0] + i].get(); // TODO: support for SIMD
@@ -1655,18 +1662,21 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             return;
         }
         case Opcode::PRINT4COND:
-            if (p.c_register[regs[0]].get() != 0)
+            if (IS_ONLINE and p.c_register[regs[0]].get() != 0)
                 m.get_out() << string((char*)&n, 4);
             break;
         case Opcode::COND_PRINT_STRB:
-            if (p.cb_register[regs[0]].get() != 0)
+            if (IS_ONLINE and p.cb_register[regs[0]].get() != 0)
                 m.get_out() << string((char*)&n, 4);
             break;
         case Opcode::PRINT_CHR: {
-            m.get_out() << static_cast<char>(n);
+            if (IS_ONLINE)
+                m.get_out() << static_cast<char>(n);
             break;
         }
         case Opcode::PRINT_INT: {
+            if (!IS_ONLINE)
+                break;
 #if BITLENGTH == DATTYPE
             m.get_out() << p.i_register[regs[0]].get();
 #else
@@ -1679,6 +1689,8 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             return;
         }
         case Opcode::PRINT_REG_PLAIN: {
+            if (!IS_ONLINE)
+                break;
             if (size > 1)
                 m.get_out() << "[";
 
@@ -1707,7 +1719,7 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             return;
         }
         case Opcode::PRINT_COND_PLAIN:
-            if (p.c_register[regs[0]].get() != 0) {
+            if (IS_ONLINE && p.c_register[regs[0]].get() != 0) {
                 m.get_out() << (p.c_register[regs[1]] << p.c_register[regs[2]]).get();
             }
             break;
@@ -1778,11 +1790,13 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
                 [](const std::string& s) -> int { return std::stoi(s.c_str(), nullptr, 10); }));
             break;
         case Opcode::INTOUTPUT:
+            if (!IS_ONLINE)
+                break;
             if (int(n) == -1 or int(n) == PARTY)
                 m.get_out() << "Output: " << p.i_register[regs[0] + vec].get() << "\n";
             break;
         case Opcode::FLOATOUTPUT:
-            if (int(n) == -1 or int(n) == PARTY) {
+            if (IS_ONLINE and (int(n) == -1 or int(n) == PARTY)) {
                 const auto& sigs = p.c_register[regs[0] + vec].get_all();
                 const auto& exp = p.c_register[regs[1] + vec].get_all();
                 const auto& zero = p.c_register[regs[2] + vec].get_all();
@@ -1919,6 +1933,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             }
             break;
         case Opcode::PRINT_REG_SIGNED: {
+            if (!IS_ONLINE)
+                break;
+
             const auto& nums = p.cb_register[regs[0]].get_all();
             m.get_out() << "(";
             int64_t reg_val = nums[0];
@@ -1950,6 +1967,9 @@ void Program<int_t, cint, Share, sint, sbit, BitShare, N>::Instruction::execute(
             p.precision = int(n);
             return;
         case Opcode::PRINT_FLOAT_PLAIN: {
+            if (!IS_ONLINE)
+                break;
+
             if (size > 1)
                 m.get_out() << "[";
 

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include <iostream>
+#include <sstream>
+
+#include "../../core/utils/print.hpp"
 
 namespace IR {
 
@@ -14,29 +16,32 @@ enum class Level {
 
 template <class... Args>
 void log(Level level, Args... args) {
+    std::ostringstream oss;
     switch (level) {
     case Level::DEBUG:
-        std::cerr << "\033[35mDEBUG\033[0m: ";
-        ((std::cerr << args), ...);
-        std::cerr << "\n";
+        oss << "\033[35mDEBUG\033[0m: ";
+        ((oss << args), ...);
+        oss << "\n";
         break;
     case Level::WARNING:
-        std::cerr << "\033[33mWARNING\033[0m: ";
-        ((std::cerr << args), ...);
-        std::cerr << "\n";
+        oss << "\033[33mWARNING\033[0m: ";
+        ((oss << args), ...);
+        oss << "\n";
         break;
     case Level::INFO:
-        std::cerr << "\033[36mINFO\033[0m: ";
-        ((std::cerr << args), ...);
-        std::cerr << "\n";
+        oss << "\033[36mINFO\033[0m: ";
+        ((oss << args), ...);
+        oss << "\n";
         break;
     case Level::ERROR:
-        std::cerr << "\033[31mERROR\033[0m: ";
-        ((std::cerr << args), ...);
-        std::cerr << "\n";
+        oss << "\033[31mERROR\033[0m: ";
+        ((oss << args), ...);
+        oss << "\n";
+        print(oss.str().c_str());
         exit(EXIT_FAILURE);
         break;
     }
+    print(oss.str().c_str());
 }
 
 /**

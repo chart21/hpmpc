@@ -118,7 +118,7 @@ class Machine {
     /**
      * @return Output stream used for printing results etc.
      */
-    std::ostream& get_out() const { return std::cout; }
+    std::ostream& get_out() { return out_stream; }
 
     /**
      * Start timer at `index`
@@ -133,7 +133,7 @@ class Machine {
     /**
      * Print the time that passed since starting the main tape
      */
-    void time() const;
+    void time();
 
     Input public_input; // Used to read public-input from file
 
@@ -149,12 +149,14 @@ class Machine {
     std::map<int, Timer> timer;    // map of timers (should not be used for benchmarks)
     std::mt19937 rand_engine;      // creates the same random numbers for every party (testing)
     std::mt19937 rand_engine_diff; // creates random numbers (different for every party)
+
+    std::ostream out_stream;
 };
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 Machine<int_t, cint, Share, sint, sbit, BitShare, N>::Machine(std::string&& path)
-    : max_mem(), loaded(false), rand_engine(21), rand_engine_diff(std::random_device()()) {
+    : max_mem(), loaded(false), rand_engine(21), rand_engine_diff(std::random_device()()), out_stream(std::cout.rdbuf()) {
     load_schedule(std::move(path));
 }
 
@@ -258,22 +260,28 @@ void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::update_max_mem(const 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::start(const int& index) {
-    timer[index].start();
-    get_out() << "starting timer " << index << " at 0\n";
+    if (IS_ONLINE) {
+        timer[index].start();
+        get_out() << "starting timer " << index << " at 0\n";
+    }
 }
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::stop(const int& index) {
-    auto res = timer[index].stop();
-    get_out() << "stopping timer " << index << " at " << res << "\n";
+    if (IS_ONLINE) {
+        auto res = timer[index].stop();
+        get_out() << "stopping timer " << index << " at " << res << "\n";
+    }
 }
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
-void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::time() const {
-    auto res = timer.at(0).get_time();
-    get_out() << "Elapsed time: " << res << "s\n";
+void Machine<int_t, cint, Share, sint, sbit, BitShare, N>::time() {
+    if (IS_ONLINE) {
+        auto res = timer.at(0).get_time();
+        get_out() << "Elapsed time: " << res << "s\n";
+    }
 }
 
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
