@@ -520,6 +520,7 @@ To benefit from Hardware Acceleration, the following config options are importan
 ### Other Compile Errors
 
 Internal g++ or clang errors might be fixed by updating the compiler to a newer version.
+
 If reading input files fails, adding -lstdc++fs to the Makefile compile flags may resolve the issue.
 
 ### Increase Accuracy of Neural Network Inference
