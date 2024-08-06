@@ -517,6 +517,11 @@ To benefit from Hardware Acceleration, the following config options are importan
 | `USE_CUDA_GEMM>0` | CUDA, CUTLASS | Use CUDA for matrix multiplications and convolution. In case your CUDA-enabled GPU does not support datatypes such as UINT8, you can comment out the respective forward declaration in `core/cuda/conv_cutlass_int.cu` and `core/cuda/gemm_cutlass_int.cu`.|
 | `ARM=1` | ARM CPU | For ARM CPUs, setting `ARM=1` may improve performance of SHA hashing. |
 
+### Other compile errors
+
+Internal g++ or clang errors might be fixed by updating the compiler to a newer version.
+If reading input files fails, adding -lstdc++fs to the Makefile compile flags may resolve the issue.
+
 ### Increase Accuracy of Neural Network Inference
 
 If you encounter issues regarding the accuracy of neural network inference, the following options may increase accuracy.
@@ -524,6 +529,7 @@ If you encounter issues regarding the accuracy of neural network inference, the 
 - Increase or reduce the number of `FRACTIONAL` bits.
 - Adjust the truncation strategy to `TRUNC_APPROACH=1` (REDUCED Slack) or `TRUNC_APPROACH=2` (Exact Truncation), along with `TRUNC_THEN_MULT=1` and `TRUNC_DELAYED=1`. Note that truncation approaches 1 and 2 require setting `TRUNC_DELAYED=1`.
 - Inspect the terminal output for any errors regarding reading the model or dataset. PIGEON uses dummy data or model parameters if the files are not found. Make sure that `MODELOWNER` and `DATAOWNER` are set during compilation and that the respective environment variables point to existing files.
+
 
 
 ## TLDR
