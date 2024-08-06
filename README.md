@@ -517,7 +517,7 @@ To benefit from Hardware Acceleration, the following config options are importan
 | `USE_CUDA_GEMM>0` | CUDA, CUTLASS | Use CUDA for matrix multiplications and convolution. In case your CUDA-enabled GPU does not support datatypes such as UINT8, you can comment out the respective forward declaration in `core/cuda/conv_cutlass_int.cu` and `core/cuda/gemm_cutlass_int.cu`.|
 | `ARM=1` | ARM CPU | For ARM CPUs, setting `ARM=1` may improve performance of SHA hashing. |
 
-### Other compile errors
+### Other Compile Errors
 
 Internal g++ or clang errors might be fixed by updating the compiler to a newer version.
 If reading input files fails, adding -lstdc++fs to the Makefile compile flags may resolve the issue.
