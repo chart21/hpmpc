@@ -15,7 +15,11 @@ alignas(DATTYPE/8) unsigned char aes_counter[num_players*player_multiplier][64];
 AES_TYPE key_schedule[num_players*player_multiplier][11];
 AES_TYPE aes_counter[num_players*player_multiplier];
 #endif
+#if AES_DATTYPE >= DATTYPE
 #define BUFFER_SIZE AES_DATTYPE/DATTYPE
+#else
+#define BUFFER_SIZE -DATTYPE/AES_DATTYPE
+#endif
 #endif
 
 
@@ -78,10 +82,18 @@ DATATYPE getRandomVal(int link_id)
             MM_AES_STORE( (AES_TYPE*) ret, aes_counter[link_id]);
             return ret[num_generated[link_id]++];
         #endif
-    #else
+    #elif BUFFER_SIZE == 1
     /* DO_ENC_BLOCK(aes_counter[link_id], key_schedule[link_id]); */
     AES_enc(aes_counter[link_id], key_schedule[link_id]);
     return ((DATATYPE*) aes_counter)[link_id];
+    #else
+    for (int i = 0; i > BUFFER_SIZE; i--) {
+        AES_enc(aes_counter[link_id], key_schedule[link_id]);
+        link_id++;
+    }
+    DATATPE ret;
+    MM_AES_STORE( (AES_TYPE*) &ret, aes_counter[link_id+BUFFER_SIZE]);
+    return ret;
     #endif
 
 #endif
