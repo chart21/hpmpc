@@ -2,6 +2,9 @@
 #include "../../datatypes/Additive_Share.hpp"
 #include "test_helper.hpp"
 #include "../../datatypes/float_fixed_converter.hpp"
+#include "../functions/prob_truncation.hpp"
+#include "../functions/exact_truncation.hpp"
+#include "../functions/Relu.hpp"
 #define RESULTTYPE DATATYPE
 #ifndef FUNCTION
 #define FUNCTION test_fixed_point_arithmetic
@@ -251,7 +254,7 @@ bool test_fixed_multiplication()
     for(int i = 0; i < vectorization_factor; i++)
     {
         fa[i] = 20+i+float(20+i)/100;
-        fb[i] = 20+float(20+i)/100;
+        fb[i] = -20+float(20+i)/100;
         a[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(fa[i]);
         b[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(fb[i]);
     }
@@ -273,9 +276,26 @@ bool test_fixed_multiplication()
 
     //multiplication
     share_c = share_a.prepare_dot(share_b);
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 0
     share_c.mask_and_send_dot();
+#else
+    share_c.mask_and_send_dot_without_trunc();
+#endif
     Share::communicate();
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 0
     share_c.complete_mult();
+#else
+    share_c.complete_mult_without_trunc();
+    Share::communicate();
+    #if TRUNC_APPROACH == 0 
+        trunc_pr_in_place(&share_c, 1);
+    #elif TRUNC_APPROACH == 1
+        trunc_2k_in_place(&share_c, 1,false);
+    #elif TRUNC_APPROACH == 2
+        trunc_exact_in_place(&share_c, 1);
+    #endif
+#endif
+
 
     //reveal
     DATATYPE vecotrized_output;

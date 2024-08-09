@@ -21,8 +21,6 @@ adam_005_tests = [
     {"function": 73, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/ResNet152_avg_CryptGPU_CIFAR-10_standard_best.bin"},
     {"function": 74, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/VGG16_CIFAR-10_custom_best.bin"},
     {"function": 74, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/VGG16_CIFAR-10_standard_best.bin"},
-    {"function": 82, "data_path": "MNIST_custom_test", "model_path": "Cifar_adam_005/LeNet_MNIST_custom_best.bin"},
-    {"function": 82, "data_path": "MNIST_standard_test", "model_path": "Cifar_adam_005/LeNet_MNIST_standard_best.bin"}
 ]
 
 adam_001_tests = [
@@ -40,8 +38,6 @@ adam_001_tests = [
     {"function": 73, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adma_001/ResNet152_avg_CryptGPU_CIFAR-10_standard_best.bin"},
     {"function": 74, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adma_001/VGG16_CIFAR-10_custom_best.bin"},
     {"function": 74, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adma_001/VGG16_CIFAR-10_standard_best.bin"},
-    {"function": 82, "data_path": "MNIST_custom_test", "model_path": "Cifar_adma_001/LeNet_MNIST_custom_best.bin"},
-    {"function": 82, "data_path": "MNIST_standard_test", "model_path": "Cifar_adma_001/LeNet_MNIST_standard_best.bin"}
 ]
 
 sgd_001_tests = [
@@ -59,11 +55,14 @@ sgd_001_tests = [
     {"function": 73, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/ResNet152_avg_CryptGPU_CIFAR-10_standard_best.bin"},
     {"function": 74, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/VGG16_CIFAR-10_custom_best.bin"},
     {"function": 74, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/VGG16_CIFAR-10_standard_best.bin"},
-    {"function": 82, "data_path": "MNIST_custom_test", "model_path": "Cifar_sgd_001/LeNet_MNIST_custom_best.bin"},
-    {"function": 82, "data_path": "MNIST_standard_test", "model_path": "Cifar_sgd_001/LeNet_MNIST_standard_best.bin"}
 ]
 
-tests = [adam_005_tests, adam_001_tests, sgd_001_tests]
+lenet_tests = [
+        {"function": 82, "data_path": "MNIST_standard_test", "model_path": "MNIST_LeNet5/LeNet5_MNIST_standard_best.bin"},
+        {"function": 82, "data_path": "MNIST_custom_test", "model_path": "MNIST_LeNet5/LeNet5_MNIST_custom_best.bin"},
+        ]
+
+tests = [adam_005_tests, adam_001_tests, sgd_001_tests, lenet_tests]
 
 def run_command(command):
     subprocess.run(command, shell=True, check=True)

@@ -79,6 +79,10 @@ void init_circuit(std::string ips[]) {
   init_from_file();
   finalize(ips);
 #endif
+
+#if TRUNC_DELAYED == 1
+  delayed = false;
+#endif
 }
 
 #if PRE == 1
@@ -200,6 +204,9 @@ void preprocess_circuit(std::string ips[]) {
   auto p_init = PROTOCOL_INIT<DATATYPE>();
   p_init.finalize(ips);
 #endif
+#endif
+#if TRUNC_DELAYED == 1
+  delayed = false;
 #endif
 }
 #endif

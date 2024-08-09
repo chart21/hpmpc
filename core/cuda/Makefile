@@ -2,7 +2,7 @@
 arch ?= sm_89
 CUDA_PATH ?= /home/usr/local/cuda
 CUTLASS_PATH ?= /home/ubuntu/cutlass
-#replace with e.g. make arch=sm_52 CUDA_PATH=/opt/cuda CUDA_PATH=/home/christopher/workspace/cutlass
+#replace with e.g. make arch=sm_52 CUDA_PATH=/opt/cuda CUTLASS_PATH=/home/christopher/workspace/cutlass
 
 # Derived variables
 NVCC=$(CUDA_PATH)/bin/nvcc

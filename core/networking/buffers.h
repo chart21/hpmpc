@@ -56,3 +56,7 @@ int use_srng_for_inputs = 1;
 
 int current_phase = 0; //Keeping track of current pahse
 int process_offset = 0; //offsets the starting input for each process, base port must be multiple of 1000 to work
+
+#if TRUNC_DELAYED == 1
+bool delayed = false; // For delayed truncation
+#endif

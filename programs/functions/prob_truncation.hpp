@@ -1,7 +1,11 @@
 #pragma once
+#include "../../datatypes/Additive_Share.hpp"
 template<typename T>
-static void trunc_2k_in_place(T*  val, const int len){
+static void trunc_2k_in_place(T*  val, const int len, bool isPositive = false){
     
+    if(!isPositive)
+        for(int i = 0; i < len; i++)
+            val[i] = val[i] +  T((UINT_TYPE(1) << (BITLENGTH - 1))); // add 2^l-1 to gurantee positive number
     T* r_msb = new T[len];
     T* r_mk2 = new T[len];
     T* c = new T[len];
@@ -33,6 +37,11 @@ static void trunc_2k_in_place(T*  val, const int len){
     {
         val[i] = c_prime[i] + b[i] - r_mk2[i];
     }
+
+    if(!isPositive)
+        for(int i = 0; i < len; i++)
+            val[i] = val[i] - T((UINT_TYPE(1) << (BITLENGTH - FRACTIONAL - 1))); // substract 2^l-1 to reverse previous addition
+
     delete[] r_mk2;
     delete[] r_msb;
     delete[] c_prime;

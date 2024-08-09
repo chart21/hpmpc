@@ -21,7 +21,7 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
     for(int i = 0; i < len; i++)
     {
         auto msb = ~ y[i][0];
-        for(int j = 0; j < bk-bm; j++)
+        for(int j = bm; j < bk; j++)
         {
             y[i][j] = y[i][j] & msb;
         }
@@ -29,19 +29,28 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
-        for(int j = 0; j < bk-bm; j++)
+        for(int j = bm; j < bk; j++)
             y[i][j].complete_and();
-    #if TRUNC_DELAYED == 1
-    for(int j = BITLENGTH - 1; j >= FRACTIONAL; j--)
+    }
+        Share::communicate();
+
+#if TRUNC_DELAYED == 1
+    if(delayed)
+    {
+    for(int i = 0; i < len; i++)
+    {
+    for(int j = bk - 1; j >= FRACTIONAL; j--)
     {
         y[i][j] = y[i][j - FRACTIONAL]; //shift right
     }
-    for(int j = 0; j < FRACTIONAL; j++)
+    for(int j = bm; j < FRACTIONAL; j++)
     {
        y[i][j] = SET_ALL_ZERO(); //set most significant bits to zero
     }
-    #endif
     }
+        delayed = false;
+    } 
+#endif
     B2A_range<bm,bk,Datatype,Share>(y, val, len);  
 }
 #endif
@@ -74,11 +83,15 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
     
     Share::communicate();
 #if TRUNC_DELAYED == 1
+    if(delayed)
 #if TRUNC_APPROACH == 0
-    trunc_pr_in_place(val, len);
-#else
-    trunc_2k_in_place(val, len);
+        trunc_pr_in_place(val, len);
+#elif TRUNC_APPROACH == 1
+        trunc_2k_in_place(val, len,true);
+#elif TRUNC_APPROACH == 2
+        trunc_exact_in_place(val, len);
 #endif
+    delayed = false;
 #endif
     /* } */
 
@@ -116,33 +129,57 @@ void RELU_range_in_place_optB2A(sint_t<Additive_Share<Datatype, Share>>* val, co
     
     Share::communicate();
 
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
+    if(delayed)
+    {
     for(int i = 0; i < len; i++)
     {
         val[i] = result[i].prepare_dot(val[i]);
-#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
         val[i].mask_and_send_dot();
-#else
-        val[i].mask_and_send_dot_without_trunc();
-#endif 
     }
-    delete[] result;
-    Share::communicate();
+    }
+    else{
     for(int i = 0; i < len; i++)
     {
-#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
-        val[i].complete_mult();
+        val[i] = result[i].prepare_dot(val[i]);
+        val[i].mask_and_send_dot_without_trunc();
+    }
+    }
 #else
+    for(int i = 0; i < len; i++)
+    {
+        val[i] = result[i].prepare_dot(val[i]);
+        val[i].mask_and_send_dot_without_trunc();
+    }
+#endif 
+    delete[] result;
+    Share::communicate();
+#if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
+    if(delayed)
+    for(int i = 0; i < len; i++)
+        val[i].complete_mult();
+    else
+    for(int i = 0; i < len; i++)
         val[i].complete_mult_without_trunc();
+    delayed = false;
+#else
+    for(int i = 0; i < len; i++)
+    {
+        val[i].complete_mult_without_trunc();
+    }
 #endif
         /* val[i] -= sint(1); // To counter the +1 in TRUNC */
-    }
 
 
     Share::communicate();
 
 
 #if TRUNC_APPROACH == 1 && TRUNC_DELAYED == 1
-    trunc_2k_in_place(val, len);
+    if(delayed)
+    {
+        trunc_2k_in_place(val, len);
+        delayed = false;
+    }
 #endif
 
 

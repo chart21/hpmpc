@@ -19,13 +19,14 @@ void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_row
 
 
 #if PUBLIC_WEIGHTS == 0
-#if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+#if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
             sum.mask_and_send_dot_without_trunc(); // send immediately to utilize network better
 #else
             sum.mask_and_send_dot();
 #endif
 #else
-    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
+            // do nothing
     #else
             sum = sum.prepare_mult_public_fixed(1); //initiate truncation
     #endif
@@ -70,13 +71,14 @@ for (int i = 0; i < m; i += TILE_SIZE) {
                 const int row = ii*p;
                 for (int jj = j; jj < j_max; ++jj) {
 #if PUBLIC_WEIGHTS == 0
-#if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+#if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
                     C[row + jj].mask_and_send_dot_without_trunc();
 #else
                     C[row + jj].mask_and_send_dot();
 #endif
 #else
-    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
+                    // do nothing
     #else
                     C[row + jj] = C[row + jj].prepare_mult_public_fixed(1); //initiate truncation
     #endif
@@ -103,13 +105,13 @@ void complete_GEMM_CPU(T* C, const int m, const int p) {
                 for (int jj = j; jj < j_max; ++jj) {
                     /* C[row + jj].complete_mult(); */
 #if PUBLIC_WEIGHTS == 0
-#if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+#if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
                 C[row+jj].complete_mult_without_trunc();
 #else
                 C[row+jj].complete_mult();
 #endif
 #else
-    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
     #else
                 C[row+jj].complete_mult_public_fixed();
     #endif
@@ -125,13 +127,14 @@ void send_GEMM_GPU(T* C, const int m, const int p) {
     for(int j = 0; j < m*p; ++j)
 {
 #if PUBLIC_WEIGHTS == 0
-#if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+#if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
     C[j].mask_and_send_dot_without_trunc();
 #else
     C[j].mask_and_send_dot();
     #endif
 #else
-    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
+    // do nothing
 #else
     C[j] = C[j].prepare_mult_public_fixed(1); //initiate truncation
 #endif
@@ -146,13 +149,13 @@ void complete_GEMM(T* C, const int len)
     for(int i = 0; i < len; ++i)
     {
 #if PUBLIC_WEIGHTS == 0
-#if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+#if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
     C[i].complete_mult_without_trunc();
 #else
     C[i].complete_mult();
 #endif
 #else
-    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH == 1
+    #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #else
     C[i].complete_mult_public_fixed();
 #endif
@@ -179,9 +182,6 @@ void complete_GEMM(T* C, const int m, const int p)
     complete_GEMM_CPU(C, m, p);
 #else
     complete_GEMM(C, m*p);
-#endif
-    #if TRUNC_DELAYED == 0 && TRUNC_APPROACH == 1
-        trunc_2k_in_place(C,m*p);
 #endif
 }
 
