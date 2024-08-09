@@ -34,8 +34,6 @@
 #define MM_AES_ENC_LAST(a,b) _mm_aesenclast_si128(a,b)
 #define MM_AES_STORE(a,b) _mm_store_si128(a,b)
 #else
-#define AES_DATTYPE 64
-#define AES_TYPE uint64_t
 #ifndef CONFIG_ERROR
 #define CONFIG_ERROR
 #endif

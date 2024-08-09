@@ -91,7 +91,7 @@ DATATYPE getRandomVal(int link_id)
         AES_enc(aes_counter[link_id], key_schedule[link_id]);
         link_id++;
     }
-    DATATPE ret;
+    DATATYPE ret;
     MM_AES_STORE( (AES_TYPE*) &ret, aes_counter[link_id+BUFFER_SIZE]);
     return ret;
     #endif
