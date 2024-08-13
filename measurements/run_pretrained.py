@@ -71,8 +71,13 @@ adam_wd_tests = [
         {"function": 71, "data_path": "CIFAR-10_standard_test", "model_path": "adam_001_wd/ResNet50_avg_AdamW_d05_wd003_lr0001_ep100_acc74_35.bin"},
         ]
 
+imagenet_tests = [
+        {"function": 85, "data_path": "imagenet128_images", "model_path": "ImageNet/AlexNet_imagenet.bin"},
+        {"function": 86, "data_path": "imagenet128_images", "model_path": "ImageNetVGG_imagenet.bin"},
+        ]
 
-tests = [adam_005_tests, adam_001_tests, sgd_001_tests, lenet_tests, adam_wd_tests]
+
+tests = [adam_005_tests, adam_001_tests, sgd_001_tests, lenet_tests, adam_wd_tests, imagenet_tests]
 
 def run_command(command):
     subprocess.run(command, shell=True, check=True)
