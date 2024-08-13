@@ -72,8 +72,8 @@ adam_wd_tests = [
         ]
 
 imagenet_tests = [
-        {"function": 85, "data_path": "imagenet128_images", "model_path": "ImageNet/AlexNet_imagenet.bin"},
-        {"function": 86, "data_path": "imagenet128_images", "model_path": "ImageNetVGG_imagenet.bin"},
+        {"function": 85, "data_path": "imagenet_128-256", "model_path": "ImageNet/AlexNet_imagenet.bin"},
+        {"function": 86, "data_path": "imagenet_128-256", "model_path": "ImageNetVGG_imagenet.bin"},
         ]
 
 
