@@ -414,6 +414,7 @@ A full end-to-end example can be executed as follows. To only benchmark the infe
     python main.py --action train --export_model --export_dataset --transform standard --model VGG16 --num_classes 10 --dataset_name CIFAR-10 --modelpath ./models/alexnet_cifar --num_epochs 30 --lr 0.01 --criterion CrossEntropyLoss --optimizer Adam
     # Option 2: Download a pretrained VGG16 model and CIFAR10 dataset
     python download_pretrained.py single_model datasets
+    # Option 3: Follow steps from PyGEON README to use pretrained PyTorch models on ImageNet
     cd ../..
     ```
 

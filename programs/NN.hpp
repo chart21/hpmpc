@@ -97,6 +97,14 @@ void inference(DATATYPE* res)
     // DeepReduce C100,7K, CIFAR-100
     int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 32, w = 32, num_classes = 100;
     auto model = DRD_C100_7K<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 85 || FUNCTION_IDENTIFIER == 185 || FUNCTION_IDENTIFIER == 285 || FUNCTION_IDENTIFIER == 385
+    // AlexNet PyTorch, ImageNet
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = AlexNet_PyTorch<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 86 || FUNCTION_IDENTIFIER == 186 || FUNCTION_IDENTIFIER == 286 || FUNCTION_IDENTIFIER == 386
+    // VGG16 PyTorch, ImageNet
+    int n_test = NUM_INPUTS*BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
+    auto model = VGG16_PyTorch<modeltype>(num_classes);
 #endif
 
    
