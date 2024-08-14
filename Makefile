@@ -7,7 +7,7 @@ NVCC ?= nvcc
 $(shell mkdir -p executables/flags)
 
 # Base flags
-CXXFLAGS := -march=native -g -fno-finite-math-only -std=c++20 -pthread -lcrypto -I nn/PIGEON
+CXXFLAGS := -w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lcrypto -I nn/PIGEON
 NVCCFLAGS := -Xptxas -O3
 
 # Additional flags for overwriting macros
