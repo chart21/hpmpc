@@ -26,7 +26,6 @@ public:
     sint_t(UINT_TYPE value[DATTYPE]) {
                 init(value);
     }
-    
     template<int id>
     void prepare_receive_from() {
         for (int i = 0; i < BITLENGTH; i++) 
@@ -413,6 +412,15 @@ public:
             Share::complete_B2A(z, out); 
         }
 /* #endif */
+
+    sint_t prepare_trunc_exact_xmod2t() const
+    {
+        sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) 
+            result[i] = shares[i].prepare_trunc_exact_xmod2t();
+        return result;
+    }
+
 };
 
 

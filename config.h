@@ -28,7 +28,7 @@
 
 // 70+ Neural network architectures (LeNet, AlexNet, VGG, ResNet, etc.) on different dataset sizes (MNIST, CIFAR-10, Imagenet). Refer to programs/functions/NN.hpp
 #ifndef FUNCTION_IDENTIFIER
-#define FUNCTION_IDENTIFIER 1
+#define FUNCTION_IDENTIFIER 15
 #endif
 
 // Number of inputs (mostly used by Benchmarking functions or Neural Networks)

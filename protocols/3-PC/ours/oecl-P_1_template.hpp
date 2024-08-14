@@ -609,6 +609,19 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     r_msb.template complete_receive_from<P_0>(ADD, SUB);
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OECL1_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    Datatype mx = ADD(p1,p2);
+    //Step 1, Compute [x/2t] -> delt with public mult fixed
+    //Step 2, Compute [x mod t]
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (FRACTIONAL)) - 1;
+    Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
+    // Apply the mask using bitwise AND
+    Datatype mxmodt = AND(mx, mask); //mod 2^t
+    // Step3, Compute [x]^B -> delt with prepareA2B
+    return OECL1_Share(mxmodt, SET_ALL_ZERO());
+}
+
 
 
 /* template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc> */

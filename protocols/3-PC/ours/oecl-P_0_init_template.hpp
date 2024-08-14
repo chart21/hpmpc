@@ -435,6 +435,11 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     this->template complete_receive_from<PSELF>(ADD, SUB);
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OECL0_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    return OECL0_init();
+}
+
 template <typename func_add, typename func_sub, typename func_mul>
 static void GEMM(const OECL0_init* a, const OECL0_init* b, OECL0_init* c, int m, int n, int k, func_add ADD, func_sub SUB, func_mul MULT)
 {

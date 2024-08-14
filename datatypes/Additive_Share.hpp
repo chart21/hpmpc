@@ -262,7 +262,11 @@ public:
     {
         *this = Additive_Share(s);
     }
-
+    
+   Additive_Share  prepare_trunc_exact_xmod2t() const
+   {
+       return Share_Type::prepare_trunc_exact_xmod2t(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND);
+   }
 };
 
 

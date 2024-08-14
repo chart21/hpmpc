@@ -464,6 +464,11 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     this->template complete_receive_from<P_0>(ADD, SUB);
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OECL2_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    return OECL2_init();
+}
+
 #if USE_CUDA_GEMM > 0
 static void GEMM(OECL2_init* a, OECL2_init* b, OECL2_init* c, int m, int n, int k, bool a_fixed)
 {
