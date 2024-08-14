@@ -48,6 +48,7 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     using Bitset = sbitset_t<bk-bm, S>;
     using Bitset_t = sbitset_t<FRACTIONAL-bm, S>;
     using sint = sint_t<A>;
+    
 
     //step1: create x/2t
     sint* x2t = new sint[len];
@@ -61,53 +62,83 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
         x2t[i].complete_public_mult_fixed();
     }
     // step2: create x mod 2t ^ B
+#if TRUNC_APPROACH == 2
     sint* xmod2t = new sint[len];
     for(int i = 0; i < len; i++)
     {
         xmod2t[i] = val[i].prepare_trunc_exact_xmod2t();
     }
+#endif
     //step 3: Nothing to do
     Bitset *x_s1 = new Bitset[len];
     Bitset *x_s2 = new Bitset[len];
+#if TRUNC_APPROACH == 2 // one-off error only needs to be corrected for deterministic truncation
     Bitset_t *xmod2t_s1 = new Bitset_t[len];
     Bitset_t *xmod2t_s2 = new Bitset_t[len];
+#endif
     for(int i = 0; i < len; i++)
     {
         x_s1[i] = Bitset::prepare_A2B_S1(bm, (S*) val[i].get_share_pointer());
         x_s2[i] = Bitset::prepare_A2B_S2(bm, (S*) val[i].get_share_pointer());
+#if TRUNC_APPROACH == 2
         xmod2t_s1[i] = Bitset_t::prepare_A2B_S1(bm, (S*) xmod2t[i].get_share_pointer());
         xmod2t_s2[i] = Bitset_t::prepare_A2B_S2(bm, (S*) xmod2t[i].get_share_pointer());
+#endif
     }
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
         x_s1[i].complete_A2B_S1();
         x_s2[i].complete_A2B_S2();
+#if TRUNC_APPROACH == 2
         xmod2t_s1[i].complete_A2B_S1();
         xmod2t_s2[i].complete_A2B_S2();
+#endif
     }
+    for(int i = 0; i < len; i++)
+    {
+        for(int j = 0; j < BITLENGTH; j++)
+        {
+            x_s1[i][j].prepare_reveal_to_all();
+            Share::communicate();
+            auto car1 = x_s1[i][j].complete_reveal_to_all();
+            printf("bits: %d\n", car1);
+        }
+    }
+    
+    /* x_s1[0][0].prepare_reveal_to_all(); */
+    /* x_s2[0][0].prepare_reveal_to_all(); */
+    /* Share::communicate(); */
+    /* auto car1 = x_s1[0][0].complete_reveal_to_all(); */
+    /* auto car2 = x_s2[0][0].complete_reveal_to_all(); */
+    /* printf("bits: %d %d\n", car1, car2); */
 
     // Step 4: Calculate carry bit of B1
     
     // Step 5: Caclulate carry bit of B2
+#if TRUNC_APPROACH == 2
     std::vector<BooleanAdder_MSB_Carry<FRACTIONAL-bm,S>> b1adder;
+    b1adder.reserve(len);
+    S* b1c = new S[len];
+#endif
+    
     std::vector<BooleanAdder_MSB_Carry<bk-bm,S>> b2adder;
-#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1 
+    b2adder.reserve(len);
+    S* b2c = new S[len]; 
+#if TRUNC_DELAYED == 1 
         S* b2y;
     if (isReLU)
         b2y = new S[len];
 #endif
-    S* b1c = new S[len];
-    S* b2c = new S[len]; 
    
-    b1adder.reserve(len);
-    b2adder.reserve(len);
     for(int i = 0; i < len; i++)
     {
+#if TRUNC_APPROACH == 2
         b1adder.emplace_back(xmod2t_s1[i], xmod2t_s2[i]);
+#endif
         b2adder.emplace_back(x_s1[i], x_s2[i]);
     }
-
+#if TRUNC_APPROACH == 2
     while(!b1adder[0].is_done())
     {
         for(int i = 0; i < len; i++)
@@ -127,6 +158,7 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     }
     b1adder.clear();
     b1adder.shrink_to_fit();
+#endif
     while(!b2adder[0].is_done())
     {
         for(int i = 0; i < len; i++)
@@ -140,7 +172,7 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     for(int i = 0; i < len; i++)
     {
         b2c[i] = b2adder[i].get_carry();
-#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1 
+#if TRUNC_DELAYED == 1 
     if (isReLU)
         b2y[i] = ~ b2adder[i].get_msb();
 #endif
@@ -148,27 +180,39 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     b2adder.clear();
     b2adder.shrink_to_fit();
 
+
     /* // Step 6: Bit2A */
+#if TRUNC_APPROACH == 2
     sint* c1A = new sint[len];
+#endif
     sint* c2A = new sint[len];
 for (int i = 0; i < len; i++)
 {
+#if TRUNC_APPROACH == 2
     b1c[i].prepare_bit2a(c1A[i].get_share_pointer());
+#endif
     b2c[i].prepare_bit2a(c2A[i].get_share_pointer());
 }
 Share::communicate();
 for (int i = 0; i < len; i++)
 {
+#if TRUNC_APPROACH == 2
     c1A[i].complete_bit2a();
+#endif
     c2A[i].complete_bit2a();
 }
 
 // Step 7: Output x/2t + b1A + b2 * 2^l-t
 for (int i = 0; i < len; i++)
 {
-    val[i] = x2t[i] + c1A[i] + c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); //in case of ReLU, bit inj
+#if TRUNC_APPROACH == 2
+    val[i] = x2t[i] + c1A[i] + c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); 
+#else
+    val[i] = x2t[i] + c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); 
+    /* val[i] = x2t[i]; */
+#endif
 }
-#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1 // Compute ReLU
+#if TRUNC_DELAYED == 1 // Compute ReLU
 if (isReLU)
 {
     bit_injection_opt_range(b2y, val, len);
@@ -176,10 +220,12 @@ if (isReLU)
 }
 #endif
 
-delete[] x2t;
+#if TRUNC_APPROACH == 2
 delete[] b1c;
-delete[] b2c;
 delete[] c1A;
+#endif
+delete[] x2t;
+delete[] b2c;
 delete[] c2A;
 
 

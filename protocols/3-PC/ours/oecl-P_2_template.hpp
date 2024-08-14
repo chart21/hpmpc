@@ -235,11 +235,8 @@ p1 = SUB(TRUNC( SUB(p1,receive_from_live(P_1))),p2); // [m2 -m1]^t - m^0
 
 void get_random_B2A()
 {
-    for(int i = 0; i < BITLENGTH; i++)
-    {
         p1 = getRandomVal(P_0);
         p2 = p1;
-    }
 }
 
 

@@ -258,11 +258,8 @@ p1 = SUB( TRUNC( SUB(receive_from_live(P_2),p1)), p2 ); // (ab + e + r01 + r0,2)
 
 void get_random_B2A()
 {
-    for(int i = 0; i < BITLENGTH; i++)
-    {
         p1 = getRandomVal(P_0);
         p2 = p1;
-    }
 }
 
 

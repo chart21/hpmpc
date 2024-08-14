@@ -411,6 +411,11 @@ public:
         {
             Share::complete_B2A(z, out); 
         }
+        template<typename X, typename A>
+        static void complete_B2A2(X z[], A out[])
+        {
+            Share::complete_B2A2(z, out); 
+        }
 /* #endif */
 
     sint_t prepare_trunc_exact_xmod2t() const

@@ -161,6 +161,13 @@ void B2A_range(sbitset_t<bk-bm,XOR_Share<Datatype, Share>>* y, sint_t<Additive_S
     {
         sint::complete_B2A(z[i].get_share_pointer(), val[i].get_share_pointer());
     }
+#if PROTOCOL > 7
+    Share::communicate();
+    for(int i = 0; i < len; i++)
+    {
+        sint::complete_B2A2(z[i].get_share_pointer(), val[i].get_share_pointer());
+    }
+#endif
     delete[] z;
     delete[] random_mask;
 }

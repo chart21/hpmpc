@@ -893,6 +893,74 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     store_compare_view(P_1, c.v);
     store_compare_view(P_1, c_prime.v);
 }
+void get_random_B2A()
+{
+        r = FUNC_XOR(getRandomVal(P_013),getRandomVal(P_023));
+        v = r;
+}
+
+
+static void prepare_B2A( OEC_MAL0_Share z[], OEC_MAL0_Share random_mask[], OEC_MAL0_Share out[])
+{
+    // 2. Share random mask
+    Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            temp[j] = random_mask[j].r; // set share to random mask
+        }
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].v = temp[i];
+        out[i].r = OP_SUB(SET_ALL_ZERO(), temp[i]); // set share to - random mask
+#if PROTOCOL == 12 || PRE == 1
+        store_compare_view(P_2, OP_SUB(out[i].r, getRandomVal(P_013))); // - random mask - r013
+#else
+#if PRE == 1
+        pre_send_to_live(P_2, OP_SUB(out[i].r, getRandomVal(P_013))); // - random mask - r013
+#else
+        send_to_live(P_2, OP_SUB(out[i].r, getRandomVal(P_013))); // - random mask - r013
+#endif
+#endif
+    } 
+
+
+}
+
+static void complete_B2A(OEC_MAL0_Share z[], OEC_MAL0_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+        store_compare_view(P_012, z[0].r);
+
+}
+
+static void complete_B2A2(OEC_MAL0_Share z[], OEC_MAL0_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        z[i].v = receive_from_live(P_2);
+        z[i].r = SET_ALL_ZERO();
+        store_compare_view(P_1, z[i].v);
+        out[i] = z[i].Add(out[i], OP_SUB);
+    }
+
+}
+
+
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OEC_MAL0_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    Datatype lx = r;
+    //Step 1, Compute [x/2t] -> delt with public mult fixed
+    //Step 2, Compute [x mod t]
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (FRACTIONAL)) - 1;
+    Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
+    // Apply the mask using bitwise AND
+    Datatype lxmodt = AND(lx, mask); //mod 2^t
+    // Step3, Compute [x]^B -> delt with prepareA2B
+    return OEC_MAL0_Share(v, lxmodt);
+}
 
 #if USE_CUDA_GEMM == 2
 

@@ -28,6 +28,27 @@ template <typename func_add, typename func_sub, typename func_xor, typename func
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, TTP_init& r_mk2, TTP_init& r_msb, TTP_init& c, TTP_init& c_prime) {
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+TTP_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    return TTP_init();
+}
+
+void prepare_bit2a(TTP_init out[])
+{
+}
+
+void complete_bit2a()
+{
+}
+
+void prepare_opt_bit_injection(TTP_init x[], TTP_init out[])
+{
+}
+
+void complete_opt_bit_injection()
+{
+}
+
 
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>

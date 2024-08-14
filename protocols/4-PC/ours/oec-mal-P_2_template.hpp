@@ -458,6 +458,100 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     r_msb.v = SET_ALL_ZERO();
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OEC_MAL2_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    Datatype mx = v;
+    //Step 1, Compute [x/2t] -> delt with public mult fixed
+    //Step 2, Compute [x mod t]
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (FRACTIONAL)) - 1;
+    Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
+    // Apply the mask using bitwise AND
+    Datatype mxmodt = AND(mx, mask); //mod 2^t
+    // Step3, Compute [x]^B -> delt with prepareA2B
+    return OEC_MAL2_Share(mxmodt, SET_ALL_ZERO());
+}
+
+void get_random_B2A()
+{
+        v = SET_ALL_ZERO();
+        r = getRandomVal(P_023);
+#if MULTI_INPUT == 1
+        m = SET_ALL_ZERO();
+#endif
+}
+
+static void prepare_B2A( OEC_MAL2_Share z[], OEC_MAL2_Share random_mask[], OEC_MAL2_Share out[])
+{
+    // 1. Reveal z to P_1 and P_2
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        send_to_live(P_1, z[i].r); //reveal z to P_2
+    
+    }
+    // 2. Get random mask from P_0,3
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].v = SET_ALL_ZERO();
+#if MULTI_INPUT == 1
+        out[i].m = SET_ALL_ZERO();
+#endif
+    } 
+
+
+}
+
+static void complete_B2A(OEC_MAL2_Share z_bool[], OEC_MAL2_Share out[])
+{
+    Datatype z[BITLENGTH]; 
+    //reconstruct z
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if PROTOCOL == 12 || PRE == 1
+#if PRE == 1
+        out[i].r = pre_receive_from_live(P_3);
+#else
+        out[i].r = receive_from_live(P_3);
+#endif
+        store_compare_view(P_0, out[i].r);
+#else
+#if PRE == 1
+        out[i].r = pre_receive_from_live(P_0);
+#else
+        out[i].r = receive_from_live(P_0);
+#endif
+        store_compare_view(P_3, out[i].r);
+#endif
+
+        Datatype mask = FUNC_XOR(z_bool[i].r, receive_from_live(P_1));
+        store_compare_view(P_012, mask);
+        z[i] = FUNC_XOR(z_bool[i].v, mask);
+    }
+
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(z, temp2);
+    orthogonalize_arithmetic(temp2, z);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        z_bool[i].r = SET_ALL_ZERO();
+        z_bool[i].v = z[i];
+#if MULTI_INPUT == 1
+        z_bool[i].m = getRandomVal(P_123);
+        send_to_live(P_0, OP_ADD(z_bool[i].v, z_bool[i].m));
+#else
+        send_to_live(P_0, OP_ADD(z_bool[i].v, getRandomVal(P_123)));
+#endif
+    }
+
+
+}
+static void complete_B2A2(OEC_MAL2_Share z_bool[], OEC_MAL2_Share out[])
+{
+for(int i = 0; i < BITLENGTH; i++)
+{
+    out[i] = z_bool[i].Add(out[i], OP_SUB);
+}
+}
+
 
 static void prepare_A2B_S1(int m, int k, OEC_MAL2_Share in[], OEC_MAL2_Share out[])
 {

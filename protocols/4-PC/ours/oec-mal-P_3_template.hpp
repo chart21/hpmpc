@@ -366,6 +366,18 @@ template <typename func_add, typename func_sub, typename func_xor, typename func
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_Share& r_mk2, OEC_MAL3_Share& r_msb, OEC_MAL3_Share& c, OEC_MAL3_Share& c_prime) const{
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OEC_MAL3_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    Datatype lx = r0;
+    //Step 1, Compute [x/2t] -> delt with public mult fixed
+    //Step 2, Compute [x mod t]
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (FRACTIONAL)) - 1;
+    Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
+    // Apply the mask using bitwise AND
+    Datatype lxmodt = AND(lx, mask); //mod 2^t
+    // Step3, Compute [x]^B -> delt with prepareA2B
+    return OEC_MAL3_Share(lxmodt, r1);
+}
 
 
 static void prepare_A2B_S1(int m, int k, OEC_MAL3_Share in[], OEC_MAL3_Share out[])
@@ -376,6 +388,13 @@ static void prepare_A2B_S1(int m, int k, OEC_MAL3_Share in[], OEC_MAL3_Share out
         out[i-m].r1 = SET_ALL_ZERO(); // set share to 0
     }
 }
+
+void get_random_B2A()
+{
+        r0 = SET_ALL_ZERO();
+        r1 = FUNC_XOR(getRandomVal(P_013), getRandomVal(P_023));
+}
+
 
 
 static void prepare_A2B_S2(int m, int k ,OEC_MAL3_Share in[], OEC_MAL3_Share out[])
@@ -417,6 +436,52 @@ static void complete_A2B_S2(int k, OEC_MAL3_Share out[])
 {
 
 }
+
+static void prepare_B2A( OEC_MAL3_Share z[], OEC_MAL3_Share random_mask[], OEC_MAL3_Share out[])
+{
+    // 2. Share random mask
+    Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+            temp[j] = random_mask[j].r1; // set share to random mask
+        }
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i].r0 = SET_ALL_ZERO();
+        out[i].r1 = OP_SUB(SET_ALL_ZERO(), temp[i]); // set share to - random mask
+#if PROTOCOL == 12 || PRE == 1
+#if PRE == 1
+        pre_send_to_live(P_2, OP_SUB(out[i].r1, getRandomVal(P_013))); // - random mask - r013
+#else
+        send_to_live(P_2, OP_SUB(out[i].r1, getRandomVal(P_013))); // - random mask - r013
+#endif
+#else
+        store_compare_view(P_2, OP_SUB(out[i].r1, getRandomVal(P_013))); // - random mask - r013
+#endif
+    } 
+
+
+}
+
+static void complete_B2A(OEC_MAL3_Share z[], OEC_MAL3_Share out[])
+{
+
+}
+
+static void complete_B2A2(OEC_MAL3_Share z[], OEC_MAL3_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        z[i].r0 = getRandomVal(P_123);
+        z[i].r1 = SET_ALL_ZERO();
+        out[i] = z[i].Add(out[i], OP_SUB);
+    }
+
+}
+
 
 void prepare_bit2a(OEC_MAL3_Share out[])
 {

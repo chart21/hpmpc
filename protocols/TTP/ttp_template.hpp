@@ -139,6 +139,24 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 #endif
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+TTP_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+#if SIMULATE_MPC_FUNCTIONS == 1
+    Datatype lx = ADD(p1,p2);
+#else
+    Datatype lx = p1;
+#endif
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (FRACTIONAL)) - 1;
+    Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
+    Datatype lxmodt = AND(lx, mask); //mod 2^t
+#if SIMULATE_MPC_FUNCTIONS == 1 
+    Datatype randomVal = getRandomVal(0);
+    return TTP_Share(ADD(lxmodt, randomVal), randomVal);
+#else
+    return TTP_Share(lxmodt);
+#endif
+
+}
 
 
 template <typename func_add>
@@ -446,7 +464,51 @@ static void complete_bit_injection_S2(TTP_Share out[])
     }
 #endif
 
+}
 
+void prepare_bit2a(TTP_Share out[])
+{
+    Datatype temp[BITLENGTH]{0};
+#if SIMULATE_MPC_FUNCTIONS == 1
+    temp[BITLENGTH - 1] = FUNC_XOR(p1,p2); // convert y_0 to an arithmetic value
+#else
+    temp[BITLENGTH - 1] = p1; // convert y_0 to an arithmetic value
+#endif
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
+
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if SIMULATE_MPC_FUNCTIONS == 1
+        out[i].p2 = getRandomVal(P_1); 
+        out[i].p1 = OP_ADD(out[i].p2,temp[i]); 
+#else
+        out[i].p1 = temp[i];
+#endif
+    }
+}
+
+void complete_bit2a()
+{
+}
+
+void prepare_opt_bit_injection(TTP_Share x[], TTP_Share out[])
+{
+        TTP_Share* temp2 = new TTP_Share[BITLENGTH];
+        prepare_bit_injection_S2(temp2);
+        complete_bit_injection_S2(temp2);
+        for(int i = 0; i < BITLENGTH; i++)
+        {
+            out[i] = x[i].prepare_mult(temp2[i],OP_ADD,OP_SUB,OP_MULT);
+            out[i].complete_mult(OP_ADD,OP_SUB);
+        }
+        delete[] temp2;
+        
+}
+
+void complete_opt_bit_injection()
+{
 }
 
 template <typename func_add, typename func_sub, typename func_mul>

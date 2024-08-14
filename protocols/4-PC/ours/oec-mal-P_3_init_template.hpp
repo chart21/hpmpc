@@ -227,6 +227,11 @@ template <typename func_add, typename func_sub, typename func_xor, typename func
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime){
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OEC_MAL3_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    return OEC_MAL3_init();
+}
+
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
@@ -254,6 +259,38 @@ OEC_MAL3_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_su
 void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {
 }
+
+static void prepare_B2A( OEC_MAL3_init z[], OEC_MAL3_init random_mask[], OEC_MAL3_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if PROTOCOL == 12 || PRE == 1
+#if PRE == 1
+        pre_send_to_(P_2);
+#else
+        send_to_(P_2);
+#endif
+#else
+        store_compare_view_init(P_2);
+#endif
+    } 
+
+
+}
+
+void get_random_B2A()
+{
+}
+
+static void complete_B2A(OEC_MAL3_init z[], OEC_MAL3_init out[])
+{
+
+}
+
+static void complete_B2A2(OEC_MAL3_init z[], OEC_MAL3_init out[])
+{
+}
+
 
 
     template <typename func_add, typename func_sub, typename func_trunc>

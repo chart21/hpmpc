@@ -290,11 +290,8 @@ OECL0_Share mult_public(const Datatype b, func_mul MULT) const
 
 void get_random_B2A()
 {
-    for(int i = 0; i < BITLENGTH; i++)
-    {
         p1 = getRandomVal(P_2);
         p2 = getRandomVal(P_1);
-    }
 }
 
 static void prepare_A2B_S1(int m, int k, OECL0_Share in[], OECL0_Share out[])

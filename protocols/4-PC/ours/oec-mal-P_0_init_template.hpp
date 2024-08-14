@@ -218,6 +218,11 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
     store_compare_view_init(P_1);
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OEC_MAL0_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    return OEC_MAL0_init();
+}
+
 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
@@ -307,6 +312,46 @@ static void prepare_A2B_S2(int m, int k, OEC_MAL0_init in[], OEC_MAL0_init out[]
         #endif
     } 
 }
+
+static void prepare_B2A( OEC_MAL0_init z[], OEC_MAL0_init random_mask[], OEC_MAL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if PROTOCOL == 12 || PRE == 1
+        store_compare_view_init(P_2);
+#else
+#if PRE == 1
+        pre_send_to_(P_2);
+#else
+        send_to_(P_2);
+#endif
+#endif
+    } 
+
+
+}
+void get_random_B2A()
+{
+}
+
+static void complete_B2A(OEC_MAL0_init z[], OEC_MAL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+        store_compare_view_init(P_012);
+
+}
+
+static void complete_B2A2(OEC_MAL0_init z[], OEC_MAL0_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        receive_from_(P_2);
+        store_compare_view_init(P_1);
+    }
+
+}
+
+
 
 static void complete_A2B_S1(int k,OEC_MAL0_init out[])
 {

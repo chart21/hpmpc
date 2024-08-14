@@ -27,7 +27,7 @@ BooleanAdder_MSB_Carry(Bitset &x0, Bitset &x1) : x(x0), y(x1)
         r = k;
     }
 
-#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1
+#if TRUNC_DELAYED == 1
 Share get_msb() {
     return msb;
 }
@@ -74,7 +74,7 @@ case k-2:
       break;
     case 0:
       complete_carry();
-#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1
+#if TRUNC_DELAYED == 1
       update_msb(); 
 #endif
       prepare_carry(); 

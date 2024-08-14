@@ -132,7 +132,7 @@ bool test_exact_truncation()
     const int vectorization_factor = DATTYPE/BITLENGTH;
     //initialize plaintext inputs
     UINT_TYPE a[vectorization_factor];
-    const int num = -123413;
+    const int num = 123413;
     float fa[vectorization_factor];
     for(int i = 0; i < vectorization_factor; i++)
     {
@@ -151,8 +151,8 @@ bool test_exact_truncation()
 
     //truncation
     /* pack_additive_inplace<0,BITLENGTH>(&share_a,1,trunc_exact_in_place<DATATYPE,Share>); */
-    /* trunc_exact_in_place(&share_a, 1); */
-    trunc_exact_opt_in_place(&share_a, 1);
+    trunc_exact_in_place(&share_a, 1);
+    /* trunc_exact_opt_in_place(&share_a, 1); */
     //reveal
     DATATYPE vecotrized_output;
     share_a.prepare_reveal_to_all();

@@ -263,6 +263,57 @@ store_compare_view_init(P_3);
 #endif
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OEC_MAL2_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    return OEC_MAL2_init();
+}
+
+static void prepare_B2A( OEC_MAL2_init z[], OEC_MAL2_init random_mask[], OEC_MAL2_init out[])
+{
+    // 1. Reveal z to P_1 and P_2
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        send_to_(P_1);
+    
+    }
+}
+
+static void complete_B2A(OEC_MAL2_init z_bool[], OEC_MAL2_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if PROTOCOL == 12 || PRE == 1
+#if PRE == 1
+        pre_receive_from_(P_3);
+#else
+        receive_from_(P_3);
+#endif
+        store_compare_view_init(P_0);
+#else
+#if PRE == 1
+        pre_receive_from_(P_0);
+#else
+        receive_from_(P_0);
+#endif
+        store_compare_view_init(P_3);
+#endif
+
+        receive_from_(P_1);
+        store_compare_view_init(P_012);
+
+        send_to_(P_0);
+    }
+
+
+}
+static void complete_B2A2(OEC_MAL2_init z_bool[], OEC_MAL2_init out[])
+{
+
+}
+
+void get_random_B2A()
+{
+}
 
     
     template <typename func_add, typename func_sub, typename func_trunc>

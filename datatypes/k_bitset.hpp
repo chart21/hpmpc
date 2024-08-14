@@ -23,6 +23,7 @@ public:
         for (int i = 0; i < k; i++) 
           shares[i] = Share(temp_d[i]);
         }
+    
 
     template<int id>
     sbitset_t(UINT_TYPE value[DATTYPE]) {

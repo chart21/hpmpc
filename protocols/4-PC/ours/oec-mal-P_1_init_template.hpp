@@ -174,6 +174,15 @@ template <typename func_add, typename func_sub, typename func_xor, typename func
 void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_init& r_mk2, OEC_MAL1_init& r_msb, OEC_MAL1_init& c, OEC_MAL1_init& c_prime){
 }
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OEC_MAL1_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    return OEC_MAL1_init();
+}
+
+void get_random_B2A()
+{
+}
+
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OEC_MAL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
@@ -222,6 +231,29 @@ static void prepare_A2B_S1(int m, int k,OEC_MAL1_init in[], OEC_MAL1_init out[])
 
 
 static void prepare_A2B_S2(int m, int k, OEC_MAL1_init in[], OEC_MAL1_init out[])
+{
+}
+
+static void prepare_B2A( OEC_MAL1_init z[], OEC_MAL1_init random_mask[], OEC_MAL1_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        send_to_(P_2);
+    
+    }
+}
+
+static void complete_B2A(OEC_MAL1_init z_bool[], OEC_MAL1_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        receive_from_(P_2);
+        store_compare_view_init(P_012);
+        store_compare_view_init(P_0);
+    }
+}
+
+static void complete_B2A2(OEC_MAL1_init z_bool[], OEC_MAL1_init out[])
 {
 }
 
