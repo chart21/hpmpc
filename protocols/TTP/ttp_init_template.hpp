@@ -49,6 +49,21 @@ void complete_opt_bit_injection()
 {
 }
 
+void get_random_B2A()
+{
+}
+
+static void prepare_B2A( TTP_init z[], TTP_init random_mask[], TTP_init out[])
+{
+
+}
+
+static void complete_B2A(TTP_init z[], TTP_init out[])
+{
+}
+
+
+
 
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>

@@ -316,6 +316,77 @@ if constexpr(id != PSELF)
 #endif
 }
 
+void get_random_B2A()
+{
+#if SIMULATE_MPC_FUNCTIONS == 1
+    p2 = getRandomVal(0);
+    p1 = FUNC_XOR(getRandomVal(0), p2);
+    /* p1 = getRandomVal(0); */
+    /* p2 = SET_ALL_ZERO(); */
+#else
+    p1 = getRandomVal(0);
+#endif
+}
+
+static void prepare_B2A( TTP_Share z[], TTP_Share random_mask[], TTP_Share out[])
+{
+    // 1. Reveal z to P_1 and P_2
+    // 2. Share random mask
+    Datatype temp[BITLENGTH];
+        for (int j = 0; j < BITLENGTH; j++)
+        {
+#if SIMULATE_MPC_FUNCTIONS == 1
+            temp[j] = FUNC_XOR(random_mask[j].p1, random_mask[j].p2); // set share to r01 xor r02
+#else 
+            temp[j] = random_mask[j].p1;
+#endif
+        }
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(temp, temp2);
+    orthogonalize_arithmetic(temp2, temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if SIMULATE_MPC_FUNCTIONS == 1
+        out[i].p2 = getRandomVal(0);
+        /* out[i].p2 = SET_ALL_ZERO(); */
+        out[i].p1 = OP_ADD(temp[i], out[i].p2); // set share to r01 xor r02
+#else
+        out[i].p1 = temp[i];
+#endif
+    } 
+    for (int j = 0; j < BITLENGTH; j++)
+    {
+#if SIMULATE_MPC_FUNCTIONS == 1
+        temp[j] = FUNC_XOR(z[j].p1, z[j].p2); // set share to z01 xor z02
+#else 
+        temp[j] = z[j].p1;
+#endif
+    }
+    unorthogonalize_arithmetic(temp, temp2);
+    orthogonalize_boolean(temp2, temp);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+#if SIMULATE_MPC_FUNCTIONS == 1
+        z[i].p2 = getRandomVal(0);
+        /* z[i].p2 = SET_ALL_ZERO(); */
+        z[i].p1 = OP_ADD(temp[i], z[i].p2);
+#else
+        z[i].p1 = temp[i];
+#endif
+    } 
+
+
+
+}
+
+static void complete_B2A(TTP_Share z[], TTP_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        out[i] = z[i].Add(out[i], OP_SUB); // calculate z - randmon mask
+    }
+
+}
 
 
 
@@ -481,7 +552,7 @@ void prepare_bit2a(TTP_Share out[])
     for(int i = 0; i < BITLENGTH; i++)
     {
 #if SIMULATE_MPC_FUNCTIONS == 1
-        out[i].p2 = getRandomVal(P_1); 
+        out[i].p2 = getRandomVal(0);
         out[i].p1 = OP_ADD(out[i].p2,temp[i]); 
 #else
         out[i].p1 = temp[i];

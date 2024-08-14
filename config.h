@@ -452,7 +452,7 @@ int base_port = BASE_PORT; // temporary solution
 
 
 #ifndef SIMULATE_MPC_FUNCTIONS
-#define SIMULATE_MPC_FUNCTIONS 0
+#define SIMULATE_MPC_FUNCTIONS 1
 #endif
 
 #if BITLENGTH == 64
