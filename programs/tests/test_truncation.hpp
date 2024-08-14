@@ -132,7 +132,7 @@ bool test_exact_truncation()
     const int vectorization_factor = DATTYPE/BITLENGTH;
     //initialize plaintext inputs
     UINT_TYPE a[vectorization_factor];
-    const int num = 123413;
+    const int num = -123413;
     float fa[vectorization_factor];
     for(int i = 0; i < vectorization_factor; i++)
     {

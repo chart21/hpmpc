@@ -92,17 +92,20 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     // Step 5: Caclulate carry bit of B2
     std::vector<BooleanAdder_MSB_Carry<FRACTIONAL-bm,S>> b1adder;
     std::vector<BooleanAdder_MSB_Carry<bk-bm,S>> b2adder;
-    S* b1y = new S[len];
+#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1 
+        S* b2y;
+    if (isReLU)
+        b2y = new S[len];
+#endif
     S* b1c = new S[len];
-    S* b2y = new S[len];
     S* b2c = new S[len]; 
    
     b1adder.reserve(len);
     b2adder.reserve(len);
     for(int i = 0; i < len; i++)
     {
-        b1adder.emplace_back(xmod2t_s1[i], xmod2t_s2[i], b1y[i]);
-        b2adder.emplace_back(x_s1[i], x_s2[i], b2y[i]);
+        b1adder.emplace_back(xmod2t_s1[i], xmod2t_s2[i]);
+        b2adder.emplace_back(x_s1[i], x_s2[i]);
     }
 
     while(!b1adder[0].is_done())
@@ -137,26 +140,27 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     for(int i = 0; i < len; i++)
     {
         b2c[i] = b2adder[i].get_carry();
+#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1 
+    if (isReLU)
+        b2y[i] = ~ b2adder[i].get_msb();
+#endif
     }
     b2adder.clear();
     b2adder.shrink_to_fit();
 
     /* // Step 6: Bit2A */
-    sint* b2A = new sint[len]; //For ReLU
     sint* c1A = new sint[len];
     sint* c2A = new sint[len];
 for (int i = 0; i < len; i++)
 {
     b1c[i].prepare_bit2a(c1A[i].get_share_pointer());
     b2c[i].prepare_bit2a(c2A[i].get_share_pointer());
-    b2y[i].prepare_bit2a(b2A[i].get_share_pointer()); // For ReLU
 }
 Share::communicate();
 for (int i = 0; i < len; i++)
 {
     c1A[i].complete_bit2a();
     c2A[i].complete_bit2a();
-    b2A[i].complete_bit2a(); // For ReLU
 }
 
 // Step 7: Output x/2t + b1A + b2 * 2^l-t
@@ -164,12 +168,17 @@ for (int i = 0; i < len; i++)
 {
     val[i] = x2t[i] + c1A[i] + c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); //in case of ReLU, bit inj
 }
+#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1 // Compute ReLU
+if (isReLU)
+{
+    bit_injection_opt_range(b2y, val, len);
+    delete[] b2y;
+}
+#endif
+
 delete[] x2t;
-delete[] b1y;
 delete[] b1c;
-delete[] b2y;
 delete[] b2c;
-delete[] b2A;
 delete[] c1A;
 delete[] c2A;
 

@@ -59,4 +59,7 @@ int process_offset = 0; //offsets the starting input for each process, base port
 
 #if TRUNC_DELAYED == 1
 bool delayed = false; // For delayed truncation
+#if TRUNC_APPROACH == 2
+bool isReLU = false; // For ReLU truncation
+#endif 
 #endif

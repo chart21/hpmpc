@@ -9,28 +9,38 @@ private:
     int r;
     Bitset &x;
     Bitset &y;
-    Share &z;
     Share carry_last;
     Share carry_this;
+    Share msb;
    
 public:
 //constructor
+
 
 BooleanAdder_MSB_Carry()
     {
         r = k;
     }
 
-BooleanAdder_MSB_Carry(Bitset &x0, Bitset &x1, Share &y0) : x(x0), y(x1), z(y0) 
+BooleanAdder_MSB_Carry(Bitset &x0, Bitset &x1) : x(x0), y(x1) 
     {
         r = k;
     }
 
-void set_values(Bitset &x0, Bitset &x1, Share &y0) 
+#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1
+Share get_msb() {
+    return msb;
+}
+
+void update_msb()
+{
+    msb = x[0] ^ y[0] ^ carry_last;
+}
+#endif
+void set_values(Bitset &x0, Bitset &x1)
     {
         x = x0;
         y = x1;
-        z = y0;
     }
 
 int get_rounds() {
@@ -40,6 +50,7 @@ int get_rounds() {
 Share get_carry() {
     return carry_this;
 }
+
 
 int get_total_rounds() {
     return k;
@@ -63,7 +74,9 @@ case k-2:
       break;
     case 0:
       complete_carry();
-      update_z(); // final value, no need to prepare another carry
+#if TRUNC_APPROACH == 2 && TRUNC_DELAYED == 1
+      update_msb(); 
+#endif
       prepare_carry(); 
       break;
     case -1:
@@ -89,11 +102,6 @@ void complete_carry()
 
 }
 
-void update_z()
-{
-    z = x[0] ^ y[0] ^ carry_last;
-
-}
 
 
 };
