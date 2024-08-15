@@ -60,6 +60,7 @@ for ip in "${ips[@]}"; do
         echo "Server started on $ip:$server_port"
     fi
         ((server_port++))
+        ((counter++))
 done
 
 done
@@ -80,10 +81,12 @@ for threads in $(seq 1 $NUM_THREADS); do
 thread_port=$((base_port + 100 * threads))
 client_port=$((thread_port + offset))
 for ip in "${ips[@]}"; do
+    counter=0
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
         iperf -c $ip -p $client_port -P 1 -t $SECONDS_IPERF > output_${ip}_${client_port}_threads_${threads}.txt &
         echo "Client started to $ip:$client_port"
     fi
+    ((counter++))
 done
 
 done
@@ -97,6 +100,7 @@ echo "Ping results and Bandwidth measurements:"
 for i in "${!ips[@]}"; do
     ip=${ips[$i]}
     label=${labels[$i]}
+    counter=0
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
         # Get average round trip time from ping results
         avg_rtt=$(ping -c $NUM_PINGS $ip | tail -1 | awk -F '/' '{print $5}')
@@ -116,4 +120,5 @@ for i in "${!ips[@]}"; do
         done
         
     fi
+    ((counter++))
 done
