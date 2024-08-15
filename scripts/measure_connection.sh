@@ -53,8 +53,8 @@ thread_port=$((base_port + 100 * threads))
 server_port=$thread_port
 
 # Start servers on all other nodes' IPs on specific ports in detached mode
+counter=0
 for ip in "${ips[@]}"; do
-    counter=0
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
         echo "IP, PID, Counter, Hostname IP, Hostname IPL: $ip, $pid, $counter, $hostname_ip, $hostname_ipl"
         iperf -s -p $server_port -D
@@ -81,8 +81,8 @@ done
 for threads in $(seq 1 $NUM_THREADS); do
 thread_port=$((base_port + 100 * threads))
 client_port=$((thread_port + offset))
+counter=0
 for ip in "${ips[@]}"; do
-    counter=0
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
         iperf -c $ip -p $client_port -P 1 -t $SECONDS_IPERF > output_${ip}_${client_port}_threads_${threads}.txt &
         echo "Client started to $ip:$client_port"
