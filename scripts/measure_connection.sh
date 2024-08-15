@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Define the number of threads, number of pings, and the duration of the iperf3 test
+# Define the number of threads, number of pings, and the duration of the iperf test
 DEFAULT_NUM_THREADS=1
 DEFAUL_NUM_PINGS=5
 DEFAUL_SECONDS_IPERF=60
@@ -47,7 +47,7 @@ NUM_NODES=${#ips[@]}
 # Base port number to avoid conflicts
 base_port=5201
 
-pkill -9 -f iperf3
+pkill -9 -f iperf
 for threads in $(seq 1 $NUM_THREADS); do
 thread_port=$((base_port + 100 * threads))
 server_port=$thread_port
@@ -56,7 +56,7 @@ server_port=$thread_port
 for ip in "${ips[@]}"; do
     counter=0
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
-        iperf3 -s -p $server_port -D
+        iperf -s -p $server_port -D
         echo "Server started on $ip:$server_port"
     fi
         ((server_port++))
@@ -81,7 +81,7 @@ thread_port=$((base_port + 100 * threads))
 client_port=$((thread_port + offset))
 for ip in "${ips[@]}"; do
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
-        iperf3 -c $ip -p $client_port -P 1 -t $SECONDS_IPERF > output_${ip}_${client_port}_threads_${threads}.txt &
+        iperf -c $ip -p $client_port -P 1 -t $SECONDS_IPERF > output_${ip}_${client_port}_threads_${threads}.txt &
         echo "Client started to $ip:$client_port"
     fi
 done
@@ -103,7 +103,7 @@ for i in "${!ips[@]}"; do
         echo "$hostname_name -> $label"
         echo "average RTT: $avg_rtt ms"
 
-        # Extract the four lines from iperf3 output but only test first two lines of those are needed
+        # Extract the four lines from iperf output but only test first two lines of those are needed
         for threads in $(seq 1 $NUM_THREADS); do
         thread_port=$((base_port + 100 * threads))
         client_port=$((thread_port + offset))
