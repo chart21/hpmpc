@@ -69,12 +69,14 @@ done
 sleep 5
 
 offset=0
+counter=0
 for ip in "${ips[@]}"; do
-    if [[ $ip == $hostname_ip ]]; then
+    if [[ $ip == $hostname_ip || $ip == $hostname_ipl || $pid == $counter ]]; then
         break
     else
         ((offset++))
     fi
+    ((counter++))
 done
 
 # Start clients to connect to every other server with a test duration of 30 seconds
