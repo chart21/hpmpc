@@ -31,7 +31,7 @@ SECONDS_IPERF=${SECONDS_IPERF:-$DEFAUL_SECONDS_IPERF}
 ips=(${ip_map[IPA]} ${ip_map[IPB]} ${ip_map[IPC]} ${ip_map[IPD]})
 labels=("IPA" "IPB" "IPC" "IPD")
 
-if [ ! -z "$pid" ]; then
+if [ -z "$pid" ]; then
     pid=-1
 fi
 
