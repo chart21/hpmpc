@@ -7,15 +7,16 @@ DEFAUL_SECONDS_IPERF=60
 
 # Command line argument parsing
 declare -A ip_map
-while getopts a:b:c:d:n:p:s: flag
+while getopts a:b:c:d:p:n:l:s: flag
 do
     case "${flag}" in
         a) ip_map[IPA]=${OPTARG};;
         b) ip_map[IPB]=${OPTARG};;
         c) ip_map[IPC]=${OPTARG};;
         d) ip_map[IPD]=${OPTARG};;
+        p) pid=${OPTARG};;
         n) NUM_THREADS=${OPTARG};;
-        p) NUM_PINGS=${OPTARG};;
+        l) NUM_PINGS=${OPTARG};;
         s) SECONDS_IPERF=${OPTARG};;
     esac
 done
@@ -29,6 +30,10 @@ SECONDS_IPERF=${SECONDS_IPERF:-$DEFAUL_SECONDS_IPERF}
 # Array of all IPs and labels
 ips=(${ip_map[IPA]} ${ip_map[IPB]} ${ip_map[IPC]} ${ip_map[IPD]})
 labels=("IPA" "IPB" "IPC" "IPD")
+
+if [[ -z $pid ]]; then
+    pid=-1
+fi
 
 # Get the hostname IP and name
 hostname_ipl=$(hostname -I | awk '{print $1}')
@@ -49,7 +54,8 @@ server_port=$thread_port
 
 # Start servers on all other nodes' IPs on specific ports in detached mode
 for ip in "${ips[@]}"; do
-    if [[ $ip != $hostname_ip && $ip != $hostname_ipl ]]; then
+    counter=0
+    if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
         iperf3 -s -p $server_port -D
         echo "Server started on $ip:$server_port"
     fi
@@ -74,7 +80,7 @@ for threads in $(seq 1 $NUM_THREADS); do
 thread_port=$((base_port + 100 * threads))
 client_port=$((thread_port + offset))
 for ip in "${ips[@]}"; do
-    if [[ $ip != $hostname_ip ]]; then
+    if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
         iperf3 -c $ip -p $client_port -P 1 -t $SECONDS_IPERF > output_${ip}_${client_port}_threads_${threads}.txt &
         echo "Client started to $ip:$client_port"
     fi
@@ -91,7 +97,7 @@ echo "Ping results and Bandwidth measurements:"
 for i in "${!ips[@]}"; do
     ip=${ips[$i]}
     label=${labels[$i]}
-    if [[ $ip != $hostname_ip ]]; then
+    if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
         # Get average round trip time from ping results
         avg_rtt=$(ping -c $NUM_PINGS $ip | tail -1 | awk -F '/' '{print $5}')
         echo "$hostname_name -> $label"
