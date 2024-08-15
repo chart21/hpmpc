@@ -4,10 +4,10 @@
 DEFAULT_NUM_THREADS=1
 DEFAUL_NUM_PINGS=5
 DEFAUL_SECONDS_IPERF=60
-
+DEFAULT_IPERF_VERSION=3
 # Command line argument parsing
 declare -A ip_map
-while getopts a:b:c:d:p:n:l:s: flag
+while getopts a:b:c:d:p:n:l:s:v: flag
 do
     case "${flag}" in
         a) ip_map[IPA]=${OPTARG};;
@@ -18,6 +18,7 @@ do
         n) NUM_THREADS=${OPTARG};;
         l) NUM_PINGS=${OPTARG};;
         s) SECONDS_IPERF=${OPTARG};;
+        v) IPERF_VERSION=${OPTARG};;
     esac
 done
 
@@ -25,7 +26,7 @@ done
 NUM_THREADS=${NUM_THREADS:-$DEFAULT_NUM_THREADS}
 NUM_PINGS=${NUM_PINGS:-$DEFAUL_NUM_PINGS}
 SECONDS_IPERF=${SECONDS_IPERF:-$DEFAUL_SECONDS_IPERF}
-
+IPERF_VERSION=${IPERF_VERSION:-$DEFAULT_IPERF_VERSION}
 
 # Array of all IPs and labels
 ips=(${ip_map[IPA]} ${ip_map[IPB]} ${ip_map[IPC]} ${ip_map[IPD]})
@@ -57,7 +58,11 @@ counter=0
 for ip in "${ips[@]}"; do
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
         echo "IP, PID, Counter, Hostname IP, Hostname IPL: $ip, $pid, $counter, $hostname_ip, $hostname_ipl"
-        iperf -s -p $server_port -D
+        if [ $IPERF_VERSION -eq 3 ]; then
+            iperf3 -s -p $server_port -D
+        else
+            iperf -s -p $server_port -D
+        fi
         echo "Server started on $ip:$server_port"
     fi
         ((server_port++))
@@ -86,7 +91,11 @@ client_port=$((thread_port + offset))
 counter=0
 for ip in "${ips[@]}"; do
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
-        iperf -c $ip -p $client_port -P 1 -t $SECONDS_IPERF > output_${ip}_${client_port}_threads_${threads}.txt &
+        if [ $IPERF_VERSION -eq 3 ]; then
+            iperf3 -c $ip -p $client_port -P 1 -t $SECONDS_IPERF > output_${ip}_${client_port}_threads_${threads}.txt &
+        else
+            iperf -c $ip -p $client_port -P 1 -t $SECONDS_IPERF > output_${ip}_${client_port}_threads_${threads}.txt &
+        fi
         echo "Client started to $ip:$client_port"
     fi
     ((counter++))
@@ -115,8 +124,13 @@ for i in "${!ips[@]}"; do
         thread_port=$((base_port + 100 * threads))
         client_port=$((thread_port + offset))
         output_file=output_${ip}_${client_port}_threads_${threads}.txt
-        sender_bandwidth=$(cat $output_file | grep sender | head -n 1)
-        receiver_bandwidth=$(cat $output_file | grep receiver | head -n 1)
+        if [ $IPERF_VERSION -eq 3 ]; then
+            sender_bandwidth=$(cat $output_file | grep sender | head -n 1)
+            receiver_bandwidth=$(cat $output_file | grep receiver | head -n 1)
+        else
+            sender_bandwidth=$(cat $output_file | grep sec | head -n 1)
+            receiver_bandwidth=$(cat $output_file | grep sec | head -n 2 | tail -n 1)
+        fi
         echo "Threads: $threads"
         echo "$sender_bandwidth"
         echo "$receiver_bandwidth"
