@@ -31,8 +31,8 @@ ips=(${ip_map[IPA]} ${ip_map[IPB]} ${ip_map[IPC]} ${ip_map[IPD]})
 labels=("IPA" "IPB" "IPC" "IPD")
 
 # Get the hostname IP and name
-#hostname_ip=$(hostname -I | awk '{print $1}')
-#hostname_name=$(hostname)
+hostname_ipl=$(hostname -I | awk '{print $1}')
+# hostname_name=$(hostname)
 hostname_ip=$(curl icanhazip.com)
 hostname_name=$(hostname)
 # Number of nodes
@@ -49,7 +49,7 @@ server_port=$thread_port
 
 # Start servers on all other nodes' IPs on specific ports in detached mode
 for ip in "${ips[@]}"; do
-    if [[ $ip != $hostname_ip ]]; then
+    if [[ $ip != $hostname_ip && $ip != $hostname_ipl ]]; then
         iperf3 -s -p $server_port -D
         echo "Server started on $ip:$server_port"
     fi
