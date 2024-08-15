@@ -56,6 +56,7 @@ server_port=$thread_port
 for ip in "${ips[@]}"; do
     counter=0
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
+        echo "IP, PID, Counter, Hostname IP, Hostname IPL: $ip, $pid, $counter, $hostname_ip, $hostname_ipl"
         iperf -s -p $server_port -D
         echo "Server started on $ip:$server_port"
     fi
