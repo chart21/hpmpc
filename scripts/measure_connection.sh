@@ -98,10 +98,10 @@ sleep 1
 
 # Ping each node and capture the average RTT
 echo "Ping results and Bandwidth measurements:"
+counter=0
 for i in "${!ips[@]}"; do
     ip=${ips[$i]}
     label=${labels[$i]}
-    counter=0
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
         # Get average round trip time from ping results
         avg_rtt=$(ping -c $NUM_PINGS $ip | tail -1 | awk -F '/' '{print $5}')
