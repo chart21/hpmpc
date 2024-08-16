@@ -204,7 +204,8 @@ template <typename func_mul, typename func_add, typename func_sub, typename func
 OECL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
 #if TRUNC_THEN_MULT == 1
-    auto result = MULT(TRUNC(ADD(p1,p2)),b);
+    /* auto result = MULT(TRUNC(ADD(p1,p2)),b); */
+    auto result = MULT(TRUNC(SUB(SET_ALL_ZERO(),ADD(p1,p2))),b);
 #else
     auto result = MULT(ADD(p1,p2),b);
 #endif
@@ -213,7 +214,8 @@ OECL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add 
 #if TRUNC_THEN_MULT == 1
     res.p1 = SUB(result,res.p2);
 #else
-    res.p1 = SUB(TRUNC(result),res.p2);
+    /* res.p1 = SUB(TRUNC(result),res.p2); */
+    res.p1 = SUB(SUB(SET_ALL_ZERO(),TRUNC(SUB(SET_ALL_ZERO(),result))),res.p2);
 #endif
 
 #if PRE == 1

@@ -1,5 +1,8 @@
 #pragma once
 #include "share_conversion.hpp"
+#if TRUNC_APPROACH > 0
+#include "exact_truncation.hpp"
+#endif
 #include "prob_truncation.hpp"
 /* #include "boolean_adder_bandwidth.hpp" */
 
@@ -48,7 +51,6 @@ void RELU_range_in_place_exact(sint_t<Additive_Share<Datatype, Share>>* val, con
        y[i][j] = SET_ALL_ZERO(); //set most significant bits to zero
     }
     }
-        delayed = false;
     } 
 #endif
     B2A_range<bm,bk,Datatype,Share>(y, val, len);  
@@ -86,12 +88,11 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
     if(delayed)
 #if TRUNC_APPROACH == 0
         trunc_pr_in_place(val, len);
-#elif TRUNC_APPROACH == 1
+#elif TRUNC_APPROACH == 1 || TRUNC_APPROACH == 4
         trunc_2k_in_place(val, len,true);
 #elif TRUNC_APPROACH == 2
         trunc_exact_in_place(val, len);
 #endif
-    delayed = false;
 #endif
     /* } */
 
@@ -156,12 +157,11 @@ void RELU_range_in_place_optB2A(sint_t<Additive_Share<Datatype, Share>>* val, co
     Share::communicate();
 #if TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1
     if(delayed)
-    for(int i = 0; i < len; i++)
-        val[i].complete_mult();
+        for(int i = 0; i < len; i++)
+            val[i].complete_mult();
     else
     for(int i = 0; i < len; i++)
         val[i].complete_mult_without_trunc();
-    delayed = false;
 #else
     for(int i = 0; i < len; i++)
     {
@@ -173,13 +173,18 @@ void RELU_range_in_place_optB2A(sint_t<Additive_Share<Datatype, Share>>* val, co
 
     Share::communicate();
 
-
-#if TRUNC_APPROACH == 1 && TRUNC_DELAYED == 1
+#if TRUNC_DELAYED == 1 && TRUNC_APPROACH > 0
     if(delayed)
     {
-        trunc_2k_in_place(val, len);
-        delayed = false;
+#if TRUNC_APPROACH == 1 || TRUNC_APPROACH == 4
+        trunc_2k_in_place(val, len, false);
+#elif TRUNC_APPROACH == 2
+        trunc_exact_in_place(val, len);
+#elif TRUNC_APPROACH == 3
+        trunc_exact_opt_in_place(val, len);
+#endif
     }
+
 #endif
 
 
@@ -227,11 +232,24 @@ void RELU_range_in_place_exact(Additive_Share<Datatype, Share>* val, const int l
 template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype>
 static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_Share<Datatype, Share>* end, Additive_Share<Datatype, Share>*  output){
     const int len = end - begin;
-#if TRUNC_APPROACH == 2
-    pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_exact<rm,rk,Share, Datatype>);
+#if TRUNC_DELAYED == 1 && TRUNC_APPROACH > 0
+        if(delayed)
+        {
+            #if TRUNC_APPROACH == 2
+            pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_exact<rm,rk,Share, Datatype>);
+            #else
+            isReLU = true;
+            pack_additive_inplace<rm, rk>(begin, output, len, trunc_exact_opt_in_place<rm,rk,Share, Datatype>);
+            isReLU = false;
+            #endif
+            delayed = false;
+        }
+        else
+            pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm,rk,Share, Datatype>);
 #else
-    pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm,rk,Share, Datatype>);
+            pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm,rk,Share, Datatype>);
 #endif
+
 }
 
 
@@ -240,10 +258,22 @@ template<int m = 0, int k = BITLENGTH, typename Share, typename Datatype>
 static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const sint_t<Additive_Share<Datatype, Share>>* end, sint_t<Additive_Share<Datatype, Share>>*  output){
     std::copy(begin, end, output);
     int len = end - begin;
-#if TRUNC_APPROACH == 2
-    RELU_range_in_place_exact<m,k,Share>(output, len);
+#if TRUNC_DELAYED == 1 && TRUNC_APPROACH > 0
+        if(delayed)
+        {
+            #if TRUNC_APPROACH == 2
+            RELU_range_in_place_exact<m,k,Share, Datatype>(output, len);
+            #else
+            isReLU = true;
+            trunc_exact_opt_in_place<m,k,Share, Datatype>(output, len);
+            isReLU = false;
+            #endif
+            delayed = false;
+        }
+        else
+            RELU_range_in_place_opt<m,k,Share, Datatype>(output, len);
 #else
-    RELU_range_in_place_optB2A<m,k,Share>(output, len);
+            RELU_range_in_place_opt<m,k,Share, Datatype>(output, len);
 #endif
 }
 

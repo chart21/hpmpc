@@ -272,8 +272,10 @@ template <typename func_mul, typename func_add, typename func_sub, typename func
 OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
 #if TRUNC_THEN_MULT == 1
-    auto result = MULT(TRUNC(r),b);
+    /* auto result = MULT(TRUNC(r),b); */
+    auto result = SUB(SET_ALL_ZERO(), MULT(TRUNC(OP_SUB(SET_ALL_ZERO(), r)), b));
 #else
+    /* auto result = TRUNC(MULT(b, r)); */
     auto result = SUB(SET_ALL_ZERO(), TRUNC(MULT(b, OP_SUB(SET_ALL_ZERO(), r))));
 #endif
     auto rand_val = getRandomVal(P_013);
