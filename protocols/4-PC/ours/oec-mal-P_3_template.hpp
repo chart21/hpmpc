@@ -294,7 +294,7 @@ OEC_MAL3_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 #if TRUNC_THEN_MULT == 1
     auto result = MULT(TRUNC(r1),b);
 #else
-    auto result = TRUNC(MULT(r1,b));
+    auto result = SUB(SET_ALL_ZERO(), TRUNC(MULT(b, SUB(SET_ALL_ZERO(), r1))));
 #endif
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
@@ -368,15 +368,16 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and>
 OEC_MAL3_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
-    Datatype lx = r0;
+    Datatype lx = SUB(SET_ALL_ZERO(), r1);
     //Step 1, Compute [x/2t] -> delt with public mult fixed
     //Step 2, Compute [x mod t]
     UINT_TYPE maskValue = (UINT_TYPE(1) << (FRACTIONAL)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
     Datatype lxmodt = AND(lx, mask); //mod 2^t
+    
     // Step3, Compute [x]^B -> delt with prepareA2B
-    return OEC_MAL3_Share(lxmodt, r1);
+    return OEC_MAL3_Share(r0, SUB(SET_ALL_ZERO(), lxmodt));
 }
 
 

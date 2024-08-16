@@ -57,7 +57,6 @@ server_port=$thread_port
 counter=0
 for ip in "${ips[@]}"; do
     if [[ $ip != $hostname_ip && $ip != $hostname_ipl && $pid != $counter ]]; then
-        echo "IP, PID, Counter, Hostname IP, Hostname IPL: $ip, $pid, $counter, $hostname_ip, $hostname_ipl"
         if [ $IPERF_VERSION -eq 3 ]; then
             iperf3 -s -p $server_port -D
         else
@@ -129,7 +128,6 @@ for i in "${!ips[@]}"; do
             receiver_bandwidth=$(cat $output_file | grep receiver | head -n 1)
         else
             sender_bandwidth=$(cat $output_file | grep sec | head -n 1)
-            receiver_bandwidth=$(cat $output_file | grep sec | head -n 2 | tail -n 1)
         fi
         echo "Threads: $threads"
         echo "$sender_bandwidth"

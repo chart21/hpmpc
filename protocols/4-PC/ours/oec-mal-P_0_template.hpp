@@ -274,7 +274,7 @@ OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 #if TRUNC_THEN_MULT == 1
     auto result = MULT(TRUNC(r),b);
 #else
-    auto result = TRUNC(MULT(r,b));
+    auto result = SUB(SET_ALL_ZERO(), TRUNC(MULT(b, OP_SUB(SET_ALL_ZERO(), r))));
 #endif
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
@@ -299,6 +299,7 @@ void complete_public_mult_fixed( func_add ADD, func_sub SUB)
     v = SUB(v,r);
     /* v = ADD(v,val); */
 }
+
 
 
 
@@ -364,6 +365,7 @@ static void prepare_A2B_S2(int m, int k, OEC_MAL0_Share in[], OEC_MAL0_Share out
         {
             /* in[j].r = SET_ALL_ZERO(); */ 
             temp[j] = OP_SUB(SET_ALL_ZERO(), in[j].r); // set share to -x0
+        
         }
     alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
     unorthogonalize_arithmetic(temp, temp2);
@@ -951,7 +953,7 @@ static void complete_B2A2(OEC_MAL0_Share z[], OEC_MAL0_Share out[])
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and>
 OEC_MAL0_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
-    Datatype lx = r;
+    Datatype lx = SUB(SET_ALL_ZERO(), r);
     //Step 1, Compute [x/2t] -> delt with public mult fixed
     //Step 2, Compute [x mod t]
     UINT_TYPE maskValue = (UINT_TYPE(1) << (FRACTIONAL)) - 1;
@@ -959,7 +961,7 @@ OEC_MAL0_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor X
     // Apply the mask using bitwise AND
     Datatype lxmodt = AND(lx, mask); //mod 2^t
     // Step3, Compute [x]^B -> delt with prepareA2B
-    return OEC_MAL0_Share(v, lxmodt);
+    return OEC_MAL0_Share(v, SUB(SET_ALL_ZERO(), lxmodt));
 }
 
 #if USE_CUDA_GEMM == 2

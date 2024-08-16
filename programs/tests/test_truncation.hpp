@@ -151,8 +151,8 @@ bool test_exact_truncation()
 
     //truncation
     /* pack_additive_inplace<0,BITLENGTH>(&share_a,1,trunc_exact_in_place<DATATYPE,Share>); */
-    trunc_exact_in_place(&share_a, 1);
-    /* trunc_exact_opt_in_place(&share_a, 1); */
+    /* trunc_exact_in_place(&share_a, 1); */
+    trunc_exact_opt_in_place(&share_a, 1);
     //reveal
     DATATYPE vecotrized_output;
     share_a.prepare_reveal_to_all();
@@ -165,6 +165,7 @@ bool test_exact_truncation()
     float output_float[vectorization_factor];
     for(int i = 0; i < vectorization_factor; i++)
     {
+        std::cout << "Before float conversion " << output[i] << std::endl;
         output_float[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::ufixed_to_float(output[i]);
     }
 

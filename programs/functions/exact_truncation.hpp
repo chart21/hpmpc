@@ -45,11 +45,13 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     using A = Additive_Share<Datatype, Share>;
     const int bm = 0;
     const int bk = BITLENGTH;
+    const int bmm = BITLENGTH - FRACTIONAL;
+    const int bkk = BITLENGTH;
     using Bitset = sbitset_t<bk-bm, S>;
-    using Bitset_t = sbitset_t<FRACTIONAL-bm, S>;
+    using Bitset_t = sbitset_t<bkk-bmm, S>;
     using sint = sint_t<A>;
     
-
+    
     //step1: create x/2t
     sint* x2t = new sint[len];
     for(int i = 0; i < len; i++)
@@ -81,8 +83,8 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
         x_s1[i] = Bitset::prepare_A2B_S1(bm, (S*) val[i].get_share_pointer());
         x_s2[i] = Bitset::prepare_A2B_S2(bm, (S*) val[i].get_share_pointer());
 #if TRUNC_APPROACH == 2
-        xmod2t_s1[i] = Bitset_t::prepare_A2B_S1(bm, (S*) xmod2t[i].get_share_pointer());
-        xmod2t_s2[i] = Bitset_t::prepare_A2B_S2(bm, (S*) xmod2t[i].get_share_pointer());
+        xmod2t_s1[i] = Bitset_t::prepare_A2B_S1(bmm, (S*) xmod2t[i].get_share_pointer());
+        xmod2t_s2[i] = Bitset_t::prepare_A2B_S2(bmm, (S*) xmod2t[i].get_share_pointer());
 #endif
     }
     Share::communicate();
@@ -95,29 +97,12 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
         xmod2t_s2[i].complete_A2B_S2();
 #endif
     }
-    for(int i = 0; i < len; i++)
-    {
-        for(int j = 0; j < BITLENGTH; j++)
-        {
-            x_s1[i][j].prepare_reveal_to_all();
-            Share::communicate();
-            auto car1 = x_s1[i][j].complete_reveal_to_all();
-            printf("bits: %d\n", car1);
-        }
-    }
-    
-    /* x_s1[0][0].prepare_reveal_to_all(); */
-    /* x_s2[0][0].prepare_reveal_to_all(); */
-    /* Share::communicate(); */
-    /* auto car1 = x_s1[0][0].complete_reveal_to_all(); */
-    /* auto car2 = x_s2[0][0].complete_reveal_to_all(); */
-    /* printf("bits: %d %d\n", car1, car2); */
 
     // Step 4: Calculate carry bit of B1
     
     // Step 5: Caclulate carry bit of B2
 #if TRUNC_APPROACH == 2
-    std::vector<BooleanAdder_MSB_Carry<FRACTIONAL-bm,S>> b1adder;
+    std::vector<BooleanAdder_MSB_Carry<bkk-bmm,S>> b1adder;
     b1adder.reserve(len);
     S* b1c = new S[len];
 #endif
@@ -146,7 +131,6 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
             b1adder[i].step();
             b2adder[i].step();
         }
-        /* std::cout << "Adder step ..." << std::endl; */
         Share::communicate();
     }
     delete[] xmod2t;
@@ -167,8 +151,6 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
         }
         Share::communicate();
     }
-    delete[] x_s1;
-    delete[] x_s2;
     for(int i = 0; i < len; i++)
     {
         b2c[i] = b2adder[i].get_carry();
@@ -179,6 +161,9 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     }
     b2adder.clear();
     b2adder.shrink_to_fit();
+     
+    delete[] x_s1;
+    delete[] x_s2;
 
 
     /* // Step 6: Bit2A */
@@ -201,15 +186,15 @@ for (int i = 0; i < len; i++)
 #endif
     c2A[i].complete_bit2a();
 }
+   
 
-// Step 7: Output x/2t + b1A + b2 * 2^l-t
+// Step 7: Output x/2t + b1A - b2 * 2^l-t
 for (int i = 0; i < len; i++)
 {
 #if TRUNC_APPROACH == 2
-    val[i] = x2t[i] + c1A[i] + c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); 
+    val[i] = x2t[i] + c1A[i] - c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); 
 #else
-    val[i] = x2t[i] + c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); 
-    /* val[i] = x2t[i]; */
+    val[i] = x2t[i] - c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); 
 #endif
 }
 #if TRUNC_DELAYED == 1 // Compute ReLU

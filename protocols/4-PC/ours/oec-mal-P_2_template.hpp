@@ -321,6 +321,7 @@ OEC_MAL2_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
     c.v = MULT(TRUNC(v),b);
 #else
     c.v = TRUNC(MULT(v,b));
+
 #endif
 #if MULTI_INPUT == 1
     c.m = getRandomVal(P_123);
@@ -582,7 +583,7 @@ static void prepare_A2B_S1(int m, int k, OEC_MAL2_Share in[], OEC_MAL2_Share out
 
 static void prepare_A2B_S2(int m, int k, OEC_MAL2_Share in[], OEC_MAL2_Share out[])
 {
-    for(int i = 0; i < k; i++)
+    for(int i = m; i < k; i++)
     {
         out[i-m].v = SET_ALL_ZERO();
         #if MULTI_INPUT == 1
