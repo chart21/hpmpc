@@ -275,8 +275,8 @@ OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
     /* auto result = MULT(TRUNC(r),b); */
     auto result = SUB(SET_ALL_ZERO(), MULT(TRUNC(OP_SUB(SET_ALL_ZERO(), r)), b));
 #else
-    /* auto result = TRUNC(MULT(b, r)); */
-    auto result = SUB(SET_ALL_ZERO(), TRUNC(MULT(b, OP_SUB(SET_ALL_ZERO(), r))));
+    auto result = TRUNC(MULT(b, r));
+    /* auto result = SUB(SET_ALL_ZERO(), TRUNC(MULT(b, OP_SUB(SET_ALL_ZERO(), r)))); */
 #endif
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);

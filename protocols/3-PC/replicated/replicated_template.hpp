@@ -151,6 +151,14 @@ void prepare_reveal_to_all() const
 }    
 
 
+/* void prepare_reveal_to(Datatype a, int id) */
+/* { */
+/*     if(PSELF != id) */
+/*     { */
+/*         send_to_live(id, a); */
+/* } */
+/* } */
+
 template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {

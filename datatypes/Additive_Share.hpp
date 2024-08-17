@@ -69,17 +69,22 @@ public:
         return Additive_Share(Share_Type::mult_public(b, OP_MULT));
     }
 
-    Additive_Share prepare_mult_public_fixed(const UINT_TYPE b)
+    Additive_Share prepare_mult_public_fixed(const UINT_TYPE b) const
     {
         return Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
     }
     
-    Additive_Share prepare_div_exp2(const int b)
+    Additive_Share prepare_trunc_share() const
+    {
+        return Share_Type::prepare_trunc_share(OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
+    }
+    
+    Additive_Share prepare_div_exp2(const int b) const
     {
         return Additive_Share(Share_Type::prepare_div_exp2(b, OP_MULT, OP_ADD, OP_SUB, OP_TRUNC2));
     }
 
-    Additive_Share prepare_mult_public_fixed_dat(const Datatype b)
+    Additive_Share prepare_mult_public_fixed_dat(const Datatype b) const
     {
         return Share_Type::prepare_mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
     }
@@ -130,7 +135,7 @@ public:
     {
         Share_Type::prepare_reveal_to_all();
     }
-    void prepare_trunc_2k_inputs(Share_Type& rmk2, Share_Type& rmsb, Share_Type& c, Share_Type& c_prime)
+    void prepare_trunc_2k_inputs(Share_Type& rmk2, Share_Type& rmsb, Share_Type& c, Share_Type& c_prime) 
     {
        Share_Type::prepare_trunc_2k_inputs(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, FUNC_TRUNC, rmk2, rmsb, c, c_prime);
     }
@@ -209,7 +214,7 @@ public:
         return Additive_Share(Share_Type::prepare_dot4(b, c, d, OP_ADD, OP_SUB, OP_MULT));
     }
     
-    void mask_and_send_dot()
+    void mask_and_send_dot() 
     {
         #if FRACTIONAL > 0
         Share_Type::mask_and_send_dot_with_trunc(OP_ADD, OP_SUB, FUNC_TRUNC);
@@ -222,7 +227,7 @@ public:
         #endif
     }
     
-    void mask_and_send_dot_without_trunc()
+    void mask_and_send_dot_without_trunc() 
     {
         #if PROTOCOL == 2
         Share_Type::mask_and_send_dot(OP_SUB, OP_MULT); // Replicated needs custom overloads because division by 3 is required

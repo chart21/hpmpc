@@ -56,7 +56,7 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     sint* x2t = new sint[len];
     for(int i = 0; i < len; i++)
     {
-            x2t[i] = val[i].prepare_mult_public_fixed(UINT_TYPE(1));
+            x2t[i] = val[i].prepare_trunc_share();
     }
     Share::communicate();
     for(int i = 0; i < len; i++)
@@ -186,7 +186,17 @@ for (int i = 0; i < len; i++)
 #endif
     c2A[i].complete_bit2a();
 }
-   
+
+#if TRUNC_DELAYED == 1 // Compute ReLU
+if(isReLU)
+{
+    get_msb_range<bm,bk,Datatype,Share>(val, b2y, len);
+    for (int i = 0; i < len; i++)
+    {
+        b2y[i] = ~ b2y[i];
+    }
+}
+#endif
 
 // Step 7: Output x/2t + b1A - b2 * 2^l-t
 for (int i = 0; i < len; i++)

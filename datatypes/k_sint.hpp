@@ -173,7 +173,7 @@ public:
         return result;
         }
 
-        sint_t prepare_mult_public_fixed(const UINT_TYPE other) {
+        sint_t prepare_mult_public_fixed(const UINT_TYPE other) const {
             sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
             result[i] = shares[i].prepare_mult_public_fixed(other);
@@ -181,6 +181,14 @@ public:
         return result;
         }
 
+        sint_t prepare_trunc_share() const {
+            sint_t result;
+        for(int i = 0; i < BITLENGTH; ++i) {
+            result[i] = shares[i].prepare_trunc_share();
+        }
+        return result;
+        }
+        
         void operator*=(const UINT_TYPE other) {
         for(int i = 0; i < BITLENGTH; ++i) {
             shares[i] = shares[i].prepare_mult_public_fixed(other);
@@ -387,7 +395,7 @@ public:
             return result;
         }
 
-        void prepare_trunc_2k_inputs(sint_t& rmk2, sint_t& rmsb, sint_t& c, sint_t& c_prime)
+        void prepare_trunc_2k_inputs(sint_t& rmk2, sint_t& rmsb, sint_t& c, sint_t& c_prime) 
         {
             for(int i = 0; i < BITLENGTH; ++i) 
                 shares[i].prepare_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i]);
