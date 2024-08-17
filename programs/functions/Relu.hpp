@@ -86,14 +86,19 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
     Share::communicate();
 #if TRUNC_DELAYED == 1
     if(delayed)
+    {
 #if TRUNC_APPROACH == 0
         trunc_pr_in_place(val, len);
 #elif TRUNC_APPROACH == 1 || TRUNC_APPROACH == 4
+        print_online("Shouldn't be here");
         trunc_2k_in_place(val, len,true);
 #elif TRUNC_APPROACH == 2
-        trunc_exact_in_place(val, len);
+        print_online("Shouldn't be here");
+        trunc_exact_in_place<Datatype,Share,void>(val, len);
 #endif
+    }
 #endif
+
     /* } */
 
 
@@ -179,9 +184,13 @@ void RELU_range_in_place_optB2A(sint_t<Additive_Share<Datatype, Share>>* val, co
 #if TRUNC_APPROACH == 1 || TRUNC_APPROACH == 4
         trunc_2k_in_place(val, len, false);
 #elif TRUNC_APPROACH == 2
-        trunc_exact_in_place(val, len);
+        print_online("Shouldn't be here");
+        trunc_exact_in_place<void>(val, len);
 #elif TRUNC_APPROACH == 3
-        trunc_exact_opt_in_place(val, len);
+        print_online("Shouldn't be here");
+        isReLU = true;
+        trunc_exact_opt_in_place<Datatype,Share,void>(val, len);
+        isReLU = false;
 #endif
     }
 
@@ -239,7 +248,7 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
             pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_exact<rm,rk,Share, Datatype>);
             #else
             isReLU = true;
-            pack_additive_inplace<rm, rk>(begin, output, len, trunc_exact_opt_in_place<rm,rk,Share, Datatype>);
+            trunc_exact_opt_in_place(output, len,true);
             isReLU = false;
             #endif
             delayed = false;
@@ -265,7 +274,7 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const si
             RELU_range_in_place_exact<m,k,Share, Datatype>(output, len);
             #else
             isReLU = true;
-            trunc_exact_opt_in_place<m,k,Share, Datatype>(output, len);
+            trunc_exact_opt_in_place<m,k,Share, Datatype>(output, len,true);
             isReLU = false;
             #endif
             delayed = false;

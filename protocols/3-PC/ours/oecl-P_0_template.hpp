@@ -205,7 +205,7 @@ OECL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add 
 {
 #if TRUNC_THEN_MULT == 1
     /* auto result = MULT(TRUNC(ADD(p1,p2)),b); */
-    auto result = MULT(TRUNC(SUB(SET_ALL_ZERO(),ADD(p1,p2))),b);
+    auto result = MULT(SUB(SET_ALL_ZERO(),TRUNC(SUB(SET_ALL_ZERO(),ADD(p1,p2)))),b);
 #else
     auto result = MULT(ADD(p1,p2),b);
 #endif
@@ -666,6 +666,8 @@ void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and 
     /* Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1); */
     Datatype rmk2 = OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(ADD(p1,p2)) );
     Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(ADD(p1,p2));
+    /* Datatype rmk2 = SUB(SET_ALL_ZERO(), OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(SUB(SET_ALL_ZERO(),ADD(p1,p2))) )); */
+    /* Datatype rmsb = SUB(SET_ALL_ZERO(), OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(SUB(SET_ALL_ZERO(),ADD(p1,p2)))); */
     /* Datatype rmk2 = ADD(p1,p2); */    
     /* Datatype rmsb = ADD(p1,p2); */
 

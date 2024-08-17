@@ -158,6 +158,10 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 }
 
 
+template <typename func_add, typename func_sub, typename func_xor, typename func_and>
+OECL_MAL3_POST_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+    return OECL_MAL3_POST_Share();
+}
 
 
 
@@ -178,6 +182,20 @@ static void complete_A2B_S2(int k, OECL_MAL3_POST_Share out[])
 {
 
 }
+
+static void prepare_B2A( OECL_MAL3_POST_Share z[], OECL_MAL3_POST_Share random_mask[], OECL_MAL3_POST_Share out[])
+{
+}
+
+static void complete_B2A(OECL_MAL3_POST_Share z[], OECL_MAL3_POST_Share out[])
+{
+
+}
+
+static void complete_B2A2(OECL_MAL3_POST_Share z[], OECL_MAL3_POST_Share out[])
+{
+}
+
 
 
 void prepare_bit2a(OECL_MAL3_POST_Share out[])

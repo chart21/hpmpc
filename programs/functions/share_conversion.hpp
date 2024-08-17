@@ -161,7 +161,7 @@ void B2A_range(sbitset_t<bk-bm,XOR_Share<Datatype, Share>>* y, sint_t<Additive_S
     {
         sint::complete_B2A(z[i].get_share_pointer(), val[i].get_share_pointer());
     }
-#if PROTOCOL > 7
+#if PROTOCOL > 7 //4PC protocols needs additional communication
     Share::communicate();
     for(int i = 0; i < len; i++)
     {

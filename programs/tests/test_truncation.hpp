@@ -9,9 +9,10 @@
 #ifndef FUNCTION
 #define FUNCTION test_truncation
 #endif
-#define TEST_PROB_TRUNC 0 // [a] -> [a]^t
-#define TEST_PROB_TRUNC_REDUCED_SLACK 0 // [a] -> [a]^t
+#define TEST_PROB_TRUNC 1 // [a] -> [a]^t
+#define TEST_PROB_TRUNC_REDUCED_SLACK 1 // [a] -> [a]^t
 #define TEST_EXACT_TRUNC 1 // [a] -> [a]^t
+#define TEST_EXACT_TRUNC_OPT 1 // [a] -> [a]^t
 
 #if TEST_PROB_TRUNC == 1
 template<typename Share>
@@ -77,10 +78,11 @@ bool test_prob_reduced_slack_truncation()
     const int vectorization_factor = DATTYPE/BITLENGTH;
     //initialize plaintext inputs
     UINT_TYPE a[vectorization_factor];
+    const int num = -123413;
     float fa[vectorization_factor];
     for(int i = 0; i < vectorization_factor; i++)
     {
-        fa[i] = 20+i+float(20+i)/100;
+        fa[i] = num+i+float(num+i)/100;
         a[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(fa[i]);
     }
     DATATYPE vectorized_input_a;
@@ -132,7 +134,7 @@ bool test_exact_truncation()
     const int vectorization_factor = DATTYPE/BITLENGTH;
     //initialize plaintext inputs
     UINT_TYPE a[vectorization_factor];
-    const int num = 123413;
+    const int num = -123413;
     float fa[vectorization_factor];
     for(int i = 0; i < vectorization_factor; i++)
     {
@@ -149,9 +151,61 @@ bool test_exact_truncation()
     Share::communicate();
     share_a.template complete_receive_from<P_0>();
 
-    //truncation
-    /* pack_additive_inplace<0,BITLENGTH>(&share_a,1,trunc_exact_in_place<DATATYPE,Share>); */
-    /* trunc_exact_in_place(&share_a, 1); */
+    trunc_exact_in_place(&share_a, 1);
+    //reveal
+    DATATYPE vecotrized_output;
+    share_a.prepare_reveal_to_all();
+    Share::communicate();
+    vecotrized_output = share_a.complete_reveal_to_all();
+
+    //unorthogonalize
+    UINT_TYPE output[vectorization_factor];
+    unorthogonalize_arithmetic(&vecotrized_output, output, 1);
+    float output_float[vectorization_factor];
+    for(int i = 0; i < vectorization_factor; i++)
+    {
+        output_float[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::ufixed_to_float(output[i]);
+    }
+
+    //compare
+    for(int i = 0; i < vectorization_factor; i++)
+    {
+        print_compare(fa[i]/(UINT_TYPE(1) << FRACTIONAL), output_float[i],epsilon);
+        if(output_float[i] - fa[i]/(UINT_TYPE(1) << FRACTIONAL) > epsilon || output_float[i] - fa[i]/(UINT_TYPE(1) << FRACTIONAL) < -epsilon)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+#endif
+
+#if TEST_EXACT_TRUNC_OPT == 1
+template<typename Share>
+bool test_opt_exact_truncation()
+{
+    using A = Additive_Share<DATATYPE, Share>;
+    const int vectorization_factor = DATTYPE/BITLENGTH;
+    //initialize plaintext inputs
+    UINT_TYPE a[vectorization_factor];
+    const int num = -123413;
+    float fa[vectorization_factor];
+    for(int i = 0; i < vectorization_factor; i++)
+    {
+        fa[i] = num+i+float(num+i)/100;
+        a[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(fa[i]);
+    }
+    DATATYPE vectorized_input_a;
+    orthogonalize_arithmetic(a, &vectorized_input_a,1);
+
+    //secret sharing 
+    A share_a;
+    
+    share_a.template prepare_receive_from<P_0>(vectorized_input_a);
+    Share::communicate();
+    share_a.template complete_receive_from<P_0>();
+
     trunc_exact_opt_in_place(&share_a, 1);
     //reveal
     DATATYPE vecotrized_output;
@@ -165,7 +219,6 @@ bool test_exact_truncation()
     float output_float[vectorization_factor];
     for(int i = 0; i < vectorization_factor; i++)
     {
-        std::cout << "Before float conversion " << output[i] << std::endl;
         output_float[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::ufixed_to_float(output[i]);
     }
 
@@ -201,6 +254,10 @@ bool test_truncation(DATATYPE *res)
 
 #if TEST_EXACT_TRUNC == 1
     test_function(num_tests, num_passed, "Exact Truncation", test_exact_truncation<Share>);
+#endif
+
+#if TEST_EXACT_TRUNC_OPT == 1
+    test_function(num_tests, num_passed, "Optimized Exact Truncation", test_opt_exact_truncation<Share>);
 #endif
     
     print_stats(num_tests, num_passed);

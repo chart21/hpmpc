@@ -217,8 +217,17 @@ delete[] c2A;
 }
 
 template<typename Datatype, typename Share>
-void trunc_exact_opt_in_place(Additive_Share<Datatype, Share>* val, const int len)
+void trunc_exact_opt_in_place(Additive_Share<Datatype, Share>* val, const int len, bool isPositive=false)
 {
+    using A = Additive_Share<Datatype, Share>;
+    if(!isPositive)
+        for(int i = 0; i < len; i++)
+            val[i] = val[i] +  A((UINT_TYPE(1) << (BITLENGTH - 1))); // add 2^l-1 to gurantee positive number
+   
     pack_additive_inplace<0,BITLENGTH>(val,len,trunc_exact_opt_in_place<Datatype,Share,void>);
+    
+    if(!isPositive) 
+        for(int i = 0; i < len; i++)
+            val[i] = val[i] - A((UINT_TYPE(1) << (BITLENGTH - FRACTIONAL - 1))); // substract 2^l-1 to reverse previous addition ..
 }
 
