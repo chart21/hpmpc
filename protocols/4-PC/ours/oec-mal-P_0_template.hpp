@@ -273,11 +273,29 @@ OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 {
 #if TRUNC_THEN_MULT == 1
     /* auto result = MULT(TRUNC(r),b); */
-    auto result = SUB(SET_ALL_ZERO(), MULT(TRUNC(OP_SUB(SET_ALL_ZERO(), r)), b));
+    auto result = MULT(TRUNC(r),b);
 #else
     auto result = TRUNC(MULT(b, r));
     /* auto result = SUB(SET_ALL_ZERO(), TRUNC(MULT(b, OP_SUB(SET_ALL_ZERO(), r)))); */
 #endif
+    auto rand_val = getRandomVal(P_013);
+    auto val = SUB(result,rand_val);
+#if PROTOCOL == 12 || PRE == 1
+    store_compare_view(P_2, val);
+#else
+#if PRE == 1
+    pre_send_to_live(P_2, val);
+#else
+    send_to_live(P_2, val);
+#endif
+#endif
+    return OEC_MAL0_Share(SET_ALL_ZERO(),result);
+} 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL0_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = SUB(SET_ALL_ZERO(),TRUNC(SUB(SET_ALL_ZERO(), r)));
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
 #if PROTOCOL == 12 || PRE == 1

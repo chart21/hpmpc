@@ -91,6 +91,12 @@ OECL0_POST_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func
     return OECL0_POST_Share();
 } 
 
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OECL0_POST_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    return OECL0_POST_Share();
+}
+
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed(func_add ADD, func_sub SUB)
 {

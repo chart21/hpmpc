@@ -304,6 +304,21 @@ OEC_MAL1_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
     res.r = getRandomVal(P_013);
     return res;
 } 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL1_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    OEC_MAL1_Share res;
+    res.v = TRUNC(v);
+#if MULTI_INPUT == 1
+    res.m = getRandomVal(P_123);
+    store_compare_view(P_0,ADD(res.v,res.m)); // compare v*b + r123 with P_0
+#else
+    store_compare_view(P_0,ADD(res.v,getRandomVal(P_123))); // compare v*b + r123 with P_0
+#endif
+    res.r = getRandomVal(P_013);
+    return res;
+} 
     
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed( func_add ADD, func_sub SUB)

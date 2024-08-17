@@ -332,6 +332,20 @@ OEC_MAL2_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
     return c;
 } 
 
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL2_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    OEC_MAL2_Share c;
+    c.v = TRUNC(v);
+#if MULTI_INPUT == 1
+    c.m = getRandomVal(P_123);
+    send_to_live(P_0, ADD(c.v,c.m));
+#else
+    send_to_live(P_0,ADD(c.v,getRandomVal(P_123))); // compare v*b + r123 with P_0
+#endif
+    return c;
+} 
+
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 {

@@ -191,6 +191,13 @@ OEC_MAL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_ad
 } 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL1_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    store_compare_view_init(P_0);
+    return OEC_MAL1_init();
+} 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OEC_MAL1_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
     Datatype dummy;

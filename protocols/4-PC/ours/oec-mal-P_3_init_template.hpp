@@ -247,6 +247,20 @@ OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_ad
 #endif
     return OEC_MAL3_init();
 } 
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL3_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
+#if PRE == 1
+    pre_send_to_(P_2);
+#else
+    send_to_(P_2);
+#endif
+#else
+    store_compare_view_init(P_2);
+#endif
+    return OEC_MAL3_init();
+} 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OEC_MAL3_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const

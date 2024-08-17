@@ -292,12 +292,29 @@ template <typename func_mul, typename func_add, typename func_sub, typename func
 OEC_MAL3_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
 #if TRUNC_THEN_MULT == 1
-    /* auto result = MULT(TRUNC(r1),b); */
-    auto result = SUB(SET_ALL_ZERO(), MULT(TRUNC(SUB(SET_ALL_ZERO(), r1)), b));
+    auto result = MULT(TRUNC(r1),b);
 #else
-    /* auto result = TRUNC(MULT(r1,b)); */
-    auto result = SUB(SET_ALL_ZERO(), TRUNC(MULT(b, SUB(SET_ALL_ZERO(), r1))));
+    auto result = TRUNC(MULT(r1,b));
 #endif
+    auto rand_val = getRandomVal(P_013);
+    auto val = SUB(result,rand_val);
+#if PROTOCOL == 12 || PRE == 1
+#if PRE == 1
+    pre_send_to_live(P_2, val);
+#else
+    send_to_live(P_2, val);
+#endif
+#else
+    store_compare_view(P_2, val);
+#endif
+    
+    return OEC_MAL3_Share(getRandomVal(P_123),result);
+} 
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+OEC_MAL3_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+    auto result = SUB(SET_ALL_ZERO(),TRUNC(SUB(SET_ALL_ZERO(), r1)));
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
 #if PROTOCOL == 12 || PRE == 1
