@@ -139,6 +139,7 @@ void inference(DATATYPE* res)
 
 
 #if DATAOWNER == -1
+    print_online("No Dataowner specified. Loading dummy data...");
     auto test_Y = read_dummy_labels(n_test);
     auto test_X = read_dummy_images(n_test, ch, h, w);
 #else
@@ -189,6 +190,7 @@ void inference(DATATYPE* res)
         print_online("Loading model parameters from file...");
     #endif
     #if MODELOWNER != -1
+        print_online("No Modelowner specified. Loading dummy parameters...");
         model.template load<MODELOWNER>(cfg.save_dir, cfg.pretrained);
     #endif
         print_online("Received Secret Share of Model Parameters.");

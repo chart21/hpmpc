@@ -33,7 +33,7 @@
 
 // Number of inputs (mostly used by Benchmarking functions or Neural Networks)
 #ifndef NUM_INPUTS
-#define NUM_INPUTS 100
+#define NUM_INPUTS 10
 #endif
 
 
