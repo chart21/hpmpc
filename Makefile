@@ -7,7 +7,9 @@ NVCC ?= nvcc
 $(shell mkdir -p executables/flags)
 
 # Base flags
-CXXFLAGS := -w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lcrypto -I nn/PIGEON
+EXECFLAGS := -w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread 
+LINKFLAGS := -lcrypto -I nn/PIGEON
+CXXFLAGS := $(EXECFLAGS) $(LINKFLAGS)
 NVCCFLAGS := -Xptxas -O3
 
 # Additional flags for overwriting macros
@@ -47,7 +49,7 @@ all: compile_pch compile_executables link_objects
 compile_pch:
 	@if [ ! -f $(PCH_OBJ) ] || [ $(PCH) -nt $(PCH_OBJ) ]; then \
 		echo "Compiling precompiled header..."; \
-		$(COMPILER) $(CXXFLAGS) -x c++-header $(PCH) -o $(PCH_OBJ); \
+		$(COMPILER) $(EXECFLAGS) -x c++-header $(PCH) -o $(PCH_OBJ); \
 	else \
 		echo "Precompiled header is up to date."; \
 	fi
