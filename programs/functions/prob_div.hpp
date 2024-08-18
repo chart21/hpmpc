@@ -37,7 +37,7 @@ void complete_prob_div(T &out, const int len, const int denominator)
         trunc_2k_in_place(out, len, true);
 #endif
 #else
-    #if trunc_approach == 1
+    #if TRUNC_APPROACH == 1
         trunc_2k_in_place(out, len, true);
 #elif TRUNC_APPROACH == 2
         trunc_exact_in_place(out, len);
