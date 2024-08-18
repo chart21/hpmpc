@@ -120,6 +120,15 @@
 #define TRUNC_DELAYED 0 // Delay CONV truncation until next ReLU 
 #endif
 
+#ifndef AVG_OPT
+#define AVG_OPT 0 // Optimize average pooling by reducing precision
+#endif
+
+#ifndef AVG_OPT_THRESHOLD
+#define AVG_OPT_THRESHOLD 100 // Threshoold of tolerated precision decrease for one bit of FRACTIONAL reduction
+#endif
+
+
 #ifndef COMPUTE_ARGMAX
 #define COMPUTE_ARGMAX 0 // 0: skip final argmax during inference, 1: Compute final argmax during inference
 #endif

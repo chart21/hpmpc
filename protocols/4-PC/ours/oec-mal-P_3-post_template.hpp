@@ -88,12 +88,12 @@ OECL_MAL3_POST_Share prepare_div_exp2(const Datatype b, func_mul MULT, func_add 
     
     
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL_MAL3_POST_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL_MAL3_POST_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
     return OECL_MAL3_POST_Share();
 } 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL_MAL3_POST_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL_MAL3_POST_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
     return OECL_MAL3_POST_Share();
 }
@@ -155,7 +155,7 @@ void complete_mult(func_add ADD, func_sub SUB)
 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL_MAL3_POST_Share& r_mk2, OECL_MAL3_POST_Share& r_msb, OECL_MAL3_POST_Share& c, OECL_MAL3_POST_Share& c_prime) const{
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL_MAL3_POST_Share& r_mk2, OECL_MAL3_POST_Share& r_msb, OECL_MAL3_POST_Share& c, OECL_MAL3_POST_Share& c_prime, int fractional_bits = FRACTIONAL) const{
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
@@ -164,7 +164,7 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and>
-OECL_MAL3_POST_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+OECL_MAL3_POST_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, int fractional_bits = FRACTIONAL) const {
     return OECL_MAL3_POST_Share();
 }
 

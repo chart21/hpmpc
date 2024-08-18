@@ -140,17 +140,16 @@ OECL1_init mult_public(const Datatype b, func_mul MULT) const
 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL1_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
     return OECL1_init();
-} 
+}
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL1_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL1_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
     return OECL1_init();
-} 
-
+}
 
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed( func_add ADD, func_sub SUB)
@@ -158,7 +157,7 @@ void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 }
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL1_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL1_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
     Datatype dummy;
     return prepare_mult_public_fixed(dummy, MULT, ADD, SUB, TRUNC);
@@ -166,7 +165,7 @@ OECL1_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub S
 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-OECL1_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const{
+OECL1_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, int fractional_bits = FRACTIONAL) const {
     send_to_(P_2);
     return OECL1_init();
 }

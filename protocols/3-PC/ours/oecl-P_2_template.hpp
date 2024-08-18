@@ -158,21 +158,21 @@ OECL2_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub 
 } 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL2_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL2_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
     OECL2_Share res;
-#if TRUNC_THEN_MULT == 1
-    res.p1 = MULT(TRUNC(ADD(p1,p2)),b);
-#else
-    res.p1 = TRUNC(MULT(ADD(p1,p2),b));
-#endif
+/* #if TRUNC_THEN_MULT == 1 */
+/*     res.p1 = MULT(TRUNC(ADD(p1,p2),fractional_bits),b); */
+/* #else */
+    res.p1 = TRUNC(MULT(ADD(p1,p2),b),fractional_bits);
+/* #endif */
     return res;
 } 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL2_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL2_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
-    return OECL2_Share(TRUNC(ADD(p1,p2)));
+    return OECL2_Share(TRUNC(ADD(p1,p2),fractional_bits));
 } 
     
     template <typename func_add, typename func_sub>
@@ -612,12 +612,12 @@ p1 = ADD(p1, receive_from_live(P_1));
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_Share& r_mk2, OECL2_Share& r_msb, OECL2_Share& c, OECL2_Share& c_prime) const{
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_Share& r_mk2, OECL2_Share& r_msb, OECL2_Share& c, OECL2_Share& c_prime, int fractional_bits = FRACTIONAL) const{
     r_mk2.template prepare_receive_from<P_0>(ADD, SUB);
     r_msb.template prepare_receive_from<P_0>(ADD, SUB);
     
     Datatype c_dat_prime = trunc(ADD(p1,p2));
-    UINT_TYPE maskValue = (UINT_TYPE(1) << (BITLENGTH-FRACTIONAL-1)) - 1;
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (BITLENGTH-fractional_bits-1)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
     c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1
@@ -646,11 +646,11 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and>
-OECL2_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+OECL2_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, int fractional_bits = FRACTIONAL) const{
     Datatype mx = ADD(p1,p2);
     //Step 1, Compute [x/2t] -> delt with public mult fixed
     //Step 2, Compute [x mod t]
-    UINT_TYPE maskValue = (UINT_TYPE(1) << (FRACTIONAL)) - 1;
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (fractional_bits)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
     Datatype mxmodt = AND(mx, mask); //mod 2^t

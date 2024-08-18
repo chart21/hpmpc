@@ -3,24 +3,24 @@
 #include "../../datatypes/float_fixed_converter.hpp"
 
     template<typename T>                    
-void prepare_prob_div(T &out, const int denominator)
+void prepare_prob_div(T &out, const int denominator, const int frac_bits = FRACTIONAL)
 {
     #if TRUNC_APPROACH == 0 || TRUNC_APPROACH == 4
-    if ((denominator & (denominator - 1)) == 0) // if power of 2
-            out = out.prepare_div_exp2(denominator);
-    else
 #if TRUNC_APPROACH == 0
-        out *= FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator)); 
+        out = out.prepare_mult_public_fixed(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits),frac_bits);
 #elif TRUNC_APPROACH == 4
-        out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator))); 
+        if(frac_bits <= FRACTIONAL / 2)
+            out = out.prepare_mult_public_fixed(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits),frac_bits);
+        else
+        out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits));
 #endif
     #else
-        out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator))); 
+        out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits));
     #endif
 }
 
 template<typename T>
-void complete_prob_div(T &out, const int len, const int denominator)
+void complete_prob_div(T &out, const int len, const int denominator, const int frac_bits = FRACTIONAL)
 {
 
 #if TRUNC_APPROACH == 0 || TRUNC_APPROACH == 4
@@ -28,21 +28,21 @@ void complete_prob_div(T &out, const int len, const int denominator)
     for (int i = 0; i < len; i++)
             out[i].complete_public_mult_fixed();
 #elif TRUNC_APPROACH == 4
-    if ((denominator & (denominator - 1)) == 0) // if power of 2
+    if (frac_bits <= FRACTIONAL / 2)
     { 
         for (int i = 0; i < len; i++)
                 out[i].complete_public_mult_fixed();
     } 
         else
-        trunc_2k_in_place(out, len, true);
+        trunc_2k_in_place(out, len, true, frac_bits);
 #endif
 #else
     #if TRUNC_APPROACH == 1
-        trunc_2k_in_place(out, len, true);
+        trunc_2k_in_place(out, len, true, frac_bits);
 #elif TRUNC_APPROACH == 2
-        trunc_exact_in_place(out, len);
+        trunc_exact_in_place(out, len, frac_bits);
 #elif TRUNC_APPROACH == 3
-        trunc_exact_opt_in_place(out, len, true);
+        trunc_exact_opt_in_place(out, len, true, frac_bits);
     #endif
 #endif
 }

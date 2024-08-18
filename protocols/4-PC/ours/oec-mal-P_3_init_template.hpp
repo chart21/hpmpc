@@ -208,7 +208,7 @@ OEC_MAL3_init mult_public(const Datatype b, func_mul MULT) const
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime){
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_init& r_mk2, OEC_MAL3_init& r_msb, OEC_MAL3_init& c, OEC_MAL3_init& c_prime, int fractional_bits = FRACTIONAL) const {
 #if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
     pre_send_to_(P_2);
@@ -228,13 +228,13 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and>
-OEC_MAL3_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+OEC_MAL3_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, int fractional_bits = FRACTIONAL) const {
     return OEC_MAL3_init();
 }
 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
 #if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1
@@ -248,7 +248,7 @@ OEC_MAL3_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_ad
     return OEC_MAL3_init();
 } 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OEC_MAL3_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OEC_MAL3_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
 #if PROTOCOL == 12 || PROTOCOL == 8 || PRE == 1
 #if PRE == 1

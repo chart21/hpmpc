@@ -165,26 +165,26 @@ public:
         return result;
         }
 
-        sint_t prepare_mult_public_fixed_dat(const DATATYPE other) const {
+        sint_t prepare_mult_public_fixed_dat(const DATATYPE other, int fractional_bits = FRACTIONAL) const {
         sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
-            result[i] = shares[i].prepare_mult_public_fixed_dat(other);
+            result[i] = shares[i].prepare_mult_public_fixed_dat(other, fractional_bits);
         }
         return result;
         }
 
-        sint_t prepare_mult_public_fixed(const UINT_TYPE other) const {
+        sint_t prepare_mult_public_fixed(const UINT_TYPE other, int fractional_bits = FRACTIONAL) const {
             sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
-            result[i] = shares[i].prepare_mult_public_fixed(other);
+            result[i] = shares[i].prepare_mult_public_fixed(other, fractional_bits);
         }
         return result;
         }
 
-        sint_t prepare_trunc_share() const {
+        sint_t prepare_trunc_share(int fractional_bits = FRACTIONAL) const {
             sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) {
-            result[i] = shares[i].prepare_trunc_share();
+            result[i] = shares[i].prepare_trunc_share(fractional_bits);
         }
         return result;
         }
@@ -395,10 +395,10 @@ public:
             return result;
         }
 
-        void prepare_trunc_2k_inputs(sint_t& rmk2, sint_t& rmsb, sint_t& c, sint_t& c_prime) 
+        void prepare_trunc_2k_inputs(sint_t& rmk2, sint_t& rmsb, sint_t& c, sint_t& c_prime, int fractional_bits = FRACTIONAL)
         {
             for(int i = 0; i < BITLENGTH; ++i) 
-                shares[i].prepare_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i]);
+                shares[i].prepare_trunc_2k_inputs(rmk2.shares[i], rmsb.shares[i], c.shares[i], c_prime.shares[i], fractional_bits);
         }
 
         void complete_trunc_2k_inputs(sint_t& rmk2, sint_t& rmsb, sint_t& c, sint_t& c_prime)
@@ -426,11 +426,11 @@ public:
         }
 /* #endif */
 
-    sint_t prepare_trunc_exact_xmod2t() const
+    sint_t prepare_trunc_exact_xmod2t(int fractional_bits = FRACTIONAL) const
     {
         sint_t result;
         for(int i = 0; i < BITLENGTH; ++i) 
-            result[i] = shares[i].prepare_trunc_exact_xmod2t();
+            result[i] = shares[i].prepare_trunc_exact_xmod2t(fractional_bits);
         return result;
     }
 

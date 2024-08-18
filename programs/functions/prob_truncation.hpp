@@ -1,7 +1,7 @@
 #pragma once
 #include "../../datatypes/Additive_Share.hpp"
 template<typename T>
-static void trunc_2k_in_place(T*  val, const int len, bool isPositive = false){
+static void trunc_2k_in_place(T*  val, const int len, bool isPositive = false, int fractional_bits = FRACTIONAL){
     
     if(!isPositive)
         for(int i = 0; i < len; i++)
@@ -13,7 +13,7 @@ static void trunc_2k_in_place(T*  val, const int len, bool isPositive = false){
     T::communicate();
     for(int i = 0; i < len; i++)
     {
-        val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i]);
+        val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i]), fractional_bits;
     }
     T::communicate();
     for(int i = 0; i < len; i++)
@@ -28,7 +28,7 @@ static void trunc_2k_in_place(T*  val, const int len, bool isPositive = false){
     for(int i = 0; i < len; i++)
     {
         b[i].complete_XOR(r_msb[i],c[i]);
-        b[i] = b[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL - 1));
+        b[i] = b[i].mult_public(UINT_TYPE(1) << (BITLENGTH - fractional_bits - 1));
     }
     T::communicate();
     delete[] c;
@@ -40,7 +40,7 @@ static void trunc_2k_in_place(T*  val, const int len, bool isPositive = false){
 
     if(!isPositive)
         for(int i = 0; i < len; i++)
-            val[i] = val[i] - T((UINT_TYPE(1) << (BITLENGTH - FRACTIONAL - 1))); // substract 2^l-1 to reverse previous addition
+            val[i] = val[i] - T((UINT_TYPE(1) << (BITLENGTH - fractional_bits - 1))); // substract 2^l-1 to reverse previous addition
 
     delete[] r_mk2;
     delete[] r_msb;
@@ -53,6 +53,7 @@ static void trunc_pr_in_place(T*  val, const int len){
     for(int i = 0; i < len; i++)
     {
         val[i] *= UINT_TYPE(1);
+        /* val[i].prepare_trunc_share(); // Worth to try out */
     }
     T::communicate();
     for(int i = 0; i < len; i++)

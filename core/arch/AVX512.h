@@ -148,13 +148,25 @@ inline __m512i _mm512_srai_epi16_wrapper(__m512i a) {
   return _mm512_srai_epi16(a,n);
 }
 
+inline __m512i _mm512_srai_epi16_wrapper(__m512i a, int n) {
+  return _mm512_srai_epi16(a,n);
+}
+
 template <int n>
 inline __m512i _mm512_srai_epi32_wrapper(__m512i a) {
   return _mm512_srai_epi32(a,n);
 }
 
+inline __m512i _mm512_srai_epi32_wrapper(__m512i a, int n) {
+  return _mm512_srai_epi32(a,n);
+}
+
 template <int n>
 inline __m512i _mm512_srai_epi64_wrapper(__m512i a) {
+  return _mm512_srai_epi64(a,n);
+}
+
+inline __m512i _mm512_srai_epi64_wrapper(__m512i a, int n) {
   return _mm512_srai_epi64(a,n);
 }
 
@@ -164,13 +176,25 @@ inline __m512i _mm512_slli_epi16_wrapper(__m512i a) {
   return _mm512_slli_epi16(a,n);
 }
 
+inline __m512i _mm512_slli_epi16_wrapper(__m512i a, int n) {
+  return _mm512_slli_epi16(a,n);
+}
+
 template <int n>
 inline __m512i _mm512_slli_epi32_wrapper(__m512i a) {
   return _mm512_slli_epi32(a,n);
 }
 
+inline __m512i _mm512_slli_epi32_wrapper(__m512i a, int n) {
+  return _mm512_slli_epi32(a,n);
+}
+
 template <int n>
 inline __m512i _mm512_slli_epi64_wrapper(__m512i a) {
+  return _mm512_slli_epi64(a,n);
+}
+
+inline __m512i _mm512_slli_epi64_wrapper(__m512i a, int n) {
   return _mm512_slli_epi64(a,n);
 }
 
@@ -180,13 +204,25 @@ inline __m512i __mm512_srl_epi16_wrapper(__m512i a) {
   return _mm512_srli_epi16(a,n);
 }
 
+inline __m512i __mm512_srl_epi16_wrapper(__m512i a, int n) {
+  return _mm512_srli_epi16(a,n);
+}
+
 template <int n>
 inline __m512i __mm512_srl_epi32_wrapper(__m512i a) {
   return _mm512_srli_epi32(a,n);
 }
 
+inline __m512i __mm512_srl_epi32_wrapper(__m512i a, int n) {
+  return _mm512_srli_epi32(a,n);
+}
+
 template <int n>
 inline __m512i __mm512_srl_epi64_wrapper(__m512i a) {
+  return _mm512_srli_epi64(a,n);
+}
+
+inline __m512i __mm512_srl_epi64_wrapper(__m512i a, int n) {
   return _mm512_srli_epi64(a,n);
 }
 

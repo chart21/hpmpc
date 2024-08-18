@@ -161,7 +161,7 @@ OECL2_init mult_public(const Datatype b, func_mul MULT) const
 }
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
     return OECL2_init();
 }
@@ -176,10 +176,10 @@ void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 }
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL2_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL2_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int frac_bits = FRACTIONAL) const
 {
     return OECL2_init();
-} 
+}
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OECL2_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
@@ -189,7 +189,7 @@ OECL2_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub S
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-OECL2_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc) const{
+OECL2_init prepare_trunc_2k(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, int fractional_bits = FRACTIONAL) const {
 #if PRE == 0
     receive_from_(P_0); //send share of bit decomposition of x_0 to P_2
 #else
@@ -458,7 +458,7 @@ void complete_mult4(func_add ADD, func_sub SUB){
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_init& r_mk2, OECL2_init& r_msb, OECL2_init& c, OECL2_init& c_prime) {
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL2_init& r_mk2, OECL2_init& r_msb, OECL2_init& c, OECL2_init& c_prime, int fractional_bits = FRACTIONAL) {
     this->template prepare_receive_from<P_0>(ADD, SUB);
     this->template prepare_receive_from<P_0>(ADD, SUB);
 
@@ -471,7 +471,7 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and>
-OECL2_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+OECL2_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, int fractional_bits = FRACTIONAL) const {
     return OECL2_init();
 }
 

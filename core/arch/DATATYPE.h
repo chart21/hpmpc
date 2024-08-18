@@ -81,6 +81,7 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 #define OP_SHIFT_LEFT SHIFT_LEFT32
 #define OP_SHIFT_RIGHT SHIFT_RIGHT32
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT32
+#define OP_SHIFT_LOG_RIGHTF SHIFT_LOG_RIGHT32F
 /* #define OP_TRUNC2 SHIFT_RIGHT32<1> */
 #elif BITLENGTH == 64
 #define OP_ADD FUNC_ADD64
@@ -98,8 +99,10 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 
 /* #define OP_TRUNC OP_SHIFT_RIGHT<FRACTIONAL> */
 /* #define OP_TRUNC2 OP_SHIFT_RIGHT<1> */
+/* #define OP_TRUNCF OP_SHIFT_RIGHT */
 #define OP_TRUNC OP_SHIFT_LOG_RIGHT<FRACTIONAL>
 #define OP_TRUNC2 OP_SHIFT_LOG_RIGHT<1>
+#define OP_TRUNCF OP_SHIFT_LOG_RIGHT<0,0>
 
 DATATYPE TRUNC2(DATATYPE x) {
     // Create a mask with lower k bits set to 1

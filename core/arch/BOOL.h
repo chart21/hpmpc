@@ -66,6 +66,9 @@ bool SET_ZERO(bool value) {
   return false;
 }
 
+bool SET_ZERO(bool value, int n) {
+  return false;
+}
 
 #ifndef DATATYPE
 #define DATATYPE bool 

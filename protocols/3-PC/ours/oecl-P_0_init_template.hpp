@@ -161,7 +161,7 @@ OECL0_init mult_public(const Datatype b, func_mul MULT) const
 
     
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL0_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL0_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
 #if PRE == 1
     pre_send_to_(P_2);
@@ -172,7 +172,7 @@ OECL0_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add A
 } 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OECL0_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OECL0_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractiona_bits = FRACTIONAL) const
 {
 #if PRE == 1
     pre_send_to_(P_2);
@@ -436,7 +436,7 @@ void complete_mult4(func_add ADD, func_sub SUB){}
 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL0_init& r_mk2, OECL0_init& r_msb, OECL0_init& c, OECL0_init& c_prime){
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL0_init& r_mk2, OECL0_init& r_msb, OECL0_init& c, OECL0_init& c_prime, int fractional_bits = FRACTIONAL) {
     this->template prepare_receive_from<PSELF>(ADD, SUB);
     this->template prepare_receive_from<PSELF>(ADD, SUB);
 }
@@ -448,7 +448,7 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and>
-OECL0_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+OECL0_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, int fractional_bits = FRACTIONAL) const {
     return OECL0_init();
 }
 

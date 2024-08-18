@@ -4,7 +4,7 @@
 /* static void trunc_exact_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len) */
 /*     template<int m, int k,typename Share, typename Datatype> */
 template<typename Datatype, typename Share, typename dummy>
-void trunc_exact_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
+void trunc_exact_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len, int fractional_bits = FRACTIONAL)
 {
     using S = XOR_Share<Datatype, Share>;
     using A = Additive_Share<Datatype, Share>;
@@ -18,11 +18,11 @@ void trunc_exact_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const in
     
     for(int i = 0; i < len; i++)
     {
-    for(int j = BITLENGTH - 1; j >= FRACTIONAL; j--)
+    for(int j = BITLENGTH - 1; j >= fractional_bits; j--)
     {
-        y[i][j] = y[i][j - FRACTIONAL]; //shift right
+        y[i][j] = y[i][j - fractional_bits]; //shift right
     }
-    for(int j = 1; j < FRACTIONAL; j++)
+    for(int j = 1; j < fractional_bits; j++)
     {
        y[i][j] = y[i][0]; //set most significant bits to sign bit
     }
@@ -31,15 +31,14 @@ void trunc_exact_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const in
 }
 
 template<typename Datatype, typename Share>
-void trunc_exact_in_place(Additive_Share<Datatype, Share>* val, const int len)
+void trunc_exact_in_place(Additive_Share<Datatype, Share>* val, const int len, int fractional_bits = FRACTIONAL)
 {
-    pack_additive_inplace<0,BITLENGTH>(val,len,trunc_exact_in_place<Datatype,Share,void>);
+    pack_additive_inplace<0,BITLENGTH>(val,len,fractional_bits,trunc_exact_in_place<Datatype,Share,void>);
 }
 
 
-
 template<typename Datatype, typename Share, typename dummy>
-void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
+void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len, int fractional_bits = FRACTIONAL)
 {
     using S = XOR_Share<Datatype, Share>;
     using A = Additive_Share<Datatype, Share>;
@@ -56,7 +55,7 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     sint* x2t = new sint[len];
     for(int i = 0; i < len; i++)
     {
-            x2t[i] = val[i].prepare_trunc_share();
+            x2t[i] = val[i].prepare_trunc_share(fractional_bits);
     }
     Share::communicate();
     for(int i = 0; i < len; i++)
@@ -68,7 +67,7 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, cons
     sint* xmod2t = new sint[len];
     for(int i = 0; i < len; i++)
     {
-        xmod2t[i] = val[i].prepare_trunc_exact_xmod2t();
+        xmod2t[i] = val[i].prepare_trunc_exact_xmod2t(fractional_bits);
     }
 #endif
     //step 3: Nothing to do
@@ -227,14 +226,14 @@ delete[] c2A;
 }
 
 template<typename Datatype, typename Share>
-void trunc_exact_opt_in_place(Additive_Share<Datatype, Share>* val, const int len, bool isPositive=false)
+void trunc_exact_opt_in_place(Additive_Share<Datatype, Share>* val, const int len, bool isPositive=false, int fractional_bits = FRACTIONAL)
 {
     using A = Additive_Share<Datatype, Share>;
     if(!isPositive)
         for(int i = 0; i < len; i++)
             val[i] = val[i] +  A((UINT_TYPE(1) << (BITLENGTH - 1))); // add 2^l-1 to gurantee positive number
    
-    pack_additive_inplace<0,BITLENGTH>(val,len,trunc_exact_opt_in_place<Datatype,Share,void>);
+    pack_additive_inplace<0,BITLENGTH>(val,len,fractional_bits,trunc_exact_opt_in_place<Datatype,Share,void>);
     
     if(!isPositive) 
         for(int i = 0; i < len; i++)

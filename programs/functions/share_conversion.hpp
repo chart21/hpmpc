@@ -347,4 +347,39 @@ static void pack_additive_inplace(Additive_Share<Datatype, Share>*  val, const i
     delete[] tmp;
 }
 
+template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype, typename FUNC_OP>
+static void pack_additive_inplace(Additive_Share<Datatype, Share>*  val, const int len, const int fractiona_bits, FUNC_OP op){
+    using sint = sint_t<Additive_Share<Datatype, Share>>;
+    int m = len;
+    sint* tmp = new sint[(m-1)/BITLENGTH+1];
+    int counter = 0;
+    while(m > BITLENGTH-1)
+    {
+       tmp[counter++] = sint::load_shares(val+counter*BITLENGTH);
+       m -= BITLENGTH;
+    }
+    if(m > 0)
+        tmp[counter++] = sint::load_shares(m, val+counter*BITLENGTH);
+    /* RELU_range_in_place<rm,rk,Share>(tmp, counter); */
+    op(tmp, counter, fractiona_bits);
+    counter = 0;
+    m = len;
+    while(m > BITLENGTH-1)
+    {
+        for(int j = 0; j < BITLENGTH; j++)
+        {
+            val[counter*BITLENGTH+j] = tmp[counter].get_share(j);
+        }
+        counter++;
+        m -= BITLENGTH;
+    }
+    if(m > 0)
+    {
+        for(int j = 0; j < m; j++)
+        {
+            val[counter*BITLENGTH+j] = tmp[counter].get_share_pointer()[j];
+        }
+    }
+    delete[] tmp;
+}
 

@@ -69,14 +69,14 @@ public:
         return Additive_Share(Share_Type::mult_public(b, OP_MULT));
     }
 
-    Additive_Share prepare_mult_public_fixed(const UINT_TYPE b) const
+    Additive_Share prepare_mult_public_fixed(const UINT_TYPE b, int fractional_bits = FRACTIONAL) const
     {
-        return Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
+        return Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, OP_TRUNCF, fractional_bits);
     }
     
-    Additive_Share prepare_trunc_share() const
+    Additive_Share prepare_trunc_share(int fractional_bits = FRACTIONAL) const
     {
-        return Share_Type::prepare_trunc_share(OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
+        return Share_Type::prepare_trunc_share(OP_MULT, OP_ADD, OP_SUB, OP_TRUNCF, fractional_bits);
     }
     
     Additive_Share prepare_div_exp2(const int b) const
@@ -84,9 +84,9 @@ public:
         return Additive_Share(Share_Type::prepare_div_exp2(b, OP_MULT, OP_ADD, OP_SUB, OP_TRUNC2));
     }
 
-    Additive_Share prepare_mult_public_fixed_dat(const Datatype b) const
+    Additive_Share prepare_mult_public_fixed_dat(const Datatype b, int fractional_bits = FRACTIONAL) const
     {
-        return Share_Type::prepare_mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, FUNC_TRUNC);
+        return Share_Type::prepare_mult_public_fixed(b, OP_MULT, OP_ADD, OP_SUB, OP_TRUNCF, fractional_bits);
     }
 
     void complete_public_mult_fixed()
@@ -135,9 +135,9 @@ public:
     {
         Share_Type::prepare_reveal_to_all();
     }
-    void prepare_trunc_2k_inputs(Share_Type& rmk2, Share_Type& rmsb, Share_Type& c, Share_Type& c_prime) 
+    void prepare_trunc_2k_inputs(Share_Type& rmk2, Share_Type& rmsb, Share_Type& c, Share_Type& c_prime, int fractional_bits = FRACTIONAL)
     {
-       Share_Type::prepare_trunc_2k_inputs(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, FUNC_TRUNC, rmk2, rmsb, c, c_prime);
+       Share_Type::prepare_trunc_2k_inputs(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, OP_TRUNCF, rmk2, rmsb, c, c_prime, fractional_bits);
     }
 
     void complete_trunc_2k_inputs(Share_Type& rmk2, Share_Type& rmsb, Share_Type& c, Share_Type& c_prime)
@@ -268,9 +268,9 @@ public:
         *this = Additive_Share(s);
     }
     
-   Additive_Share  prepare_trunc_exact_xmod2t() const
+   Additive_Share  prepare_trunc_exact_xmod2t(int fractional_bits = FRACTIONAL) const
    {
-       return Share_Type::prepare_trunc_exact_xmod2t(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND);
+       return Share_Type::prepare_trunc_exact_xmod2t(OP_ADD, OP_SUB, OP_TRUNCF, FUNC_AND, fractional_bits);
    }
 };
 

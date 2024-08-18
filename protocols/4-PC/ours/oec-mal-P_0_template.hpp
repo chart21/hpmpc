@@ -269,15 +269,15 @@ OEC_MAL0_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_s
 } 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
-#if TRUNC_THEN_MULT == 1
-    /* auto result = MULT(TRUNC(r),b); */
-    auto result = MULT(TRUNC(r),b);
-#else
-    auto result = TRUNC(MULT(b, r));
+/* #if TRUNC_THEN_MULT == 1 */
+/*     /1* auto result = MULT(TRUNC(r),b); *1/ */
+/*     auto result = MULT(TRUNC(r,fractional_bits),b); */
+/* #else */
+    auto result = TRUNC(MULT(b, r),fractional_bits);
     /* auto result = SUB(SET_ALL_ZERO(), TRUNC(MULT(b, OP_SUB(SET_ALL_ZERO(), r)))); */
-#endif
+/* #endif */
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
 #if PROTOCOL == 12 || PRE == 1
@@ -293,9 +293,9 @@ OEC_MAL0_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 } 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OEC_MAL0_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+OEC_MAL0_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
-    auto result = SUB(SET_ALL_ZERO(),TRUNC(SUB(SET_ALL_ZERO(), r)));
+    auto result = SUB(SET_ALL_ZERO(),TRUNC(SUB(SET_ALL_ZERO(), r),fractional_bits));
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
 #if PROTOCOL == 12 || PRE == 1
@@ -883,8 +883,8 @@ store_compare_view(P_012, ADD(v,r));
 #endif
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc tr, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime) const{
-    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(r) );
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc tr, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime, int fractional_bits = FRACTIONAL) const{
+    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<fractional_bits+1>( OP_SHIFT_LEFT<1>(r) );
     Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(r);
 
     r_mk2.v = rmk2;
@@ -972,11 +972,11 @@ static void complete_B2A2(OEC_MAL0_Share z[], OEC_MAL0_Share out[])
 
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and>
-OEC_MAL0_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+OEC_MAL0_Share prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, int fractional_bits = FRACTIONAL) const {
     Datatype lx = SUB(SET_ALL_ZERO(), r);
     //Step 1, Compute [x/2t] -> delt with public mult fixed
     //Step 2, Compute [x mod t]
-    UINT_TYPE maskValue = (UINT_TYPE(1) << (FRACTIONAL)) - 1;
+    UINT_TYPE maskValue = (UINT_TYPE(1) << (fractional_bits)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     // Apply the mask using bitwise AND
     Datatype lxmodt = AND(lx, mask); //mod 2^t

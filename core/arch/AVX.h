@@ -146,13 +146,25 @@ inline __m256i _mm256_slli_epi16_wrapper(__m256i a) {
     return _mm256_slli_epi16(a, n);
 }
 
+inline __m256i _mm256_slli_epi16_wrapper(__m256i a, int n) {
+    return _mm256_slli_epi16(a, n);
+}
+
 template <int n>
 inline __m256i _mm256_slli_epi32_wrapper(__m256i a) {
     return _mm256_slli_epi32(a, n);
 }
 
+inline __m256i _mm256_slli_epi32_wrapper(__m256i a, int n) {
+    return _mm256_slli_epi32(a, n);
+}
+
 template <int n>
 inline __m256i _mm256_slli_epi64_wrapper(__m256i a) {
+    return _mm256_slli_epi64(a, n);
+}
+
+inline __m256i _mm256_slli_epi64_wrapper(__m256i a, int n) {
     return _mm256_slli_epi64(a, n);
 }
 
@@ -163,13 +175,25 @@ inline __m256i _mm256_sra_epi16_wrapper(__m256i a) {
     return _mm256_srai_epi16(a, n);
 }
 
+inline __m256i _mm256_sra_epi16_wrapper(__m256i a, int n) {
+    return _mm256_srai_epi16(a, n);
+}
+
 template <int n>
 inline __m256i _mm256_sra_epi32_wrapper(__m256i a) {
     return _mm256_srai_epi32(a, n);
 }
 
+inline __m256i _mm256_sra_epi32_wrapper(__m256i a, int n) {
+    return _mm256_srai_epi32(a, n);
+}
+
 template <int n>
 inline __m256i _mm256_sra_epi64_wrapper(__m256i a) {
+    return _mm256_srai_epi64(a, n);
+}
+
+inline __m256i _mm256_sra_epi64_wrapper(__m256i a, int n) {
     return _mm256_srai_epi64(a, n);
 }
 
@@ -180,13 +204,25 @@ inline __m256i _mm256_srl_epi16_wrapper(__m256i a) {
     return _mm256_srli_epi16(a, n);
 }
 
+inline __m256i _mm256_srl_epi16_wrapper(__m256i a, int n) {
+    return _mm256_srli_epi16(a, n);
+}
+
 template <int n>
 inline __m256i _mm256_srl_epi32_wrapper(__m256i a) {
     return _mm256_srli_epi32(a, n);
 }
 
+inline __m256i _mm256_srl_epi32_wrapper(__m256i a, int n) {
+    return _mm256_srli_epi32(a, n);
+}
+
 template <int n>
 inline __m256i _mm256_srl_epi64_wrapper(__m256i a) {
+    return _mm256_srli_epi64(a, n);
+}
+
+inline __m256i _mm256_srl_epi64_wrapper(__m256i a, int n) {
     return _mm256_srli_epi64(a, n);
 }
 

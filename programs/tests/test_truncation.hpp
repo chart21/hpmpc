@@ -10,9 +10,9 @@
 #define FUNCTION test_truncation
 #endif
 #define TEST_PROB_TRUNC 1 // [a] -> [a]^t
-#define TEST_PROB_TRUNC_REDUCED_SLACK 1 // [a] -> [a]^t
+#define TEST_PROB_TRUNC_REDUCED_SLACK 0 // [a] -> [a]^t
 #define TEST_EXACT_TRUNC 1 // [a] -> [a]^t
-#define TEST_EXACT_TRUNC_OPT 1 // [a] -> [a]^t
+#define TEST_EXACT_TRUNC_OPT 0 // [a] -> [a]^t
 
 #if TEST_PROB_TRUNC == 1
 template<typename Share>
@@ -27,7 +27,7 @@ bool test_prob_truncation()
     for(int i = 0; i < vectorization_factor; i++)
     {
         fa[i] = num+i+float(num+i)/100;
-        a[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(fa[i]);
+        a[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(fa[i], 3);
     }
     DATATYPE vectorized_input_a;
     orthogonalize_arithmetic(a, &vectorized_input_a,1);
