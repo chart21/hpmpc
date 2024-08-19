@@ -884,7 +884,7 @@ store_compare_view(P_012, ADD(v,r));
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc tr, OEC_MAL0_Share& r_mk2, OEC_MAL0_Share& r_msb, OEC_MAL0_Share& c, OEC_MAL0_Share& c_prime, int fractional_bits = FRACTIONAL) const{
-    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<fractional_bits+1>( OP_SHIFT_LEFT<1>(r) );
+    Datatype rmk2 = OP_SHIFT_LOG_RIGHTF( OP_SHIFT_LEFT<1>(r), fractional_bits+1 );
     Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(r);
 
     r_mk2.v = rmk2;

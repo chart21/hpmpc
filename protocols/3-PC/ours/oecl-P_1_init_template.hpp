@@ -323,7 +323,7 @@ void complete_mult4(func_add ADD, func_sub SUB){
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
-void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL1_init& r_mk2, OECL1_init& r_msb, OECL1_init& c, OECL1_init& c_prime) {
+void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL1_init& r_mk2, OECL1_init& r_msb, OECL1_init& c, OECL1_init& c_prime, int fractional_bits = FRACTIONAL) {
     this->template prepare_receive_from<P_0>(ADD, SUB);
     this->template prepare_receive_from<P_0>(ADD, SUB);
 

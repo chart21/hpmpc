@@ -674,7 +674,7 @@ template <typename func_add, typename func_sub, typename func_xor, typename func
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OECL0_Share& r_mk2, OECL0_Share& r_msb, OECL0_Share& c, OECL0_Share& c_prime, int fractional_bits = FRACTIONAL) const{
     /* Datatype rmk2 = (ADD(p1,p2) << 1) >> (FRACTIONAL + 1); */
     /* Datatype rmsb = ADD(p1,p2) >> (BITLENGTH - 1); */
-    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<fractional_bits+1>( OP_SHIFT_LEFT<1>(ADD(p1,p2)) );
+    Datatype rmk2 = OP_SHIFT_LOG_RIGHTF( OP_SHIFT_LEFT<1>(ADD(p1,p2)), fractional_bits+1 );
     Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(ADD(p1,p2));
     /* Datatype rmk2 = SUB(SET_ALL_ZERO(), OP_SHIFT_LOG_RIGHT<FRACTIONAL+1>( OP_SHIFT_LEFT<1>(SUB(SET_ALL_ZERO(),ADD(p1,p2))) )); */
     /* Datatype rmsb = SUB(SET_ALL_ZERO(), OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(SUB(SET_ALL_ZERO(),ADD(p1,p2)))); */

@@ -85,6 +85,15 @@
 #define SHIFT_LOG_RIGHT16 __mm_srl_epi16_wrapper
 #define SHIFT_LOG_RIGHT32 __mm_srl_epi32_wrapper
 #define SHIFT_LOG_RIGHT64 __mm_srl_epi64_wrapper
+#define SHIFT_RIGHT16F __mm_sra_epi16_wrapperF
+#define SHIFT_RIGHT32F __mm_sra_epi32_wrapperF
+#define SHIFT_RIGHT64F __mm_sra_epi64_wrapperF
+#define SHIFT_LOG_RIGHT16F __mm_srl_epi16_wrapperF
+#define SHIFT_LOG_RIGHT32F __mm_srl_epi32_wrapperF
+#define SHIFT_LOG_RIGHT64F __mm_srl_epi64_wrapperF
+#define SHIFT_LEFT16F __mm_sla_epi16_wrapperF
+#define SHIFT_LEFT32F __mm_sla_epi32_wrapperF
+#define SHIFT_LEFT64F __mm_sla_epi64_wrapperF
 
 
 
@@ -163,7 +172,7 @@ inline __m128i __mm_sra_epi16_wrapper(__m128i a) {
     return _mm_srai_epi16(a,n);
 }
 
-inline __m128i __mm_sra_epi16_wrapper(__m128i a, int n) {
+inline __m128i __mm_sra_epi16_wrapperF(__m128i a, int n) {
     return _mm_srai_epi16(a,n);
 }
 
@@ -172,7 +181,7 @@ inline __m128i __mm_srl_epi16_wrapper(__m128i a) {
     return _mm_srli_epi16(a,n);
 }
 
-inline __m128i __mm_srl_epi16_wrapper(__m128i a, int n) {
+inline __m128i __mm_srl_epi16_wrapperF(__m128i a, int n) {
     return _mm_srli_epi16(a,n);
 }
 
@@ -181,7 +190,7 @@ inline __m128i __mm_sla_epi16_wrapper(__m128i a) {
     return _mm_slli_epi16(a,n);
 }
 
-inline __m128i __mm_sla_epi16_wrapper(__m128i a, int n) {
+inline __m128i __mm_sla_epi16_wrapperF(__m128i a, int n) {
     return _mm_slli_epi16(a,n);
 }
 
@@ -191,7 +200,7 @@ inline __m128i __mm_sra_epi32_wrapper(__m128i a) {
     return _mm_srai_epi32(a,n);
 }
 
-inline __m128i __mm_sra_epi32_wrapper(__m128i a, int n) {
+inline __m128i __mm_sra_epi32_wrapperF(__m128i a, int n) {
     return _mm_srai_epi32(a,n);
 }
 
@@ -200,7 +209,7 @@ inline __m128i __mm_srl_epi32_wrapper(__m128i a) {
     return _mm_srli_epi32(a,n);
 }
 
-inline __m128i __mm_srl_epi32_wrapper(__m128i a, int n) {
+inline __m128i __mm_srl_epi32_wrapperF(__m128i a, int n) {
     return _mm_srli_epi32(a,n);
 }
 
@@ -210,7 +219,7 @@ inline __m128i __mm_sla_epi32_wrapper(__m128i a) {
     return _mm_slli_epi32(a,n);
 }
 
-inline __m128i __mm_sla_epi32_wrapper(__m128i a, int n) {
+inline __m128i __mm_sla_epi32_wrapperF(__m128i a, int n) {
     return _mm_slli_epi32(a,n);
 }
 
@@ -221,7 +230,7 @@ inline __m128i __mm_sra_epi64_wrapper(__m128i a) {
     return _mm_srai_epi64(a,n);
 }
 
-inline __m128i __mm_sra_epi64_wrapper(__m128i a, int n) {
+inline __m128i __mm_sra_epi64_wrapperF(__m128i a, int n) {
     return _mm_srai_epi64(a,n);
 }
 
@@ -230,7 +239,7 @@ inline __m128i __mm_srl_epi64_wrapper(__m128i a) {
     return _mm_srli_epi64(a,n);
 }
 
-inline __m128i __mm_srl_epi64_wrapper(__m128i a, int n) {
+inline __m128i __mm_srl_epi64_wrapperF(__m128i a, int n) {
     return _mm_srli_epi64(a,n);
 }
 
@@ -240,7 +249,7 @@ inline __m128i __mm_sla_epi64_wrapper(__m128i a) {
     return _mm_slli_epi64(a,n);
 }
 
-inline __m128i __mm_sla_epi64_wrapper(__m128i a, int n) {
+inline __m128i __mm_sla_epi64_wrapperF(__m128i a, int n) {
     return _mm_slli_epi64(a,n);
 }
 

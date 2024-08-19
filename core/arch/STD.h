@@ -94,6 +94,19 @@
 #define SHIFT_LEFT16 logical_left_shift_16
 #define SHIFT_LEFT32 logical_left_shift_32
 #define SHIFT_LEFT64 logical_left_shift_64
+#define SHIFT_RIGHT8F arithmetic_right_shift_8F
+#define SHIFT_RIGHT16F arithmetic_right_shift_16F
+#define SHIFT_RIGHT32F arithmetic_right_shift_32F
+#define SHIFT_RIGHT64F arithmetic_right_shift_64F
+#define SHIFT_LOG_RIGHT8F logical_right_shift_8F
+#define SHIFT_LOG_RIGHT16F logical_right_shift_16F
+#define SHIFT_LOG_RIGHT32F logical_right_shift_32F
+#define SHIFT_LOG_RIGHT64F logical_right_shift_64F
+#define SHIFT_LEFT8F logical_left_shift_8F
+#define SHIFT_LEFT16F logical_left_shift_16F
+#define SHIFT_LEFT32F logical_left_shift_32F
+#define SHIFT_LEFT64F logical_left_shift_64F
+
 
 
 
@@ -111,7 +124,7 @@ int64_t temp = static_cast<int64_t>(value);
     return static_cast<uint64_t>(temp);
 }
 
-uint64_t arithmetic_right_shift_64(uint64_t value, int n) {
+uint64_t arithmetic_right_shift_64F(uint64_t value, int n) {
     int64_t temp = static_cast<int64_t>(value);
     temp >>= n;
     return static_cast<uint64_t>(temp);
@@ -122,7 +135,7 @@ uint64_t logical_right_shift_64(uint64_t value) {
     return value >> n;
 }
 
-uint64_t logical_right_shift_64(uint64_t value, int n) {
+uint64_t logical_right_shift_64F(uint64_t value, int n) {
     return value >> n;
 }
 
@@ -131,7 +144,7 @@ uint64_t logical_left_shift_64(uint64_t value) {
     return value << n;
 }
 
-uint64_t logical_left_shift_64(uint64_t value, int n) {
+uint64_t logical_left_shift_64F(uint64_t value, int n) {
     return value << n;
 }
 
@@ -150,8 +163,7 @@ int32_t temp = static_cast<int32_t>(value);
     return static_cast<uint32_t>(temp);
 }
 
-template<int dumm1, int dumm2>
-uint32_t arithmetic_right_shift_32(uint32_t value, int n) {
+uint32_t arithmetic_right_shift_32F(uint32_t value, int n) {
     int32_t temp = static_cast<int32_t>(value);
     temp >>= n;
     return static_cast<uint32_t>(temp);
@@ -162,8 +174,7 @@ uint32_t logical_right_shift_32(uint32_t value) {
     return value >> n;
 }
 
-template<int dumm1, int dumm2>
-uint32_t logical_right_shift_32(uint32_t value, int n) {
+uint32_t logical_right_shift_32F(uint32_t value, int n) {
     return value >> n;
 }
 
@@ -190,7 +201,7 @@ uint16_t arithmetic_right_shift_16(uint16_t value) {
     return static_cast<uint16_t>(temp);
 }
 
-uint16_t arithmetic_right_shift_16(uint16_t value, int n) {
+uint16_t arithmetic_right_shift_16F(uint16_t value, int n) {
     int16_t temp = static_cast<int16_t>(value);
     temp >>= n;
     return static_cast<uint16_t>(temp);
@@ -201,7 +212,7 @@ uint16_t logical_right_shift_16(uint16_t value) {
     return value >> n;
 }
 
-uint16_t logical_right_shift_16(uint16_t value, int n) {
+uint16_t logical_right_shift_16F(uint16_t value, int n) {
     return value >> n;
 }
 
@@ -210,7 +221,7 @@ uint16_t logical_left_shift_16(uint16_t value) {
     return value << n;
 }
 
-uint16_t logical_left_shift_16(uint16_t value, int n) {
+uint16_t logical_left_shift_16F(uint16_t value, int n) {
     return value << n;
 }
 
@@ -228,7 +239,7 @@ int8_t temp = static_cast<int8_t>(value);
     return static_cast<uint8_t>(temp);
 }
 
-uint8_t arithmetic_right_shift_8(uint8_t value, int n) {
+uint8_t arithmetic_right_shift_8F(uint8_t value, int n) {
     int8_t temp = static_cast<int8_t>(value);
     temp >>= n;
     return static_cast<uint8_t>(temp);
@@ -239,7 +250,7 @@ uint8_t logical_right_shift_8(uint8_t value) {
     return value >> n;
 }
 
-uint8_t logical_right_shift_8(uint8_t value, int n) {
+uint8_t logical_right_shift_8F(uint8_t value, int n) {
     return value >> n;
 }
 
@@ -248,7 +259,7 @@ uint8_t logical_left_shift_8(uint8_t value) {
     return value << n;
 }
 
-uint8_t logical_left_shift_8(uint8_t value, int n) {
+uint8_t logical_left_shift_8F(uint8_t value, int n) {
     return value << n;
 }
 

@@ -355,7 +355,7 @@ r0 = getRandomVal(P_123); // w
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL3_Share& r_mk2, OEC_MAL3_Share& r_msb, OEC_MAL3_Share& c, OEC_MAL3_Share& c_prime, int fractional_bits = FRACTIONAL) const{
-    Datatype rmk2 = OP_SHIFT_LOG_RIGHT<fractional_bits+1>( OP_SHIFT_LEFT<1>(r1) );
+    Datatype rmk2 = OP_SHIFT_LOG_RIGHTF( OP_SHIFT_LEFT<1>(r1), fractional_bits+1 );
     Datatype rmsb = OP_SHIFT_LOG_RIGHT<BITLENGTH-1>(r1);
     
     r_mk2.r0 = SET_ALL_ZERO();
