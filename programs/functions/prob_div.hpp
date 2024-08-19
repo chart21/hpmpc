@@ -9,10 +9,10 @@ void prepare_prob_div(T &out, const int denominator, const int frac_bits = FRACT
 #if TRUNC_APPROACH == 0
         out = out.prepare_mult_public_fixed(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits),frac_bits);
 #elif TRUNC_APPROACH == 4
-        if(frac_bits <= FRACTIONAL / 2)
+        /* if(frac_bits <= FRACTIONAL / 2) */
             out = out.prepare_mult_public_fixed(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits),frac_bits);
-        else
-        out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits));
+        /* else */
+        /* out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits)); */
 #endif
     #else
         out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits));
@@ -28,13 +28,13 @@ void complete_prob_div(T &out, const int len, const int denominator, const int f
     for (int i = 0; i < len; i++)
             out[i].complete_public_mult_fixed();
 #elif TRUNC_APPROACH == 4
-    if (frac_bits <= FRACTIONAL / 2)
-    { 
+    /* if (frac_bits <= FRACTIONAL / 2) */
+    /* { */ 
         for (int i = 0; i < len; i++)
                 out[i].complete_public_mult_fixed();
-    } 
-        else
-        trunc_2k_in_place(out, len, true, frac_bits);
+    /* } */ 
+    /*     else */
+    /*     trunc_2k_in_place(out, len, true, frac_bits); */
 #endif
 #else
     #if TRUNC_APPROACH == 1

@@ -40,6 +40,7 @@ void trunc_exact_in_place(Additive_Share<Datatype, Share>* val, const int len, i
 template<typename Datatype, typename Share, typename dummy>
 void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len, int fractional_bits = FRACTIONAL)
 {
+    assert(fractional_bits == FRACTIONAL);
     using S = XOR_Share<Datatype, Share>;
     using A = Additive_Share<Datatype, Share>;
     const int bm = 0;
@@ -201,9 +202,9 @@ if(isReLU)
 for (int i = 0; i < len; i++)
 {
 #if TRUNC_APPROACH == 2 || TRUNC_APPROACH == 3
-    val[i] = x2t[i] + c1A[i] - c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); 
+    val[i] = x2t[i] + c1A[i] - c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - fractional_bits)); 
 #else
-    val[i] = x2t[i] - c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - FRACTIONAL)); 
+    val[i] = x2t[i] - c2A[i].mult_public(UINT_TYPE(1) << (BITLENGTH - fractional_bits)); 
 #endif
 }
 #if TRUNC_DELAYED == 1 // Compute ReLU
@@ -237,6 +238,6 @@ void trunc_exact_opt_in_place(Additive_Share<Datatype, Share>* val, const int le
     
     if(!isPositive) 
         for(int i = 0; i < len; i++)
-            val[i] = val[i] - A((UINT_TYPE(1) << (BITLENGTH - FRACTIONAL - 1))); // substract 2^l-1 to reverse previous addition ..
+            val[i] = val[i] - A((UINT_TYPE(1) << (BITLENGTH - fractional_bits - 1))); // substract 2^l-1 to reverse previous addition ..
 }
 

@@ -13,7 +13,7 @@ static void trunc_2k_in_place(T*  val, const int len, bool isPositive = false, i
     T::communicate();
     for(int i = 0; i < len; i++)
     {
-        val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i]), fractional_bits;
+        val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i], fractional_bits);
     }
     T::communicate();
     for(int i = 0; i < len; i++)

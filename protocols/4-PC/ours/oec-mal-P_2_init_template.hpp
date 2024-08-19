@@ -206,7 +206,7 @@ OEC_MAL2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_ad
 } 
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
-OEC_MAL2_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL)
+OEC_MAL2_init prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
     send_to_(P_0);
     return OEC_MAL2_init();

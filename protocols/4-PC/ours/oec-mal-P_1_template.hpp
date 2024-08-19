@@ -327,7 +327,7 @@ void complete_public_mult_fixed( func_add ADD, func_sub SUB)
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
 void prepare_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, func_trunc trunc, OEC_MAL1_Share& r_mk2, OEC_MAL1_Share& r_msb, OEC_MAL1_Share& c, OEC_MAL1_Share& c_prime, int fractional_bits = FRACTIONAL) const {
-    Datatype c_dat_prime = trunc(v);
+    Datatype c_dat_prime = trunc(v, fractional_bits);
     UINT_TYPE maskValue = (UINT_TYPE(1) << (BITLENGTH-fractional_bits-1)) - 1;
     Datatype mask = PROMOTE(maskValue); // Set all elements to maskValue
     c_dat_prime = AND(c_dat_prime, mask); //mod 2^k-m-1

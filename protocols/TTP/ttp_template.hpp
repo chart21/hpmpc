@@ -56,15 +56,15 @@ TTP_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add AD
 {
 #if SIMULATE_MPC_FUNCTIONS == 1
     /* return TTP_Share(TRUNC(MULT(p1, b)), TRUNC(MULT(p2, b))); */
-#if TRUNC_THEN_MULT == 1
-    Datatype p1_v = MULT(TRUNC(p1), b);
-    Datatype p2_v = MULT(TRUNC(p2), b);
-    /* auto val = MULT(TRUNC(SUB(p1,p2)), b); */
-#else
+/* #if TRUNC_THEN_MULT == 1 */
+/*     Datatype p1_v = MULT(TRUNC(p1), b); */
+/*     Datatype p2_v = MULT(TRUNC(p2), b); */
+/*     /1* auto val = MULT(TRUNC(SUB(p1,p2)), b); *1/ */
+/* #else */
     /* auto val = TRUNC(MULT(SUB(p1,p2), b)); */
     Datatype p1_v = TRUNC(MULT(p1, b));
     Datatype p2_v = TRUNC(MULT(p2, b));
-#endif
+/* #endif */
     /* return TTP_Share(ADD(val, randomVal), randomVal); */
     auto randomVal = getRandomVal(0);
     return TTP_Share(ADD(p1_v, randomVal), ADD(p2_v, randomVal));

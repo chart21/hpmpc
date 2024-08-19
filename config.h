@@ -121,7 +121,7 @@
 #endif
 
 #ifndef AVG_OPT
-#define AVG_OPT 0 // Optimize average pooling by reducing precision
+#define AVG_OPT 1 // Optimize average pooling truncation failure by reducing fractional bits, Currently only works with trunc_approach 0,1,2,4 (not 3)
 #endif
 
 #ifndef AVG_OPT_THRESHOLD
