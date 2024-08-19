@@ -7,54 +7,54 @@ os.environ["MODEL_DIR"] = "nn/Pygeon/models/pretrained"
 os.environ["DATA_DIR"] = "nn/Pygeon/data/datasets"
 
 adam_005_tests = [
-    {"function": 80, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/AlexNet_32_CIFAR-10_custom_best.bin"},
-    {"function": 80, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/AlexNet_32_CIFAR-10_standard_best.bin"},
-    {"function": 81, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/AlexNet_CryptGPU_CIFAR-10_custom_best.bin"},
-    {"function": 81, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/AlexNet_CryptGPU_CIFAR-10_standard_best.bin"},
-    {"function": 70, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/ResNet18_avg_CIFAR-10_custom_best.bin"},
-    {"function": 70, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/ResNet18_avg_CIFAR-10_standard_best.bin"},
-    {"function": 71, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/ResNet50_avg_CIFAR-10_custom_best.bin"},
-    {"function": 71, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/ResNet50_avg_CIFAR-10_standard_best.bin"},
-    {"function": 72, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/ResNet101_avg_CIFAR-10_custom_best.bin"},
-    {"function": 72, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/ResNet101_avg_CIFAR-10_standard_best.bin"},
-    {"function": 73, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/ResNet152_avg_CIFAR-10_custom_best.bin"},
-    {"function": 73, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/ResNet152_avg_CIFAR-10_standard_best.bin"},
-    {"function": 74, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/VGG16_CIFAR-10_custom_best.bin"},
-    {"function": 74, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/VGG16_CIFAR-10_standard_best.bin"},
+    # {"function": 80, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/AlexNet_32_CIFAR-10_custom_best.bin"},
+    # {"function": 80, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/AlexNet_32_CIFAR-10_standard_best.bin"},
+    # {"function": 81, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/AlexNet_CryptGPU_CIFAR-10_custom_best.bin"},
+    # {"function": 81, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/AlexNet_CryptGPU_CIFAR-10_standard_best.bin"},
+    # {"function": 70, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/ResNet18_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 70, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/ResNet18_avg_CIFAR-10_standard_best.bin"},
+    # {"function": 71, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/ResNet50_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 71, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/ResNet50_avg_CIFAR-10_standard_best.bin"},
+    # {"function": 72, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/ResNet101_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 72, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/ResNet101_avg_CIFAR-10_standard_best.bin"},
+    # {"function": 73, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/ResNet152_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 73, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/ResNet152_avg_CIFAR-10_standard_best.bin"},
+    # {"function": 74, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_005/VGG16_CIFAR-10_custom_best.bin"},
+    # {"function": 74, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_005/VGG16_CIFAR-10_standard_best.bin"},
 ]
 
 adam_001_tests = [
-    {"function": 80, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/AlexNet_32_CIFAR-10_custom_best.bin"},
+    # {"function": 80, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/AlexNet_32_CIFAR-10_custom_best.bin"},
     {"function": 80, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_001/AlexNet_32_CIFAR-10_standard_best.bin"},
-    {"function": 81, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/AlexNet_CryptGPU_CIFAR-10_custom_best.bin"},
+    # {"function": 81, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/AlexNet_CryptGPU_CIFAR-10_custom_best.bin"},
     {"function": 81, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_001/AlexNet_CryptGPU_CIFAR-10_standard_best.bin"},
-    {"function": 70, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/ResNet18_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 70, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/ResNet18_avg_CIFAR-10_custom_best.bin"},
     {"function": 70, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_001/ResNet18_avg_CIFAR-10_standard_best.bin"},
-    {"function": 71, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/ResNet50_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 71, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/ResNet50_avg_CIFAR-10_custom_best.bin"},
     {"function": 71, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_001/ResNet50_avg_CIFAR-10_standard_best.bin"},
-    {"function": 72, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/ResNet101_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 72, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/ResNet101_avg_CIFAR-10_custom_best.bin"},
     {"function": 72, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_001/ResNet101_avg_CIFAR-10_standard_best.bin"},
-    {"function": 73, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/ResNet152_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 73, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/ResNet152_avg_CIFAR-10_custom_best.bin"},
     {"function": 73, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_001/ResNet152_avg_CIFAR-10_standard_best.bin"},
-    {"function": 74, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/VGG16_CIFAR-10_custom_best.bin"},
+    # {"function": 74, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_adam_001/VGG16_CIFAR-10_custom_best.bin"},
     {"function": 74, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_adam_001/VGG16_CIFAR-10_standard_best.bin"},
 ]
 
 sgd_001_tests = [
-    {"function": 80, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/AlexNet_32_CIFAR-10_custom_best.bin"},
-    {"function": 80, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/AlexNet_32_CIFAR-10_standard_best.bin"},
-    {"function": 81, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/AlexNet_CryptGPU_CIFAR-10_custom_best.bin"},
-    {"function": 81, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/AlexNet_CryptGPU_CIFAR-10_standard_best.bin"},
-    {"function": 70, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/ResNet18_avg_CIFAR-10_custom_best.bin"},
-    {"function": 70, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/ResNet18_avg_CIFAR-10_standard_best.bin"},
-    {"function": 71, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/ResNet50_avg_CIFAR-10_custom_best.bin"},
-    {"function": 71, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/ResNet50_avg_CIFAR-10_standard_best.bin"},
-    {"function": 72, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/ResNet101_avg_CIFAR-10_custom_best.bin"},
-    {"function": 72, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/ResNet101_avg_CIFAR-10_standard_best.bin"},
-    {"function": 73, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/ResNet152_avg_CIFAR-10_custom_best.bin"},
-    {"function": 73, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/ResNet152_avg_CIFAR-10_standard_best.bin"},
-    {"function": 74, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/VGG16_CIFAR-10_custom_best.bin"},
-    {"function": 74, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/VGG16_CIFAR-10_standard_best.bin"},
+    # {"function": 80, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/AlexNet_32_CIFAR-10_custom_best.bin"},
+    # {"function": 80, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/AlexNet_32_CIFAR-10_standard_best.bin"},
+    # {"function": 81, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/AlexNet_CryptGPU_CIFAR-10_custom_best.bin"},
+    # {"function": 81, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/AlexNet_CryptGPU_CIFAR-10_standard_best.bin"},
+    # {"function": 70, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/ResNet18_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 70, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/ResNet18_avg_CIFAR-10_standard_best.bin"},
+    # {"function": 71, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/ResNet50_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 71, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/ResNet50_avg_CIFAR-10_standard_best.bin"},
+    # {"function": 72, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/ResNet101_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 72, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/ResNet101_avg_CIFAR-10_standard_best.bin"},
+    # {"function": 73, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/ResNet152_avg_CIFAR-10_custom_best.bin"},
+    # {"function": 73, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/ResNet152_avg_CIFAR-10_standard_best.bin"},
+    # {"function": 74, "data_path": "CIFAR-10_custom_test", "model_path": "Cifar_sgd_001/VGG16_CIFAR-10_custom_best.bin"},
+    # {"function": 74, "data_path": "CIFAR-10_standard_test", "model_path": "Cifar_sgd_001/VGG16_CIFAR-10_standard_best.bin"},
 ]
 
 lenet_tests = [
@@ -114,8 +114,10 @@ def main():
             ]
 
             for config in configs:
-                print(f"FUNCTION_IDENTIFIER={setup['function']} SRNG_SEED={args.i} NUM_INPUTS={args.n}")
-                cmd = f"{base_cmd} {config} --override FUNCTION_IDENTIFIER={setup['function']} SRNG_SEED={args.i} NUM_INPUTS={args.n}"
+                print(f"FUNCTION_IDENTIFIER={setup['function']} SRNG_SEED={args.i}")
+                cmd = f"{base_cmd} {config} --override FUNCTION_IDENTIFIER={setup['function']} SRNG_SEED={args.i}"
+                # print(f"FUNCTION_IDENTIFIER={setup['function']} SRNG_SEED={args.i} NUM_INPUTS={args.n}")
+                # cmd = f"{base_cmd} {config} --override FUNCTION_IDENTIFIER={setup['function']} SRNG_SEED={args.i} NUM_INPUTS={args.n}"
                 run_command(cmd)
 if __name__ == "__main__":
     main()
