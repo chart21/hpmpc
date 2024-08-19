@@ -336,7 +336,7 @@ void complete_trunc_2k_inputs(func_add ADD, func_sub SUB, func_xor XOR, func_and
 }
 
 template <typename func_add, typename func_sub, typename func_xor, typename func_and>
-OECL1_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND) const{
+OECL1_init prepare_trunc_exact_xmod2t(func_add ADD, func_sub SUB, func_xor XOR, func_and AND, int frac_bits = FRACTIONAL) const {
     return OECL1_init();
 }
 

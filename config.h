@@ -125,7 +125,7 @@
 #endif
 
 #ifndef AVG_OPT_THRESHOLD
-#define AVG_OPT_THRESHOLD 100 // Threshoold of tolerated precision decrease for one bit of FRACTIONAL reduction
+#define AVG_OPT_THRESHOLD 0 // Threshold of tolerated precision decrease for one bit of FRACTIONAL reduction
 #endif
 
 

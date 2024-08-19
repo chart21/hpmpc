@@ -313,7 +313,6 @@ OEC_MAL3_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_a
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OEC_MAL3_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const {
-{
     auto result = SUB(SET_ALL_ZERO(),TRUNC(SUB(SET_ALL_ZERO(), r1),fractional_bits));
     auto rand_val = getRandomVal(P_013);
     auto val = SUB(result,rand_val);
