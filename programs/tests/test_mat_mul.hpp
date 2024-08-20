@@ -66,7 +66,7 @@ bool dot_product_fixed_test()
     A W[10];
     for(int i = 0; i < l; i++)
     {
-        X[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(10+i+float(10+i)/100);
+        X[i] = FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(10+i+float(10+i)/100);
         W[i] = X[i];
     }
     A Y[1] = {A(0)};

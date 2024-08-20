@@ -22,7 +22,7 @@ using namespace Eigen;
     template<typename Share>
 void inference(DATATYPE* res)
 {
-    using FLOATTYPE = float;
+    using LFLOATTYPE = float;
     using S = XOR_Share<DATATYPE, Share>;
     using A = Additive_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<BITLENGTH, S>;
@@ -157,7 +157,7 @@ void inference(DATATYPE* res)
 
 
     #if JIT_VEC == 0 
-        MatX<modeltype> test_XX = test_X.unaryExpr([](FLOATTYPE val) { 
+        MatX<modeltype> test_XX = test_X.unaryExpr([](LFLOATTYPE val) { 
                 modeltype tmp;
                 tmp.template prepare_receive_and_replicate<DATAOWNER>(FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(val));
                 return tmp;
@@ -175,7 +175,7 @@ void inference(DATATYPE* res)
         DataLoader<modeltype> test_loader;
         test_loader.load(test_XX, test_Y, cfg.batch, ch, h, w, cfg.shuffle_test);
     #else
-        DataLoader<FLOATTYPE> test_loader;
+        DataLoader<LFLOATTYPE> test_loader;
         test_loader.load(test_X, test_Y, cfg.batch, ch, h, w, cfg.shuffle_test);
     #endif
 

@@ -6,19 +6,19 @@ template <typename float_type, typename INT_TYPE, typename UINT_TYPE, int fracti
 struct FloatFixedConverter {
 static float_type fixed_to_float(INT_TYPE fixed_val, int frac_bits = fractional_bits) {
 #if TRUNC_THEN_MULT == 1
-    const float_type scale = (1 << frac_bits*2);
+    const float_type scale = (UINT_TYPE(1) << frac_bits*2);
 #else
-    const float_type scale = (1 << frac_bits);
+    const float_type scale = (UINT_TYPE(1) << frac_bits);
 #endif
     return static_cast<float_type>(fixed_val) / scale;
 }
 
 static INT_TYPE float_to_fixed(float_type float_val, int frac_bits = fractional_bits) {
 #if TRUNC_THEN_MULT == 1
-    const float_type scale = (1 << frac_bits*2);
-    float_val = float_val/ (1 << frac_bits); // variant with trunc then mult
+    const float_type scale = (UINT_TYPE(1) << frac_bits*2);
+    float_val = float_val/ (UINT_TYPE(1) << frac_bits); // variant with trunc then mult
 #else
-    const float_type scale = (1 << frac_bits);
+    const float_type scale = (UINT_TYPE(1) << frac_bits);
 #endif
   // Check for overflow and underflow
     if (float_val >= (std::numeric_limits<INT_TYPE>::max()) / scale) { // Modified check

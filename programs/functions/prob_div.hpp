@@ -7,15 +7,15 @@ void prepare_prob_div(T &out, const int denominator, const int frac_bits = FRACT
 {
     #if TRUNC_APPROACH == 0 || TRUNC_APPROACH == 4
 #if TRUNC_APPROACH == 0
-        out = out.prepare_mult_public_fixed(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits),frac_bits);
+        out = out.prepare_mult_public_fixed(FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/FLOATTYPE(denominator),frac_bits),frac_bits);
 #elif TRUNC_APPROACH == 4
         /* if(frac_bits <= FRACTIONAL / 2) */
-            out = out.prepare_mult_public_fixed(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits),frac_bits);
+            out = out.prepare_mult_public_fixed(FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/FLOATTYPE(denominator),frac_bits),frac_bits);
         /* else */
         /* out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits)); */
 #endif
     #else
-        out = out.mult_public(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/float(denominator),frac_bits));
+        out = out.mult_public(FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/FLOATTYPE(denominator),frac_bits));
     #endif
 }
 

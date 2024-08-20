@@ -30,8 +30,8 @@ bool public_division()
     {
         fa[i] = 20+i+float(20+i)/100;
         fb[i] = 5;
-        a[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(fa[i]);
-        b[i] = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/fb[i]);
+        a[i] = FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(fa[i]);
+        b[i] = FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1/fb[i]);
     }
     DATATYPE vectorized_input_a;
     DATATYPE vectorized_input_b;

@@ -188,6 +188,13 @@
 
 // === Other Settings ===
 
+#ifndef FLOATTYPE
+#if MODELOWNER == -1 || DATAOWNER == -1
+#define FLOATTYPE float
+#else
+#define FLOATTYPE double // might be useful for float/fixed conversion
+#endif
+#endif
 
 #ifndef SRNG_SEED
 #define SRNG_SEED 0 // Seed for the random number generator.
