@@ -190,8 +190,9 @@ void inference(DATATYPE* res)
         print_online("Loading model parameters from file...");
     #endif
     #if MODELOWNER != -1
-        print_online("No Modelowner specified. Loading dummy parameters...");
         model.template load<MODELOWNER>(cfg.save_dir, cfg.pretrained);
+    #else
+        print_online("No Modelowner specified. Loading dummy parameters...");
     #endif
         print_online("Received Secret Share of Model Parameters.");
 
