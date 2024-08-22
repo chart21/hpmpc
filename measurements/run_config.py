@@ -129,6 +129,7 @@ def main():
 
                     print(f"==== Saved log file {run_count}/{total_runs} to {log_file} ====")
                     print(f"==== Saved config details to {config_log_file} ====")
+                    sleep(5)
 
 if __name__ == '__main__':
     main()
