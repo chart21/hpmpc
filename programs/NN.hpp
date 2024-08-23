@@ -8,7 +8,7 @@
 #include "architectures/ResNet.hpp" // includes ResNet architectures
 #include "architectures/DeepReduce.hpp" // includes DeepReduce architectures
 #include "headers/config.h" // NN configuration
-#if TRUNC_APPROACH == 2
+#if TRUNC_APPROACH > 1
 #include "functions/exact_truncation.hpp"
 #endif
 #define FUNCTION inference

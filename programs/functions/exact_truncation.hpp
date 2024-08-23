@@ -241,3 +241,210 @@ void trunc_exact_opt_in_place(Additive_Share<Datatype, Share>* val, const int le
             val[i] = val[i] - A((UINT_TYPE(1) << (BITLENGTH - fractional_bits - 1))); // substract 2^l-1 to reverse previous addition ..
 }
 
+
+/* template<typename Datatype, typename Share, typename dummy> */
+/* static void trunc_2k_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len, int fractional_bits = FRACTIONAL) */
+/* { */
+/*     using S = XOR_Share<Datatype, Share>; */
+/*     using A = Additive_Share<Datatype, Share>; */
+/*     const int bm = 0; */
+/*     const int bk = BITLENGTH; */
+/*     const int bmm = BITLENGTH - FRACTIONAL; */
+/*     const int bkk = BITLENGTH; */
+/*     using Bitset = sbitset_t<bk-bm, S>; */
+/*     using Bitset_t = sbitset_t<bkk-bmm, S>; */
+/*     using sint = sint_t<A>; */
+/*     using T = sint_t<A>; */
+    
+/*     T* r_msb = new T[len]; */
+/*     T* r_mk2 = new T[len]; */
+/*     T* c = new T[len]; */
+/*     T* c_prime = new T[len]; */
+/*     T::communicate(); */
+/*     sint* xmod2t = new sint[len]; */
+/*     sint* xmod2t2 = new sint[len]; */
+/*     for(int i = 0; i < len; i++) */
+/*     { */
+/*         xmod2t[i] = val[i].prepare_trunc_exact_xmod2t(fractional_bits); */
+/* #if PARTY == 0 */
+/*         xmod2t2[i] = sint(0) - val[i]; */
+/*         xmod2t2[i] = xmod2t2[i].prepare_trunc_exact_xmod2t(fractional_bits); */
+/* #else */
+/*         xmod2t2[i] = val[i].prepare_trunc_exact_xmod2t(fractional_bits); */
+/* #endif */
+/*     } */
+/*     for(int i = 0; i < len; i++) */
+/*     { */
+/*         val[i].prepare_trunc_2k_inputs(r_mk2[i], r_msb[i], c[i], c_prime[i], fractional_bits); */
+/*     } */
+/*     T::communicate(); */
+/*     for(int i = 0; i < len; i++) */
+/*     { */
+/*         val[i].complete_trunc_2k_inputs(r_mk2[i], r_msb[i],c[i], c_prime[i]); */
+/*     } */
+/*     T::communicate(); */
+/*     T* b = new T[len]; */
+/*     for(int i = 0; i < len; i++) */
+/*         b[i].prepare_XOR(r_msb[i],c[i]); */
+/*     T::communicate(); */
+/*     for(int i = 0; i < len; i++) */
+/*     { */
+/*         b[i].complete_XOR(r_msb[i],c[i]); */
+/*         val[i] = c_prime[i] + b[i].mult_public(UINT_TYPE(1) << (BITLENGTH - fractional_bits - 1)) - r_mk2[i]; */
+        
+/*     } */
+/*     T::communicate(); */
+/*     delete[] c; */
+    
+
+
+/*     delete[] r_mk2; */
+/*     delete[] c_prime; */
+
+
+    
+    
+/*     Bitset_t *xmod2t_s1 = new Bitset_t[len]; */
+/*     Bitset_t *xmod2t_s2 = new Bitset_t[len]; */
+/*     for(int i = 0; i < len; i++) */
+/*     { */
+/*         xmod2t_s1[i] = Bitset_t::prepare_A2B_S1(bmm, (S*) xmod2t[i].get_share_pointer()); */
+/*         xmod2t_s2[i] = Bitset_t::prepare_A2B_S2(bmm, (S*) xmod2t[i].get_share_pointer()); */
+/*     } */
+/*     Share::communicate(); */
+/*     for(int i = 0; i < len; i++) */
+/*     { */
+/*         xmod2t_s1[i].complete_A2B_S1(); */
+/*         xmod2t_s2[i].complete_A2B_S2(); */
+/*     } */
+
+/*     // Step 4: Calculate carry bit of B1 */
+    
+/*     // Step 5: Caclulate carry bit of B2 */
+/*     std::vector<BooleanAdder_MSB_Carry<bkk-bmm,S>> b1adder; */
+/*     b1adder.reserve(len); */
+/*     S* b1c = new S[len]; */
+    
+   
+/*     for(int i = 0; i < len; i++) */
+/*         b1adder.emplace_back(xmod2t_s1[i], xmod2t_s2[i]); */
+/*     while(!b1adder[0].is_done()) */
+/*     { */
+/*         for(int i = 0; i < len; i++) */
+/*         { */
+/*             b1adder[i].step(); */
+/*         } */
+/*         Share::communicate(); */
+/*     } */
+/*     for(int i = 0; i < len; i++) */
+/*     { */
+/*         b1c[i] = b1adder[i].get_carry(); */
+/*     } */
+/*     b1adder.clear(); */
+/*     b1adder.shrink_to_fit(); */
+/*     sint* c1A = new sint[len]; */
+/* for (int i = 0; i < len; i++) */
+/* { */
+/*     b1c[i].prepare_bit2a(c1A[i].get_share_pointer()); */
+/* } */
+/* Share::communicate(); */
+/* for (int i = 0; i < len; i++) */
+/*     c1A[i].complete_bit2a(); */
+   
+/* sint* c2A = new sint[len]; */
+/* for(int i = 0; i < len; i++) */
+/*     c2A[i] = c1A[i].prepare_mult(sint(1) - r_msb[i]); */
+/* T::communicate(); */
+/* for(int i = 0; i < len; i++) */
+/* { */
+/*     c2A[i].complete_mult_without_trunc(); */
+/* } */
+
+
+
+
+/* for (int i = 0; i < len; i++) */
+/*     val[i] = val[i] + c2A[i]; */
+    
+
+/* for(int i = 0; i < len; i++) */
+/*     { */
+/*         xmod2t_s1[i] = Bitset_t::prepare_A2B_S1(bmm, (S*) xmod2t2[i].get_share_pointer()); */
+/*         xmod2t_s2[i] = Bitset_t::prepare_A2B_S2(bmm, (S*) xmod2t2[i].get_share_pointer()); */
+/*     } */
+/*     Share::communicate(); */
+/*     for(int i = 0; i < len; i++) */
+/*     { */
+/*         xmod2t_s1[i].complete_A2B_S1(); */
+/*         xmod2t_s2[i].complete_A2B_S2(); */
+/*     } */
+
+/*     // Step 4: Calculate carry bit of B1 */
+    
+/*     // Step 5: Caclulate carry bit of B2 */
+/*     std::vector<BooleanAdder_MSB_Carry<bkk-bmm,S>> b2adder; */
+/*     b2adder.reserve(len); */
+    
+   
+/*     for(int i = 0; i < len; i++) */
+/*         b2adder.emplace_back(xmod2t_s1[i], xmod2t_s2[i]); */
+/*     while(!b2adder[0].is_done()) */
+/*     { */
+/*         for(int i = 0; i < len; i++) */
+/*         { */
+/*             b2adder[i].step(); */
+/*         } */
+/*         Share::communicate(); */
+/*     } */
+/*     delete[] xmod2t; */
+/*     delete[] xmod2t_s1; */
+/*     delete[] xmod2t_s2; */
+/*     for(int i = 0; i < len; i++) */
+/*     { */
+/*         b1c[i] = b2adder[i].get_carry(); */
+/*     } */
+/*     b2adder.clear(); */
+/*     b2adder.shrink_to_fit(); */
+/* for (int i = 0; i < len; i++) */
+/* { */
+/*     b1c[i].prepare_bit2a(c1A[i].get_share_pointer()); */
+/* } */
+/* Share::communicate(); */
+/* for (int i = 0; i < len; i++) */
+/*     c1A[i].complete_bit2a(); */
+   
+/* for(int i = 0; i < len; i++) */
+/*     c2A[i] = c1A[i].prepare_mult(r_msb[i]); */
+/* T::communicate(); */
+/* for(int i = 0; i < len; i++) */
+/* { */
+/*     c2A[i].complete_mult_without_trunc(); */
+/* } */
+
+
+
+
+/* for (int i = 0; i < len; i++) */
+/*     val[i] = val[i] + c2A[i]; */
+
+/* delete[] b1c; */
+/* delete[] c1A; */
+/* } */
+
+/* template<typename Datatype, typename Share> */
+/* void trunc_2k_in_place(Additive_Share<Datatype, Share>* val, const int len, bool isPositive=false, int fractional_bits = FRACTIONAL) */
+/* { */
+/*     using A = Additive_Share<Datatype, Share>; */
+/*     using sint = sint_t<A>; */
+/*     if(!isPositive) */
+/*         for(int i = 0; i < len; i++) */
+/*             val[i] = val[i] +  A((UINT_TYPE(1) << (BITLENGTH - 1))); // add 2^l-1 to gurantee positive number */
+   
+/*     /1* pack_additive_inplace<0,BITLENGTH>(val,len,fractional_bits,trunc_2k_in_place<sint,void>); *1/ */
+/*     pack_additive_inplace<0,BITLENGTH>(val,len,fractional_bits,trunc_2k_in_place<Datatype,Share,void>); */
+    
+/*     if(!isPositive) */ 
+/*         for(int i = 0; i < len; i++) */
+/*             val[i] = val[i] - A((UINT_TYPE(1) << (BITLENGTH - fractional_bits - 1))); // substract 2^l-1 to reverse previous addition .. */
+/* } */
+
