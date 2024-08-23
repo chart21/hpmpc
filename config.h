@@ -113,7 +113,7 @@
 #endif
 
 #ifndef TRUNC_APPROACH
-#define TRUNC_APPROACH 3 // 0: Probabilistic truncation, 1: Reduced Slack Truncation, 2: Exact Truncation //3: Optimized exact truncation
+#define TRUNC_APPROACH 0 // 0: Probabilistic truncation, 1: Reduced Slack Truncation, 2: Exact Truncation //3: Optimized exact truncation
 #endif
 
 #ifndef TRUNC_DELAYED
