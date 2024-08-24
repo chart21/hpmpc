@@ -230,13 +230,17 @@ template<typename Datatype, typename Share>
 void trunc_exact_opt_in_place(Additive_Share<Datatype, Share>* val, const int len, bool isPositive=false, int fractional_bits = FRACTIONAL)
 {
     using A = Additive_Share<Datatype, Share>;
+#if MSB0_OPT == 1 //if optimization is deactivaated, always add 2^l-1 to gurantee positive number
     if(!isPositive)
+#endif
         for(int i = 0; i < len; i++)
             val[i] = val[i] +  A((UINT_TYPE(1) << (BITLENGTH - 1))); // add 2^l-1 to gurantee positive number
    
     pack_additive_inplace<0,BITLENGTH>(val,len,fractional_bits,trunc_exact_opt_in_place<Datatype,Share,void>);
     
+#if MSB0_OPT == 1 
     if(!isPositive) 
+#endif
         for(int i = 0; i < len; i++)
             val[i] = val[i] - A((UINT_TYPE(1) << (BITLENGTH - fractional_bits - 1))); // substract 2^l-1 to reverse previous addition ..
 }

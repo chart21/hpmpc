@@ -128,6 +128,14 @@
 #define AVG_OPT_THRESHOLD 0 // Threshold of tolerated precision decrease for one bit of FRACTIONAL reduction
 #endif
 
+#ifndef MSB0_OPT
+#define MSB0_OPT 1 // Exploit that the MSB of many layers is 0 when uing truncation
+#endif
+
+#ifndef AVG1_OPT // OPtimze avaerage pooling for denominator = 1
+#define AVG1_OPT 1
+#endif
+
 
 #ifndef COMPUTE_ARGMAX
 #define COMPUTE_ARGMAX 0 // 0: skip final argmax during inference, 1: Compute final argmax during inference
