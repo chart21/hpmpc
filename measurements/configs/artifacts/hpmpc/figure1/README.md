@@ -26,12 +26,12 @@ Run the following commands on each node.
 
 ### Execute 3PC Experiments
 ```sh
-measurements/run_config.sh measurements/configs/artifacts/hpmpc/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE
 ```
 
 ### Execute 4PC Experiments
 ```sh
-measurements/run_config.sh measurements/configs/artifacts/hpmpc/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override PROTOCOL=9 DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override PROTOCOL=9 DATTYPE=$DATTYPE
 ```
 
 ## Parse Results
@@ -39,7 +39,7 @@ measurements/run_config.sh measurements/configs/artifacts/hpmpc/figure1 -i $ITER
 Run the following commands on each node.
 
 ```sh
-measurements/parse_logs.sh measurements/logs/
+python3 measurements/parse_logs.py measurements/logs/
 ```
 
 ## Interpret Results
