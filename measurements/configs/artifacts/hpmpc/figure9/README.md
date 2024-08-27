@@ -1,6 +1,6 @@
 # Instructions
 
-Run all commands from the root directory of the repository.
+Run all commands from the root directory of the repository. 
 
 ## Setup
 
@@ -14,28 +14,26 @@ export IP2=10.10.94.3
 export IP3=10.10.94.3
 export PID=0 # replace with node id
 export DATTYPE=256 # replace with highest DATTYPE supported by your hardware
+epxort DATTYPES=1,8,16,32,64,128,256 # replace with all DATTYPES supported by your hardware
 ```
 
-## Network Shaping
-
-Make sure to apply the bandwidths from figure 1 for each run.
 
 ## Execution
 
 Run the following commands on each node.
 
-### Execute 3PC Experiments
-This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes, e.g. by adding PROCESS_NUM=1,2,4 after --override.
 
+### Execute 4PC Experiments (1)
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure9/bits_per_register.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPES
 ```
 
-### Execute 4PC Experiments
+### Execute 4PC Experiments (2)
+
 This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes, e.g. by adding PROCESS_NUM=1,2,4 after --override.
 
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override PROTOCOL=9 DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure9/bits_per_register.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE
 ```
 
 ## Parse Results
