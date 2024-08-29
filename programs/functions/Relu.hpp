@@ -279,6 +279,7 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const si
             RELU_range_in_place_exact<m,k,Share, Datatype>(output, len);
             #else
             isReLU = true;
+            RELU_range_in_place_opt<m,k,Share, Datatype>(output, len);
             trunc_exact_opt_in_place<m,k,Share, Datatype>(output, len,true);
             isReLU = false;
             #endif

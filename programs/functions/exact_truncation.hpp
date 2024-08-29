@@ -187,16 +187,16 @@ for (int i = 0; i < len; i++)
     c2A[i].complete_bit2a();
 }
 
-#if TRUNC_DELAYED == 1 // Compute ReLU
-if(isReLU)
-{
-    get_msb_range<bm,bk,Datatype,Share>(val, b2y, len);
-    for (int i = 0; i < len; i++)
-    {
-        b2y[i] = ~ b2y[i];
-    }
-}
-#endif
+/* #if TRUNC_DELAYED == 1 // Compute ReLU */
+/* if(isReLU) */
+/* { */
+/*     get_msb_range<bm,bk,Datatype,Share>(val, b2y, len); */
+/*     for (int i = 0; i < len; i++) */
+/*     { */
+/*         b2y[i] = ~ b2y[i]; */
+/*     } */
+/* } */
+/* #endif */
 
 // Step 7: Output x/2t + b1A - b2 * 2^l-t
 for (int i = 0; i < len; i++)
