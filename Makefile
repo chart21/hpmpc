@@ -8,7 +8,7 @@ $(shell mkdir -p executables/flags)
 
 # Base flags
 EXECFLAGS := -w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread 
-LINKFLAGS := -lcrypto -I nn/PIGEON
+LINKFLAGS := -lssl -lcrypto -I nn/PIGEON
 CXXFLAGS := $(EXECFLAGS) $(LINKFLAGS)
 NVCCFLAGS := -Xptxas -O3
 
