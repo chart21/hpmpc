@@ -38,11 +38,11 @@ void complete_prob_div(T &out, const int len, const int denominator, const int f
 #endif
 #else
     #if TRUNC_APPROACH == 1
-        trunc_2k_in_place(out, len, true, frac_bits);
+        trunc_2k_in_place(out, len, all_positive, frac_bits);
 #elif TRUNC_APPROACH == 2
         trunc_exact_in_place(out, len, frac_bits);
 #elif TRUNC_APPROACH == 3
-        trunc_exact_opt_in_place(out, len, true, frac_bits);
+        trunc_exact_opt_in_place(out, len, all_positive, frac_bits);
     #endif
 #endif
 }

@@ -264,6 +264,10 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
     delayed = false;
 #endif
 
+#if TRUNC_APPROACH > 0
+    all_positive = true;
+#endif
+
 }
 
 
@@ -292,6 +296,10 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const si
 
 #if TRUNC_DELAYED == 1
     delayed = false;
+#endif
+
+#if TRUNC_APPROACH > 0
+    all_positive = true;
 #endif
 }
 

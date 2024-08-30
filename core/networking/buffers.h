@@ -61,3 +61,7 @@ int process_offset = 0; //offsets the starting input for each process, base port
 bool delayed = false; // For delayed truncation
 bool isReLU = false; // For ReLU truncation
 #endif
+
+#if TRUNC_APPROACH > 0
+bool all_positive = false; // for slack-based optiimzation
+#endif
