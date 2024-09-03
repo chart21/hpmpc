@@ -29,6 +29,25 @@ OECL0_init prepare_dot(const OECL0_init b, func_add ADD, func_sub SUB, func_mul 
 {
     return OECL0_init();
 }
+#if FUSE_DOT != 1
+template <typename func_add, typename func_sub, typename func_mul>
+OECL0_init prepare_dot(const OECL0_init b, int i, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OECL0_init c;
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void join_dots(OECL0_init c[], func_add ADD, func_sub SUB) 
+{
+}
+
+static constexpr int getNumDotProducts()
+{
+    return 2;
+}
+
+#endif
 
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)

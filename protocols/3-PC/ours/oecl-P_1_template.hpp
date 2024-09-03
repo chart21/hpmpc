@@ -33,6 +33,30 @@ OECL1_Share c;
 c.p1 = ADD(MULT(p1,b.p2), MULT(b.p1,p2)); // ab_2, e_1 = x1 y2 + x2 y1 -> since substraction: e_1 = - x1 y2 - x2 y1
 return c;
 }
+#if FUSE_DOT != 1
+template <typename func_add, typename func_sub, typename func_mul>
+OECL1_Share prepare_dot(const OECL1_Share b, int i, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OECL1_Share c;
+if(i == 0)
+    c.p1 = MULT(p1,b.p2); 
+else 
+    c.p2 = MULT( b.p1,p2);
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void join_dots(OECL1_Share c[],func_add ADD, func_sub SUB) 
+{
+    p1 = ADD(ADD(c[0].p1,c[1].p1),p1);
+    p2 = SET_ALL_ZERO();
+}
+
+static constexpr int getNumDotProducts()
+{
+    return 2;
+}
+#endif
 
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)

@@ -203,6 +203,16 @@ public:
     {
         return Additive_Share(Share_Type::prepare_dot(b, OP_ADD, OP_SUB, OP_MULT));
     }
+#if FUSE_DOT != 1
+    Additive_Share prepare_dot(const Additive_Share<Datatype, Share_Type>& b, int i) const
+    {
+        return Additive_Share(Share_Type::prepare_dot(b, i, OP_ADD, OP_SUB, OP_MULT));
+    }
+    void join_dots(Additive_Share<Datatype, Share_Type> b[]) 
+    {
+        Share_Type::join_dots(b, OP_ADD, OP_SUB);
+    }
+#endif
 
     Additive_Share prepare_dot3(const Additive_Share<Datatype, Share_Type>& b, const Additive_Share<Datatype, Share_Type>& c) const
     {

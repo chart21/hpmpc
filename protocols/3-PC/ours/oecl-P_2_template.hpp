@@ -35,6 +35,26 @@ OECL2_Share c;
 c.p1 = MULT(p1,b.p1); // ab_2 + e_2, e_2 = x1 y_1 
 return c;
 }
+#if FUSE_DOT != 1
+template <typename func_add, typename func_sub, typename func_mul>
+OECL2_Share prepare_dot(const OECL2_Share b, int i, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OECL2_Share c;
+    c.p1 = MULT(p1,b.p1); 
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void join_dots(OECL2_Share c[],func_add ADD, func_sub SUB) 
+{
+    p1 = ADD(c[0].p1,p1);
+}
+
+static constexpr int getNumDotProducts()
+{
+    return 1;
+}
+#endif
 
 template <typename func_add, typename func_sub>
 void mask_and_send_dot( func_add ADD, func_sub SUB)

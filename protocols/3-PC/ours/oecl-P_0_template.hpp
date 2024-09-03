@@ -50,7 +50,30 @@ c.p1 = SUB( MULT( SUB(p1,p2), SUB(b.p1,b.p2)), MULT(p1,b.p1)  ); // -> e = (x1-x
 /* #endif */
 return c;
 }
+#if FUSE_DOT != 1
+template <typename func_add, typename func_sub, typename func_mul>
+OECL0_Share prepare_dot(const OECL0_Share b, int i, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OECL0_Share c;
+if(i == 0)
+    c.p1 = MULT(p1,b.p1);   // -> e = (x1-x2)(y1-y2) - x2y2 = x1 y1 - x1 y2 - x2 y1
+else 
+    c.p2 = MULT( SUB(p1,p2), SUB(b.p1,b.p2));
+return c;
+}
 
+template <typename func_add, typename func_sub>
+void join_dots(OECL0_Share c[],func_add ADD, func_sub SUB) 
+{
+    p1 = ADD(p1, SUB(c[0].p1,c[1].p1));
+    p2 = SET_ALL_ZERO();
+}
+
+static constexpr int getNumDotProducts()
+{
+    return 2;
+}
+#endif
 template <typename func_add, typename func_sub>
 void mask_and_send_dot(func_add ADD, func_sub SUB)
 {
