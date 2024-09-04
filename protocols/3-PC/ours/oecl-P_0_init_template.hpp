@@ -44,7 +44,7 @@ void join_dots(OECL0_init c[], func_add ADD, func_sub SUB)
 
 static constexpr int getNumDotProducts()
 {
-    return 2;
+    return 1;
 }
 
 #endif

@@ -102,6 +102,38 @@ c.r = ADD(MULT(v,b.r), MULT(b.v,r)); // a_0 y_1 + b_0 x_1
 c.v = MULT(v, b.v); // a0b0
 return c;
 }
+#if FUSE_DOT != 1
+template <typename func_add, typename func_sub, typename func_mul>
+OEC_MAL1_Share prepare_dot(const OEC_MAL1_Share b, int i, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OEC_MAL1_Share c;
+if(i == 0)
+{
+    c.r = MULT(v, b.r);
+}
+else if (i == 1)
+{
+    c.r = MULT(b.v,r);
+}
+else if (i == 2)
+{
+    c.v = MULT(v, b.v);
+}
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void join_dots(OEC_MAL1_Share c[],func_add ADD, func_sub SUB) 
+{
+    v = ADD(v, c[2].v);
+    r = ADD(r, ADD(c[0].r, c[1].r));
+}
+
+static constexpr int getNumDotProducts()
+{
+    return 3;
+}
+#endif
 
 
 template <typename func_add, typename func_sub>

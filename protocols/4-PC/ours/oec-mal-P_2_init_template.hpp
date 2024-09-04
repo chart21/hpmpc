@@ -24,6 +24,25 @@ OEC_MAL2_init Add(OEC_MAL2_init b, func_add ADD) const
 {
    return OEC_MAL2_init();
 }
+#if FUSE_DOT != 1
+template <typename func_add, typename func_sub, typename func_mul>
+OEC_MAL2_init prepare_dot(const OEC_MAL2_init b, int i, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OEC_MAL2_init c;
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void join_dots(OEC_MAL2_init c[], func_add ADD, func_sub SUB) 
+{
+}
+
+static constexpr int getNumDotProducts()
+{
+    return 1;
+}
+
+#endif
     
 template <typename func_add, typename func_sub, typename func_mul>
 OEC_MAL2_init prepare_dot(const OEC_MAL2_init b, func_add ADD, func_sub SUB, func_mul MULT) const

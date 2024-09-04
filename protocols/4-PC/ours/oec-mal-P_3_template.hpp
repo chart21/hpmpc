@@ -96,6 +96,38 @@ send_to_live(P_2, SUB(r1,getRandomVal(P_013))); // compare m^0 - z_1
 store_compare_view(P_2, SUB(r1,getRandomVal(P_013))); // compare m^0 - z_1
 #endif
 }
+#if FUSE_DOT != 1
+template <typename func_add, typename func_sub, typename func_mul>
+OEC_MAL3_Share prepare_dot(const OEC_MAL3_Share b, int i, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+OEC_MAL3_Share c;
+if(i == 0)
+{
+    c.r0 = MULT(r1, SUB(b.r1,b.r0));
+}
+else if (i == 1)
+{
+    c.r0 = MULT(b.r1, r0);
+}
+else if (i == 2)
+{
+    c.r1 = MULT(r1, b.r1);
+}
+return c;
+}
+
+template <typename func_add, typename func_sub>
+void join_dots(OEC_MAL3_Share c[],func_add ADD, func_sub SUB) 
+{
+    r0 = ADD(r0, SUB(c[0].r0, c[1].r0));
+    r1 = ADD(r1, c[2].r1);
+}
+
+static constexpr int getNumDotProducts()
+{
+    return 3;
+}
+#endif
 
 template <typename func_add, typename func_sub>
 void mask_and_send_dot(func_add ADD, func_sub SUB)
