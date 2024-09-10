@@ -230,11 +230,11 @@ int base_port = BASE_PORT; // temporary solution
 #endif
 
 #ifndef FUSE_DOT 
-#define FUSE_DOT 2 // Fuse multiple dot products into one
+#define FUSE_DOT 1 // Fuse multiple dot products into one
 #endif
 
 #ifndef INTERLEAVE_COMM
-#define INTERLEAVE_COMM 0 // Interleave communication
+#define INTERLEAVE_COMM 1 // Interleave communication
 #endif
 
 // === Legacy Settings ===
