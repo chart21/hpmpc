@@ -8,10 +8,10 @@ Run the following commands on each node.
 
 ```sh
 export ITERATIONS=1 # replace with number of repeated executions you want to run
-export P0=10.10.94.2 # replace with your IPs
+export IP0=10.10.94.2 # replace with your IPs
 export IP1=10.10.94.3
-export IP2=10.10.94.3
-export IP3=10.10.94.3
+export IP2=10.10.94.4
+export IP3=10.10.94.5
 export PID=0 # replace with node id
 export DATTYPE=256 # replace with highest DATTYPE supported by your hardware
 epxort DATTYPES=1,8,16,32,64,128,256 # replace with all DATTYPES supported by your hardware

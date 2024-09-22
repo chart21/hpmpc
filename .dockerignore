@@ -1,0 +1,32 @@
+# Prerequisites
+*.d
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+*.out
+# Debugger config
+*.json
+#precompiled headers
+*.gch
+# macroflags
+*macro_flags
+# nn
+nn/
+# log and csv files
+*.log
+*.log-config
+*.csv
+# MP-SPDZ directories
+Bytecodes
+Schedules
+#measurements
+measurements/logs/
+#executables
+executables/
+build/
+#for now
+CMake*
+#git
+.git

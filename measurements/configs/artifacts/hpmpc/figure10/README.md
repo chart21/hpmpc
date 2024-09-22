@@ -8,7 +8,7 @@ Run the following commands on each node.
 
 ```sh
 export ITERATIONS=1 # replace with number of repeated executions you want to run
-export P0=10.10.94.2 # replace with your IPs
+export IP0=10.10.94.2 # replace with your IPs
 export IP1=10.10.94.3
 export IP2=10.10.94.3
 export IP3=10.10.94.3
@@ -25,15 +25,15 @@ Run the following commands on each node.
 
 ### Execute 4PC Experiments (1)
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure9/bits_per_register.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPES
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPES
 ```
 
 ### Execute 4PC Experiments (2)
 
-This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes, e.g. by adding PROCESS_NUM=1,2,4 after --override.
+This experiment requires a lot of processes and system RAM. If necessary, reduce the number of inputs and num processes, e.g. by adding PROCESS_NUM=4 NUM_INPUTS=1000 after --override.
 
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure9/num_processes.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/vector_matrix.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE
 ```
 
 ## Parse Results

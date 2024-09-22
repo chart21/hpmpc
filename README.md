@@ -20,6 +20,15 @@ You can use the provided Dockerfile or set up the project manually. The only dep
 #Install Dependencies:
 sudo apt install libssl-dev libeigen3-dev
 ```
+```
+#Run with Docker
+docker build -t hpmpc .
+#Run each command in different terminals or different machines
+docker run -it --network host p0
+docker run -it --network host p1
+docker run -it --network host p2
+docker run -it --network host p3
+```
 
 ### Local Setting
 You can run the following commands to compile and execute a program with an MPC protocol locally.
@@ -489,6 +498,42 @@ Results in `.log` files can be parsed with the `measurements/parse_logs.py` scri
 ```bash
 python3 measurements/parse_logs.py measurements/logs/<log_file>.log
 ```
+
+### Network Shaping
+
+To simulate real world network settings you can specify a json file with network configuarations. Examples based on real-world measurements are found in `measurements/network_shaping`.
+```json
+{
+  "name": "CMAN",
+  "latencies": [
+    [2.318, 1.244, 1.432],
+    [2.394, 1.088, 2.020],
+    [1.232, 1.091, 1.883],
+    [1.418, 2.054, 1.892]
+  ],
+  "bandwidth": [
+    [137, 1532, 417],
+    [139, 1144, 312],
+    [1550, 1023, 602],
+    [444, 389, 609]
+  ]
+}
+```
+Each row in `latencies` and `bandwidth` corresponds to a party. The values are in milliseconds and Mbps respectively. The third row would for instance be parsed as party 2 having a latency of 1.232ms to party 0, 1.091ms to party 1, and 1.883ms to party 3. The bandwidth is parsed in the same way.
+To apply the bandwidths from a config file, run the following script.
+```bash
+./measurements/network_shaping/shape_network.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> -l 2 -f measurements/network_shaping/<config_file>.json
+```
+The `-l 2` flag divides the applied latencies by 2 to avoid that both round trip times between two parties are added up.
+This option should be used for all provided json files and if the latencies are measured with the ping utility.
+
+The resulting network shaping can be verified by running the following script on all nodes simultaneously.
+The script sends and receives data between all parties in parallel and thus may deviate from pair-wise measurements but therefore might be more accurate to represent MPC communication.
+Note that some deviations in network shaping and verification are expected.
+```bash
+./scripts/measure_connection.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
+```
+
 
 ## Troubleshooting
 The framework utilizes different hardware acceleration techniques for a range of hardware architectures.
