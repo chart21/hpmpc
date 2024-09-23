@@ -32,7 +32,7 @@ python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11
 ```
 
 ### Execute 4PC Experiments
-This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes, e.g. by adding PROCESS_NUM=1,2,4 after --override.
+This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes, e.g. by adding PROCESS_NUM=1 after --override.
 
 ```sh
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/runtime_baseline -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=9 DATTYPE=$DATTYPE

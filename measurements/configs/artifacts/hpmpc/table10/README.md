@@ -27,9 +27,21 @@ Run the following commands on each node.
 ### Execute Experiments
 This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes or input size, e.g. by adding PROCESS_NUM=1 NUM_INPUTS=1000 after --override.
 
+### Execute 3PC Experiments
+
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_bdw/ -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=8,9,10,12 DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID 
+
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID 
 ```
+
+### Execute 4PC Experiments
+```sh
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID 
+
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID 
+```
+
 
 ## Parse Results
 

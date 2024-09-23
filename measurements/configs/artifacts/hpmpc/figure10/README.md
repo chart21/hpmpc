@@ -22,10 +22,14 @@ epxort DATTYPES=1,8,16,32,64,128,256 # replace with all DATTYPES supported by yo
 
 Run the following commands on each node.
 
+### Execute 3PC Experiments (1)
+```sh
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPES PROTOCOL=2,5
+```
 
 ### Execute 4PC Experiments (1)
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPES
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPES PROTOCOL=9,10,12
 ```
 
 ### Execute 4PC Experiments (2)
@@ -34,6 +38,7 @@ This experiment requires a lot of processes and system RAM. If necessary, reduce
 
 ```sh
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/vector_matrix.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/mult_throughput.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE
 ```
 
 ## Parse Results

@@ -25,7 +25,7 @@ Make sure to apply the bandwidths from figure 1 for each run.
 Run the following commands on each node.
 
 ### Execute 3PC Experiments
-This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes, e.g. by adding PROCESS_NUM=1,2,4 after --override.
+This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes, e.g. by adding PROCESS_NUM=1 after --override.
 
 ```sh
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE
