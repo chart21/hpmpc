@@ -44,25 +44,32 @@ apply_tc_ip_specific() {
   local classid="${5}"  # Unique class ID for each IP
 
   echo "Applying settings for IP ${ip} on interface ${iface}:"
-  echo "  Latency: ${latency}ms"
-  echo "  Bandwidth: ${bw}mbit"
-
-  # Add a class to control bandwidth for specific IP
-  echo "Executing: tc class add dev ${iface} parent 1: classid 1:${classid} htb rate ${bw}mbit ceil ${bw}mbit"
-  tc class add dev "${iface}" parent 1: classid 1:${classid} htb rate "${bw}mbit" ceil "${bw}mbit"
-  if [ $? -eq 0 ]; then
-    echo "  Successfully added bandwidth limit to ${iface} for ${ip}"
+  if [ "${latency}" != "-1" ]; then
+    echo "  Latency: ${latency}ms"
+    # Add a netem qdisc to control latency
+    echo "Executing: tc qdisc add dev ${iface} parent 1:${classid} handle ${classid}0: netem delay ${latency}ms"
+    tc qdisc add dev "${iface}" parent 1:${classid} handle ${classid}0: netem delay "${latency}ms"
+    if [ $? -eq 0 ]; then
+      echo "  Successfully added latency control to ${iface} for ${ip}"
+    else
+      echo "  Error setting latency on ${iface} for ${ip}"
+    fi
   else
-    echo "  Error setting bandwidth on ${iface} for ${ip}"
+    echo "  Skipping latency rule for IP ${ip}"
   fi
 
-  # Add a netem qdisc to control latency
-  echo "Executing: tc qdisc add dev ${iface} parent 1:${classid} handle ${classid}0: netem delay ${latency}ms"
-  tc qdisc add dev "${iface}" parent 1:${classid} handle ${classid}0: netem delay "${latency}ms"
-  if [ $? -eq 0 ]; then
-    echo "  Successfully added latency control to ${iface} for ${ip}"
+  if [ "${bw}" != "-1" ]; then
+    echo "  Bandwidth: ${bw}mbit"
+    # Add a class to control bandwidth for specific IP
+    echo "Executing: tc class add dev ${iface} parent 1: classid 1:${classid} htb rate ${bw}mbit ceil ${bw}mbit"
+    tc class add dev "${iface}" parent 1: classid 1:${classid} htb rate "${bw}mbit" ceil "${bw}mbit"
+    if [ $? -eq 0 ]; then
+      echo "  Successfully added bandwidth limit to ${iface} for ${ip}"
+    else
+      echo "  Error setting bandwidth on ${iface} for ${ip}"
+    fi
   else
-    echo "  Error setting latency on ${iface} for ${ip}"
+    echo "  Skipping bandwidth rule for IP ${ip}"
   fi
 
   # Filter by IP address (assuming IPv4 here)
@@ -80,9 +87,11 @@ PARTY=-1
 JSON_FILE=""
 LATENCY_DIVISOR=1
 IPS=()
+LATENCY_OVERRIDE=""
+BANDWIDTH_OVERRIDE=""
 
 # Parse input arguments
-while getopts ":a:b:c:d:p:f:l:" opt; do
+while getopts ":a:b:c:d:p:f:l:L:B:" opt; do
   case $opt in
     a) IPS[0]=$OPTARG ;;
     b) IPS[1]=$OPTARG ;;
@@ -91,18 +100,27 @@ while getopts ":a:b:c:d:p:f:l:" opt; do
     p) PARTY=$OPTARG ;;
     f) JSON_FILE=$OPTARG ;;
     l) LATENCY_DIVISOR=$OPTARG ;;
+    L) LATENCY_OVERRIDE=$OPTARG ;;
+    B) BANDWIDTH_OVERRIDE=$OPTARG ;;
     \?) echo "Invalid option -$OPTARG" >&2; exit 1 ;;
   esac
 done
 
-# Ensure the party index and JSON file are valid
-if [[ ${PARTY} -lt 0 || -z "${JSON_FILE}" ]]; then
-  echo "Error: Please provide a valid party index and JSON file."
+# Ensure the party index is valid
+if [[ ${PARTY} -lt 0 ]]; then
+  echo "Error: Please provide a valid party index."
   exit 1
 fi
 
-# Parse the JSON file and extract latencies and bandwidths for the given party
-parse_json "${JSON_FILE}" "${PARTY}"
+# If neither L nor B is provided, read from the JSON file
+if [[ -z "${LATENCY_OVERRIDE}" && -z "${BANDWIDTH_OVERRIDE}" ]]; then
+  if [[ -z "${JSON_FILE}" ]]; then
+    echo "Error: Please provide a valid JSON file."
+    exit 1
+  fi
+  # Parse the JSON file and extract latencies and bandwidths for the given party
+  parse_json "${JSON_FILE}" "${PARTY}"
+fi
 
 # Get network interfaces on the system
 IFACES=$(ip -o -4 link show | awk -F': ' '{print $2}' | grep -v -e lo -e vir -e docker)
@@ -124,16 +142,23 @@ for IFACE in ${IFACES}; do
       continue
     fi
 
-    RAW_LATENCY=$(echo "${latencies}" | sed -n "$((config_index+1))p")
-    BW=$(echo "${bandwidth}" | sed -n "$((config_index+1))p")
-
-    if [[ -z "${RAW_LATENCY}" || -z "${BW}" ]]; then
-      echo "Warning: Skipping due to missing values for IP ${IP} at config index ${config_index}"
-      continue
+    if [[ -n "${LATENCY_OVERRIDE}" ]]; then
+      RAW_LATENCY="${LATENCY_OVERRIDE}"
+      if [[ "${RAW_LATENCY}" -lt 0 ]]; then
+        LATENCY=-1
+      else
+        LATENCY=$(echo "scale=2; ${RAW_LATENCY} / ${LATENCY_DIVISOR}" | bc)
+      fi
+    else
+      RAW_LATENCY=$(echo "${latencies}" | sed -n "$((config_index+1))p")
+      LATENCY=$(echo "scale=2; ${RAW_LATENCY} / ${LATENCY_DIVISOR}" | bc)
     fi
 
-    # Adjust latency by the specified divisor
-    LATENCY=$(echo "scale=2; ${RAW_LATENCY} / ${LATENCY_DIVISOR}" | bc)
+    if [[ -n "${BANDWIDTH_OVERRIDE}" ]]; then
+      BW="${BANDWIDTH_OVERRIDE}"
+    else
+      BW=$(echo "${bandwidth}" | sed -n "$((config_index+1))p")
+    fi
 
     apply_tc_ip_specific "${IFACE}" "${IP}" "${LATENCY}" "${BW}" "$((10 + i))"
     config_index=$((config_index + 1))
