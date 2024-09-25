@@ -26,10 +26,10 @@ while getopts "p:a:b:c:d:D:L:R:" opt
 do
    case "$opt" in
       p ) PID="$OPTARG" ;;
-      a ) IP1="$OPTARG" ;;
-      b ) IP2="$OPTARG" ;;
-      c ) IP3="$OPTARG" ;;
-      d ) IP4="$OPTARG" ;;
+      a ) IP0="$OPTARG" ;;
+      b ) IP1="$OPTARG" ;;
+      c ) IP2="$OPTARG" ;;
+      d ) IP3="$OPTARG" ;;
       D ) DATTYPE="$OPTARG" ;;
       L ) DATTYPES="$OPTARG" ;;
       R ) REDUCED="$OPTARG" ;;

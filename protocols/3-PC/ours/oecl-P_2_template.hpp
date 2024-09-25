@@ -164,7 +164,7 @@ static void communicate()
     communicate_live();
 }
 
-#if FUNCTION_IDENTIFIER > 14
+#if FUNCTION_IDENTIFIER > 8
 
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 OECL2_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const

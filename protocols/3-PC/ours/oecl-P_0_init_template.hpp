@@ -168,7 +168,7 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-#if FUNCTION_IDENTIFIER > 14
+#if FUNCTION_IDENTIFIER > 8
 
 
 template <typename func_mul>

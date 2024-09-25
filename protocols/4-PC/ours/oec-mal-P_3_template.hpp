@@ -291,7 +291,7 @@ static void communicate()
 #endif
 }
 
-#if FUNCTION_IDENTIFIER > 14
+#if FUNCTION_IDENTIFIER > 8
 
 template <typename func_mul>
 OEC_MAL3_Share mult_public(const Datatype b, func_mul MULT) const
