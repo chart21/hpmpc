@@ -1,12 +1,44 @@
-export ITERATIONS=1 # replace with number of repeated executions you want to run
-export IP0=10.10.94.2 # replace with your IPs
-export IP1=10.10.94.3
-export IP2=10.10.94.3
-export IP3=10.10.94.3
-export PID=0 # replace with node id
-export DATTYPE=256 # replace with highest DATTYPE supported by your hardware
-export DATTYPES=1,8,16,32,64,128,256 # only include DATTYPES supported by your hardware
-export REDUCED="PROCESS_NUM=1 DATTYPE=32"
+ITERATIONS=1 # replace with number of repeated executions you want to run
+IP0=127.0.0.1
+IP1=127.0.0.1
+IP2=127.0.0.1
+IP3=127.0.0.1
+PID=all # replace with node id
+DATTYPE=256 # replace with highest DATTYPE supported by your hardware
+DATTYPES=1,8,16,32,64,256 # only include DATTYPES supported by your hardware
+REDUCED="PROCESS_NUM=1 DATTYPE=32 NUM_INPUTS=1"
+
+helpFunction()
+{
+   echo "Script to run all tests"
+   echo -e "\t-p Party number"
+   echo -e "\t-a IP address of player 0 (if ip matches player_id can be empty)"
+   echo -e "\t-b IP address of player 1 (if ip matches player_id can be empty)"
+   echo -e "\t-c IP address of player 2 (if ip matches player_id can be empty)"
+   echo -e "\t-d IP address of player 3 (if ip matches player_id can be empty)"
+   echo -e "\t-D Highest DATTYPE supported by hardware"
+   echo -e "\t-L List of DATTYPES supported by hardware"
+   echo -e "\t-R Reduced settings for faster execution"
+   exit 1 # Exit script after printing help
+}
+
+while getopts "p:a:b:c:d:D:L:R:" opt
+do
+   case "$opt" in
+      p ) PID="$OPTARG" ;;
+      a ) IP1="$OPTARG" ;;
+      b ) IP2="$OPTARG" ;;
+      c ) IP3="$OPTARG" ;;
+      d ) IP4="$OPTARG" ;;
+      D ) DATTYPE="$OPTARG" ;;
+      L ) DATTYPES="$OPTARG" ;;
+      R ) REDUCED="$OPTARG" ;;
+      ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
+   esac
+done
+
+echo $REDUCED
+
 
 
 #4PC
@@ -15,64 +47,95 @@ export REDUCED="PROCESS_NUM=1 DATTYPE=32"
 
 #Apply Bandwidth
 #100,200,500,1000,2000,4000
-
+bandwidths=(100 200 500 1000 2000 4000)
+for bandwidth in ${bandwidths[@]}
+do
+echo "=====Measuring Figure 1 with bandwidth $bandwidth Mbps====="
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -p $PID -l 2 -B $bandwidth
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=9 DATTYPE=$DATTYPE $REDUCED
-
+done
 #Reset network shaping
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -p $PID -L -1 -B -1
 
 #Figure 10
 
 #Apply Latency
 #1,3,5,7,9,11ms
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPES PROTOCOL=9,10,12 $REDUCED
+latencies=(1 3 5 7 9 11)
+for latency in ${latencies[@]}
+do
+echo "=====Measuring Figure 10 (a) with latency $latency ms====="
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -L $latency
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE PROTOCOL=9,10,12 $REDUCED
+done
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1
 #Reset network shaping
 
 #Apply Bandwidth
 #1000,2000,4000,6000,8000,10000 Mbps
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/mult_throughput.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE $REDUCED
+bandwidths=(1000 2000 4000 6000 8000 10000)
+for bandwidth in ${bandwidths[@]}
+do
+echo "=====Measuring Figure 10 (b) with bandwidth $bandwidth Mbps====="
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -B $bandwidth
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/mult_throughput.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
+done
 #Reset network shaping
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1
 
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/vector_matrix.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE $REDUCED
+echo "=====Measuring Figure 10 (c)====="
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/vector_matrix.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
 
-#Figure 1
+#Figure 11
 #Apply Bandwidth
 #100,200,500,1000,2000,4000
-
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/runtime_baseline -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=9 DATTYPE=$DATTYPE $REDUCED
-
+bandwidths=(100 200 500 1000 2000 4000)
+for bandwidth in ${bandwidths[@]}
+do
+echo "=====Measuring Figure 11 with bandwidth $bandwidth Mbps====="
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -B $bandwidth
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/runtime_baseline.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=9 DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/runtime_Trio_Quad.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 DATTYPE=$DATTYPE $REDUCED
+done
 #Reset network shaping
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1
 
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/runtime_Trio_Quad -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 DATTYPE=$DATTYPE $REDUCED
 
 #Figure 9
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure9/bits_per_register.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPES $REDUCED
+echo "=====Measuring Figure 9====="
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure9/bits_per_register.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPES $REDUCED
 
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure9/num_processes.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure9/num_processes.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
 #Table 10
 
 declare -a t10_settings=("CMAN.json" "WAN1.json" "Mixed.json")
 for setting in ${t10_settings[@]}
 do
-measurements/configs/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override -l 2 -f measurements/configs/network_shaping/$setting
+echo "=====Measuring Table 10 with network setting $setting====="
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -f measurements/network_shaping/$setting
 
 
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override $REDUCED
 
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override $REDUCED
 
 done
 #Reset network shaping
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1
 
 #Table 6
+echo "=====Measuring Table 6====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table6/ -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=8,9,10,12 DATTYPE=$DATTYPE $REDUCED
 
 #Table 7
+echo "=====Measuring Table 7====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/throughput_4PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/throughput_4PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
 #Table 8
+echo "=====Measuring Table 8====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/throughput_4PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/throughput_4PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
@@ -81,31 +144,42 @@ python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/t
 #Apply WAN1 for all if REDUCED is not setto ""
 if [ -z "$REDUCED" ]
 then
-    python3 measurements/configs/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override -l 2 -f measurements/configs/network_shaping/WAN1.json
+    python3 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -f measurements/network_shaping/WAN1.json
 fi
 
+echo "=====Measuring Table 9====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_bdw/aes-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_bdw/aes-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_lat/aes1-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_lat/aes1-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_lat/aes1-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_lat/aes1-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override $REDUCED
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/vector_prod20k/dot-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/vector_prod20k/dot-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
 #Reset network shaping
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1
 
 #3PC
 
 #Figure 1
+echo "=====Measuring Figure 1 (3PC)====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE $REDUCED
 
 #Figure 10
 #Apply Latency
 #1,3,5,7,9,11ms
-
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPES PROTOCOL=2,5 $REDUCED
+latencies=(1 3 5 7 9 11)
+for latency in ${latencies[@]}
+do
+    echo "=====Measuring Figure 10 (a) (3PC) with latency $latency ms====="
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -L $latency
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE PROTOCOL=2,5 $REDUCED
+done
 #Reset network shaping
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -p $PID -L -1 -B -1
+
 
 #Figure 11
+echo "=====Measuring Figure 11 (3PC)====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/runtime_baseline -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE $REDUCED
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/runtime_Trio_Quad -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 DATTYPE=$DATTYPE $REDUCED
 
@@ -116,38 +190,44 @@ python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11
 
 for setting in ${t10_settings[@]}
 do
-measurements/configs/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override -l 2 -f measurements/configs/network_shaping/$setting
+echo "=====Measuring Table 10 (3PC) with network setting $setting====="
+if [ -z "$REDUCED" ]
+then
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -f measurements/network_shaping/$setting
+fi
 
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override $REDUCED
 
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID $REDUCED
-
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override $REDUCED
 
 done
 #Reset network shaping
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1
 
 #Table 6
+echo "=====Measuring Table 6 (3PC)====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table6/ -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2,3,5 DATTYPE=$DATTYPE $REDUCED
 
 #Table 7
+echo "=====Measuring Table 7 (3PC)====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/throughput_3PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/throughput_3PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
 
 #Table 8
+echo "=====Measuring Table 8 (3PC)====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/throughput_3PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/throughput_3PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
 
 #Table 9
 
-#Apply WAN1 for all if REDUCED is not setto ""
+#Apply WAN1 for all if REDUCED is not set to ""
 
 if [ -z "$REDUCED" ]
 then
-    python3 measurements/configs/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override -l 2 -f measurements/configs/network_shaping/WAN1.json
+    python3 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -f measurements/network_shaping/WAN1.json
 fi
 
-measurements/configs/network_shaping/shape_network.sh - a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override -l 2 -f measurements/configs/network_shaping/WAN1.json
-
+echo "=====Measuring Table 10 (3PC)====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_bdw/aes-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_bdw/aes-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_lat/aes1-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID
@@ -156,3 +236,4 @@ python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/vector_prod20k/dot-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
 
 #Reset network shaping
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override -L -1 -B -1

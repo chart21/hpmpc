@@ -112,6 +112,12 @@ if [[ ${PARTY} -lt 0 ]]; then
   exit 1
 fi
 
+if [[ ${PARTY} -eq "all" ]]; then
+    exit
+fi
+
+
+
 # If neither L nor B is provided, read from the JSON file
 if [[ -z "${LATENCY_OVERRIDE}" && -z "${BANDWIDTH_OVERRIDE}" ]]; then
   if [[ -z "${JSON_FILE}" ]]; then
