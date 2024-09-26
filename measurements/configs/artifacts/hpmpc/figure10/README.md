@@ -24,12 +24,12 @@ Run the following commands on each node.
 
 ### Execute 3PC Experiments (1)
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPES PROTOCOL=2,5
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/figure10a_aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPES PROTOCOL=2,5
 ```
 
 ### Execute 4PC Experiments (1)
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPES PROTOCOL=9,10,12
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/figure10b_aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPES PROTOCOL=9,10,12
 ```
 
 ### Execute 4PC Experiments (2)
@@ -37,8 +37,8 @@ python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10
 This experiment requires a lot of processes and system RAM. If necessary, reduce the number of inputs and num processes, e.g. by adding PROCESS_NUM=4 NUM_INPUTS=1000 after --override.
 
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/vector_matrix.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/mult_throughput.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/figure10c_vector_matrix.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/figure10b_mult_throughput.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3-p $PID --override DATTYPE=$DATTYPE
 ```
 
 ## Parse Results

@@ -27,8 +27,8 @@ Run the following commands on each node.
 ### Execute 3PC Experiments
 
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/runtime_baseline -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/runtime_Trio_Quad -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/figure11_runtime_baseline -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/figure11_runtime_Trio_Quad -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 DATTYPE=$DATTYPE
 ```
 
 ### Execute 4PC Experiments

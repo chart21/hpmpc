@@ -24,16 +24,16 @@ Run the following commands on each node.
 This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes or input size, e.g. by adding PROCESS_NUM=1 NUM_INPUTS=10000 after --override.
 
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/throughput_3PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/throughput_3PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_3PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_3PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
 ```
 
 ### Execute 4PC Experiments
 This experiment requires a lot of processes and system RAM. If necessary, reduce the number of processes or input size, e.g. by adding PROCESS_NUM=4 NUM_INPUTS=10000 after --override.
 
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/throughput_4PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/throughput_4PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_4PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_4PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE
 ```
 
 ## Parse Results
