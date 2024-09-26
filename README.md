@@ -24,10 +24,10 @@ sudo apt install libssl-dev libeigen3-dev
 #Run with Docker
 docker build -t hpmpc .
 #Run each command in different terminals or different machines
-docker run -it --network host p0
-docker run -it --network host p1
-docker run -it --network host p2
-docker run -it --network host p3
+docker run -it --network host cat-add=NET_ADMIN p0
+docker run -it --network host cat-add=NET_ADMIN p1
+docker run -it --network host cat-add=NET_ADMIN p2
+docker run -it --network host cat-add=NET_ADMIN p3
 ```
 
 ### Local Setting
