@@ -106,13 +106,15 @@ while getopts ":a:b:c:d:p:f:l:L:B:" opt; do
   esac
 done
 
+
 # Ensure the party index is valid
 if [[ ${PARTY} -lt 0 ]]; then
   echo "Error: Please provide a valid party index."
   exit 1
 fi
 
-if [[ ${PARTY} -eq "all" ]]; then
+if [[ ${PARTY} = "all" ]]; then
+    echo "Parties set to all, skipping configuration"
     exit
 fi
 
