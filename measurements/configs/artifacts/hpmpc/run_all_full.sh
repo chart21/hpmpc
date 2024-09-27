@@ -158,6 +158,13 @@ python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/v
 #Reset network shaping
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1
 
+
+echo "=====Finished all 4PC measurements====="
+if [ $PID == 3 ]
+then
+    exit 0
+fi
+
 #3PC
 
 #Figure 1
@@ -237,3 +244,5 @@ python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/v
 
 #Reset network shaping
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override -L -1 -B -1
+
+echo "=====Finished all 3PC measurements====="
