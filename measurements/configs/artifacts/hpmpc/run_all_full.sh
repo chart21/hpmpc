@@ -23,7 +23,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "p:a:b:c:d:D:L:R:i;" opt
+while getopts "p:a:b:c:d:D:L:R:i:" opt
 do
    case "$opt" in
       p ) PID="$OPTARG" ;;
