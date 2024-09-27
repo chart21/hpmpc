@@ -20,14 +20,15 @@ You can use the provided Dockerfile or set up the project manually. The only dep
 #Install Dependencies:
 sudo apt install libssl-dev libeigen3-dev
 ```
-```
+
+```bash
 #Run with Docker
 docker build -t hpmpc .
 #Run each command in different terminals or different machines
-docker run -it --network host cat-add=NET_ADMIN p0
-docker run -it --network host cat-add=NET_ADMIN p1
-docker run -it --network host cat-add=NET_ADMIN p2
-docker run -it --network host cat-add=NET_ADMIN p3
+ docker run -it --network host --cap-add=NET_ADMIN --name p0 hpmpc
+ docker run -it --network host --cap-add=NET_ADMIN --name p1 hpmpc
+ docker run -it --network host --cap-add=NET_ADMIN --name p2 hpmpc
+ docker run -it --network host --cap-add=NET_ADMIN --name p3 hpmpc
 ```
 
 ### Local Setting

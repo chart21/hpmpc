@@ -1,3 +1,4 @@
+#!/bin/bash
 ITERATIONS=1 # replace with number of repeated executions you want to run
 IP0=127.0.0.1
 IP1=127.0.0.1

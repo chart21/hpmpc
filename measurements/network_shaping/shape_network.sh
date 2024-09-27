@@ -114,9 +114,17 @@ if [[ ${PARTY} -lt 0 ]]; then
 fi
 
 if [[ ${PARTY} = "all" ]]; then
-    echo "Parties set to all, skipping configuration"
+    echo "Parties set to all, skipping network shaping"
     exit
 fi
+
+#Check if 127.0.0.1 is in the list of IPs and exit if it is
+for ip in "${IPS[@]}"; do
+  if [[ "${ip}" == "127.0.0.1" ]]; then
+    echo "IP set to localhost, skipping network shaping"
+    exit
+    fi
+done
 
 
 
