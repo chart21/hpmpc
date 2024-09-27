@@ -44,7 +44,7 @@ apply_tc_ip_specific() {
   local classid="${5}"  # Unique class ID for each IP
 
   echo "Applying settings for IP ${ip} on interface ${iface}:"
-  if [ "${latency}" != "-1" ]; then
+  if [ "${latency}" -gt "0" ]; then
     echo "  Latency: ${latency}ms"
     # Add a netem qdisc to control latency
     echo "Executing: tc qdisc add dev ${iface} parent 1:${classid} handle ${classid}0: netem delay ${latency}ms"
