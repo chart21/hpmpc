@@ -18,7 +18,7 @@ export DATTYPE=256 # replace with highest DATTYPE supported by your hardware
 
 ## Network Shaping
 
-Make sure to apply the bandwidths/latencies from table 10 for each run.
+Make sure to apply the bandwidths/latencies from table 9 for each run.
 
 ## Execution
 

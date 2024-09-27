@@ -148,12 +148,12 @@ then
 fi
 
 echo "=====Measuring Table 9====="
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9_aes-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9_aes-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9_aes1-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9_aes1-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9_dot-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9_dot-PRE-4PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
 #Reset network shaping
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1
@@ -172,7 +172,7 @@ for latency in ${latencies[@]}
 do
     echo "=====Measuring Figure 10 (a) (3PC) with latency $latency ms====="
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -L $latency -B -1
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/figure10_aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE PROTOCOL=2,5 $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure10/figure10a_aes_latency.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE PROTOCOL=2,5 $REDUCED
 done
 #Reset network shaping
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -p $PID -L -1 -B -1
@@ -180,8 +180,8 @@ measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -p $PID -L
 
 #Figure 11
 echo "=====Measuring Figure 11 (3PC)====="
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/figure11_runtime_baseline -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/figure11_runtime_Trio_Quad -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/figure11_runtime_baseline.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=2 DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure11/figure11_runtime_Trio_Quad.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 DATTYPE=$DATTYPE $REDUCED
 
 #Figure 9
 #-
@@ -229,11 +229,11 @@ fi
 
 echo "=====Measuring Table 9 (3PC)====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9_aes-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_bdw/table9_aes-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_lat/table9_aes1-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/aes_lat/table9_aes1-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/vector_prod20k/table9_dot-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/vector_prod20k/table9_dot-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9_aes-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9_aes1-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9_aes1-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9_dot-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9_dot-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
 
 #Reset network shaping
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override -L -1 -B -1
