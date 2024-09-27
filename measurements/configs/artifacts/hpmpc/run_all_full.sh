@@ -23,7 +23,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "p:a:b:c:d:D:L:R:" opt
+while getopts "p:a:b:c:d:D:L:R:i;" opt
 do
    case "$opt" in
       p ) PID="$OPTARG" ;;
@@ -34,6 +34,7 @@ do
       D ) DATTYPE="$OPTARG" ;;
       L ) DATTYPES="$OPTARG" ;;
       R ) REDUCED="$OPTARG" ;;
+      i ) ITERATIONS="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
