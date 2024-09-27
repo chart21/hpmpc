@@ -1,0 +1,15 @@
+{
+    "configurations":{
+        "Launch":{
+            "adapter": "vscode-cpptools",
+            "configuration": {
+                "request": "launch",
+                "program": "executables/run-P2.o",
+                "cwd": "~/workspace/july_backup/hpmpc/",
+                "externalConsole":true,
+                "MiMode": "gdb",
+                "args": []
+            }
+        }
+    }
+}
