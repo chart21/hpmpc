@@ -7,7 +7,7 @@ Artifacts HotCRP Id: **Submission #22 (2025.1)**
 Requested Badge: **Functional**
 
 ## Description
-The artifact reproduces the experiments of all included figures and tables (except Table 2) of the paper. Table 2 only evaluates third-party frameworks and is thus not covered. 
+The artifact reproduces the experiments of all included figures and tables (except Table 1,2) of the paper. Table 1,2 only evaluate framework-independent or third-party framework measurements and are thus not covered. 
 For each experiment, the artifact produces one or multiple csv files with measurement results that can be directly compared to the corresponding measurement point of a figure or an entry in a table of the paper.
 The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the results of the paper.
 The reduced workload should complete within an hour on four multi-core machines in a distributed setup.
@@ -182,7 +182,7 @@ python3 measurements/parse_logs.py measurements/logs
 ```
 
 ## Limitations 
-Table2 of the paper evaluates only third-party frameworks and is not covered by the artifact.
+Tables 1 and 2 of the paper do not evaluate our framework and are thus not covered by the artifact.
 
 ## Notes on Reusability 
 Our repository allows users to develop new functions and experiments in a protocol-agnostic way that can be easily integrated into the existing framework.
