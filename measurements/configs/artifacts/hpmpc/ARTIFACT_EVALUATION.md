@@ -44,14 +44,17 @@ The following instructions are for setting up the environment to run the experim
 
 #### Install dependencies and clone repository without Docker on Debian-based systems
 
-Execute on each node:
+Execute on each node to install dependencies (may require root privileges and running each command with sudo).
 ```bash
 apt-get update && \
     apt-get install -y --no-install-recommends gcc-12 g++-12 libeigen3-dev libssl-dev git vim ca-certificates python3 jq bc build-essential iproute2 iperf && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 && \
     update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 100 && \
-    update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 100 && \
+    update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 100 
+```
 
+Clone the repository and its submodules.
+```bash
 git clone https://github.com/chart21/hpmpc && \
     cd hpmpc && \
     git submodule update --init --recursive
@@ -73,7 +76,7 @@ docker build -t hpmpc .
 
 
 #### Networking
-We recommend setting the following environment variables on each node. Replace the IP addresses with the actual IP addresses of the nodes. The PID has to be set to the ID of the node (0, 1, 2, or 3) for each machine/container individually.
+We recommend setting the following environment variables on each node. Replace the IP addresses with the actual IP addresses of the nodes. The PID has to be set to the ID of the node (0, 1, 2, or 3) for each machine/container individually. Use PID=all for a single machine setup.
 ```bash
 export IP0=127.0.0.1 
 export IP1=127.0.0.1
@@ -109,7 +112,7 @@ After setting up the environment, you can test the correctness of your setup by 
 If the nodes are able to connect and all tests pass, the environment is set up correctly.
 
 ```bash
-make -j PARTY=$PID FUNCTION_IDENTIFIER=54 PROTOCOL=12 && scripts/run.sh -p $PID -a $IP0 -b $IP1 -c $IP2 -d $IP3 
+make -j PARTY=$PID FUNCTION_IDENTIFIER=54 PROTOCOL=12 && scripts/run.sh -p $PID -n 4 -a $IP0 -b $IP1 -c $IP2 -d $IP3 
 ```
 
 
