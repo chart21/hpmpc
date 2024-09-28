@@ -105,6 +105,12 @@ export ITERATIONS=1 # Change to the desired number of iterations
 
 
 ### Testing the Environment 
+After setting up the environment, you can test the correctness of your setup by running the following command on each node.
+If the nodes are able to connect and all tests pass, the environment is set up correctly.
+
+```bash
+make -j PARTY=$PID FUNCTION_IDENTIFIER=54 PROTOCOL=12 && scripts/run.sh -p $PID -a $IP0 -b $IP1 -c $IP2 -d $IP3 
+```
 
 
 ## Artifact Evaluation 
