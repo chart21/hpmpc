@@ -2,7 +2,7 @@
 
 Paper title: **High Throughput Secure Multiparty Computation in Various Network Settings**
 
-Artifacts HotCRP Id: **#Enter your HotCRP Id here** (not your paper Id, but the artifacts id)
+Artifacts HotCRP Id: **Submission #22 (2025.1)** 
 
 Requested Badge: **Functional**
 
@@ -36,8 +36,7 @@ The reduced workload should complete within an hour on multi-core machines while
 
 
 ### Accessibility
-Our artifact is publicly available on GitHub and may be evaluated using the following Git commit:
-
+Our artifact is publicly available on GitHub.
 
 ### Set up the environment 
 
