@@ -219,13 +219,13 @@ python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table6/ 
 
 #Table 7
 echo "=====Measuring Table 7 (3PC)====="
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_3PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_3PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_3PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_3PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
 #Table 8
 echo "=====Measuring Table 8 (3PC)====="
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/table8_throughput_3PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/table8_throughput_3PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/table8_throughput_3PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/table8_throughput_3PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
 #Table 9
 
@@ -237,12 +237,12 @@ then
 fi
 
 echo "=====Measuring Table 9 (3PC)====="
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9_aes-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9_aes-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9_aes1-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9_aes1-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9_dot-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9_dot-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9_aes-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_bdw/table9_aes-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9_aes1-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/aes_lat/table9_aes1-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9_dot-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table9/vector_prod20k/table9_dot-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2  -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
 #Reset network shaping
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override -L -1 -B -1
