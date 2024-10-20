@@ -111,6 +111,33 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
+#if SKIP_PRE == 1
+template <typename func_add, typename func_sub, typename func_mul>
+static void generate_zero_triples(uint64_t triple_num, func_add ADD, func_sub SUB, func_mul MULT)
+{
+    init_beaver();
+    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    {
+        for(uint64_t i = 0; i < triple_num; i++)
+        {
+            boolean_triple_a[i] = SET_ALL_ZERO();
+            boolean_triple_b[i] = SET_ALL_ZERO();
+            boolean_triple_c[i] = SET_ALL_ZERO();
+        }
+    }
+    else
+    {
+        for(uint64_t i = 0; i < triple_num; i++)
+        {
+            arithmetic_triple_a[i] = SET_ALL_ZERO();
+            arithmetic_triple_b[i] = SET_ALL_ZERO();
+            arithmetic_triple_c[i] = SET_ALL_ZERO();
+        }
+    }
+}
+#endif
+
+
 
 };
 

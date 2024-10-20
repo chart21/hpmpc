@@ -76,8 +76,8 @@ void init_circuit(std::string ips[]) {
   PROTOCOL_INIT<DATATYPE>::complete_preprocessing(num_arithmetic_triples, num_boolean_triples, preprocessed_outputs_index);
 #endif
 #if BEAVER == 1 && SKIP_PRE == 1
-  generate_zero_triples(num_arithmetic_triples, OP_ADD, OP_SUB, OP_MULT);
-  generate_zero_triples(num_boolean_triples, FUNC_XOR, FUNC_XOR, FUNC_AND);
+  PROTOCOL_INIT<DATATYPE>::generate_zero_triples(num_arithmetic_triples, OP_ADD, OP_SUB, OP_MULT);
+  PROTOCOL_INIT<DATATYPE>::generate_zero_triples(num_boolean_triples, FUNC_XOR, FUNC_XOR, FUNC_AND);
 #endif
 
 #if MAL == 1

@@ -135,6 +135,32 @@ for(uint64_t i = 0; i < num_output_shares; i++)
 triple_type = new uint8_t[arithmetic_triple_num + boolean_triple_num];
 }
 
+#if SKIP_PRE == 1
+template <typename func_add, typename func_sub, typename func_mul>
+static void generate_zero_triples(uint64_t triple_num, func_add ADD, func_sub SUB, func_mul MULT)
+{
+DATATYPE* lxly = new DATATYPE[triple_num];
+for (uint64_t i = 0; i < triple_num; i++)
+{
+    lxly[i] = SET_ALL_ZERO();
+}
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+{
+delete[] preprocessed_outputs_bool;
+preprocessed_outputs_bool = lxly;
+preprocessed_outputs_bool_index = 0;
+preprocessed_outputs_bool_input_index = 0;
+}
+else
+{
+delete[] preprocessed_outputs_arithmetic;
+preprocessed_outputs_arithmetic = lxly;
+preprocessed_outputs_arithmetic_index = 0;
+preprocessed_outputs_arithmetic_input_index = 0;
+}
+}
+#endif
+
 
 
 };
