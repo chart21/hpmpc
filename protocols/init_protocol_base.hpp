@@ -36,6 +36,9 @@ sockets_received.push_back(0);
 #if PRE == 1
 void pre_send_to_(int player_index)
 {
+#if SKIP_PRE == 1
+    return;
+#endif
 sending_args_pre[player_index].elements_to_send[0] += 1;
 total_send_pre[player_index] += 1;
 /* sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] += 1; */
@@ -43,6 +46,9 @@ total_send_pre[player_index] += 1;
 
 void pre_receive_from_(int player_index)
 {
+#if SKIP_PRE == 1
+    return;
+#endif
 /* receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1; */
 receiving_args_pre[player_index].elements_to_rec[0] += 1;
 total_recv_pre[player_index] += 1;
@@ -225,6 +231,17 @@ void compare_views_init()
 #endif
 
 #if (PRE == 1 &&  HAS_POST_PROTOCOL == 1) || BEAVER == 1
+#if BEAVER == 1 && PRE == 1
+void store_output_share_bool_()
+{
+    preprocessed_outputs_bool_index+=1;
+}
+
+void store_output_share_arithmetic_()
+{
+    preprocessed_outputs_arithmetic_index+=1;
+}
+#endif
 void store_output_share_()
 {
    preprocessed_outputs_index+=1; 
@@ -272,15 +289,28 @@ for(int t=0;t<(num_players*player_multiplier);t++) {
 #endif
 
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
-preprocessed_outputs_index = 0; // reset index for post phase
-preprocessed_outputs_input_index = 0;
+#if BEAVER == 1 && PRE == 1
+if(preprocessed_outputs_bool_initialized == false)
+{
+    preprocessed_outputs_bool = new DATATYPE[preprocessed_outputs_bool_index];
+}
+if(preprocessed_outputs_arithmetic_initialized == false)
+{
+    preprocessed_outputs_arithmetic = new DATATYPE[preprocessed_outputs_arithmetic_index];
+}
+preprocessed_outputs_bool_index = 0;
+preprocessed_outputs_arithmetic_index = 0;
+preprocessed_outputs_bool_initialized = true;
+preprocessed_outputs_arithmetic_initialized = true;
+#endif
 if(preprocessed_outputs_initialized == false)
 {
     preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
     preprocessed_outputs_initialized = true;
 }
+preprocessed_outputs_index = 0; // reset index for post phase
+preprocessed_outputs_input_index = 0;
 #endif
-
 rounds = 0;
 sending_rounds = 0;
 rb = 0;
@@ -343,11 +373,27 @@ for(int t=0;t<(num_players*player_multiplier);t++) {
 #endif
 
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
+#if BEAVER == 1 && PRE == 1
+if(preprocessed_outputs_bool_initialized == false)
+{
+    preprocessed_outputs_bool = new DATATYPE[preprocessed_outputs_bool_index];
+}
+if(preprocessed_outputs_arithmetic_initialized == false)
+{
+    preprocessed_outputs_arithmetic = new DATATYPE[preprocessed_outputs_arithmetic_index];
+}
+preprocessed_outputs_bool_index = 0;
+preprocessed_outputs_arithmetic_index = 0;
+preprocessed_outputs_bool_initialized = true;
+preprocessed_outputs_arithmetic_initialized = true;
+#endif
 preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
+total_preprocessed_outputs = preprocessed_outputs_index;
 preprocessed_outputs_index = 0;
 preprocessed_outputs_input_index = 0;
 preprocessed_outputs_initialized = true;
 #endif
+    
 
 rounds = 0;
 sending_rounds = 0;

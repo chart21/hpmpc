@@ -57,7 +57,7 @@ return SET_ALL_ZERO();
 template <typename func_add, typename func_sub, typename func_mul>
     Add_init prepare_mult(Add_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-if constexpr(std::is_same_v<func_add, FUNC_XOR>)
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
     num_boolean_triples++;
 else
     num_arithmetic_triples++;

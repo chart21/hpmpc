@@ -47,9 +47,21 @@ uint32_t hash_val[num_players*player_multiplier][8]; // Hash value for each play
 uint64_t elements_to_compare[num_players*player_multiplier] = {0};
 #endif
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1// Store preprocessed-output to get the correct results during post-processing
+
+#if BEAVER == 1 && PRE == 1
+DATATYPE* preprocessed_outputs_bool;
+DATATYPE* preprocessed_outputs_arithmetic;
+uint64_t preprocessed_outputs_bool_index = 0;
+uint64_t preprocessed_outputs_bool_input_index = 0;
+uint64_t preprocessed_outputs_arithmetic_input_index = 0;
+uint64_t preprocessed_outputs_arithmetic_index = 0;
+bool preprocessed_outputs_bool_initialized = false;
+bool preprocessed_outputs_arithmetic_initialized = false;
+#endif
 DATATYPE* preprocessed_outputs;
 uint64_t preprocessed_outputs_input_index = 0;
 uint64_t preprocessed_outputs_index = 0;
+uint64_t total_preprocessed_outputs = 0;
 bool preprocessed_outputs_initialized = false;
 #endif
 uint64_t num_generated[num_players*player_multiplier] = {0};

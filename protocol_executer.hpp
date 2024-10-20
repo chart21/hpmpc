@@ -1,5 +1,6 @@
 #pragma once
 #include "config.h"
+#include "core/arch/STD.h"
 #include "core/init.hpp"
 #include "core/networking/buffers.h"
 #include "protocols/Protocols.h"
@@ -71,12 +72,19 @@ void init_circuit(std::string ips[]) {
 #if INIT == 1 && NO_INI == 0
   auto garbage = new RESULTTYPE;
   FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
+#if PRE== 1 && BEAVER == 1 && SKIP_PRE == 0
+  PROTOCOL_INIT<DATATYPE>::complete_preprocessing(num_arithmetic_triples, num_boolean_triples, preprocessed_outputs_index);
+#endif
+#if BEAVER == 1 && SKIP_PRE == 1
+  generate_zero_triples(num_arithmetic_triples, OP_ADD, OP_SUB, OP_MULT);
+  generate_zero_triples(num_boolean_triples, FUNC_XOR, FUNC_XOR, FUNC_AND);
+#endif
 
 #if MAL == 1
   compare_views_init();
 #endif
 
-#if PRE == 1
+#if PRE == 1 && SKIP_PRE == 0
   PROTOCOL_INIT<DATATYPE>::finalize(ips, receiving_args_pre, sending_args_pre);
 #else
   PROTOCOL_INIT<DATATYPE>::finalize(ips); // TODO change to new version
@@ -92,7 +100,7 @@ void init_circuit(std::string ips[]) {
 #endif
 }
 
-#if BEAVER == 1
+#if BEAVER == 1 && SKIP_PRE == 0
 void beaver(std::string ips[])
 {
 #if PRINT == 1
@@ -207,21 +215,6 @@ void preprocess_circuit(std::string ips[]) {
     pthread_join(sending_Threads_pre[t], NULL);
   }
 
-  double time_pre = std::chrono::duration_cast<std::chrono::microseconds>(
-                        std::chrono::high_resolution_clock::now() - p)
-                        .count();
-  /* searchComm__<Sharemind,DATATYPE>(protocol,*found); */
-  clock_gettime(CLOCK_REALTIME, &p2);
-  double accum_pre = (p2.tv_sec - p1.tv_sec) +
-                     (double)(p2.tv_nsec - p1.tv_nsec) / (double)1000000000L;
-  clock_t time_pre_function_finished = clock();
-
-  print("Time measured to perform preprocessing clock: %fs \n",
-        double((time_pre_function_finished - time_pre_function_start)) /
-            CLOCKS_PER_SEC);
-  print("Time measured to perform preprocessing getTime: %fs \n", accum_pre);
-  print("Time measured to perform preprocessing chrono: %fs \n",
-        time_pre / 1000000);
 
 #if LIVE == 1
   // reset all variables
@@ -244,6 +237,30 @@ void preprocess_circuit(std::string ips[]) {
   p_init.finalize(ips);
 #endif
 #endif
+
+#if BEAVER == 1 
+    #if SKIP_PRE == 0
+  PROTOCOL_PRE<DATATYPE>::complete_preprocessing(num_arithmetic_triples, num_boolean_triples, total_preprocessed_outputs);
+#endif
+#endif
+
+  double time_pre = std::chrono::duration_cast<std::chrono::microseconds>(
+                        std::chrono::high_resolution_clock::now() - p)
+                        .count();
+  /* searchComm__<Sharemind,DATATYPE>(protocol,*found); */
+  clock_gettime(CLOCK_REALTIME, &p2);
+  double accum_pre = (p2.tv_sec - p1.tv_sec) +
+                     (double)(p2.tv_nsec - p1.tv_nsec) / (double)1000000000L;
+  clock_t time_pre_function_finished = clock();
+
+  print("Time measured to perform preprocessing clock: %fs \n",
+        double((time_pre_function_finished - time_pre_function_start)) /
+            CLOCKS_PER_SEC);
+  print("Time measured to perform preprocessing getTime: %fs \n", accum_pre);
+  print("Time measured to perform preprocessing chrono: %fs \n",
+        time_pre / 1000000);
+
+
 #if TRUNC_DELAYED == 1
   delayed = false;
 #endif
@@ -401,11 +418,11 @@ init_srng(PSELF, PARTY+1+SRNG_SEED);
 
   init_circuit(ips);
 
-#if BEAVER == 1
+#if BEAVER == 1 && SKIP_PRE == 0
   beaver(ips);
 #endif
 
-#if PRE == 1
+#if PRE == 1 && SKIP_PRE == 0
   preprocess_circuit(ips);
 #endif
 

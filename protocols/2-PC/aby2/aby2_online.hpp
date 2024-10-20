@@ -1,5 +1,5 @@
 #pragma once
-#include "../../beaver_tiples.hpp"
+#include "../../beaver_triples.hpp"
 template <typename Datatype>
 class ABY2_ONLINE_Share{
 using BT = triple<Datatype>;
@@ -52,35 +52,39 @@ ABY2_ONLINE_Share Add( ABY2_ONLINE_Share b, func_add ADD) const
 
 void prepare_reveal_to_all() const
 {
-    send_to_live(PNEXT, l);
 }    
 
 
 template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
-    return SUB(m,ADD(receive_from_live(PNEXT),l));
+    return SUB(m,ADD(retrieve_output_share(),l));
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_mult(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-Datatype lxly = retreive_shares();
+Datatype lxly;
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+   lxly = retrieve_output_share_bool();
+else
+   lxly = retrieve_output_share_arithmetic();
 ABY2_ONLINE_Share c;
 c.l = getRandomVal(PSELF);
 #if PARTY == 0
-c.m = ADD(msg, MULT(m,b.m));
+c.m = MULT(m,b.m);
 #else
 c.m = SET_ALL_ZERO();
 #endif
-c.m = SUB(c.m, ADD(ADD(MULT(m,b.l),MULT(l,b.m),SUB(lxly,c.l)))); // mx my - (mx[ly] + my[lx] + [lxly] - [lz])
+c.m = SUB(c.m, SUB(ADD(MULT(m,b.l),MULT(l,b.m)),ADD(lxly,c.l))); // mx my - (mx[ly] + my[lx] - [lxly] - [lz])
+send_to_live(PNEXT, c.m);
 return c;
 }
     
     template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {
-    Datatype msg = receive_from_live(PPREV);
+    Datatype msg = receive_from_live(PNEXT);
     m = ADD(m,msg);
 }
 

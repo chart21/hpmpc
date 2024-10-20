@@ -8,7 +8,7 @@
 
 // Use a preprocessing phase? Only supported by Protocols 3,5,8,11,12
 #ifndef PRE
-#define PRE 0
+#define PRE 1
 #endif
 
 // Party ID (starting from 0)
@@ -275,6 +275,10 @@ int base_port = BASE_PORT; // temporary solution
 
 #ifndef FAKE_TRIPLES
 #define FAKE_TRIPLES 1
+#endif
+
+#ifndef SKIP_PRE
+#define SKIP_PRE 0 // Skip preprocessing phase even if enabled by setting all preprocessing material to 0
 #endif
 
 #if PROTOCOL == 4

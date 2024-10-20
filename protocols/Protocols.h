@@ -96,7 +96,7 @@
             #include "2-PC/aby2/aby2_init.hpp"
         #endif
         #if LIVE == 1 
-            #define PROTOCOL_LIVE ABY2_Share
+            #define PROTOCOL_LIVE ABY2_ONLINE_Share
             #include "2-PC/aby2/aby2_online.hpp"
         #endif
     #else

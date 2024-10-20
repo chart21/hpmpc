@@ -46,8 +46,9 @@ void init_buffers(int link_id)
 
 DATATYPE getRandomVal(int link_id)
 {
-/* if(link_id == 5 || link_id == 6 ) */
-    /* return SET_ALL_ZERO(); */
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#endif
 #if RANDOM_ALGORITHM == 0
    if(num_generated[link_id] > 63)
    {

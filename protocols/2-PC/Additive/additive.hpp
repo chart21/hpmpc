@@ -60,7 +60,7 @@ template <typename func_add, typename func_sub, typename func_mul>
     Add_Share prepare_mult(Add_Share y, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 BT t;
-if constexpr(std::is_same_v<func_add, FUNC_XOR>)
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
 {
     t = retrieveBooleanTriple<Datatype>();
 }

@@ -108,6 +108,9 @@ return receiving_args[player_id].received_elements[rounds-1][share_buffer[player
 #if PRE == 1
 void pre_send_to_live(int player_id, DATATYPE a)
 {
+#if SKIP_PRE == 1
+    return;
+#endif
 sending_args_pre[player_id].sent_elements[0][send_count_pre[player_id]] = a;
 /* sending_args_pre[player_id].sent_elements[sending_args_pre[player_id].send_rounds][send_count[player_id]] = a; */
 send_count_pre[player_id]+=1;
@@ -115,6 +118,9 @@ send_count_pre[player_id]+=1;
 
 DATATYPE pre_receive_from_live(int player_id)
 {
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#endif
 share_buffer_pre[player_id] +=1;
 return receiving_args_pre[player_id].received_elements[0][share_buffer_pre[player_id] - 1];
 /* return receiving_args_pre[player_id].received_elements[receiving_args_pre[player_id].rec_rounds][share_buffer[player_id] -1]; */
@@ -358,11 +364,38 @@ void compare_views() {
 #endif
 
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
+#if BEAVER==1 && PRE == 1
+void store_output_share_bool(DATATYPE val)
+{
+preprocessed_outputs_bool[preprocessed_outputs_bool_input_index] = val;
+preprocessed_outputs_bool_input_index+=1;
+}
+
+void store_output_share_arithmetic(DATATYPE val)
+{
+preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_input_index] = val;
+preprocessed_outputs_arithmetic_input_index+=1;
+}
+
+DATATYPE retrieve_output_share_bool()
+{
+    preprocessed_outputs_bool_index+=1;
+    return preprocessed_outputs_bool[preprocessed_outputs_bool_index-1];
+}
+
+DATATYPE retrieve_output_share_arithmetic()
+{
+    preprocessed_outputs_arithmetic_index+=1;
+    return preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_index-1];
+}
+#endif
+
 void store_output_share(DATATYPE val)
 {
 preprocessed_outputs[preprocessed_outputs_input_index] = val;
 preprocessed_outputs_input_index+=1;
 }
+
 
 DATATYPE retrieve_output_share()
 {

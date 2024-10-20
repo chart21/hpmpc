@@ -1,5 +1,6 @@
 #pragma once
 #include "../../beaver_triples.hpp"
+#include <cstdint>
 #include <functional>
 template <typename Datatype>
 class ABY2_init{
@@ -43,15 +44,15 @@ ABY2_init Add( ABY2_init b, func_add ADD) const
 
 void prepare_reveal_to_all() const
 {
-    send_to_(PNEXT);
+    pre_send_to_(PNEXT);
+    store_output_share_();
 }    
 
 
 template <typename func_add, typename func_sub>
 Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 {
-receive_from_(PNEXT);
-return SET_ALL_ZERO();
+    return SET_ALL_ZERO();
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
@@ -59,9 +60,20 @@ template <typename func_add, typename func_sub, typename func_mul>
 {
 ABY2_init c;
 if constexpr(std::is_same_v<func_add, FUNC_XOR>)
+{
     num_boolean_triples++;
+    store_output_share_bool_();
+    store_output_share_bool_();
+    store_output_share_bool_();
+}
 else
+{
     num_arithmetic_triples++;
+    store_output_share_arithmetic_();
+    store_output_share_arithmetic_();
+    store_output_share_arithmetic_();
+}
+
 pre_send_to_(PNEXT);
 pre_send_to_(PNEXT);
 send_to_(PNEXT);
@@ -109,13 +121,18 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void complete_preprocessing(Datatype* lxly, uint64_t n)
+static void complete_preprocessing(uint64_t arithmetic_triple_num, uint64_t boolean_triple_num, uint64_t num_output_shares)
 {
-for(int i = 0; i < n; i++)
+for(uint64_t i = 0; i < arithmetic_triple_num + boolean_triple_num; i++)
 {
     pre_receive_from_(PNEXT);
     pre_receive_from_(PNEXT);
 }
+for(uint64_t i = 0; i < num_output_shares; i++)
+{
+    pre_receive_from_(PNEXT);
+}
+triple_type = new uint8_t[arithmetic_triple_num + boolean_triple_num];
 }
 
 
