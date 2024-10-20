@@ -1,6 +1,6 @@
 #pragma once
 #include "generic_share.hpp"
-#include "generate_beaver_tiples.hpp"
+#include "../core/generate_beaver_tiples.hpp"
 #include <cstdint>
 #include <sys/types.h>
 
