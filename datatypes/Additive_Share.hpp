@@ -248,7 +248,7 @@ public:
     
     void complete_mult()
     {
-    #if PROTOCOL == 1 // Sharemind needs custom overload
+    #if PROTOCOL == 1 || (PROTOCOL == 4 && PRE == 0)// Sharemind and Additive need custom overload
         Share_Type::complete_mult(OP_ADD, OP_SUB, OP_MULT);
     #else
         #if FRACTIONAL > 0
@@ -261,7 +261,7 @@ public:
 
         void complete_mult_without_trunc()
     {
-    #if PROTOCOL == 1 // Sharemind needs custom overload
+    #if PROTOCOL == 1 || (PROTOCOL == 4 && PRE == 0)// Sharemind and Additive need custom overload
         Share_Type::complete_mult(OP_ADD, OP_SUB, OP_MULT);
     #else
         Share_Type::complete_mult(OP_ADD, OP_SUB);

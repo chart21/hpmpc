@@ -3,7 +3,7 @@
 // === Basic Settings ===
 
 #ifndef PROTOCOL
-#define PROTOCOL 5
+#define PROTOCOL 4
 #endif
 
 // Use a preprocessing phase? Only supported by Protocols 3,5,8,11,12
@@ -273,7 +273,12 @@ int base_port = BASE_PORT; // temporary solution
 
 // === Internal Settings, do not change ===
 
+#ifndef FAKE_TRIPLES
+#define FAKE_TRIPLES 1
+#endif
+
 #if PROTOCOL == 4
+#define BEAVER 1
 #define HAS_POST_PROTOCOL 1
 #elif (PROTOCOL == 3 || PROTOCOL == 5) && PARTY == 0
 #define HAS_POST_PROTOCOL 1

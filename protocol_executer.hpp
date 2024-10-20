@@ -1,6 +1,12 @@
 #pragma once
+#include "config.h"
 #include "core/init.hpp"
+#include "core/networking/buffers.h"
 #include "protocols/Protocols.h"
+#include <sys/ucontext.h>
+#if BEAVER == 1
+#include "protocols/beaver_triples.hpp"
+#endif
 
 #if FUNCTION_IDENTIFIER < 8
 #include "programs/benchmarks/bench_basic_primitives.hpp"
@@ -65,6 +71,7 @@ void init_circuit(std::string ips[]) {
 #if INIT == 1 && NO_INI == 0
   auto garbage = new RESULTTYPE;
   FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
+
 #if MAL == 1
   compare_views_init();
 #endif
@@ -84,6 +91,38 @@ void init_circuit(std::string ips[]) {
   delayed = false;
 #endif
 }
+
+#if BEAVER == 1
+void beaver(std::string ips[])
+{
+#if PRINT == 1
+  print("Beaver Triple Generation ...\n");
+#endif
+  init_beaver();
+  print_num_triples();
+  clock_t time_beaver_function_start = clock();
+  clock_gettime(CLOCK_REALTIME, &p1);
+  std::chrono::high_resolution_clock::time_point p =
+      std::chrono::high_resolution_clock::now();
+
+  generate_beaver_triples(ips, base_port, process_offset);
+  
+  clock_gettime(CLOCK_REALTIME, &p2);
+  double accum_beaver = (p2.tv_sec - p1.tv_sec) +
+                     (double)(p2.tv_nsec - p1.tv_nsec) / (double)1000000000L;
+  clock_t time_beaver_function_finished = clock();
+  print("Time measured to perform beaver triple generation clock: %fs \n",
+        double((time_beaver_function_finished - time_beaver_function_start)) /
+            CLOCKS_PER_SEC);
+  print("Time measured to perform beaver triple generation getTime: %fs \n",
+        accum_beaver);
+  print("Time measured to perform beaver triple generation chrono: %fs \n",
+        double(std::chrono::duration_cast<std::chrono::microseconds>(
+                   std::chrono::high_resolution_clock::now() - p)
+                   .count()) /
+            1000000);
+}
+#endif
 
 #if PRE == 1
 void preprocess_circuit(std::string ips[]) {
@@ -302,6 +341,10 @@ void live_circuit() {
   print("Time measured to perform computation getTime: %fs \n", accum);
   print("Time measured to perform computation chrono: %fs \n", time / 1000000);
   // Join threads to ensure closing of sockets
+#if BEAVER == 1
+  deinit_beaver();
+#endif
+
 #if FUNCTION_IDENTIFIER >= 70
   print_layer_stats();
 #endif
@@ -357,6 +400,10 @@ init_srng(PSELF, PARTY+1+SRNG_SEED);
   init_muetexes();
 
   init_circuit(ips);
+
+#if BEAVER == 1
+  beaver(ips);
+#endif
 
 #if PRE == 1
   preprocess_circuit(ips);

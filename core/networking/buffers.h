@@ -46,9 +46,11 @@ uint32_t hash_val[num_players*player_multiplier][8]; // Hash value for each play
 #endif
 uint64_t elements_to_compare[num_players*player_multiplier] = {0};
 #endif
-#if PRE == 1 && HAS_POST_PROTOCOL == 1 // Store preprocessed-output to get the correct results during post-processing
+#if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1// Store preprocessed-output to get the correct results during post-processing
 DATATYPE* preprocessed_outputs;
+uint64_t preprocessed_outputs_input_index = 0;
 uint64_t preprocessed_outputs_index = 0;
+bool preprocessed_outputs_initialized = false;
 #endif
 uint64_t num_generated[num_players*player_multiplier] = {0};
 
@@ -65,3 +67,4 @@ bool isReLU = false; // For ReLU truncation
 #if TRUNC_APPROACH > 0
 bool all_positive = false; // for slack-based optiimzation
 #endif
+

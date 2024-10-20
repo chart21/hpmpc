@@ -174,6 +174,7 @@ void print_communication()
 #if PRINT_IMPORTANT == 1
 //set decimal precision
 std::cout.precision(4);
+
 #if PRE == 1
 #if num_players == 2
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset <<  ": " << "Sending to other players:" << total_send_pre[PPREV]*(float(DATTYPE)/(8000*1000)) << "MB " << std::endl;

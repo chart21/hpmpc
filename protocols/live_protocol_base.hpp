@@ -357,11 +357,11 @@ void compare_views() {
 }
 #endif
 
-#if PRE == 1 && HAS_POST_PROTOCOL == 1
+#if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 void store_output_share(DATATYPE val)
 {
-preprocessed_outputs[preprocessed_outputs_index] = val;
-preprocessed_outputs_index+=1;
+preprocessed_outputs[preprocessed_outputs_input_index] = val;
+preprocessed_outputs_input_index+=1;
 }
 
 DATATYPE retrieve_output_share()

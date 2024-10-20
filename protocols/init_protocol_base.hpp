@@ -224,7 +224,7 @@ void compare_views_init()
 
 #endif
 
-#if PRE == 1 &&  HAS_POST_PROTOCOL == 1
+#if (PRE == 1 &&  HAS_POST_PROTOCOL == 1) || BEAVER == 1
 void store_output_share_()
 {
    preprocessed_outputs_index+=1; 
@@ -271,14 +271,22 @@ for(int t=0;t<(num_players*player_multiplier);t++) {
 }
 #endif
 
-#if PRE == 1 && HAS_POST_PROTOCOL == 1
+#if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 preprocessed_outputs_index = 0; // reset index for post phase
+preprocessed_outputs_input_index = 0;
+if(preprocessed_outputs_initialized == false)
+{
+    preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
+    preprocessed_outputs_initialized = true;
+}
 #endif
+
 rounds = 0;
 sending_rounds = 0;
 rb = 0;
 sb = 0;
 current_phase = PHASE_LIVE;
+
 print_communication();  
 }
 
@@ -288,6 +296,7 @@ sending_args[t].elements_to_send[0] = 0;
 receiving_args[t].elements_to_rec[0] = 0;
 }
 }
+
 
 void finalize_(std::string* ips, receiver_args* ra, sender_args* sa)
 {
@@ -333,9 +342,11 @@ for(int t=0;t<(num_players*player_multiplier);t++) {
 }
 #endif
 
-#if PRE == 1 && HAS_POST_PROTOCOL == 1
+#if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
 preprocessed_outputs_index = 0;
+preprocessed_outputs_input_index = 0;
+preprocessed_outputs_initialized = true;
 #endif
 
 rounds = 0;
@@ -343,7 +354,7 @@ sending_rounds = 0;
 rb = 0;
 sb = 0;
 current_phase = PHASE_PRE;
-/* print_communication(); */  
+
 }
 
 
