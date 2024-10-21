@@ -29,7 +29,8 @@ struct triple
 template <typename Datatype>
 triple<Datatype> retrieveArithmeticTriple()
 {
-    return triple<Datatype>{arithmetic_triple_a[arithmetic_triple_index], arithmetic_triple_b[arithmetic_triple_index], arithmetic_triple_c[arithmetic_triple_index++]};
+    arithmetic_triple_index++;
+    return triple<Datatype>{arithmetic_triple_a[arithmetic_triple_index-1], arithmetic_triple_b[arithmetic_triple_index-1], arithmetic_triple_c[arithmetic_triple_index-1]};
 }
 
 template <typename Datatype>

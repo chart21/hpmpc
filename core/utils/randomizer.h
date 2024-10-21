@@ -46,6 +46,8 @@ void init_buffers(int link_id)
 
 DATATYPE getRandomVal(int link_id)
 {
+    /* return SET_ALL_ZERO(); */
+    /* return 20; */
 #if SKIP_PRE == 1
     return SET_ALL_ZERO();
 #endif

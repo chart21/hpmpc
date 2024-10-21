@@ -84,11 +84,146 @@ store_output_share_arithmetic(lxly);
 }
 return ABY2_PRE_Share(getRandomVal(PSELF)); //new mask
 }
+
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_dot(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+BT t;
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+{
+    t = retrieveBooleanTriple<Datatype>();
+    triple_type[triple_type_index++] = 0;
+}
+else
+{
+    t = retrieveArithmeticTriple<Datatype>();
+    std::cout << "t.a, t.b, t.c: " << t.a << " " << t.b << " " << t.c << std::endl;
+    triple_type[triple_type_index++] = 1;
+}
+//open
+auto lta = ADD(l,t.a);
+auto ltb = ADD(b.l,t.b);
+pre_send_to_live(PNEXT, lta);
+pre_send_to_live(PNEXT, ltb);
+auto lxly = ADD(SUB(MULT(lta, b.l), MULT(ltb, t.a)), t.c);
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+{
+store_output_share_bool(t.a);
+store_output_share_bool(b.l);
+store_output_share_bool(lxly);
+}
+else
+{
+store_output_share_arithmetic(t.a);
+store_output_share_arithmetic(b.l);
+store_output_share_arithmetic(lxly);
+}
+return ABY2_PRE_Share();
+}
+
+/* template <typename func_add, typename func_sub, typename func_mul, typename func_trunc> */
+/*     ABY2_PRE_Share prepare_dot_with_trunc(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) const */
+/* { */
+/*     return prepare_mult(b, ADD, SUB, MULT); */
+/* } */
+
+template <typename func_add, typename func_sub>
+
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+    l = getRandomVal(PSELF);
+}
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+    l = getRandomVal(PSELF);
+}
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+ABY2_PRE_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
+{
+return ABY2_PRE_Share(getRandomVal(PSELF));
+}
+    
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed(func_add ADD, func_sub SUB)
+{
+}
+
     
     template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {
 }
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+}
+
+static void prepare_A2B_S1(int m, int k, ABY2_PRE_Share in[], ABY2_PRE_Share out[])
+{
+#if PARTY == 0
+    for(int i = m; i < k; i++)
+    {
+        out[i-m].l = getRandomVal(PSELF);
+    }
+#endif
+}
+
+static void prepare_A2B_S2(int m, int k, ABY2_PRE_Share in[], ABY2_PRE_Share out[])
+{
+#if PARTY == 1
+    for(int i = m; i < k; i++)
+    {
+        out[i-m].l = getRandomVal(PSELF);
+    }
+#endif
+}
+
+void prepare_bit2a(ABY2_PRE_Share out[])
+{
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    Datatype lb[BITLENGTH]{0};
+    lb[BITLENGTH - 1] = l;
+    unorthogonalize_boolean(lb, temp2);
+    orthogonalize_arithmetic(temp2, lb);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        auto t = retrieveArithmeticTriple<Datatype>();
+        triple_type[triple_type_index++] = 3;
+#if PARTY == 0
+        auto bl = SET_ALL_ZERO();
+        auto al = lb[i];
+#else 
+        auto bl = lb[i];
+        auto al = SET_ALL_ZERO();
+#endif
+        auto lta = OP_ADD(al, t.a);
+        auto ltb = OP_ADD(bl, t.b); //optimization?
+        pre_send_to_live(PNEXT, lta); 
+        pre_send_to_live(PNEXT, ltb);
+        auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), MULT(ltb, t.a)), t.c);
+        store_output_share_arihmetic(t.a);
+        store_output_share_arithmetic(bl);
+        store_output_share_arithmetic(lxly);
+        out[i].l = getRandomVal(PSELF); 
+    }
+}
+
+void complete_bit2a()
+{
+}
+
+
+static void complete_A2B_S1(int k, ABY2_PRE_Share out[])
+{
+}
+
+static void complete_A2B_S2(int k, ABY2_PRE_Share out[])
+{
+}
+
 
 ABY2_PRE_Share public_val(Datatype a)
 {
@@ -117,6 +252,7 @@ static void communicate()
 
 static void complete_preprocessing(uint64_t arithmetic_triple_num, uint64_t boolean_triple_num, uint64_t num_output_shares)
 {
+std::cout << "arith: " << arithmetic_triple_num << " bool: " << boolean_triple_num << " out: " << num_output_shares << std::endl;
 Datatype* lxly_a = new Datatype[arithmetic_triple_num];
 Datatype* lxly_b = new Datatype[boolean_triple_num];
 uint64_t arithmetic_triple_counter = 0;
@@ -131,16 +267,27 @@ if(triple_type[i] == 0)
     auto ta = retrieve_output_share_bool();
     auto bl = retrieve_output_share_bool();
     auto prev_val = retrieve_output_share_bool();
-    lxly_b[arithmetic_triple_counter++] = FUNC_XOR(FUNC_XOR(FUNC_AND(lta, bl), FUNC_AND(ltb, ta)), prev_val);
+    lxly_b[boolean_triple_counter++] = FUNC_XOR(FUNC_XOR(FUNC_AND(lta, bl), FUNC_AND(ltb, ta)), prev_val);
 }
 else if(triple_type[i] == 1)
+{
+    auto lta = pre_receive_from_live(PNEXT);
+   auto ltb = pre_receive_from_live(PNEXT);
+    auto ta = retrieve_output_share_arithmetic();
+    auto bl = retrieve_output_share_arithmetic();
+    auto prev_val = retrieve_output_share_arithmetic();
+    lxly_a[arithmetic_triple_counter++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
+    std::cout << "lxly_a: " << lxly_a[arithmetic_triple_counter-1] << std::endl;
+    std::cout << "lta, bl, ltb, ta, prev_val: " << lta << " " << bl << " " << ltb << " " << ta << " " << prev_val << std::endl;
+}
+else if(triple_type[i] == 3)
 {
     auto lta = pre_receive_from_live(PNEXT);
     auto ltb = pre_receive_from_live(PNEXT);
     auto ta = retrieve_output_share_arithmetic();
     auto bl = retrieve_output_share_arithmetic();
     auto prev_val = retrieve_output_share_arithmetic();
-    lxly_a[boolean_triple_counter++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
+    lxly_a[arithmetic_triple_counter++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
 }
 else
 {

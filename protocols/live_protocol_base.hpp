@@ -374,18 +374,23 @@ preprocessed_outputs_bool_input_index+=1;
 void store_output_share_arithmetic(DATATYPE val)
 {
 preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_input_index] = val;
+std::cout << "Stored arithmetic output: " << preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_input_index] << std::endl;
+std::cout << "Index: " << preprocessed_outputs_arithmetic_input_index << std::endl;
 preprocessed_outputs_arithmetic_input_index+=1;
 }
 
 DATATYPE retrieve_output_share_bool()
 {
     preprocessed_outputs_bool_index+=1;
+    std::cout << "Retrieved boolean output: " << preprocessed_outputs_bool[preprocessed_outputs_bool_index-1] << std::endl;
     return preprocessed_outputs_bool[preprocessed_outputs_bool_index-1];
 }
 
 DATATYPE retrieve_output_share_arithmetic()
 {
     preprocessed_outputs_arithmetic_index+=1;
+    std::cout << "Retrieved arithmetic output: " << preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_index-1] << std::endl;
+    std::cout << "Index: " << preprocessed_outputs_arithmetic_index << std::endl;
     return preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_index-1];
 }
 #endif

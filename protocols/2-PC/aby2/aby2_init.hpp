@@ -16,6 +16,20 @@ ABY2_init mult_public(const Datatype b, func_mul MULT) const
     return ABY2_init();
 }
 
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+ABY2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
+{
+send_to_(PNEXT);
+return ABY2_init();
+}
+    
+    template <typename func_add, typename func_sub>
+void complete_public_mult_fixed(func_add ADD, func_sub SUB)
+{
+    receive_from_(PNEXT);
+}
+
+
 // P_i shares mx - lxi, P_j sets lxj to 0
 template <int id, typename func_add, typename func_sub>
 void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
@@ -79,13 +93,126 @@ pre_send_to_(PNEXT);
 send_to_(PNEXT);
 return c;
 }
+
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_dot(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+ABY2_init c;
+if constexpr(std::is_same_v<func_add, FUNC_XOR>)
+{
+    num_boolean_triples++;
+    store_output_share_bool_();
+    store_output_share_bool_();
+    store_output_share_bool_();
+}
+else
+{
+    num_arithmetic_triples++;
+    store_output_share_arithmetic_();
+    store_output_share_arithmetic_();
+    store_output_share_arithmetic_();
+}
+
+pre_send_to_(PNEXT);
+pre_send_to_(PNEXT);
+return c;
+}
+
+/* template <typename func_add, typename func_sub, typename func_mul, typename func_trunc> */
+/*     ABY2_init prepare_dot_with_trunc(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) const */
+/* { */
+/*     return prepare_dot(b, ADD, SUB, MULT); */
+/* } */
+
+template <typename func_add, typename func_sub>
+void mask_and_send_dot(func_add ADD, func_sub SUB)
+{
+    send_to_(PNEXT);
+}
+    template <typename func_add, typename func_sub, typename func_trunc>
+void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+    send_to_(PNEXT);
+}
     
+
+static void prepare_A2B_S1(int m, int k, ABY2_init in[], ABY2_init out[])
+{
+#if PARTY == 0
+    for(int i = m; i < k; i++)
+    {
+        send_to_(PNEXT);
+    }
+#endif
+}
+
+static void prepare_A2B_S2(int m, int k, ABY2_init in[], ABY2_init out[])
+{
+#if PARTY == 1
+    for(int i = m; i < k; i++)
+    {
+        send_to_(PNEXT);
+    }
+#endif
+}
+
+static void complete_A2B_S1(int k, ABY2_init out[])
+{
+#if PARTY == 1
+    for(int i = 0; i < k; i++)
+    {
+        receive_from_(PNEXT);
+    }
+#endif
+}
+
+static void complete_A2B_S2(int k, ABY2_init out[])
+{
+#if PARTY == 0
+    for(int i = 0; i < k; i++)
+    {
+        receive_from_(PNEXT);
+    }
+#endif
+}
+
+
+void prepare_bit2a(ABY2_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        num_arithmetic_triples++;
+        store_output_share_arithmetic_();
+        store_output_share_arithmetic_();
+        store_output_share_arithmetic_();
+        pre_send_to_(PNEXT);
+        pre_send_to_(PNEXT);
+        send_to_(PNEXT);
+    }
+}
+
+void complete_bit2a()
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        receive_from_(PNEXT);
+    }
+}
+
+
+
+
     template <typename func_add, typename func_sub>
 void complete_mult(func_add ADD, func_sub SUB)
 {
-    receive_from_(PPREV);
+    receive_from_(PNEXT);
 }
 
+    template <typename func_add, typename func_sub, typename func_trunc>
+void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+{
+    receive_from_(PNEXT);
+}
 
 
 ABY2_init public_val(Datatype a)
@@ -132,7 +259,7 @@ for(uint64_t i = 0; i < num_output_shares; i++)
 {
     pre_receive_from_(PNEXT);
 }
-triple_type = new uint8_t[arithmetic_triple_num + boolean_triple_num];
+triple_type = new uint8_t[arithmetic_triple_num + boolean_triple_num + num_output_shares];
 }
 
 #if SKIP_PRE == 1

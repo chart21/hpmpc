@@ -30,7 +30,7 @@ void generateFakeArithmeticTriples(type a[], type b[], type c[], int bitlength, 
 {
     for (uint64_t i = 0; i < num_triples; i++)
     {
-#if num_players == 2
+/* #if num_players == 2 */
 #if PARTY == 0
         a[i] = PROMOTE(3);
         b[i] = PROMOTE(5);
@@ -40,11 +40,14 @@ void generateFakeArithmeticTriples(type a[], type b[], type c[], int bitlength, 
         b[i] = PROMOTE(2);
         c[i] = PROMOTE(22);
 #endif
-#else
-        a[i] = SET_ALL_ZERO();
-        b[i] = SET_ALL_ZERO();
-        c[i] = SET_ALL_ZERO();
-#endif
+/* #else */
+        /* a[i] = SET_ALL_ZERO(); */
+        /* b[i] = SET_ALL_ZERO(); */
+        /* c[i] = SET_ALL_ZERO(); */
+        /* a[i] = PROMOTE(2); */
+        /* b[i] = PROMOTE(3); */
+        /* c[i] = PROMOTE(24); */
+/* #endif */
     }
 }
 
