@@ -203,8 +203,8 @@ void prepare_bit2a(ABY2_PRE_Share out[])
         auto ltb = OP_ADD(bl, t.b); //optimization?
         pre_send_to_live(PNEXT, lta); 
         pre_send_to_live(PNEXT, ltb);
-        auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), MULT(ltb, t.a)), t.c);
-        store_output_share_arihmetic(t.a);
+        auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, t.a)), t.c);
+        store_output_share_arithmetic(t.a);
         store_output_share_arithmetic(bl);
         store_output_share_arithmetic(lxly);
         out[i].l = getRandomVal(PSELF); 
@@ -225,7 +225,7 @@ static void complete_A2B_S2(int k, ABY2_PRE_Share out[])
 }
 
 
-ABY2_PRE_Share public_val(Datatype a)
+static ABY2_PRE_Share public_val(Datatype a)
 {
     return ABY2_PRE_Share(SET_ALL_ZERO());
 }
@@ -305,10 +305,11 @@ preprocessed_outputs_arithmetic = lxly_a;
 preprocessed_outputs_arithmetic_index = 0;
 preprocessed_outputs_arithmetic_input_index = 0;
 deinit_beaver();
-for(int i = 0; i < num_players*player_multiplier; i++)
-{
-    num_generated[i] = 0; // reset the random number generator to receive identical lx,ly
-}
+init_srngs();
+/* for(int i = 0; i < num_players*player_multiplier; i++) */
+/* { */
+/*     num_generated[i] = 0; // reset the random number generator to receive identical lx,ly */
+/* } */
 delete[] triple_type;
 
 }

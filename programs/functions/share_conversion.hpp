@@ -270,8 +270,8 @@ static void pack_additive(const Additive_Share<Datatype, Share>*  input, Additiv
             output[counter*BITLENGTH+j] = tmp_output[counter].get_share_pointer()[j];
         }
     }
-    delete[] tmp;
-    delete[] tmp_output;
+    /* delete[] tmp; */
+    /* delete[] tmp_output; */
 }
 
 template<int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype, typename FUNC_OP>

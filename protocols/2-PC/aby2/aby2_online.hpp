@@ -192,7 +192,7 @@ static void prepare_A2B_S1(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Sha
     {
         out[i-m].l = getRandomVal(PSELF);
         out[i-m].m = FUNC_XOR(temp_p1[i],out[i-m].l);
-        send_to_live(PNEXT, out[i-m].p1);
+        send_to_live(PNEXT, out[i-m].m);
     }
 #endif
 }
@@ -213,7 +213,7 @@ static void prepare_A2B_S2(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Sha
     {
         out[i-m].l = getRandomVal(PSELF);
         out[i-m].m = FUNC_XOR(temp_p1[i],out[i-m].l);
-        send_to_live(PNEXT, out[i-m].p1);
+        send_to_live(PNEXT, out[i-m].m);
     }
 #endif
 }
@@ -255,13 +255,14 @@ void prepare_bit2a(ABY2_ONLINE_Share out[])
     {
         Datatype lxly = retrieve_output_share_arithmetic();
 #if PARTY == 0
-        out[i].v = b0[i];
+        out[i].m = b0[i];
 #else
-        out[i].v = SET_ALL_ZERO();
+        out[i].m = SET_ALL_ZERO();
 #endif
-        out[i].v = SUB(out[i].v, OP_MULT( OP_SUB(OP_ADD(b0[i], b0[i]),PROMOTE(1)), OP_ADD(lb[i], lxly))); // mb -  (2mb - 1) * (lvi + lxly)
+        out[i].m = OP_SUB(out[i].m, OP_MULT( OP_SUB(OP_ADD(b0[i], b0[i]),PROMOTE(1)), OP_ADD(lb[i], lxly))); // mb -  (2mb - 1) * (lvi + lxly)
         out[i].l = getRandomVal(PSELF); 
-        send_to_live(PNEXT, out[i].v);
+        out[i].m = OP_ADD(out[i].m, out[i].l);
+        send_to_live(PNEXT, out[i].m);
     }
 }
 
@@ -271,7 +272,7 @@ void complete_bit2a()
 }
 
 
-ABY2_ONLINE_Share public_val(Datatype a)
+static ABY2_ONLINE_Share public_val(Datatype a)
 {
     return ABY2_ONLINE_Share(a,SET_ALL_ZERO());
 }

@@ -74,6 +74,7 @@ void init_circuit(std::string ips[]) {
   FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
 #if PRE== 1 && BEAVER == 1 && SKIP_PRE == 0
   PROTOCOL_INIT<DATATYPE>::complete_preprocessing(num_arithmetic_triples, num_boolean_triples, preprocessed_outputs_index);
+  std::cout << "completed preprocessing_init" << std::endl;
 #endif
 #if BEAVER == 1 && SKIP_PRE == 1
   PROTOCOL_INIT<DATATYPE>::generate_zero_triples(num_arithmetic_triples, OP_ADD, OP_SUB, OP_MULT);
@@ -241,6 +242,7 @@ void preprocess_circuit(std::string ips[]) {
 #if BEAVER == 1 
     #if SKIP_PRE == 0
   PROTOCOL_PRE<DATATYPE>::complete_preprocessing(num_arithmetic_triples, num_boolean_triples, total_preprocessed_outputs);
+  std::cout << "completed preprocessing" << std::endl;
 #endif
 #endif
 
@@ -371,37 +373,8 @@ void live_circuit() {
 #if PROTOCOL != 13
 void executeProgram(int argc, char *argv[], int process_id, int process_num) {
   clock_gettime(CLOCK_REALTIME, &i1);
-
   player_id = PARTY;
-#if num_players == 2
-init_srng(PPREV, SRNG_SEED);
-init_srng(PSELF, PARTY+1+SRNG_SEED);
-#elif num_players == 3
-/* init_srng(PPREV,SRNG_SEED); */
-/* init_srng(PNEXT,SRNG_SEED); */
-/* init_srng(PSELF,PARTY+1+SRNG_SEED); */
-#if PROTOCOL == 6 || PROTOCOL == 7 //TTP
-  init_srng(0, SRNG_SEED);
-  init_srng(1, SRNG_SEED);
-  init_srng(2, SRNG_SEED);
-#else
-  init_srng(PPREV,
-            modulo((player_id - 1), num_players) * 101011 + 5000 + SRNG_SEED);
-  init_srng(PNEXT, player_id * 101011 + 5000 + SRNG_SEED);
-  init_srng(num_players - 1,
-            player_id * 291932 + 6000 + SRNG_SEED); // used for sharing inputs
-#endif
-#elif num_players == 4
-  init_srng(0, SRNG_SEED);
-  init_srng(1, SRNG_SEED);
-  init_srng(2, SRNG_SEED);
-  init_srng(3, SRNG_SEED);
-  init_srng(4, SRNG_SEED);
-  init_srng(5, SRNG_SEED);
-  init_srng(6, SRNG_SEED);
-  init_srng(7, SRNG_SEED);
-#endif
-
+  init_srngs();
   /// Connecting to other Players
   std::string ips[num_players - 1];
 

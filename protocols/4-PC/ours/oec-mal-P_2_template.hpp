@@ -96,13 +96,14 @@ return c;
 }
 
 template <typename func_add, typename func_sub, typename func_mul>
-OEC_MAL2_Share prepare_dot(const OEC_MAL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+OEC_MAL2_Share prepare_dot_og(const OEC_MAL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 OEC_MAL2_Share c;
 c.r = ADD(MULT(v, b.r), MULT(b.v, r)); // a0 y_2 + b_0 x_2
 c.v = MULT(v, b.v); // a0b0
 return c;
 }
+
 #if FUSE_DOT != 1
 template <typename func_add, typename func_sub, typename func_mul>
 OEC_MAL2_Share prepare_dot(const OEC_MAL2_Share b, int i, func_add ADD, func_sub SUB, func_mul MULT) const

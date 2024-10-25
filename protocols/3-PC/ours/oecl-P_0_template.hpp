@@ -279,7 +279,8 @@ Datatype maskP_1 = getRandomVal(P_1);
 Datatype maskP_1_2 = getRandomVal(P_1);
 Datatype maskP_2 = getRandomVal(P_2);
 
-p1 = SUB( TRUNC(ADD(ADD(p1,maskP_1),maskP_2)), maskP_1_2); // (e + r0,1 + r0,2)^t - z_1
+/* p1 = SUB( TRUNC(ADD(ADD(p1,maskP_1),maskP_2)), maskP_1_2); // (e + r0,1 + r0,2)^t - z_1 */
+p1 = SUB(z_1, TRUNC(ADD(ADD(p1,maskP_1),maskP_2))); // z_1 - (e + r0,1 + r0,2)^t
 p2 = maskP_1_2; // z_1
 
 

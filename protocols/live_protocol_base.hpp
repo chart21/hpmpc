@@ -111,6 +111,7 @@ void pre_send_to_live(int player_id, DATATYPE a)
 #if SKIP_PRE == 1
     return;
 #endif
+    std::cout << "pre_send_to_live index" << send_count_pre[player_id] << std::endl;
 sending_args_pre[player_id].sent_elements[0][send_count_pre[player_id]] = a;
 /* sending_args_pre[player_id].sent_elements[sending_args_pre[player_id].send_rounds][send_count[player_id]] = a; */
 send_count_pre[player_id]+=1;
@@ -374,23 +375,18 @@ preprocessed_outputs_bool_input_index+=1;
 void store_output_share_arithmetic(DATATYPE val)
 {
 preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_input_index] = val;
-std::cout << "Stored arithmetic output: " << preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_input_index] << std::endl;
-std::cout << "Index: " << preprocessed_outputs_arithmetic_input_index << std::endl;
 preprocessed_outputs_arithmetic_input_index+=1;
 }
 
 DATATYPE retrieve_output_share_bool()
 {
     preprocessed_outputs_bool_index+=1;
-    std::cout << "Retrieved boolean output: " << preprocessed_outputs_bool[preprocessed_outputs_bool_index-1] << std::endl;
     return preprocessed_outputs_bool[preprocessed_outputs_bool_index-1];
 }
 
 DATATYPE retrieve_output_share_arithmetic()
 {
     preprocessed_outputs_arithmetic_index+=1;
-    std::cout << "Retrieved arithmetic output: " << preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_index-1] << std::endl;
-    std::cout << "Index: " << preprocessed_outputs_arithmetic_index << std::endl;
     return preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_index-1];
 }
 #endif

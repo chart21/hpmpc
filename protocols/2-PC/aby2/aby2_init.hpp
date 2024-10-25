@@ -73,7 +73,7 @@ template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_mult(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 ABY2_init c;
-if constexpr(std::is_same_v<func_add, FUNC_XOR>)
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
 {
     num_boolean_triples++;
     store_output_share_bool_();
@@ -98,7 +98,7 @@ template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 ABY2_init c;
-if constexpr(std::is_same_v<func_add, FUNC_XOR>)
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
 {
     num_boolean_triples++;
     store_output_share_bool_();
@@ -193,10 +193,7 @@ void prepare_bit2a(ABY2_init out[])
 
 void complete_bit2a()
 {
-    for(int i = 0; i < BITLENGTH; i++)
-    {
         receive_from_(PNEXT);
-    }
 }
 
 
@@ -215,7 +212,7 @@ void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 }
 
 
-ABY2_init public_val(Datatype a)
+static ABY2_init public_val(Datatype a)
 {
     return ABY2_init();
 }

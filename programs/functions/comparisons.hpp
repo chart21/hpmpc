@@ -16,12 +16,14 @@ void LTZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     for(int i = 0; i < len; i++)
     {
         y[i].prepare_bit2a(result[i].get_share_pointer());
+        std::cout << "PARTY: " << PARTY << " ip: " << i << std::endl;
     }
     delete[] y;
     Share::communicate();
     for(int i = 0; i < len; i++)
     {
         result[i].complete_bit2a();
+        std::cout << "PARTY: " << PARTY << " ic: " << i << std::endl;
     }
     
 }

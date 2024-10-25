@@ -1,6 +1,7 @@
 #pragma once
 #include "generic_share.hpp"
 #include "../core/generate_beaver_tiples.hpp"
+#include "../core/init.hpp"
 #include <cstdint>
 #include <sys/types.h>
 
@@ -29,6 +30,7 @@ struct triple
 template <typename Datatype>
 triple<Datatype> retrieveArithmeticTriple()
 {
+    std::cout << "arithmetic_triple_index: " << arithmetic_triple_index << std::endl;
     arithmetic_triple_index++;
     return triple<Datatype>{arithmetic_triple_a[arithmetic_triple_index-1], arithmetic_triple_b[arithmetic_triple_index-1], arithmetic_triple_c[arithmetic_triple_index-1]};
 }
@@ -36,13 +38,18 @@ triple<Datatype> retrieveArithmeticTriple()
 template <typename Datatype>
 triple<Datatype> retrieveBooleanTriple()
 {
-    return triple<Datatype>{boolean_triple_a[boolean_triple_index], boolean_triple_b[boolean_triple_index], boolean_triple_c[boolean_triple_index++]};
+    std::cout << "boolean_triple_index: " << boolean_triple_index << std::endl;
+    boolean_triple_index++;
+    return triple<Datatype>{boolean_triple_a[boolean_triple_index-1], boolean_triple_b[boolean_triple_index-1], boolean_triple_c[boolean_triple_index-1]};
+    /* return triple<Datatype>{boolean_triple_a[boolean_triple_index], boolean_triple_b[boolean_triple_index], boolean_triple_c[boolean_triple_index++]}; */
 }
 
 void init_beaver()
 {
     arithmetic_triple_index = 0;
     boolean_triple_index = 0;
+    std::cout << "num_arithmetic_triples: " << num_arithmetic_triples << std::endl;
+    std::cout << "num_boolean_triples: " << num_boolean_triples << std::endl;
     arithmetic_triple_a = new DATATYPE[num_arithmetic_triples];
     arithmetic_triple_b = new DATATYPE[num_arithmetic_triples];
     arithmetic_triple_c = new DATATYPE[num_arithmetic_triples];
