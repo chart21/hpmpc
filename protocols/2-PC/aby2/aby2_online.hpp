@@ -156,6 +156,7 @@ void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 {
     l = getRandomVal(PSELF);
 #if PARTY == 0
+    /* m = ADD(TRUNC(m),l); */
     m = ADD(OP_SUB(SET_ALL_ZERO(),TRUNC(OP_SUB(SET_ALL_ZERO(),m))),l); // whyever this is necessary ...
 #else
     m = ADD(TRUNC(m),l);

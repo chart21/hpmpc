@@ -29,7 +29,6 @@ template <typename type>
 void generateFakeArithmeticTriples(type a[], type b[], type c[], int bitlength, uint64_t num_triples, std::string ip, int port)
 {
     num_triples /= DATTYPE/BITLENGTH;
-    std::cout << "Generating arithemtic fake num_triples: " << num_triples << std::endl;
     for (uint64_t i = 0; i < num_triples; i++)
     {
 /* #if num_players == 2 */
@@ -57,7 +56,6 @@ template <typename type>
 void generateFakeBooleanTriples(type a[], type b[], type c[], int bitlength, uint64_t num_triples, std::string ip, int port)
 {
     num_triples /= DATTYPE;
-    std::cout << "Generating boolean fake num_triples: " << num_triples << std::endl;
     for (uint64_t i = 0; i < num_triples; i++)
     {
 #if num_paties == 2

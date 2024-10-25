@@ -9,9 +9,9 @@
 #ifndef FUNCTION
 #define FUNCTION test_fixed_point_arithmetic
 #endif
-#define TEST_FIXED_MULTIPLICATION 0 // [a] * c
-#define TEST_PUBLIC_FIXED_MULTIPLICATION 0 // [a] * [b]
-#define TEST_PUBLIC_FIXED_DIVISION 0 // [a] / c
+#define TEST_FIXED_MULTIPLICATION 1 // [a] * c
+#define TEST_PUBLIC_FIXED_MULTIPLICATION 1 // [a] * [b]
+#define TEST_PUBLIC_FIXED_DIVISION 1 // [a] / c
 #define TEST_NEWTON_RAPHSON_DIVISION 1 // [a] / [b]
 
 

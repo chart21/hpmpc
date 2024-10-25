@@ -359,10 +359,7 @@ for(int t=0;t<(num_players-1);t++) {
     sa[t].connected_to = t+offset;
     sa[t].port = (int) base_port + player_id * (num_players-1) + t; //e.g. P_0 receives on base port from P_1, P_2 on base port + num_players from P_0 6000,6002
     sa[t].sent_elements[0] = NEW(DATATYPE[sa[t].elements_to_send[0]]); // Allocate memory for first round
-    std::cout << "t" << t << std::endl;
     share_buffer[t] = 0;  
-    std::cout << "send_rounds: " << sa[t].send_rounds << std::endl;
-    std::cout << "elements_to_send: " << sa[t].elements_to_send[0] << std::endl;
 
 }
 #if MAL == 1  && PRE == 1

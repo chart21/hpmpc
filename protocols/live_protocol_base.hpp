@@ -111,7 +111,6 @@ void pre_send_to_live(int player_id, DATATYPE a)
 #if SKIP_PRE == 1
     return;
 #endif
-    std::cout << "pre_send_to_live index" << send_count_pre[player_id] << std::endl;
 sending_args_pre[player_id].sent_elements[0][send_count_pre[player_id]] = a;
 /* sending_args_pre[player_id].sent_elements[sending_args_pre[player_id].send_rounds][send_count[player_id]] = a; */
 send_count_pre[player_id]+=1;

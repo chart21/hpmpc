@@ -30,7 +30,6 @@ struct triple
 template <typename Datatype>
 triple<Datatype> retrieveArithmeticTriple()
 {
-    std::cout << "arithmetic_triple_index: " << arithmetic_triple_index << std::endl;
     arithmetic_triple_index++;
     return triple<Datatype>{arithmetic_triple_a[arithmetic_triple_index-1], arithmetic_triple_b[arithmetic_triple_index-1], arithmetic_triple_c[arithmetic_triple_index-1]};
 }
@@ -38,7 +37,6 @@ triple<Datatype> retrieveArithmeticTriple()
 template <typename Datatype>
 triple<Datatype> retrieveBooleanTriple()
 {
-    std::cout << "boolean_triple_index: " << boolean_triple_index << std::endl;
     boolean_triple_index++;
     return triple<Datatype>{boolean_triple_a[boolean_triple_index-1], boolean_triple_b[boolean_triple_index-1], boolean_triple_c[boolean_triple_index-1]};
     /* return triple<Datatype>{boolean_triple_a[boolean_triple_index], boolean_triple_b[boolean_triple_index], boolean_triple_c[boolean_triple_index++]}; */

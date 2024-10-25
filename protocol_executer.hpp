@@ -74,7 +74,6 @@ void init_circuit(std::string ips[]) {
   FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
 #if PRE== 1 && BEAVER == 1 && SKIP_PRE == 0
   PROTOCOL_INIT<DATATYPE>::complete_preprocessing(num_arithmetic_triples, num_boolean_triples, preprocessed_outputs_index);
-  std::cout << "completed preprocessing_init" << std::endl;
 #endif
 #if BEAVER == 1 && SKIP_PRE == 1
   PROTOCOL_INIT<DATATYPE>::generate_zero_triples(num_arithmetic_triples, OP_ADD, OP_SUB, OP_MULT);
@@ -242,7 +241,6 @@ void preprocess_circuit(std::string ips[]) {
 #if BEAVER == 1 
     #if SKIP_PRE == 0
   PROTOCOL_PRE<DATATYPE>::complete_preprocessing(num_arithmetic_triples, num_boolean_triples, total_preprocessed_outputs);
-  std::cout << "completed preprocessing" << std::endl;
 #endif
 #endif
 

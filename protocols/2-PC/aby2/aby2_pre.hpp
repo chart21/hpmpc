@@ -97,7 +97,6 @@ if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
 else
 {
     t = retrieveArithmeticTriple<Datatype>();
-    std::cout << "t.a, t.b, t.c: " << t.a << " " << t.b << " " << t.c << std::endl;
     triple_type[triple_type_index++] = 1;
 }
 //open
@@ -252,7 +251,6 @@ static void communicate()
 
 static void complete_preprocessing(uint64_t arithmetic_triple_num, uint64_t boolean_triple_num, uint64_t num_output_shares)
 {
-std::cout << "arith: " << arithmetic_triple_num << " bool: " << boolean_triple_num << " out: " << num_output_shares << std::endl;
 Datatype* lxly_a = new Datatype[arithmetic_triple_num];
 Datatype* lxly_b = new Datatype[boolean_triple_num];
 uint64_t arithmetic_triple_counter = 0;
@@ -277,8 +275,6 @@ else if(triple_type[i] == 1)
     auto bl = retrieve_output_share_arithmetic();
     auto prev_val = retrieve_output_share_arithmetic();
     lxly_a[arithmetic_triple_counter++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
-    std::cout << "lxly_a: " << lxly_a[arithmetic_triple_counter-1] << std::endl;
-    std::cout << "lta, bl, ltb, ta, prev_val: " << lta << " " << bl << " " << ltb << " " << ta << " " << prev_val << std::endl;
 }
 else if(triple_type[i] == 3)
 {
