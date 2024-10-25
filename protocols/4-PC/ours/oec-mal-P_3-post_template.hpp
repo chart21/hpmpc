@@ -235,6 +235,9 @@ static void complete_bit_injection_S1(OECL_MAL3_POST_Share out[])
 static void complete_bit_injection_S2(OECL_MAL3_POST_Share out[])
 {
 }
+void get_random_B2A()
+{
+}
 
 #if MULTI_INPUT == 1
 
