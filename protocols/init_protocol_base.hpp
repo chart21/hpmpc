@@ -3,7 +3,35 @@
 #include "../core/networking/buffers.h"
 #include "../core/utils/print.hpp"
 
+#if PRE == 1
+void send_pre_()
+{
+for (int t = 0; t < num_players-1; t++)
+{
+    /* if(sending_args[t].elements_to_send[sending_args[t].send_rounds] > 0) */
+    /* { */
+    sending_args_pre[t].total_rounds += 1;
+    sending_args_pre[t].send_rounds += 1;
+    sending_args_pre[t].elements_to_send.push_back(0);
+    sending_args_pre[t].elements_to_send.push_back(0);
+    /* } */
+}
+}
 
+void receive_pre_()
+{
+for (int t = 0; t < num_players-1; t++)
+{
+    /* if(receiving_args[t].elements_to_rec[receiving_args[t].rec_rounds] > 0) */
+    /* { */
+    receiving_args_pre[t].total_rounds += 1;
+    receiving_args_pre[t].rec_rounds +=1;
+    receiving_args_pre[t].elements_to_rec.push_back(0);
+    /* } */
+}
+sockets_received.push_back(0);
+}
+#endif
 
 void send_()
 {
@@ -34,23 +62,42 @@ sockets_received.push_back(0);
 }
 
 #if PRE == 1
-void pre_send_to_(int player_index)
+/* void pre_send_to_(int player_index) */
+/* { */
+/* #if SKIP_PRE == 1 */
+/*     return; */
+/* #endif */
+/* sending_args_pre[player_index].elements_to_send[0] += 1; */
+/* total_send_pre[player_index] += 1; */
+/* /1* sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] += 1; *1/ */
+/* } */
+
+/* void pre_receive_from_(int player_index) */
+/* { */
+/* #if SKIP_PRE == 1 */
+/*     return; */
+/* #endif */
+/* /1* receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1; *1/ */
+/* receiving_args_pre[player_index].elements_to_rec[0] += 1; */
+/* total_recv_pre[player_index] += 1; */
+/* } */
+void pre_send_to_(int player_index, int num_round = 0)
 {
 #if SKIP_PRE == 1
     return;
 #endif
-sending_args_pre[player_index].elements_to_send[0] += 1;
+sending_args_pre[player_index].elements_to_send[num_round] += 1;
 total_send_pre[player_index] += 1;
 /* sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] += 1; */
 }
 
-void pre_receive_from_(int player_index)
+void pre_receive_from_(int player_index, int num_round = 0)
 {
 #if SKIP_PRE == 1
     return;
 #endif
 /* receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1; */
-receiving_args_pre[player_index].elements_to_rec[0] += 1;
+receiving_args_pre[player_index].elements_to_rec[num_round] += 1;
 total_recv_pre[player_index] += 1;
 }
 #endif
@@ -83,6 +130,12 @@ void communicate_()
 {
     send_();
     receive_();
+}
+
+void communicate_pre_()
+{
+    send_pre_();
+    receive_pre_();
 }
 
 #if MAL == 1
@@ -232,14 +285,14 @@ void compare_views_init()
 
 #if (PRE == 1 &&  HAS_POST_PROTOCOL == 1) || BEAVER == 1
 #if BEAVER == 1 && PRE == 1
-void store_output_share_bool_()
+void store_output_share_bool_(int index = 0)
 {
-    preprocessed_outputs_bool_index+=1;
+    preprocessed_outputs_bool_input_index[index]+=1;
 }
 
-void store_output_share_arithmetic_()
+void store_output_share_arithmetic_(int index = 0)
 {
-    preprocessed_outputs_arithmetic_index+=1;
+    preprocessed_outputs_arithmetic_input_index[0]+=1;
 }
 #endif
 void store_output_share_()
@@ -290,23 +343,26 @@ for(int t=0;t<(num_players*player_multiplier);t++) {
 
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 #if BEAVER == 1 && PRE == 1
-if(preprocessed_outputs_bool_initialized == false)
+if(preprocessed_outputs_bool == nullptr)
+    preprocessed_outputs_bool = new DATATYPE*[1]{nullptr};
+if(preprocessed_outputs_arithmetic == nullptr)
+    preprocessed_outputs_arithmetic = new DATATYPE*[1]{nullptr};
+if(preprocessed_outputs_bool[0] == nullptr)
 {
-    preprocessed_outputs_bool = new DATATYPE[preprocessed_outputs_bool_index];
+    preprocessed_outputs_bool[0] = new DATATYPE[preprocessed_outputs_bool_index[0]];
 }
-if(preprocessed_outputs_arithmetic_initialized == false)
+if(preprocessed_outputs_arithmetic[0] == nullptr)
 {
-    preprocessed_outputs_arithmetic = new DATATYPE[preprocessed_outputs_arithmetic_index];
+    preprocessed_outputs_arithmetic[0] = new DATATYPE[preprocessed_outputs_arithmetic_index[0]];
 }
-preprocessed_outputs_bool_index = 0;
-preprocessed_outputs_arithmetic_index = 0;
-preprocessed_outputs_bool_initialized = true;
-preprocessed_outputs_arithmetic_initialized = true;
+preprocessed_outputs_bool_input_index[0] = 0;
+preprocessed_outputs_bool_index[0] = 0;
+preprocessed_outputs_arithmetic_input_index[0] = 0;
+preprocessed_outputs_arithmetic_index[0] = 0;
 #endif
-if(preprocessed_outputs_initialized == false)
+if(preprocessed_outputs == nullptr)
 {
     preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
-    preprocessed_outputs_initialized = true;
 }
 preprocessed_outputs_index = 0; // reset index for post phase
 preprocessed_outputs_input_index = 0;
@@ -330,6 +386,7 @@ receiving_args[t].elements_to_rec[0] = 0;
 
 void finalize_(std::string* ips, receiver_args* ra, sender_args* sa)
 {
+int max_rec_rounds = 0;
 for(int t=0;t<(num_players-1);t++) {
     int offset = 0;
     if(t >= player_id)
@@ -343,7 +400,9 @@ for(int t=0;t<(num_players-1);t++) {
     ra[t].ip = ips[t];
     ra[t].hostname = (char*)"hostname";
     ra[t].port =(int) base_port + (t+offset) * (num_players -1) + player_id - 1 + offset; //e.g. P_0 sends on base port + num_players  for P_1, P_2 on base port + num_players for P_0 (6001,6000) 
-}
+    max_rec_rounds = std::max(max_rec_rounds, ra[t].rec_rounds);
+
+    }
 for(int t=0;t<(num_players-1);t++) {
     int offset = 0;
     if(t >= player_id)
@@ -374,24 +433,28 @@ for(int t=0;t<(num_players*player_multiplier);t++) {
 
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 #if BEAVER == 1 && PRE == 1
-if(preprocessed_outputs_bool_initialized == false)
+if(preprocessed_outputs_bool == nullptr)
+    preprocessed_outputs_bool = new DATATYPE*[max_rec_rounds]{nullptr};
+if(preprocessed_outputs_arithmetic == nullptr)
+    preprocessed_outputs_arithmetic = new DATATYPE*[max_rec_rounds]{nullptr};
+if(preprocessed_outputs_bool[0] == nullptr)
 {
-    preprocessed_outputs_bool = new DATATYPE[preprocessed_outputs_bool_index];
+    preprocessed_outputs_bool[0] = new DATATYPE[preprocessed_outputs_bool_input_index[0]];
 }
-if(preprocessed_outputs_arithmetic_initialized == false)
+if(preprocessed_outputs_arithmetic[0] == nullptr)
 {
-    preprocessed_outputs_arithmetic = new DATATYPE[preprocessed_outputs_arithmetic_index];
+    preprocessed_outputs_arithmetic[0] = new DATATYPE[preprocessed_outputs_arithmetic_input_index[0]];
+    std::cout << preprocessed_outputs_arithmetic_input_index[0] << std::endl;
 }
-preprocessed_outputs_bool_index = 0;
-preprocessed_outputs_arithmetic_index = 0;
-preprocessed_outputs_bool_initialized = true;
-preprocessed_outputs_arithmetic_initialized = true;
+preprocessed_outputs_bool_input_index[0] = 0;
+preprocessed_outputs_bool_index[0] = 0;
+preprocessed_outputs_arithmetic_input_index[0] = 0;
+preprocessed_outputs_arithmetic_index[0] = 0;
 #endif
 preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
 total_preprocessed_outputs = preprocessed_outputs_index;
 preprocessed_outputs_index = 0;
 preprocessed_outputs_input_index = 0;
-preprocessed_outputs_initialized = true;
 #endif
     
 

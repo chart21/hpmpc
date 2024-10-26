@@ -69,11 +69,28 @@ void init_circuit(std::string ips[]) {
     sending_args_pre[t].send_rounds = 1;
 #endif
   }
+#if PRE== 1 && BEAVER == 1 && SKIP_PRE == 0
+  num_arithmetic_triples.push_back(0); //temporary
+  num_arithmetic_triples.push_back(0);
+  num_boolean_triples.push_back(0);
+  num_boolean_triples.push_back(0);
+  boolean_triple_index.push_back(0);
+  boolean_triple_index.push_back(0);
+  arithmetic_triple_index.push_back(0);
+  arithmetic_triple_index.push_back(0);
+  preprocessed_outputs_arithmetic_index = new uint64_t[2]{0};
+  preprocessed_outputs_bool_index = new uint64_t[2]{0};
+  preprocessed_outputs_arithmetic_input_index = new uint64_t[2]{0};
+  preprocessed_outputs_bool_input_index = new uint64_t[2]{0};
+#endif
+
 #if INIT == 1 && NO_INI == 0
   auto garbage = new RESULTTYPE;
   FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
 #if PRE== 1 && BEAVER == 1 && SKIP_PRE == 0
-  PROTOCOL_INIT<DATATYPE>::complete_preprocessing(num_arithmetic_triples, num_boolean_triples, preprocessed_outputs_index);
+  PROTOCOL_INIT<DATATYPE>::complete_preprocessing(num_arithmetic_triples.data(), num_boolean_triples.data(), preprocessed_outputs_index);
+#else
+  communicate_pre_();
 #endif
 #if BEAVER == 1 && SKIP_PRE == 1
   PROTOCOL_INIT<DATATYPE>::generate_zero_triples(num_arithmetic_triples, OP_ADD, OP_SUB, OP_MULT);
@@ -106,6 +123,10 @@ void beaver(std::string ips[])
 #if PRINT == 1
   print("Beaver Triple Generation ...\n");
 #endif
+    for(auto i : num_arithmetic_triples)
+        total_arithmetic_triples_num += i;
+    for(auto i : num_boolean_triples)
+        total_boolean_triples_num += i;
   init_beaver();
   print_num_triples();
   clock_t time_beaver_function_start = clock();
@@ -187,27 +208,33 @@ void preprocess_circuit(std::string ips[]) {
 #endif
   // manual send
 
-  sb = 0;
-  pthread_mutex_lock(&mtx_send_next);
-  sending_rounds += 1;
-  pthread_cond_broadcast(&cond_send_next); // signal all threads that sending
-                                           // buffer contains next data
-  pthread_mutex_unlock(&mtx_send_next);
+  /* sb = 0; */
+  /* pthread_mutex_lock(&mtx_send_next); */
+  /* sending_rounds += 1; */
+  /* pthread_cond_broadcast(&cond_send_next); // signal all threads that sending */
+  /*                                          // buffer contains next data */
+  /* pthread_mutex_unlock(&mtx_send_next); */
 
-  // manual receive
+  /* // manual receive */
 
-  rounds += 1;
-  // receive_data
-  // wait until all sockets have finished received their last data
-  pthread_mutex_lock(&mtx_receive_next);
+  /* rounds += 1; */
+  /* // receive_data */
+  /* // wait until all sockets have finished received their last data */
+  /* pthread_mutex_lock(&mtx_receive_next); */
 
-  while (rounds > receiving_rounds) // wait until all threads received their
-                                    // data
-    pthread_cond_wait(&cond_receive_next, &mtx_receive_next);
+  /* while (rounds > receiving_rounds) // wait until all threads received their */
+  /*                                   // data */
+  /*   pthread_cond_wait(&cond_receive_next, &mtx_receive_next); */
 
-  pthread_mutex_unlock(&mtx_receive_next);
+  /* pthread_mutex_unlock(&mtx_receive_next); */
 
-  rb = 0;
+  /* rb = 0; */
+
+    #if SKIP_PRE == 0 && BEAVER == 1
+  PROTOCOL_PRE<DATATYPE>::complete_preprocessing(num_arithmetic_triples.data(), num_boolean_triples.data(), total_preprocessed_outputs);
+#else
+  communicate_pre();
+#endif
 
   // Join threads to avoid address rebind
   for (int t = 0; t < (num_players - 1); t++) {
@@ -238,11 +265,6 @@ void preprocess_circuit(std::string ips[]) {
 #endif
 #endif
 
-#if BEAVER == 1 
-    #if SKIP_PRE == 0
-  PROTOCOL_PRE<DATATYPE>::complete_preprocessing(num_arithmetic_triples, num_boolean_triples, total_preprocessed_outputs);
-#endif
-#endif
 
   double time_pre = std::chrono::duration_cast<std::chrono::microseconds>(
                         std::chrono::high_resolution_clock::now() - p)

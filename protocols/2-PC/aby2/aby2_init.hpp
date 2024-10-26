@@ -75,14 +75,14 @@ template <typename func_add, typename func_sub, typename func_mul>
 ABY2_init c;
 if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
 {
-    num_boolean_triples++;
+    num_boolean_triples[0]++;
     store_output_share_bool_();
     store_output_share_bool_();
     store_output_share_bool_();
 }
 else
 {
-    num_arithmetic_triples++;
+    num_arithmetic_triples[0]++;
     store_output_share_arithmetic_();
     store_output_share_arithmetic_();
     store_output_share_arithmetic_();
@@ -100,14 +100,14 @@ template <typename func_add, typename func_sub, typename func_mul>
 ABY2_init c;
 if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
 {
-    num_boolean_triples++;
+    num_boolean_triples[0]++;
     store_output_share_bool_();
     store_output_share_bool_();
     store_output_share_bool_();
 }
 else
 {
-    num_arithmetic_triples++;
+    num_arithmetic_triples[0]++;
     store_output_share_arithmetic_();
     store_output_share_arithmetic_();
     store_output_share_arithmetic_();
@@ -181,7 +181,7 @@ void prepare_bit2a(ABY2_init out[])
 {
     for(int i = 0; i < BITLENGTH; i++)
     {
-        num_arithmetic_triples++;
+        num_arithmetic_triples[0]++;
         store_output_share_arithmetic_();
         store_output_share_arithmetic_();
         store_output_share_arithmetic_();
@@ -196,7 +196,32 @@ void complete_bit2a()
         receive_from_(PNEXT);
 }
 
+void prepare_opt_bit_injection(ABY2_init x[], ABY2_init out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        num_arithmetic_triples[0]++;
+        num_arithmetic_triples[1]++;
+        store_output_share_arithmetic_();
+        store_output_share_arithmetic_();
+        store_output_share_arithmetic_();
+        store_output_share_arithmetic_();
+        store_output_share_arithmetic_();
+        store_output_share_arithmetic_(1);
+        store_output_share_arithmetic_(1);
+        store_output_share_arithmetic_(1);
+        pre_send_to_(PNEXT);
+        pre_send_to_(PNEXT);
+        pre_send_to_(PNEXT,1); //second round
+        pre_send_to_(PNEXT,1);
+        send_to_(PNEXT);
+    }
+}
 
+void complete_opt_bit_injection()
+{
+        receive_from_(PNEXT);
+}
 
 
     template <typename func_add, typename func_sub>
@@ -245,18 +270,25 @@ static void finalize(std::string* ips, receiver_args* ra, sender_args* sa)
     finalize_(ips, ra, sa);
 }
 
-static void complete_preprocessing(uint64_t arithmetic_triple_num, uint64_t boolean_triple_num, uint64_t num_output_shares)
+static void complete_preprocessing(uint64_t* arithmetic_triple_num, uint64_t* boolean_triple_num, uint64_t num_output_shares)
 {
-for(uint64_t i = 0; i < arithmetic_triple_num + boolean_triple_num; i++)
+for(uint64_t j = 0; j < 2; j++)
 {
-    pre_receive_from_(PNEXT);
-    pre_receive_from_(PNEXT);
+    communicate_pre_();
+for(uint64_t i = 0; i < arithmetic_triple_num[j] + boolean_triple_num[j]; i++)
+{
+    pre_receive_from_(PNEXT, j);
+    pre_receive_from_(PNEXT, j);
 }
-for(uint64_t i = 0; i < num_output_shares; i++)
-{
-    pre_receive_from_(PNEXT);
+if(j == 0)
+    for(uint64_t i = 0; i < num_output_shares; i++)
+        pre_receive_from_(PNEXT);
 }
-triple_type = new uint8_t[arithmetic_triple_num + boolean_triple_num + num_output_shares];
+triple_type.push_back(new uint8_t[arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares]);
+std::cout << "num values in triple type: " << arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares << std::endl;
+triple_type_index.push_back(0);
+triple_type.push_back(new uint8_t[arithmetic_triple_num[1] + boolean_triple_num[1]]);
+triple_type_index.push_back(0);
 }
 
 #if SKIP_PRE == 1

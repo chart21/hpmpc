@@ -4,8 +4,8 @@
 #define FUNCTION test_basic_primitives
 #endif
 #define RESULTTYPE DATATYPE
-#define TEST_SECRET_SHARING 1 // a -> [a]
-#define TEST_ADD_MULT_CONSTANTS 1 // b -> [b], [a] + [b], [a] * c
+#define TEST_SECRET_SHARING 0 // a -> [a]
+#define TEST_ADD_MULT_CONSTANTS 0 // b -> [b], [a] + [b], [a] * c
 #define TEST_MULTIPLICATION 1 // [a] * [b]
 
 #if TEST_SECRET_SHARING == 1

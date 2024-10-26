@@ -106,30 +106,98 @@ return receiving_args[player_id].received_elements[rounds-1][share_buffer[player
 
 
 #if PRE == 1
+
+void send_pre()
+{
+sb = 0;     
+for(int t = 0; t < (num_players-1); t++)
+{
+send_count[t] = 0;
+}
+    // different in PRE
+    for(int t = 0; t < (num_players-1); t++)
+        if(sending_rounds < sending_args_pre[t].send_rounds - 1) // don't allocate memory for the last+1 round
+        sending_args_pre[t].sent_elements[sending_rounds + 1] = NEW(DATATYPE[sending_args_pre[t].elements_to_send[sending_rounds + 1]]); // Allocate memory for all sending buffers for next round
+    pthread_mutex_lock(&mtx_send_next); 
+     sending_rounds +=1;
+      pthread_cond_broadcast(&cond_send_next); //signal all threads that sending buffer contains next data
+      pthread_mutex_unlock(&mtx_send_next); 
+}
+
+void receive_pre(){
+for(int t = 0; t < (num_players-1); t++)
+    share_buffer_pre[t] = 0;
+
+rounds+=1;  
+        // receive_data
+      //wait until all sockets have finished received their last data
+      pthread_mutex_lock(&mtx_receive_next);
+      
+/* std::chrono::high_resolution_clock::time_point c1 = */
+/*         std::chrono::high_resolution_clock::now(); */
+      while(rounds > receiving_rounds) //wait until all threads received their data
+          pthread_cond_wait(&cond_receive_next, &mtx_receive_next);
+      
+/* double time = std::chrono::duration_cast<std::chrono::microseconds>( */
+/*                      std::chrono::high_resolution_clock::now() - c1) */
+/*                      .count(); */
+      /* printf("finished waiting for receive in round %i \n", rounds - 1); */
+      pthread_mutex_unlock(&mtx_receive_next);
+      for(int t = 0; t < (num_players-1); t++)
+      {
+          if(rounds > 2)
+              if(receiving_args_pre[t].rec_rounds > 1)
+                  /* if(receiving_args[t].received_elements[rounds - 2] != NULL) */ 
+                    delete[] receiving_args_pre[t].received_elements[rounds - 2]; // delete memory of last round
+/* printf("Time spent waiting for data chrono: %fs \n", time / 1000000); */
+      }
+      rb = 0;
+}
+
+void communicate_pre()
+{
+/* #if PRE == 0 */
+    send_pre();
+    receive_pre();
+/* #endif */
+}
+
 void pre_send_to_live(int player_id, DATATYPE a)
 {
+/* sending_args[player_id].sent_elements[sending_args[player_id].send_rounds][send_count[player_id]] = a; */ 
 #if SKIP_PRE == 1
     return;
-#endif
-sending_args_pre[player_id].sent_elements[0][send_count_pre[player_id]] = a;
-/* sending_args_pre[player_id].sent_elements[sending_args_pre[player_id].send_rounds][send_count[player_id]] = a; */
-send_count_pre[player_id]+=1;
+#else
+
+#if SEND_BUFFER > 0
+if(send_count_pre[player_id] == SEND_BUFFER)
+{
+    send_pre();
 }
+#endif
+sending_args_pre[player_id].sent_elements[sending_rounds][send_count_pre[player_id]] = a; 
+send_count_pre[player_id]+=1;
+#endif
+}
+
+
 
 DATATYPE pre_receive_from_live(int player_id)
 {
 #if SKIP_PRE == 1
-    return SET_ALL_ZERO();
+    return 0;
+#else
+#if RECV_BUFFER > 0
+if(share_buffer_pre[player_id] == RECV_BUFFER)
+{
+    receive_pre();
+}
 #endif
 share_buffer_pre[player_id] +=1;
-return receiving_args_pre[player_id].received_elements[0][share_buffer_pre[player_id] - 1];
-/* return receiving_args_pre[player_id].received_elements[receiving_args_pre[player_id].rec_rounds][share_buffer[player_id] -1]; */
+return receiving_args_pre[player_id].received_elements[rounds-1][share_buffer_pre[player_id] - 1];
+#endif
 }
 
-DATATYPE fetch_from_pre(int player_id)
-{
-    return sending_args_pre[player_id].sent_elements[0][sending_args_pre[player_id].fetch_counter++];
-}
 #endif
 
 DATATYPE get_input_live()
@@ -365,28 +433,30 @@ void compare_views() {
 
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 #if BEAVER==1 && PRE == 1
-void store_output_share_bool(DATATYPE val)
+void store_output_share_bool(DATATYPE val, int index=0)
 {
-preprocessed_outputs_bool[preprocessed_outputs_bool_input_index] = val;
-preprocessed_outputs_bool_input_index+=1;
+preprocessed_outputs_bool[index][preprocessed_outputs_bool_input_index[index]] = val;
+preprocessed_outputs_bool_input_index[index]+=1;
 }
 
-void store_output_share_arithmetic(DATATYPE val)
+void store_output_share_arithmetic(DATATYPE val, int index=0)
 {
-preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_input_index] = val;
-preprocessed_outputs_arithmetic_input_index+=1;
+preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_input_index[index]] = val;
+std::cout << "Stored: Index, Value, PARTY: " << preprocessed_outputs_arithmetic_input_index[index] << " " << val << " " << PARTY << std::endl;
+preprocessed_outputs_arithmetic_input_index[index]+=1;
 }
 
-DATATYPE retrieve_output_share_bool()
+DATATYPE retrieve_output_share_bool(int index = 0)
 {
-    preprocessed_outputs_bool_index+=1;
-    return preprocessed_outputs_bool[preprocessed_outputs_bool_index-1];
+    preprocessed_outputs_bool_index[index]+=1;
+    return preprocessed_outputs_bool[index][preprocessed_outputs_bool_index[index]-1];
 }
 
-DATATYPE retrieve_output_share_arithmetic()
+DATATYPE retrieve_output_share_arithmetic(int index = 0)
 {
-    preprocessed_outputs_arithmetic_index+=1;
-    return preprocessed_outputs_arithmetic[preprocessed_outputs_arithmetic_index-1];
+    preprocessed_outputs_arithmetic_index[index]+=1;
+    std::cout << "Retrieved: Index, Value, PARTY: " << preprocessed_outputs_arithmetic_index[index]-1 << " " << preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index]-1] << " " << PARTY << std::endl;
+    return preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index]-1];
 }
 #endif
 

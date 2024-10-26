@@ -41,6 +41,41 @@ void complete_public_mult_fixed(func_add ADD, func_sub SUB)
     m = ADD(m,msg); //recv Trunc(mv1 * b) - TRunc(lv1 * b)
 }
 
+void prepare_opt_bit_injection(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[])
+{
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+    Datatype b0[BITLENGTH]{0};
+    b0[BITLENGTH - 1] = m; //convert b0 to an arithemtic value
+    alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_boolean(b0, temp2);
+    orthogonalize_arithmetic(temp2, b0);
+    Datatype lb[BITLENGTH]{0};
+    lb[BITLENGTH - 1] = l;
+    unorthogonalize_boolean(lb, temp2);
+    orthogonalize_arithmetic(temp2, lb);
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        Datatype lb = retrieve_output_share_arithmetic();
+        Datatype lalb = retrieve_output_share_arithmetic(1);
+#if PARTY == 0
+        out[i].m = OP_MULT(b0[i],x[i].m);
+#else
+        out[i].m = SET_ALL_ZERO();
+#endif
+        out[i].m =
+                OP_ADD(
+                OP_SUB(out[i].m, // mamb 
+                OP_MULT(b0[i], x[i].l) ), // - mb [la]
+                OP_MULT( OP_SUB(OP_ADD(b0[i], b0[i]),PROMOTE(1)), // + (2mb -1) 
+                OP_SUB(lalb, OP_MULT(x[i].m, lb)) )   ); // ([lalb] - ma [lb]) 
+        out[i].l = getRandomVal(PSELF); 
+        out[i].m = OP_ADD(out[i].m, out[i].l);
+        send_to_live(PNEXT, out[i].m);
+    }
+    }
+}
+
 
 
 // P_i shares mx - lxi, P_j sets lxj to 0
@@ -272,6 +307,10 @@ void complete_bit2a()
         m = OP_ADD(m, receive_from_live(PNEXT));
 }
 
+void complete_opt_bit_injection()
+{
+        m = OP_ADD(m, receive_from_live(PNEXT));
+}
 
 static ABY2_ONLINE_Share public_val(Datatype a)
 {

@@ -49,20 +49,17 @@ uint64_t elements_to_compare[num_players*player_multiplier] = {0};
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1// Store preprocessed-output to get the correct results during post-processing
 
 #if BEAVER == 1 && PRE == 1
-DATATYPE* preprocessed_outputs_bool;
-DATATYPE* preprocessed_outputs_arithmetic;
-uint64_t preprocessed_outputs_bool_index = 0;
-uint64_t preprocessed_outputs_bool_input_index = 0;
-uint64_t preprocessed_outputs_arithmetic_input_index = 0;
-uint64_t preprocessed_outputs_arithmetic_index = 0;
-bool preprocessed_outputs_bool_initialized = false;
-bool preprocessed_outputs_arithmetic_initialized = false;
+DATATYPE** preprocessed_outputs_bool = nullptr;
+DATATYPE** preprocessed_outputs_arithmetic = nullptr;
+uint64_t* preprocessed_outputs_bool_index = nullptr;
+uint64_t* preprocessed_outputs_bool_input_index = nullptr;
+uint64_t* preprocessed_outputs_arithmetic_input_index = nullptr;
+uint64_t* preprocessed_outputs_arithmetic_index = nullptr;
 #endif
-DATATYPE* preprocessed_outputs;
+DATATYPE* preprocessed_outputs = nullptr;
 uint64_t preprocessed_outputs_input_index = 0;
 uint64_t preprocessed_outputs_index = 0;
 uint64_t total_preprocessed_outputs = 0;
-bool preprocessed_outputs_initialized = false;
 #endif
 uint64_t num_generated[num_players*player_multiplier] = {0};
 

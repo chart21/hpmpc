@@ -7,7 +7,7 @@ NVCC ?= nvcc
 $(shell mkdir -p executables/flags)
 
 # Base flags
-EXECFLAGS := -march=native -g -fno-finite-math-only -std=c++20 -pthread
+EXECFLAGS := -march=native -g -fno-finite-math-only -std=c++20 -pthread 
 LINKFLAGS := -lssl -lcrypto -I nn/PIGEON
 CXXFLAGS := $(EXECFLAGS) $(LINKFLAGS)
 NVCCFLAGS := -Xptxas -O3
