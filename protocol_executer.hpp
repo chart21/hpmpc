@@ -89,7 +89,7 @@ void init_circuit(std::string ips[]) {
   FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
 #if PRE== 1 && BEAVER == 1 && SKIP_PRE == 0
   PROTOCOL_INIT<DATATYPE>::complete_preprocessing(num_arithmetic_triples.data(), num_boolean_triples.data(), preprocessed_outputs_index);
-#else
+#elif PRE == 1
   communicate_pre_();
 #endif
 #if BEAVER == 1 && SKIP_PRE == 1

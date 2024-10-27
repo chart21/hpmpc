@@ -31,6 +31,11 @@ for (int t = 0; t < num_players-1; t++)
 }
 sockets_received.push_back(0);
 }
+void communicate_pre_()
+{
+    send_pre_();
+    receive_pre_();
+}
 #endif
 
 void send_()
@@ -132,11 +137,6 @@ void communicate_()
     receive_();
 }
 
-void communicate_pre_()
-{
-    send_pre_();
-    receive_pre_();
-}
 
 #if MAL == 1
 

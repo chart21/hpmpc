@@ -4,7 +4,7 @@
             "adapter": "vscode-cpptools",
             "configuration": {
                 "request": "launch",
-                "program": "executables/run-P1.o",
+                "program": "executables/run-P2.o",
                 "cwd": "~/workspace/july_backup/hpmpc/",
                 "externalConsole":true,
                 "MiMode": "gdb",

@@ -182,7 +182,7 @@ send_count_pre[player_id]+=1;
 
 
 
-DATATYPE pre_receive_from_live(int player_id)
+DATATYPE pre_receive_from_live(int player_id, int rounds = 0)
 {
 #if SKIP_PRE == 1
     return 0;
@@ -194,7 +194,7 @@ if(share_buffer_pre[player_id] == RECV_BUFFER)
 }
 #endif
 share_buffer_pre[player_id] +=1;
-return receiving_args_pre[player_id].received_elements[rounds-1][share_buffer_pre[player_id] - 1];
+return receiving_args_pre[player_id].received_elements[rounds][share_buffer_pre[player_id] - 1];
 #endif
 }
 
@@ -442,7 +442,6 @@ preprocessed_outputs_bool_input_index[index]+=1;
 void store_output_share_arithmetic(DATATYPE val, int index=0)
 {
 preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_input_index[index]] = val;
-std::cout << "Stored: Index, Value, PARTY: " << preprocessed_outputs_arithmetic_input_index[index] << " " << val << " " << PARTY << std::endl;
 preprocessed_outputs_arithmetic_input_index[index]+=1;
 }
 
@@ -455,7 +454,6 @@ DATATYPE retrieve_output_share_bool(int index = 0)
 DATATYPE retrieve_output_share_arithmetic(int index = 0)
 {
     preprocessed_outputs_arithmetic_index[index]+=1;
-    std::cout << "Retrieved: Index, Value, PARTY: " << preprocessed_outputs_arithmetic_index[index]-1 << " " << preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index]-1] << " " << PARTY << std::endl;
     return preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index]-1];
 }
 #endif

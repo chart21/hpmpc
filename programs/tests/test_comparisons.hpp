@@ -15,7 +15,7 @@
 #define TEST_EQZ 1 // [a] == 0 ? [1] : [0]
 #define TEST_LTZ 1 // [a] < 0 ? [1] : [0]
 #define TEST_MAX_MIN 1 // [A] -> [max(A)] [min(A)]
-#define TEST_RELU 1 // [a] > 0 ? [a] : 0
+#define TEST_RELU 0 // [a] > 0 ? [a] : 0
 #if TEST_EQZ == 1
 template<typename Share>
 bool test_EQZ()

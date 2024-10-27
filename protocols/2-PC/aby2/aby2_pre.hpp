@@ -392,8 +392,8 @@ for(uint64_t i = 0; i < num_triples; i++)
     {
         case 4:
         {
-            auto lta = pre_receive_from_live(PNEXT);
-            auto ltb = pre_receive_from_live(PNEXT);
+            auto lta = pre_receive_from_live(PNEXT,1);
+            auto ltb = pre_receive_from_live(PNEXT,1);
             auto ta = retrieve_output_share_arithmetic();
             auto bl = retrieve_output_share_arithmetic();
             auto prev_val = retrieve_output_share_arithmetic();
