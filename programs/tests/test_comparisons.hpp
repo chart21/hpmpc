@@ -16,9 +16,11 @@
 #define TEST_LTZ 1 // [a] < 0 ? [1] : [0]
 #define TEST_MAX_MIN 0 // [A] -> [max(A)] [min(A)]
 #define TEST_RELU 0 // [a] > 0 ? [a] : 0
-#define TEST_BOOLEAN_ADDITION 1 // [a]^B + [b]^B
-#define TEST_A2B 1 // [a]^A -> [a]^B
-#define TEST_Bit2A 1 // [a]^b -> [a]^A
+#define TEST_BOOLEAN_ADDITION 0 // [a]^B + [b]^B
+#define TEST_A2B_ADD 1 // Test A2B followed by addition when testing boolean addition
+#define TEST_A2B 0 // [a]^A -> [a]^B
+#define TEST_Bit2A 0 // [a]^b -> [a]^A
+
 #if TEST_EQZ == 1
 template<typename Share>
 bool test_EQZ()
@@ -190,6 +192,8 @@ bool test_boolean_addition()
 {
     using S = XOR_Share<DATATYPE, Share>;
     using Bitset = sbitset_t<BITLENGTH, S>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
     const int vectorization_factor = DATTYPE/BITLENGTH;
     
     //initialize plaintext inputs
@@ -202,11 +206,21 @@ bool test_boolean_addition()
     }
     DATATYPE vectorized_input_a[BITLENGTH];
     DATATYPE vectorized_input_b[BITLENGTH];
+    
+
+#if TEST_A2B_ADD == 0
     orthogonalize_boolean(a, vectorized_input_a);
     orthogonalize_boolean(b, vectorized_input_b);
     //secret sharing 
     Bitset share_a;
     Bitset share_b;
+#else
+    orthogonalize_arithmetic(a, vectorized_input_a, BITLENGTH);
+    orthogonalize_arithmetic(b, vectorized_input_b, BITLENGTH);
+    //secret sharing
+    sint share_a;
+    sint share_b;
+#endif
     Bitset share_c;
     
     share_a.template prepare_receive_from<P_0>(vectorized_input_a);
@@ -215,13 +229,32 @@ bool test_boolean_addition()
     share_a.template complete_receive_from<P_0>();
     share_b.template complete_receive_from<P_1>();
 
+#if TEST_A2B_ADD == 1
+    //A2B
+    Bitset s1;
+    Bitset s2;
+
+    s1 = Bitset::prepare_A2B_S1(BITLENGTH, (S*) share_a.get_share_pointer());
+    s2 = Bitset::prepare_A2B_S2(BITLENGTH, (S*) share_a.get_share_pointer());
+
+    Share::communicate();
+
+    s1.complete_A2B_S1();
+    s2.complete_A2B_S2();
+    Share::communicate();
+#endif
+
     //boolean addition
     std::vector<BooleanAdder<BITLENGTH,S>> adders;
     
     adders.reserve(1);
     for(int i = 0; i < 1; i++)
     {
+#if TEST_A2B_ADD == 0
         adders.emplace_back(share_a, share_b, share_c);
+#else
+        adders.emplace_back(s1, s2, share_c);
+#endif
     }
     while(!adders[0].is_done())
     {
@@ -239,6 +272,12 @@ bool test_boolean_addition()
     share_c.prepare_reveal_to_all();
     Share::communicate();
     share_c.complete_reveal_to_all(output);
+#if TEST_A2B_ADD == 1
+    UINT_TYPE ortho_output[BITLENGTH]; //TODO: Check, another ortho should not be neccecary!
+    unorthogonalize_boolean( (DATATYPE*) output, ortho_output);
+    for(int i = 0; i < DATTYPE; i++)
+        output[i] = ortho_output[i] * 2;
+#endif
 
     //compare
     for(int i = 0; i < BITLENGTH*vectorization_factor; i++)
