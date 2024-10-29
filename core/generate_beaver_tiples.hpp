@@ -65,7 +65,7 @@ void generateFakeBooleanTriples(type a[], type b[], type c[], int bitlength, uin
         c[i] = SET_ALL_ZERO();
 #else
         a[i] = SET_ALL_ONE();
-        b[i] = SET_ALL_ONE();
+        b[i] = SET_ALL_ZERO();
         c[i] = SET_ALL_ONE();
 #endif
 #else

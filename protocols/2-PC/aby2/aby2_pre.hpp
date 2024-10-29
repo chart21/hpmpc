@@ -246,10 +246,22 @@ void prepare_opt_bit_injection(ABY2_PRE_Share x[], ABY2_PRE_Share out[])
 }
 static void complete_A2B_S1(int k, ABY2_PRE_Share out[])
 {
+#if PARTY == 1
+    for(int i = 0; i < k; i++)
+    {
+        out[i].l = SET_ALL_ZERO();
+    }
+#endif
 }
 
 static void complete_A2B_S2(int k, ABY2_PRE_Share out[])
 {
+#if PARTY == 0
+    for(int i = 0; i < k; i++)
+    {
+        out[i].l = SET_ALL_ZERO();
+    }
+#endif
 }
 
 
@@ -302,6 +314,7 @@ case 0: //AND
     auto bl = retrieve_output_share_bool();
     auto prev_val = retrieve_output_share_bool();
     lxly_b[0][boolean_triple_counter[0]++] = FUNC_XOR(FUNC_XOR(FUNC_AND(lta, bl), FUNC_AND(ltb, ta)), prev_val);
+    std::cout << "type i=: " << i << " AND" << std::endl;
     break;
 }
 case 1:
@@ -312,6 +325,7 @@ case 1:
     auto bl = retrieve_output_share_arithmetic();
     auto prev_val = retrieve_output_share_arithmetic();
     lxly_a[0][arithmetic_triple_counter[0]++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
+    std::cout << "type i=: " << i << " ADD" << std::endl;
     break;
 }
 case 3:
@@ -322,6 +336,7 @@ case 3:
     auto bl = retrieve_output_share_arithmetic();
     auto prev_val = retrieve_output_share_arithmetic();
     lxly_a[0][arithmetic_triple_counter[0]++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
+    std::cout << "type i=: " << i << "Bit2A" << std::endl;
     break;
 }
 case 4:
@@ -345,13 +360,15 @@ case 4:
     store_output_share_arithmetic(t.a,1);
     store_output_share_arithmetic(bl2,1);
     store_output_share_arithmetic(lxly2,1);
-    std::cout << "send" << std::endl;
+    std::cout << "type i=: " << i << "Bit Inj" << std::endl;
     break;
 }
 default:
 {
     auto l = pre_receive_from_live(PNEXT);
     store_output_share(l);
+    std::cout << "type i=: " << i << " Output" << std::endl;
+    break;
 }
 }
 }

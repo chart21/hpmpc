@@ -1,5 +1,6 @@
 #pragma once
 #include "test_helper.hpp"
+#include <cstdint>
 #ifndef FUNCTION
 #define FUNCTION test_basic_primitives
 #endif
@@ -7,6 +8,7 @@
 #define TEST_SECRET_SHARING 1 // a -> [a]
 #define TEST_ADD_MULT_CONSTANTS 1 // b -> [b], [a] + [b], [a] * c
 #define TEST_MULTIPLICATION 1 // [a] * [b]
+#define TEST_AND 1 // [a] & [b]
 
 #if TEST_SECRET_SHARING == 1
 template<typename Share, int party_id>
@@ -162,6 +164,52 @@ bool test_multiplication()
 }
 #endif
 
+#if TEST_AND == 1
+template<typename Share>
+bool test_and()
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    
+    //initialize plaintext inputs
+    DATATYPE vectorized_input_a = SET_ALL_ONE();
+    DATATYPE vectorized_input_b = SET_ALL_ONE();
+
+    //secret sharing 
+    S share_a;
+    S share_b;
+    S share_c;
+    
+    share_a.template prepare_receive_from<P_0>(vectorized_input_a);
+    share_b.template prepare_receive_from<P_1>(vectorized_input_b);
+    Share::communicate();
+    share_a.template complete_receive_from<P_0>();
+    share_b.template complete_receive_from<P_1>();
+
+    //multiplication
+    share_c = share_a.prepare_and(share_b);
+    Share::communicate();
+    share_c.complete_and();
+
+    //reveal
+    DATATYPE vecotrized_output;
+    share_c.prepare_reveal_to_all();
+    Share::communicate();
+    vecotrized_output = share_c.complete_reveal_to_all();
+
+    //compare
+    for(int i = 0; i < DATTYPE/BITLENGTH; i++)
+    {
+        print_compare(-1, ((UINT_TYPE*)(&vecotrized_output))[i]);
+        if(((UINT_TYPE*)(&vecotrized_output))[i] != UINT_TYPE(-1))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+#endif
+
+
 
 template<typename Share>
 bool test_basic_primitives(DATATYPE *res)
@@ -185,6 +233,10 @@ bool test_basic_primitives(DATATYPE *res)
 
     #if TEST_MULTIPLICATION == 1
     test_function(num_tests, num_passed, "Multiplication", test_multiplication<Share>);
+    #endif
+
+    #if TEST_AND == 1
+    test_function(num_tests, num_passed, "AND", test_and<Share>);
     #endif
     
     print_stats(num_tests, num_passed);

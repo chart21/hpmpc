@@ -1,6 +1,5 @@
 #pragma once
 #include "config.h"
-#include "core/arch/STD.h"
 #include "core/init.hpp"
 #include "core/networking/buffers.h"
 #include "protocols/Protocols.h"

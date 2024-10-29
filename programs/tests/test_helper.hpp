@@ -1,5 +1,6 @@
 #pragma once
 #include "../../datatypes/Additive_Share.hpp"
+#include "../../datatypes/XOR_Share.hpp"
 const float epsilon = 0.8;
 template<typename FUNC>
 void test_function(int &num_tests, int &num_passed, std::string name, FUNC f)
