@@ -295,7 +295,7 @@ void prepare_bit2a(ABY2_ONLINE_Share out[])
 #else
         out[i].m = SET_ALL_ZERO();
 #endif
-        out[i].m = OP_SUB(out[i].m, OP_MULT( OP_SUB(OP_ADD(b0[i], b0[i]),PROMOTE(1)), OP_ADD(lb[i], lxly))); // mb -  (2mb - 1) * (lvi + lxly)
+        out[i].m = OP_SUB(out[i].m, OP_MULT( OP_SUB(OP_ADD(b0[i], b0[i]),PROMOTE(1)), OP_SUB(lb[i], OP_ADD(lxly,lxly)))); // mb -  (2mb - 1) * (lvi - 2 lxly)
         out[i].l = getRandomVal(PSELF); 
         out[i].m = OP_ADD(out[i].m, out[i].l);
         send_to_live(PNEXT, out[i].m);
