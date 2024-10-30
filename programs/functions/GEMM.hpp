@@ -134,6 +134,102 @@ for (int i = 0; i < m*p; ++i)
 #endif
 }
 
+template<typename T>
+void prepare_GEMM_CPU(const T* A, const T* B, T* C, const int m, const int p, const int f, bool is_A_fixed, bool truncate) {
+    if(truncate)
+    {
+        prepare_GEMM_CPU(A, B, C, m, p, f, is_A_fixed);
+        return;
+    }
+const int TILE_SIZE = 64;
+
+#if FUSE_DOT == 2
+T* Q = new T[m*p*T::getNumDotProducts()];
+for(int t = 0; t < T::getNumDotProducts(); t++)
+{
+#endif
+for (int i = 0; i < m; i += TILE_SIZE) {
+        int i_max = std::min(i + TILE_SIZE, m);
+        for (int j = 0; j < p; j += TILE_SIZE) {
+            /* _mm_prefetch(B + j * f, _MM_HINT_T0); */
+            int j_max = std::min(j + TILE_SIZE, p);
+            for (int k = 0; k < f; k += TILE_SIZE) {
+                int k_max = std::min(k + TILE_SIZE, f);
+                for (int ii = i; ii < i_max; ++ii) {
+                    const int iip = ii*p;
+                    const int iif = ii*f;
+                    /* const int row2 = ii*f+kk; */
+                    for (int jj = j; jj < j_max; ++jj) {
+                        const int jjf = jj*f;
+                    auto temp = T(0);
+#if FUSE_DOT == 0
+                    T temps[T::getNumDotProducts()] = {T(0)};
+#endif
+                        for (int kk = k; kk < k_max; ++kk) {
+                            /* _mm_prefetch(C + ii * p + jj, _MM_HINT_T0); */
+#if PUBLIC_WEIGHTS == 0
+#if FUSE_DOT == 0
+                            for(int i = 0; i < T::getNumDotProducts(); ++i)
+                            {
+                                temps[i] += A[iif+kk].prepare_dot(B[jjf + kk], i);
+                            }
+                            temp.join_dots(temps);
+#elif FUSE_DOT == 1
+                            temp += A[iif+kk].prepare_dot(B[jjf + kk]);
+#elif FUSE_DOT == 2
+                            Q[iip + jj + t*m*p] += A[iif+kk].prepare_dot(B[jjf + kk], t);
+#endif
+#else
+
+                            temp += B[jjf + kk].mult_public(A[iif+kk]);
+#endif
+                        }
+#if FUSE_DOT == 2
+                        Q[iip + jj + t*m*p] = temp;
+#else
+                        C[iip + jj] += temp;
+#endif
+                    }
+                }
+            }
+#if INTERLEAVE_COMM == 1
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+#if PUBLIC_WEIGHTS == 0
+                    C[row + jj].mask_and_send_dot_without_trunc();
+#else
+                    // do nothing
+#endif
+                }
+            }
+#endif
+        }
+    }
+#if FUSE_DOT == 2
+}
+#endif
+#if FUSE_DOT == 2
+for (int i = 0; i < m*p; ++i)
+{
+    T temps[T::getNumDotProducts()];
+    for(int t = 0; t < T::getNumDotProducts(); t++)
+    {
+        temps[t] = Q[i + t*m*p];
+    }
+    C[i].join_dots(temps);
+    C[i].mask_and_send_dot_without_trunc();
+}
+delete[] Q;
+#else
+#if INTERLEAVE_COMM == 0
+for (int i = 0; i < m*p; ++i)
+    C[i].mask_and_send_dot_without_trunc();
+#endif
+#endif
+}
+
+
 
 
 
@@ -167,7 +263,45 @@ void complete_GEMM_CPU(T* C, const int m, const int p) {
 }
 
 template<typename T>
-void send_GEMM_GPU(T* C, const int m, const int p) {
+void complete_GEMM_CPU(T* C, const int m, const int p, bool truncate) {
+    if(truncate)
+    {
+        complete_GEMM_CPU(C, m, p);
+        return;
+    }
+    const int TILE_SIZE = 64;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+      int i_max = std::min(i + TILE_SIZE, m);
+      for (int j = 0; j < p; j += TILE_SIZE) {
+          int j_max = std::min(j + TILE_SIZE, p);
+            for (int ii = i; ii < i_max; ++ii) {
+                const int row = ii*p;
+                for (int jj = j; jj < j_max; ++jj) {
+                    /* C[row + jj].complete_mult(); */
+#if PUBLIC_WEIGHTS == 0
+                C[row+jj].complete_mult_without_trunc();
+#endif
+                }
+            }
+            }
+            }
+}
+
+template<typename T>
+void send_GEMM_GPU(T* C, const int m, const int p, bool truncate = true) {
+if(!truncate)
+{
+    for(int j = 0; j < m*p; ++j)
+    {
+    #if PUBLIC_WEIGHTS == 0
+        C[j].mask_and_send_dot_without_trunc();
+    #else
+        // do nothing
+    #endif
+    }
+    return;
+}
+
     for(int j = 0; j < m*p; ++j)
 {
 #if PUBLIC_WEIGHTS == 0
@@ -207,25 +341,39 @@ void complete_GEMM(T* C, const int len)
 }
 }
 
+    template<typename T>
+void complete_GEMM(T* C, const int len, bool truncate)
+{
+    if(truncate)
+    {
+        complete_GEMM(C, len);
+        return;
+    }
+#if PUBLIC_WEIGHTS == 0
+    for(int i = 0; i < len; ++i)
+        C[i].complete_mult_without_trunc();
+#endif
+}
+
 template<typename T>
-void prepare_GEMM(T* A, T* B, T* C, const int m, const int p, const int f, bool is_A_fixed)
+void prepare_GEMM(T* A, T* B, T* C, const int m, const int p, const int f, bool is_A_fixed, bool truncate = true)
 {
 #if USE_CUDA_GEMM == 0
-    prepare_GEMM_CPU(A, B, C, m, p, f, is_A_fixed);
+    prepare_GEMM_CPU(A, B, C, m, p, f, is_A_fixed, truncate);
 #else
     T::GEMM(A, B, C, m, p, f, is_A_fixed);
-    send_GEMM_GPU(C, m, p);
+    send_GEMM_GPU(C, m, p, truncate);
 #endif
 }
             /* T::CONV_2D( im,W,C, local_batch, ih, iw, ic, oc, kh, kw, pad, stride, 1); */
    
 template<typename T>
-void complete_GEMM(T* C, const int m, const int p)
+void complete_GEMM(T* C, const int m, const int p, bool truncate = true)
 {
 #if USE_CUDA_GEMM == 0
-    complete_GEMM_CPU(C, m, p);
+    complete_GEMM_CPU(C, m, p, truncate);
 #else
-    complete_GEMM(C, m*p);
+    complete_GEMM(C, m*p, truncate);
 #endif
 }
 
