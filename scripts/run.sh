@@ -77,7 +77,7 @@ fi
 if [ "$O_SPLIT_ROLES" = "0" ]; then
     if [ "$O_PARTY" = "all" ]
     then
-        scripts/run_locally.sh -n $O_NUM_PLAYERS
+        scripts/run_locally.sh -n $O_NUM_PLAYERS -g $O_NUM_GPUS
     else
         scripts/run_distributed.sh -p $O_PARTY -a $O_IP1 -b $O_IP2 -c $O_IP3 -d $O_IP4
     fi
