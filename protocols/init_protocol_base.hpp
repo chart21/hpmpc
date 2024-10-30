@@ -407,9 +407,10 @@ for(int t=0;t<(num_players-1);t++) {
     int offset = 0;
     if(t >= player_id)
         offset = 1; // player should not send to itself
-#if PRE == 1 // only in actual preprocessing phase
-    sa[t].send_rounds = 1;
-#endif
+
+    #if PRE == 1 && (BEAVER == 0 || SKIP_PRE == 1)
+        sa[t].send_rounds = 1; //TODO: Can be deleted and replaced? -> Not yet
+    #endif
 
     sa[t].sent_elements = new DATATYPE*[sa[t].send_rounds];
     /* sending_args[t].elements_to_send[0] = 0; //input sharing with SRNGs */ 

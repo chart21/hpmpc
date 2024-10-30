@@ -13,13 +13,14 @@
 #define FUNCTION test_comparisons
 #endif
 #define TEST_EQZ 0 // [a] == 0 ? [1] : [0]
-#define TEST_LTZ 1 // [a] < 0 ? [1] : [0]
+#define TEST_LTZ 0 // [a] < 0 ? [1] : [0]
 #define TEST_MAX_MIN 0 // [A] -> [max(A)] [min(A)]
 #define TEST_RELU 0 // [a] > 0 ? [a] : 0
 #define TEST_BOOLEAN_ADDITION 0 // [a]^B + [b]^B
 #define TEST_A2B_ADD 1 // Test A2B followed by addition when testing boolean addition
 #define TEST_A2B 0 // [a]^A -> [a]^B
 #define TEST_Bit2A 0 // [a]^b -> [a]^A
+#define TEST_BitInj 1 // [a]^A, [b]^b = [ab]^A
 
 #if TEST_EQZ == 1
 template<typename Share>
@@ -412,6 +413,59 @@ bool test_Bit2A()
 }
 #endif
 
+
+#if TEST_BitInj == 1
+template<typename Share>
+bool test_BitInj()
+{
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<BITLENGTH, S>;
+    using sint = sint_t<A>;
+    const int vectorization_factor = DATTYPE/BITLENGTH;
+    
+    S share_a = SET_ALL_ZERO();
+    S share_b = SET_ALL_ONE();
+    sint val_a = 25;
+    sint val_b = 25;
+    sint output_a;
+    sint output_b;
+    Share::communicate();
+
+    //Bit2A
+    share_a.prepare_opt_bit_injection(val_a.get_share_pointer(), output_a.get_share_pointer());
+    share_b.prepare_opt_bit_injection(val_b.get_share_pointer(), output_b.get_share_pointer());
+    Share::communicate();
+    output_a.complete_opt_bit_injection();
+    output_b.complete_opt_bit_injection();
+    
+    //reveal
+    UINT_TYPE ortho_a[DATTYPE];
+    UINT_TYPE ortho_b[DATTYPE];
+    output_a.prepare_reveal_to_all();
+    output_b.prepare_reveal_to_all();
+    Share::communicate();
+    output_a.complete_reveal_to_all(ortho_a);
+    output_b.complete_reveal_to_all(ortho_b);
+    //compare
+    
+    for(int i = 0; i < DATTYPE; i++)
+    {
+        print_compare(0, ortho_a[i]);
+        print_compare(25, ortho_b[i]);
+    }
+    for(int i = 0; i < DATTYPE; i++)
+    {
+        if(ortho_a[i] != 0 || ortho_b[i] != 25)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+#endif
+
 template<typename Share>
 bool test_comparisons(DATATYPE *res)
 {
@@ -444,6 +498,10 @@ bool test_comparisons(DATATYPE *res)
 
 #if TEST_Bit2A == 1
     test_function(num_tests, num_passed, "Bit2A", test_Bit2A<Share>);
+#endif
+
+#if TEST_BitInj == 1
+    test_function(num_tests, num_passed, "BitInj", test_BitInj<Share>);
 #endif
     
     print_stats(num_tests, num_passed);

@@ -112,7 +112,7 @@ void send_pre()
 sb = 0;     
 for(int t = 0; t < (num_players-1); t++)
 {
-send_count[t] = 0;
+send_count_pre[t] = 0;
 }
     // different in PRE
     for(int t = 0; t < (num_players-1); t++)

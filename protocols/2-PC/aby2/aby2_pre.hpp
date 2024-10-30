@@ -213,6 +213,10 @@ void complete_bit2a()
 {
 }
 
+void complete_opt_bit_injection()
+{
+}
+
 void prepare_opt_bit_injection(ABY2_PRE_Share x[], ABY2_PRE_Share out[])
 {
     alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
@@ -301,6 +305,8 @@ lxly_b[0] = new Datatype[boolean_triple_num[0]];
 uint64_t arithmetic_triple_counter[num_rounds]{0};
 uint64_t boolean_triple_counter[num_rounds]{0};
 auto num_triples = arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares;
+preprocessed_outputs_bool[1] = new Datatype[preprocessed_outputs_bool_input_index[1]];
+preprocessed_outputs_arithmetic[1] = new Datatype[preprocessed_outputs_arithmetic_input_index[1]];
 for(uint64_t i = 0; i < num_triples; i++)
 {
 std::cout << "type: " << uint32_t(triple_type[0][i]) << std::endl;
@@ -386,11 +392,9 @@ for(uint64_t i = 0; i < arithmetic_triple_num[0]; i++)
 /* preprocessed_outputs_arithmetic_index[0] = 0; */
 preprocessed_outputs_arithmetic_input_index[0] = 0;
 
-preprocessed_outputs_bool[1] = new Datatype[preprocessed_outputs_bool_input_index[1]];
 /* preprocessed_outputs_bool_index[1] = 0; */
 preprocessed_outputs_bool_input_index[1] = 0;
 
-preprocessed_outputs_arithmetic[1] = new Datatype[preprocessed_outputs_arithmetic_input_index[1]];
 /* preprocessed_outputs_arithmetic_index[1] = 0; */
 preprocessed_outputs_arithmetic_input_index[1] = 0;
 
