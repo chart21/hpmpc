@@ -68,8 +68,9 @@ client.Send_all( ((char*) ((sender_args*) threadParameters)->sent_elements[round
 printf("P%i: Sent %li bytes to player %i in round %i out of %i \n", PARTY, elements_to_send , ((sender_args*) threadParameters)->connected_to, rounds + 1, ((sender_args*) threadParameters)->send_rounds);
 #endif
             }
-           free(((sender_args*) threadParameters)->sent_elements[rounds]);
-
+            std::cout << "freeing memory of round " << rounds << std::endl;
+           /* free(((sender_args*) threadParameters)->sent_elements[rounds]); */
+            delete[] ((sender_args*) threadParameters)->sent_elements[rounds];
             rounds += 1;
         
 

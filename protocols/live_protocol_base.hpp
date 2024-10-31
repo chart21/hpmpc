@@ -116,8 +116,13 @@ send_count_pre[t] = 0;
 }
     // different in PRE
     for(int t = 0; t < (num_players-1); t++)
+{
         if(sending_rounds < sending_args_pre[t].send_rounds - 1) // don't allocate memory for the last+1 round
+{ 
+        std::cout << PARTY << "allocating " << sending_args_pre[t].elements_to_send[sending_rounds + 1] << " elements for sending round " << sending_rounds + 1 << std::endl;
         sending_args_pre[t].sent_elements[sending_rounds + 1] = NEW(DATATYPE[sending_args_pre[t].elements_to_send[sending_rounds + 1]]); // Allocate memory for all sending buffers for next round
+}                                                                                                                                         
+}
     pthread_mutex_lock(&mtx_send_next); 
      sending_rounds +=1;
       pthread_cond_broadcast(&cond_send_next); //signal all threads that sending buffer contains next data
@@ -441,6 +446,7 @@ preprocessed_outputs_bool_input_index[index]+=1;
 
 void store_output_share_arithmetic(DATATYPE val, int index=0)
 {
+std::cout << PARTY << "storing " << val << " in index " << preprocessed_outputs_arithmetic_input_index[index] << std::endl;
 preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_input_index[index]] = val;
 preprocessed_outputs_arithmetic_input_index[index]+=1;
 }
@@ -453,6 +459,7 @@ DATATYPE retrieve_output_share_bool(int index = 0)
 
 DATATYPE retrieve_output_share_arithmetic(int index = 0)
 {
+    std::cout << PARTY << "retrieving index " <<  index << " in index " << preprocessed_outputs_arithmetic_index[index] << std::endl;
     preprocessed_outputs_arithmetic_index[index]+=1;
     return preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index]-1];
 }

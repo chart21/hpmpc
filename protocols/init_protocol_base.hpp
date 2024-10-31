@@ -91,6 +91,7 @@ void pre_send_to_(int player_index, int num_round = 0)
 #if SKIP_PRE == 1
     return;
 #endif
+std::cout << "Party " << PARTY << "num_round: " << num_round << std::endl;
 sending_args_pre[player_index].elements_to_send[num_round] += 1;
 total_send_pre[player_index] += 1;
 /* sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] += 1; */
@@ -292,7 +293,7 @@ void store_output_share_bool_(int index = 0)
 
 void store_output_share_arithmetic_(int index = 0)
 {
-    preprocessed_outputs_arithmetic_input_index[0]+=1;
+    preprocessed_outputs_arithmetic_input_index[index]+=1;
 }
 #endif
 void store_output_share_()
@@ -412,12 +413,14 @@ for(int t=0;t<(num_players-1);t++) {
         sa[t].send_rounds = 1; //TODO: Can be deleted and replaced? -> Not yet
     #endif
 
+    std::cout << PARTY << "Allocating memory buffers for" << sa[t].send_rounds << " rounds" << std::endl;
     sa[t].sent_elements = new DATATYPE*[sa[t].send_rounds];
     /* sending_args[t].elements_to_send[0] = 0; //input sharing with SRNGs */ 
     sa[t].player_id = player_id;
     sa[t].player_count = num_players;
     sa[t].connected_to = t+offset;
     sa[t].port = (int) base_port + player_id * (num_players-1) + t; //e.g. P_0 receives on base port from P_1, P_2 on base port + num_players from P_0 6000,6002
+    std::cout << PARTY << "Allocating " << sa[t].elements_to_send[0] << " elements in round 0" << std::endl;
     sa[t].sent_elements[0] = NEW(DATATYPE[sa[t].elements_to_send[0]]); // Allocate memory for first round
     share_buffer[t] = 0;  
 

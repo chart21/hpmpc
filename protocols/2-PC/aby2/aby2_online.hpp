@@ -43,8 +43,6 @@ void complete_public_mult_fixed(func_add ADD, func_sub SUB)
 
 void prepare_opt_bit_injection(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[])
 {
-    for(int i = 0; i < BITLENGTH; i++)
-    {
     Datatype b0[BITLENGTH]{0};
     b0[BITLENGTH - 1] = m; //convert b0 to an arithemtic value
     alignas (sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
@@ -72,7 +70,6 @@ void prepare_opt_bit_injection(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[])
         out[i].l = getRandomVal(PSELF); 
         out[i].m = OP_ADD(out[i].m, out[i].l);
         send_to_live(PNEXT, out[i].m);
-    }
     }
 }
 

@@ -306,7 +306,10 @@ uint64_t arithmetic_triple_counter[num_rounds]{0};
 uint64_t boolean_triple_counter[num_rounds]{0};
 auto num_triples = arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares;
 preprocessed_outputs_bool[1] = new Datatype[preprocessed_outputs_bool_input_index[1]];
+std::cout << PARTY << " allocating " << preprocessed_outputs_arithmetic_input_index[1] << " for storing prep" << std::endl;
 preprocessed_outputs_arithmetic[1] = new Datatype[preprocessed_outputs_arithmetic_input_index[1]];
+preprocessed_outputs_arithmetic_input_index[1] = 0;
+preprocessed_outputs_bool_input_index[1] = 0;
 for(uint64_t i = 0; i < num_triples; i++)
 {
 std::cout << "type: " << uint32_t(triple_type[0][i]) << std::endl;
@@ -415,10 +418,11 @@ for(uint64_t i = 0; i < num_triples; i++)
         {
             auto lta = pre_receive_from_live(PNEXT,1);
             auto ltb = pre_receive_from_live(PNEXT,1);
-            auto ta = retrieve_output_share_arithmetic();
-            auto bl = retrieve_output_share_arithmetic();
-            auto prev_val = retrieve_output_share_arithmetic();
+            auto ta = retrieve_output_share_arithmetic(1);
+            auto bl = retrieve_output_share_arithmetic(1);
+            auto prev_val = retrieve_output_share_arithmetic(1);
             auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
+            std::cout << "Storing lxly inddex, round 1: " << arithmetic_triple_counter[1] << " value: " << int32_t(lxly) << std::endl;
             lxly_a[1][arithmetic_triple_counter[1]++] = lxly;
         }
     }
@@ -434,9 +438,13 @@ preprocessed_outputs_arithmetic[1] = lxly_a[1];
 /* preprocessed_outputs_arithmetic_index[1] = 0; */
 preprocessed_outputs_arithmetic_input_index[1] = 0;
 
+preprocessed_outputs_bool_index[1] = 0;
+preprocessed_outputs_arithmetic_index[1] = 0;
+
 /* delete[] lxly_a; */
 /* delete[] lxly_b; */
 init_srngs();
+std::cout << "completed preprocessing" << std::endl;
 }
 
 };

@@ -64,8 +64,14 @@ void init_circuit(std::string ips[]) {
 #if PRE == 1
     receiving_args_pre[t].elements_to_rec.push_back(0);
     sending_args_pre[t].elements_to_send.push_back(0);
+    #if BEAVER == 1 && SKIP_PRE == 0
+    sending_args_pre[t].elements_to_send.push_back(0); //second preprocessing round TODO: generalize and get number of rounds
+    receiving_args_pre[t].rec_rounds = 0;
+    sending_args_pre[t].send_rounds = 0;
+    #else
     receiving_args_pre[t].rec_rounds = 1;
     sending_args_pre[t].send_rounds = 1;
+    #endif
 #endif
   }
 #if PRE== 1 && BEAVER == 1 && SKIP_PRE == 0
@@ -235,13 +241,16 @@ void preprocess_circuit(std::string ips[]) {
   communicate_pre();
 #endif
 
+  std::cout << "Joining threads" << std::endl;
   // Join threads to avoid address rebind
   for (int t = 0; t < (num_players - 1); t++) {
     pthread_join(receiving_threads_pre[t], NULL);
+    std::cout << "Joined receiving thread " << t << std::endl;
     pthread_join(sending_Threads_pre[t], NULL);
+    std::cout << "Joined sending thread " << t << std::endl;
   }
 
-
+    std::cout << "Threads joined" << std::endl;
 #if LIVE == 1
   // reset all variables
   num_successful_connections = 0;
