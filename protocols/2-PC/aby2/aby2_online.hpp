@@ -313,19 +313,17 @@ template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_dot3(const ABY2_ONLINE_Share b, const ABY2_ONLINE_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype rxy = retrieve_output_share_arithmetic();
+Datatype rxyz = retrieve_output_share_arithmetic(1);
 Datatype rxz = retrieve_output_share_arithmetic();
 Datatype ryz = retrieve_output_share_arithmetic();
-Datatype rxyz = retrieve_output_share_arithmetic(1);
 
 ABY2_ONLINE_Share d;
-#if PARTY == 0
+#if PARTY == 1
 d.m = 
-    SUB(SET_ALL_ZERO(),
     ADD(
         ADD( MULT(m,SUB(ryz,MULT(b.m,c.l)))
         ,(MULT(b.m,SUB(rxz, MULT(c.m,l)))))
-        ,MULT(c.m,SUB(rxy, MULT(m,b.l))))
-        );
+        ,MULT(c.m,SUB(rxy, MULT(m,b.l))));
 #else
 d.p1 = ADD(
         ADD( MULT(m,ADD(MULT(b.m,SUB(c.m,c.l)),ryz))
@@ -340,20 +338,22 @@ template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_dot4(ABY2_ONLINE_Share b, ABY2_ONLINE_Share c, ABY2_ONLINE_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype rxy = retrieve_output_share_arithmetic();
-Datatype rxz = retrieve_output_share_arithmetic();
-Datatype rxw = retrieve_output_share_arithmetic();
-Datatype ryz = retrieve_output_share_arithmetic();
-Datatype ryw = retrieve_output_share_arithmetic();
 Datatype rzw = retrieve_output_share_arithmetic();
+
 Datatype rxyz = retrieve_output_share_arithmetic(1);
 Datatype rxyw = retrieve_output_share_arithmetic(1);
 Datatype rxzw = retrieve_output_share_arithmetic(1);
 Datatype ryzw = retrieve_output_share_arithmetic(1);
 Datatype rxyzw = retrieve_output_share_arithmetic(1);
 
+Datatype rxz = retrieve_output_share_arithmetic();
+Datatype rxw = retrieve_output_share_arithmetic();
+Datatype ryz = retrieve_output_share_arithmetic();
+Datatype ryw = retrieve_output_share_arithmetic();
+
 ABY2_ONLINE_Share e;
-#if PARTY == 0
-e.m =       OP_SUB(SET_ALL_ZERO(), 
+#if PARTY == 1
+e.m =     
                 ADD(
                     ADD(
                         MULT(m, SUB( MULT(d.m, SUB(ryz, MULT(b.m,c.l))), ryzw))
@@ -369,7 +369,6 @@ e.m =       OP_SUB(SET_ALL_ZERO(),
                         
                             MULT(d.m, ADD( MULT(b.m, SUB(rxz, MULT(c.m,l))),
                             SUB( MULT(c.m, rxy), rxyz)))
-                )
                 )
             );
 #else
@@ -406,6 +405,19 @@ template <typename func_add, typename func_sub, typename func_mul>
 
 template <typename func_add, typename func_sub>
 void complete_mult3(func_add ADD, func_sub SUB){
+    complete_mult(ADD,SUB);
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_mult4(ABY2_ONLINE_Share b, ABY2_ONLINE_Share c, ABY2_ONLINE_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    ABY2_ONLINE_Share e = prepare_dot4(b,c,d,ADD,SUB,MULT);
+    e.mask_and_send_dot(ADD,SUB);
+    return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
     complete_mult(ADD,SUB);
 }
 

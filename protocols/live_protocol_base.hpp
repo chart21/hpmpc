@@ -265,7 +265,7 @@ void compare_views() {
         int hash_chunks_to_send = (sizeof(uint32_t) * 8) / sizeof(DATATYPE);
 #endif
     DATATYPE val_to_send[num_players*player_multiplier][hash_chunks_to_send];
-    DATATYPE val_recieved[num_players*player_multiplier][hash_chunks_to_send];
+    DATATYPE val_received[num_players*player_multiplier][hash_chunks_to_send];
     for (int player_id = 0; player_id < num_players*player_multiplier; player_id++) {
         if (elements_to_compare[player_id] > 0) {
             perform_compare_view(player_id);
@@ -410,14 +410,14 @@ void compare_views() {
                         val_rec[counter++] = receive_from_live(P_3);
                     val_rec[0] = AND(val_rec[0], val_rec[1]); //trick to ensure equality of both values with certain probability 
                   }
-              val_recieved[player_id][i] = val_rec[0];
+              val_received[player_id][i] = val_rec[0];
                } 
                 else
-                  val_recieved[player_id][i] = receive_from_live(player_id);
+                  val_received[player_id][i] = receive_from_live(player_id);
             
         }
             for (unsigned long j = 0; j < sizeof(DATATYPE); j++) {
-              if (*(((uint8_t *)&(val_recieved[player_id])) + j) !=
+              if (*(((uint8_t *)&(val_received[player_id])) + j) !=
                   *(((uint8_t *)&(val_to_send[player_id])) + j)) {
                 verified = false;
         }
