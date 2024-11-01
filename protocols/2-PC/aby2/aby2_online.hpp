@@ -309,6 +309,106 @@ void complete_opt_bit_injection()
         m = OP_ADD(m, receive_from_live(PNEXT));
 }
 
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_dot3(const ABY2_ONLINE_Share b, const ABY2_ONLINE_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype rxy = retrieve_output_share_arithmetic();
+Datatype rxz = retrieve_output_share_arithmetic();
+Datatype ryz = retrieve_output_share_arithmetic();
+Datatype rxyz = retrieve_output_share_arithmetic(1);
+
+ABY2_ONLINE_Share d;
+#if PARTY == 0
+d.m = 
+    SUB(SET_ALL_ZERO(),
+    ADD(
+        ADD( MULT(m,SUB(ryz,MULT(b.m,c.l)))
+        ,(MULT(b.m,SUB(rxz, MULT(c.m,l)))))
+        ,MULT(c.m,SUB(rxy, MULT(m,b.l))))
+        );
+#else
+d.p1 = ADD(
+        ADD( MULT(m,ADD(MULT(b.m,SUB(c.m,c.l)),ryz))
+        ,(MULT(b.m,SUB(rxz, MULT(c.m,l)))))
+        ,MULT(c.m,SUB(rxy, MULT(m,b.l)))); 
+#endif
+d.m = SUB(d.m, rxyz);
+return d;
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_dot4(ABY2_ONLINE_Share b, ABY2_ONLINE_Share c, ABY2_ONLINE_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+Datatype rxy = retrieve_output_share_arithmetic();
+Datatype rxz = retrieve_output_share_arithmetic();
+Datatype rxw = retrieve_output_share_arithmetic();
+Datatype ryz = retrieve_output_share_arithmetic();
+Datatype ryw = retrieve_output_share_arithmetic();
+Datatype rzw = retrieve_output_share_arithmetic();
+Datatype rxyz = retrieve_output_share_arithmetic(1);
+Datatype rxyw = retrieve_output_share_arithmetic(1);
+Datatype rxzw = retrieve_output_share_arithmetic(1);
+Datatype ryzw = retrieve_output_share_arithmetic(1);
+Datatype rxyzw = retrieve_output_share_arithmetic(1);
+
+ABY2_ONLINE_Share e;
+#if PARTY == 0
+e.m =       OP_SUB(SET_ALL_ZERO(), 
+                ADD(
+                    ADD(
+                        MULT(m, SUB( MULT(d.m, SUB(ryz, MULT(b.m,c.l))), ryzw))
+                        ,
+                            MULT(b.m, ADD( MULT(m, SUB(rzw, MULT(c.m,d.l))), 
+                            SUB( MULT(c.m, rxw), rxzw)))
+                    ),
+                    ADD(
+                            
+                            MULT(c.m, SUB( MULT(m, SUB(ryw, MULT(d.m,b.l))), rxyw))
+                            ,
+                    
+                        
+                            MULT(d.m, ADD( MULT(b.m, SUB(rxz, MULT(c.m,l))),
+                            SUB( MULT(c.m, rxy), rxyz)))
+                )
+                )
+            );
+#else
+e.m = 
+                ADD(
+                    ADD(
+                        MULT(m, SUB( MULT(d.m, ADD(MULT(b.m,SUB(c.m,c.l)),ryz )), ryzw))
+                            ,
+                            MULT(b.m, ADD( MULT(m, SUB(rzw, MULT(c.m,d.l))), 
+                            SUB( MULT(c.m, rxw), rxzw)))
+                        )
+                    ,
+                    ADD(
+                            MULT(c.m, SUB( MULT(m, SUB(ryw, MULT(d.m,b.l))), rxyw))
+                            ,
+                            MULT(d.m, ADD( MULT(b.m, SUB(rxz, MULT(c.m,l))),
+                            SUB( MULT(c.m, rxy), rxyz)))
+                        )
+                               
+                ); // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) + d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+
+#endif
+e.m = ADD(e.m, rxyzw);
+return e;
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_mult3(ABY2_ONLINE_Share b, ABY2_ONLINE_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    ABY2_ONLINE_Share d = prepare_dot3(b,c,ADD,SUB,MULT);
+    d.mask_and_send_dot(ADD,SUB);
+    return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+    complete_mult(ADD,SUB);
+}
+
 static ABY2_ONLINE_Share public_val(Datatype a)
 {
     return ABY2_ONLINE_Share(a,SET_ALL_ZERO());

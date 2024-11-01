@@ -172,8 +172,8 @@ void pre_send_to_live(int player_id, DATATYPE a)
 #if SKIP_PRE == 1
     return;
 #else
-    std::cout << "PRE sending rounds: " << sending_rounds << std::endl;
-    std::cout << send_count_pre[player_id] << std::endl;
+    /* std::cout << "PRE sending rounds: " << sending_rounds << std::endl; */
+    /* std::cout << send_count_pre[player_id] << std::endl; */
 #if SEND_BUFFER > 0
 if(send_count_pre[player_id] == SEND_BUFFER)
 {

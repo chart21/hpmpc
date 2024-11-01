@@ -91,12 +91,12 @@ void pre_send_to_(int player_index)
 #if SKIP_PRE == 1
     return;
 #endif
-    std::cout << "Init sending rounds: " << sending_args_pre[player_index].send_rounds << std::endl;
-    std::cout << sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] << std::endl;
+    /* std::cout << "Init sending rounds: " << sending_args_pre[player_index].send_rounds << std::endl; */
+    /* std::cout << sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] << std::endl; */
 #if SEND_BUFFER > 0
 if(sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] == SEND_BUFFER)
 {
-    send_();
+    send_pre_();
 }
 #endif
 /* sending_args_pre[player_index].elements_to_send[num_round] += 1; */
@@ -112,7 +112,7 @@ void pre_receive_from_(int player_index)
 #if RECV_BUFFER > 0
 if(receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] == RECV_BUFFER)
 {
-    receive_();
+    receive_pre_();
 }
 #endif
 receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1;
