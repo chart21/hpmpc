@@ -198,6 +198,7 @@ if(share_buffer_pre[player_id] == RECV_BUFFER)
     receive_pre();
 }
 #endif
+std::cout << "PRE recieive rounds, num elements: " << rounds-1 << " " << share_buffer_pre[player_id] << std::endl;
 share_buffer_pre[player_id] +=1;
 return receiving_args_pre[player_id].received_elements[rounds-1][share_buffer_pre[player_id] - 1];
 #endif

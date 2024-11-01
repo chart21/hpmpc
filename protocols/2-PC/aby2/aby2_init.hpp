@@ -142,24 +142,6 @@ return ABY2_init();
 template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot4(const ABY2_init b, const ABY2_init c, const ABY2_init d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
-{
-    triple_type[0][triple_type_index[0]++] = 7; //xy, zw
-    triple_type[0][triple_type_index[0]++] = 0; //xz
-    triple_type[0][triple_type_index[0]++] = 0; //yz
-    triple_type[0][triple_type_index[0]++] = 0; //yw
-    triple_type[1][triple_type_index[1]++] = 7; //xyzw
-
-}
-else
-{
-    triple_type[0][triple_type_index[0]++] = 8; //xy, zw
-    triple_type[0][triple_type_index[0]++] = 1; //xz
-    triple_type[0][triple_type_index[0]++] = 1; //yz
-    triple_type[0][triple_type_index[0]++] = 1; //yw
-    triple_type[1][triple_type_index[1]++] = 8; //xyzw
-}
-
 store_output_share_arithmetic_(); //xzw
 store_output_share_arithmetic_(); //yzw
 store_output_share_arithmetic_(); // xyz
@@ -172,6 +154,7 @@ generate_lxly_from_triple(ADD,1); //yzw
 generate_lxly_from_triple(ADD,1); //xyz
 generate_lxly_from_triple(ADD,1); //xyzw
 generate_lxly_from_triple(ADD); //xz
+generate_lxly_from_triple(ADD); //xw
 generate_lxly_from_triple(ADD); //yz
 generate_lxly_from_triple(ADD); //yw
 return ABY2_init();

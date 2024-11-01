@@ -115,6 +115,8 @@ if(receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_in
     receive_pre_();
 }
 #endif
+std::cout << "Rounds, elements: " << receiving_args_pre[player_index].rec_rounds << " " << receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] << std::endl;
+
 receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1;
 /* receiving_args_pre[player_index].elements_to_rec[num_round] += 1; */
 total_recv_pre[player_index] += 1;
