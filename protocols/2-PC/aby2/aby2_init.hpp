@@ -8,7 +8,49 @@ private:
     public:
 ABY2_init()  {}
 
+template <typename func_add>
+static void store_output_share_aORb(func_add ADD, int index=0)
+{
+    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    {
+        num_boolean_triples[index]++;
+        store_output_share_bool_(index);
+    }
+    else
+    {
+        num_arithmetic_triples[index]++;
+        store_output_share_arithmetic_(index);
+    }
+}
 
+template <typename func_add>
+void generate_lxly_from_triple(func_add ADD, int num_round=0)
+{
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+{
+    num_boolean_triples[num_round]++;
+    store_output_share_bool_(num_round);
+    store_output_share_bool_(num_round);
+    store_output_share_bool_(num_round);
+}
+else
+{
+    num_arithmetic_triples[num_round]++;
+    store_output_share_arithmetic_(num_round);
+    store_output_share_arithmetic_(num_round);
+    store_output_share_arithmetic_(num_round);
+}
+if(num_round == 0)
+{
+pre_send_to_(PNEXT);
+pre_send_to_(PNEXT);
+}
+else
+{
+send_in_last_round[PNEXT]++;
+send_in_last_round[PNEXT]++;
+}
+}
 
 template <typename func_mul>
 ABY2_init mult_public(const Datatype b, func_mul MULT) const
@@ -73,23 +115,7 @@ template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_mult(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 ABY2_init c;
-if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
-{
-    num_boolean_triples[0]++;
-    store_output_share_bool_();
-    store_output_share_bool_();
-    store_output_share_bool_();
-}
-else
-{
-    num_arithmetic_triples[0]++;
-    store_output_share_arithmetic_();
-    store_output_share_arithmetic_();
-    store_output_share_arithmetic_();
-}
-
-pre_send_to_(PNEXT);
-pre_send_to_(PNEXT);
+generate_lxly_from_triple(ADD);
 send_to_(PNEXT);
 return c;
 }
@@ -98,31 +124,86 @@ template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 ABY2_init c;
-if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
-{
-    num_boolean_triples[0]++;
-    store_output_share_bool_();
-    store_output_share_bool_();
-    store_output_share_bool_();
-}
-else
-{
-    num_arithmetic_triples[0]++;
-    store_output_share_arithmetic_();
-    store_output_share_arithmetic_();
-    store_output_share_arithmetic_();
-}
-
-pre_send_to_(PNEXT);
-pre_send_to_(PNEXT);
+generate_lxly_from_triple(ADD);
 return c;
 }
 
-/* template <typename func_add, typename func_sub, typename func_mul, typename func_trunc> */
-/*     ABY2_init prepare_dot_with_trunc(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) const */
-/* { */
-/*     return prepare_dot(b, ADD, SUB, MULT); */
-/* } */
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_dot3(const ABY2_init b, const ABY2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+store_output_share_arithmetic_(); // z
+generate_lxly_from_triple(ADD); //rxy
+generate_lxly_from_triple(ADD,1); //rxyz
+generate_lxly_from_triple(ADD); //rxz
+b.generate_lxly_from_triple(ADD); //ryz
+return ABY2_init();
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_dot4(const ABY2_init b, const ABY2_init c, const ABY2_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+{
+    triple_type[0][triple_type_index[0]++] = 7; //xy, zw
+    triple_type[0][triple_type_index[0]++] = 0; //xz
+    triple_type[0][triple_type_index[0]++] = 0; //yz
+    triple_type[0][triple_type_index[0]++] = 0; //yw
+    triple_type[1][triple_type_index[1]++] = 7; //xyzw
+
+}
+else
+{
+    triple_type[0][triple_type_index[0]++] = 8; //xy, zw
+    triple_type[0][triple_type_index[0]++] = 1; //xz
+    triple_type[0][triple_type_index[0]++] = 1; //yz
+    triple_type[0][triple_type_index[0]++] = 1; //yw
+    triple_type[1][triple_type_index[1]++] = 8; //xyzw
+}
+
+store_output_share_arithmetic_(); //xzw
+store_output_share_arithmetic_(); //yzw
+store_output_share_arithmetic_(); // xyz
+store_output_share_arithmetic_(); //xyw
+generate_lxly_from_triple(ADD); //xy --> +2 stores
+generate_lxly_from_triple(ADD); //zw --> +2 stores
+generate_lxly_from_triple(ADD,1); //xyw
+generate_lxly_from_triple(ADD,1); //xzw
+generate_lxly_from_triple(ADD,1); //yzw
+generate_lxly_from_triple(ADD,1); //xyz
+generate_lxly_from_triple(ADD,1); //xyzw
+generate_lxly_from_triple(c, ADD); //xz
+generate_lxly_from_triple(d, ADD); //yz
+generate_lxly_from_triple(c, ADD); //yw
+return ABY2_init();
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_mult3(ABY2_init b, ABY2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    ABY2_init d = prepare_dot3(b,c,ADD,SUB,MULT);
+    d.mask_and_send_dot(ADD,SUB);
+    return d;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult3(func_add ADD, func_sub SUB){
+    complete_mult(ADD,SUB);
+}
+
+template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_mult4(ABY2_init b, ABY2_init c, ABY2_init d, func_add ADD, func_sub SUB, func_mul MULT) const
+{
+    ABY2_init e = prepare_dot4(b,c,d,ADD,SUB,MULT);
+    e.mask_and_send_dot(ADD,SUB);
+    return e;
+}
+
+template <typename func_add, typename func_sub>
+void complete_mult4(func_add ADD, func_sub SUB){
+    complete_mult(ADD,SUB);
+}
+
+
 
 template <typename func_add, typename func_sub>
 void mask_and_send_dot(func_add ADD, func_sub SUB)
