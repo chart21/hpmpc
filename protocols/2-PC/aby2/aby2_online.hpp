@@ -325,7 +325,7 @@ d.m =
         ,(MULT(b.m,SUB(rxz, MULT(c.m,l)))))
         ,MULT(c.m,SUB(rxy, MULT(m,b.l))));
 #else
-d.p1 = ADD(
+d.m = ADD(
         ADD( MULT(m,ADD(MULT(b.m,SUB(c.m,c.l)),ryz))
         ,(MULT(b.m,SUB(rxz, MULT(c.m,l)))))
         ,MULT(c.m,SUB(rxy, MULT(m,b.l)))); 

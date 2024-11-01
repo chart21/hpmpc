@@ -24,7 +24,7 @@ static void store_output_share_aORb(func_add ADD, int index=0)
 }
 
 template <typename func_add>
-void generate_lxly_from_triple(func_add ADD, int num_round=0)
+void generate_lxly_from_triple(func_add ADD, int num_round=0) const
 {
 if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
 {
@@ -171,9 +171,9 @@ generate_lxly_from_triple(ADD,1); //xzw
 generate_lxly_from_triple(ADD,1); //yzw
 generate_lxly_from_triple(ADD,1); //xyz
 generate_lxly_from_triple(ADD,1); //xyzw
-generate_lxly_from_triple(c, ADD); //xz
-generate_lxly_from_triple(d, ADD); //yz
-generate_lxly_from_triple(c, ADD); //yw
+generate_lxly_from_triple(ADD); //xz
+generate_lxly_from_triple(ADD); //yz
+generate_lxly_from_triple(ADD); //yw
 return ABY2_init();
 }
 

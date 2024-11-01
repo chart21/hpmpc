@@ -10,7 +10,7 @@ ABY2_PRE_Share()  {}
 ABY2_PRE_Share(Datatype l) { this->l = l; }
 
 template <typename func_add>
-void generate_lxly_from_triple(ABY2_PRE_Share b, func_add ADD, int num_round=0)
+void generate_lxly_from_triple(ABY2_PRE_Share b, func_add ADD, int num_round=0) const
 {
     BT t;
     if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
@@ -41,14 +41,14 @@ void generate_lxly_from_triple(ABY2_PRE_Share b, func_add ADD, int num_round=0)
 }
     
 template <typename func_add, typename func_sub, typename func_mul>
-static ABY2_PRE_Share receive_and_compute_lxly_share(func_add ADD, func_sub SUB, func_mul MULT, int num_round=0)
+static Datatype receive_and_compute_lxly_share(func_add ADD, func_sub SUB, func_mul MULT, int num_round=0) 
 {
     auto lta = pre_receive_from_live(PNEXT);
     auto ltb = pre_receive_from_live(PNEXT);
     auto ta = retrieve_output_share_arithmetic(num_round);
     auto bl = retrieve_output_share_arithmetic(num_round);
     auto prev_val = retrieve_output_share_arithmetic(num_round);
-    auto lxly = ADD(SUB(MULT(lta, bl), MULT(ltb, ta)), prev_val);
+    return ADD(SUB(MULT(lta, bl), MULT(ltb, ta)), prev_val);
 }
 
 template <typename func_mul>
@@ -583,6 +583,7 @@ for(uint64_t i = 0; i < num_triples; i++)
             lxly_b[1][arithmetic_triple_counter[1]++] = lzlw_ly;
             lxly_b[1][arithmetic_triple_counter[1]++] = lxly_lzlw;
         }
+}
 }
 delete[] triple_type[1];
 delete[] preprocessed_outputs_bool[1];
