@@ -212,8 +212,10 @@ void prepare_opt_bit_injection(ABY2_init x[], ABY2_init out[])
         store_output_share_arithmetic_(1);
         pre_send_to_(PNEXT);
         pre_send_to_(PNEXT);
-        pre_send_to_(PNEXT,1); //second round
-        pre_send_to_(PNEXT,1);
+        /* pre_send_to_(PNEXT,1); //second round */
+        /* pre_send_to_(PNEXT,1); */
+        send_in_last_round[PNEXT]++;
+        send_in_last_round[PNEXT]++;
         send_to_(PNEXT);
     }
 }
@@ -275,17 +277,21 @@ static void complete_preprocessing(uint64_t* arithmetic_triple_num, uint64_t* bo
 for(uint64_t j = 0; j < 2; j++)
 {
     communicate_pre_();
-for(uint64_t i = 0; i < arithmetic_triple_num[j] + boolean_triple_num[j]; i++)
-{
-    pre_receive_from_(PNEXT, j);
-    pre_receive_from_(PNEXT, j);
-}
-if(j == 0)
-    for(uint64_t i = 0; i < num_output_shares; i++)
+    for(uint64_t i = 0; i < arithmetic_triple_num[j] + boolean_triple_num[j]; i++)
+    {
         pre_receive_from_(PNEXT);
+        pre_receive_from_(PNEXT);
+    }
+    if(j == 0)
+    {
+        for(uint64_t i = 0; i < num_output_shares; i++)
+            pre_receive_from_(PNEXT);
+        for(uint64_t i = 0; i < send_in_last_round[PNEXT]; i++)
+            pre_send_to_(PNEXT);
+    }
+
 }
 triple_type.push_back(new uint8_t[arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares]);
-std::cout << "num values in triple type: " << arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares << std::endl;
 triple_type_index.push_back(0);
 triple_type.push_back(new uint8_t[arithmetic_triple_num[1] + boolean_triple_num[1]]);
 triple_type_index.push_back(0);

@@ -119,7 +119,6 @@ send_count_pre[t] = 0;
 {
         if(sending_rounds < sending_args_pre[t].send_rounds - 1) // don't allocate memory for the last+1 round
 { 
-        std::cout << PARTY << "allocating " << sending_args_pre[t].elements_to_send[sending_rounds + 1] << " elements for sending round " << sending_rounds + 1 << std::endl;
         sending_args_pre[t].sent_elements[sending_rounds + 1] = NEW(DATATYPE[sending_args_pre[t].elements_to_send[sending_rounds + 1]]); // Allocate memory for all sending buffers for next round
 }                                                                                                                                         
 }
@@ -173,7 +172,8 @@ void pre_send_to_live(int player_id, DATATYPE a)
 #if SKIP_PRE == 1
     return;
 #else
-
+    std::cout << "PRE sending rounds: " << sending_rounds << std::endl;
+    std::cout << send_count_pre[player_id] << std::endl;
 #if SEND_BUFFER > 0
 if(send_count_pre[player_id] == SEND_BUFFER)
 {
@@ -187,7 +187,7 @@ send_count_pre[player_id]+=1;
 
 
 
-DATATYPE pre_receive_from_live(int player_id, int rounds = 0)
+DATATYPE pre_receive_from_live(int player_id)
 {
 #if SKIP_PRE == 1
     return 0;
@@ -199,7 +199,7 @@ if(share_buffer_pre[player_id] == RECV_BUFFER)
 }
 #endif
 share_buffer_pre[player_id] +=1;
-return receiving_args_pre[player_id].received_elements[rounds][share_buffer_pre[player_id] - 1];
+return receiving_args_pre[player_id].received_elements[rounds-1][share_buffer_pre[player_id] - 1];
 #endif
 }
 
@@ -446,7 +446,6 @@ preprocessed_outputs_bool_input_index[index]+=1;
 
 void store_output_share_arithmetic(DATATYPE val, int index=0)
 {
-std::cout << PARTY << "storing " << val << " in index " << preprocessed_outputs_arithmetic_input_index[index] << std::endl;
 preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_input_index[index]] = val;
 preprocessed_outputs_arithmetic_input_index[index]+=1;
 }
@@ -459,7 +458,6 @@ DATATYPE retrieve_output_share_bool(int index = 0)
 
 DATATYPE retrieve_output_share_arithmetic(int index = 0)
 {
-    std::cout << PARTY << "retrieving index " <<  index << " in index " << preprocessed_outputs_arithmetic_index[index] << std::endl;
     preprocessed_outputs_arithmetic_index[index]+=1;
     return preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index]-1];
 }

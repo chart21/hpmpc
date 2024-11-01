@@ -79,9 +79,6 @@ void complete_mult(func_add ADD, func_sub SUB)
     l1 = ADD(l1,p.l1);
     l2 = ADD(l2,p.l2);
     l3 = ADD(l3,p.l3);
-    /* std::cout << "l1: " << l1 << std::endl; */
-    /* std::cout << "l2: " << l2 << std::endl; */
-    /* std::cout << "l3: " << l3 << std::endl; */
 }
 
 template <typename func_add, typename func_sub, typename func_mul>

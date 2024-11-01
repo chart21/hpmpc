@@ -306,13 +306,11 @@ uint64_t arithmetic_triple_counter[num_rounds]{0};
 uint64_t boolean_triple_counter[num_rounds]{0};
 auto num_triples = arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares;
 preprocessed_outputs_bool[1] = new Datatype[preprocessed_outputs_bool_input_index[1]];
-std::cout << PARTY << " allocating " << preprocessed_outputs_arithmetic_input_index[1] << " for storing prep" << std::endl;
 preprocessed_outputs_arithmetic[1] = new Datatype[preprocessed_outputs_arithmetic_input_index[1]];
 preprocessed_outputs_arithmetic_input_index[1] = 0;
 preprocessed_outputs_bool_input_index[1] = 0;
 for(uint64_t i = 0; i < num_triples; i++)
 {
-std::cout << "type: " << uint32_t(triple_type[0][i]) << std::endl;
 switch(triple_type[0][i])
 {
 case 0: //AND
@@ -323,7 +321,6 @@ case 0: //AND
     auto bl = retrieve_output_share_bool();
     auto prev_val = retrieve_output_share_bool();
     lxly_b[0][boolean_triple_counter[0]++] = FUNC_XOR(FUNC_XOR(FUNC_AND(lta, bl), FUNC_AND(ltb, ta)), prev_val);
-    std::cout << "type i=: " << i << " AND" << std::endl;
     break;
 }
 case 1:
@@ -334,7 +331,6 @@ case 1:
     auto bl = retrieve_output_share_arithmetic();
     auto prev_val = retrieve_output_share_arithmetic();
     lxly_a[0][arithmetic_triple_counter[0]++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
-    std::cout << "type i=: " << i << " ADD" << std::endl;
     break;
 }
 case 3:
@@ -345,7 +341,6 @@ case 3:
     auto bl = retrieve_output_share_arithmetic();
     auto prev_val = retrieve_output_share_arithmetic();
     lxly_a[0][arithmetic_triple_counter[0]++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
-    std::cout << "type i=: " << i << "Bit2A" << std::endl;
     break;
 }
 case 4:
@@ -369,18 +364,17 @@ case 4:
     store_output_share_arithmetic(t.a,1);
     store_output_share_arithmetic(bl2,1);
     store_output_share_arithmetic(lxly2,1);
-    std::cout << "type i=: " << i << "Bit Inj" << std::endl;
     break;
 }
 default:
 {
     auto l = pre_receive_from_live(PNEXT);
     store_output_share(l);
-    std::cout << "type i=: " << i << " Output" << std::endl;
     break;
 }
 }
 }
+delete[] triple_type[0];
 delete[] preprocessed_outputs_bool[0];
 preprocessed_outputs_bool[0] = lxly_b[0];
 /* preprocessed_outputs_bool_index[0] = 0; */
@@ -388,10 +382,6 @@ preprocessed_outputs_bool_input_index[0] = 0;
 
 delete[] preprocessed_outputs_arithmetic[0];
 preprocessed_outputs_arithmetic[0] = lxly_a[0];
-for(uint64_t i = 0; i < arithmetic_triple_num[0]; i++)
-{
-    std::cout << "stored, inde, value: " << i << " " << int32_t(lxly_a[0][i]) << std::endl;
-}
 /* preprocessed_outputs_arithmetic_index[0] = 0; */
 preprocessed_outputs_arithmetic_input_index[0] = 0;
 
@@ -403,10 +393,7 @@ preprocessed_outputs_arithmetic_input_index[1] = 0;
 
 
 deinit_beaver();
-delete[] triple_type[0];
-std::cout << "communciating pre" << std::endl;
 communicate_pre();
-std::cout << "communciating pre done" << std::endl;
 lxly_a[1] = new Datatype[arithmetic_triple_num[1]];
 lxly_b[1] = new Datatype[boolean_triple_num[1]];
 num_triples = arithmetic_triple_num[1] + boolean_triple_num[1];
@@ -416,18 +403,19 @@ for(uint64_t i = 0; i < num_triples; i++)
     {
         case 4:
         {
-            auto lta = pre_receive_from_live(PNEXT,1);
-            auto ltb = pre_receive_from_live(PNEXT,1);
+            /* auto lta = pre_receive_from_live(PNEXT,1); */
+            /* auto ltb = pre_receive_from_live(PNEXT,1); */
+            auto lta = pre_receive_from_live(PNEXT);
+            auto ltb = pre_receive_from_live(PNEXT);
             auto ta = retrieve_output_share_arithmetic(1);
             auto bl = retrieve_output_share_arithmetic(1);
             auto prev_val = retrieve_output_share_arithmetic(1);
             auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
-            std::cout << "Storing lxly inddex, round 1: " << arithmetic_triple_counter[1] << " value: " << int32_t(lxly) << std::endl;
             lxly_a[1][arithmetic_triple_counter[1]++] = lxly;
         }
     }
 }
-
+delete[] triple_type[1];
 delete[] preprocessed_outputs_bool[1];
 preprocessed_outputs_bool[1] = lxly_b[1];
 /* preprocessed_outputs_bool_index[1] = 0; */
@@ -441,10 +429,9 @@ preprocessed_outputs_arithmetic_input_index[1] = 0;
 preprocessed_outputs_bool_index[1] = 0;
 preprocessed_outputs_arithmetic_index[1] = 0;
 
-/* delete[] lxly_a; */
-/* delete[] lxly_b; */
+delete[] lxly_a;
+delete[] lxly_b;
 init_srngs();
-std::cout << "completed preprocessing" << std::endl;
 }
 
 };

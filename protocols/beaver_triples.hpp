@@ -40,7 +40,6 @@ template <typename Datatype>
 triple<Datatype> retrieveArithmeticTriple()
 {
     total_arithmetic_triples_index++;
-    std::cout << "Triple: " << arithmetic_triple_a[total_arithmetic_triples_index-1] << " " << arithmetic_triple_b[total_arithmetic_triples_index-1] << " " << arithmetic_triple_c[total_arithmetic_triples_index-1] << std::endl;
     return triple<Datatype>{arithmetic_triple_a[total_arithmetic_triples_index-1], arithmetic_triple_b[total_arithmetic_triples_index-1], arithmetic_triple_c[total_arithmetic_triples_index-1]};
 }
 

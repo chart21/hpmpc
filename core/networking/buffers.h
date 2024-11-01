@@ -60,6 +60,7 @@ DATATYPE* preprocessed_outputs = nullptr;
 uint64_t preprocessed_outputs_input_index = 0;
 uint64_t preprocessed_outputs_index = 0;
 uint64_t total_preprocessed_outputs = 0;
+uint64_t send_in_last_round[num_players-1] = {0};
 #endif
 uint64_t num_generated[num_players*player_multiplier] = {0};
 

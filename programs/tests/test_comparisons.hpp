@@ -235,8 +235,8 @@ bool test_boolean_addition()
     Bitset s1;
     Bitset s2;
 
-    s1 = Bitset::prepare_A2B_S1(BITLENGTH, (S*) share_a.get_share_pointer());
-    s2 = Bitset::prepare_A2B_S2(BITLENGTH, (S*) share_a.get_share_pointer());
+    s1 = Bitset::prepare_A2B_S1(0, (S*) share_a.get_share_pointer());
+    s2 = Bitset::prepare_A2B_S2(0, (S*) share_a.get_share_pointer());
 
     Share::communicate();
 
@@ -274,10 +274,12 @@ bool test_boolean_addition()
     Share::communicate();
     share_c.complete_reveal_to_all(output);
 #if TEST_A2B_ADD == 1
-    UINT_TYPE ortho_output[BITLENGTH]; //TODO: Check, another ortho should not be neccecary!
-    unorthogonalize_boolean( (DATATYPE*) output, ortho_output);
+/*     UINT_TYPE ortho_output[BITLENGTH]; //TODO: Check, another ortho should not be neccecary! */
+/*     unorthogonalize_boolean( (DATATYPE*) output, ortho_output); */
+    /* for(int i = 0; i < DATTYPE; i++) */
+    /*     output[i] = ortho_output[i] * 2; */
     for(int i = 0; i < DATTYPE; i++)
-        output[i] = ortho_output[i] * 2;
+        output[i] *= 2;
 #endif
 
     //compare
@@ -324,8 +326,8 @@ bool test_A2B()
     Bitset s1;
     Bitset s2;
 
-    s1 = Bitset::prepare_A2B_S1(BITLENGTH, (S*) share_a.get_share_pointer());
-    s2 = Bitset::prepare_A2B_S2(BITLENGTH, (S*) share_a.get_share_pointer());
+    s1 = Bitset::prepare_A2B_S1(0, (S*) share_a.get_share_pointer());
+    s2 = Bitset::prepare_A2B_S2(0, (S*) share_a.get_share_pointer());
     
     Share::communicate();
     
@@ -345,17 +347,17 @@ bool test_A2B()
     s2.complete_reveal_to_all(a2_output);
    
     //TODO: Check, another ortho should not be neccecary! 
-    UINT_TYPE ortho_a1[BITLENGTH]; 
-    UINT_TYPE ortho_a2[BITLENGTH];
-    unorthogonalize_boolean( (DATATYPE*) a1_output, ortho_a1);
-    unorthogonalize_boolean( (DATATYPE*) a2_output, ortho_a2);
+    /* UINT_TYPE ortho_a1[BITLENGTH]; */ 
+    /* UINT_TYPE ortho_a2[BITLENGTH]; */
+    /* unorthogonalize_boolean( (DATATYPE*) a1_output, ortho_a1); */
+    /* unorthogonalize_boolean( (DATATYPE*) a2_output, ortho_a2); */
 
     //compare
     for(int i = 0; i < BITLENGTH*vectorization_factor; i++)
-        print_compare(a[i], ortho_a1[i] + ortho_a2[i]);
+        print_compare(a[i], a1_output[i] + a2_output[i]);
     for(int i = 0; i < BITLENGTH*vectorization_factor; i++)
     {
-        if(a[i] != ortho_a1[i] + ortho_a2[i])
+        if(a[i] != a1_output[i] + a2_output[i])
         {
             return false;
         }
