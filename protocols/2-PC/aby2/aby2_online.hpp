@@ -316,21 +316,22 @@ Datatype rxy = retrieve_output_share_arithmetic();
 Datatype rxyz = retrieve_output_share_arithmetic(1);
 Datatype rxz = retrieve_output_share_arithmetic();
 Datatype ryz = retrieve_output_share_arithmetic();
+std::cout << "rxy, rxyz, rxz, ryz: " << rxy << " " << rxyz << " " << rxz << " " << ryz << std::endl;
 
 ABY2_ONLINE_Share d;
 #if PARTY == 1
 d.m = 
     ADD(
-        ADD( MULT(m,SUB(ryz,MULT(b.m,c.l)))
-        ,(MULT(b.m,SUB(rxz, MULT(c.m,l)))))
-        ,MULT(c.m,SUB(rxy, MULT(m,b.l))));
+        ADD( MULT(m,SUB(ryz,MULT(b.m,c.l))) // a [lb lc] - ab [lc]
+        ,(MULT(b.m,SUB(rxz, MULT(c.m,l))))) // + b [la lc] - bc [la]
+        ,MULT(c.m,SUB(rxy, MULT(m,b.l)))); // + c [la lb] - ac [lb]
 #else
-d.m = ADD(
-        ADD( MULT(m,ADD(MULT(b.m,SUB(c.m,c.l)),ryz))
-        ,(MULT(b.m,SUB(rxz, MULT(c.m,l)))))
-        ,MULT(c.m,SUB(rxy, MULT(m,b.l)))); 
+d.m = ADD(                                              //abc +
+        ADD( MULT(m,ADD(MULT(b.m,SUB(c.m,c.l)),ryz)) // a [lb lc] - ab [lc]
+        ,(MULT(b.m,SUB(rxz, MULT(c.m,l))))) // + b [la lc] - bc [la]
+        ,MULT(c.m,SUB(rxy, MULT(m,b.l))));  // + c [la lb] - ac [lb]
 #endif
-d.m = SUB(d.m, rxyz);
+d.m = SUB(d.m, rxyz); // -rxyz
 return d;
 }
 

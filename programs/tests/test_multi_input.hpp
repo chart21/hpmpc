@@ -9,7 +9,7 @@
 #ifndef FUNCTION
 #define FUNCTION test_multi_input
 #endif
-#define TEST_MULTIMULT 0 // [a] * [b] * [c] = [d]
+#define TEST_MULTIMULT 1 // [a] * [b] * [c] = [d]
 #define TEST_MULTIDOT 1 // [A] x [B] x [C] = [d]
 
 #if TEST_MULTIMULT == 1

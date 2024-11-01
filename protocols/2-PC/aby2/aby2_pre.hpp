@@ -9,8 +9,8 @@ public:
 ABY2_PRE_Share()  {}
 ABY2_PRE_Share(Datatype l) { this->l = l; }
 
-template <typename func_add>
-void generate_lxly_from_triple(ABY2_PRE_Share b, func_add ADD, int num_round=0) const
+template <typename func_add, typename func_sub, typename func_mul>
+void generate_lxly_from_triple(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT, int num_round=0) const
 {
     BT t;
     if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
@@ -21,11 +21,12 @@ void generate_lxly_from_triple(ABY2_PRE_Share b, func_add ADD, int num_round=0) 
     {
         t = retrieveArithmeticTriple<Datatype>();
     }
+    std::cout << "l, b.l" << int(l) << " " << int(b.l) << std::endl;
     auto lta = ADD(l,t.a);
     auto ltb = ADD(b.l,t.b);
     pre_send_to_live(PNEXT, lta);
     pre_send_to_live(PNEXT, ltb);
-    auto lxly = ADD(ADD(lta, b.l), t.c);
+    auto lxly = ADD(SUB(MULT(lta, b.l), MULT(ltb, t.a)), t.c);
     if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
     {
     store_output_share_bool(t.a, num_round);
@@ -102,7 +103,7 @@ template <typename func_add, typename func_sub, typename func_mul>
     {
         triple_type[0][triple_type_index[0]++] = 1;
     }
-generate_lxly_from_triple(b, ADD);
+generate_lxly_from_triple(b, ADD, SUB, MULT);
 return ABY2_PRE_Share(getRandomVal(PSELF)); //new mask
 }
 
@@ -118,7 +119,7 @@ template <typename func_add, typename func_sub, typename func_mul>
     {
         triple_type[0][triple_type_index[0]++] = 1;
     }
-    generate_lxly_from_triple(b, ADD);
+    generate_lxly_from_triple(b, ADD, SUB, MULT);
     return ABY2_PRE_Share();
 }
 
@@ -295,9 +296,9 @@ else
     triple_type[1][triple_type_index[1]++] = 6;
 }
 store_output_share_arithmetic(c.l); // rxyz
-generate_lxly_from_triple(b, ADD); //rxy
-generate_lxly_from_triple(c, ADD); //rxz
-b.generate_lxly_from_triple(c, ADD); //ryz
+generate_lxly_from_triple(b, ADD, SUB, MULT); //rxy
+generate_lxly_from_triple(c, ADD, SUB, MULT); //rxz
+b.generate_lxly_from_triple(c, ADD, SUB, MULT); //ryz
 return ABY2_PRE_Share();
 }
 
@@ -330,12 +331,12 @@ store_output_share_arithmetic(l); //xzw
 store_output_share_arithmetic(b.l); //yzw
 store_output_share_arithmetic(c.l); // xyz
 store_output_share_arithmetic(d.l); //xyw
-generate_lxly_from_triple(b, ADD); //xy --> +2 stores
-c.generate_lxly_from_triple(d, ADD); //zw --> +2 stores
-generate_lxly_from_triple(c, ADD); //xz
-generate_lxly_from_triple(d, ADD); //xw
-b.generate_lxly_from_triple(d, ADD); //yz
-b.generate_lxly_from_triple(c, ADD); //yw
+generate_lxly_from_triple(b, ADD, SUB, MULT); //xy --> +2 stores
+c.generate_lxly_from_triple(d, ADD, SUB, MULT); //zw --> +2 stores
+generate_lxly_from_triple(c, ADD, SUB, MULT); //xz
+generate_lxly_from_triple(d, ADD, SUB, MULT); //xw
+b.generate_lxly_from_triple(d, ADD, SUB, MULT); //yz
+b.generate_lxly_from_triple(c, ADD, SUB, MULT); //yw
 return ABY2_PRE_Share();
 }
 
@@ -420,6 +421,7 @@ case 1: //ADD
 {
     auto lxly = receive_and_compute_lxly_share(OP_ADD,OP_SUB,OP_MULT);
     lxly_a[0][arithmetic_triple_counter[0]++] = lxly;
+    std::cout << PARTY << "case 1, index: " << arithmetic_triple_counter[0] << " lxly: " << lxly << std::endl;
     break;
 }
 case 3: //Bit2A
@@ -460,7 +462,7 @@ case 5: //Dot3 (bool)
     auto third = retrieve_output_share_bool();
     auto lxly = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND);
     lxly_b[0][boolean_triple_counter[0]++] = lxly;
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(third, FUNC_XOR, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(third, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
     break;
 }
 case 6: //Dot3 (arithemtic)
@@ -468,7 +470,8 @@ case 6: //Dot3 (arithemtic)
     auto third = retrieve_output_share_arithmetic();
     auto lxly = receive_and_compute_lxly_share(OP_ADD,OP_SUB,OP_MULT);
     lxly_a[0][arithmetic_triple_counter[0]++] = lxly;
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(third, OP_ADD, 1);
+    std::cout << PARTY << "index: " << arithmetic_triple_counter[0] << " lxly: " << lxly << std::endl;
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(third, OP_ADD, OP_SUB, OP_MULT, 1);
     break;
 }
 case 7: //Dot4 (bool)
@@ -481,11 +484,11 @@ case 7: //Dot4 (bool)
     auto lzlw = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND);
     lxly_b[0][boolean_triple_counter[0]++] = lxly;
     lxly_b[0][boolean_triple_counter[0]++] = lzlw;
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(z, FUNC_XOR, 1);
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(w, FUNC_XOR, 1);
-    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(x, FUNC_XOR, 1);
-    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(y, FUNC_XOR, 1);
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(lzlw, FUNC_XOR, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(z, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(w, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
+    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(x, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
+    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(y, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(lzlw, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
     break;
 }
 case 8: //Dot4 (arithemtic)
@@ -498,11 +501,11 @@ case 8: //Dot4 (arithemtic)
     auto lzlw = receive_and_compute_lxly_share(OP_ADD,OP_SUB,OP_MULT);
     lxly_a[0][arithmetic_triple_counter[0]++] = lxly;
     lxly_a[0][arithmetic_triple_counter[0]++] = lzlw;
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(z, OP_ADD, 1);
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(w, OP_ADD, 1);
-    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(x, OP_ADD, 1);
-    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(y, OP_ADD, 1);
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(lzlw, OP_ADD, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(z, OP_ADD, OP_SUB, OP_MULT, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(w, OP_ADD, OP_SUB, OP_MULT, 1);
+    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(x, OP_ADD, OP_SUB, OP_MULT,1);
+    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(y, OP_ADD, OP_SUB, OP_MULT, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(lzlw, OP_ADD, OP_SUB, OP_MULT, 1);
     break;
 }
 case 99: //Triple already consumed by previous case
@@ -566,6 +569,7 @@ for(uint64_t i = 0; i < num_triples; i++)
         {
             auto lxly = receive_and_compute_lxly_share(OP_ADD,OP_SUB,OP_MULT,1);
             lxly_a[1][arithmetic_triple_counter[1]++] = lxly;
+            std::cout << PARTY << "case 6, index: " << arithmetic_triple_counter[1] << " lxly: " << lxly << std::endl;
             break;
         }
         case 7:
