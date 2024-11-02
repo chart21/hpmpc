@@ -46,10 +46,20 @@ static Datatype receive_and_compute_lxly_share(func_add ADD, func_sub SUB, func_
 {
     auto lta = pre_receive_from_live(PNEXT);
     auto ltb = pre_receive_from_live(PNEXT);
+    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    {
+    auto ta = retrieve_output_share_bool(num_round);
+    auto bl = retrieve_output_share_bool(num_round);
+    auto prev_val = retrieve_output_share_bool(num_round);
+    return ADD(SUB(MULT(lta, bl), MULT(ltb, ta)), prev_val);
+    }
+    else
+    {
     auto ta = retrieve_output_share_arithmetic(num_round);
     auto bl = retrieve_output_share_arithmetic(num_round);
     auto prev_val = retrieve_output_share_arithmetic(num_round);
     return ADD(SUB(MULT(lta, bl), MULT(ltb, ta)), prev_val);
+    }
 }
 
 template <typename func_mul>
@@ -558,6 +568,7 @@ for(uint64_t i = 0; i < num_triples; i++)
             auto prev_val = retrieve_output_share_arithmetic(1);
             auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
             lxly_a[1][arithmetic_triple_counter[1]++] = lxly;
+            break;
         }
         case 5:
         {
@@ -584,6 +595,7 @@ for(uint64_t i = 0; i < num_triples; i++)
             lxly_b[1][boolean_triple_counter[1]++] = lzlw_lx;
             lxly_b[1][boolean_triple_counter[1]++] = lzlw_ly;
             lxly_b[1][boolean_triple_counter[1]++] = lxly_lzlw;
+            break;
         }
         case 8:
         {
@@ -597,6 +609,7 @@ for(uint64_t i = 0; i < num_triples; i++)
             lxly_a[1][arithmetic_triple_counter[1]++] = lzlw_lx;
             lxly_a[1][arithmetic_triple_counter[1]++] = lzlw_ly;
             lxly_a[1][arithmetic_triple_counter[1]++] = lxly_lzlw;
+            break;
         }
 }
 }
