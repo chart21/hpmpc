@@ -91,8 +91,6 @@ void pre_send_to_(int player_index)
 #if SKIP_PRE == 1
     return;
 #endif
-    /* std::cout << "Init sending rounds: " << sending_args_pre[player_index].send_rounds << std::endl; */
-    /* std::cout << sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] << std::endl; */
 #if SEND_BUFFER > 0
 if(sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] == SEND_BUFFER)
 {
@@ -115,8 +113,6 @@ if(receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_in
     receive_pre_();
 }
 #endif
-std::cout << "Rounds, elements: " << receiving_args_pre[player_index].rec_rounds << " " << receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] << std::endl;
-
 receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1;
 /* receiving_args_pre[player_index].elements_to_rec[num_round] += 1; */
 total_recv_pre[player_index] += 1;
@@ -310,6 +306,20 @@ void store_output_share_arithmetic_(int index = 0)
 {
     preprocessed_outputs_arithmetic_input_index[index]+=1;
 }
+
+template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+void store_output_share_ab_(func_add ADD, int index = 0)
+{
+    store_output_share_bool_(index);
+}
+
+template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+void store_output_share_ab_(func_add ADD, int index = 0)
+{
+    store_output_share_arithmetic_(index);
+}
+
+
 #endif
 void store_output_share_()
 {

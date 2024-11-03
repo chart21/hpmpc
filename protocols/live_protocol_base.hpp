@@ -172,8 +172,6 @@ void pre_send_to_live(int player_id, DATATYPE a)
 #if SKIP_PRE == 1
     return;
 #else
-    /* std::cout << "PRE sending rounds: " << sending_rounds << std::endl; */
-    /* std::cout << send_count_pre[player_id] << std::endl; */
 #if SEND_BUFFER > 0
 if(send_count_pre[player_id] == SEND_BUFFER)
 {
@@ -198,7 +196,6 @@ if(share_buffer_pre[player_id] == RECV_BUFFER)
     receive_pre();
 }
 #endif
-std::cout << "PRE recieive rounds, num elements: " << rounds-1 << " " << share_buffer_pre[player_id] << std::endl;
 share_buffer_pre[player_id] +=1;
 return receiving_args_pre[player_id].received_elements[rounds-1][share_buffer_pre[player_id] - 1];
 #endif
@@ -451,6 +448,8 @@ preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_input_ind
 preprocessed_outputs_arithmetic_input_index[index]+=1;
 }
 
+
+
 DATATYPE retrieve_output_share_bool(int index = 0)
 {
     preprocessed_outputs_bool_index[index]+=1;
@@ -462,6 +461,35 @@ DATATYPE retrieve_output_share_arithmetic(int index = 0)
     preprocessed_outputs_arithmetic_index[index]+=1;
     return preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index]-1];
 }
+
+
+
+template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+void store_output_share_ab(DATATYPE val, func_add ADD, int index = 0)
+{
+    store_output_share_bool(val, index);
+}
+
+template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+void store_output_share_ab(DATATYPE val, func_add ADD, int index = 0)
+{
+    store_output_share_arithmetic(val, index);
+}
+
+    template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+DATATYPE retrieve_output_share_ab(func_add ADD, int index = 0)
+{
+    return retrieve_output_share_bool(index);
+}
+
+template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+DATATYPE retrieve_output_share_ab(func_add ADD, int index = 0)
+{
+    return retrieve_output_share_arithmetic(index);
+}
+
+
+
 #endif
 
 void store_output_share(DATATYPE val)

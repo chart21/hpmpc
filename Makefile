@@ -7,7 +7,7 @@ NVCC ?= nvcc
 $(shell mkdir -p executables/flags)
 
 # Base flags
-EXECFLAGS := -march=native -g3 -fsanitize=address -fno-finite-math-only -std=c++20 -pthread 
+EXECFLAGS := -march=native -g -fno-finite-math-only -std=c++20 -pthread -fsanitize=address
 LINKFLAGS := -lssl -lcrypto -I nn/PIGEON
 CXXFLAGS := $(EXECFLAGS) $(LINKFLAGS)
 NVCCFLAGS := -Xptxas -O3
@@ -41,6 +41,7 @@ CONFIG_OPTIONS := PROTOCOL PRE PARTY BITLENGTH FRACTIONAL FUNCTION_IDENTIFIER NU
 				AVG_OPT AVG_OPT_THRESHOLD MSB0_OPT AVG1_OPT \
 				FUSE_DOT INTERLEAVE_COMM \
 				SKIP_PRE FAKE_TRIPLES \
+				ONLINE_OPTIMIZED BANDWIDTH_OPTIMIZED \
 
 
 

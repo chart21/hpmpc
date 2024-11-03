@@ -92,6 +92,15 @@ void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
         l = SET_ALL_ZERO();
     }
 }
+    
+template <int id,typename func_add, typename func_sub>
+void prepare_receive_from(func_add ADD, func_sub SUB)
+{
+    if constexpr(id == PSELF)
+        prepare_receive_from<id>(get_input_live(), ADD, SUB);
+    else
+        prepare_receive_from<id>(SET_ALL_ZERO(), ADD, SUB);
+}
 
 
 template <int id, typename func_add, typename func_sub>
@@ -191,9 +200,10 @@ void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
     l = getRandomVal(PSELF);
 #if PARTY == 0
     /* m = ADD(TRUNC(m),l); */
-    m = ADD(OP_SUB(SET_ALL_ZERO(),TRUNC(OP_SUB(SET_ALL_ZERO(),m))),l); // whyever this is necessary ...
+    m = ADD(SUB(SET_ALL_ZERO(),TRUNC(SUB(SET_ALL_ZERO(),m))),l); // whyever this is necessary ...
 #else
     m = ADD(TRUNC(m),l);
+    /* m = ADD(SUB(TRUNC(m), OP_MULT(OP_SHIFT_LOG_RIGHTF(m, BITLENGTH -1), PROMOTE(UINT_TYPE(1) << (BITLENGTH - 1))))   ,l); // x2^t - (x2 > 1) * 2^l */
 #endif
     send_to_live(PNEXT, m);
 }
@@ -314,11 +324,15 @@ void complete_opt_bit_injection()
 template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_dot3(const ABY2_ONLINE_Share b, const ABY2_ONLINE_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-Datatype rxy = retrieve_output_share_arithmetic();
-Datatype rxyz = retrieve_output_share_arithmetic(1);
-Datatype rxz = retrieve_output_share_arithmetic();
-Datatype ryz = retrieve_output_share_arithmetic();
-std::cout << "rxy, rxyz, rxz, ryz: " << rxy << " " << rxyz << " " << rxz << " " << ryz << std::endl;
+
+Datatype rxy = retrieve_output_share_ab(ADD);
+Datatype rxyz = retrieve_output_share_ab(ADD,1);
+Datatype rxz = retrieve_output_share_ab(ADD);
+Datatype ryz = retrieve_output_share_ab(ADD);
+/* Datatype rxy = retrieve_output_share_arithmetic(); */
+/* Datatype rxyz = retrieve_output_share_arithmetic(1); */
+/* Datatype rxz = retrieve_output_share_arithmetic(); */
+/* Datatype ryz = retrieve_output_share_arithmetic(); */
 
 ABY2_ONLINE_Share d;
 #if PARTY == 1
@@ -340,19 +354,35 @@ return d;
 template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_dot4(ABY2_ONLINE_Share b, ABY2_ONLINE_Share c, ABY2_ONLINE_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-Datatype rxy = retrieve_output_share_arithmetic();
-Datatype rzw = retrieve_output_share_arithmetic();
 
-Datatype rxyz = retrieve_output_share_arithmetic(1);
-Datatype rxyw = retrieve_output_share_arithmetic(1);
-Datatype rxzw = retrieve_output_share_arithmetic(1);
-Datatype ryzw = retrieve_output_share_arithmetic(1);
-Datatype rxyzw = retrieve_output_share_arithmetic(1);
+Datatype rxy = retrieve_output_share_ab(ADD);
+Datatype rzw = retrieve_output_share_ab(ADD);
 
-Datatype rxz = retrieve_output_share_arithmetic();
-Datatype rxw = retrieve_output_share_arithmetic();
-Datatype ryz = retrieve_output_share_arithmetic();
-Datatype ryw = retrieve_output_share_arithmetic();
+Datatype rxyz = retrieve_output_share_ab(ADD,1);
+Datatype rxyw = retrieve_output_share_ab(ADD,1);
+Datatype rxzw = retrieve_output_share_ab(ADD,1);
+Datatype ryzw = retrieve_output_share_ab(ADD,1);
+Datatype rxyzw = retrieve_output_share_ab(ADD,1);
+
+Datatype rxz = retrieve_output_share_ab(ADD);
+Datatype rxw = retrieve_output_share_ab(ADD);
+Datatype ryz = retrieve_output_share_ab(ADD);
+Datatype ryw = retrieve_output_share_ab(ADD);
+
+    
+/* Datatype rxy = retrieve_output_share_arithmetic(); */
+/* Datatype rzw = retrieve_output_share_arithmetic(); */
+
+/* Datatype rxyz = retrieve_output_share_arithmetic(1); */
+/* Datatype rxyw = retrieve_output_share_arithmetic(1); */
+/* Datatype rxzw = retrieve_output_share_arithmetic(1); */
+/* Datatype ryzw = retrieve_output_share_arithmetic(1); */
+/* Datatype rxyzw = retrieve_output_share_arithmetic(1); */
+
+/* Datatype rxz = retrieve_output_share_arithmetic(); */
+/* Datatype rxw = retrieve_output_share_arithmetic(); */
+/* Datatype ryz = retrieve_output_share_arithmetic(); */
+/* Datatype ryw = retrieve_output_share_arithmetic(); */
 
 ABY2_ONLINE_Share e;
 #if PARTY == 1
