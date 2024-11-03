@@ -12,15 +12,15 @@
 #ifndef FUNCTION
 #define FUNCTION test_comparisons
 #endif
-#define TEST_EQZ 0 // [a] == 0 ? [1] : [0]
+#define TEST_EQZ 1 // [a] == 0 ? [1] : [0]
 #define TEST_LTZ 1 // [a] < 0 ? [1] : [0]
-#define TEST_MAX_MIN 0 // [A] -> [max(A)] [min(A)]
-#define TEST_RELU 0 // [a] > 0 ? [a] : 0
-#define TEST_BOOLEAN_ADDITION 0 // [a]^B + [b]^B
+#define TEST_MAX_MIN 1 // [A] -> [max(A)] [min(A)]
+#define TEST_RELU 1 // [a] > 0 ? [a] : 0
+#define TEST_BOOLEAN_ADDITION 1 // [a]^B + [b]^B
 #define TEST_A2B_ADD 1 // Test A2B followed by addition when testing boolean addition
-#define TEST_A2B 0 // [a]^A -> [a]^B
-#define TEST_Bit2A 0 // [a]^b -> [a]^A
-#define TEST_BitInj 0 // [a]^A, [b]^b = [ab]^A
+#define TEST_A2B 1 // [a]^A -> [a]^B
+#define TEST_Bit2A 1 // [a]^b -> [a]^A
+#define TEST_BitInj 1 // [a]^A, [b]^b = [ab]^A
 
 #if TEST_EQZ == 1
 template<typename Share>
