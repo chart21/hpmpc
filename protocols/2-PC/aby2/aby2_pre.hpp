@@ -615,4 +615,41 @@ delete[] lxly_b;
 init_srngs();
 }
 
+// --- Untested Functions --- TODO: Test
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+ABY2_PRE_Share prepare_trunc_share(func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits=FRACTIONAL) const
+{
+    return ABY2_PRE_Share(getRandomVal(PSELF));
+} 
+
+void get_random_B2A()
+{
+        l = getRandomVal(PSELF);
+}
+
+
+#if USE_CUDA_GEMM == 2
+static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
+{}
+
+#elif USE_CUDA_GEMM == 4
+
+static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
+{}
+#endif
+#if USE_CUDA_GEMM > 0
+#if USE_CUDA_GEMM == 1
+    
+
+static void GEMM(OECL1_Share* a, OECL1_Share* b, OECL1_Share* c, int m, int n, int k, bool a_fixed = false)
+{}
+#else
+    
+
+static void GEMM(OECL1_Share* a, OECL1_Share* b, OECL1_Share* c, int m, int n, int k, bool a_fixed = false)
+{}
+#endif
+#endif
+
 };
