@@ -202,24 +202,32 @@ void prepare_bit2a(ABY2_PRE_Share out[])
     orthogonalize_arithmetic(temp2, lb);
     for(int i = 0; i < BITLENGTH; i++)
     {
-        auto t = retrieveArithmeticTriple<Datatype>();
         triple_type[0][triple_type_index[0]++] = 3;
 #if PARTY == 0
-        auto bl = SET_ALL_ZERO();
-        auto al = lb[i];
-#else 
-        auto bl = lb[i];
-        auto al = SET_ALL_ZERO();
+        ABY2_PRE_Share b1{lb[i]};
+        ABY2_PRE_Share b2{SET_ALL_ZERO()};
+#else
+        ABY2_PRE_Share b1{SET_ALL_ZERO()};
+        ABY2_PRE_Share b2{lb[i]};
 #endif
-        auto lta = OP_ADD(al, t.a);
-        auto ltb = OP_ADD(bl, t.b); //optimization?
-        pre_send_to_live(PNEXT, lta); 
-        pre_send_to_live(PNEXT, ltb);
-        auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, t.a)), t.c);
-        store_output_share_arithmetic(t.a);
-        store_output_share_arithmetic(bl);
-        store_output_share_arithmetic(lxly);
+        b1.generate_lxly_from_triple(b2, OP_ADD, OP_SUB, OP_MULT); // communication can be cut in half if triple of type x(P_0),y(P_1),[z] is used
         out[i].l = getRandomVal(PSELF); 
+/* #if PARTY == 0 */
+/*         auto bl = SET_ALL_ZERO(); */
+/*         auto al = lb[i]; */
+/* #else */ 
+/*         auto bl = lb[i]; */
+/*         auto al = SET_ALL_ZERO(); */
+/* #endif */
+/*         auto lta = OP_ADD(al, t.a); */
+/*         auto ltb = OP_ADD(bl, t.b); //optimization? */
+/*         pre_send_to_live(PNEXT, lta); */ 
+/*         pre_send_to_live(PNEXT, ltb); */
+/*         auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, t.a)), t.c); */
+/*         store_output_share_arithmetic(t.a); */
+/*         store_output_share_arithmetic(bl); */
+/*         store_output_share_arithmetic(lxly); */
+        /* out[i].l = getRandomVal(PSELF); */ 
     }
 }
 
@@ -240,24 +248,17 @@ void prepare_opt_bit_injection(ABY2_PRE_Share x[], ABY2_PRE_Share out[])
     orthogonalize_arithmetic(temp2, lb);
     for(int i = 0; i < BITLENGTH; i++)
     {
-        auto t = retrieveArithmeticTriple<Datatype>();
         triple_type[0][triple_type_index[0]++] = 4;
+        triple_type[1][triple_type_index[1]++] = 4;
 #if PARTY == 0
-        auto bl = SET_ALL_ZERO();
-        auto al = lb[i];
-#else 
-        auto bl = lb[i];
-        auto al = SET_ALL_ZERO();
+        ABY2_PRE_Share b1{lb[i]};
+        ABY2_PRE_Share b2{SET_ALL_ZERO()};
+#else
+        ABY2_PRE_Share b1{SET_ALL_ZERO()};
+        ABY2_PRE_Share b2{lb[i]};
 #endif
-        auto lta = OP_ADD(al, t.a);
-        auto ltb = OP_ADD(bl, t.b); //optimization?
-        pre_send_to_live(PNEXT, lta); 
-        pre_send_to_live(PNEXT, ltb);
-        auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, t.a)), t.c);
-        store_output_share_arithmetic(t.a);
-        store_output_share_arithmetic(bl);
-        store_output_share_arithmetic(lxly);
-        store_output_share_arithmetic(l);
+        b1.generate_lxly_from_triple(b2, OP_ADD, OP_SUB, OP_MULT); // communication can be cut in half if triple of type x(P_0),y(P_1),[z] is used
+        store_output_share_arithmetic(lb[i]);
         store_output_share_arithmetic(x[i].l);
         out[i].l = getRandomVal(PSELF); 
     }
@@ -436,35 +437,24 @@ case 1: //ADD
 }
 case 3: //Bit2A
 {
-    auto lta = pre_receive_from_live(PNEXT);
-    auto ltb = pre_receive_from_live(PNEXT);
-    auto ta = retrieve_output_share_arithmetic();
-    auto bl = retrieve_output_share_arithmetic();
-    auto prev_val = retrieve_output_share_arithmetic();
-    lxly_a[0][arithmetic_triple_counter[0]++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
+    /* auto lta = pre_receive_from_live(PNEXT); */
+    /* auto ltb = pre_receive_from_live(PNEXT); */
+    /* auto ta = retrieve_output_share_arithmetic(); */
+    /* auto bl = retrieve_output_share_arithmetic(); */
+    /* auto prev_val = retrieve_output_share_arithmetic(); */
+    /* lxly_a[0][arithmetic_triple_counter[0]++] = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val); */
+    auto lxly = receive_and_compute_lxly_share(OP_ADD,OP_SUB,OP_MULT); // preprocessing costs can be cut in half if triple of type x(P_0),y(P_1),[z] is used
+    lxly_a[0][arithmetic_triple_counter[0]++] = lxly;
     break;
 }
 case 4: //BitInjection
 {
-    auto lta = pre_receive_from_live(PNEXT);
-    auto ltb = pre_receive_from_live(PNEXT);
-    auto ta = retrieve_output_share_arithmetic();
-    auto bl = retrieve_output_share_arithmetic();
-    auto prev_val = retrieve_output_share_arithmetic();
-    auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
-    lxly_a[0][arithmetic_triple_counter[0]++] = lxly;
-    auto t = retrieveArithmeticTriple<Datatype>();
-    triple_type[1][triple_type_index[1]++] = 4;
-    auto bl2 = OP_SUB(retrieve_output_share_arithmetic(), OP_ADD(lxly,lxly)); // [lb] - 2[lb1lb2]
-    auto al2 = retrieve_output_share_arithmetic();
-    auto lta2 = OP_ADD(al2, t.a);
-    auto ltb2 = OP_ADD(bl2, t.b); //optimization?
-    pre_send_to_live(PNEXT, lta2); 
-    pre_send_to_live(PNEXT, ltb2);
-    auto lxly2 = OP_ADD(OP_SUB(OP_MULT(lta2, bl2), OP_MULT(ltb2, t.a)), t.c);
-    store_output_share_arithmetic(t.a,1);
-    store_output_share_arithmetic(bl2,1);
-    store_output_share_arithmetic(lxly2,1);
+    auto lxly = receive_and_compute_lxly_share(OP_ADD,OP_SUB,OP_MULT);
+    lxly = OP_SUB(retrieve_output_share_arithmetic(), OP_ADD(lxly,lxly)); 
+    lxly_a[0][arithmetic_triple_counter[0]++] = lxly; // [lb] - 2[lb1lb2] 
+    
+    ABY2_PRE_Share al2 = retrieve_output_share_arithmetic(); // [la]
+    al2.generate_lxly_from_triple(lxly, OP_ADD, OP_SUB, OP_MULT,1); // [la] [lb]
     break;
 }
 case 5: //Dot3 (bool)
@@ -559,14 +549,7 @@ for(uint64_t i = 0; i < num_triples; i++)
     {
         case 4:
         {
-            /* auto lta = pre_receive_from_live(PNEXT,1); */
-            /* auto ltb = pre_receive_from_live(PNEXT,1); */
-            auto lta = pre_receive_from_live(PNEXT);
-            auto ltb = pre_receive_from_live(PNEXT);
-            auto ta = retrieve_output_share_arithmetic(1);
-            auto bl = retrieve_output_share_arithmetic(1);
-            auto prev_val = retrieve_output_share_arithmetic(1);
-            auto lxly = OP_ADD(OP_SUB(OP_MULT(lta, bl), OP_MULT(ltb, ta)), prev_val);
+            auto lxly = receive_and_compute_lxly_share(OP_ADD,OP_SUB,OP_MULT,1);
             lxly_a[1][arithmetic_triple_counter[1]++] = lxly;
             break;
         }

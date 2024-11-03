@@ -56,17 +56,19 @@ void prepare_opt_bit_injection(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[])
     {
         Datatype lb = retrieve_output_share_arithmetic();
         Datatype lalb = retrieve_output_share_arithmetic(1);
+        auto xim = x[i].m;
+        auto xil = x[i].l;
 #if PARTY == 0
-        out[i].m = OP_MULT(b0[i],x[i].m);
+        out[i].m = OP_MULT(b0[i],xim);
 #else
         out[i].m = SET_ALL_ZERO();
 #endif
         out[i].m =
                 OP_ADD(
                 OP_SUB(out[i].m, // mamb 
-                OP_MULT(b0[i], x[i].l) ), // - mb [la]
+                OP_MULT(b0[i], xil) ), // - mb [la]
                 OP_MULT( OP_SUB(OP_ADD(b0[i], b0[i]),PROMOTE(1)), // + (2mb -1) 
-                OP_SUB(lalb, OP_MULT(x[i].m, lb)) )   ); // ([lalb] - ma [lb]) 
+                OP_SUB(lalb, OP_MULT(xim, lb)) )   ); // ([lalb] - ma [lb]) 
         out[i].l = getRandomVal(PSELF); 
         out[i].m = OP_ADD(out[i].m, out[i].l);
         send_to_live(PNEXT, out[i].m);

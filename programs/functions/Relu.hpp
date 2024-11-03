@@ -256,8 +256,10 @@ static void RELU(const Additive_Share<Datatype, Share>*  begin, const Additive_S
         }
         else
             pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm,rk,Share, Datatype>);
+            /* pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_optB2A<rm,rk,Share, Datatype>); */
 #else
             pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm,rk,Share, Datatype>);
+            /* pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_optB2A<rm,rk,Share, Datatype>); */
 #endif
 
 #if TRUNC_DELAYED == 1
@@ -290,8 +292,10 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>*  begin, const si
         }
         else
             RELU_range_in_place_opt<m,k,Share, Datatype>(output, len);
+            /* RELU_range_in_place_optB2A<m,k,Share, Datatype>(output, len); */
 #else
             RELU_range_in_place_opt<m,k,Share, Datatype>(output, len);
+            /* RELU_range_in_place_optB2A<m,k,Share, Datatype>(output, len); */
 #endif
 
 #if TRUNC_DELAYED == 1

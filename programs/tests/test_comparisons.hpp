@@ -12,14 +12,14 @@
 #ifndef FUNCTION
 #define FUNCTION test_comparisons
 #endif
-#define TEST_EQZ 1 // [a] == 0 ? [1] : [0]
-#define TEST_LTZ 1 // [a] < 0 ? [1] : [0]
-#define TEST_MAX_MIN 1 // [A] -> [max(A)] [min(A)]
+#define TEST_EQZ 0 // [a] == 0 ? [1] : [0]
+#define TEST_LTZ 0 // [a] < 0 ? [1] : [0]
+#define TEST_MAX_MIN 0 // [A] -> [max(A)] [min(A)]
 #define TEST_RELU 0 // [a] > 0 ? [a] : 0
-#define TEST_BOOLEAN_ADDITION 1 // [a]^B + [b]^B
-#define TEST_A2B_ADD 1 // Test A2B followed by addition when testing boolean addition
-#define TEST_A2B 1 // [a]^A -> [a]^B
-#define TEST_Bit2A 1 // [a]^b -> [a]^A
+#define TEST_BOOLEAN_ADDITION 0 // [a]^B + [b]^B
+#define TEST_A2B_ADD 0 // Test A2B followed by addition when testing boolean addition
+#define TEST_A2B 0 // [a]^A -> [a]^B
+#define TEST_Bit2A 0 // [a]^b -> [a]^A
 #define TEST_BitInj 1 // [a]^A, [b]^b = [ab]^A
 
 #if TEST_EQZ == 1
@@ -431,35 +431,82 @@ bool test_BitInj()
     S share_b = SET_ALL_ONE();
     sint val_a = 25;
     sint val_b = 25;
+    sint val_c = -10;
+    sint val_d = -10;
+    sint val_e = 0;
+    sint val_f = 0;
     sint output_a;
     sint output_b;
+    sint output_c;
+    sint output_d;
+    sint output_e;
+    sint output_f;
     Share::communicate();
+    share_a = share_a & share_b;
+    share_b = share_b & share_b;
+    Share::communicate();
+    share_a.complete_and();
+    share_b.complete_and();
+
+
 
     //Bit2A
-    share_a.prepare_opt_bit_injection(val_a.get_share_pointer(), output_a.get_share_pointer());
-    share_b.prepare_opt_bit_injection(val_b.get_share_pointer(), output_b.get_share_pointer());
+    share_a.prepare_opt_bit_injection(val_a.get_share_pointer(), val_a.get_share_pointer());
+    share_b.prepare_opt_bit_injection(val_b.get_share_pointer(), val_b.get_share_pointer());
+    share_a.prepare_opt_bit_injection(val_c.get_share_pointer(), val_c.get_share_pointer());
+    share_b.prepare_opt_bit_injection(val_d.get_share_pointer(), val_d.get_share_pointer()); 
+    share_a.prepare_opt_bit_injection(val_e.get_share_pointer(), val_e.get_share_pointer());
+    share_b.prepare_opt_bit_injection(val_f.get_share_pointer(), val_f.get_share_pointer());
     Share::communicate();
-    output_a.complete_opt_bit_injection();
-    output_b.complete_opt_bit_injection();
+    val_a.complete_opt_bit_injection();
+    val_b.complete_opt_bit_injection();
+    val_c.complete_opt_bit_injection();
+    val_d.complete_opt_bit_injection();
+    val_e.complete_opt_bit_injection();
+    val_f.complete_opt_bit_injection();
+    output_a = val_a;
+    output_b = val_b;
+    output_c = val_c;
+    output_d = val_d;
+    output_e = val_e;
+    output_f = val_f;
     
     //reveal
     UINT_TYPE ortho_a[DATTYPE];
     UINT_TYPE ortho_b[DATTYPE];
+    UINT_TYPE ortho_c[DATTYPE];
+    UINT_TYPE ortho_d[DATTYPE];
+    UINT_TYPE ortho_e[DATTYPE];
+    UINT_TYPE ortho_f[DATTYPE];
+    
     output_a.prepare_reveal_to_all();
     output_b.prepare_reveal_to_all();
+    output_c.prepare_reveal_to_all();
+    output_d.prepare_reveal_to_all();
+    output_e.prepare_reveal_to_all();
+    output_f.prepare_reveal_to_all();
+
     Share::communicate();
     output_a.complete_reveal_to_all(ortho_a);
     output_b.complete_reveal_to_all(ortho_b);
+    output_c.complete_reveal_to_all(ortho_c);
+    output_d.complete_reveal_to_all(ortho_d);
+    output_e.complete_reveal_to_all(ortho_e);
+    output_f.complete_reveal_to_all(ortho_f);
     //compare
     
     for(int i = 0; i < DATTYPE; i++)
     {
         print_compare(0, ortho_a[i]);
         print_compare(25, ortho_b[i]);
+        print_compare(0, ortho_c[i]);
+        print_compare(-10, ortho_d[i]);
+        print_compare(0, ortho_e[i]);
+        print_compare(0, ortho_f[i]);
     }
     for(int i = 0; i < DATTYPE; i++)
     {
-        if(ortho_a[i] != 0 || ortho_b[i] != 25)
+        if(ortho_a[i] != 0 || ortho_b[i] != 25 || ortho_c[i] != 0 || ortho_d[i] != -10 || ortho_e[i] != 0 || ortho_f[i] != 0)
         {
             return false;
         }
