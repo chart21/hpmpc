@@ -44,14 +44,8 @@ void init_buffers(int link_id)
 #endif
 }
 
-DATATYPE getRandomVal_l(int link_id)
+DATATYPE getRandomVal(int link_id)
 {
-/* #if PARTY == 0 */
-/*     num_generated[link_id] += 1; */
-/* #else */
-/*     num_generated[link_id] += 2; */
-/* #endif */
-/*     return num_generated[link_id]; */
 #if SKIP_PRE == 1
     return SET_ALL_ZERO();
 #endif
@@ -106,31 +100,3 @@ DATATYPE getRandomVal_l(int link_id)
 }
 
 
-/* DATATYPE getRandomVal(int link_id1, int link_id2) */
-/* { */
-/*     return getRandomVal( num_players * (link_id1+1) + link_id2); */
-/* } */
-#include <deque>
-std::deque<DATATYPE> randvals;
-
-DATATYPE getRandomVal(int link_id)
-{
-    auto a = getRandomVal_l(link_id);
-    return a;
-    /* std::cout << "PARTY " << PARTY << " LINK " << link_id << " RANDOM " << a << std::endl; */
-/* if(current_phase == PHASE_PRE) */
-/* { */
-    /* randvals.push_back(a); */
-/* } */
-/* else */
-/* { */
- /* if(randvals.front() != a) */
-    /*  std::cout << "ERROR: RANDOM VALUES DO NOT MATCH" << std::endl; */
- /* else */
-    /*  std::cout << "MATCH" << std::endl; */
- /* randvals.pop_front(); */
-/* } */
-/* /1* return a; *1/ */
-/* std::cout << "num_gen " << num_generated[link_id]*100000000 << std::endl; */
-/* return num_generated[link_id]*100000000; */
-}

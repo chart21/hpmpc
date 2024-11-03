@@ -529,7 +529,7 @@ void get_random_B2A()
 
 
 #if USE_CUDA_GEMM == 2
-static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+static void CONV_2D(const ABY2_ONLINE_Share* X, const ABY2_ONLINE_Share* W, ABY2_ONLINE_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
     const int factor = DATTYPE/BITLENGTH;
     const int xSize = inh * inw * din * batchSize;
     const int wSize = wh * ww * din * dout;
@@ -549,7 +549,7 @@ static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, 
         alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
         #if PARTY == 0
         auto tempml = OP_SUB(X[i].m,X[i].l);
-        unorthogonalize_arithmetic(&templ, temp, 1);
+        unorthogonalize_arithmetic(&tempml, temp, 1);
         #else
         unorthogonalize_arithmetic(&X[i].m, temp, 1);
         #endif
@@ -590,6 +590,8 @@ static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, 
             temp[j] = - y_p1[j * ySize + i] + y_p1_2[j * ySize + i];
 #endif
             orthogonalize_arithmetic(temp, &Y[i].m, 1);
+            auto lxly = retrieve_output_share_arithmetic();
+            Y[i].m = OP_SUB(Y[i].m, lxly);
     }
 
     delete[] x_p1;
@@ -603,7 +605,7 @@ static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, 
 
 #elif USE_CUDA_GEMM == 4
 
-static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
+static void CONV_2D(const ABY2_ONLINE_Share* X, const ABY2_ONLINE_Share* W, ABY2_ONLINE_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1){
     const int factor = DATTYPE/BITLENGTH;
     const int xSize = inh * inw * din * batchSize;
     const int wSize = wh * ww * din * dout;
@@ -658,6 +660,8 @@ static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, 
             temp[j] = - y_p1[j * ySize + i] - y_p1_2[j * ySize + i];
 #endif
         orthogonalize_arithmetic(temp, &Y[i].m, 1);
+        auto lxly = retrieve_output_share_arithmetic();
+        Y[i].m = OP_SUB(Y[i].m, lxly);
     }
 
     delete[] x_p1;
@@ -673,7 +677,7 @@ static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, 
 #if USE_CUDA_GEMM == 1
     
 
-static void GEMM(OECL1_Share* a, OECL1_Share* b, OECL1_Share* c, int m, int n, int k, bool a_fixed = false)
+static void GEMM(ABY2_ONLINE_Share* a, ABY2_ONLINE_Share* b, ABY2_ONLINE_Share* c, int m, int n, int k, bool a_fixed = false)
 {
     const int factor = DATTYPE / BITLENGTH;
     const int a_size = m * k;    
@@ -777,6 +781,8 @@ static void GEMM(OECL1_Share* a, OECL1_Share* b, OECL1_Share* c, int m, int n, i
         temp[i] = - cp1_1[i * c_size + j] - cp1_1[i * c_size + j];
 #endif
         orthogonalize_arithmetic(temp, &c[j].m, 1);
+        auto lxly = retrieve_output_share_arithmetic();
+        c[j].m = OP_SUB(c[j].m, lxly);
     }
 
     delete[] p1;
@@ -789,7 +795,7 @@ static void GEMM(OECL1_Share* a, OECL1_Share* b, OECL1_Share* c, int m, int n, i
 #else
     
 
-static void GEMM(OECL1_Share* a, OECL1_Share* b, OECL1_Share* c, int m, int n, int k, bool a_fixed = false)
+static void GEMM(ABY2_ONLINE_Share* a, ABY2_ONLINE_Share* b, ABY2_ONLINE_Share* c, int m, int n, int k, bool a_fixed = false)
 {
     const int factor = DATTYPE / BITLENGTH;
     const int a_size = m * k;    
@@ -926,6 +932,8 @@ else
         temp[i] = - cp1_1[i * c_size + j] - cp1_2[i * c_size + j];
 #endif
         orthogonalize_arithmetic(temp, &c[j].m, 1);
+        auto lxly = retrieve_output_share_arithmetic();
+        c[j].m = OP_SUB(c[j].m, lxly);
     }
 
 }

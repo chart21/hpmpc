@@ -393,25 +393,60 @@ void get_random_B2A()
 
 
 #if USE_CUDA_GEMM == 2
-static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
-{}
+static void CONV_2D(const ABY2_init* X, const ABY2_init* W, ABY2_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
+{
+    const int xSize = inh * inw * din * batchSize;
+    const int wSize = wh * ww * din * dout;
+    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = out_h * out_w * dout * batchSize;
+    
+    for(int i = 0; i < ySize; i++)
+    {
+        ABY2_init().generate_lxly_from_triple(OP_ADD);
+    }
+}
 
 #elif USE_CUDA_GEMM == 4
 
-static void CONV_2D(const OECL1_Share* X, const OECL1_Share* W, OECL1_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
-{}
+static void CONV_2D(const ABY2_init* X, const ABY2_init* W, ABY2_init* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
+{
+    const int xSize = inh * inw * din * batchSize;
+    const int wSize = wh * ww * din * dout;
+    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    const int ySize = out_h * out_w * dout * batchSize;
+    for(int i = 0; i < ySize; i++)
+    {
+        ABY2_init().generate_lxly_from_triple(OP_ADD);
+    }
+}
 #endif
 #if USE_CUDA_GEMM > 0
 #if USE_CUDA_GEMM == 1
     
 
-static void GEMM(OECL1_Share* a, OECL1_Share* b, OECL1_Share* c, int m, int n, int k, bool a_fixed = false)
-{}
+static void GEMM(ABY2_init* a, ABY2_init* b, ABY2_init* c, int m, int n, int k, bool a_fixed = false)
+{
+    const int c_size = m * n;
+    for(int i = 0; i < c_size; i++)
+    {
+        ABY2_init().generate_lxly_from_triple(OP_ADD);
+    }
+}
 #else
     
 
-static void GEMM(OECL1_Share* a, OECL1_Share* b, OECL1_Share* c, int m, int n, int k, bool a_fixed = false)
-{}
+static void GEMM(ABY2_init* a, ABY2_init* b, ABY2_init* c, int m, int n, int k, bool a_fixed = false)
+{
+
+
+    const int c_size = m * n;
+    for(int i = 0; i < c_size; i++)
+    {
+        ABY2_init().generate_lxly_from_triple(OP_ADD);
+    }
+}
 #endif
 #endif
 
