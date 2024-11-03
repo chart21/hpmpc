@@ -39,6 +39,40 @@ void generate_lxly_from_triple(ABY2_PRE_Share b, func_add ADD, func_sub SUB, fun
     store_output_share_arithmetic(lxly, num_round);
     }
 }
+
+template <typename func_add, typename func_sub, typename func_mul>
+void generate_lxly_from_triple_comp_opt(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT, int num_round=0) const
+{
+    BT t;
+    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    {
+        t = retrieveBooleanTriple<Datatype>();
+    }
+    else
+    {
+        t = retrieveArithmeticTriple<Datatype>();
+    }
+    auto lta = ADD(l,t.a);
+    auto ltb = ADD(b.l,t.b);
+    pre_send_to_live(PNEXT, lta);
+    auto lxly = ADD(SUB(MULT(lta, b.l), MULT(ltb, t.a)), t.c);
+    store_output_share_ab(lta, ADD, num_round);
+    store_output_share_ab(ltb, ADD, num_round);
+    store_output_share_ab(b.l, ADD, num_round);
+    store_output_share_ab(t.a, ADD, num_round);
+    store_output_share_ab(t.c, ADD, num_round);
+}
+
+    template <typename func_add, typename func_sub, typename func_mul>
+static Datatype receive_and_compute_lxly_share_comp_opt(func_add ADD, func_sub SUB, func_mul MULT, int num_round=0) 
+{
+    auto lta = OP_ADD(pre_receive_from_live(PNEXT), retrieve_output_share_ab(ADD, num_round));
+    auto ltb = OP_ADD(pre_receive_from_live(PNEXT), retrieve_output_share_ab(ADD, num_round));
+    auto ta = retrieve_output_share_ab(ADD, num_round);
+    auto bl = retrieve_output_share_ab(ADD, num_round);
+    auto tc = retrieve_output_share_ab(ADD, num_round);
+    return ADD(SUB(MULT(lta, bl), MULT(ltb, ta)), tc);
+}
     
 template <typename func_add, typename func_sub, typename func_mul>
 static Datatype receive_and_compute_lxly_share(func_add ADD, func_sub SUB, func_mul MULT, int num_round=0) 
@@ -641,48 +675,6 @@ void get_random_B2A()
 }
 
 
-#if USE_CUDA_GEMM == 2
-static void CONV_2D(const ABY2_PRE_Share* X, const ABY2_PRE_Share* W, ABY2_PRE_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
-{
-    const int m = out_h * out_w * batchSize;
-    const int k = wh * ww * din;
-    const int n = dout;
-    for(int i = 0; i < m; i++)
-    {
-        for(int j = 0; j < n; j++)
-        {
-            for(int l = 0; l < k; l++)
-            {
-                Y[i * n + j].generate_lxly_from_triple(W[l * n + j], OP_ADD, OP_SUB, OP_MULT);
-                triple_type[0][triple_type_index[0]++] = 10;
-            }
-            triple_type[0][triple_type_index[0]-k] = 9; // first triple
-        }
-    }
-}
-
-#elif USE_CUDA_GEMM == 4
-
-static void CONV_2D(const ABY2_PRE_Share* X, const ABY2_PRE_Share* W, ABY2_PRE_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
-{
-    const int m = out_h * out_w * batchSize;
-    const int k = wh * ww * din;
-    const int n = dout;
-    for(int i = 0; i < m; i++)
-    {
-        for(int j = 0; j < n; j++)
-        {
-            for(int l = 0; l < k; l++)
-            {
-                Y[i * n + j].generate_lxly_from_triple(W[l * n + j], OP_ADD, OP_SUB, OP_MULT);
-                triple_type[0][triple_type_index[0]++] = 10;
-            }
-            triple_type[0][triple_type_index[0]-k] = 9;
-        }
-    }
-
-
-#endif
 
 #if USE_CUDA_GEMM > 0
 #if USE_CUDA_GEMM == 1
@@ -696,7 +688,7 @@ static void GEMM(ABY2_PRE_Share* a, ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m,
         {
             for(int l = 0; l < k; l++)
             {
-                a[i * k + l].generate_lxly_from_triple(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
+                a[i * k + l].generate_lxly_from_triple_comp_opt(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
                 triple_type[0][triple_type_index[0]++] = 10;
             }
             triple_type[0][triple_type_index[0]-k] = 9;
@@ -714,7 +706,7 @@ static void GEMM(ABY2_PRE_Share* a, ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m,
         {
             for(int l = 0; l < k; l++)
             {
-                a[i * k + l].generate_lxly_from_triple(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
+                a[i * k + l].generate_lxly_from_triple_comp_opt(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
                 triple_type[0][triple_type_index[0]++] = 10;
             }
             triple_type[0][triple_type_index[0]-k] = 9;
@@ -724,3 +716,91 @@ static void GEMM(ABY2_PRE_Share* a, ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m,
 #endif
 
 };
+
+#if USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
+template <typename T>
+T im2col_get_pixel_l(const T* im, int height, int width, int channels,
+                        int row, int col, int channel, int pad)
+{
+    row -= pad;
+    col -= pad;
+
+    if (row < 0 || col < 0 || row >= height || col >= width) return 0;
+    return im[col + width * (row + height * channel)];
+}
+
+// From Berkeley Vision's Caffe!
+// https://github.com/BVLC/caffe/blob/master/LICENSE
+template <typename T>
+void im2col_l(const T* data_im, int channels, int height, int width,
+            int ksize, int stride, int pad, T* data_col)
+{
+    int c, h, w;
+    int height_col = (height + 2 * pad - ksize) / stride + 1;
+    int width_col = (width + 2 * pad - ksize) / stride + 1;
+
+    int channels_col = channels * ksize * ksize;
+    for (c = 0; c < channels_col; ++c) {
+        int w_offset = c % ksize;
+        int h_offset = (c / ksize) % ksize;
+        int c_im = c / ksize / ksize;
+        for (h = 0; h < height_col; ++h) {
+            for (w = 0; w < width_col; ++w) {
+                int im_row = h_offset + h * stride;
+                int im_col = w_offset + w * stride;
+                int col_index = (c * height_col + h) * width_col + w;
+                data_col[col_index] = im2col_get_pixel_l(data_im, height, width, channels,
+                    im_row, im_col, c_im, pad);
+            }
+        }
+    }
+}
+
+/* struct CONV2D_args */
+/* { */
+/*     int batchSize; */
+/*     int inh; */
+/*     int inw; */
+/*     int din; */
+/*     int dout; */
+/*     int wh; */
+/*     int ww; */
+/*     int padding; */
+/*     int stride; */
+/*     int dilation; */
+/*     int m; */
+/*     int n; */
+/*     int k; */
+/* }; */
+
+/* std::queue<CONV2D_args> CONV2D_args_queue; */
+
+
+
+
+
+/* static void COMPLETE_CONV_2D(const ABY2_PRE_Share* X, const ABY2_PRE_Share* W, ABY2_PRE_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1) */
+/* { */
+/* } */
+
+template <typename Datatype>
+static void ABY2_PRE_Share<Datatype>::CONV_2D(const ABY2_PRE_Share* X, const ABY2_PRE_Share* W, ABY2_PRE_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
+{
+    const int factor = DATTYPE/BITLENGTH;
+    const int xSize = inh * inw * din * batchSize;
+    const int wSize = wh * ww * din * dout;
+    const int ySize = out_h * out_w * dout * batchSize;
+    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
+    
+    const int m = out_h * out_w * batchSize;
+    const int k = wh * ww * din;
+    const int n = dout;
+    batchSize *= factor; 
+
+    X_col = new Datatype[k * m];
+    im2col_l(X, din, inh, inw, wh, stride, padding, X_col);
+    ABY2_PRE_Share<T>::GEMM(X_col, W, Y, m, n, k, true);
+    delete[] X_col;
+}
+#endif

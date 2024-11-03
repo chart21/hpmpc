@@ -777,7 +777,7 @@ static void GEMM(ABY2_ONLINE_Share* a, ABY2_ONLINE_Share* b, ABY2_ONLINE_Share* 
 #if PARTY == 0
             temp[i] = cp1_1[i * c_size + j] - cp1_1[i * c_size + j];
 #else
-        temp[i] = - cp1_1[i * c_size + j] - cp1_1[i * c_size + j];
+            temp[i] = - cp1_1[i * c_size + j] - cp1_1[i * c_size + j];
 #endif
         orthogonalize_arithmetic(temp, &c[j].m, 1);
         auto lxly = retrieve_output_share_arithmetic();
