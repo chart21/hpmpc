@@ -509,6 +509,18 @@ case 8: //Dot4 (arithemtic)
     ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(lzlw, OP_ADD, OP_SUB, OP_MULT, 1);
     break;
 }
+case 9: //MatMul First Dot element
+{
+    auto lxly = receive_and_compute_lxly_share(OP_ADD,OP_SUB,OP_MULT);
+    lxly_a[0][arithmetic_triple_counter[0]++] = lxly;
+    break;
+}
+case 10: //MatMul
+{
+    auto lxly = receive_and_compute_lxly_share(OP_ADD,OP_SUB,OP_MULT);
+    lxly_a[0][arithmetic_triple_counter[0]-1] = OP_ADD(lxly_a[0][arithmetic_triple_counter[0]-1], lxly);
+    break;
+}
 case 99: //Triple already consumed by previous case
 {
     break;
@@ -632,14 +644,20 @@ void get_random_B2A()
 #if USE_CUDA_GEMM == 2
 static void CONV_2D(const ABY2_PRE_Share* X, const ABY2_PRE_Share* W, ABY2_PRE_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
 {
-    const int xSize = inh * inw * din * batchSize;
-    const int wSize = wh * ww * din * dout;
-    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
-    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
-    const int ySize = out_h * out_w * dout * batchSize;
-    for(int i = 0; i < ySize; i++)
+    const int m = out_h * out_w * batchSize;
+    const int k = wh * ww * din;
+    const int n = dout;
+    for(int i = 0; i < m; i++)
     {
-        X[i].generate_lxly_from_triple(W[i], OP_ADD, OP_SUB, OP_MULT);
+        for(int j = 0; j < n; j++)
+        {
+            for(int l = 0; l < k; l++)
+            {
+                Y[i * n + j].generate_lxly_from_triple(W[l * n + j], OP_ADD, OP_SUB, OP_MULT);
+                triple_type[0][triple_type_index[0]++] = 10;
+            }
+            triple_type[0][triple_type_index[0]-k] = 9; // first triple
+        }
     }
 }
 
@@ -647,42 +665,61 @@ static void CONV_2D(const ABY2_PRE_Share* X, const ABY2_PRE_Share* W, ABY2_PRE_S
 
 static void CONV_2D(const ABY2_PRE_Share* X, const ABY2_PRE_Share* W, ABY2_PRE_Share* Y, int batchSize, int inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1)
 {
-    const int xSize = inh * inw * din * batchSize;
-    const int wSize = wh * ww * din * dout;
-    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
-    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
-    const int ySize = out_h * out_w * dout * batchSize;
-    for(int i = 0; i < ySize; i++)
+    const int m = out_h * out_w * batchSize;
+    const int k = wh * ww * din;
+    const int n = dout;
+    for(int i = 0; i < m; i++)
     {
-        X[i].generate_lxly_from_triple(W[i], OP_ADD, OP_SUB, OP_MULT);
+        for(int j = 0; j < n; j++)
+        {
+            for(int l = 0; l < k; l++)
+            {
+                Y[i * n + j].generate_lxly_from_triple(W[l * n + j], OP_ADD, OP_SUB, OP_MULT);
+                triple_type[0][triple_type_index[0]++] = 10;
+            }
+            triple_type[0][triple_type_index[0]-k] = 9;
+        }
     }
-}
+
+
 #endif
+
 #if USE_CUDA_GEMM > 0
 #if USE_CUDA_GEMM == 1
     
 
 static void GEMM(ABY2_PRE_Share* a, ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m, int n, int k, bool a_fixed = false)
 {
-    const int c_size = m * n;
-    for(int i = 0; i < c_size; i++)
+    for(int i = 0; i < m; i++)
     {
-        a[i].generate_lxly_from_triple(b[i], OP_ADD, OP_SUB, OP_MULT);
+        for(int j = 0; j < n; j++)
+        {
+            for(int l = 0; l < k; l++)
+            {
+                a[i * k + l].generate_lxly_from_triple(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
+                triple_type[0][triple_type_index[0]++] = 10;
+            }
+            triple_type[0][triple_type_index[0]-k] = 9;
+        }
     }
-
 }
+
 #else
-    
 
 static void GEMM(ABY2_PRE_Share* a, ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m, int n, int k, bool a_fixed = false)
 {
-    const int c_size = m * n;
-    for(int i = 0; i < c_size; i++)
+    for(int i = 0; i < m; i++)
     {
-        a[i].generate_lxly_from_triple(b[i], OP_ADD, OP_SUB, OP_MULT);
-    }
-
-}
+        for(int j = 0; j < n; j++)
+        {
+            for(int l = 0; l < k; l++)
+            {
+                a[i * k + l].generate_lxly_from_triple(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
+                triple_type[0][triple_type_index[0]++] = 10;
+            }
+            triple_type[0][triple_type_index[0]-k] = 9;
+        }
+       
 #endif
 #endif
 

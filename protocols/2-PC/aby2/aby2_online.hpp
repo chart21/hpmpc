@@ -699,7 +699,6 @@ static void GEMM(ABY2_ONLINE_Share* a, ABY2_ONLINE_Share* b, ABY2_ONLINE_Share* 
     UINT_TYPE* bp2 = new UINT_TYPE[factor * b_size];
     UINT_TYPE* cp1_1 = new UINT_TYPE[factor * c_size];
     UINT_TYPE* cp1_2 = new UINT_TYPE[factor * c_size];
-    UINT_TYPE* cp0 = new UINT_TYPE[factor * c_size]{0}; 
 
 
     for(int i = 0; i < a_size; i++)
@@ -817,7 +816,6 @@ static void GEMM(ABY2_ONLINE_Share* a, ABY2_ONLINE_Share* b, ABY2_ONLINE_Share* 
     UINT_TYPE* bp2 = new UINT_TYPE[factor * b_size];
     UINT_TYPE* cp1_1 = new UINT_TYPE[factor * c_size];
     UINT_TYPE* cp1_2 = new UINT_TYPE[factor * c_size];
-    UINT_TYPE* cp0 = new UINT_TYPE[factor * c_size]{0};
 
 
     for(int i = 0; i < a_size; i++)
@@ -927,9 +925,9 @@ else
         alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
         for (int i = 0; i < factor; i++)
 #if PARTY == 0
-        temp[i] = cp1_1[i * c_size + j] - cp1_2[i * c_size + j];
+            temp[i] = cp1_1[i * c_size + j] - cp1_2[i * c_size + j];
 #else
-        temp[i] = - cp1_1[i * c_size + j] - cp1_2[i * c_size + j];
+            temp[i] = - cp1_1[i * c_size + j] - cp1_2[i * c_size + j];
 #endif
         orthogonalize_arithmetic(temp, &c[j].m, 1);
         auto lxly = retrieve_output_share_arithmetic();
