@@ -347,6 +347,9 @@ for(uint64_t j = 0; j < 2; j++)
     }
 
 }
+#if SKIP_PRE == 1
+return;
+#endif
 triple_type.push_back(new uint8_t[arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares]);
 triple_type_index.push_back(0);
 triple_type.push_back(new uint8_t[arithmetic_triple_num[1] + boolean_triple_num[1]]);
@@ -356,28 +359,29 @@ triple_type_index.push_back(0);
 #if SKIP_PRE == 1
 template <typename func_add, typename func_sub, typename func_mul>
 static void generate_zero_triples(uint64_t triple_num, func_add ADD, func_sub SUB, func_mul MULT)
-{
-DATATYPE* lxly = new DATATYPE[triple_num];
-for (uint64_t i = 0; i < triple_num; i++)
-{
-    lxly[i] = SET_ALL_ZERO();
-}
-if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
-{
-delete[] preprocessed_outputs_bool;
-preprocessed_outputs_bool = lxly;
-preprocessed_outputs_bool_index = 0;
-preprocessed_outputs_bool_input_index = 0;
-}
-else
-{
-delete[] preprocessed_outputs_arithmetic;
-preprocessed_outputs_arithmetic = lxly;
-preprocessed_outputs_arithmetic_index = 0;
-preprocessed_outputs_arithmetic_input_index = 0;
-}
-}
+{}
 #endif
+/* { */
+/* DATATYPE* lxly = new DATATYPE[triple_num]; */
+/* for (uint64_t i = 0; i < triple_num; i++) */
+/* { */
+/*     lxly[i] = SET_ALL_ZERO(); */
+/* } */
+/* if constexpr(std::is_same_v<func_add(), FUNC_XOR>) */
+/* { */
+/* delete[] preprocessed_outputs_bool; */
+/* preprocessed_outputs_bool[0] = lxly; */
+/* preprocessed_outputs_bool_index[0] = 0; */
+/* preprocessed_outputs_bool_input_index[0] = 0; */
+/* } */
+/* else */
+/* { */
+/* delete[] preprocessed_outputs_arithmetic; */
+/* preprocessed_outputs_arithmetic[0] = lxly; */
+/* preprocessed_outputs_arithmetic_index[0] = 0; */
+/* preprocessed_outputs_arithmetic_input_index[0] = 0; */
+/* } */
+/* } */
 
 // --- Untested Functions --- TODO: Test
 

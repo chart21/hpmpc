@@ -74,7 +74,7 @@ void init_circuit(std::string ips[]) {
     #endif
 #endif
   }
-#if PRE== 1 && BEAVER == 1 && SKIP_PRE == 0
+#if PRE== 1 && BEAVER == 1 
   num_arithmetic_triples.push_back(0); //temporary
   num_arithmetic_triples.push_back(0);
   num_boolean_triples.push_back(0);
@@ -93,14 +93,10 @@ void init_circuit(std::string ips[]) {
   auto garbage = new RESULTTYPE;
   FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
   /* delete garbage; */
-#if PRE== 1 && BEAVER == 1 && SKIP_PRE == 0
+#if PRE== 1 && BEAVER == 1 
   PROTOCOL_INIT<DATATYPE>::complete_preprocessing(num_arithmetic_triples.data(), num_boolean_triples.data(), preprocessed_outputs_index);
 #elif PRE == 1
   communicate_pre_();
-#endif
-#if BEAVER == 1 && SKIP_PRE == 1
-  PROTOCOL_INIT<DATATYPE>::generate_zero_triples(num_arithmetic_triples, OP_ADD, OP_SUB, OP_MULT);
-  PROTOCOL_INIT<DATATYPE>::generate_zero_triples(num_boolean_triples, FUNC_XOR, FUNC_XOR, FUNC_AND);
 #endif
 
 #if MAL == 1
@@ -123,18 +119,23 @@ void init_circuit(std::string ips[]) {
 #endif
 }
 
-#if BEAVER == 1 && SKIP_PRE == 0
+#if BEAVER == 1
 void beaver(std::string ips[])
 {
-#if PRINT == 1
-  print("Beaver Triple Generation ...\n");
-#endif
     for(auto i : num_arithmetic_triples)
         total_arithmetic_triples_num += i;
     for(auto i : num_boolean_triples)
         total_boolean_triples_num += i;
   init_beaver();
   print_num_triples();
+#if SKIP_PRE == 1
+    print("SKIP_PRE set to 1, skipping preprocessing phase and Beaver triples generation ... \n");
+    return;
+#elif FAKE_TRIPLES == 1
+  print("Fake Triples set to 1, generating fake triples ... \n");
+#else
+  print("Generating Beaver Triples ... \n");
+#endif
   clock_t time_beaver_function_start = clock();
   clock_gettime(CLOCK_REALTIME, &p1);
   std::chrono::high_resolution_clock::time_point p =
@@ -159,7 +160,7 @@ void beaver(std::string ips[])
 }
 #endif
 
-#if PRE == 1
+#if PRE == 1 && SKIP_PRE == 0
 void preprocess_circuit(std::string ips[]) {
   pthread_t sending_Threads_pre[num_players - 1];
   pthread_t receiving_threads_pre[num_players - 1];
@@ -236,7 +237,7 @@ void preprocess_circuit(std::string ips[]) {
 
   /* rb = 0; */
 
-    #if SKIP_PRE == 0 && BEAVER == 1
+#if BEAVER == 1
   PROTOCOL_PRE<DATATYPE>::complete_preprocessing(num_arithmetic_triples.data(), num_boolean_triples.data(), total_preprocessed_outputs);
 #else
   communicate_pre();
@@ -417,7 +418,7 @@ void executeProgram(int argc, char *argv[], int process_id, int process_num) {
 
   init_circuit(ips);
 
-#if BEAVER == 1 && SKIP_PRE == 0
+#if BEAVER == 1
   beaver(ips);
 #endif
 

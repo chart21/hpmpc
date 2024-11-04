@@ -452,12 +452,18 @@ preprocessed_outputs_arithmetic_input_index[index]+=1;
 
 DATATYPE retrieve_output_share_bool(int index = 0)
 {
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#endif
     preprocessed_outputs_bool_index[index]+=1;
     return preprocessed_outputs_bool[index][preprocessed_outputs_bool_index[index]-1];
 }
 
 DATATYPE retrieve_output_share_arithmetic(int index = 0)
 {
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#endif
     preprocessed_outputs_arithmetic_index[index]+=1;
     return preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index]-1];
 }
@@ -473,18 +479,27 @@ void store_output_share_ab(DATATYPE val, func_add ADD, int index = 0)
 template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
 void store_output_share_ab(DATATYPE val, func_add ADD, int index = 0)
 {
+#if SKIP_PRE == 1
+    return;
+#endif
     store_output_share_arithmetic(val, index);
 }
 
     template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
 DATATYPE retrieve_output_share_ab(func_add ADD, int index = 0)
 {
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#endif
     return retrieve_output_share_bool(index);
 }
 
 template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
 DATATYPE retrieve_output_share_ab(func_add ADD, int index = 0)
 {
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#endif
     return retrieve_output_share_arithmetic(index);
 }
 
@@ -494,6 +509,9 @@ DATATYPE retrieve_output_share_ab(func_add ADD, int index = 0)
 
 void store_output_share(DATATYPE val)
 {
+#if SKIP_PRE == 1
+    return;
+#endif
 preprocessed_outputs[preprocessed_outputs_input_index] = val;
 preprocessed_outputs_input_index+=1;
 }
@@ -501,6 +519,9 @@ preprocessed_outputs_input_index+=1;
 
 DATATYPE retrieve_output_share()
 {
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#endif
     preprocessed_outputs_index+=1;
     return preprocessed_outputs[preprocessed_outputs_index-1];
 }

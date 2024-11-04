@@ -88,9 +88,6 @@ sockets_received.push_back(0);
 /* } */
 void pre_send_to_(int player_index)
 {
-#if SKIP_PRE == 1
-    return;
-#endif
 #if SEND_BUFFER > 0
 if(sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] == SEND_BUFFER)
 {
@@ -104,9 +101,6 @@ total_send_pre[player_index] += 1;
 
 void pre_receive_from_(int player_index)
 {
-#if SKIP_PRE == 1
-    return;
-#endif
 #if RECV_BUFFER > 0
 if(receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] == RECV_BUFFER)
 {
@@ -299,23 +293,35 @@ void compare_views_init()
 #if BEAVER == 1 && PRE == 1
 void store_output_share_bool_(int index = 0)
 {
+#if SKIP_PRE == 1
+    return;
+#endif
     preprocessed_outputs_bool_input_index[index]+=1;
 }
 
 void store_output_share_arithmetic_(int index = 0)
 {
+#if SKIP_PRE == 1
+    return;
+#endif
     preprocessed_outputs_arithmetic_input_index[index]+=1;
 }
 
 template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
 void store_output_share_ab_(func_add ADD, int index = 0)
 {
+#if SKIP_PRE == 1
+    return;
+#endif
     store_output_share_bool_(index);
 }
 
 template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
 void store_output_share_ab_(func_add ADD, int index = 0)
 {
+#if SKIP_PRE == 1
+    return;
+#endif
     store_output_share_arithmetic_(index);
 }
 
@@ -367,6 +373,7 @@ for(int t=0;t<(num_players*player_multiplier);t++) {
 }
 #endif
 
+#if SKIP_PRE == 0
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 #if BEAVER == 1 && PRE == 1
 if(preprocessed_outputs_bool == nullptr)
@@ -392,6 +399,7 @@ if(preprocessed_outputs == nullptr)
 }
 preprocessed_outputs_index = 0; // reset index for post phase
 preprocessed_outputs_input_index = 0;
+#endif
 #endif
 rounds = 0;
 sending_rounds = 0;
@@ -458,6 +466,7 @@ for(int t=0;t<(num_players*player_multiplier);t++) {
 }
 #endif
 
+#if SKIP_PRE == 0
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 #if BEAVER == 1 && PRE == 1
 if(preprocessed_outputs_bool == nullptr)
@@ -482,7 +491,7 @@ total_preprocessed_outputs = preprocessed_outputs_index;
 preprocessed_outputs_index = 0;
 preprocessed_outputs_input_index = 0;
 #endif
-    
+#endif 
 
 rounds = 0;
 sending_rounds = 0;
