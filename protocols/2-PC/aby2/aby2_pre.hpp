@@ -682,13 +682,24 @@ void get_random_B2A()
 
 static void GEMM(ABY2_PRE_Share* a, ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m, int n, int k, bool a_fixed = false)
 {
+    if(a_fixed == true)
+    {
+        const int factor = DATTYPE/BITLENGTH;
+        if(factor > 1)
+            for(int i = 0; i < m*k; i++)
+            {
+                alignas (sizeof(Datatype)) UINT_TYPE temp[factor];
+                unorthogonalize_arithmetic(&a[i].l, temp,1);
+                a[i].l = PROMOTE(temp[0]);
+            }
+    }
     for(int i = 0; i < m; i++)
     {
         for(int j = 0; j < n; j++)
         {
             for(int l = 0; l < k; l++)
             {
-                a[i * k + l].generate_lxly_from_triple_comp_opt(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
+                a[i * k + l].generate_lxly_from_triple(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
                 triple_type[0][triple_type_index[0]++] = 10;
             }
             triple_type[0][triple_type_index[0]-k] = 9;
@@ -700,17 +711,30 @@ static void GEMM(ABY2_PRE_Share* a, ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m,
 
 static void GEMM(ABY2_PRE_Share* a, ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m, int n, int k, bool a_fixed = false)
 {
+    if(a_fixed == true)
+    {
+        const int factor = DATTYPE/BITLENGTH;
+        if(factor > 1)
+            for(int i = 0; i < m*k; i++)
+            {
+                alignas (sizeof(Datatype)) UINT_TYPE temp[factor];
+                unorthogonalize_arithmetic(&a[i].l, temp,1);
+                a[i].l = PROMOTE(temp[0]);
+            }
+    }
     for(int i = 0; i < m; i++)
     {
         for(int j = 0; j < n; j++)
         {
             for(int l = 0; l < k; l++)
             {
-                a[i * k + l].generate_lxly_from_triple_comp_opt(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
+                a[i * k + l].generate_lxly_from_triple(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
                 triple_type[0][triple_type_index[0]++] = 10;
             }
             triple_type[0][triple_type_index[0]-k] = 9;
         }
+    }
+}
        
 #endif
 #endif

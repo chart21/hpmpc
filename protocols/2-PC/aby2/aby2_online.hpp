@@ -775,13 +775,17 @@ static void GEMM(ABY2_ONLINE_Share* a, ABY2_ONLINE_Share* b, ABY2_ONLINE_Share* 
         alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
         for (int i = 0; i < factor; i++)
 #if PARTY == 0
-            temp[i] = cp1_1[i * c_size + j] - cp1_1[i * c_size + j];
+            temp[i] = cp1_1[i * c_size + j] - cp1_2[i * c_size + j];
 #else
-            temp[i] = - cp1_1[i * c_size + j] - cp1_1[i * c_size + j];
+            temp[i] = cp1_1[i * c_size + j] - cp1_2[i * c_size + j];
 #endif
         orthogonalize_arithmetic(temp, &c[j].m, 1);
         auto lxly = retrieve_output_share_arithmetic();
+#if PARTY == 0
         c[j].m = OP_SUB(c[j].m, lxly);
+#else
+        c[j].m = OP_SUB(SET_ALL_ZERO(), OP_ADD(c[j].m, lxly));
+#endif
     }
 
     delete[] p1;
