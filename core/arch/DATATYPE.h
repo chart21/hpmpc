@@ -97,7 +97,11 @@ void unorthogonalize_arithmetic_full(DATATYPE *in, UINT_TYPE *out)
 /* #define OP_TRUNC OP_SHIFT_RIGHT<FRACTIONAL> */
 /* #define OP_TRUNC2 OP_SHIFT_RIGHT<1> */
 /* #define OP_TRUNCF OP_SHIFT_RIGHT */
+#if SKIP_PRE == 0
 #define OP_TRUNC OP_SHIFT_LOG_RIGHT<FRACTIONAL>
+#else
+#define OP_TRUNC OP_SHIFT_RIGHT<FRACTIONAL>
+#endif
 #define OP_TRUNC2 OP_SHIFT_LOG_RIGHT<1> 
 #define OP_TRUNCF OP_SHIFT_LOG_RIGHTF
 
