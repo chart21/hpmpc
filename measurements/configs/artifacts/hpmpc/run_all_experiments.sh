@@ -108,8 +108,8 @@ for latency in ${latencies[@]}
 do
 echo "=====Measuring Figure 29 with latency $latency ms====="
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -L $latency -B -1
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure29/figure29_runtime_baseline.conf -f ${bandwidth}Mbps -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=9 DATTYPE=$DATTYPE $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure29/figure29_runtime_Trio_Quad.conf -f ${bandwidth}Mbps  -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure29/figure29_runtime_baseline.conf -f ${latency}ms -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=9 DATTYPE=$DATTYPE $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/figure29/figure29_runtime_Trio_Quad.conf -f ${latency}ms  -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 DATTYPE=$DATTYPE $REDUCED
 done
 #Reset network shaping
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1
@@ -209,9 +209,9 @@ then
 measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -f measurements/network_shaping/$setting -f $setting
 fi
 
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/table10_aes-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/table10_aes-3PC.conf -f $setting -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override $REDUCED
 
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/table10_aes-PRE-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/table10_aes-PRE-3PC.conf -f $setting -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override $REDUCED
 
 done
 #Reset network shaping
