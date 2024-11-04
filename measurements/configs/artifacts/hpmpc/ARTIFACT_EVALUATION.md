@@ -8,11 +8,11 @@ Requested Badge: **Functional**
 
 ## Description
 The artifact reproduces the experiments of all included figures and tables (except Table 1,2) of the paper. Table 1,2 only evaluate framework-independent or third-party framework measurements and are thus not covered. 
-For each experiment, the artifact produces one or multiple csv files with measurement results that can be directly compared to the corresponding measurement point of a figure or an entry in a table of the paper.
-The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the results of the paper.
-The reduced workload should complete within an hour on four multi-core machines in a distributed setup.
+For each experiment, the artifact produces one or multiple csv files with measurement results that can be directly compared to the corresponding measurement point of a figure or an entry of a table in the paper.
+The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the paper's results.
+The reduced workload should complete within an hour on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and throughput achieved by the full results.
 The full workload may take several hours to complete and requires high-performance hardware.
-Different network settings (e.g., latency, bandwidth) are simulated by the artifact using Linux traffic control.
+Different network settings (e.g., latency, bandwidth) are applied by the artifact using Linux traffic control.
 All experiments can be executed using a single script and we provide a Dockerfile to run the experiments in a containerized environment.
 
 ### Security/Privacy Issues and Ethical Concerns (All badges)
@@ -107,7 +107,7 @@ export ITERATIONS=1 # Change to the desired number of iterations
 ```
 
 
-### Testing the Environment 
+### Testing the Environment
 After setting up the environment, you can test the correctness of your setup by running the following command on each node.
 If the nodes are able to connect and all tests pass, the environment is set up correctly.
 
@@ -128,17 +128,18 @@ Our main results that should be supported by the artifact are the following:
 #### Run the experiments (FUNCTIONALITY)
 
 By default, the experiment script will run a single iteration and a heavily reduced workload to test the functionality of each experiment. 
+All measurement points from the covered tables and figures are generated but with a smaller input size and thus lower throughput can be expected.
 Run the following script on each node to execute the experiments.
 Note that some experiments simulate different network settings by using Linux traffic control. Setting these may require root privileges and running the script below with sudo.
 ```bash
-./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH # Run with sudo if necessary
+sudo ./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH # Run with sudo if necessary
 ```
 
 #### Run the experiments (REPRODUCIBILITY)
 
-To reproduce the results of the paper, we provide an option to run the full workload of each experiment by specifying -R "" in the script. 
+To reproduce the results of the paper, we provide an option to run the full workload of each experiment by specifying -R "" in the script (not that the "" after -R is required). 
 ```bash
-./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH -R "" # Run with sudo if necessary
+sudo ./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH -R "" # Run with sudo if necessary
 ```
 
 Our nodes were configured as follows:
@@ -161,6 +162,7 @@ To parse the log files to csv tables, run the following script after running the
 python3 measurements/parse_logs.py measurements/logs
 ```
 For each experiment, the script generates one or multiple csv files with the measurement data containing runtime or throughput values. The csv files are stored in the measurements/logs directory and are named after the experiment.
+
 Protocols are represented by their respective IDs as shown in the table below. 
 
 | Protocol | Adversary Model | Preprocessing | Supported Primitives |
@@ -178,17 +180,66 @@ Protocols are represented by their respective IDs as shown in the table below.
 | `11` Quad: Het (4PC) | Malicious | ✔ | All
 | `12` Quad (4PC) | Malicious | ✔ | All
 
+The measurement data provided by the figures/tables corresponds to the columns of the .csv log files described below. Each experiment run produces a batch of one or multiple csv files. For instance, a batch may contain all 3PC experiments in one csv file while the 4PC experiments are saved in another csv file. Bandwidth and latency experiments produce a batch of csv files for each network configuration with a suffix to the filename indicating the network configuration, e.g. `_100Mbps`. Sometimes units in the csv files need to be converted to the desired unit in the paper (e.g. s to ms or Blocks into Million Blocks).
+
+| Metric | Relevant Columns | Explanation |
+| --- | --- | --- |
+| TP (Gates/sec) | `TP_ONLINE_MAX(Mbit/s)` | The network throuhput in Mbit/s when running the experiment. Since all throughput evaluations in the paper are based on boolean gates, the throughput in MBit/s is equivalent to the throughput in Gates/sec. `TP_ONLINE_MAX` measures the throughput based on the slowest process and is used for the results in the paper while `TP_AVG_MAX` measures the average throughput of all processes. |
+| Runtime (s) | `ONLINE_MAX(s)` | The runtime of the experiment in seconds. `ONLINE_MAX` measures the runtime based on the slowest process (i.e. when all parallel processes are finished) and is used for the results in the paper while `ONLINE_AVG` measures the average runtime of all processes. |
+| Bits per Register | `DATTYPE` | The number of bits per register used in the experiment. |
+| NUM_INPUTS | `NUM_INPUTS` | The number of inputs used in the experiment. Is set to 1 for FUNCTIONALITY experiments. |
+| Bandwidth (Mbit/s) / Latency (ms) | - (Filename suffix) | Experiments containing Figures with varying Latencies/Bandwidths are evaluated multiple times with different network configurations. The csv files contain a suffix indicating the network configuration, e.g. `_100Mbps` for 100Mbps bandwidth. |
+| Blocks/s | `TP_ONLINE_MAX(OPs/s)` | The throughput in operations per second. For AES the number of blocks evaluated is equivalent to the number of OP/s. |
+- Theoretical Limit (%) | - | The theoretical limit is calculated as the achieved throuhput in Mbit/s (`TP_ONLINE_MAX`) divided by Mbit/s available on the network (e.g. 150Gbps resp. 300Gbps in case of a 25Gbps duplex link between each pair of three resp. four nodes. The theoretical limit can be manually calculated if the physical topology of the network is known. |
+| Settins (e.g. MAN, WAN, Online) | - (Filename) | Some tables contain columns with different settings. The csv files contain a suffix indicating the setting, e.g. `_WAN.csv` for the computation benchmark in Table 9. `PRE` indicates that a separate preprocessing phase is used and corresponds to the results marked with (Online), for instance in Table 7 and 8. |
+
+#### Detailed Results
+
+On successful completion of the experiments, the results can be found in the measurements/logs directory. The data can be interpreted as follows:
+
+| Figure | x-Axis: Source | y-Axis: Source | Plot: Source |
+| --- | --- | --- | --- |
+| Figure 1 | Bandwidth (Mbit/s): `File suffix, e.g. _100Mbps` | Throughput (Gates/sec): `TP_ONLINE_MAX(Mbit/s)` | Multiplication: `FUNCTION_IDENTIFIER=2`, Scalar Product: `FUNCTION_IDENTIFIER=7`, Protocols: `PROTOCOL` |
+| Figure 9 | Bits per Register: `DATTYPE`, Number of Processes: `PROCESS_NUM` | Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` x1000, Protocols: `PROTOCOL` |
+| Figure 10 | Latency (ms): File suffix, e.g. `8ms`, Bandwidth (Mbit/s): File suffix, e.g. `_100Mbps`, Input Size: `NUM_INPUTS` | Runtime (s): `ONLINE_MAX(s)`, Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` x1000, Protocols: `PROTOCOL` |
+| Figure 29 | Latency (ms): File suffix, e.g. `_8ms` | Runtime (s): `ONLINE_MAX(s)` | Multiplication: `FUNCTION_IDENTIFIER=8`, Mult + Trunc: `FUNCTION_IDENTIFIER=9`, A2B: `FUNCTION_IDENTIFIER=10`, Bit2A: `FUNCTION_IDENTIFIER=11`, Protocols: `PROTOCOL` |
+
+|Table | Rows: Source | Columns: Source |
+| --- | --- | --- |
+| Table 6 | Protocols: `PROTOCOL` | Billion Gates/sec: `TP_ONLINE_MAX(Mbit/s)` x1000, Theoretical Limit: Network-Limit(Mbit/s)/`TP_ONLINE_MAX(Mbit/s)` |
+| Table 7 | same as Table 6, (Online) refers to `PRE=1` | same as Table 6 |
+| Table 8 | same as Table 7 | Million Blocks/sec: `ONLINE_MAX (OPs/s)`/10^6, Theoretical Limit: Network-Limit(Mbit/s)/`TP_ONLINE_MAX(Mbit/s)` |
+| Table 9 | Protocols: `PROTOCOL` | `ONLINE_MAX(s)`, Lat: Filename contains `_ms` suffix, Bdw: Filename contains `_Mbps` suffix, Comp: Filename contains `_dot` |
+| Table 10 | Protocols: `PROTOCOL` |
+Thousand Blocks/s: `TP_ONLINE_MAX(OPs/s)`x10^3, CMAN/WAN1/Mixed: Filename contains `_Comp`/`_WAN1`/`_WAN2` suffix |
+
+
+#### Automation of distributed tests with a Master Node
+
+To run all tests from a single master node and stream all outputs in the Master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the master node. This requires `pip install paramiko`.
+```bash
+cd hpmpc/measurements/configs/artifacts/hpmpc
+python3 run_all_on_remote_servers.py
+```
+Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
+```bash
+cd hpmpc/measurements/configs/artifacts/hpmpc
+./run_with_tmux_grid.sh
+```
+
 #### TLDR
 
-To run the experiments without further elaboration, complete the `Dependencies` and `Networking` sections and run the following commands on each machine. The results will be stored in the measurements/logs directory.
+To run the experiments without further elaboration, complete the `Dependencies` and `Networking` sections and run the following commands on each machine. The results will be stored in the measurements/logs directory. The commands need to be executed on all machines simultaneously within 10 minutes.
 
 ```bash
 export MAX_BITWIDTH=$(lscpu | grep -i flags | grep -q "avx512" && echo 512 || (lscpu | grep -i flags | grep -q "avx2" && echo 256 || (lscpu | grep -i flags | grep -q "sse" && echo 128 || echo 64)))
 export SUPPORTED_BITWIDTHS=$(echo 1 8 16 32 64 128 256 512 | awk -v max="$MAX_BITWIDTH" '{for(i=1;i<=NF;i++) if($i<=max) printf $i (i<NF && $i<max?",":"")}')
 export ITERATIONS=1
-./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH # Run with sudo if necessary
+sudo ./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH # Run with sudo if necessary
 python3 measurements/parse_logs.py measurements/logs
 ```
+
+
 
 ## Limitations 
 Tables 1 and 2 of the paper do not evaluate our framework and are thus not covered by the artifact.
@@ -196,4 +247,5 @@ Tables 1 and 2 of the paper do not evaluate our framework and are thus not cover
 ## Notes on Reusability 
 Our repository allows users to develop new functions and experiments in a protocol-agnostic way that can be easily integrated into the existing framework.
 We provide extensive documentation, tutorials, and examples on how to integrate new functions, protocols, and experiments into the framework.
+
 
