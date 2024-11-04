@@ -207,7 +207,7 @@ do
 echo "=====Measuring Table 10 (3PC) with network setting $setting====="
 if [ -z "$REDUCED" ]
 then
-measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -f measurements/network_shaping/$setting
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -f measurements/network_shaping/$setting -f $setting
 fi
 
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table10/table10_aes-3PC.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override $REDUCED

@@ -129,6 +129,8 @@ Our main results that should be supported by the artifact are the following:
 
 By default, the experiment script will run a single iteration and a heavily reduced workload to test the functionality of each experiment. 
 All measurement points from the covered tables and figures are generated but with a smaller input size and thus lower throughput can be expected.
+Also the tested number of bits per register and the number of processes is reduced. Hence, one can expect all results from the different tables and figures but with lower throughput and runtime values and in some cases a smaller range of tested parameters per plot.
+
 Run the following script on each node to execute the experiments.
 Note that some experiments simulate different network settings by using Linux traffic control. Setting these may require root privileges and running the script below with sudo.
 ```bash
@@ -188,8 +190,8 @@ The measurement data provided by the figures/tables corresponds to the columns o
 | TP (Gates/sec) | `TP_ONLINE_MAX(Mbit/s)` | The network throuhput in Mbit/s when running the experiment. Since all evaluations in the paper stating Gates/sec are based on boolean gates, the throughput in Mbit/s is equivalent to the throughput in 10^6 Gates/sec. `TP_ONLINE_MAX` measures the throughput based on the slowest process and is used for the results in the paper while `TP_AVG_MAX` measures the average throughput of all processes. |
 | Runtime (s) | `ONLINE_MAX(s)` | The runtime of the experiment in seconds. `ONLINE_MAX` measures the runtime based on the slowest process (i.e. when all parallel processes are finished) and is used for the results in the paper while `ONLINE_AVG` measures the average runtime of all processes. |
 | Bits per Register | `DATTYPE` | The number of bits per register used in the experiment. |
-| NUM_INPUTS | `NUM_INPUTS` | The number of inputs used in the experiment. Is set to 1 for FUNCTIONALITY experiments. |
-| Bandwidth (Mbit/s) / Latency (ms) | - (Filename suffix) | Experiments containing Figures with varying Latencies/Bandwidths are evaluated multiple times with different network configurations. The csv files contain a suffix indicating the network configuration, e.g. `_100Mbps` for 100Mbps bandwidth. |
+| Number of inputs | `NUM_INPUTS` | The number of inputs used in the experiment. Is set to 1 for FUNCTIONALITY experiments. |
+| Bandwidth (Mbit/s) / Latency (ms) | - (Filename suffix) | Experiments containing figures with varying latencies/bandwidths are evaluated multiple times with different network configurations. The csv files contain a suffix indicating the network configuration, e.g. `_100Mbps` for 100Mbps bandwidth. |
 | Blocks/s | `TP_ONLINE_MAX(OPs/s)` | The throughput in operations per second. For AES the number of blocks evaluated is equivalent to the number of OP/s. |
 | Theoretical Limit (%) | - | The theoretical limit is calculated as the achieved throuhput in Mbit/s (`TP_ONLINE_MAX`) divided by Mbit/s available on the network (e.g. 150Gbps resp. 300Gbps in case of a 25Gbps duplex link between each pair of three resp. four nodes. The theoretical limit can be manually calculated if the physical topology of the network is known. |
 | Settins (e.g. MAN, WAN, Online) | - (Filename) | Some tables contain columns with different settings. The csv files contain a suffix indicating the setting, e.g. `_WAN.csv` for the computation benchmark in Table 9. `PRE` indicates that a separate preprocessing phase is used and corresponds to the results marked with (Online), for instance in Table 7 and 8. |
