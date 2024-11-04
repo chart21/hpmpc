@@ -55,6 +55,7 @@ def main():
     parser.add_argument('-d', type=str, default='127.0.0.1', help='IP address for d')
     parser.add_argument('-g', type=int, default=0, help='Numbers of GPUs to use (0 for CPU only)')
     parser.add_argument('-s', type=int, default=0, help='SplitRoles Identifier')
+    parser.add_argument('-f', type=str, default='', help='filename suffix')
     parser.add_argument('--override', nargs='*', help='Override config options (key=value)')
     parser.add_argument('-i', type=int, default=1, help='Number of iterations per run')
 
@@ -94,8 +95,12 @@ def main():
         print("===================\n===================")
 
         timestamp = int(time.time())
-        log_file = f"measurements/logs/{os.path.basename(config_file).split('.')[0]}_{timestamp}.log"
-        config_log_file = f"measurements/logs/{os.path.basename(config_file).split('.')[0]}_{timestamp}.log-config"
+        if args.f != '':
+            log_file = f"measurements/logs/{os.path.basename(config_file).split('.')[0]}_{args.f}_{timestamp}.log"
+            config_log_file = f"measurements/logs/{os.path.basename(config_file).split('.')[0]}_{args.f}_{timestamp}.log-config"
+        else:
+            log_file = f"measurements/logs/{os.path.basename(config_file).split('.')[0]}_{timestamp}.log"
+            config_log_file = f"measurements/logs/{os.path.basename(config_file).split('.')[0]}_{timestamp}.log-config"
         
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         
