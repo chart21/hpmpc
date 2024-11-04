@@ -40,9 +40,7 @@ do
    esac
 done
 
-echo $REDUCED
-
-
+echo "=====Starting all measurements with PID $PID, IP0 $IP0, IP1 $IP1, IP2 $IP2, IP3 $IP3, DATTYPE $DATTYPE, DATTYPES $DATTYPES, REDUCED $REDUCED, ITERATIONS $ITERATIONS====="
 
 #4PC
 
@@ -147,10 +145,6 @@ echo "=====Measuring Table 7====="
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_4PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table7/table7_throughput_4PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
-#Table 8
-echo "=====Measuring Table 8====="
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/table8_throughput_4PC_PRE0.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
-python3 measurements/run_config.py measurements/configs/artifacts/hpmpc/table8/table8_throughput_4PC_PRE1.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override DATTYPE=$DATTYPE $REDUCED
 
 #Table 9
 
