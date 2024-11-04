@@ -200,19 +200,19 @@ On successful completion of the experiments, the results can be found in the mea
 
 | Figure | x-Axis: Source | y-Axis: Source | Plot: Source |
 | --- | --- | --- | --- |
-| Figure 1 | Bandwidth (Mbit/s): `File suffix, e.g. _100Mbps` | Throughput (Gates/sec): `TP_ONLINE_MAX(Mbit/s)` | Multiplication: `FUNCTION_IDENTIFIER=2` <br /> Scalar Product: `FUNCTION_IDENTIFIER=7`, Protocols: `PROTOCOL` |
-| Figure 9 | Bits per Register: `DATTYPE`, Number of Processes: `PROCESS_NUM` | Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` x1000 | Protocols: `PROTOCOL` |
-| Figure 10 | Latency (ms): File suffix, e.g. `8ms`, Bandwidth (Mbit/s): File suffix, e.g. `_100Mbps`, Input Size: `NUM_INPUTS` | Runtime (s): `ONLINE_MAX(s)`, Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` x1000 | Protocols: `PROTOCOL` |
-| Figure 29 | Latency (ms): File suffix, e.g. `_8ms` | Runtime (s): `ONLINE_MAX(s)`, Multiplication: `FUNCTION_IDENTIFIER=8`, Mult + Trunc: `FUNCTION_IDENTIFIER=9`, A2B: `FUNCTION_IDENTIFIER=10`, Bit2A: `FUNCTION_IDENTIFIER=11` | Protocols: `PROTOCOL` |
+| Figure 1 | Bandwidth (Mbit/s): `File suffix (e.g. _100Mbps)` | Throughput (Gates/sec): `TP_ONLINE_MAX(Mbit/s)` | Multiplication: `FUNCTION_IDENTIFIER=2` <br /> Scalar Product: `FUNCTION_IDENTIFIER=7`, Protocols: `PROTOCOL` |
+| Figure 9 | Bits per Register: `DATTYPE` <br /> Number of Processes: `PROCESS_NUM` | Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` x1000 | Protocols: `PROTOCOL` |
+| Figure 10 | Latency (ms): File suffix (e.g. `8ms`) <br /> Bandwidth (Mbit/s): File suffix (e.g. `_100Mbps`) <br /> Input Size: `NUM_INPUTS` | Runtime (s): `ONLINE_MAX(s)` <br /> Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` x1000 | Protocols: `PROTOCOL` |
+| Figure 29 | Latency (ms): File suffix (e.g. `_8ms`) | Runtime (s): `ONLINE_MAX(s)` <br /> Multiplication: `FUNCTION_IDENTIFIER=8` <br \> Mult + Trunc: `FUNCTION_IDENTIFIER=9` <br \> A2B: `FUNCTION_IDENTIFIER=10` <br \> Bit2A: `FUNCTION_IDENTIFIER=11` | Protocols: `PROTOCOL` |
 
 
 |Table | Rows: Source | Columns: Source |
 | --- | --- | --- |
-| Table 6 | Protocols: `PROTOCOL` | Billion Gates/sec: `TP_ONLINE_MAX(Mbit/s)` x1000, Theoretical Limit: Network-Limit(Mbit/s)/`TP_ONLINE_MAX(Mbit/s)` |
+| Table 6 | Protocols: `PROTOCOL` | Billion Gates/sec: `TP_ONLINE_MAX(Mbit/s)` x1000 <br \> Theoretical Limit: Network-Limit(Mbit/s)/`TP_ONLINE_MAX(Mbit/s)` |
 | Table 7 | same as Table 6, (Online) refers to `PRE=1` | same as Table 6 |
-| Table 8 | same as Table 7 | Million Blocks/sec: `ONLINE_MAX (OPs/s)`/10^6, Theoretical Limit: Network-Limit(Mbit/s)/`TP_ONLINE_MAX(Mbit/s)` |
-| Table 9 | Protocols: `PROTOCOL` | `ONLINE_MAX(s)`, Lat: Filename contains `_ms` suffix, Bdw: Filename contains `_Mbps` suffix, Comp: Filename contains `_dot` |
-| Table 10 | Protocols: `PROTOCOL` | Thousand Blocks/s: `TP_ONLINE_MAX(OPs/s)`x10^3, CMAN/WAN1/Mixed: Filename contains `_Comp`/`_WAN1`/`_WAN2` suffix |
+| Table 8 | same as Table 7 | Million Blocks/sec: `ONLINE_MAX (OPs/s)`/10^6 <br \> Theoretical Limit: Network-Limit(Mbit/s)/`TP_ONLINE_MAX(Mbit/s)` |
+| Table 9 | Protocols: `PROTOCOL` | `ONLINE_MAX(s)` <br \> Lat: Filename contains `_ms` suffix <br \> Bdw: Filename contains `_Mbps` suffix, <br \> Comp: Filename contains `_dot` |
+| Table 10 | Protocols: `PROTOCOL` | Thousand Blocks/s: `TP_ONLINE_MAX(OPs/s)`x10^3 <br \> CMAN/WAN1/Mixed: Filename contains `_CMAN`/`_WAN1`/`_WAN2` suffix |
 
 
 #### Automation of distributed tests with a Master Node
