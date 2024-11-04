@@ -202,7 +202,7 @@ On successful completion of the experiments, the results can be found in the mea
 
 | Figure | x-Axis: Source | y-Axis: Source | Plot: Source |
 | --- | --- | --- | --- |
-| Figure 1 | Bandwidth (Mbit/s): `File suffix (e.g. _100Mbps)` | Throughput (Gates/sec): `TP_ONLINE_MAX(Mbit/s)` | Multiplication: `FUNCTION_IDENTIFIER=2` <br /> Scalar Product: `FUNCTION_IDENTIFIER=7` <br /> Protocols: `PROTOCOL` |
+| Figure 1 | Bandwidth (Mbit/s): `File suffix (e.g. _100Mbps)` | Runtime (ms): `ONLINE_MAX(s)` x10^3 | Multiplication: `FUNCTION_IDENTIFIER=2` <br /> Scalar Product: `FUNCTION_IDENTIFIER=7` <br /> Protocols: `PROTOCOL` |
 | Figure 9 | Bits per Register: `DATTYPE` <br /> Number of Processes: `PROCESS_NUM` | Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` x1000 | Protocols: `PROTOCOL` |
 | Figure 10 | Latency (ms): File suffix (e.g. `8ms`) <br /> Bandwidth (Mbit/s): File suffix (e.g. `_100Mbps`) <br /> Input Size: `NUM_INPUTS` | Runtime (s): `ONLINE_MAX(s)` <br /> Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` x1000 | Protocols: `PROTOCOL` |
 | Figure 29 | Latency (ms): File suffix (e.g. `_8ms`) | Runtime (s): `ONLINE_MAX(s)` | <br /> Multiplication: `FUNCTION_IDENTIFIER=8` <br /> Mult + Trunc: `FUNCTION_IDENTIFIER=9` <br /> A2B: `FUNCTION_IDENTIFIER=10` <br /> Bit2A: `FUNCTION_IDENTIFIER=11` <br /> Protocols: `PROTOCOL` |
