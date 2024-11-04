@@ -193,8 +193,8 @@ The measurement data provided by the figures/tables corresponds to the columns o
 | Number of inputs | `NUM_INPUTS` | The number of inputs used in the experiment. Is set to 1 for FUNCTIONALITY experiments. |
 | Bandwidth (Mbit/s) / Latency (ms) | - (Filename suffix) | Experiments containing figures with varying latencies/bandwidths are evaluated multiple times with different network configurations. The csv files contain a suffix indicating the network configuration, e.g. `_100Mbps` for 100Mbps bandwidth. |
 | Blocks/s | `TP_ONLINE_MAX(OPs/s)` | The throughput in operations per second. For AES the number of blocks evaluated is equivalent to the number of OP/s. |
-| Theoretical Limit (%) | - | The theoretical limit is calculated as the achieved throuhput in Mbit/s (`TP_ONLINE_MAX`) divided by Mbit/s available on the network (e.g. 150Gbps resp. 300Gbps in case of a 25Gbps duplex link between each pair of three resp. four nodes. The theoretical limit can be manually calculated if the physical topology of the network is known. |
-| Settins (e.g. MAN, WAN, Online) | - (Filename) | Some tables contain columns with different settings. The csv files contain a suffix indicating the setting, e.g. `_WAN.csv` for the computation benchmark in Table 9. `PRE` indicates that a separate preprocessing phase is used and corresponds to the results marked with (Online), for instance in Table 7 and 8. |
+| Theoretical Limit (%) | - | The theoretical limit is calculated as the achieved throughput in Mbit/s available on the network (e.g. 150Gbps resp. 300Gbps in case of a 25Gbps duplex link between each pair of three resp. four nodes) divided by the achieved `TP_ONLINE_MAX(Mbit/s)`. The theoretical limit can be manually calculated if the physical topology of the network is known. |
+| Settings (e.g. MAN, WAN, Online) | - (Filename) | Some tables contain columns with different settings. The csv files contain a suffix indicating the setting, e.g. `_WAN.csv` for the computation benchmark in Table 9. `PRE` indicates that a separate preprocessing phase is used and corresponds to the results marked with (Online), for instance in Table 7 and 8. |
 
 #### Detailed Results
 
@@ -210,9 +210,9 @@ On successful completion of the experiments, the results can be found in the mea
 
 |Table | Rows: Source | Columns: Source |
 | --- | --- | --- |
-| Table 6 | Protocols: `PROTOCOL` | Billion Gates/sec: `TP_ONLINE_MAX(Mbit/s)` x1000 <br /> Theoretical Limit: Network-Limit(Mbit/s)/`TP_ONLINE_MAX(Mbit/s)` |
+| Table 6 | Protocols: `PROTOCOL` | Billion Gates/sec: `TP_ONLINE_MAX(Mbit/s)` / 1000 <br /> Theoretical Limit: `TP_ONLINE_MAX(Mbit/s)` / NETWORK_LIMIT(Mbit/s) |
 | Table 7 | same as Table 6, (Online) refers to `PRE=1` | same as Table 6 |
-| Table 8 | same as Table 7 | Million Blocks/sec: `ONLINE_MAX (OPs/s)`/10^6 <br /> Theoretical Limit: Network-Limit(Mbit/s)/`TP_ONLINE_MAX(Mbit/s)` |
+| Table 8 | same as Table 7 | Million Blocks/sec: `ONLINE_MAX (OPs/s)`/10^6 <br /> Theoretical Limit: `TP_ONLINE_MAX(Mbit/s)` / NETWORK_LIMIT(Mbit/s) |
 | Table 9 | Protocols: `PROTOCOL` | Runtime: `ONLINE_MAX(s)` <br /> Lat: Filename contains `_ms` suffix <br /> Bdw: Filename contains `_Mbps` suffix <br /> Comp: Filename contains `_dot` |
 | Table 10 | Protocols: `PROTOCOL` | Thousand Blocks/s: `TP_ONLINE_MAX(OPs/s)`x10^3 <br /> CMAN/WAN1/Mixed: Filename contains `_CMAN`/`_WAN1`/`_WAN2` suffix |
 
