@@ -187,7 +187,7 @@ The measurement data provided by the figures/tables corresponds to the columns o
 
 | Metric | Relevant Columns | Explanation |
 | --- | --- | --- |
-| TP (Gates/sec) | `TP_ONLINE_MAX(Mbit/s)` | The network throuhput in Mbit/s when running the experiment. Since all evaluations in the paper stating Gates/sec are based on boolean gates, the throughput in Mbit/s is equivalent to the throughput in 10^6 Gates/sec. `TP_ONLINE_MAX` measures the throughput based on the slowest process and is used for the results in the paper while `TP_AVG_MAX` measures the average throughput of all processes. |
+| TP (Gates/sec) | `TP_ONLINE_MAX(Mbit/s)` | The network throuhput in Mbit/s when running the experiment. Since all evaluations in the paper stating Gates/sec are based on boolean gates, the throughput in Mbit/s is equivalent to the throughput in 10^6 Gates/sec. `TP_ONLINE_MAX` measures the throughput based on the slowest process and is used for the results in the paper while `TP_ONLINE_AVG` measures the average throughput of all processes. |
 | Runtime (s) | `ONLINE_MAX(s)` | The runtime of the experiment in seconds. `ONLINE_MAX` measures the runtime based on the slowest process (i.e. when all parallel processes are finished) and is used for the results in the paper while `ONLINE_AVG` measures the average runtime of all processes. |
 | Bits per Register | `DATTYPE` | The number of bits per register used in the experiment. |
 | Number of inputs | `NUM_INPUTS` | The number of inputs used in the experiment. It is set to 1 for FUNCTIONALITY experiments. |
