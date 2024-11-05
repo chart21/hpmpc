@@ -194,7 +194,7 @@ The measurement data provided by the figures/tables corresponds to the columns o
 | Bandwidth (Mbit/s) / Latency (ms) | - (Filename suffix) | Some experiments are evaluated with varying latencies/bandwidths. These experiments are evaluated once per specified network parameter. The resulting csv files contain a suffix indicating the network configuration, e.g. `_100Mbps` for 100Mbps bandwidth. |
 | Blocks/s | `TP_ONLINE_MAX(OPs/s)` | The throughput in operations per second. For AES the number of blocks evaluated is equivalent to the number of OP/s. |
 | Theoretical Limit (%) | - | The theoretical limit is calculated as the the achieved `TP_ONLINE_MAX(Mbit/s)` divided by the maximum bandwidth available on the network (e.g. 150Gbps resp. 300Gbps in case of a 25Gbps duplex link between each pair of three resp. four nodes). The theoretical limit needs to be calculated manually once the physical topology of the network is known. |
-| Settings (e.g. MAN, WAN, Online) | - (Filename) | Some tables contain columns with different settings. The csv files contain a suffix indicating the setting, e.g. `_WAN.csv` for the computation benchmark in Table 9. `PRE` indicates that a separate preprocessing phase is used and corresponds to the results marked with (Online), for instance in Table 7 and 8. |
+| Settings (e.g. MAN, WAN, Online) | - (Filename) | Some tables contain columns with different settings. The csv files contain a suffix indicating the setting, e.g. `_WAN.csv`. `PRE` indicates that a separate preprocessing phase is used and corresponds to the results marked with (Online), for instance in Table 7 and 8. |
 
 #### Detailed Results
 
