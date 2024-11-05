@@ -213,7 +213,7 @@ On successful completion of the experiments, the results can be found in the mea
 | Table 6 | Protocols: `PROTOCOL` | Billion Gates/sec: `TP_ONLINE_MAX(Mbit/s)` / 1000 <br /> Theoretical Limit: `TP_ONLINE_MAX(Mbit/s)` / NETWORK_LIMIT(Mbit/s) |
 | Table 7 | same as Table 6, (Online) refers to `PRE=1` | same as Table 6 |
 | Table 8 | same as Table 7 | Million Blocks/sec: `ONLINE_MAX (OPs/s)`/10^6 <br /> Theoretical Limit: `TP_ONLINE_MAX(Mbit/s)` / NETWORK_LIMIT(Mbit/s) |
-| Table 9 | Protocols: `PROTOCOL` | Runtime: `ONLINE_MAX(s)` <br /> Lat: Filename contains `_ms` suffix <br /> Bdw: Filename contains `_Mbps` suffix <br /> Comp: Filename contains `_dot` |
+| Table 9 | Protocols: `PROTOCOL` | Runtime: `TP_ONLINE_MAX(s)` <br /> Lat: Filename contains `_ms` suffix <br /> Bdw: Filename contains `_Mbps` suffix <br /> Comp: Filename contains `_dot` |
 | Table 10 | Protocols: `PROTOCOL` | Thousand Blocks/s: `TP_ONLINE_MAX(OPs/s)`/ 10^3 <br /> CMAN/WAN1/Mixed: Filename contains `_CMAN`/`_WAN1`/`_WAN2` suffix |
 
 
