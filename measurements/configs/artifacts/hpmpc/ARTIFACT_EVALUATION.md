@@ -26,10 +26,10 @@ Each machine should have identical hardware specifications.
 ### Hardware Requirements
 
 We recommend a multi-core machine with at least 16 cores and the AES-NI instruction set for running the experiments.
-For full reproducability, please refer to the exact details in the `Run the experiments` section.
+For full reproducibility, please refer to the exact details in the `Run the experiments` section.
 
 ### Software Requirements
-Each machine should come with a debian-based operating system or Docker installed. For install instructions, please refer to the `Setup the environment` section.
+Each machine should come with a Debian-based operating system or Docker installed. For install instructions, please refer to the `Setup the environment` section.
 
 ### Estimated Time and Storage Consumption
 The reduced workload should complete within an hour on multi-core machines while the full workload may take several hours to complete and requires high-performance hardware. For exact details, please refer to the `Run the experiments` section.
@@ -76,7 +76,7 @@ docker build -t hpmpc .
 
 
 #### Networking
-We recommend setting the following environment variables on each node. Replace the IP addresses with the actual IP addresses of the nodes. The PID has to be set to the ID of the node (0, 1, 2, or 3) for each machine/container individually. Use PID=all for a single machine setup.
+We recommend setting the following environment variables on each node. Replace the IP addresses with the actual IP addresses of the nodes. The PID has to be set to the ID of the node (0, 1, 2, or 3) for each machine/container individually. Use PID=all for a single-machine setup.
 ```bash
 export IP0=127.0.0.1 
 export IP1=127.0.0.1
@@ -129,7 +129,7 @@ Our main results that should be supported by the artifact are the following:
 
 By default, the experiment script will run a single iteration and a heavily reduced workload to test the functionality of each experiment. 
 All measurement points from the covered tables and figures are generated but with a smaller input size and thus lower throughput can be expected.
-Also the tested number of bits per register and the number of processes is reduced. Hence, one can expect all results from the different tables and figures but with lower throughput and runtime values and in some cases a smaller range of tested parameters per plot.
+Also, the tested number of bits per register and the number of processes is reduced. Hence, one can expect all results from the different tables and figures but with lower throughput and runtime values and in some cases a smaller range of tested parameters per plot.
 
 Run the following script on each node to execute the experiments.
 Note that some experiments simulate different network settings by using Linux traffic control. Setting these may require root privileges and running the script below with sudo.
@@ -150,7 +150,7 @@ Our nodes were configured as follows:
 - Maximum Bitwidth: 256
 - OS: Debian Trixie
 - Network Links: 25 Gbit/s duplex link between all pairs of nodes without a switch (directly connected)
-- Network Latecy: 0.3ms
+- Network Latency: 0.3ms
 
 Note that the experiments may take a long time to complete. Significantly fewer cores or RAM on the nodes may crash the experiments.
 Note also that the network topology is not equivalent to setting up servers on AWS with 25 Gbit/s links as AWS restricts the total bandwidth instead of the bandwidth per link to 25 Gbit/s.
@@ -190,7 +190,7 @@ The measurement data provided by the figures/tables corresponds to the columns o
 | TP (Gates/sec) | `TP_ONLINE_MAX(Mbit/s)` | The network throuhput in Mbit/s when running the experiment. Since all evaluations in the paper stating Gates/sec are based on boolean gates, the throughput in Mbit/s is equivalent to the throughput in 10^6 Gates/sec. `TP_ONLINE_MAX` measures the throughput based on the slowest process and is used for the results in the paper while `TP_AVG_MAX` measures the average throughput of all processes. |
 | Runtime (s) | `ONLINE_MAX(s)` | The runtime of the experiment in seconds. `ONLINE_MAX` measures the runtime based on the slowest process (i.e. when all parallel processes are finished) and is used for the results in the paper while `ONLINE_AVG` measures the average runtime of all processes. |
 | Bits per Register | `DATTYPE` | The number of bits per register used in the experiment. |
-| Number of inputs | `NUM_INPUTS` | The number of inputs used in the experiment. Is set to 1 for FUNCTIONALITY experiments. |
+| Number of inputs | `NUM_INPUTS` | The number of inputs used in the experiment. It is set to 1 for FUNCTIONALITY experiments. |
 | Bandwidth (Mbit/s) / Latency (ms) | - (Filename suffix) | Experiments containing figures with varying latencies/bandwidths are evaluated multiple times with different network configurations. The csv files contain a suffix indicating the network configuration, e.g. `_100Mbps` for 100Mbps bandwidth. |
 | Blocks/s | `TP_ONLINE_MAX(OPs/s)` | The throughput in operations per second. For AES the number of blocks evaluated is equivalent to the number of OP/s. |
 | Theoretical Limit (%) | - | The theoretical limit is calculated as the achieved throughput in Mbit/s available on the network (e.g. 150Gbps resp. 300Gbps in case of a 25Gbps duplex link between each pair of three resp. four nodes) divided by the achieved `TP_ONLINE_MAX(Mbit/s)`. The theoretical limit can be manually calculated if the physical topology of the network is known. |
@@ -250,5 +250,6 @@ Tables 1 and 2 of the paper do not evaluate our framework and are thus not cover
 ## Notes on Reusability 
 Our repository allows users to develop new functions and experiments in a protocol-agnostic way that can be easily integrated into the existing framework.
 We provide extensive documentation, tutorials, and examples on how to integrate new functions, protocols, and experiments into the framework.
+
 
 
