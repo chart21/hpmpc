@@ -219,7 +219,7 @@ On successful completion of the experiments, the results can be found in the mea
 
 #### Automation of distributed tests with a Master Node
 
-To run all tests from a single master node and stream all outputs in the Master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the master node. This requires `pip install paramiko`.
+To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. This requires `pip install paramiko`.
 ```bash
 cd hpmpc/measurements/configs/artifacts/hpmpc
 python3 run_all_on_remote_servers.py
@@ -232,7 +232,7 @@ cd hpmpc/measurements/configs/artifacts/hpmpc
 
 #### TLDR
 
-To run the experiments without further elaboration, complete the `Dependencies` and `Networking` sections and run the following commands on each machine. The results will be stored in the measurements/logs directory. The commands need to be executed on all machines simultaneously within 10 minutes.
+To run the experiments without further elaboration, complete the `Dependencies` and `Networking` sections and run the following commands on each machine. The results will be stored in the measurements/logs directory. The commands need to be executed on all machines simultaneously within 10 minutes to prevent connection timeouts.
 
 ```bash
 export MAX_BITWIDTH=$(lscpu | grep -i flags | grep -q "avx512" && echo 512 || (lscpu | grep -i flags | grep -q "avx2" && echo 256 || (lscpu | grep -i flags | grep -q "sse" && echo 128 || echo 64)))
