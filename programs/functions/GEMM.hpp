@@ -36,6 +36,36 @@ void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_row
         }
 }
 
+    template<typename T>
+void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_rows, const int w_cols, bool truncate)
+{
+    if(truncate)
+    {
+        prepare_Matrix_Vector_Product(W, A, C, w_rows, w_cols);
+        return;
+    }
+    for(int i = 0; i < w_rows; ++i) {
+        T sum = T(0);
+            for(int j = 0; j < w_cols; ++j) {
+
+#if PUBLIC_WEIGHTS == 0
+                sum += W[i*w_cols+j].prepare_dot(A[j]);
+#else
+                sum += A[j].mult_public(W[i*w_cols+j]);
+#endif
+            }
+
+
+#if PUBLIC_WEIGHTS == 0
+            sum.mask_and_send_dot_without_trunc(); // send immediately to utilize network better
+#else
+            // do nothing
+#endif
+
+    C[i] = sum;
+        }
+}
+
 template<typename T>
 void prepare_GEMM_CPU(const T* A, const T* B, T* C, const int m, const int p, const int f, bool is_A_fixed) {
     const int TILE_SIZE = 64;
@@ -391,3 +421,10 @@ void add_bias(T &C, const T &bias)
 #endif
 #endif
 }
+
+template<typename T>
+void add_bias_without_trunc(T &C, const T &bias)
+{
+    C+=bias;
+}
+
