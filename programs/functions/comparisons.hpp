@@ -45,6 +45,7 @@ void EQZ(sint_t<Additive_Share<Datatype, Share>>* val, sint_t<Additive_Share<Dat
     }
     get_msb_range<m, k, Datatype, Share>(val, y, len);
     get_msb_range<m, k, Datatype, Share>(val_check, y_check, len);
+    delete[] val_check;
     for(int i = 0; i < len; i++)
     {
         y[i] = y[i] ^ y_check[i];
