@@ -76,7 +76,14 @@ void start_layer_stats(std::string layer_name, int layer_id) {
         layer_stats.push_back(Layer_Timing());
         layer_stats.back().layer_id = layer_id;
         layer_stats.back().layer_name = layer_name;
-#if num_players == 3
+#if num_players == 2
+        #if PRE == 1
+        layer_stats.back().elements_sent_pre = total_send_pre[0];
+        layer_stats.back().elements_received_pre = total_recv_pre[0];
+        #endif
+        layer_stats.back().elements_sent_live = total_send[0];
+        layer_stats.back().elements_received_live = total_recv[0];
+#elif num_players == 3
         #if PRE == 1
         layer_stats.back().elements_sent_pre = total_send_pre[0] + total_send_pre[1];
         layer_stats.back().elements_received_pre = total_recv_pre[0] + total_recv_pre[1];
@@ -102,7 +109,14 @@ void start_layer_stats(std::string layer_name, int layer_id) {
 
 void stop_layer_stats(int layer_id) {
     if(current_phase == PHASE_INIT) {
-#if num_players == 3
+#if num_players == 2
+        #if PRE == 1
+        layer_stats.back().elements_sent_pre = total_send_pre[0] - layer_stats.back().elements_sent_pre;
+        layer_stats.back().elements_received_pre = total_recv_pre[0] - layer_stats.back().elements_received_pre;
+        #endif
+        layer_stats.back().elements_sent_live = total_send[0] - layer_stats.back().elements_sent_live;
+        layer_stats.back().elements_received_live = total_recv[0] - layer_stats.back().elements_received_live;
+#elif num_players == 3
         #if PRE == 1
         layer_stats.back().elements_sent_pre = total_send_pre[0] + total_send_pre[1] - layer_stats.back().elements_sent_pre;
         layer_stats.back().elements_received_pre = total_recv_pre[0] + total_recv_pre[1] - layer_stats.back().elements_received_pre;
