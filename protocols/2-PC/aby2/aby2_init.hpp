@@ -12,7 +12,7 @@ ABY2_init()  {}
 template <typename func_add>
 void generate_lxly_from_triple(func_add ADD, int num_round=0) const
 {
-if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+if constexpr(std::is_same_v<func_add(), OP_XOR>)
 {
     num_boolean_triples[num_round]++;
     store_output_share_bool_(num_round);
@@ -367,7 +367,7 @@ static void generate_zero_triples(uint64_t triple_num, func_add ADD, func_sub SU
 /* { */
 /*     lxly[i] = SET_ALL_ZERO(); */
 /* } */
-/* if constexpr(std::is_same_v<func_add(), FUNC_XOR>) */
+/* if constexpr(std::is_same_v<func_add(), OP_XOR>) */
 /* { */
 /* delete[] preprocessed_outputs_bool; */
 /* preprocessed_outputs_bool[0] = lxly; */

@@ -59,23 +59,21 @@
 #define ADD_SIGNED(a,b,c) _mm_add_epi##c(a,b)
 #define SUB_SIGNED(a,b,c) _mm_sub_epi##c(a,b)
 
-#define FUNC_AND __mm_and_si128_wrapper
-#define FUNC_OR __mm_or_si128_wrapper
-#define FUNC_XOR __mm_xor_si128_wrapper
+#define FUNC_AND _mm_and_si128
+#define FUNC_OR _mm_or_si128
+#define FUNC_XOR _mm_xor_si128
+#define FUNC_ADD8 _mm_add_epi8
+#define FUNC_ADD16 _mm_add_epi16
+#define FUNC_ADD32 _mm_add_epi32
+#define FUNC_ADD64 _mm_add_epi64
+#define FUNC_SUB8 _mm_sub_epi8
+#define FUNC_SUB16 _mm_sub_epi16
+#define FUNC_SUB32 _mm_sub_epi32
+#define FUNC_SUB64 _mm_sub_epi64
+#define FUNC_MUL16 _mm_mullo_epi16
+#define FUNC_MUL32 _mm_mullo_epi32
+#define FUNC_MUL64 _mm_mullo_epi64
 #define FUNC_ANDN __mm_andnot_si128_wrapper
-#define FUNC_ADD8 __mm_add_epi8_wrapper
-#define FUNC_ADD16 __mm_add_epi16_wrapper
-#define FUNC_ADD32 __mm_add_epi32_wrapper
-#define FUNC_ADD64 __mm_add_epi64_wrapper
-#define FUNC_SUB8 __mm_sub_epi8_wrapper
-#define FUNC_SUB16 __mm_sub_epi16_wrapper
-#define FUNC_SUB32 __mm_sub_epi32_wrapper
-#define FUNC_SUB64 __mm_sub_epi64_wrapper
-#define FUNC_MUL16 __mm_mullo_epi16_wrapper
-#define FUNC_MUL32 __mm_mullo_epi32_wrapper
-#define FUNC_MUL64 _mm_mullo_epi64_wrapper
-#define FUNC_DIV32 __mm_div_epi32_wrapper
-#define FUNC_DIV64 __mm_div_epi64_wrapper
 #define SHIFT_LEFT16 __mm_sla_epi16_wrapper
 #define SHIFT_LEFT32 __mm_sla_epi32_wrapper
 #define SHIFT_LEFT64 __mm_sla_epi64_wrapper
@@ -97,74 +95,9 @@
 
 
 
-inline __m128i __mm_and_si128_wrapper(__m128i a, __m128i b) {
-  return _mm_and_si128(a,b);
-}
-
-inline __m128i __mm_or_si128_wrapper(__m128i a, __m128i b) {
-  return _mm_or_si128(a,b);
-}
-
-inline __m128i __mm_xor_si128_wrapper(__m128i a, __m128i b) {
-  return _mm_xor_si128(a,b);
-}
 
 inline __m128i __mm_andnot_si128_wrapper(__m128i a, __m128i b) {
   return _mm_andnot_si128(a,b);
-}
-
-inline __m128i __mm_add_epi8_wrapper(__m128i a, __m128i b) {
-  return _mm_add_epi8(a,b);
-}
-
-inline __m128i __mm_add_epi16_wrapper(__m128i a, __m128i b) {
-  return _mm_add_epi16(a,b);
-}
-
-inline __m128i __mm_add_epi32_wrapper(__m128i a, __m128i b) {
-  return _mm_add_epi32(a,b);
-}
-
-inline __m128i __mm_add_epi64_wrapper(__m128i a, __m128i b) {
-  return _mm_add_epi64(a,b);
-}
-
-inline __m128i __mm_sub_epi8_wrapper(__m128i a, __m128i b) {
-  return _mm_sub_epi8(a,b);
-}
-
-inline __m128i __mm_sub_epi16_wrapper(__m128i a, __m128i b) {
-  return _mm_sub_epi16(a,b);
-}
-
-inline __m128i __mm_sub_epi32_wrapper(__m128i a, __m128i b) {
-  return _mm_sub_epi32(a,b);
-}
-
-inline __m128i __mm_sub_epi64_wrapper(__m128i a, __m128i b) {
-  return _mm_sub_epi64(a,b);
-}
-
-inline __m128i __mm_mullo_epi16_wrapper(__m128i a, __m128i b) {
-  return _mm_mullo_epi16(a,b);
-}
-
-inline __m128i __mm_mullo_epi32_wrapper(__m128i a, __m128i b) {
-  return _mm_mullo_epi32(a,b);
-}
-
-inline __m128i __mm_mullo_epi64_wrapper(__m128i a, __m128i b) {
-  return _mm_mullo_epi64(a,b);
-}
-
-inline __m128i __mm_div_epi32_wrapper(__m128i a, __m128i b) {
-  /* return _mm_div_epi32(a,b); */ // not implemented it seems
-    return a; 
-}
-
-inline __m128i __mm_div_epi64_wrapper(__m128i a, __m128i b) {
-  /* return _mm_div_epi64(a,b); */ // not implemented it seems
-    return a;
 }
 
 template <int n>

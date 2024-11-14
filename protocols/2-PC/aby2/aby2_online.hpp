@@ -155,7 +155,7 @@ template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_mult(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype lxly;
-if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+if constexpr(std::is_same_v<func_add(), OP_XOR>)
    lxly = retrieve_output_share_bool();
 else
    lxly = retrieve_output_share_arithmetic();
@@ -175,7 +175,7 @@ template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_dot(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
 Datatype lxly;
-if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+if constexpr(std::is_same_v<func_add(), OP_XOR>)
    lxly = retrieve_output_share_bool();
 else
    lxly = retrieve_output_share_arithmetic();
@@ -194,7 +194,7 @@ return c;
 /*     ABY2_ONLINE_Share prepare_dot_with_trunc(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) const */
 /* { */
 /* Datatype lxly; */
-/* if constexpr(std::is_same_v<func_add(), FUNC_XOR>) */
+/* if constexpr(std::is_same_v<func_add(), OP_XOR>) */
 /*    lxly = retrieve_output_share_bool(); */
 /* else */
 /*    lxly = retrieve_output_share_arithmetic(); */
@@ -260,7 +260,7 @@ static void prepare_A2B_S1(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Sha
     for(int i = m; i < k; i++)
     {
         out[i-m].l = getRandomVal(PSELF);
-        out[i-m].m = FUNC_XOR(temp_p1[i],out[i-m].l);
+        out[i-m].m = OP_XOR(temp_p1[i],out[i-m].l);
         send_to_live(PNEXT, out[i-m].m);
     }
 #endif
@@ -281,7 +281,7 @@ static void prepare_A2B_S2(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Sha
     for(int i = m; i < k; i++)
     {
         out[i-m].l = getRandomVal(PSELF);
-        out[i-m].m = FUNC_XOR(temp_p1[i],out[i-m].l);
+        out[i-m].m = OP_XOR(temp_p1[i],out[i-m].l);
         send_to_live(PNEXT, out[i-m].m);
     }
 #endif

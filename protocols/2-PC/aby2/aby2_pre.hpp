@@ -13,7 +13,7 @@ template <typename func_add, typename func_sub, typename func_mul>
 void generate_lxly_from_triple(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT, int num_round=0) const
 {
     BT t;
-    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    if constexpr(std::is_same_v<func_add(), OP_XOR>)
     {
         t = retrieveBooleanTriple<Datatype>();
     }
@@ -26,7 +26,7 @@ void generate_lxly_from_triple(ABY2_PRE_Share b, func_add ADD, func_sub SUB, fun
     pre_send_to_live(PNEXT, lta);
     pre_send_to_live(PNEXT, ltb);
     auto lxly = ADD(SUB(MULT(lta, b.l), MULT(ltb, t.a)), t.c);
-    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    if constexpr(std::is_same_v<func_add(), OP_XOR>)
     {
     store_output_share_bool(t.a, num_round);
     store_output_share_bool(b.l, num_round);
@@ -44,7 +44,7 @@ template <typename func_add, typename func_sub, typename func_mul>
 void generate_lxly_from_triple_comp_opt(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT, int num_round=0) const
 {
     BT t;
-    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    if constexpr(std::is_same_v<func_add(), OP_XOR>)
     {
         t = retrieveBooleanTriple<Datatype>();
     }
@@ -79,7 +79,7 @@ static Datatype receive_and_compute_lxly_share(func_add ADD, func_sub SUB, func_
 {
     auto lta = pre_receive_from_live(PNEXT);
     auto ltb = pre_receive_from_live(PNEXT);
-    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    if constexpr(std::is_same_v<func_add(), OP_XOR>)
     {
     auto ta = retrieve_output_share_bool(num_round);
     auto bl = retrieve_output_share_bool(num_round);
@@ -144,7 +144,7 @@ Datatype complete_Reveal(func_add ADD, func_sub SUB) const
 template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    if constexpr(std::is_same_v<func_add(), OP_XOR>)
     {
         triple_type[0][triple_type_index[0]++] = 0;
     }
@@ -160,7 +160,7 @@ return ABY2_PRE_Share(getRandomVal(PSELF)); //new mask
 template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-    if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+    if constexpr(std::is_same_v<func_add(), OP_XOR>)
     {
         triple_type[0][triple_type_index[0]++] = 0;
     }
@@ -331,7 +331,7 @@ static ABY2_PRE_Share public_val(Datatype a)
 template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot3(const ABY2_PRE_Share b, const ABY2_PRE_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+if constexpr(std::is_same_v<func_add(), OP_XOR>)
 {
     triple_type[0][triple_type_index[0]++] = 5;
     triple_type[0][triple_type_index[0]++] = 0;
@@ -355,7 +355,7 @@ return ABY2_PRE_Share();
 template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot4(const ABY2_PRE_Share b, const ABY2_PRE_Share c, const ABY2_PRE_Share d, func_add ADD, func_sub SUB, func_mul MULT) const
 {
-if constexpr(std::is_same_v<func_add(), FUNC_XOR>)
+if constexpr(std::is_same_v<func_add(), OP_XOR>)
 {
     triple_type[0][triple_type_index[0]++] = 7; //xy, zw
     triple_type[0][triple_type_index[0]++] = 99; //since xy,zw are together, skip next triple
@@ -461,7 +461,7 @@ switch(triple_type[0][i])
 {
 case 0: //AND
 {
-    auto lxly = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND);
+    auto lxly = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND);
     lxly_b[0][boolean_triple_counter[0]++] = lxly;
     break;
 }
@@ -496,9 +496,9 @@ case 4: //BitInjection
 case 5: //Dot3 (bool)
 {
     auto third = retrieve_output_share_bool();
-    auto lxly = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND);
+    auto lxly = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND);
     lxly_b[0][boolean_triple_counter[0]++] = lxly;
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(third, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(third, OP_XOR, OP_XOR, OP_AND, 1);
     break;
 }
 case 6: //Dot3 (arithemtic)
@@ -515,15 +515,15 @@ case 7: //Dot4 (bool)
     auto y = retrieve_output_share_bool();
     auto z = retrieve_output_share_bool();
     auto w = retrieve_output_share_bool();
-    auto lxly = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND);
-    auto lzlw = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND);
+    auto lxly = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND);
+    auto lzlw = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND);
     lxly_b[0][boolean_triple_counter[0]++] = lxly;
     lxly_b[0][boolean_triple_counter[0]++] = lzlw;
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(z, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(w, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
-    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(x, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
-    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(y, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
-    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(lzlw, FUNC_XOR, FUNC_XOR, FUNC_AND, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(z, OP_XOR, OP_XOR, OP_AND, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(w, OP_XOR, OP_XOR, OP_AND, 1);
+    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(x, OP_XOR, OP_XOR, OP_AND, 1);
+    ABY2_PRE_Share<Datatype>(lzlw).generate_lxly_from_triple(y, OP_XOR, OP_XOR, OP_AND, 1);
+    ABY2_PRE_Share<Datatype>(lxly).generate_lxly_from_triple(lzlw, OP_XOR, OP_XOR, OP_AND, 1);
     break;
 }
 case 8: //Dot4 (arithemtic)
@@ -602,7 +602,7 @@ for(uint64_t i = 0; i < num_triples; i++)
         }
         case 5:
         {
-            auto lxly = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND,1);
+            auto lxly = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND,1);
             lxly_b[1][boolean_triple_counter[1]++] = lxly;
             break;
         }
@@ -614,11 +614,11 @@ for(uint64_t i = 0; i < num_triples; i++)
         }
         case 7:
         {
-            auto lxly_lz = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND,1);
-            auto lxly_lw = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND,1);
-            auto lzlw_lx = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND,1);
-            auto lzlw_ly = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND,1);
-            auto lxly_lzlw = receive_and_compute_lxly_share(FUNC_XOR,FUNC_XOR,FUNC_AND,1);
+            auto lxly_lz = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND,1);
+            auto lxly_lw = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND,1);
+            auto lzlw_lx = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND,1);
+            auto lzlw_ly = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND,1);
+            auto lxly_lzlw = receive_and_compute_lxly_share(OP_XOR,OP_XOR,OP_AND,1);
             lxly_b[1][boolean_triple_counter[1]++] = lxly_lz;
             lxly_b[1][boolean_triple_counter[1]++] = lxly_lw;
             lxly_b[1][boolean_triple_counter[1]++] = lzlw_lx;

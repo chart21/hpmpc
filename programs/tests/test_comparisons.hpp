@@ -500,13 +500,13 @@ bool test_BitInj()
         print_compare(0, ortho_a[i]);
         print_compare(25, ortho_b[i]);
         print_compare(0, ortho_c[i]);
-        print_compare(-10, ortho_d[i]);
+        print_compare(-10, INT_TYPE(ortho_d[i]));
         print_compare(0, ortho_e[i]);
         print_compare(0, ortho_f[i]);
     }
     for(int i = 0; i < DATTYPE; i++)
     {
-        if(ortho_a[i] != 0 || ortho_b[i] != 25 || ortho_c[i] != 0 || ortho_d[i] != -10 || ortho_e[i] != 0 || ortho_f[i] != 0)
+        if(ortho_a[i] != 0 || ortho_b[i] != 25 || ortho_c[i] != 0 || INT_TYPE(ortho_d[i]) != -10 || ortho_e[i] != 0 || ortho_f[i] != 0)
         {
             return false;
         }
