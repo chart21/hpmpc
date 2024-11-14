@@ -54,6 +54,17 @@ pre_send_to_(PNEXT);
 #endif
 return ABY2_init();
 }
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+ABY2_init prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if PARTY == 0
+    send_to_(PNEXT);
+#else
+    pre_send_to_(PNEXT);
+#endif
+return ABY2_init();
+} 
     
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed(func_add ADD, func_sub SUB)

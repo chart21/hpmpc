@@ -202,6 +202,24 @@ pre_send_to_live(PNEXT,ADD(c.l, SUB(SET_ALL_ZERO(), TRUNC(MULT(l,b),fractional_b
 return c;
 #endif
 }
+
+template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+ABY2_PRE_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+{
+#if PARTY == 0
+    triple_type[0][triple_type_index[0]++] = 2;
+    return ABY2_PRE_Share(getRandomVal(PSELF));
+#else
+    auto result = l; // Share Trunc - Trunc(lv1)
+    for(int i = 2; i <= b; i*=2)
+        result = OP_TRUNC2(result);
+    result = OP_SUB(SET_ALL_ZERO(),result);
+
+    Datatype res_l = getRandomVal(PSELF);
+    pre_send_to_live(PNEXT, ADD(result,res_l));
+    return ABY2_PRE_Share(res_l);
+#endif
+} 
     
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed(func_add ADD, func_sub SUB)

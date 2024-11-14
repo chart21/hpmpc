@@ -40,7 +40,7 @@ template <typename func_mul, typename func_add, typename func_sub, typename func
 ABY2_ONLINE_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
 {
 #if PARTY == 0
-    auto result = MULT(SUB(m,l)); // Share Trunc(mv1)
+    auto result = SUB(m,l); // Share Trunc(mv1)
 #else
     auto result = l; // Share Trunc - Trunc(lv1)
 #endif
@@ -54,7 +54,9 @@ ABY2_ONLINE_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, fun
     ABY2_ONLINE_Share res;
     res.l = getRandomVal(PSELF);
     res.m = ADD(result,res.l);
+#if PARTY == 0
     send_to_live(PNEXT, res.m);
+#endif
     return res;
 } 
 
