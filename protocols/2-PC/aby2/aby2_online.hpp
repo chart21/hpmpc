@@ -30,7 +30,9 @@ c.m = SUB(SET_ALL_ZERO(), TRUNC(MULT(l,b),fractional_bits)); // Share Trunc -(lv
 #endif
 c.l = getRandomVal(PSELF);
 c.m = ADD(c.m,c.l);
+#if PARTY == 0
 send_to_live(PNEXT, c.m);
+#endif
 return c;
 }
 
@@ -61,7 +63,11 @@ ABY2_ONLINE_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, fun
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed(func_add ADD, func_sub SUB)
 {
+#if PARTY == 1
     Datatype msg = receive_from_live(PNEXT);
+#else
+    Datatype msg = retrieve_output_share();
+#endif
     m = ADD(m,msg); //recv Trunc(mv1 * b) - TRunc(lv1 * b)
 }
 
@@ -282,7 +288,6 @@ static void prepare_A2B_S2(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Sha
     {
         out[i-m].l = getRandomVal(PSELF);
         out[i-m].m = OP_XOR(temp_p1[i],out[i-m].l);
-        send_to_live(PNEXT, out[i-m].m);
     }
 #endif
 }
@@ -303,7 +308,7 @@ static void complete_A2B_S2(int k, ABY2_ONLINE_Share out[])
 #if PARTY == 0
     for(int i = 0; i < k; i++)
     {
-        out[i].m = receive_from_live(PNEXT);
+        out[i].m = retrieve_output_share();
         out[i].l = SET_ALL_ZERO();
     }
 #endif

@@ -193,7 +193,14 @@ void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 ABY2_PRE_Share prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
+#if PARTY == 0
+triple_type[0][triple_type_index[0]++] = 2;
 return ABY2_PRE_Share(getRandomVal(PSELF));
+#else
+auto c = ABY2_PRE_Share(getRandomVal(PSELF));
+pre_send_to_live(PNEXT,ADD(c.l, SUB(SET_ALL_ZERO(), TRUNC(MULT(l,b),fractional_bits)))); // Share Trunc -(lv1 * b) + lz
+return c;
+#endif
 }
     
     template <typename func_add, typename func_sub>
@@ -225,11 +232,28 @@ static void prepare_A2B_S1(int m, int k, ABY2_PRE_Share in[], ABY2_PRE_Share out
 static void prepare_A2B_S2(int m, int k, ABY2_PRE_Share in[], ABY2_PRE_Share out[])
 {
 #if PARTY == 1
+    Datatype temp_p1[BITLENGTH];
+    for(int i = 0; i < BITLENGTH; i++)
+    {
+        temp_p1[i] = OP_SUB(SET_ALL_ZERO(),in[i].l) ; // set second share to -lv2
+    }
+    alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+    unorthogonalize_arithmetic(temp_p1, temp2);
+    orthogonalize_boolean(temp2, temp_p1);
+    
     for(int i = m; i < k; i++)
     {
         out[i-m].l = getRandomVal(PSELF);
+        Datatype out_m = OP_XOR(temp_p1[i],out[i-m].l);
+        pre_send_to_live(PNEXT, out_m);
+    }
+#else
+    for(int i = m; i < k; i++)
+    {
+        triple_type[0][triple_type_index[0]++] = 2;
     }
 #endif
+
 }
 
 void prepare_bit2a(ABY2_PRE_Share out[])

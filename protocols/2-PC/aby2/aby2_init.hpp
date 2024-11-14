@@ -47,14 +47,22 @@ ABY2_init mult_public(const Datatype b, func_mul MULT) const
 template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
 ABY2_init prepare_mult_public_fixed(const Datatype b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC, int fractional_bits = FRACTIONAL) const
 {
+#if PARTY == 0
 send_to_(PNEXT);
+#else
+pre_send_to_(PNEXT);
+#endif
 return ABY2_init();
 }
     
     template <typename func_add, typename func_sub>
 void complete_public_mult_fixed(func_add ADD, func_sub SUB)
 {
+#if PARTY == 1
     receive_from_(PNEXT);
+#else
+    store_output_share_();
+#endif
 }
 
 
@@ -207,7 +215,7 @@ static void prepare_A2B_S2(int m, int k, ABY2_init in[], ABY2_init out[])
 #if PARTY == 1
     for(int i = m; i < k; i++)
     {
-        send_to_(PNEXT);
+        pre_send_to_(PNEXT);
     }
 #endif
 }
@@ -227,7 +235,7 @@ static void complete_A2B_S2(int k, ABY2_init out[])
 #if PARTY == 0
     for(int i = 0; i < k; i++)
     {
-        receive_from_(PNEXT);
+        store_output_share_();
     }
 #endif
 }

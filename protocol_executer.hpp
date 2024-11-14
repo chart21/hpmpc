@@ -90,8 +90,8 @@ void init_circuit(std::string ips[]) {
 #endif
 
 #if INIT == 1 && NO_INI == 0
-  auto garbage = new RESULTTYPE;
-  FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
+  RESULTTYPE garbage;
+  FUNCTION<PROTOCOL_INIT<DATATYPE>>(&garbage);
   /* delete garbage; */
 #if PRE== 1 && BEAVER == 1 
   PROTOCOL_INIT<DATATYPE>::complete_preprocessing(num_arithmetic_triples.data(), num_boolean_triples.data(), preprocessed_outputs_index);
@@ -210,8 +210,8 @@ void preprocess_circuit(std::string ips[]) {
   // receive only
 #else
   /* auto p_pre = PROTOCOL_PRE(); */
-  auto garbage_PRE = new RESULTTYPE;
-  FUNCTION<PROTOCOL_PRE<DATATYPE>>(garbage_PRE);
+  RESULTTYPE garbage_PRE;
+  FUNCTION<PROTOCOL_PRE<DATATYPE>>(&garbage_PRE);
 #endif
   // manual send
 
@@ -347,8 +347,8 @@ void live_circuit() {
       std::chrono::high_resolution_clock::now();
 
   /* auto p_live = PROTOCOL_LIVE(); */
-  auto result = new RESULTTYPE;
-  FUNCTION<PROTOCOL_LIVE<DATATYPE>>(result);
+  RESULTTYPE result;
+  FUNCTION<PROTOCOL_LIVE<DATATYPE>>(&result);
 #if MAL == 1
   compare_views();
   /* p_live.communicate(); */
@@ -447,8 +447,8 @@ void simulate_live() {
   std::chrono::high_resolution_clock::time_point c1 =
       std::chrono::high_resolution_clock::now();
 
-  auto result = new RESULTTYPE;
-  FUNCTION<PROTOCOL_LIVE<DATATYPE>>(result);
+  RESULTTYPE result;
+  FUNCTION<PROTOCOL_LIVE<DATATYPE>>(&result);
 
   double time = std::chrono::duration_cast<std::chrono::microseconds>(
                     std::chrono::high_resolution_clock::now() - c1)
