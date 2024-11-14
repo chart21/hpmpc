@@ -470,13 +470,13 @@ DATATYPE retrieve_output_share_arithmetic(int index = 0)
 
 
 
-template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), OP_XOR>, int> = 0>
 void store_output_share_ab(DATATYPE val, func_add ADD, int index = 0)
 {
     store_output_share_bool(val, index);
 }
 
-template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), OP_XOR>, int> = 0>
 void store_output_share_ab(DATATYPE val, func_add ADD, int index = 0)
 {
 #if SKIP_PRE == 1
@@ -485,7 +485,7 @@ void store_output_share_ab(DATATYPE val, func_add ADD, int index = 0)
     store_output_share_arithmetic(val, index);
 }
 
-    template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+    template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), OP_XOR>, int> = 0>
 DATATYPE retrieve_output_share_ab(func_add ADD, int index = 0)
 {
 #if SKIP_PRE == 1
@@ -494,7 +494,7 @@ DATATYPE retrieve_output_share_ab(func_add ADD, int index = 0)
     return retrieve_output_share_bool(index);
 }
 
-template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), OP_XOR>, int> = 0>
 DATATYPE retrieve_output_share_ab(func_add ADD, int index = 0)
 {
 #if SKIP_PRE == 1

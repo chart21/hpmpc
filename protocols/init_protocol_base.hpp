@@ -307,7 +307,7 @@ void store_output_share_arithmetic_(int index = 0)
     preprocessed_outputs_arithmetic_input_index[index]+=1;
 }
 
-template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), OP_XOR>, int> = 0>
 void store_output_share_ab_(func_add ADD, int index = 0)
 {
 #if SKIP_PRE == 1
@@ -316,7 +316,7 @@ void store_output_share_ab_(func_add ADD, int index = 0)
     store_output_share_bool_(index);
 }
 
-template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), FUNC_XOR>, int> = 0>
+template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), OP_XOR>, int> = 0>
 void store_output_share_ab_(func_add ADD, int index = 0)
 {
 #if SKIP_PRE == 1
