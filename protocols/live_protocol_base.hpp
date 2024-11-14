@@ -188,7 +188,7 @@ send_count_pre[player_id]+=1;
 DATATYPE pre_receive_from_live(int player_id)
 {
 #if SKIP_PRE == 1
-    return 0;
+    return SET_ALL_ZERO();
 #else
 #if RECV_BUFFER > 0
 if(share_buffer_pre[player_id] == RECV_BUFFER)
