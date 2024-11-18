@@ -53,6 +53,10 @@ void print_result(T* var)
     printf("\n");
 }
 
+
+std::chrono::microseconds total_receive_time;
+std::chrono::microseconds pre_receive_time;
+int curr_layer_id = -1;
 #if FUNCTION_IDENTIFIER >= 35
 struct Layer_Timing
 {
@@ -61,6 +65,7 @@ struct Layer_Timing
     std::chrono::microseconds pre_time_duration;
     std::chrono::microseconds live_time_duration;
     std::chrono::high_resolution_clock::time_point timer;
+    std::chrono::microseconds receive_time = std::chrono::microseconds(0);
     uint64_t elements_sent_live;
     uint64_t elements_sent_pre;
     uint64_t elements_received_live;
@@ -97,6 +102,7 @@ void start_layer_stats(std::string layer_name, int layer_id) {
     }
     else if(current_phase == PHASE_LIVE) {
         layer_stats[layer_id].timer = std::chrono::high_resolution_clock::now();
+        curr_layer_id = layer_id;
     }
 }
 
@@ -122,6 +128,7 @@ void stop_layer_stats(int layer_id) {
         layer_stats[layer_id].pre_time_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - layer_stats[layer_id].timer);
     }
     else if(current_phase == PHASE_LIVE) {
+        curr_layer_id = -1;
         layer_stats[layer_id].live_time_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - layer_stats[layer_id].timer);
     }
 }
@@ -131,11 +138,11 @@ void print_layer_stats()
     std::cout.precision(4);
 #if PRE == 1
     for(auto& layer : layer_stats) {
-        std::cout << "P" << PARTY << ": --NN_STATS (Individual)-- ID: " << layer.layer_id << " " << layer.layer_name << "    MB SENT:" << layer.elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << layer.elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << layer.elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << layer.elements_received_pre*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(layer.live_time_duration.count()) /1000 << "    ms PRE: " << double(layer.pre_time_duration.count()) /1000 << std::endl;
+        std::cout << "P" << PARTY << ": --NN_STATS (Individual)-- ID: " << layer.layer_id << " " << layer.layer_name << "    MB SENT:" << layer.elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << layer.elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << layer.elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << layer.elements_received_pre*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(layer.live_time_duration.count()) /1000 << "    ms PRE: " << double(layer.pre_time_duration.count()) /1000  << "   ms LIVE RECV: " << double(layer.receive_time.count()) /1000 << std::endl;
     }
 #else
     for(auto& layer : layer_stats) {
-        std::cout << "P" << PARTY << ": --NN_STATS (Individual)-- ID: " << layer.layer_id << " " << layer.layer_name << "    MB SENT:" << layer.elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << layer.elements_received_live*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(layer.live_time_duration.count()) /1000 << std::endl;
+        std::cout << "P" << PARTY << ": --NN_STATS (Individual)-- ID: " << layer.layer_id << " " << layer.layer_name << "    MB SENT:" << layer.elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << layer.elements_received_live*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(layer.live_time_duration.count()) /1000 << "    ms LIVE RECV: " << double(layer.receive_time.count()) /1000 << std::endl;
     }
 #endif
 //define hashmap with all layer types
@@ -151,18 +158,19 @@ for(auto& layer_pair : layer_stats_map) {
     uint64_t total_elements_received_pre = 0;
     double total_live_time_duration = 0;
     double total_pre_time_duration = 0;
+    double total_receive_time = 0;
     for(auto& layer_stats : layer_pair.second) {
         total_elements_sent_live += layer_stats.elements_sent_live;
         total_elements_sent_pre += layer_stats.elements_sent_pre;
         total_elements_received_live += layer_stats.elements_received_live;
         total_elements_received_pre += layer_stats.elements_received_pre;
         total_live_time_duration += layer_stats.live_time_duration.count();
-        total_pre_time_duration += layer_stats.pre_time_duration.count();
+        total_receive_time += layer_stats.receive_time.count();
     }
 #if PRE == 1
-    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED: " << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << total_elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << total_elements_received_pre*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(total_live_time_duration) /1000 << "    ms PRE: " << double(total_pre_time_duration) /1000 << std::endl;
+    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED: " << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "   MB SENT PRE:" << total_elements_sent_pre*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED PRE: " << total_elements_received_pre*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(total_live_time_duration) /1000 << "    ms PRE: " << double(total_pre_time_duration) /1000 << "   ms LIVE RECV: " << double(total_receive_time) /1000 << std::endl;
 #else
-    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(total_live_time_duration) /1000 << std::endl;
+    std::cout << "P" << PARTY << ": --NN_STATS (Aggregated)-- " << layer_pair.first << "    MB SENT:" << total_elements_sent_live*(double(DATTYPE)/(8000*1000)) << "   MB RECEIVED:" << total_elements_received_live*(double(DATTYPE)/(8000*1000)) << "    ms LIVE: " << double(total_live_time_duration) /1000 << "    ms LIVE RECV: " << double(total_receive_time) /1000 << std::endl;
 #endif
 
 }

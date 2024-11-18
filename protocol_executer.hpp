@@ -152,13 +152,20 @@ void preprocess_circuit(std::string ips[]) {
   rounds += 1;
   // receive_data
   // wait until all sockets have finished received their last data
+#if FUNCTION_IDENTIFIER >= 70
+  auto tm = std::chrono::high_resolution_clock::now();
+#endif
+
   pthread_mutex_lock(&mtx_receive_next);
 
   while (rounds > receiving_rounds) // wait until all threads received their
                                     // data
     pthread_cond_wait(&cond_receive_next, &mtx_receive_next);
-
   pthread_mutex_unlock(&mtx_receive_next);
+#if FUNCTION_IDENTIFIER >= 70
+      auto time_m = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - tm);
+      pre_receive_time = time_m;
+#endif
 
   rb = 0;
 
@@ -177,6 +184,8 @@ void preprocess_circuit(std::string ips[]) {
                      (double)(p2.tv_nsec - p1.tv_nsec) / (double)1000000000L;
   clock_t time_pre_function_finished = clock();
 
+  print("Time measured waiting for network (preprocessing) chrono: %fs \n",
+        double(pre_receive_time.count()) / 1000000);
   print("Time measured to perform preprocessing clock: %fs \n",
         double((time_pre_function_finished - time_pre_function_start)) /
             CLOCKS_PER_SEC);
@@ -295,6 +304,8 @@ void live_circuit() {
                      (double)(p2.tv_nsec - p1.tv_nsec) / (double)1000000000L;
   init_time = init_time - accum_pre;
 #endif
+  print("Time measured waiting for network chrono: %fs \n",
+        double(total_receive_time.count()) / 1000000);
   print("Time measured to initialize program: %fs \n", init_time);
   print("Time measured to perform computation clock: %fs \n",
         double((time_function_finished - time_function_start)) /

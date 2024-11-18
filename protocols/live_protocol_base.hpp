@@ -38,8 +38,10 @@ for(int t = 0; t < (num_players-1); t++)
 rounds+=1;  
         // receive_data
       //wait until all sockets have finished received their last data
-      pthread_mutex_lock(&mtx_receive_next);
-      
+#if FUNCTION_IDENTIFIER >= 70 
+    auto t_lm = std::chrono::high_resolution_clock::now();
+#endif
+    pthread_mutex_lock(&mtx_receive_next);
 /* std::chrono::high_resolution_clock::time_point c1 = */
 /*         std::chrono::high_resolution_clock::now(); */
       while(rounds > receiving_rounds) //wait until all threads received their data
@@ -50,6 +52,15 @@ rounds+=1;
 /*                      .count(); */
       /* printf("finished waiting for receive in round %i \n", rounds - 1); */
       pthread_mutex_unlock(&mtx_receive_next);
+#if FUNCTION_IDENTIFIER >= 70
+      auto time_lm = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - t_lm);
+      total_receive_time += time_lm;
+      if(curr_layer_id != -1)
+        layer_stats[curr_layer_id].receive_time += time_lm;
+#endif
+        /* std::chrono microsendonds pre_recv_wait_time; */
+        /* std::chrono microsendonds receive_time; */
+      
       for(int t = 0; t < (num_players-1); t++)
       {
           if(rounds > 2)
