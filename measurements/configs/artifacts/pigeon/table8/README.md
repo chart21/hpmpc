@@ -25,12 +25,12 @@ This experiment requires a lot of processes and system RAM. If necessary, reduce
 ### Execute 3PC Experiments
 
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table4/table4.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table8/table8.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 
 ```
 
 ### Execute 4PC Experiments
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table8 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=12 
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table8 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 
 ```
 
 
