@@ -198,16 +198,16 @@ On successful completion of the experiments, the results can be found in the mea
 
 | Figure | x-Axis: Source | y-Axis: Source | Plot: Source |
 | --- | --- | --- | --- |
-| Figure 1 | a,c) Bits per register: `DATTYPE`, b,d) Number of Threads `PROCESS_NUM` | Throughput: `TP_ONLINE_MAX(Mbit/s)`/1000 | 3PC: `PROTOCOL`=5, 4PC: `PROTOCOL`=12 |
-| Figure 3 | Threads: `PROCESS_NUM` | Throughput (Gbit/s): `TP_ONLINE_MAX(Mbit/s)` / 1000 | 3PC: `PROTOCOL=5`, 4PC: `PROTOCOL=12`, Naive: `FUSE_DOT=0`, `INTERLEAVE_COMM=0`, MPC-friendly: `FUSE-DOT=1`, `INTERLEAVE_COMM=1`, GPU: `USE_CUDA_GEMM=2` |
-| Figure 6 | Input Size: `NUM_INPUTS` | Runtime (ms): `ONLINE_MAX(s)` * 1000 | 3PC: `PROTOCOL=5`, 4PC: `PROTOCOL=12`, Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` |
+| Figure 1 | a,c) Bits per register: `DATTYPE` <br /> b,d) Number of Threads `PROCESS_NUM` | Throughput: `TP_ONLINE_MAX(Mbit/s)`/1000 | 3PC: `PROTOCOL`=5 <br /> , 4PC: `PROTOCOL`=12 |
+| Figure 3 | Threads: `PROCESS_NUM` | Throughput (Gbit/s): `TP_ONLINE_MAX(Mbit/s)` / 1000 | 3PC: `PROTOCOL=5`<br />  4PC: `PROTOCOL=12`, Naive: `FUSE_DOT=0`, `INTERLEAVE_COMM=0`<br /> MPC-friendly: `FUSE-DOT=1`, `INTERLEAVE_COMM=1`, <br /> GPU: `USE_CUDA_GEMM=2` |
+| Figure 6 | Input Size: `NUM_INPUTS` | Runtime (ms): `ONLINE_MAX(s)` * 1000 | 3PC: `PROTOCOL=5`<br /> 4PC: `PROTOCOL=12`<br /> Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` |
 
 
 |Table | Rows: Source | Columns: Source |
 | --- | --- | --- |
-| Table 4,7,8,9 | Setting: `PROTOCOL`, PIGEON CPU: `USE_CUDA_GEMM=0`, PIGEON GPU (if available): `USE_CUDA_GEMM=2` | AlexNet (CIFAR-10): `FUNCTION_IDENTIFIER=180`, ResNet18 (CIFAR-10): `FUNCTION_IDENTIFIER=170`, ResNet50 (CIFAR-10): `FUNCTION_IDENTIFIER=171`, VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`, ResNet18 (ImageNet): `FUNCTION_IDENTIFIER=175`, ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`, VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`, Throughput (Images/s): `Throughput(Op/s)` |
-| Table 5 | Total Runtime (s): `ONLINE_MAX(s)`, Total Gbps: TP_ONLINE_MAX(Mbit/s) / 1000, Total GB: `ONLINE_SENT(MB)`/1000 | VGG-16: `FUNCTION_IDENTIFIER=179`, ResNet152: `FUNCTION_IDENTIFIER=178` | 
-Table 6 | PPA: `FUNCTION_IDENTIFIER` of CNN, RCA: `FUNCTION_IDENTIFIER` of CNN - 100, RCA_8: `COMPRESS`=1, ON: `PRE=1`, PIGEON CPU: `USE_CUDA_GEMM=0`, PIGEON GPU (if available): `USE_CUDA_GEMM=2` | VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`, ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`, VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`, Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` | Throughput (Images/s): `Throughput(Op/s)` |
+| Table 4,7,8,9 | Setting: `PROTOCOL`<br /> PIGEON CPU: `USE_CUDA_GEMM=0`, PIGEON GPU (if available): `USE_CUDA_GEMM=2` | AlexNet (CIFAR-10): `FUNCTION_IDENTIFIER=180`<br /> ResNet18 (CIFAR-10): `FUNCTION_IDENTIFIER=170`<br /> ResNet50 (CIFAR-10): `FUNCTION_IDENTIFIER=171`<br /> VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`<br /> ResNet18 (ImageNet): `FUNCTION_IDENTIFIER=175`<br /> ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`<br /> VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`<br /> Throughput (Images/s): `Throughput(Op/s)` |
+| Table 5 | Total Runtime (s): `ONLINE_MAX(s)`<br /> Total Gbps: TP_ONLINE_MAX(Mbit/s) / 1000<br /> Total GB: `ONLINE_SENT(MB)`/1000 | VGG-16: `FUNCTION_IDENTIFIER=179`<br /> ResNet152: `FUNCTION_IDENTIFIER=178` | 
+Table 6 | PPA: `FUNCTION_IDENTIFIER` of CNN<br /> RCA: `FUNCTION_IDENTIFIER` of CNN - 100<br /> RCA_8: `COMPRESS`=1<br /> ON: `PRE=1`<br /> PIGEON CPU: `USE_CUDA_GEMM=0`<br /> PIGEON GPU (if available): `USE_CUDA_GEMM=2` | VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`<br /> ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`<br /> VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`<br /> Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` <br />  Throughput (Images/s): `Throughput(Op/s)` |
 
 
 #### Automation of distributed tests with a Master Node
@@ -221,18 +221,6 @@ Alternatively, if you have tmux installed on the master node, you can run the fo
 ```bash
 cd hpmpc/measurements/configs/artifacts/pigeon
 ./run_with_tmux_grid.sh
-```
-
-#### TLDR
-
-To run the experiments without further elaboration, complete the `Dependencies` and `Networking` sections and run the following commands on each machine. The results will be stored in the measurements/logs directory. The commands need to be executed on all machines simultaneously within 10 minutes to prevent connection timeouts.
-
-```bash
-export MAX_BITWIDTH=$(lscpu | grep -i flags | grep -q "avx512" && echo 512 || (lscpu | grep -i flags | grep -q "avx2" && echo 256 || (lscpu | grep -i flags | grep -q "sse" && echo 128 || echo 64)))
-export SUPPORTED_BITWIDTHS=$(echo 1 8 16 32 64 128 256 512 | awk -v max="$MAX_BITWIDTH" '{for(i=1;i<=NF;i++) if($i<=max) printf $i (i<NF && $i<max?",":"")}')
-export ITERATIONS=1
-sudo ./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH # Run with sudo if necessary
-python3 measurements/parse_logs.py measurements/logs
 ```
 
 ## Limitations 
