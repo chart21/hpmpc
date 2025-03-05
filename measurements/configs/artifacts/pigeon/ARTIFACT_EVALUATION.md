@@ -14,8 +14,8 @@ We set up machines and provided a `machines.json` file with login information in
 The artifact reproduces the experiments of all included figures and tables (exluding evaluation of third-party frameworks and evaluation of subroutines) of the paper. Table 1 only evaluates a third-party framework and is thus not covered. 
 For each experiment, the artifact produces one or multiple csv files with measurement results that can be directly compared to the corresponding measurement point of a figure or an entry of a table in the paper.
 The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the paper's results.
-The reduced workload should complete within an hour on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and throughput achieved by the full results.
-The full workload should also complete within an hour but requires high-performance hardware (32 cores, AVX2, 512GB RAM, ideally an NVIDIA GPU with at least 24GB VRAM).
+The reduced workload should complete within two hours on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and throughput achieved by the full results.
+The full workload should also complete within two hours but requires high-performance hardware (32 cores, AVX2, 512GB RAM, ideally an NVIDIA GPU with at least 24GB VRAM).
 All experiments can be executed using a single script and we provide a Dockerfile to run the experiments in a containerized environment.
 
 ### Security/Privacy Issues and Ethical Concerns (All badges)
