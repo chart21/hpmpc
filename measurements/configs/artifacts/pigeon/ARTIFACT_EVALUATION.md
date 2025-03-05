@@ -189,7 +189,6 @@ The measurement data provided by the figures/tables corresponds to the columns o
 | Runtime (s) | `ONLINE_MAX(s)` | The runtime of the experiment in seconds. `ONLINE_MAX` measures the runtime based on the slowest process (i.e. when all parallel processes are finished) and is used for the results in the paper while `ONLINE_AVG` measures the average runtime of all processes. |
 | Bits per Register | `DATTYPE` | The number of bits per register used in the experiment. |
 | Number of inputs | `NUM_INPUTS` | The number of inputs used in the experiment. It is set to 1 for FUNCTIONALITY experiments. |
-| Bandwidth (Mbit/s) / Latency (ms) | - (Filename suffix) | Some experiments are evaluated with varying latencies/bandwidths. These experiments are evaluated once per specified network parameter. The resulting csv files contain a suffix indicating the network configuration, e.g. `_100Mbps` for 100Mbps bandwidth. |
 | Blocks/s | `TP_ONLINE_MAX(OPs/s)` | The throughput in operations per second. |
 
 #### Detailed Results
@@ -198,16 +197,16 @@ On successful completion of the experiments, the results can be found in the mea
 
 | Figure | x-Axis: Source | y-Axis: Source | Plot: Source |
 | --- | --- | --- | --- |
-| Figure 1 | a,c) Bits per register: `DATTYPE` <br /> b,d) Number of Threads `PROCESS_NUM` | Throughput: `TP_ONLINE_MAX(Mbit/s)`/1000 | 3PC: `PROTOCOL`=5 <br /> , 4PC: `PROTOCOL`=12 |
+| Figure 1 | a,c) Bits per register: `DATTYPE` <br /> b,d) Number of Threads: `PROCESS_NUM` | Throughput: `TP_ONLINE_MAX(Mbit/s)`/1000 | 3PC: `PROTOCOL`=5 <br /> 4PC: `PROTOCOL`=12 |
 | Figure 3 | Threads: `PROCESS_NUM` | Throughput (Gbit/s): `TP_ONLINE_MAX(Mbit/s)` / 1000 | 3PC: `PROTOCOL=5`<br />  4PC: `PROTOCOL=12`, Naive: `FUSE_DOT=0`, `INTERLEAVE_COMM=0`<br /> MPC-friendly: `FUSE-DOT=1`, `INTERLEAVE_COMM=1`, <br /> GPU: `USE_CUDA_GEMM=2` |
-| Figure 6 | Input Size: `NUM_INPUTS` | Runtime (ms): `ONLINE_MAX(s)` * 1000 | 3PC: `PROTOCOL=5`<br /> 4PC: `PROTOCOL=12`<br /> Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` |
+| Figure 6 | Input Size: `NUM_INPUTS` | Runtime (ms): `ONLINE_MAX(s)` * 1000 | 3PC: `PROTOCOL=5`<br /> 4PC: `PROTOCOL=12`<br /> Batch Size: `DATTYPE/(BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM`) |
 
 
 |Table | Rows: Source | Columns: Source |
 | --- | --- | --- |
-| Table 4,7,8,9 | Setting: `PROTOCOL`<br /> PIGEON CPU: `USE_CUDA_GEMM=0`, PIGEON GPU (if available): `USE_CUDA_GEMM=2` | AlexNet (CIFAR-10): `FUNCTION_IDENTIFIER=180`<br /> ResNet18 (CIFAR-10): `FUNCTION_IDENTIFIER=170`<br /> ResNet50 (CIFAR-10): `FUNCTION_IDENTIFIER=171`<br /> VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`<br /> ResNet18 (ImageNet): `FUNCTION_IDENTIFIER=175`<br /> ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`<br /> VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`<br /> Throughput (Images/s): `Throughput(Op/s)` |
-| Table 5 | Total Runtime (s): `ONLINE_MAX(s)`<br /> Total Gbps: TP_ONLINE_MAX(Mbit/s) / 1000<br /> Total GB: `ONLINE_SENT(MB)`/1000 | VGG-16: `FUNCTION_IDENTIFIER=179`<br /> ResNet152: `FUNCTION_IDENTIFIER=178` | 
-Table 6 | PPA: `FUNCTION_IDENTIFIER` of CNN<br /> RCA: `FUNCTION_IDENTIFIER` of CNN - 100<br /> RCA_8: `COMPRESS`=1<br /> ON: `PRE=1`<br /> PIGEON CPU: `USE_CUDA_GEMM=0`<br /> PIGEON GPU (if available): `USE_CUDA_GEMM=2` | VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`<br /> ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`<br /> VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`<br /> Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` <br />  Throughput (Images/s): `Throughput(Op/s)` |
+| Table 4,7,8,9 | Setting: `PROTOCOL`<br /> PIGEON CPU: `USE_CUDA_GEMM=0` <br /> PIGEON GPU (if available): `USE_CUDA_GEMM=2` | AlexNet (CIFAR-10): `FUNCTION_IDENTIFIER=180`<br /> ResNet18 (CIFAR-10): `FUNCTION_IDENTIFIER=170`<br /> ResNet50 (CIFAR-10): `FUNCTION_IDENTIFIER=171`<br /> VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`<br /> ResNet18 (ImageNet): `FUNCTION_IDENTIFIER=175`<br /> ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`<br /> VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`<br /> Throughput (Images/s): `Throughput(Op/s)` |
+| Table 5 | Total Runtime (s): `ONLINE_MAX(s)`<br /> Total Gbps: `TP_ONLINE_MAX(Mbit/s)` / 1000<br /> Total GB: `ONLINE_SENT(MB)`/1000 | VGG-16: `FUNCTION_IDENTIFIER=179`<br /> ResNet152: `FUNCTION_IDENTIFIER=178` | 
+Table 6 | PPA: `FUNCTION_IDENTIFIER` of CNN<br /> RCA: `FUNCTION_IDENTIFIER` of CNN subtracted by `100` <br /> RCA_8: `COMPRESS`=1<br /> ON: `PRE=1`<br /> PIGEON CPU: `USE_CUDA_GEMM=0`<br /> PIGEON GPU (if available): `USE_CUDA_GEMM=2` | VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`<br /> ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`<br /> VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`<br /> Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` <br />  Throughput (Images/s): `Throughput(Op/s)` |
 
 
 #### Automation of distributed tests with a Master Node
