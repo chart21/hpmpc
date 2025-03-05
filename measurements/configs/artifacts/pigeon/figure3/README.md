@@ -22,12 +22,12 @@ Run the following commands on each node. This experiment requires a lot of proce
 
 ### Execute 3PC Experiments
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3CPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5
 ```
 
 ### Execute 4PC Experiments
 ```sh
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3CPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12
 ```
 
 ### Execute 3PC Experiments (GPU)

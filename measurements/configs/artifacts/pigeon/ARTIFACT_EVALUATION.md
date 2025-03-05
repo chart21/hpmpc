@@ -6,12 +6,16 @@ Artifacts HotCRP Id: **Submission #2 (2025.3)**
 
 Requested Badge: **Functional**
 
+## Reviewer Instructions
+
+We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/pigeon` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments.
+
 ## Description
-The artifact reproduces the experiments of all included figures and tables (exluding evaluation of third-party frameworks) of the paper. Table 1 only evaluates a third-party framework and is thus not covered. 
+The artifact reproduces the experiments of all included figures and tables (exluding evaluation of third-party frameworks and evaluation of subroutines) of the paper. Table 1 only evaluates a third-party framework and is thus not covered. 
 For each experiment, the artifact produces one or multiple csv files with measurement results that can be directly compared to the corresponding measurement point of a figure or an entry of a table in the paper.
 The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the paper's results.
 The reduced workload should complete within an hour on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and throughput achieved by the full results.
-The full workload should also complete within an hour but requires high-performance hardware (32 cores, AVX2,512GB RAM, ideally an NVIDIA GPU with at least 24GB VRAM).
+The full workload should also complete within an hour but requires high-performance hardware (32 cores, AVX2, 512GB RAM, ideally an NVIDIA GPU with at least 24GB VRAM).
 All experiments can be executed using a single script and we provide a Dockerfile to run the experiments in a containerized environment.
 
 ### Security/Privacy Issues and Ethical Concerns (All badges)
@@ -24,7 +28,7 @@ Each machine should have identical hardware specifications.
 
 ### Hardware Requirements
 
-Each node must support AVX512.
+Each node must support AVX512 to run the scripts without manual modifications.
 We recommend four multi-core machines with at least 16 cores and 64GB RAM for running the reduced workload.
 We recommend four multi-core machines with at least 32 cores, 512GB RAM, and a 24GB GPU for running the full workload.
 For full reproducibility, please refer to the exact details in the `Run the experiments` section.
@@ -125,18 +129,18 @@ make -j USE_CUDA_GEMM=2 PARTY=$PID FUNCTION_IDENTIFIER=57 PROTOCOL=12 && scripts
 
 ### Main Results and Claims
 Our main results that should be supported by the artifact are the following:
-- Result1: Increasing the utilized bits per register with vectorization and bitslicing improves network throughput significantly (Figure 1) 
-- Result2: PIGEON can import trained PyTorch CNN models and obtain correct accuracy.
+- Result1: Increasing the utilized bits per register with vectorization and bitslicing improves network throughput significantly (Figure 1).
+- Result2: All relevant tables and figures from the paper can be re-evaluated with the artifact.
 
 ### Experiments 
 
 #### Run the experiments (FUNCTIONALITY)
 
 By default, the experiment script will run a single iteration and a heavily reduced workload to test the functionality of each experiment. 
-All measurement points from the covered tables and figures are generated but with a smaller input size and thus lower throughput can be expected.
+All measurement points from the covered tables and figures are generated but with a smaller input size.
 Also, the tested number of bits per register and the number of processes is reduced. Hence, one can expect all results from the different tables and figures but with lower throughput and runtime values and in some cases a smaller range of tested parameters per plot.
 
-Run the following script on each node to execute the experiments.
+Run the following script on each node simultaneously to execute the experiments.
 ```bash
 ./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH 
 ```
@@ -159,6 +163,7 @@ Four AWS G6 16xlarge instances with the following properties:
     - Network Latency: 0.3ms
 
 Note that fewer cores or RAM on the nodes may crash the experiments.
+For some 64-bit tests we utilized CPU-based machines with AVX-512 support such as R7a instances due to the missing AVX-512 support of instances with a GPU.
 
 #### Parse the results
 
@@ -193,19 +198,16 @@ On successful completion of the experiments, the results can be found in the mea
 
 | Figure | x-Axis: Source | y-Axis: Source | Plot: Source |
 | --- | --- | --- | --- |
-| Figure 1 | a,c) Bits per register, b,d) Number of Threads | Runtime (ms): `ONLINE_MAX(s)` x10^3 | Multiplication: `FUNCTION_IDENTIFIER=2` <br /> Scalar Product: `FUNCTION_IDENTIFIER=7` <br /> Protocols: `PROTOCOL` |
-| Figure 9 | Bits per Register: `DATTYPE` <br /> Number of Processes: `PROCESS_NUM` | Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` / 1000 | Protocols: `PROTOCOL` |
-| Figure 10 | Latency (ms): File suffix (e.g. `_8ms`) <br /> Bandwidth (Mbit/s): File suffix (e.g. `_100Mbps`) <br /> Input Size: `NUM_INPUTS` | Runtime (s): `ONLINE_MAX(s)` <br /> Throughput (10^9 Gates/sec): `TP_ONLINE_MAX(Mbit/s)` / 1000 | Protocols: `PROTOCOL` |
-| Figure 29 | Latency (ms): File suffix (e.g. `_10ms`) | Runtime (s): `ONLINE_MAX(s)` | <br /> Multiplication: `FUNCTION_IDENTIFIER=8` <br /> Mult + Trunc: `FUNCTION_IDENTIFIER=9` <br /> A2B: `FUNCTION_IDENTIFIER=10` <br /> Bit2A: `FUNCTION_IDENTIFIER=11` <br /> Protocols: `PROTOCOL` |
+| Figure 1 | a,c) Bits per register: `DATTYPE`, b,d) Number of Threads `PROCESS_NUM` | Throughput: `TP_ONLINE_MAX(Mbit/s)`/1000 | 3PC: `PROTOCOL`=5, 4PC: `PROTOCOL`=12 |
+| Figure 3 | Threads: `PROCESS_NUM` | Throughput (Gbit/s): `TP_ONLINE_MAX(Mbit/s)` / 1000 | 3PC: `PROTOCOL=5`, 4PC: `PROTOCOL=12`, Naive: `FUSE_DOT=0`, `INTERLEAVE_COMM=0`, MPC-friendly: `FUSE-DOT=1`, `INTERLEAVE_COMM=1`, GPU: `USE_CUDA_GEMM=2` |
+| Figure 6 | Input Size: `NUM_INPUTS` | Runtime (ms): `ONLINE_MAX(s)` * 1000 | 3PC: `PROTOCOL=5`, 4PC: `PROTOCOL=12`, Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` |
 
 
 |Table | Rows: Source | Columns: Source |
 | --- | --- | --- |
-| Table 6 | Protocols: `PROTOCOL` | Billion Gates/sec: `TP_ONLINE_MAX(Mbit/s)` / 1000 <br /> Theoretical Limit: `TP_ONLINE_MAX(Mbit/s)` / NETWORK_LIMIT(Mbit/s) |
-| Table 7 | same as Table 6, (Online) refers to `PRE=1` | same as Table 6 |
-| Table 8 | same as Table 7 | Million Blocks/sec: `ONLINE_MAX (OPs/s)`/10^6 <br /> Theoretical Limit: `TP_ONLINE_MAX(Mbit/s)` / NETWORK_LIMIT(Mbit/s) |
-| Table 9 | Protocols: `PROTOCOL` | Runtime: `TP_ONLINE_MAX(s)` <br /> Lat: Filename contains `_ms` suffix <br /> Bdw: Filename contains `_Mbps` suffix <br /> Comp: Filename contains `_dot` |
-| Table 10 | Protocols: `PROTOCOL` | Thousand Blocks/s: `TP_ONLINE_MAX(OPs/s)`/ 10^3 <br /> CMAN/WAN1/Mixed: Filename contains `_CMAN`/`_WAN1`/`_WAN2` suffix |
+| Table 4,7,8,9 | Setting: `PROTOCOL`, PIGEON CPU: `USE_CUDA_GEMM=0`, PIGEON GPU (if available): `USE_CUDA_GEMM=2` | AlexNet (CIFAR-10): `FUNCTION_IDENTIFIER=180`, ResNet18 (CIFAR-10): `FUNCTION_IDENTIFIER=170`, ResNet50 (CIFAR-10): `FUNCTION_IDENTIFIER=171`, VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`, ResNet18 (ImageNet): `FUNCTION_IDENTIFIER=175`, ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`, VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`, Throughput (Images/s): `Throughput(Op/s)` |
+| Table 5 | Total Runtime (s): `ONLINE_MAX(s)`, Total Gbps: TP_ONLINE_MAX(Mbit/s) / 1000, Total GB: `ONLINE_SENT(MB)`/1000 | VGG-16: `FUNCTION_IDENTIFIER=179`, ResNet152: `FUNCTION_IDENTIFIER=178` | 
+Table 6 | PPA: `FUNCTION_IDENTIFIER` of CNN, RCA: `FUNCTION_IDENTIFIER` of CNN - 100, RCA_8: `COMPRESS`=1, ON: `PRE=1`, PIGEON CPU: `USE_CUDA_GEMM=0`, PIGEON GPU (if available): `USE_CUDA_GEMM=2` | VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`, ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`, VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`, Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` | Throughput (Images/s): `Throughput(Op/s)` |
 
 
 #### Automation of distributed tests with a Master Node
