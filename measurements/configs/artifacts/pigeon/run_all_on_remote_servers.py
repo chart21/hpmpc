@@ -2,6 +2,7 @@ import json
 import paramiko
 import sys
 import threading
+import os
 
 # Load machine credentials from JSON file
 with open('machines.json') as f:
@@ -20,6 +21,31 @@ echo "Running experiments with the following parameters: PID=$PID, IP0=$IP0, IP1
 
 experiment_command = "sudo ./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
 parse_command = "python3 measurements/parse_logs.py measurements/logs"
+
+def fetch_logs(machine, pid):
+    """Fetch logs from the remote machine and store locally"""
+    ip = machine['ip']
+    username = machine['username']
+    password = machine['password']
+    hostname = machine['hostname']
+    local_log_dir = f"../../../logs/node_{pid}"
+    remote_log_dir = "hpmpc/measurements/logs"
+    os.makedirs(local_log_dir, exist_ok=True)
+    
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        client.connect(ip, username=username, password=password)
+        sftp = client.open_sftp()
+        
+        for filename in sftp.listdir(remote_log_dir):
+            remote_file = f"{remote_log_dir}/{filename}"
+            local_file = f"{local_log_dir}/{filename}"
+            sftp.get(remote_file, local_file)
+            
+        sftp.close()
+    finally:
+        client.close()
 
 # Lock for synchronized printing
 print_lock = threading.Lock()
@@ -51,6 +77,9 @@ def execute_commands_on_remote(machine, pid):
         if exit_status == 0:
             with print_lock:
                 print(f"[Machine {pid} - {hostname}] Commands completed successfully")
+                
+            # Fetch logs after execution
+            fetch_logs(machine, pid)
         else:
             with print_lock:
                 print(f"[Machine {pid} - {hostname}] Command failed with exit status {exit_status}")

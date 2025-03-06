@@ -41,7 +41,7 @@ done
 
 echo "=====Starting all measurements with PID $PID, IP0 $IP0, IP1 $IP1, IP2 $IP2, IP3 $IP3, REDUCED $REDUCED, ITERATIONS $ITERATIONS, USE_CUDA_GEMM $USE_CUDA_GEMM====="
 
-#4PC
+##4PC
 
 echo "===Starting 4PC measurements for figure 1==="
 
@@ -129,6 +129,6 @@ python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table8/
 
 echo "===Starting 3PC measurements for table 9==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table9 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM 
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table9 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM 
 
 echo "=====Finished all 3PC measurements====="
