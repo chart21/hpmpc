@@ -103,4 +103,5 @@ if __name__ == "__main__":
         # Wait for all threads to complete
         for thread in threads:
             thread.join()
+    exit(0)
 
