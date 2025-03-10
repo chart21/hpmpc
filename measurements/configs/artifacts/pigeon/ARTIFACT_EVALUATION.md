@@ -214,7 +214,7 @@ On successful completion of the experiments, the results can be found in the mea
 Table 6 | PPA: `FUNCTION_IDENTIFIER` of CNN<br /> RCA: `FUNCTION_IDENTIFIER` of CNN subtracted by `100` <br /> RCA_8: `COMPRESS`=1<br /> ON: `PRE=1`<br /> PIGEON CPU: `USE_CUDA_GEMM=0`<br /> PIGEON GPU (if available): `USE_CUDA_GEMM=2` | VGG-16 (CIFAR-10): `FUNCTION_IDENTIFIER=174`<br /> ResNet50 (ImageNet): `FUNCTION_IDENTIFIER=176`<br /> VGG-16 (ImageNet) `FUNCTION_IDENTIFIER=179`<br /> Batch Size: `DATTYPE/BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM` <br />  Throughput (Images/s): `Throughput(Op/s)` |
 
 
-### Automation of distributed tests with a Master Node
+## Automation of distributed tests with a Master Node
 
 To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. This requires `pip install paramiko`. The experiment results will be stored as csv files on each node locally in the `hpmpc/measurements/logs` directory and also on the master node in the `hpmpc/measurements/logs/node_$PID/` directory.
 ```bash
