@@ -159,7 +159,7 @@ Four AWS G6 16xlarge instances with the following properties:
     - GPU: NVIDIA L4 GPU, 32GB
     - RAM: 512GB
     - Maximum Bitwidth: 256
-    - OS: Debian Trixie
+    - OS: Ubuntu LTS 22.04
     - Network Links: 25 Gbit/s duplex link between all pairs of nodes without a switch (directly connected)
     - Network Latency: 0.3ms
 
