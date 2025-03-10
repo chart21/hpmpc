@@ -37,7 +37,7 @@ For full reproducibility, please refer to the exact details in the `Run the expe
 Each machine should come with a Debian-based operating system or Docker installed. For install instructions, please refer to the `Setup the environment` section.
 
 ### Estimated Time and Storage Consumption
-All workload should complete within an hour in a LAN setting with the specified hardware requirements. For exact details, please refer to the `Run the experiments` section.
+All workload should complete within two hours in a LAN setting with the specified hardware requirements. For exact details, please refer to the `Run the experiments` section.
 
 
 ### Accessibility
@@ -51,11 +51,11 @@ The following instructions are for setting up the environment to run the experim
 
 Execute on each node to install dependencies (may require root privileges and running each command with sudo).
 ```bash
-apt-get update && \
-    apt-get install -y --no-install-recommends gcc-12 g++-12 libeigen3-dev libssl-dev git vim ca-certificates python3 jq bc build-essential iproute2 iperf && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 && \
-    update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 100 && \
-    update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 100 
+sudo apt-get update && \
+    sudo apt-get install -y --no-install-recommends gcc-12 g++-12 libeigen3-dev libssl-dev git vim ca-certificates python3 jq bc build-essential iproute2 iperf && \
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 && \
+    sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 100 && \
+    sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 100 
 ```
 
 Clone the repository and its submodules.
@@ -129,6 +129,7 @@ make -j USE_CUDA_GEMM=2 PARTY=$PID FUNCTION_IDENTIFIER=57 PROTOCOL=12 && scripts
 
 ### Main Results and Claims
 Our main results that should be supported by the artifact are the following:
+
 - Result1: Increasing the utilized bits per register with vectorization and bitslicing improves network throughput significantly (Figure 1).
 - Result2: All relevant tables and figures from the paper can be re-evaluated with the artifact.
 
