@@ -8,7 +8,7 @@ Requested Badge: **Functional**
 
 ## Reviewer Instructions
 
-We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/pigeon` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments.
+We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/pigeon` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments. Note that the servers do not have a GPU, thus only PIGEON CPU is evaluated.
 
 ## Description
 The artifact reproduces the experiments of all included figures and tables (exluding evaluation of third-party frameworks and evaluation of subroutines) of the paper. Table 1 only evaluates a third-party framework and is thus not covered. 
