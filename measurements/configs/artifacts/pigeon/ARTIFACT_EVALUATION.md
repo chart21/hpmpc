@@ -201,8 +201,8 @@ On successful completion of the experiments, the results can be found in the mea
 
 | Figure | x-Axis: Source | y-Axis: Source | Plot: Source |
 | --- | --- | --- | --- |
-| Figure 1 | a,c) Bits per register: `DATTYPE` <br /> b,d) Number of Threads: `PROCESS_NUM` | Throughput: `TP_ONLINE_MAX(Mbit/s)`/1000 | 3PC: `PROTOCOL`=5 <br /> 4PC: `PROTOCOL`=12 |
-| Figure 3 | Threads: `PROCESS_NUM` | Throughput (Gbit/s): `TP_ONLINE_MAX(Mbit/s)` / 1000 | 3PC: `PROTOCOL=5`<br />  4PC: `PROTOCOL=12`, Naive: `FUSE_DOT=0`, `INTERLEAVE_COMM=0`<br /> MPC-friendly: `FUSE-DOT=1`, `INTERLEAVE_COMM=1`, <br /> GPU: `USE_CUDA_GEMM=2` |
+| Figure 1 | a,c) Bits per register: `DATTYPE` <br /> b,d) Number of Threads: `PROCESS_NUM` | Throughput: `TP_ONLINE_MAX(Mbit/s)`/1000 | 3PC: `PROTOCOL=5` <br /> 4PC: `PROTOCOL=12` |
+| Figure 3 | Threads: `PROCESS_NUM` | Throughput (Gbit/s): `TP_ONLINE_MAX(Mbit/s)` / 1000 | 3PC: `PROTOCOL=5`<br />  4PC: `PROTOCOL=12` <br />  Naive: `FUSE_DOT=0`, `INTERLEAVE_COMM=0`<br /> MPC-friendly: `FUSE-DOT=1`, `INTERLEAVE_COMM=1`, <br /> GPU: `USE_CUDA_GEMM=2` |
 | Figure 6 | Input Size: `NUM_INPUTS` | Runtime (ms): `ONLINE_MAX(s)` * 1000 | 3PC: `PROTOCOL=5`<br /> 4PC: `PROTOCOL=12`<br /> Batch Size: `DATTYPE/(BITLENGTH*SPLITROLES_FACTOR*PROCESS_NUM`) |
 
 
