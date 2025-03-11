@@ -52,11 +52,11 @@ def execute_commands_on_remote(machine, pid):
         exit_status = stdout.channel.recv_exit_status()
         if exit_status == 0:
             with print_lock:
-                print(f"[Machine {pid} - {hostname}] Commands completed successfully")
+                print(f"[Machine {pid} - {hostname}] Experiments completed successfully")
             success = True
         else:
             with print_lock:
-                print(f"[Machine {pid} - {hostname}] Command failed with exit status {exit_status}")
+                print(f"[Machine {pid} - {hostname}] Experiments failed with exit status {exit_status}")
     finally:
         # Explicitly close all channels
         if hasattr(client, 'get_transport') and client.get_transport():
@@ -128,5 +128,5 @@ if __name__ == "__main__":
             if success:
                 fetch_logs_with_timeout(machines[pid], pid)
                 
-    print("Script execution completed.")
+    print("Script execution completed. Logs are saved to measurements/logs")
     exit(0)
