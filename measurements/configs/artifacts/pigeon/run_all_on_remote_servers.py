@@ -22,32 +22,6 @@ echo "Running experiments with the following parameters: PID=$PID, IP0=$IP0, IP1
 experiment_command = "sudo ./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
 parse_command = "python3 measurements/parse_logs.py measurements/logs"
 
-def fetch_logs(machine, pid):
-    """Fetch logs from the remote machine and store locally"""
-    ip = machine['ip']
-    username = machine['username']
-    password = machine['password']
-    hostname = machine['hostname']
-    local_log_dir = f"../../../logs/node_{pid}"
-    remote_log_dir = "hpmpc/measurements/logs"
-    os.makedirs(local_log_dir, exist_ok=True)
-    
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    try:
-        client.connect(ip, username=username, password=password)
-        sftp = client.open_sftp()
-        
-        for filename in sftp.listdir(remote_log_dir):
-            remote_file = f"{remote_log_dir}/{filename}"
-            local_file = f"{local_log_dir}/{filename}"
-            sftp.get(remote_file, local_file)
-            
-        sftp.close()
-    finally:
-        client.close()
-
-# Lock for synchronized printing
 print_lock = threading.Lock()
 
 def execute_commands_on_remote(machine, pid):
@@ -63,8 +37,10 @@ def execute_commands_on_remote(machine, pid):
     # Connect via SSH and execute commands
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    success = False
+    
     try:
-        client.connect(ip, username=username, password=password)
+        client.connect(ip, username=username, password=password, timeout=30)
         stdin, stdout, stderr = client.exec_command(commands, get_pty=True)
 
         # Stream command output until completion
@@ -77,13 +53,47 @@ def execute_commands_on_remote(machine, pid):
         if exit_status == 0:
             with print_lock:
                 print(f"[Machine {pid} - {hostname}] Commands completed successfully")
-                
-            # Fetch logs after execution
-            fetch_logs(machine, pid)
+            success = True
         else:
             with print_lock:
                 print(f"[Machine {pid} - {hostname}] Command failed with exit status {exit_status}")
     finally:
+        # Explicitly close all channels
+        if hasattr(client, 'get_transport') and client.get_transport():
+            if client.get_transport().is_active():
+                client.get_transport().close()
+        client.close()
+    
+    # Return success status to determine if logs should be fetched
+    return success
+
+def fetch_logs_with_timeout(machine, pid, timeout=30):
+    """Fetch logs with explicit timeout and connection management"""
+    ip = machine['ip']
+    username = machine['username']
+    password = machine['password']
+    hostname = machine['hostname']
+    local_log_dir = f"../../../logs/node_{pid}"
+    remote_log_dir = "hpmpc/measurements/logs"
+    os.makedirs(local_log_dir, exist_ok=True)
+    
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        client.connect(ip, username=username, password=password, timeout=timeout)
+        sftp = client.open_sftp()
+        
+        for filename in sftp.listdir(remote_log_dir):
+            remote_file = f"{remote_log_dir}/{filename}"
+            local_file = f"{local_log_dir}/{filename}"
+            sftp.get(remote_file, local_file)
+            
+        sftp.close()
+    finally:
+        # Explicitly close all channels
+        if hasattr(client, 'get_transport') and client.get_transport():
+            if client.get_transport().is_active():
+                client.get_transport().close()
         client.close()
 
 # Main execution
@@ -91,17 +101,32 @@ if __name__ == "__main__":
     # Check if script is launched with an argument for a specific machine
     if len(sys.argv) > 1:
         machine_index = int(sys.argv[1])
-        execute_commands_on_remote(machines[machine_index], machine_index)
+        success = execute_commands_on_remote(machines[machine_index], machine_index)
+        if success:
+            fetch_logs_with_timeout(machines[machine_index], machine_index)
     else:
         # Run in multi-threaded mode for all machines
         threads = []
+        results = [False] * len(machines)
+        
+        # Define a wrapper function to track success
+        def run_and_track(machine, pid, result_index):
+            results[result_index] = execute_commands_on_remote(machine, pid)
+        
+        # Start all threads
         for pid, machine in enumerate(machines):
-            thread = threading.Thread(target=execute_commands_on_remote, args=(machine, pid))
+            thread = threading.Thread(target=run_and_track, args=(machine, pid, pid))
             threads.append(thread)
             thread.start()
 
         # Wait for all threads to complete
         for thread in threads:
             thread.join()
+            
+        # Now fetch logs for successful executions
+        for pid, success in enumerate(results):
+            if success:
+                fetch_logs_with_timeout(machines[pid], pid)
+                
+    print("Script execution completed.")
     exit(0)
-
