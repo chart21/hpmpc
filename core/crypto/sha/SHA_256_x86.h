@@ -7,15 +7,15 @@
 
 /* Include the GCC super header */
 #if defined(__GNUC__)
-# include <stdint.h>
-# include <x86intrin.h>
+#include <x86intrin.h>
+#include <stdint.h>
 #endif
 
 /* Microsoft supports Intel SHA ACLE extensions as of Visual Studio 2015 */
 #if defined(_MSC_VER)
-# include <immintrin.h>
-# define WIN32_LEAN_AND_MEAN
-# include <Windows.h>
+#include <immintrin.h>
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 typedef UINT32 uint32_t;
 typedef UINT8 uint8_t;
 #endif
@@ -31,9 +31,8 @@ void sha256_process_x86(uint32_t state[8], const uint8_t data[], uint32_t length
     const __m128i MASK = _mm_set_epi64x(0x0c0d0e0f08090a0bULL, 0x0405060700010203ULL);
 
     /* Load initial values */
-    TMP = _mm_loadu_si128((const __m128i*) &state[0]);
-    STATE1 = _mm_loadu_si128((const __m128i*) &state[4]);
-
+    TMP = _mm_loadu_si128((const __m128i*)&state[0]);
+    STATE1 = _mm_loadu_si128((const __m128i*)&state[4]);
 
     TMP = _mm_shuffle_epi32(TMP, 0xB1);          /* CDAB */
     STATE1 = _mm_shuffle_epi32(STATE1, 0x1B);    /* EFGH */
@@ -47,7 +46,7 @@ void sha256_process_x86(uint32_t state[8], const uint8_t data[], uint32_t length
         CDGH_SAVE = STATE1;
 
         /* Rounds 0-3 */
-        MSG = _mm_loadu_si128((const __m128i*) (data+0));
+        MSG = _mm_loadu_si128((const __m128i*)(data + 0));
         MSG0 = _mm_shuffle_epi8(MSG, MASK);
         MSG = _mm_add_epi32(MSG0, _mm_set_epi64x(0xE9B5DBA5B5C0FBCFULL, 0x71374491428A2F98ULL));
         STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
@@ -55,7 +54,7 @@ void sha256_process_x86(uint32_t state[8], const uint8_t data[], uint32_t length
         STATE0 = _mm_sha256rnds2_epu32(STATE0, STATE1, MSG);
 
         /* Rounds 4-7 */
-        MSG1 = _mm_loadu_si128((const __m128i*) (data+16));
+        MSG1 = _mm_loadu_si128((const __m128i*)(data + 16));
         MSG1 = _mm_shuffle_epi8(MSG1, MASK);
         MSG = _mm_add_epi32(MSG1, _mm_set_epi64x(0xAB1C5ED5923F82A4ULL, 0x59F111F13956C25BULL));
         STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
@@ -64,7 +63,7 @@ void sha256_process_x86(uint32_t state[8], const uint8_t data[], uint32_t length
         MSG0 = _mm_sha256msg1_epu32(MSG0, MSG1);
 
         /* Rounds 8-11 */
-        MSG2 = _mm_loadu_si128((const __m128i*) (data+32));
+        MSG2 = _mm_loadu_si128((const __m128i*)(data + 32));
         MSG2 = _mm_shuffle_epi8(MSG2, MASK);
         MSG = _mm_add_epi32(MSG2, _mm_set_epi64x(0x550C7DC3243185BEULL, 0x12835B01D807AA98ULL));
         STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
@@ -73,7 +72,7 @@ void sha256_process_x86(uint32_t state[8], const uint8_t data[], uint32_t length
         MSG1 = _mm_sha256msg1_epu32(MSG1, MSG2);
 
         /* Rounds 12-15 */
-        MSG3 = _mm_loadu_si128((const __m128i*) (data+48));
+        MSG3 = _mm_loadu_si128((const __m128i*)(data + 48));
         MSG3 = _mm_shuffle_epi8(MSG3, MASK);
         MSG = _mm_add_epi32(MSG3, _mm_set_epi64x(0xC19BF1749BDC06A7ULL, 0x80DEB1FE72BE5D74ULL));
         STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
@@ -115,7 +114,7 @@ void sha256_process_x86(uint32_t state[8], const uint8_t data[], uint32_t length
         MSG1 = _mm_sha256msg1_epu32(MSG1, MSG2);
 
         /* Rounds 28-31 */
-        MSG = _mm_add_epi32(MSG3, _mm_set_epi64x(0x1429296706CA6351ULL,  0xD5A79147C6E00BF3ULL));
+        MSG = _mm_add_epi32(MSG3, _mm_set_epi64x(0x1429296706CA6351ULL, 0xD5A79147C6E00BF3ULL));
         STATE1 = _mm_sha256rnds2_epu32(STATE1, STATE0, MSG);
         TMP = _mm_alignr_epi8(MSG3, MSG2, 4);
         MSG0 = _mm_add_epi32(MSG0, TMP);
@@ -212,8 +211,8 @@ void sha256_process_x86(uint32_t state[8], const uint8_t data[], uint32_t length
     STATE1 = _mm_alignr_epi8(STATE1, TMP, 8);    /* ABEF */
 
     /* Save state */
-    _mm_storeu_si128((__m128i*) &state[0], STATE0);
-    _mm_storeu_si128((__m128i*) &state[4], STATE1);
+    _mm_storeu_si128((__m128i*)&state[0], STATE0);
+    _mm_storeu_si128((__m128i*)&state[4], STATE1);
 }
 
 #if defined(TEST_MAIN)
@@ -229,28 +228,25 @@ int main(int argc, char* argv[])
 
     /* initial state */
     uint32_t state[8] = {
-        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
-    };
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
 
     sha256_process_x86(state, message, sizeof(message));
 
     const uint8_t b1 = (uint8_t)(state[0] >> 24);
     const uint8_t b2 = (uint8_t)(state[0] >> 16);
-    const uint8_t b3 = (uint8_t)(state[0] >>  8);
-    const uint8_t b4 = (uint8_t)(state[0] >>  0);
+    const uint8_t b3 = (uint8_t)(state[0] >> 8);
+    const uint8_t b4 = (uint8_t)(state[0] >> 0);
     const uint8_t b5 = (uint8_t)(state[1] >> 24);
     const uint8_t b6 = (uint8_t)(state[1] >> 16);
-    const uint8_t b7 = (uint8_t)(state[1] >>  8);
-    const uint8_t b8 = (uint8_t)(state[1] >>  0);
+    const uint8_t b7 = (uint8_t)(state[1] >> 8);
+    const uint8_t b8 = (uint8_t)(state[1] >> 0);
 
     /* e3b0c44298fc1c14... */
     printf("SHA256 hash of empty message: ");
-    printf("%02X%02X%02X%02X%02X%02X%02X%02X...\n",
-        b1, b2, b3, b4, b5, b6, b7, b8);
+    printf("%02X%02X%02X%02X%02X%02X%02X%02X...\n", b1, b2, b3, b4, b5, b6, b7, b8);
 
-    int success = ((b1 == 0xE3) && (b2 == 0xB0) && (b3 == 0xC4) && (b4 == 0x42) &&
-                    (b5 == 0x98) && (b6 == 0xFC) && (b7 == 0x1C) && (b8 == 0x14));
+    int success = ((b1 == 0xE3) && (b2 == 0xB0) && (b3 == 0xC4) && (b4 == 0x42) && (b5 == 0x98) && (b6 == 0xFC) &&
+                   (b7 == 0x1C) && (b8 == 0x14));
 
     if (success)
         printf("Success!\n");

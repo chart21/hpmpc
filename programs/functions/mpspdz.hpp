@@ -1,19 +1,18 @@
 #pragma once
 
-#include <cstdint>
-#include <cstring>
-#include <iostream>
-#include <cmath>
-#include "../../protocols/Protocols.h"
-#include "../../datatypes/XOR_Share.hpp"
-#include "../../datatypes/Additive_Share.hpp"
-#include "../../datatypes/k_sint.hpp"
-#include "../../datatypes/k_bitset.hpp"
-#include "../../core/utils/print.hpp"
-
 #include "../../MP-SPDZ/lib/Machine.hpp"
 #include "../../MP-SPDZ/lib/Shares/CInteger.hpp"
 #include "../../MP-SPDZ/lib/Shares/Integer.hpp"
+#include "../../core/utils/print.hpp"
+#include "../../datatypes/Additive_Share.hpp"
+#include "../../datatypes/XOR_Share.hpp"
+#include "../../datatypes/k_bitset.hpp"
+#include "../../datatypes/k_sint.hpp"
+#include "../../protocols/Protocols.h"
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <iostream>
 
 #if FUNCTION_IDENTIFIER == 500
 #define FUNCTION MP_MACHINE_TUTORIAL
@@ -59,13 +58,12 @@
 #define FUNCTION MP_MACHINE_VGG_BENCH
 #endif
 
-//Boilerplate
+// Boilerplate
 #define RESULTTYPE DATATYPE
-void generateElements()
-{}
+void generateElements() {}
 
 #if FUNCTION_IDENTIFIER == 500
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_TUTORIAL(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -81,7 +79,7 @@ void MP_MACHINE_TUTORIAL(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 501
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_TMP(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -99,7 +97,7 @@ void MP_MACHINE_TMP(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 502
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_ADD(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -116,7 +114,7 @@ void MP_MACHINE_ADD(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 503
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_MUL(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -133,7 +131,7 @@ void MP_MACHINE_MUL(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 504
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_MUL_FIX(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -150,7 +148,7 @@ void MP_MACHINE_MUL_FIX(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 505
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_INT_TESTS(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -173,7 +171,7 @@ void MP_MACHINE_INT_TESTS(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 506
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_MUL_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -191,7 +189,7 @@ void MP_MACHINE_MUL_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 507 || FUNCTION_IDENTIFIER == 508 || FUNCTION_IDENTIFIER == 509
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_COMP_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -208,7 +206,7 @@ void MP_MACHINE_COMP_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 510
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_DIV_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -225,7 +223,7 @@ void MP_MACHINE_DIV_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 511
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_SHARE_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -242,7 +240,7 @@ void MP_MACHINE_SHARE_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 512
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_REVEAL_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -259,7 +257,7 @@ void MP_MACHINE_REVEAL_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 513 || FUNCTION_IDENTIFIER == 514 || FUNCTION_IDENTIFIER == 515
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_MAX_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -276,7 +274,7 @@ void MP_MACHINE_MAX_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 516 || FUNCTION_IDENTIFIER == 517 || FUNCTION_IDENTIFIER == 518
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_MIN_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -293,7 +291,7 @@ void MP_MACHINE_MIN_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 519
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_AVG_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -310,7 +308,7 @@ void MP_MACHINE_AVG_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 520
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_INTERSECTION_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -327,7 +325,7 @@ void MP_MACHINE_INTERSECTION_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 521 || FUNCTION_IDENTIFIER == 522 || FUNCTION_IDENTIFIER == 523
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_AUCTION_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -344,7 +342,7 @@ void MP_MACHINE_AUCTION_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 524
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_BIT_AND_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -362,7 +360,7 @@ void MP_MACHINE_BIT_AND_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 525
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_AES_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -380,7 +378,7 @@ void MP_MACHINE_AES_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 526 || FUNCTION_IDENTIFIER == 527 || FUNCTION_IDENTIFIER == 528
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_REG_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -396,7 +394,7 @@ void MP_MACHINE_REG_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 529 || FUNCTION_IDENTIFIER == 530 || FUNCTION_IDENTIFIER == 531
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_LENET_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
@@ -412,7 +410,7 @@ void MP_MACHINE_LENET_BENCH(DATATYPE* res)
 }
 
 #elif FUNCTION_IDENTIFIER == 532 || FUNCTION_IDENTIFIER == 533 || FUNCTION_IDENTIFIER == 534
-template<typename Share>
+template <typename Share>
 void MP_MACHINE_VGG_BENCH(DATATYPE* res)
 {
     using cint = IR::CInteger<INT_TYPE, UINT_TYPE>;
