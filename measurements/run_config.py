@@ -54,7 +54,6 @@ def main():
     parser.add_argument('-c', type=str, default='127.0.0.1', help='IP address for c')
     parser.add_argument('-d', type=str, default='127.0.0.1', help='IP address for d')
     parser.add_argument('-g', type=int, default=0, help='Numbers of GPUs to use (0 for CPU only)')
-    parser.add_argument('-s', type=int, default=0, help='SplitRoles Identifier')
     parser.add_argument('-f', type=str, default='', help='filename suffix')
     parser.add_argument('--override', nargs='*', help='Override config options (key=value)')
     parser.add_argument('-i', type=int, default=1, help='Number of iterations per run')
@@ -120,9 +119,8 @@ def main():
                     print(f"Running: PARTY={args.p} " + ' '.join([f"{k}={v}" for k, v in comb.items()]))
                     print("===================")
 
-                    make_command = f"make -j PARTY={args.p} SPLITROLES={args.s} " + ' '.join([f"{k}={v}" for k, v in comb.items()])
-                    script_command = f"scripts/run.sh -n {n_value} -p {args.p} -a {args.a} -b {args.b} -c {args.c} -d {args.d} -g {args.g} -s {args.s}"
-
+                    make_command = f"make -j PARTY={args.p} " + ' '.join([f"{k}={v}" for k, v in comb.items()])
+                    script_command = f"scripts/run.sh -n {n_value} -p {args.p} -a {args.a} -b {args.b} -c {args.c} -d {args.d} -g {args.g} -s {comb['SPLITROLES']}"
                     log.write(f"\n====== Run {run_count}/{total_runs} (Iteration {iteration}/{args.i}) ======\n")
                     log.write(f"Running: PARTY={args.p} " + ' '.join([f"{k}={v}" for k, v in comb.items()]) + "\n")
                     log.write("===================\n")

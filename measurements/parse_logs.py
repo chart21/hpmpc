@@ -114,6 +114,14 @@ def parse_log_file(file_path, debug=False):
             run_data['TESTS_PASSED'] = f"{tests_passed}/{tests_total}"
 
         # Calculate Ops/s if applicable
+        splitroles_factor = 1 
+        if 'SPLITROLES' in run_data:
+            splitroles_factor = 6 if run_data['SPLITROLES'] == '1' else splitroles_factor
+            splitroles_factor = 24 if run_data['SPLITROLES'] == '2' else splitroles_factor
+            splitroles_factor = 24 if run_data['SPLITROLES'] == '3' else splitroles_factor
+        num_processes = 1
+        if 'PROCESS_NUM' in run_data:
+            num_processes = int(run_data['PROCESS_NUM'])
         if all(key in run_data for key in ['BITLENGTH', 'DATTYPE', 'NUM_INPUTS','FUNCTION_IDENTIFIER']):
             bitlength = float(run_data['BITLENGTH'])
             dattype = float(run_data['DATTYPE'])
@@ -121,17 +129,17 @@ def parse_log_file(file_path, debug=False):
             function_identifier = int(run_data['FUNCTION_IDENTIFIER'])
             if function_identifier in bool_functions:
                 run_data.update({
-                    'TP_PRE_AVG(Ops/s)': (num_inputs * dattype) / pre_avg if pre_avg else 0,
-                    'TP_PRE_MAX(Ops/s)': (num_inputs * dattype) / pre_max if pre_max else 0,
-                    'TP_ONLINE_AVG(Ops/s)': (num_inputs * dattype) / online_avg if online_avg else 0,
-                    'TP_ONLINE_MAX(Ops/s)': (num_inputs * dattype) / online_max if online_max else 0,
+                    'TP_PRE_AVG(Ops/s)': (num_inputs * dattype * splitroles_factor * num_processes) / pre_avg if pre_avg else 0,
+                    'TP_PRE_MAX(Ops/s)': (num_inputs * dattype * splitroles_factor * num_processes) / pre_max if pre_max else 0,
+                    'TP_ONLINE_AVG(Ops/s)': (num_inputs * dattype * splitroles_factor * num_processes) / online_avg if online_avg else 0,
+                    'TP_ONLINE_MAX(Ops/s)': (num_inputs * dattype * splitroles_factor * num_processes) / online_max if online_max else 0,
                 })
             else:
                 run_data.update({
-                    'TP_PRE_AVG(Ops/s)': (num_inputs * (dattype / bitlength)) / pre_avg if pre_avg else 0,
-                    'TP_PRE_MAX(Ops/s)': (num_inputs * (dattype / bitlength)) / pre_max if pre_max else 0,
-                    'TP_ONLINE_AVG(Ops/s)': (num_inputs * (dattype / bitlength)) / online_avg if online_avg else 0,
-                    'TP_ONLINE_MAX(Ops/s)': (num_inputs * (dattype / bitlength)) / online_max if online_max else 0,
+                    'TP_PRE_AVG(Ops/s)': (num_inputs * (dattype / bitlength) * splitroles_factor * num_processes) / pre_avg if pre_avg else 0,
+                    'TP_PRE_MAX(Ops/s)': (num_inputs * (dattype / bitlength) * splitroles_factor * num_processes) / pre_max if pre_max else 0,
+                    'TP_ONLINE_AVG(Ops/s)': (num_inputs * (dattype / bitlength) * splitroles_factor * num_processes) / online_avg if online_avg else 0,
+                    'TP_ONLINE_MAX(Ops/s)': (num_inputs * (dattype / bitlength) * splitroles_factor * num_processes) / online_max if online_max else 0,
                 })
 
         if debug:
