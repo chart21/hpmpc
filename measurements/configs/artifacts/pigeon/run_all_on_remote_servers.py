@@ -9,6 +9,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Run experiments on remote servers.')
 parser.add_argument('-g', type=str, help='Argument for -g')
 parser.add_argument('-R', type=str, help='Argument for -R')
+parser.add_argument('-p', type=str, help='PID for the experiment', required=True)
 
 # Parse the arguments
 args = parser.parse_args()
@@ -117,8 +118,8 @@ def fetch_logs_with_timeout(machine, pid, timeout=30):
 # Main execution
 if __name__ == "__main__":
     # Check if script is launched with an argument for a specific machine
-    if len(sys.argv) > 1:
-        machine_index = int(sys.argv[1])
+    if args.p != "all":
+        machine_index = int(args.p)
         success = execute_commands_on_remote(machines[machine_index], machine_index)
         if success:
             fetch_logs_with_timeout(machines[machine_index], machine_index)

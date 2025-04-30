@@ -8,7 +8,7 @@ Requested Badge: **Functional**
 
 ## Reviewer Instructions
 
-We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/pigeon` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments. Note that the servers do not have a GPU, thus only PIGEON CPU is evaluated.
+We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/pigeon` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments. 
 
 ## Description
 The artifact reproduces the experiments of all included figures and tables (exluding evaluation of third-party frameworks and evaluation of subroutines) of the paper. Table 1 only evaluates a third-party framework and is thus not covered. 
@@ -217,16 +217,32 @@ Table 6 | PPA: `FUNCTION_IDENTIFIER` of CNN<br /> RCA: `FUNCTION_IDENTIFIER` of 
 
 ## Automation of distributed tests with a Master Node
 
-To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. This requires `pip install paramiko`. The experiment results will be stored as csv files on each node locally in the `hpmpc/measurements/logs` directory and also on the master node in the `hpmpc/measurements/logs/node_$PID/` directory.
+To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. This requires `pip install paramiko`. The experiment results will be stored as csv files on each node locally in the `hpmpc/measurements/logs` directory and also on the master node in the `hpmpc/measurements/logs/node_$PID/` directory. For GPU support, additionally set `-g 2` in the commands below.
+
+### For Functionality 
+
 ```bash
 cd hpmpc/measurements/configs/artifacts/pigeon
-python3 run_all_on_remote_servers.py
+python3 run_all_on_remote_servers.py -p all
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
 ```bash
 cd hpmpc/measurements/configs/artifacts/pigeon
 ./run_with_tmux_grid.sh
 ```
+
+### For Reproducibility
+
+```bash
+cd hpmpc/measurements/configs/artifacts/pigeon
+python3 run_all_on_remote_servers.py -p all -R ""
+```
+Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
+```bash
+cd hpmpc/measurements/configs/artifacts/pigeon
+./run_with_tmux_grid.sh -R ""
+```
+
 
 ## Limitations 
 
