@@ -3,6 +3,15 @@ import paramiko
 import sys
 import threading
 import os
+import argparse
+
+# Set up argument parser
+parser = argparse.ArgumentParser(description='Run experiments on remote servers.')
+parser.add_argument('-g', type=str, help='Argument for -g')
+parser.add_argument('-R', type=str, help='Argument for -R')
+
+# Parse the arguments
+args = parser.parse_args()
 
 # Load machine credentials from JSON file
 with open('machines.json') as f:
@@ -19,7 +28,16 @@ export ITERATIONS=1
 echo "Running experiments with the following parameters: PID=$PID, IP0=$IP0, IP1=$IP1, IP2=$IP2, IP3=$IP3, ITERATIONS=$ITERATIONS, SUPPORTED_BITWIDTHS=$SUPPORTED_BITWIDTHS, MAX_BITWIDTH=$MAX_BITWIDTH" 
 """
 
-experiment_command = "sudo ./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
+# Construct experiment command with optional arguments
+experiment_command = "./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
+
+# Append -g and -R arguments if they are provided
+if args.g:
+    experiment_command += f" -g {args.g}"
+if args.R:
+    experiment_command += f" -R {args.R}"
+# Load machine credentials from JSON file
+
 parse_command = "python3 measurements/parse_logs.py measurements/logs"
 
 print_lock = threading.Lock()
