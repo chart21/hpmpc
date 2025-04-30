@@ -3,10 +3,10 @@
 
 #include <fstream>
 #include <functional>
+#include <queue>
 #include <string>
 #include <string_view>
 #include <utility>
-#include <queue>
 #include <vector>
 
 #include "../Constants.hpp"

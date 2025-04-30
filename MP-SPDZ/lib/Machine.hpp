@@ -156,7 +156,8 @@ class Machine {
 template <class int_t, class cint, class Share, class sint, template <int, class> class sbit,
           class BitShare, int N>
 Machine<int_t, cint, Share, sint, sbit, BitShare, N>::Machine(std::string&& path)
-    : max_mem(), loaded(false), rand_engine(21), rand_engine_diff(std::random_device()()), out_stream(std::cout.rdbuf()) {
+    : max_mem(), loaded(false), rand_engine(21), rand_engine_diff(std::random_device()()),
+      out_stream(std::cout.rdbuf()) {
     load_schedule(std::move(path));
 }
 

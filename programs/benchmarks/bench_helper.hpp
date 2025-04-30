@@ -1,7 +1,7 @@
 #pragma once
 #include "../../datatypes/XOR_Share.hpp"
-//if placed after a function, gurantees that all parties have finished computation and communication
-template<typename Share>
+// if placed after a function, gurantees that all parties have finished computation and communication
+template <typename Share>
 void dummy_reveal()
 {
     using S = XOR_Share<DATATYPE, Share>;
@@ -10,5 +10,3 @@ void dummy_reveal()
     Share::communicate();
     dummy.complete_reveal_to_all();
 }
-
-
