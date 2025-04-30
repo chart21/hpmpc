@@ -4,7 +4,7 @@ Paper title: **PIGEON: A High Throughput Framework for Private Inference of Neur
 
 Artifacts HotCRP Id: **Submission #2 (2025.3)** 
 
-Requested Badge: **Functional**
+Requested Badge: **Reproducable**
 
 ## Reviewer Instructions
 
@@ -141,16 +141,16 @@ By default, the experiment script will run a single iteration and a heavily redu
 All measurement points from the covered tables and figures are generated but with a smaller input size.
 Also, the tested number of bits per register and the number of processes is reduced. Hence, one can expect all results from the different tables and figures but with lower throughput and runtime values and in some cases a smaller range of tested parameters per plot.
 
-Run the following script on each node simultaneously to execute the experiments.
+Run the following script on each node simultaneously to execute the experiments. If your machines have GPUs, you can set the `-g 2` flag to also run GPU-based experiments. 
 ```bash
-./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH 
+./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS  
 ```
 
 #### Run the experiments (REPRODUCIBILITY)
 
 To reproduce the results of the paper, we provide an option to run the full workload of each experiment by specifying -R "" in the script (not that the "" after -R is required). 
 ```bash
-sudo ./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH -R "" 
+sudo ./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -R "" 
 ```
 
 Our nodes were configured as follows:
