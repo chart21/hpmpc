@@ -26,3 +26,5 @@ executables/
 build/
 #for now
 CMake*
+#credentials
+machines.json
