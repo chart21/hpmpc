@@ -113,14 +113,14 @@ def main():
                 run_count += 1
                 for iteration in range(1, args.i + 1):
                     n_value = determine_n(int(comb['PROTOCOL']))
-                    
+                    splitroles = int(comb['SPLITROLES']) if 'SPLITROLES' in comb else 0
                     print_progress_bar(run_count, total_runs, prefix='Progress', suffix=f'{run_count}/{total_runs}')
                     print(f"\n====== Run {run_count}/{total_runs} (Iteration {iteration}/{args.i}) ======")
                     print(f"Running: PARTY={args.p} " + ' '.join([f"{k}={v}" for k, v in comb.items()]))
                     print("===================")
 
                     make_command = f"make -j PARTY={args.p} " + ' '.join([f"{k}={v}" for k, v in comb.items()])
-                    script_command = f"scripts/run.sh -n {n_value} -p {args.p} -a {args.a} -b {args.b} -c {args.c} -d {args.d} -g {args.g} -s {comb['SPLITROLES']}"
+                    script_command = f"scripts/run.sh -n {n_value} -p {args.p} -a {args.a} -b {args.b} -c {args.c} -d {args.d} -g {args.g} -s {splitroles}"
                     log.write(f"\n====== Run {run_count}/{total_runs} (Iteration {iteration}/{args.i}) ======\n")
                     log.write(f"Running: PARTY={args.p} " + ' '.join([f"{k}={v}" for k, v in comb.items()]) + "\n")
                     log.write("===================\n")
