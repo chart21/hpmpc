@@ -1,24 +1,39 @@
 #!/bin/bash
 
-#if exists kill tmux session grid
-tmux kill-session -t grid
+# Parse optional arguments, Reduced, GPU
+while getopts "R:g:" opt; do
+  case $opt in
+    R) R_ARG="-R $OPTARG" ;;
+    g) G_ARG="-g $OPTARG" ;;
+    *) echo "Usage: $0 [-R value] [-g value]"; exit 1 ;;
+  esac
+done
 
-# Start a new tmux session named 'grid'
+# Kill existing tmux session if it exists
+tmux kill-session -t grid 2>/dev/null
+
+# Start a new detached tmux session
 tmux new-session -d -s grid
 
-# Split the window into a 2x2 grid and run the Python script for each machine
-tmux send-keys "python3 run_all_on_remote_servers.py 0" C-m    # Machine 0
+# Base command with optional args
+ARGS=("$R_ARG" "$G_ARG")
+CMD="python3 run_all_on_remote_servers.py"
+
+# Function to run the command on a given machine ID
+run_on_machine() {
+  tmux send-keys "$CMD $1 ${ARGS[*]}" C-m
+}
+
+# Launch scripts on 4 machines in a 2x2 tmux grid
+run_on_machine 0
 tmux split-window -h
-tmux send-keys "python3 run_all_on_remote_servers.py 1" C-m    # Machine 1
+run_on_machine 1
 tmux split-window -v
-tmux send-keys "python3 run_all_on_remote_servers.py 2" C-m    # Machine 2
+run_on_machine 2
 tmux select-pane -t 0
 tmux split-window -v
-tmux send-keys "python3 run_all_on_remote_servers.py 3" C-m    # Machine 3
+run_on_machine 3
 
-# Adjust layout to ensure a 2x2 grid
+# Arrange panes and attach to session
 tmux select-layout tiled
-
-# Attach to the tmux session
 tmux attach -t grid
-

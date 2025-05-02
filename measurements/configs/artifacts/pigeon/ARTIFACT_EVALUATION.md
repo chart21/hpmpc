@@ -4,7 +4,7 @@ Paper title: **PIGEON: A High Throughput Framework for Private Inference of Neur
 
 Artifacts HotCRP Id: **Submission #2 (2025.3)** 
 
-Requested Badge: **Reproducable**
+Requested Badge: **Reproducible**
 
 ## Reviewer Instructions
 

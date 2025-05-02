@@ -51,7 +51,7 @@ echo "===Starting 4PC measurements for figure 3==="
 
 python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3CPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 USE_CUDA_GEMM=$USE_CUDA_GEMM $REDUCED_PROCESS_NUM
 
-if [ $USE_CUDA_GEMM == "0,2" ]
+if [ $USE_CUDA_GEMM != "0" ]
 then
     python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3GPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 USE_CUDA_GEMM=2 $REDUCED_PROCESS_NUM
 fi
@@ -97,7 +97,7 @@ echo "===Starting 3PC measurements for figure 3==="
 
 python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3CPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 USE_CUDA_GEMM=$USE_CUDA_GEMM $REDUCED_PROCESS_NUM
 
-if [ $USE_CUDA_GEMM == "0,2" ]
+if [ $USE_CUDA_GEMM != "0" ]
 then
     python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3GPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 USE_CUDA_GEMM=2 $REDUCED_PROCESS_NUM
 fi
