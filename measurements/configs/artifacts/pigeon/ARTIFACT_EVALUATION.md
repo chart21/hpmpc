@@ -4,11 +4,11 @@ Paper title: **PIGEON: A High Throughput Framework for Private Inference of Neur
 
 Artifacts HotCRP Id: **Submission #2 (2025.3)** 
 
-Requested Badge: **Functional**
+Requested Badge: **Reproducable**
 
 ## Reviewer Instructions
 
-We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/pigeon` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments. Note that the servers do not have a GPU, thus only PIGEON CPU is evaluated.
+We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/pigeon` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments. 
 
 ## Description
 The artifact reproduces the experiments of all included figures and tables (exluding evaluation of third-party frameworks and evaluation of subroutines) of the paper. Table 1 only evaluates a third-party framework and is thus not covered. 
@@ -141,16 +141,16 @@ By default, the experiment script will run a single iteration and a heavily redu
 All measurement points from the covered tables and figures are generated but with a smaller input size.
 Also, the tested number of bits per register and the number of processes is reduced. Hence, one can expect all results from the different tables and figures but with lower throughput and runtime values and in some cases a smaller range of tested parameters per plot.
 
-Run the following script on each node simultaneously to execute the experiments.
+Run the following script on each node simultaneously to execute the experiments. If your machines have GPUs, you can set the `-g 2` flag to also run GPU-based experiments. 
 ```bash
-./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH 
+./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS  
 ```
 
 #### Run the experiments (REPRODUCIBILITY)
 
 To reproduce the results of the paper, we provide an option to run the full workload of each experiment by specifying -R "" in the script (not that the "" after -R is required). 
 ```bash
-sudo ./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH -R "" 
+sudo ./measurements/configs/artifacts/hpmpc/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -R "" 
 ```
 
 Our nodes were configured as follows:
@@ -217,16 +217,32 @@ Table 6 | PPA: `FUNCTION_IDENTIFIER` of CNN<br /> RCA: `FUNCTION_IDENTIFIER` of 
 
 ## Automation of distributed tests with a Master Node
 
-To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. This requires `pip install paramiko`. The experiment results will be stored as csv files on each node locally in the `hpmpc/measurements/logs` directory and also on the master node in the `hpmpc/measurements/logs/node_$PID/` directory.
+To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. This requires `pip install paramiko`. The experiment results will be stored as csv files on each node locally in the `hpmpc/measurements/logs` directory and also on the master node in the `hpmpc/measurements/logs/node_$PID/` directory. For GPU support, additionally set `-g 2` in the commands below.
+
+### For Functionality 
+
 ```bash
 cd hpmpc/measurements/configs/artifacts/pigeon
-python3 run_all_on_remote_servers.py
+python3 run_all_on_remote_servers.py -p all
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
 ```bash
 cd hpmpc/measurements/configs/artifacts/pigeon
 ./run_with_tmux_grid.sh
 ```
+
+### For Reproducibility
+
+```bash
+cd hpmpc/measurements/configs/artifacts/pigeon
+python3 run_all_on_remote_servers.py -p all -R ""
+```
+Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
+```bash
+cd hpmpc/measurements/configs/artifacts/pigeon
+./run_with_tmux_grid.sh -R ""
+```
+
 
 ## Limitations 
 
