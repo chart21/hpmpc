@@ -21,6 +21,7 @@ with open('machines.json') as f:
 # Define commands to execute
 base_commands = """
 cd hpmpc
+git pull
 sudo chmod 777 measurements/logs
 rm -rf measurements/logs/*
 export MAX_BITWIDTH=$(lscpu | grep -i flags | grep -q "avx512" && echo 512 || (lscpu | grep -i flags | grep -q "avx2" && echo 256 || (lscpu | grep -i flags | grep -q "sse" && echo 128 || echo 64)))
