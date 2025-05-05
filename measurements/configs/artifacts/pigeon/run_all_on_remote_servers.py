@@ -20,7 +20,6 @@ with open('machines.json') as f:
 
 # Define commands to execute
 base_commands = """
-pkill -9 -f run-P
 cd hpmpc
 git pull
 sudo chmod 777 measurements/logs
