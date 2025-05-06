@@ -124,7 +124,7 @@ python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table4/
 
 echo "===Starting 3PC measurements for table 5==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table5/table5.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM 
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table5/table5.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=1 PRE=0 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM 
 
 echo "===Starting 3PC measurements for table 6==="
 
