@@ -64,30 +64,30 @@ echo "===Starting 4PC measurements for table 4==="
 
 # python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table4/table4.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 PROCESS_NUM=1 SPLITROLES=3 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=180,171,174
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table4/table4.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 PROCESS_NUM=1 SPLITROLES=0 PROCESS_NUM=8 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=176,179
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table4/table4.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 PROCESS_NUM=1 SPLITROLES=0 PROCESS_NUM=8 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=176,179
 
-echo "===Starting 4PC measurements for table 5==="
+# echo "===Starting 4PC measurements for table 5==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table5/table5.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=4 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=178
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table5/table5.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=4 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=178
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table5/table5.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=8 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=179
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table5/table5.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=8 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=179
 
-echo "===Starting 4PC measurements for table 7==="
+# echo "===Starting 4PC measurements for table 7==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=3 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=180,171,174
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=3 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=180,171,174
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=8 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=175
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=8 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=175
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=4 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=179
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=4 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=179
 
 
-echo "===Starting 4PC measurements for table 8==="
+# echo "===Starting 4PC measurements for table 8==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table8 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 PROCESS_NUM=1 USE_CUDA_GEMM=$USE_CUDA_GEMM 
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table8 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 PROCESS_NUM=1 USE_CUDA_GEMM=$USE_CUDA_GEMM 
 
-echo "===Starting 4PC measurements for table 9==="
+# echo "===Starting 4PC measurements for table 9==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table9 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 PROCESS_NUM=1 USE_CUDA_GEMM=$USE_CUDA_GEMM 
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table9 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 PROCESS_NUM=1 USE_CUDA_GEMM=$USE_CUDA_GEMM 
 
 
 echo "=====Finished all 4PC measurements====="
@@ -98,18 +98,18 @@ fi
 
 #3PC
 
-echo "===Starting 3PC measurements for figure 1==="
+# echo "===Starting 3PC measurements for figure 1==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED_PROCESS_NUM
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure1 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED_PROCESS_NUM
 
-echo "===Starting 3PC measurements for figure 3==="
+# echo "===Starting 3PC measurements for figure 3==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3CPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 USE_CUDA_GEMM=$USE_CUDA_GEMM $REDUCED_PROCESS_NUM
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3CPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 USE_CUDA_GEMM=$USE_CUDA_GEMM $REDUCED_PROCESS_NUM
 
-if [ $USE_CUDA_GEMM != "0" ]
-then
-    python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3GPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 USE_CUDA_GEMM=2 $REDUCED_PROCESS_NUM
-fi
+# if [ $USE_CUDA_GEMM != "0" ]
+# then
+#     python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure3/figure3GPU.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 USE_CUDA_GEMM=2 $REDUCED_PROCESS_NUM
+# fi
 
 
 echo "===Starting 3PC measurements for figure 6==="
