@@ -118,25 +118,25 @@ fi
 
 echo "===Starting 3PC measurements for table 4==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table4/table4.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=2 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=180,171,174
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table4/table4.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=180,171,174
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table4/table4.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=2 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=176,179
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table4/table4.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=176,179
 
 echo "===Starting 3PC measurements for table 5==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table5/table5.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=2 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM 
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table5/table5.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM 
 
 echo "===Starting 3PC measurements for table 6==="
 
 python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table6/table6_cifar.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table6/table6_imagenet.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=2 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table6/table6_imagenet.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM
 
 echo "===Starting 3PC measurements for table 7==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=180,171,174
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=180,171,174
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=2 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=175,179
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 SPLITROLES=1 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=175,179
 
 echo "===Starting 3PC measurements for table 8==="
 
