@@ -112,9 +112,9 @@ fi
 # fi
 
 
-echo "===Starting 3PC measurements for figure 6==="
+# echo "===Starting 3PC measurements for figure 6==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure6/ -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 SPLITROLES=0,1 $REDUCED
+# python3 measurements/run_config.py measurements/configs/artifacts/pigeon/figure6/ -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=5 SPLITROLES=0,1 $REDUCED NUM_INPUTS=10000,100000,1000000
 
 echo "===Starting 3PC measurements for table 4==="
 
