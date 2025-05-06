@@ -21,6 +21,10 @@ with open('machines.json') as f:
 # Define commands to execute
 base_commands = """
 cd hpmpc
+pkill -9 -f run-P0
+pkill -9 -f run-P1
+pkill -9 -f run-P2
+pkill -9 -f run-P3
 git pull
 sudo chmod 777 measurements/logs
 rm -rf measurements/logs/*
