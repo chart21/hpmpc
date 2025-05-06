@@ -31,7 +31,7 @@ echo "Running experiments with the following parameters: PID=$PID, IP0=$IP0, IP1
 """
 
 # Construct experiment command with optional arguments
-experiment_command = "./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
+experiment_command = "./measurements/configs/artifacts/pigeon/run_all_experiments_16Core_VMS.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
 
 # Append -g and -R arguments if they are provided
 if args.g:
