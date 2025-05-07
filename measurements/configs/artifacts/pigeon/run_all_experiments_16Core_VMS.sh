@@ -78,7 +78,7 @@ python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/
 
 python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=8 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=175
 
-python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=2 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=179
+python3 measurements/run_config.py measurements/configs/artifacts/pigeon/table7/table7.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 SPLITROLES=0 PROCESS_NUM=1 $REDUCED USE_CUDA_GEMM=$USE_CUDA_GEMM FUNCTION_IDENTIFIER=179
 
 
 echo "===Starting 4PC measurements for table 8==="
