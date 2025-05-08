@@ -35,7 +35,7 @@ echo "Running experiments with the following parameters: PID=$PID, IP0=$IP0, IP1
 base_experiment_command = "./measurements/configs/artifacts/pigeon/run_all_experiments"
 if args.O == "16Core_VMS":
     base_experiment_command += "_16Core_VMS"
-base_experiment_command += ".sh"
+base_experiment_command += ".sh "
 
 experiment_command = base_experiment_command + "-a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
 
