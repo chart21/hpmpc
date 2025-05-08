@@ -5,12 +5,12 @@ EXTRA_ARGS=()
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    -R|-g)
+    -R|-g|-O)
       EXTRA_ARGS+=("$1" "$2")
       shift 2
       ;;
     *)
-      echo "Usage: $0 [-R value] [-g value]"
+      echo "Usage: $0 [-R value] [-g value] [-O value]"
       exit 1
       ;;
   esac

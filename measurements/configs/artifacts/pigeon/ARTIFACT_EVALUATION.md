@@ -238,9 +238,11 @@ cd hpmpc/measurements/configs/artifacts/pigeon
 python3 run_all_on_remote_servers.py -p all -R ""
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
+For the optimized version on weaker hardware with reduced parallelization factor and batch sizes (e.g. 16 cores, 64GB RAM), you can add the `-O 16Core_VMS` flag to the command.
+
 ```bash
 cd hpmpc/measurements/configs/artifacts/pigeon
-./run_with_tmux_grid.sh -R ""
+./run_with_tmux_grid.sh -R "\"\""  # Add [-O 16Core_VMS] for weaker hardware
 ```
 
 

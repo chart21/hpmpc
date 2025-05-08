@@ -9,6 +9,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Run experiments on remote servers.')
 parser.add_argument('-g', type=str, help='Argument for -g')
 parser.add_argument('-R', type=str, help='Argument for -R')
+parser.add_argument('-O', type=str, help='Argument for -O')
 parser.add_argument('-p', type=str, help='PID for the experiment', required=True)
 
 # Parse the arguments
@@ -31,7 +32,12 @@ echo "Running experiments with the following parameters: PID=$PID, IP0=$IP0, IP1
 """
 
 # Construct experiment command with optional arguments
-experiment_command = "./measurements/configs/artifacts/pigeon/run_all_experiments_16Core_VMS.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
+base_experiment_command = "./measurements/configs/artifacts/pigeon/run_all_experiments"
+if args.O == "16Core_VMS":
+    base_experiment_command += "_16Core_VMS"
+base_experiment_command += ".sh"
+
+experiment_command = base_experiment_command + "-a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
 
 # Append -g and -R arguments if they are provided
 if args.g:
