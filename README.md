@@ -184,6 +184,283 @@ The following examples illustrate the concept of parallelism in HPMPC.
 - Setting `DATTYPE=1`, `SplitRoles=0`, and `PROCESS_NUM=1` will compute 10 AES blocks on a single core without vectorization.
 - Setting `SPLITROLES=1`, `PROCESS_NUM=4`, and `DATTYPE=256`, `NUM_INPUTS=1` to compile a program computing a single neural network inference (mixed circuit) will evaluate `6x4x256/32=192` samples in parallel, thus effectively using a batch size of 192.
 
+## PIGEON: Private Inference of Neural Networks
+
+PIGEON adds support for private inference of neural networks. PIGEON adds the following submodules to the framework.
+
+* [FlexNN](https://github.com/chart21/flexNN/tree/hpmpc): A templated neural network inference engine to perform the forward pass of a CNN.
+* [Pygeon](https://github.com/chart21/Pygeon): Python scripts for exporting models and datsets from PyTorch to the inference engine.
+
+All protocols that are fully supported by HPMPC can be used with PIGEON. To get started with PIGEON, initialize the submodules to set up FlexNN and Pygeon.
+```bash
+git submodule update --init --recursive
+```
+
+### End-to-End Training and Inference Pipeline
+
+A full end-to-end example can be executed as follows. To only benchmark the inference without real data, set `MODELOWNER` and `DATAOWNER` to `-1` and skip steps 1 and 5.
+
+1. Use Pygeon to train a model in PyTorch and export its test labels, test images, and model parameters to `.bin` files using the provided scripts. Alternatively, download the provided pre-trained models.
+
+    ```bash
+    cd nn/Pygeon
+    # Option 1: Train a model and export it to PyGEON
+    python main.py --action train --export_model --export_dataset --transform standard --model VGG16 --num_classes 10 --dataset_name CIFAR-10 --modelpath ./models/alexnet_cifar --num_epochs 30 --lr 0.01 --criterion CrossEntropyLoss --optimizer Adam
+    # Option 2: Download a pretrained VGG16 model and CIFAR10 dataset
+    python download_pretrained.py single_model datasets
+    # Option 3: Follow steps from PyGEON README to use pretrained PyTorch models on ImageNet
+    cd ../..
+    ```
+
+2. If it does not exist yet, add your model architecture to `nn/PIGEON/architectures/`.
+
+3. If it does not exist yet, add a `FUNCTION_IDENTIFIER` for your model architecture and dataset dimensions in `Programs/functions/NN.hpp`.
+
+4. Specify the `MODELOWNER` and `DATAOWNER` config options when compiling.
+
+    ```bash
+    # Example for MODELOWNER=P_0 and DATAOWNER=P_1
+    make -j PARTY=<party_id> FUNCTION_IDENTIFIER=<function_id> DATAOWNER=P_0 MODELOWNER=P_1
+    ```
+
+5. Specify the path of your model, images, and labels by exporting the environment variables `MODEL_DIR`, `DATA_DIR`, `MODEL_FILE`, `SAMPLES_FILE`, and `LABELS_FILE`.
+
+    ```bash
+    # Set environment variables for the party holding the model parameters (adjust paths if needed)
+    export MODEL_DIR=nn/Pygeon/models/pretrained
+    export MODEL_FILE=vgg16_cifar_standard.bin
+
+    # Set environment variables for the party holding the dataset (adjust paths if needed)
+    export DATA_DIR=nn/Pygeon/data/datasets
+    export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
+    export LABELS_FILE=CIFAR-10_standard_test_labels.bin
+    ```
+
+6. Run the program
+
+    ```bash
+    scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
+    ```
+
+### Inference Configurations
+
+
+PIGEON provides several options to modify the inference. The following are the most important settings that can be adjusted by setting the respective flags when compiling.
+| Configuration Type | Options | Description |
+| --- | --- | --- |
+| Bits | `BITLENGTH`, `FRACTIONAL` | The number of bits used for the total bitlength and the fractional part respectively. |
+| Truncation | `TRUNC_APPROACH`, `TRUNC_THEN_MULT`, `TRUNC_DELAYED` | There are multiple approaches to truncation. The default approach is to truncate probabilistically after each multiplication. The different approaches allow switching between several truncation strategies. |
+| ReLU | `REDUCED_BITLENGTH_m`, `REDUCED_BITLENGTH_k` | ReLU can be evaluated probabilistically by reducing its bitwidth to save communication and computation. The default setting is to evaluate ReLU with the same bitwidth as the rest of the computation. |
+| Secrecy | `PUBLIC_WEIGHTS`, `COMPUTE_ARGMAX` | The weights can be public or private. The final argmax computation may not be required if parties should learn the probabilities of each class. |
+| Optimizations | `ONLINE_OPTIMIZED`, `BANDWIDTH_OPTIMIZED` | All layers requiring sign bit extraction such as ReLU, Maxpooling, and Argmax can be evaluated with different types of adders. These have different trade-offs in terms of online/preprocessing communication as well as total round complexity and communication complexity. |
+| Other Optimizations | `SPLITROLES`, `BUFFER_SIZE`, `VECTORIZE` | All default optimizations of HPMPC such as `SPLITROLES`, different buffers, and vectorization can be used with PIGEON. The parties automatically utilize the concurrency to perform inference on multiple independent samples from the dataset in parallel. To benchmark the inference without real data, `MODELOWNER` and `DATAOWNER` can be set to `-1`. |
+
+
+
+
+## Measurements
+
+To automate benchmarks and tests of various functions and protocols, users can define `.conf` files in the `measurements/configs` directory. The following is an example of a configuration file that runs a function with different number of inputs and different protocols.
+
+```
+PROTOCOL=8,9,12
+NUM_INPUTS=10000,100000,1000000
+FUNCTION_IDENTIFIER=1
+DATTYPE=32
+BITLENGTH=32
+```
+
+### Running Measurements
+The `run_config.py` script runs compiles and executes all combinations in `.conf`. Outputs are stored as `.log` files in the `measurements/logs/` directory.
+```bash
+python3 measurements/run_config.py -p <party_id> measurements/configs/<config_file>.conf
+```
+
+
+
+### Parsing Measurement Results
+Results in `.log` files can be parsed with the `measurements/parse_logs.py` script. The parsed result contains information such as communication, runtime, throughput, and if applicable the number of unit tests passed or accuracy achieved.
+```bash
+python3 measurements/parse_logs.py measurements/logs/<log_file>.log
+```
+
+### Network Shaping
+
+To simulate real world network settings you can specify a json file with network configuarations. Examples based on real-world measurements are found in `measurements/network_shaping`.
+```json
+{
+  "name": "CMAN",
+  "latencies": [
+    [2.318, 1.244, 1.432],
+    [2.394, 1.088, 2.020],
+    [1.232, 1.091, 1.883],
+    [1.418, 2.054, 1.892]
+  ],
+  "bandwidth": [
+    [137, 1532, 417],
+    [139, 1144, 312],
+    [1550, 1023, 602],
+    [444, 389, 609]
+  ]
+}
+```
+Each row in `latencies` and `bandwidth` corresponds to a party. The values are in milliseconds and Mbps respectively. The third row would for instance be parsed as party 2 having a latency of 1.232ms to party 0, 1.091ms to party 1, and 1.883ms to party 3. The bandwidth is parsed in the same way.
+To apply the bandwidths from a config file, run the following script.
+```bash
+./measurements/network_shaping/shape_network.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> -l 2 -f measurements/network_shaping/<config_file>.json
+```
+The `-l 2` flag divides the applied latencies by 2 to avoid that both round trip times between two parties are added up.
+This option should be used for all provided json files and if the latencies are measured with the ping utility.
+
+The resulting network shaping can be verified by running the following script on all nodes simultaneously.
+The script sends and receives data between all parties in parallel and thus may deviate from pair-wise measurements but therefore might be more accurate to represent MPC communication.
+Note that some deviations in network shaping and verification are expected.
+```bash
+./scripts/measure_connection.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
+```
+
+
+## Troubleshooting
+The framework utilizes different hardware acceleration techniques for a range of hardware architectures.
+In case of timeouts, change the `BASE_PORT` or make sure that all previous executions have been terminated by executing `pkill -9 -f run-P` on all nodes.
+In case of compile errors, please note the following requirements and supported bitlengths for different `DATTYPE` values.
+
+### Register Size and Hardware Requirements
+
+| Register Size | Requirements            | Supported BITLENGTH             | Config Option                  |
+|------|-------------------------|---------------------------------|--------------------------------------|
+| 512  | AVX512         | 16, 32, 64                      | `DATTYPE=512`                |
+| 256  | AVX2           | 16, 32, (64 with AVX512)         | `DATTYPE=256`                |
+| 128  | SSE                     | 16, 32, (64 with AVX512)         | `DATTYPE=128`                |
+| 64   | None                    | 64                              | `DATTYPE=64`                 |
+| 32   | None                    | 32                              | `DATTYPE=32`                 |
+| 16   | None                    | 16                              | `DATTYPE=16`                 |
+| 8    | None                    | 8 (Does not support all arithmetic instructions) | `DATTYPE=8`                  |
+| 1    | None                    | 16,32,64 (Use only for boolean circuits)                               | `DATTYPE=1`                  |
+
+### Hardware Acceleration Requirements
+
+To benefit from Hardware Acceleration, the following config options are important.
+
+| Config Option | Requirements            | Description |
+|------|-------------------------|---------------------------------|
+| `RANDOM_ALGORITHM=2` | AES-NI or VAES | Use the AES-NI or VAES instruction set for AES. If not available, set `USE_SSL_AES=1` or `RANDOM_ALGORITHM=1` |
+| `USE_CUDA_GEMM>0` | CUDA, CUTLASS | Use CUDA for matrix multiplications and convolution. In case your CUDA-enabled GPU does not support datatypes such as UINT8, you can comment out the respective forward declaration in `core/cuda/conv_cutlass_int.cu` and `core/cuda/gemm_cutlass_int.cu`.|
+| `ARM=1` | ARM CPU | For ARM CPUs, setting `ARM=1` may improve performance of SHA hashing. |
+
+### Other Compile Errors
+
+Internal g++ or clang errors might be fixed by updating the compiler to a newer version.
+
+If reading input files fails, adding `-lstdc++fs` to the Makefile compile flags may resolve the issue.
+
+### Increase Accuracy of Neural Network Inference
+
+If you encounter issues regarding the accuracy of neural network inference, the following options may increase accuracy.
+- Increase the `BITLENGTH`.
+- Increase or reduce the number of `FRACTIONAL` bits.
+- Adjust the truncation strategy to `TRUNC_APPROACH=1` (REDUCED Slack), `TRUNC_APPROACH=2` (Exact Truncation), `TRUNC_APPROACH=3` (Exact Truncation with no slack), `TRUNC_APPROACH=4` (Mixed Truncation)
+, along with `TRUNC_THEN_MULT=0` and `TRUNC_DELAYED=1`. Note that truncation approaches 1 and 2 require setting `TRUNC_DELAYED=1`.
+- Inspect the terminal output for any errors regarding reading the model or dataset. PIGEON uses dummy data or model parameters if the files are not found. Make sure that `MODELOWNER` and `DATAOWNER` are set during compilation and that the respective environment variables point to existing files.
+
+
+
+## TLDR
+
+### Setup (CPU only)
+```bash
+sudo apt install libssl-dev libeigen3-dev
+git submodule update --init --recursive
+pip install torch torchvision gdown # if not already installed
+```
+
+### Unit Tests
+
+#### Run all unit tests locally
+```bash
+python3 measurements/run_config.py measurements/configs/unit_tests/
+```
+#### Run all unit tests on a distributed setup
+```bash
+python3 measurements/run_config.py measurements/configs/unit_tests/ -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
+```
+#### Parse the results
+```bash
+python3 measurements/parse_logs.py measurements/logs/ # results are stored as `.csv` in measurements/logs/
+```
+
+### End to End neural network training and secure inference
+
+#### Prepare neural network inference with a pre-trained model
+```bash
+cd nn/Pygeon
+python download_pretrained.py single_model datasets
+export MODEL_DIR=nn/Pygeon/models/pretrained
+export MODEL_FILE=vgg16_cifar_standard.bin
+export DATA_DIR=nn/Pygeon/data/datasets
+export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
+export LABELS_FILE=CIFAR-10_standard_test_labels.bin
+cd ../..
+```
+
+#### Compile and run the neural network inference locally
+
+```bash
+make -j PARTY=all FUNCTION_IDENTIFIER=74 PROTOCOL=5 MODELOWNER=P_0 DATAOWNER=P_1 NUM_INPUTS=40 BITLENGTH=32 DATTYPE=32
+scripts/run.sh -p all -n 3
+```
+
+#### Compile and run the neural network inference on a distributed setup
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=74 PROTOCOL=5 MODELOWNER=P_0 DATAOWNER=P_1
+scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
+```
+
+### Benchmarks
+
+#### Run AND gate benchmark with different protocols and number of processes on a local/distributed setup
+```bash
+# use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
+
+#Local Setup
+python3 measurements/run_config.py -p all measurements/configs/benchmarks/Multiprocessing.conf --override NUM_INPUTS=1000000 DATTYPE=512
+
+#Distributed Setup, 3PC
+python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512 PROTOCOL=1,2,3,5,6
+
+#Distributed Setup, 4PC
+python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512 PROTOCOL=7,8,9,10,11,12
+```
+
+#### Run LeNet5 on MNIST locally with batch size 24 using SPLITROLES
+```bash
+# use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
+
+# 3PC
+python3 measurements/run_config.py -s 1 -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=5 PROCESS_NUM=4
+
+# 4PC
+python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=12 PROCESS_NUM=1
+```
+
+#### Run various neural network models in a distributed setting on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)
+```bash
+# use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
+
+# 3PC
+python3 measurements/run_config.py -s 1 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=5 PROCESS_NUM=4 
+
+# 4PC
+python3 measurements/run_config.py -s 3 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=12 PROCESS_NUM=12
+```
+
+#### Parse the results
+```bash
+python3 measurements/parse_logs.py measurements/logs/ # results are stored as `.csv` in measurements/logs/
+```
+
+
 ## Executing MP-SPDZ Bytecode 
 
 HPMPC can execute bytecode generated by the MP-SPDZ compiler.
@@ -399,280 +676,6 @@ You can use/change the clang-format file in [MP-SPDZ/](/MP-SPDZ/.clang-format)
 
 ```sh
 clang-format --style=file:MP-SPDZ/.clang-format -i MP-SPDZ/lib/**/*.hpp MP-SPDZ/lib/**/*.cpp
-```
-## PIGEON: Private Inference of Neural Networks
-
-PIGEON adds support for private inference of neural networks. PIGEON adds the following submodules to the framework.
-
-* [FlexNN](https://github.com/chart21/flexNN/tree/hpmpc): A templated neural network inference engine to perform the forward pass of a CNN.
-* [Pygeon](https://github.com/chart21/Pygeon): Python scripts for exporting models and datsets from PyTorch to the inference engine.
-
-All protocols that are fully supported by HPMPC can be used with PIGEON. To get started with PIGEON, initialize the submodules to set up FlexNN and Pygeon.
-```bash
-git submodule update --init --recursive
-```
-
-### End-to-End Training and Inference Pipeline
-
-A full end-to-end example can be executed as follows. To only benchmark the inference without real data, set `MODELOWNER` and `DATAOWNER` to `-1` and skip steps 1 and 5.
-
-1. Use Pygeon to train a model in PyTorch and export its test labels, test images, and model parameters to `.bin` files using the provided scripts. Alternatively, download the provided pre-trained models.
-
-    ```bash
-    cd nn/Pygeon
-    # Option 1: Train a model and export it to PyGEON
-    python main.py --action train --export_model --export_dataset --transform standard --model VGG16 --num_classes 10 --dataset_name CIFAR-10 --modelpath ./models/alexnet_cifar --num_epochs 30 --lr 0.01 --criterion CrossEntropyLoss --optimizer Adam
-    # Option 2: Download a pretrained VGG16 model and CIFAR10 dataset
-    python download_pretrained.py single_model datasets
-    # Option 3: Follow steps from PyGEON README to use pretrained PyTorch models on ImageNet
-    cd ../..
-    ```
-
-2. If it does not exist yet, add your model architecture to `nn/PIGEON/architectures/`.
-
-3. If it does not exist yet, add a `FUNCTION_IDENTIFIER` for your model architecture and dataset dimensions in `Programs/functions/NN.hpp`.
-
-4. Specify the `MODELOWNER` and `DATAOWNER` config options when compiling.
-
-    ```bash
-    # Example for MODELOWNER=P_0 and DATAOWNER=P_1
-    make -j PARTY=<party_id> FUNCTION_IDENTIFIER=<function_id> DATAOWNER=P_0 MODELOWNER=P_1
-    ```
-
-5. Specify the path of your model, images, and labels by exporting the environment variables `MODEL_DIR`, `DATA_DIR`, `MODEL_FILE`, `SAMPLES_FILE`, and `LABELS_FILE`.
-
-    ```bash
-    # Set environment variables for the party holding the model parameters (adjust paths if needed)
-    export MODEL_DIR=nn/Pygeon/models/pretrained
-    export MODEL_FILE=vgg16_cifar_standard.bin
-
-    # Set environment variables for the party holding the dataset (adjust paths if needed)
-    export DATA_DIR=nn/Pygeon/data/datasets
-    export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
-    export LABELS_FILE=CIFAR-10_standard_test_labels.bin
-    ```
-
-6. Run the program
-
-    ```bash
-    scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
-    ```
-
-### Inference Configurations
-
-
-PIGEON provides several options to modify the inference. The following are the most important settings that can be adjusted by setting the respective flags when compiling.
-| Configuration Type | Options | Description |
-| --- | --- | --- |
-| Bits | `BITLENGTH`, `FRACTIONAL` | The number of bits used for the total bitlength and the fractional part respectively. |
-| Truncation | `TRUNC_APPROACH`, `TRUNC_THEN_MULT`, `TRUNC_DELAYED` | There are multiple approaches to truncation. The default approach is to truncate probabilistically after each multiplication. The different approaches allow switching between several truncation strategies. |
-| ReLU | `REDUCED_BITLENGTH_m`, `REDUCED_BITLENGTH_k` | ReLU can be evaluated probabilistically by reducing its bitwidth to save communication and computation. The default setting is to evaluate ReLU with the same bitwidth as the rest of the computation. |
-| Secrecy | `PUBLIC_WEIGHTS`, `COMPUTE_ARGMAX` | The weights can be public or private. The final argmax computation may not be required if parties should learn the probabilities of each class. |
-| Optimizations | `ONLINE_OPTIMIZED`, `BANDWIDTH_OPTIMIZED` | All layers requiring sign bit extraction such as ReLU, Maxpooling, and Argmax can be evaluated with different types of adders. These have different trade-offs in terms of online/preprocessing communication as well as total round complexity and communication complexity. |
-| Other Optimizations | `SPLITROLES`, `BUFFER_SIZE`, `VECTORIZE` | All default optimizations of HPMPC such as `SPLITROLES`, different buffers, and vectorization can be used with PIGEON. The parties automatically utilize the concurrency to perform inference on multiple independent samples from the dataset in parallel. To benchmark the inference without real data, `MODELOWNER` and `DATAOWNER` can be set to `-1`. |
-
-
-
-
-## Measurements
-
-To automate benchmarks and tests of various functions and protocols, users can define `.conf` files in the `measurements/configs` directory. The following is an example of a configuration file that runs a function with different number of inputs and different protocols.
-
-```
-PROTOCOL=8,9,12
-NUM_INPUTS=10000,100000,1000000
-FUNCTION_IDENTIFIER=1
-DATTYPE=32
-BITLENGTH=32
-```
-
-### Running Measurements
-The `run_config.py` script runs compiles and executes all combinations in `.conf`. Outputs are stored as `.log` files in the `measurements/logs/` directory.
-```bash
-python3 measurements/run_config.py -p <party_id> measurements/configs/<config_file>.conf
-```
-
-
-
-### Parsing Measurement Results
-Results in `.log` files can be parsed with the `measurements/parse_logs.py` script. The parsed result contains information such as communication, runtime, throughput, and if applicable the number of unit tests passed or accuracy achieved.
-```bash
-python3 measurements/parse_logs.py measurements/logs/<log_file>.log
-```
-
-### Network Shaping
-
-To simulate real world network settings you can specify a json file with network configuarations. Examples based on real-world measurements are found in `measurements/network_shaping`.
-```json
-{
-  "name": "CMAN",
-  "latencies": [
-    [2.318, 1.244, 1.432],
-    [2.394, 1.088, 2.020],
-    [1.232, 1.091, 1.883],
-    [1.418, 2.054, 1.892]
-  ],
-  "bandwidth": [
-    [137, 1532, 417],
-    [139, 1144, 312],
-    [1550, 1023, 602],
-    [444, 389, 609]
-  ]
-}
-```
-Each row in `latencies` and `bandwidth` corresponds to a party. The values are in milliseconds and Mbps respectively. The third row would for instance be parsed as party 2 having a latency of 1.232ms to party 0, 1.091ms to party 1, and 1.883ms to party 3. The bandwidth is parsed in the same way.
-To apply the bandwidths from a config file, run the following script.
-```bash
-./measurements/network_shaping/shape_network.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> -l 2 -f measurements/network_shaping/<config_file>.json
-```
-The `-l 2` flag divides the applied latencies by 2 to avoid that both round trip times between two parties are added up.
-This option should be used for all provided json files and if the latencies are measured with the ping utility.
-
-The resulting network shaping can be verified by running the following script on all nodes simultaneously.
-The script sends and receives data between all parties in parallel and thus may deviate from pair-wise measurements but therefore might be more accurate to represent MPC communication.
-Note that some deviations in network shaping and verification are expected.
-```bash
-./scripts/measure_connection.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
-```
-
-
-## Troubleshooting
-The framework utilizes different hardware acceleration techniques for a range of hardware architectures.
-In case of timeouts, change the `BASE_PORT` or make sure that all previous executions have been terminated by executing `pkill -9 -f run-P` on all nodes.
-In case of compile errors, please note the following requirements and supported bitlengths for different `DATTYPE` values.
-
-### Register Size and Hardware Requirements
-
-| Register Size | Requirements            | Supported BITLENGTH             | Config Option                  |
-|------|-------------------------|---------------------------------|--------------------------------------|
-| 512  | AVX512         | 16, 32, 64                      | `DATTYPE=512`                |
-| 256  | AVX2           | 16, 32, (64 with AVX512)         | `DATTYPE=256`                |
-| 128  | SSE                     | 16, 32, (64 with AVX512)         | `DATTYPE=128`                |
-| 64   | None                    | 64                              | `DATTYPE=64`                 |
-| 32   | None                    | 32                              | `DATTYPE=32`                 |
-| 16   | None                    | 16                              | `DATTYPE=16`                 |
-| 8    | None                    | 8 (Does not support all arithmetic instructions) | `DATTYPE=8`                  |
-| 1    | None                    | 16,32,64 (Use only for boolean circuits)                               | `DATTYPE=1`                  |
-
-### Hardware Acceleration Requirements
-
-To benefit from Hardware Acceleration, the following config options are important.
-
-| Config Option | Requirements            | Description |
-|------|-------------------------|---------------------------------|
-| `RANDOM_ALGORITHM=2` | AES-NI or VAES | Use the AES-NI or VAES instruction set for AES. If not available, set `USE_SSL_AES=1` or `RANDOM_ALGORITHM=1` |
-| `USE_CUDA_GEMM>0` | CUDA, CUTLASS | Use CUDA for matrix multiplications and convolution. In case your CUDA-enabled GPU does not support datatypes such as UINT8, you can comment out the respective forward declaration in `core/cuda/conv_cutlass_int.cu` and `core/cuda/gemm_cutlass_int.cu`.|
-| `ARM=1` | ARM CPU | For ARM CPUs, setting `ARM=1` may improve performance of SHA hashing. |
-
-### Other Compile Errors
-
-Internal g++ or clang errors might be fixed by updating the compiler to a newer version.
-
-If reading input files fails, adding `-lstdc++fs` to the Makefile compile flags may resolve the issue.
-
-### Increase Accuracy of Neural Network Inference
-
-If you encounter issues regarding the accuracy of neural network inference, the following options may increase accuracy.
-- Increase the `BITLENGTH`.
-- Increase or reduce the number of `FRACTIONAL` bits.
-- Adjust the truncation strategy to `TRUNC_APPROACH=1` (REDUCED Slack) or `TRUNC_APPROACH=2` (Exact Truncation), along with `TRUNC_THEN_MULT=1` and `TRUNC_DELAYED=1`. Note that truncation approaches 1 and 2 require setting `TRUNC_DELAYED=1`.
-- Inspect the terminal output for any errors regarding reading the model or dataset. PIGEON uses dummy data or model parameters if the files are not found. Make sure that `MODELOWNER` and `DATAOWNER` are set during compilation and that the respective environment variables point to existing files.
-
-
-
-## TLDR
-
-### Setup (CPU only)
-```bash
-sudo apt install libssl-dev libeigen3-dev
-git submodule update --init --recursive
-pip install torch torchvision gdown # if not already installed
-```
-
-### Unit Tests
-
-#### Run all unit tests locally
-```bash
-python3 measurements/run_config.py measurements/configs/unit_tests/
-```
-#### Run all unit tests on a distributed setup
-```bash
-python3 measurements/run_config.py measurements/configs/unit_tests/ -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
-```
-#### Parse the results
-```bash
-python3 measurements/parse_logs.py measurements/logs/ # results are stored as `.csv` in measurements/logs/
-```
-
-### End to End neural network training and secure inference
-
-#### Prepare neural network inference with a pre-trained model
-```bash
-cd nn/Pygeon
-python download_pretrained.py single_model datasets
-export MODEL_DIR=nn/Pygeon/models/pretrained
-export MODEL_FILE=vgg16_cifar_standard.bin
-export DATA_DIR=nn/Pygeon/data/datasets
-export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
-export LABELS_FILE=CIFAR-10_standard_test_labels.bin
-cd ../..
-```
-
-#### Compile and run the neural network inference locally
-
-```bash
-make -j PARTY=all FUNCTION_IDENTIFIER=74 PROTOCOL=5 MODELOWNER=P_0 DATAOWNER=P_1 NUM_INPUTS=40 BITLENGTH=32 DATTYPE=32
-scripts/run.sh -p all -n 3
-```
-
-#### Compile and run the neural network inference on a distributed setup
-
-```bash
-make -j PARTY=<party_id> FUNCTION_IDENTIFIER=74 PROTOCOL=5 MODELOWNER=P_0 DATAOWNER=P_1
-scripts/run.sh -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3>
-```
-
-### Benchmarks
-
-#### Run AND gate benchmark with different protocols and number of processes on a local/distributed setup
-```bash
-# use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
-
-#Local Setup
-python3 measurements/run_config.py -p all measurements/configs/benchmarks/Multiprocessing.conf --override NUM_INPUTS=1000000 DATTYPE=512
-
-#Distributed Setup, 3PC
-python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512 PROTOCOL=1,2,3,5,6
-
-#Distributed Setup, 4PC
-python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/Multiprocesssing.conf --override NUM_INPUTS=1000000 DATTYPE=512 PROTOCOL=7,8,9,10,11,12
-```
-
-#### Run LeNet5 on MNIST locally with batch size 24 using SPLITROLES
-```bash
-# use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
-
-# 3PC
-python3 measurements/run_config.py -s 1 -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=5 PROCESS_NUM=4
-
-# 4PC
-python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=12 PROCESS_NUM=1
-```
-
-#### Run various neural network models in a distributed setting on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)
-```bash
-# use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
-
-# 3PC
-python3 measurements/run_config.py -s 1 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=5 PROCESS_NUM=4 
-
-# 4PC
-python3 measurements/run_config.py -s 3 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=12 PROCESS_NUM=12
-```
-
-#### Parse the results
-```bash
-python3 measurements/parse_logs.py measurements/logs/ # results are stored as `.csv` in measurements/logs/
 ```
 
 
