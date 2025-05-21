@@ -359,7 +359,7 @@ If reading input files fails, adding `-lstdc++fs` to the Makefile compile flags 
 If you encounter issues regarding the accuracy of neural network inference, the following options may increase accuracy.
 - Increase the `BITLENGTH`.
 - Increase or reduce the number of `FRACTIONAL` bits.
-- Adjust the truncation strategy to `TRUNC_APPROACH=1` (REDUCED Slack), `TRUNC_APPROACH=2` (Exact Truncation), `TRUNC_APPROACH=3` (Exact Truncation with no slack), `TRUNC_APPROACH=4` (Mixed Truncation)
+- Adjust the truncation strategy to `TRUNC_APPROACH=1` (Reduced Slack), `TRUNC_APPROACH=2` (Exact Truncation), `TRUNC_APPROACH=3` (Exact Truncation with no slack), `TRUNC_APPROACH=4` (Mixed Truncation)
 , along with `TRUNC_THEN_MULT=0` and `TRUNC_DELAYED=1`. Note that truncation approaches 1 and 2 require setting `TRUNC_DELAYED=1`.
 - Inspect the terminal output for any errors regarding reading the model or dataset. PIGEON uses dummy data or model parameters if the files are not found. Make sure that `MODELOWNER` and `DATAOWNER` are set during compilation and that the respective environment variables point to existing files.
 
