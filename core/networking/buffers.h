@@ -65,3 +65,4 @@ bool isReLU = false;   // For ReLU truncation
 #if TRUNC_APPROACH > 0
 bool all_positive = false;  // for slack-based optiimzation
 #endif
+

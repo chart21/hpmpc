@@ -71,6 +71,9 @@ void communicate_live()
     /* #endif */
 }
 
+void send_to_live(int player_id);
+DATATYPE receive_from_live(int player_id);
+
 void send_to_live(int player_id, DATATYPE a)
 {
 /* sending_args[player_id].sent_elements[sending_args[player_id].send_rounds][send_count[player_id]] = a; */
@@ -82,6 +85,14 @@ void send_to_live(int player_id, DATATYPE a)
 #endif
     sending_args[player_id].sent_elements[sending_rounds][send_count[player_id]] = a;
     send_count[player_id] += 1;
+#if WAIT_AFTER_MESSAGES_IF_AHEAD >= 0
+    total_send[player_id] += 1;
+    if ((SYNC_PARTY_RECV == player_id || SYNC_PARTY_RECV2 == player_id) && (total_send[player_id]) % WAIT_AFTER_MESSAGES_IF_AHEAD == 0)
+    {
+        receive_live();  // expect sync message
+        receive_from_live(player_id);  // expect sync message 
+    }
+#endif
 }
 
 DATATYPE receive_from_live(int player_id)
@@ -93,6 +104,14 @@ DATATYPE receive_from_live(int player_id)
     }
 #endif
     share_buffer[player_id] += 1;
+#if WAIT_AFTER_MESSAGES_IF_AHEAD >= 0
+    total_recv[player_id] += 1;
+if (SYNC_PARTY_SEND == player_id && (total_recv[player_id] -1) % WAIT_AFTER_MESSAGES_IF_AHEAD == 0)
+{
+    send_to_live(player_id, SET_ALL_ZERO()); // send sync message
+    send_live();  // send sync message
+}
+#endif
     return receiving_args[player_id].received_elements[rounds - 1][share_buffer[player_id] - 1];
     /* return
      * receiving_args[player_id].received_elements[receiving_args[player_id].rec_rounds-1][share_buffer[player_id] -1];

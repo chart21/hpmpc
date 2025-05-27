@@ -47,6 +47,9 @@ void pre_receive_from_(int player_index)
 }
 #endif
 
+void send_to_(int player_index);
+void receive_from_(int player_index);
+
 void send_to_(int player_index)
 {
 #if SEND_BUFFER > 0
@@ -57,6 +60,13 @@ void send_to_(int player_index)
 #endif
     sending_args[player_index].elements_to_send[sending_args[player_index].send_rounds] += 1;
     total_send[player_index] += 1;
+    #if WAIT_AFTER_MESSAGES_IF_AHEAD >= 0
+    if((SYNC_PARTY_RECV2 == player_index || SYNC_PARTY_RECV == player_index) && total_send[player_index] % WAIT_AFTER_MESSAGES_IF_AHEAD == 0)
+    {
+        receive_(); // receive sync message
+        receive_from_(player_index); // expect sync message
+    }
+    #endif
 }
 
 void receive_from_(int player_index)
@@ -69,6 +79,13 @@ void receive_from_(int player_index)
 #endif
     receiving_args[player_index].elements_to_rec[receiving_args[player_index].rec_rounds - 1] += 1;
     total_recv[player_index] += 1;
+#if WAIT_AFTER_MESSAGES_IF_AHEAD >= 0
+    if(SYNC_PARTY_SEND == player_index && (total_recv[player_index]-1) % WAIT_AFTER_MESSAGES_IF_AHEAD == 0)
+    {
+        send_to_(player_index); // send sync message
+        send_(); // send sync message
+    }
+#endif
 }
 
 void communicate_()
@@ -281,6 +298,14 @@ void finalize_(std::string* ips)
     sb = 0;
     current_phase = PHASE_LIVE;
     print_communication();
+#if WAIT_AFTER_MESSAGES_IF_AHEAD >= 0
+    for (int t = 0; t < num_players - 1; t++)
+    {
+        total_recv[t] = 0;
+        total_send[t] = 0;
+    }
+#endif
+
 }
 
 void init()

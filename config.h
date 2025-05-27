@@ -34,7 +34,7 @@
 
 // Number of inputs (mostly used by Benchmarking functions or Neural Networks)
 #ifndef NUM_INPUTS
-#define NUM_INPUTS 10
+#define NUM_INPUTS 1
 #endif
 
 // === Concurrency Settings ===
@@ -91,6 +91,11 @@
 #define VERIFY_BUFFER 512 / DATTYPE
 #endif
 
+#if PRE == 0
+    #ifndef WAIT_AFTER_MESSAGES_IF_AHEAD //Experimental, P0/P3 will not get correct output
+    #define WAIT_AFTER_MESSAGES_IF_AHEAD -1  // In case of interleaved computation, the preprocessing party will at most be x messages ahead to save RAM
+#endif
+#endif
 // === Network Settings ===
 
 // Use SSL encrypted communication?
@@ -374,6 +379,37 @@ int base_port = BASE_PORT;  // temporary solution
 #define PNEXT 0
 #define PMIDDLE 1
 #endif
+#endif
+
+#if WAIT_AFTER_MESSAGES_IF_AHEAD >= 0
+
+#if PROTOCOL == 5
+#if PARTY == 0
+#define SYNC_PARTY_RECV P_2
+#elif PARTY == 2
+#define SYNC_PARTY_SEND P_0
+#endif
+#endif
+
+#if PROTOCOL == 12
+#if PARTY == 3
+#define SYNC_PARTY_RECV P_2
+#define SYNC_PARTY_RECV2 P_0
+#elif PARTY == 0 || PARTY == 2
+#define SYNC_PARTY_SEND P_3
+#endif
+#endif
+
+#ifndef SYNC_PARTY_RECV
+#define SYNC_PARTY_RECV -1
+#endif
+#ifndef SYNC_PARTY_SEND
+#define SYNC_PARTY_SEND -1
+#endif
+#ifndef SYNC_PARTY_RECV2
+#define SYNC_PARTY_RECV2 -1
+#endif
+
 #endif
 
 #if FUNCTION_IDENTIFIER > 5
