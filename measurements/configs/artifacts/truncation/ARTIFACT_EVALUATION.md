@@ -196,7 +196,7 @@ The measurement data provided by the figures/tables corresponds to the columns o
 | Accuracy (%) | `ACCURACY(%)` | The accuracy achieved in the experiment. |
 | Truncation Primitive | `TRUNC_APPROACH` | The truncation primitive used in the experiment. We use the following mapping: <br /> `TRUNC_APPROACH=0` - TS_L <br /> `TRUNC_APPROACH=1` - TS_1 <br /> `TRUNC_APPROACH=2` - TE_0 <br /> `TRUNC_APPROACH=3` - TE_1 <br /> `TRUNC_APPROACH=4` - TS_Mix |
 | Model Architecture | `FUNCTION_IDENTIFIER` |  The identifier of the model architecture used in the experiment. We use the following mapping:<br /> `FUNCTION_IDENTIFIER=182` - LeNet on MNIST<br /> `FUNCTION_IDENTIFIER=171` - ResNet50 on CIFAR-10<br /> `FUNCTION_IDENTIFIER=174` - VGG-16 on CIFAR-10<br /> `FUNCTION_IDENTIFIER=186` - VGG-16 on ImageNet (as specified by PyTorch) |
-| Number of fractional bits | `FRACTIONAL` | The number of fractional bits used in fixed point representation. |
+| Number of Fractional Bits | `FRACTIONAL` | The number of fractional bits used in fixed point representation. |
 | Optimizations | `TRUNC_DELAYED`, `MSB0_OPT`, `AVG_OPT` | Flags indicate whether certain optimizations such as `TRUNC_DELAYED` or `AVG_OPT` are active (`1`) or not (`0`/missing) |
 
 
