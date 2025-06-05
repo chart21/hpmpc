@@ -195,11 +195,11 @@ The measurement data provided by the figures/tables corresponds to the columns o
 | Runtime (s) | `ONLINE_MAX(s)` | The runtime of the experiment in seconds. `ONLINE_MAX` measures the runtime based on the slowest process (i.e. when all parallel processes are finished) and is used for the results in the paper while `ONLINE_AVG` measures the average runtime of all processes. |
 | Accuracy (%) | `ACCURACY(%)` | The accuracy achieved in the experiment. |
 | Truncation Primitive | `TRUNC_APPROACH` | TS_L: `TRUNC_APPROACH=0`, TS_1: `TRUNC_APPROACH=1`, TE_0: `TRUNC_APPROACH=2`, TE_1: `TRUNC_APPROACH=3`, TS_Mix: `TRUNC_APPROACH=4` |
-| Model Architecture | `FUNCTION_IDENTIFIER` | The identifier of the model architecture used in the experiment. We use the following mapping:<br />
+| Model Architecture | `FUNCTION_IDENTIFIER` |  The identifier of the model architecture used in the experiment. We use the following mapping:<br />
 `182` - LeNet on MNIST<br />
 `171` - ResNet50 on CIFAR-10<br />
 `174` - VGG-16 on CIFAR-10<br />
-`186` - VGG-16 on ImageNet (as specified by PyTorch)<br /> |
+`186` - VGG-16 on ImageNet (as specified by PyTorch) |
 | Number of fractional bits | `FRACTIONAL` | The number of fractional bits used in fixed point representation. |
 | Optimizations | Flags indicate whether certain optimizations such as `TRUNC_DELAYED` or `AVG_OPT` are active (1) or not (0/missing) |
 
