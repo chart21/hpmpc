@@ -13,10 +13,10 @@ We set up machines and provided a `machines.json` file with login information in
 ## Description
 The artifact reproduces the experiments of all included figures and tables in the main body of the paper.  
 For each experiment, the artifact produces one or multiple csv files with measurement results that can be directly compared to the corresponding measurement point of a figure or an entry of a table in the paper.
-For experiments in specific network environments, bandwidths and latency are simulated using Linux traffic control (tc).
+For experiments in specific network environments, bandwidth and latency are simulated using Linux traffic control (tc).
 The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the paper's results.
-The reduced workload should complete within two hours on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and throughput achieved by the full results.
-The full workload should also complete within two hours but requires high-performance hardware (32 cores, AVX2, 512GB RAM).
+The reduced workload should complete within two hours on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and accuracy achieved by the full results.
+The full workload should also complete within two hours but requires high-performance hardware (16 cores, AVX2, 64GB RAM).
 All experiments can be executed using a single script and we provide a Dockerfile to run the experiments in a containerized environment.
 
 ### Security/Privacy Issues and Ethical Concerns (All badges)
@@ -30,8 +30,8 @@ Each machine should have identical hardware specifications.
 ### Hardware Requirements
 
 Each node must support AVX512 to run the scripts without manual modifications.
-We recommend four multi-core machines with at least 16 cores and 64GB RAM for running the reduced workload.
-We recommend four multi-core machines with at least 32 cores, 512GB RAM, and a 24GB GPU for running the full workload.
+We recommend four multi-core machines with at least 4 cores and 16GB RAM for running the reduced workload.
+We recommend four multi-core machines with at least 16 cores, 64GB RAM, for running the full workload.
 For full reproducibility, please refer to the exact details in the `Run the experiments` section.
 
 ### Software Requirements
@@ -78,9 +78,17 @@ docker build -t hpmpc .
  docker run -it --network host --cap-add=NET_ADMIN --name p3 hpmpc
 ```
 
+#### Download pretrained model weights and datasets
+```bash
+cd nn/Pygeon
+python download_pretrained.py all
+cd ../..
+```
+
 #### Optional: Set up GPU Support
 
 To run all GPU-based experiments on the CPU, this step can be omitted.
+
 ```bash
 # Dependencies for GPU acceleration
 git clone https://github.com/NVIDIA/cutlass.git

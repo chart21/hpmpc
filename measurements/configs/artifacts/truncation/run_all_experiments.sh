@@ -38,6 +38,9 @@ do
    esac
 done
 
+export MODEL_DIR=nn/Pygeon/models/pretrained
+export DATA_DIR=nn/Pygeon/data/datasets
+
 echo "=====Starting all measurements with PID $PID, IP0 $IP0, IP1 $IP1, IP2 $IP2, IP3 $IP3, REDUCED $REDUCED, ITERATIONS $ITERATIONS, USE_CUDA_GEMM $USE_CUDA_GEMM====="
 
 ##4PC
@@ -46,9 +49,13 @@ echo "===Starting 4PC measurements for table 6==="
 
 python3 measurements/run_config.py measurements/configs/artifacts/truncation/table6 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 $REDUCED
 
-echo "===Starting 4PC measurements for table 8==="
+echo "===Starting 4PC measurements for table 8 with 1Gbps bandwidth and 2ms latency==="
+
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -l 2 -B 1000 -L 2
 
 python3 measurements/run_config.py measurements/configs/artifacts/truncation/table8 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID --override PROTOCOL=12 $REDUCED
+
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -L -1 -B -1 #Reset network shaping
 
 
 echo "=====Finished all 4PC measurements====="
@@ -61,21 +68,49 @@ fi
 
 echo "===Starting 3PC measurements for figure 14==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure14 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+export MODEL_FILE=Cifar_adam_001/ResNet50_avg_CIFAR-10_standard_best.bin
+export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
+export LABELS_FILE=CIFAR-10_standard_test_labels.bin
+
+python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure14/test_fractional_vs_accuracy_32.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+
+export MODEL_FILE=adam_001_wd/ResNet50_avg_AdamW_d05_wd003_lr0001_ep100_acc74_35.bin
+
+python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure14/test_fractional_vs_accuracy_32_weight_decay.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+
+
 
 echo "===Starting 3PC measurements for figure 15==="
+        
+export MODEL_FILE=MNIST_LeNet5/LeNet5_MNIST_standard_best.bin
+export SAMPLES_FILE=MNIST_standard_test_images.bin
+export LABELS_FILE=MNIST_standard_test_labels.bin
+
 
 python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure15 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
 
 echo "===Starting 3PC measurements for figure 16==="
 
+export MODEL_FILE=Cifar_adam_001/ResNet50_avg_CIFAR-10_standard_best.bin
+export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
+export LABELS_FILE=CIFAR-10_standard_test_labels.bin
+
 python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure16 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
 
 echo "===Starting 3PC measurements for figure 17==="
 
+export MODEL_FILE=imagenet_128-256/VGG_imagenet.bin
+export SAMPLES_FILE=imagenet_128-256/imagenet_test_images.bin
+export LABELS_FILE=imagenet_128-256/imagenet_test_labels.bin
+
+
 python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
 
 echo "===Starting 3PC measurements for table 5==="
+
+export MODEL_FILE=Cifar_adam_001/VGG16_CIFAR-10_standard_best.bin
+export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
+export LABELS_FILE=CIFAR-10_standard_test_labels.bin
 
 python3 measurements/run_config.py measurements/configs/artifacts/truncation/table5 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
 
@@ -83,8 +118,12 @@ echo "===Starting 3PC measurements for table 6==="
 
 python3 measurements/run_config.py measurements/configs/artifacts/truncation/table6 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
 
-echo "===Starting 3PC measurements for table 7==="
+echo "===Starting 3PC measurements for table 8 with 1Gbps bandwidth and 2ms latency==="
 
-python3 measurements/run_config.py measurements/configs/artifacts/truncation/table7 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -p $PID -l 2 -B 1000 -L 2
+
+python3 measurements/run_config.py measurements/configs/artifacts/truncation/table8 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+
+measurements/network_shaping/shape_network.sh -a $IP0 -b $IP1 -c $IP2 -p $PID -L -1 -B -1 #Reset network shaping
 
 echo "=====Finished all 3PC measurements====="
