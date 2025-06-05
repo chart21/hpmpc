@@ -1,21 +1,22 @@
 # Artifact Appendix
 
-Paper title: **PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation**
+Paper title: **SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets**
 
-Artifacts HotCRP Id: **Submission #2 (2025.3)** 
+Artifacts HotCRP Id: **Submission #6 (2025.4)** 
 
 Requested Badge: **Reproducible**
 
 ## Reviewer Instructions
 
-We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/pigeon` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments. 
+We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/truncation` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments. 
 
 ## Description
-The artifact reproduces the experiments of all included figures and tables (exluding evaluation of third-party frameworks and evaluation of subroutines) of the paper. Table 1 only evaluates a third-party framework and is thus not covered. 
+The artifact reproduces the experiments of all included figures and tables in the main body of the paper.  
 For each experiment, the artifact produces one or multiple csv files with measurement results that can be directly compared to the corresponding measurement point of a figure or an entry of a table in the paper.
+For experiments in specific network environments, bandwidths and latency are simulated using Linux traffic control (tc).
 The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the paper's results.
 The reduced workload should complete within two hours on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and throughput achieved by the full results.
-The full workload should also complete within two hours but requires high-performance hardware (32 cores, AVX2, 512GB RAM, ideally an NVIDIA GPU with at least 24GB VRAM).
+The full workload should also complete within two hours but requires high-performance hardware (32 cores, AVX2, 512GB RAM).
 All experiments can be executed using a single script and we provide a Dockerfile to run the experiments in a containerized environment.
 
 ### Security/Privacy Issues and Ethical Concerns (All badges)
@@ -130,42 +131,38 @@ make -j USE_CUDA_GEMM=2 PARTY=$PID FUNCTION_IDENTIFIER=57 PROTOCOL=12 && scripts
 ### Main Results and Claims
 Our main results that should be supported by the artifact are the following:
 
-- Result1: Increasing the utilized bits per register with vectorization and bitslicing improves network throughput significantly (Figure 1).
-- Result2: All relevant tables and figures from the paper can be re-evaluated with the artifact.
+- Result1: The accuracy results of the paper can be reproduced with the artifact.
+- Result2: The runtime results of the paper can be reproduced with the artifact.
 
 ### Experiments 
 
 #### Run the experiments (FUNCTIONALITY)
 
-By default, the experiment script will run a single iteration and a heavily reduced workload to test the functionality of each experiment. 
-All measurement points from the covered tables and figures are generated but with a smaller input size.
-Also, the tested number of bits per register and the number of processes is reduced. Hence, one can expect all results from the different tables and figures but with lower throughput and runtime values and in some cases a smaller range of tested parameters per plot.
+By default, the experiment script will run at a reduced workload. 
+All measurement points from the covered tables and figures are generated but with a smaller input size, i.e. the number of images is reduced.
+Hence, one can expect slightly different results for accuracy and runtime compared to the results in the paper.
 
 Run the following script on each node simultaneously to execute the experiments. If your machines have GPUs, you can set the `-g 2` flag to also run GPU-based experiments. 
 ```bash
-./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS  
+./measurements/configs/artifacts/truncation/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS  
 ```
 
 #### Run the experiments (REPRODUCIBILITY)
 
 To reproduce the results of the paper, we provide an option to run the full workload of each experiment by specifying -R "" in the script (not that the "" after -R is required). 
 ```bash
-sudo ./measurements/configs/artifacts/pigeon/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -R "" 
+sudo ./measurements/configs/artifacts/truncation/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -R "" 
 ```
 
 Our nodes were configured as follows:
-Four AWS G6 16xlarge instances with the following properties:
 
-    - CPU: AMD EPYC 7543 32-Core Processor
-    - GPU: NVIDIA L4 GPU, 32GB
-    - RAM: 512GB
-    - Maximum Bitwidth: 256
-    - OS: Ubuntu LTS 22.04
-    - Network Links: 25 Gbit/s duplex link between all pairs of nodes without a switch (directly connected)
-    - Network Latency: 0.3ms
+- CPU: AMD EPYC 7543 32-Core Processor
+- RAM: 512GB
+- Maximum Bitwidth: 256
+- OS: Debian Trixie
+- Network Links: 25 Gbit/s duplex link between all pairs of nodes without a switch (directly connected)
+- Network Latency: 0.3ms
 
-Note that fewer cores or RAM on the nodes may crash the experiments.
-For some 64-bit tests we utilized CPU-based machines with AVX-512 support such as R7a instances due to the missing AVX-512 support of instances with a GPU.
 
 ### Parse the results
 
@@ -222,33 +219,30 @@ To run all tests from a single (external) master node that is not part of the co
 ### For Functionality 
 
 ```bash
-cd hpmpc/measurements/configs/artifacts/pigeon
+cd hpmpc/measurements/configs/artifacts/truncation
 python3 run_all_on_remote_servers.py -p all
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
 ```bash
-cd hpmpc/measurements/configs/artifacts/pigeon
+cd hpmpc/measurements/configs/artifacts/truncation
 ./run_with_tmux_grid.sh
 ```
 
 ### For Reproducibility
 
 ```bash
-cd hpmpc/measurements/configs/artifacts/pigeon
+cd hpmpc/measurements/configs/artifacts/truncation
 python3 run_all_on_remote_servers.py -p all -R ""
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
 For the optimized version on weaker hardware with reduced parallelization factor and batch sizes (e.g. 16 cores, 64GB RAM), you can add the `-O 16Core_VMS` flag to the command.
 
 ```bash
-cd hpmpc/measurements/configs/artifacts/pigeon
+cd hpmpc/measurements/configs/artifacts/truncation
 ./run_with_tmux_grid.sh -R "\"\""  # Add [-O 16Core_VMS] for weaker hardware
 ```
 
 
-## Limitations 
-
-Results of third-party frameworks are not included in the artifact.
 
 
 
