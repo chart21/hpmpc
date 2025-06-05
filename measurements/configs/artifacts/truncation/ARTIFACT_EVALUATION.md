@@ -223,7 +223,6 @@ cd hpmpc/measurements/configs/artifacts/truncation
 python3 run_all_on_remote_servers.py -p all -R ""
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
-For the optimized version on weaker hardware with reduced parallelization factor and batch sizes (e.g. 16 cores, 64GB RAM), you can add the `-O 16Core_VMS` flag to the command.
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
