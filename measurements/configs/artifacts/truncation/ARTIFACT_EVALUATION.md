@@ -227,7 +227,7 @@ For the optimized version on weaker hardware with reduced parallelization factor
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-./run_with_tmux_grid.sh -R "\"\""  # Add [-O 16Core_VMS] for weaker hardware
+./run_with_tmux_grid.sh -R "\"\""  
 ```
 
 
