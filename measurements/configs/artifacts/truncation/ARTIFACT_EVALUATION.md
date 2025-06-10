@@ -15,8 +15,8 @@ The artifact reproduces the experiments of all included figures and tables in th
 For each experiment, the artifact produces one or multiple csv files with measurement results that can be directly compared to the corresponding measurement point of a figure or an entry of a table in the paper.
 For experiments in specific network environments, bandwidth and latency are simulated using Linux traffic control (tc).
 The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the paper's results.
-The reduced workload should complete within two hours on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and accuracy achieved by the full results.
-The full workload should also complete within two hours but requires high-performance hardware (16 cores, AVX2, 64GB RAM).
+The reduced workload should complete within four hours on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and accuracy achieved by the full results.
+The full workload should also complete within four hours but requires high-performance hardware (16 cores, AVX2, 64GB RAM).
 All experiments can be executed using a single script and we provide a Dockerfile to run the experiments in a containerized environment.
 
 ### Security/Privacy Issues and Ethical Concerns (All badges)
@@ -38,7 +38,7 @@ For full reproducibility, please refer to the exact details in the `Run the expe
 Each machine should come with a Debian-based operating system or Docker installed. For install instructions, please refer to the `Setup the environment` section.
 
 ### Estimated Time and Storage Consumption
-All workload should complete within two hours in a LAN setting with the specified hardware requirements. For exact details, please refer to the `Run the experiments` section.
+All workload should complete within four hours in a LAN setting with the specified hardware requirements. For exact details, please refer to the `Run the experiments` section.
 
 
 ### Accessibility
@@ -84,21 +84,6 @@ cd nn/Pygeon
 sudo apt install -y python3-pip #if not already installed
 pip install gdown #if not already installed
 python3 download_pretrained.py all
-cd ../..
-```
-
-#### Optional: Set up GPU Support
-
-To run all GPU-based experiments on the CPU, this step can be omitted.
-
-```bash
-# Dependencies for GPU acceleration
-git clone https://github.com/NVIDIA/cutlass.git
-
-# Compile standalone executable for GPU acceleration
-cd core/cuda
-# Replace with your GPU architecture, nvcc path, and CUTLASS path:
-make -j arch=sm_89 CUDA_PATH=/usr/local/cuda CUTLASS_PATH=/home/user/cutlass
 cd ../..
 ```
 
@@ -231,6 +216,17 @@ cd hpmpc/measurements/configs/artifacts/truncation
 sudo ./run_with_tmux_grid.sh -R "\"\""  
 ```
 
+## Plot Results
+
+After running all experiments, plots can be generated from the csv files in the `hpmpc/measurements/logs` directory using the provided plotting scripts in this directory.
+
+```bash
+python3 plot_acc.py <path_to_hpmpc>/measurements/logs/node0/ #or any other node with the csv files
+```
+
+## Limitations
+
+Figure 17 is only reproduced with a single Bitlength (32) and Fractional bit setting (10) and with 32 instead of 128 inputs due to the significant runtime of the experiment. The full workload can be activated by specifying `-I false` when calling the `run_all_on_remote_servers.py` script. We performed the full workload on a 512GB RAM machine with 32 core and do not gurantee that the full experiment will run on weaker hardware.
 
 
 

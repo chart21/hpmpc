@@ -6,6 +6,7 @@ IP2=127.0.0.1
 IP3=127.0.0.1
 PID=all # replace with node id
 REDUCED="NUM_INPUTS=1"
+REDUCED_IMAGENET="true"
 USE_CUDA_GEMM="0"
 
 helpFunction()
@@ -21,7 +22,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "p:a:b:c:d:D:L:R:i:g:" opt
+while getopts "p:a:b:c:d:D:L:R:i:g:I:" opt
 do
    case "$opt" in
       p ) PID="$OPTARG" ;;
@@ -34,6 +35,7 @@ do
       R ) REDUCED="$OPTARG" ;;
       i ) ITERATIONS="$OPTARG" ;;
       g ) USE_CUDA_GEMM="$OPTARG" ;;
+      I ) REDUCED_IMAGENET="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -104,7 +106,11 @@ export SAMPLES_FILE=imagenet_128-256/imagenet_test_images.bin
 export LABELS_FILE=imagenet_128-256/imagenet_test_labels.bin
 
 
-python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+if REDUCED_IMAGENET == "true"; then
+    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17/figure14_32bit.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 NUM_INPUTS=4 FRACTIONAL=10 BITLENGTH=32 $REDUCED
+else
+    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+fi
 
 echo "===Starting 3PC measurements for table 5==="
 
