@@ -99,7 +99,7 @@ python3 measurements/run_config.py measurements/configs/artifacts/truncation/fig
 
 echo "===Starting 3PC measurements for figure 17==="
 
-export MODEL_FILE=imagenet_128-256/VGG_imagenet.bin
+export MODEL_FILE=ImageNet/VGG_imagenet.bin
 export SAMPLES_FILE=imagenet_128-256/imagenet_test_images.bin
 export LABELS_FILE=imagenet_128-256/imagenet_test_labels.bin
 
