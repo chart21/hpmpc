@@ -81,7 +81,9 @@ docker build -t hpmpc .
 #### Download pretrained model weights and datasets
 ```bash
 cd nn/Pygeon
-python download_pretrained.py all
+sudo apt install -y python3-pip #if not already installed
+pip install gdown #if not already installed
+python3 download_pretrained.py all
 cd ../..
 ```
 
@@ -208,25 +210,25 @@ To run all tests from a single (external) master node that is not part of the co
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-python3 run_all_on_remote_servers.py -p all
+sudo python3 run_all_on_remote_servers.py -p all
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-./run_with_tmux_grid.sh
+sudo ./run_with_tmux_grid.sh
 ```
 
 ### For Reproducibility
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-python3 run_all_on_remote_servers.py -p all -R ""
+sudo python3 run_all_on_remote_servers.py -p all -R ""
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-./run_with_tmux_grid.sh -R "\"\""  
+sudo /run_with_tmux_grid.sh -R "\"\""  
 ```
 
 

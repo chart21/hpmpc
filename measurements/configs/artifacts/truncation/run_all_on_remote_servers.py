@@ -11,6 +11,9 @@ parser.add_argument('-g', type=str, help='Argument for -g')
 parser.add_argument('-R', type=str, help='Argument for -R')
 parser.add_argument('-O', type=str, help='Argument for -O')
 parser.add_argument('-p', type=str, help='PID for the experiment', required=True)
+#flag to indicate if the script should include setup, should be false by default
+parser.add_argument('--setup', action='store_true', help='Run setup commands before experiments')
+
 
 # Parse the arguments
 args = parser.parse_args()
@@ -18,6 +21,20 @@ args = parser.parse_args()
 # Load machine credentials from JSON file
 with open('machines.json') as f:
     machines = json.load(f)
+
+# Define commands to setup
+
+setup_commands = """
+sudo apt-get update && \
+    sudo apt-get install -y --no-install-recommends gcc-12 g++-12 libeigen3-dev libssl-dev git vim ca-certificates python3 jq bc build-essential iproute2 iperf && \
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 && \
+    sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 100 && \
+    sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 100 
+git clone https://github.com/chart21/hpmpc && \
+    cd hpmpc && \
+    git submodule update --init --recursive
+python3 download_pretrained.py all
+"""
 
 # Define commands to execute
 base_commands = """
@@ -31,11 +48,12 @@ export ITERATIONS=1
 echo "Running experiments with the following parameters: PID=$PID, IP0=$IP0, IP1=$IP1, IP2=$IP2, IP3=$IP3, ITERATIONS=$ITERATIONS, SUPPORTED_BITWIDTHS=$SUPPORTED_BITWIDTHS, MAX_BITWIDTH=$MAX_BITWIDTH" 
 """
 
-# Construct experiment command with optional arguments
-base_experiment_command = "./measurements/configs/artifacts/pigeon/run_all_experiments"
-if args.O == "16Core_VMS":
-    base_experiment_command += "_16Core_VMS"
-base_experiment_command += ".sh "
+if args.setup:
+    # If setup is requested, prepend setup commands
+    base_commands = setup_commands + base_commands
+
+
+base_experiment_command = "./measurements/configs/artifacts/truncation/run_all_experiments.sh "
 
 experiment_command = base_experiment_command + "-a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
 
