@@ -228,7 +228,7 @@ Alternatively, if you have tmux installed on the master node, you can run the fo
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-sudo /run_with_tmux_grid.sh -R "\"\""  
+sudo ./run_with_tmux_grid.sh -R "\"\""  
 ```
 
 
