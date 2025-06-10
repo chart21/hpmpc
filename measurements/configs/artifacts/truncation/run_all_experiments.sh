@@ -72,7 +72,7 @@ export MODEL_FILE=Cifar_adam_001/ResNet50_avg_CIFAR-10_standard_best.bin
 export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
 export LABELS_FILE=CIFAR-10_standard_test_labels.bin
 
-python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure14/figure14_32.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure14/figure14_32bit.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
 
 export MODEL_FILE=adam_001_wd/ResNet50_avg_AdamW_d05_wd003_lr0001_ep100_acc74_35.bin
 
