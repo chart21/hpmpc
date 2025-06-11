@@ -33,7 +33,11 @@ sudo apt-get update && \
 git clone https://github.com/chart21/hpmpc && \
     cd hpmpc && \
     git submodule update --init --recursive
-python3 download_pretrained.py all
+cd nn/Pygeon \
+sudo apt install -y python3-pip \
+pip install gdown \
+python3 download_pretrained.py all \
+cd ../.. \
 """
 
 # Define commands to execute
@@ -53,7 +57,7 @@ if args.setup:
     base_commands = setup_commands + base_commands
 
 
-base_experiment_command = "./measurements/configs/artifacts/truncation/run_all_experiments.sh "
+base_experiment_command = "sudo ./measurements/configs/artifacts/truncation/run_all_experiments.sh "
 
 experiment_command = base_experiment_command + "-a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS -L $SUPPORTED_BITWIDTHS -D $MAX_BITWIDTH"
 

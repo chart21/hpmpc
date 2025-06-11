@@ -6,7 +6,7 @@ IP2=127.0.0.1
 IP3=127.0.0.1
 PID=all # replace with node id
 REDUCED="NUM_INPUTS=1"
-REDUCED_IMAGENET="true"
+IMAGENET=""
 USE_CUDA_GEMM="0"
 
 helpFunction()
@@ -19,6 +19,8 @@ helpFunction()
    echo -e "\t-d IP address of player 3 (if ip matches player_id can be empty)"
    echo -e "\t-R Reduced settings for faster execution"
    echo -e "\t-G GPU Support"
+   echo -e "\t-i Number of iterations to run"
+   echo -e "\t-I Imagenet dataset (default: empty, full for all parameters of figure 17)
    exit 1 # Exit script after printing help
 }
 
@@ -35,7 +37,7 @@ do
       R ) REDUCED="$OPTARG" ;;
       i ) ITERATIONS="$OPTARG" ;;
       g ) USE_CUDA_GEMM="$OPTARG" ;;
-      I ) REDUCED_IMAGENET="$OPTARG" ;;
+      I ) IMAGENET="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -53,10 +55,10 @@ export SAMPLES_FILE=imagenet_128-256/imagenet_test_images.bin
 export LABELS_FILE=imagenet_128-256/imagenet_test_labels.bin
 
 
-if REDUCED_IMAGENET != "false"; then
-    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17/figure17_32bit.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 NUM_INPUTS=4 FRACTIONAL=10 BITLENGTH=32 $REDUCED
-else
+if [ $IMAGENET == "full" ]
     python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+else
+    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17/figure17_32bit.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 NUM_INPUTS=4 FRACTIONAL=10 BITLENGTH=32 $REDUCED
 fi
 
 

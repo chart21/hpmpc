@@ -133,7 +133,7 @@ Hence, one can expect slightly different results for accuracy and runtime compar
 
 Run the following script on each node simultaneously to execute the experiments. 
 ```bash
-./measurements/configs/artifacts/truncation/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS  
+sudo ./measurements/configs/artifacts/truncation/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS  
 ```
 
 #### Run the experiments (REPRODUCIBILITY)
@@ -189,25 +189,25 @@ To run all tests from a single (external) master node that is not part of the co
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-sudo python3 run_all_on_remote_servers.py -p all
+python3 run_all_on_remote_servers.py -p all
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-sudo ./run_with_tmux_grid.sh
+./run_with_tmux_grid.sh
 ```
 
 ### For Reproducibility
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-sudo python3 run_all_on_remote_servers.py -p all -R ""
+python3 run_all_on_remote_servers.py -p all -R ""
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-sudo ./run_with_tmux_grid.sh -R "\"\""  
+./run_with_tmux_grid.sh -R "\"\""  
 ```
 
 ## Plot Results
