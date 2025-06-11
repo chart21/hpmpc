@@ -221,7 +221,7 @@ sudo ./run_with_tmux_grid.sh -R "\"\""
 After running all experiments, plots can be generated from the csv files in the `hpmpc/measurements/logs` directory using the provided plotting scripts in this directory.
 
 ```bash
-python3 plot_acc.py <path_to_hpmpc>/measurements/logs/node0/ #or any other node with the csv files
+python3 plot_acc.py ../../../measurements/logs/node_0/ #or any other node with the csv files
 ```
 
 ## Limitations
