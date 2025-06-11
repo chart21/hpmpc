@@ -56,6 +56,7 @@ export LABELS_FILE=imagenet_128-256/imagenet_test_labels.bin
 
 
 if [ $IMAGENET == "full" ]
+then
     python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
 else
     python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17/figure17_32bit.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 NUM_INPUTS=4 FRACTIONAL=10 BITLENGTH=32 $REDUCED
