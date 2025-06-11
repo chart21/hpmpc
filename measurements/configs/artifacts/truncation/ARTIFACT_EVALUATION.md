@@ -115,12 +115,6 @@ If the nodes are able to connect and all tests pass, the environment is set up c
 make -j PARTY=$PID FUNCTION_IDENTIFIER=54 PROTOCOL=12 && scripts/run.sh -p $PID -n 4 -a $IP0 -b $IP1 -c $IP2 -d $IP3 
 ```
 
-To test GPU support, run the following command on each node simultaneously.
-
-```bash
-make -j USE_CUDA_GEMM=2 PARTY=$PID FUNCTION_IDENTIFIER=57 PROTOCOL=12 && scripts/run.sh -p $PID -n 4 -a $IP0 -b $IP1 -c $IP2 -d $IP3 
-```
-
 ## Artifact Evaluation 
 
 ### Main Results and Claims
@@ -137,7 +131,7 @@ By default, the experiment script will run at a reduced workload.
 All measurement points from the covered tables and figures are generated but with a smaller input size, i.e. the number of images is reduced.
 Hence, one can expect slightly different results for accuracy and runtime compared to the results in the paper.
 
-Run the following script on each node simultaneously to execute the experiments. If your machines have GPUs, you can set the `-g 2` flag to also run GPU-based experiments. 
+Run the following script on each node simultaneously to execute the experiments. 
 ```bash
 ./measurements/configs/artifacts/truncation/run_all_experiments.sh -a $IP0 -b $IP1 -c $IP2 -d $IP3 -p $PID -i $ITERATIONS  
 ```
@@ -189,7 +183,7 @@ The measurement data provided by the figures/tables corresponds to the columns o
 
 ## Automation of distributed tests with a Master Node
 
-To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. This requires `pip install paramiko`. The experiment results will be stored as csv files on each node locally in the `hpmpc/measurements/logs` directory and also on the master node in the `hpmpc/measurements/logs/node_$PID/` directory. For GPU support, additionally set `-g 2` in the commands below.
+To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. This requires `pip install paramiko`. The experiment results will be stored as csv files on each node locally in the `hpmpc/measurements/logs` directory and also on the master node in the `hpmpc/measurements/logs/node_$PID/` directory. 
 
 ### For Functionality 
 
