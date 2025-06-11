@@ -1,2 +1,26 @@
 [
+    {
+        "ip": "141.39.221.202",
+        "username": "artifacts",
+        "password": "QPR5bBf2gcepYPm",
+        "hostname": "pets-x7e9-3-248-compute.artifacts.measurement.network"
+    },
+    {
+        "ip": "141.39.220.192",
+        "username": "artifacts",
+        "password": "BAHQ0vBPTQbjKlc",
+        "hostname": "pets-x7e9-3-249-compute.artifacts.measurement.network"
+    },
+    {
+        "ip": "141.39.221.246",
+        "username": "artifacts",
+        "password": "VVu5Ui1UOU0vgMp",
+        "hostname": "pets-x7e9-3-250-compute.artifacts.measurement.network"
+    },
+    {
+        "ip": "141.39.220.180",
+        "username": "artifacts",
+        "password": "9cp4W44axfNpNY2",
+        "hostname": "pets-x7e9-3-251-compute.artifacts.measurement.network"
+    }
 ]

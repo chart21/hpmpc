@@ -50,7 +50,7 @@ echo "=====Starting all measurements with PID $PID, IP0 $IP0, IP1 $IP1, IP2 $IP2
 
 echo "===Starting 3PC measurements for figure 17==="
 
-export MODEL_FILE=ImageNet/VGG_imagenet.bin
+export MODEL_FILE=ImageNet/AlexNet_imagenet.bin
 export SAMPLES_FILE=imagenet_128-256_images.bin
 export LABELS_FILE=imagenet_128-256_labels.bin
 
@@ -58,7 +58,7 @@ export LABELS_FILE=imagenet_128-256_labels.bin
 if [ "$IMAGENET" = "full" ]; then
     python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
 else
-    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17/figure17_32bit.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override TRUNC_APPROACH=1 PROTOCOL=5 NUM_INPUTS=8 FRACTIONAL=10 BITLENGTH=32 PROCESS_NUM=1 $REDUCED
+    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17/figure17_32bit.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override TRUNC_APPROACH=1 FUNCTION_IDENTIFIER=85 PROTOCOL=5 NUM_INPUTS=4 FRACTIONAL=10 BITLENGTH=32 PROCESS_NUM=1 $REDUCED
 fi
 
 
