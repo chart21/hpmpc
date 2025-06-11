@@ -20,7 +20,7 @@ helpFunction()
    echo -e "\t-R Reduced settings for faster execution"
    echo -e "\t-G GPU Support"
    echo -e "\t-i Number of iterations to run"
-   echo -e "\t-I Imagenet dataset (default: empty, full for all parameters of figure 17)
+   echo -e "\t-I Imagenet dataset (default: empty, full for all parameters of figure 17)"
    exit 1 # Exit script after printing help
 }
 
