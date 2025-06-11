@@ -8,7 +8,7 @@ Requested Badge: **Reproducible**
 
 ## Reviewer Instructions
 
-We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/truncation` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments. 
+We set up machines and provided a `machines.json` file with login information in the submission portal. All servers already have the neccessary dependencies installed. To run all experiments, clone the `HPMPC` repository to your PC, copy the `machines.json` to the `measurements/configs/artifacts/truncation` directory, and jump to the [Automation of distributed tests with a Master Node](#automation-of-distributed-tests-with-a-master-node) section for instructions to execute all experiments. The provided VMs are powerful enough to run the full workload (reproducability) of the experiments, thus there is no need to run follow the functionality section.
 
 ## Description
 The artifact reproduces the experiments of all included figures and tables in the main body of the paper.  
@@ -16,7 +16,7 @@ For each experiment, the artifact produces one or multiple csv files with measur
 For experiments in specific network environments, bandwidth and latency are simulated using Linux traffic control (tc).
 The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the paper's results.
 The reduced workload should complete within four hours on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and accuracy achieved by the full results.
-The full workload should also complete within four hours but requires high-performance hardware (16 cores, AVX2, 64GB RAM).
+The full workload should also completes within four hours but requires high-performance hardware (16 cores, AVX2, 64GB RAM).
 All experiments can be executed using a single script and we provide a Dockerfile to run the experiments in a containerized environment.
 
 ### Security/Privacy Issues and Ethical Concerns (All badges)
@@ -29,7 +29,7 @@ Each machine should have identical hardware specifications.
 
 ### Hardware Requirements
 
-Each node must support AVX512 to run the scripts without manual modifications.
+Each node must support AVX2 to run the scripts without manual modifications.
 We recommend four multi-core machines with at least 4 cores and 16GB RAM for running the reduced workload.
 We recommend four multi-core machines with at least 16 cores, 64GB RAM, for running the full workload.
 For full reproducibility, please refer to the exact details in the `Run the experiments` section.
@@ -180,6 +180,14 @@ The measurement data provided by the figures/tables corresponds to the columns o
 | Number of Fractional Bits | `FRACTIONAL` | The number of fractional bits used in fixed point representation. |
 | Optimizations | `TRUNC_DELAYED`, `MSB0_OPT`, `AVG_OPT` | Flags indicate whether certain optimizations such as `TRUNC_DELAYED` or `AVG_OPT` are active (`1`) or not (`0`/missing). |
 
+### Plot the results
+
+After running all experiments, plots can be generated from the csv files in the `hpmpc/measurements/logs` directory using the provided plotting scripts in this directory.
+
+```bash
+python3 plot_acc.py ../../../measurements/logs/node_0/ #or any other node with the csv files
+```
+
 
 ## Automation of distributed tests with a Master Node
 
@@ -208,14 +216,6 @@ Alternatively, if you have tmux installed on the master node, you can run the fo
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
 ./run_with_tmux_grid.sh -R "\"\""  
-```
-
-## Plot Results
-
-After running all experiments, plots can be generated from the csv files in the `hpmpc/measurements/logs` directory using the provided plotting scripts in this directory.
-
-```bash
-python3 plot_acc.py ../../../measurements/logs/node_0/ #or any other node with the csv files
 ```
 
 ## Limitations
