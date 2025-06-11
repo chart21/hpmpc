@@ -220,7 +220,7 @@ python3 plot_acc.py ../../../measurements/logs/node_0/ #or any other node with t
 
 ## Limitations
 
-Figure 17 is only reproduced with a single Bitlength (32) and Fractional bit setting (10) and with 32 instead of 128 inputs due to the significantly long runtime of the experiment. The full workload can be activated by specifying `-I false` when calling the `run_all_on_remote_servers.py` script. We performed the full workload on a 512GB RAM machine with 32 cores and do not guarantee that the full experiment will run on weaker hardware.
+Figure 17 is not reproduced by the artifact due to ImageNet license restrictions.
 
 
 
