@@ -9,7 +9,6 @@ import argparse
 parser = argparse.ArgumentParser(description='Run experiments on remote servers.')
 parser.add_argument('-g', type=str, help='Argument for -g')
 parser.add_argument('-R', type=str, help='Argument for -R')
-parser.add_argument('-I', type=str, help='Argument for -I')
 parser.add_argument('-p', type=str, help='PID for the experiment', required=True)
 #flag to indicate if the script should include setup, should be false by default
 parser.add_argument('--setup', action='store_true', help='Run setup commands before experiments')
@@ -66,8 +65,6 @@ if args.g:
     experiment_command += f" -g {args.g}"
 if args.R:
     experiment_command += f" -R {args.R}"
-if args.I:
-    experiment_command += f" -I {args.I}"
 # Load machine credentials from JSON file
 
 parse_command = "python3 measurements/parse_logs.py measurements/logs"
