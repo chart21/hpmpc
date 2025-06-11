@@ -438,10 +438,10 @@ python3 measurements/run_config.py -p <party_id> -a <ip_address_party_0> -b <ip_
 # use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
 # 3PC
-python3 measurements/run_config.py -s 1 -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=5 PROCESS_NUM=4
+python3 measurements/run_config.py -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=5 PROCESS_NUM=4 SPLITROLES=1
 
 # 4PC
-python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=12 PROCESS_NUM=1
+python3 measurements/run_config.py -p all measurements/configs/benchmarks/lenet.conf --override PROTOCOL=12 PROCESS_NUM=1 SPLITROLES=3
 ```
 
 #### Run various neural network models in a distributed setting on ImageNet with 3 iterations per run and SPLITROLES (Requires server-grade hardware)
@@ -449,10 +449,10 @@ python3 measurements/run_config.py -s 3 -p all measurements/configs/benchmarks/l
 # use DATTYPE=256 or DATTYPE=128 or DATTYPE=64 for CPUs without AVX/SSE support.
 
 # 3PC
-python3 measurements/run_config.py -s 1 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=5 PROCESS_NUM=4 
+python3 measurements/run_config.py -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=5 PROCESS_NUM=4 SPLITROLES=1
 
 # 4PC
-python3 measurements/run_config.py -s 3 -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=12 PROCESS_NUM=12
+python3 measurements/run_config.py -i 3 -p <party_id> -a <ip_address_party_0> -b <ip_address_party_1> -c <ip_address_party_2> -d <ip_address_party_3> measurements/configs/benchmarks/imagenetmodels.conf --override PROTOCOL=12 PROCESS_NUM=1 SPLITROLES=3
 ```
 
 #### Parse the results
