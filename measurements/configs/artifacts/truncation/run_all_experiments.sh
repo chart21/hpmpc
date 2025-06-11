@@ -51,8 +51,8 @@ echo "=====Starting all measurements with PID $PID, IP0 $IP0, IP1 $IP1, IP2 $IP2
 echo "===Starting 3PC measurements for figure 17==="
 
 export MODEL_FILE=ImageNet/VGG_imagenet.bin
-export SAMPLES_FILE=imagenet_128-256/imagenet_test_images.bin
-export LABELS_FILE=imagenet_128-256/imagenet_test_labels.bin
+export SAMPLES_FILE=imagenet_128-256_images.bin
+export LABELS_FILE=imagenet_128-256_labels.bin
 
 
 if [ $IMAGENET == "full" ]
