@@ -45,6 +45,21 @@ export DATA_DIR=nn/Pygeon/data/datasets
 
 echo "=====Starting all measurements with PID $PID, IP0 $IP0, IP1 $IP1, IP2 $IP2, IP3 $IP3, REDUCED $REDUCED, ITERATIONS $ITERATIONS, USE_CUDA_GEMM $USE_CUDA_GEMM====="
 
+
+echo "===Starting 3PC measurements for figure 17==="
+
+export MODEL_FILE=ImageNet/VGG_imagenet.bin
+export SAMPLES_FILE=imagenet_128-256/imagenet_test_images.bin
+export LABELS_FILE=imagenet_128-256/imagenet_test_labels.bin
+
+
+if REDUCED_IMAGENET != "false"; then
+    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17/figure17_32bit.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 NUM_INPUTS=4 FRACTIONAL=10 BITLENGTH=32 $REDUCED
+else
+    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
+fi
+
+
 ##4PC
 
 echo "===Starting 4PC measurements for table 6==="
@@ -99,18 +114,6 @@ export LABELS_FILE=CIFAR-10_standard_test_labels.bin
 
 python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure16 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
 
-echo "===Starting 3PC measurements for figure 17==="
-
-export MODEL_FILE=ImageNet/VGG_imagenet.bin
-export SAMPLES_FILE=imagenet_128-256/imagenet_test_images.bin
-export LABELS_FILE=imagenet_128-256/imagenet_test_labels.bin
-
-
-if REDUCED_IMAGENET == "true"; then
-    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17/figure14_32bit.conf -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 NUM_INPUTS=4 FRACTIONAL=10 BITLENGTH=32 $REDUCED
-else
-    python3 measurements/run_config.py measurements/configs/artifacts/truncation/figure17 -i $ITERATIONS -a $IP0 -b $IP1 -c $IP2 -p $PID --override PROTOCOL=5 $REDUCED
-fi
 
 echo "===Starting 3PC measurements for table 5==="
 
