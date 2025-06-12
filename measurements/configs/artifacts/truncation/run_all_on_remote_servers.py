@@ -66,6 +66,8 @@ if args.g:
     experiment_command += f" -g {args.g}"
 if args.R:
     experiment_command += f" -R {args.R}"
+if args.E and args.E != "all":
+    experiment_command += f" -E {args.E}"
 # Load machine credentials from JSON file
 
 parse_command = "python3 measurements/parse_logs.py measurements/logs"

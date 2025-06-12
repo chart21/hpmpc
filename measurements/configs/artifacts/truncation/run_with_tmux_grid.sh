@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Parse -R and -g options
+# Parse -R and -E options
 EXTRA_ARGS=()
 
 while [[ $# -gt 0 ]]; do
