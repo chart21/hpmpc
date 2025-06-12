@@ -15,8 +15,8 @@ The artifact reproduces the experiments of all included figures and tables in th
 For each experiment, the artifact produces one or multiple csv files with measurement results that can be directly compared to the corresponding measurement point of a figure or an entry of a table in the paper.
 For experiments in specific network environments, bandwidth and latency are simulated using Linux traffic control (tc).
 The artifact includes an option to run the experiments with a reduced workload to test the functionality of the experiments and a full workload to reproduce the paper's results.
-The reduced workload should complete within four hours on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and accuracy achieved by the full results.
-The full workload should also completes within four hours but requires high-performance hardware (16 cores, AVX2, 64GB RAM).
+The reduced workload should complete within eight hours on four multi-core machines in a distributed setup. It runs all tests with a reduced number of inputs and is therefore not comparable to runtimes and accuracy achieved by the full results.
+The full workload should complete within four hours but requires high-performance hardware (16 cores, AVX2, 64GB RAM).
 All experiments can be executed using a single script and we provide a Dockerfile to run the experiments in a containerized environment.
 
 ### Security/Privacy Issues and Ethical Concerns (All badges)
@@ -38,7 +38,7 @@ For full reproducibility, please refer to the exact details in the `Run the expe
 Each machine should come with a Debian-based operating system or Docker installed. For install instructions, please refer to the `Setup the environment` section.
 
 ### Estimated Time and Storage Consumption
-All workload should complete within four hours in a LAN setting with the specified hardware requirements. For exact details, please refer to the `Run the experiments` section.
+All experiments should complete within eight hours in a LAN setting with the specified hardware requirements. For exact details, please refer to the `Run the experiments` section.
 
 
 ### Accessibility
@@ -179,6 +179,8 @@ The measurement data provided by the figures/tables corresponds to the columns o
 | Model Architecture | `FUNCTION_IDENTIFIER` |  The identifier of the model architecture used in the experiment. We use the following mapping:<br /> `FUNCTION_IDENTIFIER=182` - LeNet on MNIST<br /> `FUNCTION_IDENTIFIER=171` - ResNet50 on CIFAR-10<br /> `FUNCTION_IDENTIFIER=174` - VGG-16 on CIFAR-10<br /> `FUNCTION_IDENTIFIER=186` - VGG-16 on ImageNet (as specified by PyTorch) |
 | Number of Fractional Bits | `FRACTIONAL` | The number of fractional bits used in fixed point representation. |
 | Optimizations | `TRUNC_DELAYED`, `MSB0_OPT`, `AVG_OPT` | Flags indicate whether certain optimizations such as `TRUNC_DELAYED` or `AVG_OPT` are active (`1`) or not (`0`/missing). |
+| Communication | `ONLINE_SENT(MB)` | The amount of data sent by a node to other nodes in megabytes. Note that all nodes' `ONLINE_SENT(MB)` values need to be summed up to get the total communication of the experiment. |
+
 
 ### Plot the results
 
