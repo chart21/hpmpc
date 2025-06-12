@@ -155,7 +155,7 @@ Our nodes were configured as follows:
 
 ### Parse the results
 
-To parse the log files to csv tables, run the following script after running the experiments.
+To parse the log files to csv tables, run the following script after running the experiments from the base `hpmpc` directory.
 ```bash
 python3 measurements/parse_logs.py measurements/logs
 ```
@@ -182,7 +182,7 @@ The measurement data provided by the figures/tables corresponds to the columns o
 
 ### Plot the results
 
-After running all experiments, plots can be generated from the csv files in the `hpmpc/measurements/logs` directory using the provided plotting scripts in this directory.
+After running all experiments, plots can be generated from the csv files in the `hpmpc/measurements/logs` directory using the provided plotting scripts in this directory. Results will also be saved to the artifact directory.
 
 ```bash
 python3 plot_acc.py ../../../logs/node_0/ #or any other node with the csv files
