@@ -226,7 +226,29 @@ Figure 17 is not reproduced by the artifact due to ImageNet license restrictions
 Some accuracy slightly deviate from the paper results due to different input sizes in the experiments.
 Some runtime results may slightly deviate from the paper results due to different hardware and network setup.
 The network throttling for Table 8 may sometimes cause outliers which can be filtered out by repeating the experiments.
+
+## Running only specific experiments
+
 A specific experiment can be started by adding e.g. `-E Table8` or `-E Figure14` to any of the scripts above.
+This can help also help to split up the eight-hour workload into smaller chunks. For instance the following command runs the whole workload:
+
+```bash
+./run_with_tmux_grid.sh -R "\"\""  
+```
+
+While these commands also run the full workload but one experiment at a time:
+```bash
+./run_with_tmux_grid.sh -R "\"\"" -E Figure14
+./run_with_tmux_grid.sh -R "\"\"" -E Figure15
+./run_with_tmux_grid.sh -R "\"\"" -E Figure16
+./run_with_tmux_grid.sh -R "\"\"" -E Table5
+./run_with_tmux_grid.sh -R "\"\"" -E Table6
+./run_with_tmux_grid.sh -R "\"\"" -E Table8
+```
+
+
+
+
 
 
 
