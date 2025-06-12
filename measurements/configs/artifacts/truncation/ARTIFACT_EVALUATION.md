@@ -223,6 +223,11 @@ cd hpmpc/measurements/configs/artifacts/truncation
 ## Limitations
 
 Figure 17 is not reproduced by the artifact due to ImageNet license restrictions.
+Some accuracy slightly deviate from the paper results due to different input sizes in the experiments.
+Some runtime results may slightly deviate from the paper results due to different hardware and network setup.
+The network throttling for Table 8 may sometimes cause outliers which can be filtered out by repeating the experiments.
+A specific experiment can be started by adding e.g. `-E Table8` or `-E Figure14` to any of the scripts above.
+
 
 
 
