@@ -21,6 +21,7 @@ helpFunction()
    echo -e "\t-R Reduced settings for faster execution"
    echo -e "\t-G GPU Support"
    echo -e "\t-i Number of iterations to run"
+   echo -e "\t-E Experiments to run (default: all, options: Table6, Table8, Figure14, Figure15, Figure16, Table5)"
    exit 1 # Exit script after printing help
 }
 
@@ -37,7 +38,7 @@ do
       R ) REDUCED="$OPTARG" ;;
       i ) ITERATIONS="$OPTARG" ;;
       g ) USE_CUDA_GEMM="$OPTARG" ;;
-      E ) Experiments="$OPTARG" ;;
+      E ) EXPERIMENTS="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
