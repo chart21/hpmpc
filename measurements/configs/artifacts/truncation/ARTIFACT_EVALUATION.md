@@ -193,7 +193,13 @@ python3 plot_acc.py ../../../logs/node_0/ #or any other node with the csv files
 
 ## Automation of distributed tests with a Master Node
 
-To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. This requires `pip install paramiko`. The experiment results will be stored as csv files on each node locally in the `hpmpc/measurements/logs` directory and also on the master node in the `hpmpc/measurements/logs/node_$PID/` directory. 
+To run all tests from a single (external) master node that is not part of the computation servers and stream all outputs in the master node's terminal, you can fill in the `machines.json` file with the login credentials of 4 remote servers and run the following command on the seperate master node. The experiment results will be stored as csv files on each node locally in the `hpmpc/measurements/logs` directory and also on the master node in the `hpmpc/measurements/logs/node_$PID/` directory. 
+The Master node requires the following dependencies:
+
+```bash
+pip install paramiko matplotlib pandas
+sudo apt install texlive-full
+```
 
 ### For Functionality 
 
@@ -211,7 +217,7 @@ cd hpmpc/measurements/configs/artifacts/truncation
 
 ```bash
 cd hpmpc/measurements/configs/artifacts/truncation
-python3 run_all_on_remote_servers.py -p all -R ""
+python3 run_all_on_remote_servers.py -p all -R "\"\"" 
 ```
 Alternatively, if you have tmux installed on the master node, you can run the following command for a cleaner terminal output in a 2x2 grid of the master node.
 
