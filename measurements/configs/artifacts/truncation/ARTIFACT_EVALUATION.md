@@ -184,9 +184,8 @@ The measurement data provided by the figures/tables corresponds to the columns o
 
 ### Plot the results
 
-After running all experiments, plots can be generated from the csv files in the `hpmpc/measurements/logs` directory using the provided plotting scripts in this directory. Results will also be saved to the artifact directory.
+After running all experiments, plots can be generated from the csv files in the `hpmpc/measurements/logs` directory using the provided plotting scripts in this directory. Results will be saved to the artifact directory. To cleanup existing measurement data and plots, `./cleanup_results.sh` deletes existing logs and plots.
 
-```bash
 python3 plot_acc.py ../../../logs/node_0/ #or any other node with the csv files
 ```
 
