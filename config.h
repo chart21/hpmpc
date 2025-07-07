@@ -8,7 +8,7 @@
 
 // Use a preprocessing phase? Only supported by Protocols 3,5,8,11,12
 #ifndef PRE
-#define PRE 1
+#define PRE 0
 #endif
 
 // Party ID (starting from 0)
@@ -94,6 +94,8 @@
 #if PRE == 0
     #ifndef WAIT_AFTER_MESSAGES_IF_AHEAD //Experimental, P0/P3 will not get correct output
     #define WAIT_AFTER_MESSAGES_IF_AHEAD -1  // In case of interleaved computation, the preprocessing party will at most be x messages ahead to save RAM
+#else
+    #define WAIT_AFTER_MESSAGES_IF_AHEAD 0  // In case of preprocessing, this option is deactivated
 #endif
 #endif
 
