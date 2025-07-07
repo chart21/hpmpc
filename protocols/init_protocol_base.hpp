@@ -413,7 +413,6 @@ void finalize_(std::string* ips)
     preprocessed_outputs_index = 0;  // reset index for post phase
     preprocessed_outputs_input_index = 0;
 #endif
->>>>>>> c1a5281 (Add Aby2)
 #endif
     rounds = 0;
     sending_rounds = 0;

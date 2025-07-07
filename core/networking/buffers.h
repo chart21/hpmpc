@@ -46,8 +46,6 @@ uint32_t hash_val[num_players * player_multiplier][8];  // Hash value for each p
 #endif
 uint64_t elements_to_compare[num_players * player_multiplier] = {0};
 #endif
-#if PRE == 1 && HAS_POST_PROTOCOL == 1  // Store preprocessed-output to get the correct results during post-processing
-DATATYPE* preprocessed_outputs;
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || \
     BEAVER == 1  // Store preprocessed-output to get the correct results during post-processing
 
