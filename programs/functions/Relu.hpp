@@ -244,8 +244,6 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
     }
     else
         pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm, rk, Share, Datatype>);
-#else
-    pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm, rk, Share, Datatype>);
 #endif
 
 #if TRUNC_DELAYED == 1

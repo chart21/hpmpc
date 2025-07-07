@@ -125,12 +125,12 @@ class Additive_Share : public Share_Type
                                  int fractional_bits = FRACTIONAL)
     {
         Share_Type::prepare_trunc_2k_inputs(
-            OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, OP_TRUNCF, rmk2, rmsb, c, c_prime, fractional_bits);
+            OP_ADD, OP_SUB, OP_XOR, OP_AND, OP_TRUNCF, rmk2, rmsb, c, c_prime, fractional_bits);
     }
 
     void complete_trunc_2k_inputs(Share_Type& rmk2, Share_Type& rmsb, Share_Type& c, Share_Type& c_prime)
     {
-        Share_Type::complete_trunc_2k_inputs(OP_ADD, OP_SUB, FUNC_XOR, FUNC_AND, FUNC_TRUNC, rmk2, rmsb, c, c_prime);
+        Share_Type::complete_trunc_2k_inputs(OP_ADD, OP_SUB, OP_XOR, OP_AND, FUNC_TRUNC, rmk2, rmsb, c, c_prime);
     }
 
     Datatype complete_reveal_to_all() const { return Share_Type::complete_Reveal(OP_ADD, OP_SUB); }
@@ -230,7 +230,7 @@ class Additive_Share : public Share_Type
 
     void complete_mult()
     {
-#if PROTOCOL == 1  // Sharemind needs custom overload
+#if PROTOCOL == 1 || (PROTOCOL == 4 && PRE == 0)  // Sharemind and Additive need custom overload
         Share_Type::complete_mult(OP_ADD, OP_SUB, OP_MULT);
 #else
 #if FRACTIONAL > 0
@@ -243,7 +243,7 @@ class Additive_Share : public Share_Type
 
     void complete_mult_without_trunc()
     {
-#if PROTOCOL == 1  // Sharemind needs custom overload
+#if PROTOCOL == 1 || (PROTOCOL == 4 && PRE == 0)  // Sharemind and Additive need custom overload
         Share_Type::complete_mult(OP_ADD, OP_SUB, OP_MULT);
 #else
         Share_Type::complete_mult(OP_ADD, OP_SUB);
@@ -256,6 +256,6 @@ class Additive_Share : public Share_Type
 
     Additive_Share prepare_trunc_exact_xmod2t(int fractional_bits = FRACTIONAL) const
     {
-        return Share_Type::prepare_trunc_exact_xmod2t(OP_ADD, OP_SUB, OP_TRUNCF, FUNC_AND, fractional_bits);
+        return Share_Type::prepare_trunc_exact_xmod2t(OP_ADD, OP_SUB, OP_TRUNCF, OP_AND, fractional_bits);
     }
 };

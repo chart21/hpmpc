@@ -1,13 +1,13 @@
 #pragma once
-#include "functions/Relu.hpp" // for Activations
-#include "functions/max_min.hpp" // for MaxPool2d and Softmax
-#include "functions/GEMM.hpp" // for Conv2d
-#include "functions/prob_div.hpp" //for AvgPool2d
-#include "headers/simple_nn.h" // templated inference engine
-#include "architectures/CNNs.hpp" // includes common CNN architectures
-#include "architectures/ResNet.hpp" // includes ResNet architectures
-#include "architectures/DeepReduce.hpp" // includes DeepReduce architectures
-#include "headers/config.h" // NN configuration
+#include "architectures/CNNs.hpp"        // includes common CNN architectures
+#include "architectures/DeepReduce.hpp"  // includes DeepReduce architectures
+#include "architectures/ResNet.hpp"      // includes ResNet architectures
+#include "functions/GEMM.hpp"            // for Conv2d
+#include "functions/Relu.hpp"            // for Activations
+#include "functions/max_min.hpp"         // for MaxPool2d and Softmax
+#include "functions/prob_div.hpp"        //for AvgPool2d
+#include "headers/config.h"              // NN configuration
+#include "headers/simple_nn.h"           // templated inference engine
 #if TRUNC_APPROACH > 1
 #include "functions/exact_truncation.hpp"
 #endif

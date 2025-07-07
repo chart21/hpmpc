@@ -54,46 +54,140 @@ void unorthogonalize_arithmetic_full(DATATYPE* in, UINT_TYPE* out)
 
 #endif
 
+#if DATTYPE > 64
+namespace std
+{
+
+template <>
+struct bit_xor<DATATYPE>
+{
+    inline DATATYPE operator()(const DATATYPE a, const DATATYPE b) const { return FUNC_XOR(a, b); }
+};
+
+template <>
+struct bit_and<DATATYPE>
+{
+    inline DATATYPE operator()(const DATATYPE a, const DATATYPE b) const { return FUNC_AND(a, b); }
+};
+
+#if BITLENGTH == 64
+template <>
+struct plus<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_ADD64(a, b); }
+};
+
+template <>
+struct minus<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_SUB64(a, b); }
+};
+
+template <>
+struct multiplies<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_MUL64(a, b); }
+};
+
+#elif BITLENGTH == 32
+
+template <>
+struct plus<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_ADD32(a, b); }
+};
+
+template <>
+struct minus<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_SUB32(a, b); }
+};
+
+template <>
+struct multiplies<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_MUL32(a, b); }
+};
+
+#elif BITLENGTH == 16
+template <>
+struct plus<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_ADD16(a, b); }
+};
+
+template <>
+struct minus<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_SUB16(a, b); }
+};
+
+template <>
+struct multiplies<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_MUL16(a, b); }
+};
+
+#elif BITLENGTH == 8
+template <>
+struct plus<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_ADD8(a, b); }
+};
+
+template <>
+struct minus<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_SUB8(a, b); }
+};
+
+template <>
+struct multiplies<DATATYPE>
+{
+    inline DATATYPE operator()(DATATYPE a, DATATYPE b) { return FUNC_MUL8(a, b); }
+};
+
+#endif
+}  // namespace std
+#endif
+
 #if BITLENGTH == 8
-#define OP_ADD FUNC_ADD8
-#define OP_SUB FUNC_SUB8
-#define OP_MULT FUNC_MUL8
 /* #define OP_TRUNC SHIFT_RIGHT8<FRACTIONAL> */
 #define OP_SHIFT_LEFT SHIFT_LEFT8
 #define OP_SHIFT_RIGHT SHIFT_RIGHT8
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT8
 #define OP_SHIFT_LOG_RIGHTF SHIFT_LOG_RIGHT8F
 #elif BITLENGTH == 16
-#define OP_ADD FUNC_ADD16
-#define OP_SUB FUNC_SUB16
-#define OP_MULT FUNC_MUL16
 #define OP_SHIFT_LEFT SHIFT_LEFT16
 #define OP_SHIFT_RIGHT SHIFT_RIGHT16
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT16
 #define OP_SHIFT_LOG_RIGHTF SHIFT_LOG_RIGHT16F
 #elif BITLENGTH == 32
-#define OP_ADD FUNC_ADD32
-#define OP_SUB FUNC_SUB32
-#define OP_MULT FUNC_MUL32
 /* #define OP_TRUNC SHIFT_RIGHT32<FRACTIONAL> */
 #define OP_SHIFT_LEFT SHIFT_LEFT32
 #define OP_SHIFT_RIGHT SHIFT_RIGHT32
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT32
 #define OP_SHIFT_LOG_RIGHTF SHIFT_LOG_RIGHT32F
 #elif BITLENGTH == 64
-#define OP_ADD FUNC_ADD64
-#define OP_SUB FUNC_SUB64
-#define OP_MULT FUNC_MUL64
 #define OP_SHIFT_LEFT SHIFT_LEFT64
 #define OP_SHIFT_RIGHT SHIFT_RIGHT64
 #define OP_SHIFT_LOG_RIGHT SHIFT_LOG_RIGHT64
 #define OP_SHIFT_LOG_RIGHTF SHIFT_LOG_RIGHT64F
 #endif
+#define OP_ADD std::plus<DATATYPE>()
+#define OP_SUB std::minus<DATATYPE>()
+#define OP_MULT std::multiplies<DATATYPE>()
+#define OP_XOR std::bit_xor<DATATYPE>()
+#define OP_AND std::bit_and<DATATYPE>()
 
 /* #define OP_TRUNC OP_SHIFT_RIGHT<FRACTIONAL> */
 /* #define OP_TRUNC2 OP_SHIFT_RIGHT<1> */
 /* #define OP_TRUNCF OP_SHIFT_RIGHT */
+#if SKIP_PRE == 0
 #define OP_TRUNC OP_SHIFT_LOG_RIGHT<FRACTIONAL>
+#else
+#define OP_TRUNC OP_SHIFT_RIGHT<FRACTIONAL>
+#endif
 #define OP_TRUNC2 OP_SHIFT_LOG_RIGHT<1>
 #define OP_TRUNCF OP_SHIFT_LOG_RIGHTF
 

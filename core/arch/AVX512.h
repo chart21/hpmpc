@@ -57,20 +57,20 @@
 #define MUL_SIGNED(a, b, c) _mm512_mullo_epi##c(a, b)
 #define MUL_SINGED_64(a, b) _mm512_mullox_epi64(a, b)
 
-#define FUNC_AND _mm512_and_si512_wrapper
-#define FUNC_OR _mm512_or_si512_wrapper
-#define FUNC_XOR _mm512_xor_si512_wrapper
-#define FUNC_ADD8 _mm512_add_epi8_wrapper
-#define FUNC_ADD16 _mm512_add_epi16_wrapper
-#define FUNC_ADD32 _mm512_add_epi32_wrapper
-#define FUNC_ADD64 _mm512_add_epi64_wrapper
-#define FUNC_SUB8 _mm512_sub_epi8_wrapper
-#define FUNC_SUB16 _mm512_sub_epi16_wrapper
-#define FUNC_SUB32 _mm512_sub_epi32_wrapper
-#define FUNC_SUB64 _mm512_sub_epi64_wrapper
-#define FUNC_MUL16 _mm512_mullo_epi16_wrapper
-#define FUNC_MUL32 _mm512_mullo_epi32_wrapper
-#define FUNC_MUL64 _mm512_mullo_epi64_wrapper
+#define FUNC_AND _mm512_and_si512
+#define FUNC_OR _mm512_or_si512
+#define FUNC_XOR _mm512_xor_si512
+#define FUNC_ADD8 _mm512_add_epi8
+#define FUNC_ADD16 _mm512_add_epi16
+#define FUNC_ADD32 _mm512_add_epi32
+#define FUNC_ADD64 _mm512_add_epi64
+#define FUNC_SUB8 _mm512_sub_epi8
+#define FUNC_SUB16 _mm512_sub_epi16
+#define FUNC_SUB32 _mm512_sub_epi32
+#define FUNC_SUB64 _mm512_sub_epi64
+#define FUNC_MUL16 _mm512_mullo_epi16
+#define FUNC_MUL32 _mm512_mullo_epi32
+#define FUNC_MUL64 _mm512_mullo_epi64
 
 #define SHIFT_RIGHT16 _mm512_srai_epi16_wrapper
 #define SHIFT_LEFT16 _mm512_slli_epi16_wrapper
@@ -90,78 +90,6 @@
 #define SHIFT_LOG_RIGHT16F __mm512_srl_epi16_wrapperF
 #define SHIFT_LOG_RIGHT32F __mm512_srl_epi32_wrapperF
 #define SHIFT_LOG_RIGHT64F __mm512_srl_epi64_wrapperF
-
-// wrapper functions needed for some compilers
-
-inline __m512i _mm512_and_si512_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_and_si512(a, b);
-}
-
-inline __m512i _mm512_or_si512_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_or_si512(a, b);
-}
-
-inline __m512i _mm512_xor_si512_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_xor_si512(a, b);
-}
-
-inline __m512i _mm512_add_epi8_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_add_epi8(a, b);
-}
-
-inline __m512i _mm512_add_epi16_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_add_epi16(a, b);
-}
-
-inline __m512i _mm512_add_epi32_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_add_epi32(a, b);
-}
-
-inline __m512i _mm512_add_epi64_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_add_epi64(a, b);
-}
-
-inline __m512i _mm512_sub_epi8_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_sub_epi8(a, b);
-}
-
-inline __m512i _mm512_sub_epi16_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_sub_epi16(a, b);
-}
-
-inline __m512i _mm512_sub_epi32_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_sub_epi32(a, b);
-}
-
-inline __m512i _mm512_sub_epi64_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_sub_epi64(a, b);
-}
-
-inline __m512i _mm512_mullo_epi16_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_mullo_epi16(a, b);
-}
-
-inline __m512i _mm512_mullo_epi32_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_mullo_epi32(a, b);
-}
-
-inline __m512i _mm512_mullo_epi64_wrapper(__m512i a, __m512i b)
-{
-    return _mm512_mullo_epi64(a, b);
-}
 
 // shift right arithmetic
 template <int n>

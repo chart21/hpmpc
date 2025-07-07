@@ -48,21 +48,22 @@
 #define ANDN(a, b) _mm256_andnot_si256(a, b)
 #define NOT(a) _mm256_xor_si256(ONES, a)
 
-#define FUNC_AND _mm256_and_si256_wrapper
-#define FUNC_OR _mm256_or_si256_wrapper
-#define FUNC_XOR _mm256_xor_si256_wrapper
-#define FUNC_ANDN _mm256_andnot_si256_wrapper
-#define FUNC_NOT _mm256_xor_si256_wrapper
-#define FUNC_ADD8 _mm256_add_epi8_wrapper
-#define FUNC_ADD16 _mm256_add_epi16_wrapper
-#define FUNC_ADD32 _mm256_add_epi32_wrapper
-#define FUNC_ADD64 _mm256_add_epi64_wrapper
-#define FUNC_SUB8 _mm256_sub_epi8_wrapper
-#define FUNC_SUB16 _mm256_sub_epi16_wrapper
-#define FUNC_SUB32 _mm256_sub_epi32_wrapper
-#define FUNC_SUB64 _mm256_sub_epi64_wrapper
-#define FUNC_MUL32 _mm256_mullo_epi32_wrapper
-#define FUNC_MUL64 _mm256_mullo_epi64_wrapper
+#define FUNC_AND _mm256_and_si256
+#define FUNC_OR _mm256_or_si256
+#define FUNC_XOR _mm256_xor_si256
+#define FUNC_NOT _mm256_xor_si256
+#define FUNC_ADD8 _mm256_add_epi8
+#define FUNC_ADD16 _mm256_add_epi16
+#define FUNC_ADD32 _mm256_add_epi32
+#define FUNC_ADD64 _mm256_add_epi64
+#define FUNC_SUB8 _mm256_sub_epi8
+#define FUNC_SUB16 _mm256_sub_epi16
+#define FUNC_SUB32 _mm256_sub_epi32
+#define FUNC_SUB64 _mm256_sub_epi64
+#define FUNC_MUL16 _mm256_mullo_epi16
+#define FUNC_MUL32 _mm256_mullo_epi32
+#define FUNC_MUL64 _mm256_mullo_epi64
+
 #define SHIFT_LEFT16 _mm256_slli_epi16_wrapper
 #define SHIFT_LEFT32 _mm256_slli_epi32_wrapper
 #define SHIFT_LEFT64 _mm256_slli_epi64_wrapper
@@ -81,88 +82,6 @@
 #define SHIFT_LOG_RIGHT16F _mm256_srl_epi16_wrapperF
 #define SHIFT_LOG_RIGHT32F _mm256_srl_epi32_wrapperF
 #define SHIFT_LOG_RIGHT64F _mm256_srl_epi64_wrapperF
-
-// wrapper functions needed for some compilers
-
-inline __m256i _mm256_and_si256_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_and_si256(a, b);
-}
-
-inline __m256i _mm256_or_si256_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_or_si256(a, b);
-}
-
-inline __m256i _mm256_xor_si256_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_xor_si256(a, b);
-}
-
-inline __m256i _mm256_andnot_si256_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_andnot_si256(a, b);
-}
-
-inline __m256i _mm256_not_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_xor_si256(ONES, a);
-}
-
-inline __m256i _mm256_add_epi8_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_add_epi8(a, b);
-}
-
-inline __m256i _mm256_add_epi16_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_add_epi16(a, b);
-}
-
-inline __m256i _mm256_add_epi32_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_add_epi32(a, b);
-}
-
-inline __m256i _mm256_sub_epi8_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_sub_epi8(a, b);
-}
-
-inline __m256i _mm256_sub_epi16_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_sub_epi16(a, b);
-}
-
-inline __m256i _mm256_sub_epi32_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_sub_epi32(a, b);
-}
-
-inline __m256i _mm256_mullo_epi16_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_mullo_epi16(a, b);
-}
-
-inline __m256i _mm256_mullo_epi32_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_mullo_epi32(a, b);
-}
-
-inline __m256i _mm256_add_epi64_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_add_epi64(a, b);
-}
-
-inline __m256i _mm256_sub_epi64_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_sub_epi64(a, b);
-}
-
-inline __m256i _mm256_mullo_epi64_wrapper(__m256i a, __m256i b)
-{
-    return _mm256_mullo_epi64(a, b);
-}
 
 // shift left arithmetic
 

@@ -33,6 +33,13 @@ class sbitset_t
     }
 
     template <int id>
+    void prepare_receive_from(DATATYPE vals[k])
+    {
+        for (int i = 0; i < k; i++)
+            shares[i].template prepare_receive_from<id>(vals[i]);
+    }
+
+    template <int id>
     void prepare_receive_from()
     {
         for (int i = 0; i < k; i++)
@@ -147,12 +154,11 @@ class sbitset_t
     void complete_reveal_to_all(UINT_TYPE result[DATTYPE])
     {
         DATATYPE temp[BITLENGTH]{0};
-        /* DATATYPE* temp = (DATATYPE*) result; */
         for (int i = 0; i < k; ++i)
         {
             temp[i] = shares[i].complete_reveal_to_all();
         }
-        unorthogonalize_boolean((DATATYPE*)temp, result);
+        unorthogonalize_boolean(temp, result);
     }
 
     Share* get_share_pointer() { return shares; }

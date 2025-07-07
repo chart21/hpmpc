@@ -13,7 +13,7 @@
 #define sharemind 1
 #define rep3 2
 #define astra 3
-#define aby2_dummy 4
+#define TwoPC 4
 #define trio 5
 #define ttp3 6
 #define ttp4 7
@@ -87,23 +87,26 @@
 #include "3-PC/astra/astra-P_2_template.hpp"
 #endif
 #endif
-#elif PROTOCOL == aby2_dummy
+#elif PROTOCOL == TwoPC
 #if PRE == 1
-#define PROTOCOL_PRE ABY2_Share
-#include "2-PC/aby2_dummy/aby2.hpp"
-#endif
+#define PROTOCOL_PRE ABY2_PRE_Share
+#include "2-PC/aby2/aby2_pre.hpp"
 #if INIT == 1
 #define PROTOCOL_INIT ABY2_init
-#include "2-PC/aby2_dummy/aby2_init.hpp"
+#include "2-PC/aby2/aby2_init.hpp"
 #endif
 #if LIVE == 1
-#if PRE == 1
-#define PROTOCOL_LIVE ABY2_POST_Share
-/* #define HAS_POST_PROTOCOL 1 */
-#include "2-PC/aby2_dummy/aby2_post.hpp"
+#define PROTOCOL_LIVE ABY2_ONLINE_Share
+#include "2-PC/aby2/aby2_online.hpp"
+#endif
 #else
-#define PROTOCOL_LIVE ABY2_Share
-#include "2-PC/aby2_dummy/aby2.hpp"
+#if INIT == 1
+#define PROTOCOL_INIT Add_init
+#include "2-PC/Additive/additive_init.hpp"
+#endif
+#if LIVE == 1
+#define PROTOCOL_LIVE Add_Share
+#include "2-PC/Additive/additive.hpp"
 #endif
 #endif
 #elif PROTOCOL == trio

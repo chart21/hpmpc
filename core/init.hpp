@@ -106,3 +106,31 @@ void init_muetexes()
     pthread_cond_init(&cond_start_signal, NULL);
     pthread_cond_init(&cond_send_next, NULL);
 }
+
+void init_srngs()
+{
+#if num_players == 2
+    init_srng(PPREV, SRNG_SEED);
+    init_srng(PSELF, PARTY + 1 + SRNG_SEED);
+#elif num_players == 3
+#if PROTOCOL == 6 || PROTOCOL == 7  // TTP
+    init_srng(0, SRNG_SEED);
+    init_srng(1, SRNG_SEED);
+    init_srng(2, SRNG_SEED);
+#else
+    init_srng(PPREV, modulo((player_id - 1), num_players) * 101011 + 5000 + SRNG_SEED);
+    init_srng(PNEXT, player_id * 101011 + 5000 + SRNG_SEED);
+    init_srng(num_players - 1,
+              player_id * 291932 + 6000 + SRNG_SEED);  // used for sharing inputs
+#endif
+#elif num_players == 4
+    init_srng(0, SRNG_SEED);
+    init_srng(1, SRNG_SEED);
+    init_srng(2, SRNG_SEED);
+    init_srng(3, SRNG_SEED);
+    init_srng(4, SRNG_SEED);
+    init_srng(5, SRNG_SEED);
+    init_srng(6, SRNG_SEED);
+    init_srng(7, SRNG_SEED);
+#endif
+}

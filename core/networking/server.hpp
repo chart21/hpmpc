@@ -73,8 +73,7 @@ void* sender(void* threadParameters)
                    ((sender_args*)threadParameters)->send_rounds);
 #endif
         }
-        free(((sender_args*)threadParameters)->sent_elements[rounds]);
-
+        delete[] ((sender_args*)threadParameters)->sent_elements[rounds];
         rounds += 1;
     }
 
