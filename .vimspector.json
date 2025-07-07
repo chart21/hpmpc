@@ -4,10 +4,8 @@
             "adapter": "vscode-cpptools",
             "configuration": {
                 "request": "launch",
-                "program": "executables/run-P0.o",
+                "program": "executables/run-P3.o",
                 "cwd": "~/workspace/tmp/hpmpc/",
-                "program": "executables/run-P1.o",
-                "cwd": "~/workspace/july_backup/hpmpc/",
                 "externalConsole":true,
                 "MiMode": "gdb",
                 "args": []
