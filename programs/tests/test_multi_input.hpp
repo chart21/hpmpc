@@ -70,6 +70,18 @@ bool dot234_test()
     UINT_TYPE b[10] = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
     A inputsa[10] = {A(a[0]), A(a[1]), A(a[2]), A(a[3]), A(a[4]), A(a[5]), A(a[6]), A(a[7]), A(a[8]), A(a[9])};
     A inputsb[10] = {A(b[0]), A(b[1]), A(b[2]), A(b[3]), A(b[4]), A(b[5]), A(b[6]), A(b[7]), A(b[8]), A(b[9])};
+    for (int i = 0; i < 10; i++)
+    {
+        inputsa[i] = inputsa[i].prepare_mult(A(1));
+        inputsb[i] = inputsb[i].prepare_mult(A(1));
+    }
+    Share::communicate();
+    for (int i = 0; i < 10; i++)
+    {
+        inputsa[i].complete_mult_without_trunc();
+        inputsb[i].complete_mult_without_trunc();
+    }
+
     auto result1 = inputsa[0].prepare_dot(inputsa[1]) + inputsa[2].prepare_dot3(inputsa[3], inputsa[4]) +
                    inputsa[5].prepare_dot4(inputsa[6], inputsa[7], inputsa[8]);
     auto result2 = inputsb[0].prepare_dot(inputsb[1]) + inputsb[2].prepare_dot3(inputsb[3], inputsb[4]) +

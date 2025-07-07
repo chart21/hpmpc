@@ -3,12 +3,12 @@
 // === Basic Settings ===
 
 #ifndef PROTOCOL
-#define PROTOCOL 5
+#define PROTOCOL 4
 #endif
 
 // Use a preprocessing phase? Only supported by Protocols 3,5,8,11,12
 #ifndef PRE
-#define PRE 0
+#define PRE 1
 #endif
 
 // Party ID (starting from 0)
@@ -96,6 +96,7 @@
     #define WAIT_AFTER_MESSAGES_IF_AHEAD -1  // In case of interleaved computation, the preprocessing party will at most be x messages ahead to save RAM
 #endif
 #endif
+
 // === Network Settings ===
 
 // Use SSL encrypted communication?
@@ -277,7 +278,16 @@ int base_port = BASE_PORT;  // temporary solution
 
 // === Internal Settings, do not change ===
 
+#ifndef FAKE_TRIPLES
+#define FAKE_TRIPLES 1
+#endif
+
+#ifndef SKIP_PRE
+#define SKIP_PRE 0  // Skip preprocessing phase even if enabled by setting all preprocessing material to 0
+#endif
+
 #if PROTOCOL == 4
+#define BEAVER 1
 #define HAS_POST_PROTOCOL 1
 #elif (PROTOCOL == 3 || PROTOCOL == 5) && PARTY == 0
 #define HAS_POST_PROTOCOL 1

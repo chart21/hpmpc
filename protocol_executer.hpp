@@ -1,6 +1,12 @@
 #pragma once
+#include "config.h"
 #include "core/init.hpp"
+#include "core/networking/buffers.h"
 #include "protocols/Protocols.h"
+#include <sys/ucontext.h>
+#if BEAVER == 1
+#include "protocols/beaver_triples.hpp"
+#endif
 
 #if FUNCTION_IDENTIFIER < 8
 #include "programs/benchmarks/bench_basic_primitives.hpp"
@@ -60,18 +66,48 @@ void init_circuit(std::string ips[])
 #if PRE == 1
         receiving_args_pre[t].elements_to_rec.push_back(0);
         sending_args_pre[t].elements_to_send.push_back(0);
+#if BEAVER == 1 && SKIP_PRE == 0
+        /* sending_args_pre[t].elements_to_send.push_back(0); //second preprocessing round TODO: generalize and get
+         * number of rounds */
+        receiving_args_pre[t].rec_rounds = 0;
+        sending_args_pre[t].send_rounds = 0;
+#else
         receiving_args_pre[t].rec_rounds = 1;
         sending_args_pre[t].send_rounds = 1;
 #endif
+#endif
     }
+#if PRE == 1 && BEAVER == 1
+    num_arithmetic_triples.push_back(0);  // temporary
+    num_arithmetic_triples.push_back(0);
+    num_boolean_triples.push_back(0);
+    num_boolean_triples.push_back(0);
+    boolean_triple_index.push_back(0);
+    boolean_triple_index.push_back(0);
+    arithmetic_triple_index.push_back(0);
+    arithmetic_triple_index.push_back(0);
+    preprocessed_outputs_arithmetic_index = new uint64_t[2]{0};
+    preprocessed_outputs_bool_index = new uint64_t[2]{0};
+    preprocessed_outputs_arithmetic_input_index = new uint64_t[2]{0};
+    preprocessed_outputs_bool_input_index = new uint64_t[2]{0};
+#endif
+
 #if INIT == 1 && NO_INI == 0
-    auto garbage = new RESULTTYPE;
-    FUNCTION<PROTOCOL_INIT<DATATYPE>>(garbage);
+    RESULTTYPE garbage;
+    FUNCTION<PROTOCOL_INIT<DATATYPE>>(&garbage);
+    /* delete garbage; */
+#if PRE == 1 && BEAVER == 1
+    PROTOCOL_INIT<DATATYPE>::complete_preprocessing(
+        num_arithmetic_triples.data(), num_boolean_triples.data(), preprocessed_outputs_index);
+#elif PRE == 1
+    communicate_pre_();
+#endif
+
 #if MAL == 1
     compare_views_init();
 #endif
 
-#if PRE == 1
+#if PRE == 1 && SKIP_PRE == 0
     PROTOCOL_INIT<DATATYPE>::finalize(ips, receiving_args_pre, sending_args_pre);
 #else
     PROTOCOL_INIT<DATATYPE>::finalize(ips);  // TODO change to new version
@@ -87,7 +123,43 @@ void init_circuit(std::string ips[])
 #endif
 }
 
-#if PRE == 1
+#if BEAVER == 1
+void beaver(std::string ips[])
+{
+    for (auto i : num_arithmetic_triples)
+        total_arithmetic_triples_num += i;
+    for (auto i : num_boolean_triples)
+        total_boolean_triples_num += i;
+    init_beaver();
+    print_num_triples();
+#if SKIP_PRE == 1
+    print("SKIP_PRE set to 1, skipping preprocessing phase and Beaver triples generation ... \n");
+    return;
+#elif FAKE_TRIPLES == 1
+    print("Fake Triples set to 1, generating fake triples ... \n");
+#else
+    print("Generating Beaver Triples ... \n");
+#endif
+    clock_t time_beaver_function_start = clock();
+    clock_gettime(CLOCK_REALTIME, &p1);
+    std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
+
+    generate_beaver_triples(ips, base_port, process_offset);
+
+    clock_gettime(CLOCK_REALTIME, &p2);
+    double accum_beaver = (p2.tv_sec - p1.tv_sec) + (double)(p2.tv_nsec - p1.tv_nsec) / (double)1000000000L;
+    clock_t time_beaver_function_finished = clock();
+    print("Time measured to perform beaver triple generation clock: %fs \n",
+          double((time_beaver_function_finished - time_beaver_function_start)) / CLOCKS_PER_SEC);
+    print("Time measured to perform beaver triple generation getTime: %fs \n", accum_beaver);
+    print("Time measured to perform beaver triple generation chrono: %fs \n",
+          double(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - p)
+                     .count()) /
+              1000000);
+}
+#endif
+
+#if PRE == 1 && SKIP_PRE == 0
 void preprocess_circuit(std::string ips[])
 {
     pthread_t sending_Threads_pre[num_players - 1];
@@ -138,33 +210,39 @@ void preprocess_circuit(std::string ips[])
 #if PROTOCOL_PRE == -1
     // receive only
 #else
-    /* auto p_pre = PROTOCOL_PRE(); */
-    auto garbage_PRE = new RESULTTYPE;
-    FUNCTION<PROTOCOL_PRE<DATATYPE>>(garbage_PRE);
+    RESULTTYPE garbage_PRE;
+    FUNCTION<PROTOCOL_PRE<DATATYPE>>(&garbage_PRE);
 #endif
     // manual send
 
-    sb = 0;
-    pthread_mutex_lock(&mtx_send_next);
-    sending_rounds += 1;
-    pthread_cond_broadcast(&cond_send_next);  // signal all threads that sending
-                                              // buffer contains next data
-    pthread_mutex_unlock(&mtx_send_next);
+    /* sb = 0; */
+    /* pthread_mutex_lock(&mtx_send_next); */
+    /* sending_rounds += 1; */
+    /* pthread_cond_broadcast(&cond_send_next); // signal all threads that sending */
+    /*                                          // buffer contains next data */
+    /* pthread_mutex_unlock(&mtx_send_next); */
 
-    // manual receive
+    /* // manual receive */
 
-    rounds += 1;
-    // receive_data
-    // wait until all sockets have finished received their last data
-    pthread_mutex_lock(&mtx_receive_next);
+    /* rounds += 1; */
+    /* // receive_data */
+    /* // wait until all sockets have finished received their last data */
+    /* pthread_mutex_lock(&mtx_receive_next); */
 
-    while (rounds > receiving_rounds)  // wait until all threads received their
-                                       // data
-        pthread_cond_wait(&cond_receive_next, &mtx_receive_next);
+    /* while (rounds > receiving_rounds) // wait until all threads received their */
+    /*                                   // data */
+    /*   pthread_cond_wait(&cond_receive_next, &mtx_receive_next); */
 
-    pthread_mutex_unlock(&mtx_receive_next);
+    /* pthread_mutex_unlock(&mtx_receive_next); */
 
-    rb = 0;
+    /* rb = 0; */
+
+#if BEAVER == 1
+    PROTOCOL_PRE<DATATYPE>::complete_preprocessing(
+        num_arithmetic_triples.data(), num_boolean_triples.data(), total_preprocessed_outputs);
+#else
+    communicate_pre();
+#endif
 
     // Join threads to avoid address rebind
     for (int t = 0; t < (num_players - 1); t++)
@@ -172,18 +250,6 @@ void preprocess_circuit(std::string ips[])
         pthread_join(receiving_threads_pre[t], NULL);
         pthread_join(sending_Threads_pre[t], NULL);
     }
-
-    double time_pre =
-        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - p).count();
-    /* searchComm__<Sharemind,DATATYPE>(protocol,*found); */
-    clock_gettime(CLOCK_REALTIME, &p2);
-    double accum_pre = (p2.tv_sec - p1.tv_sec) + (double)(p2.tv_nsec - p1.tv_nsec) / (double)1000000000L;
-    clock_t time_pre_function_finished = clock();
-
-    print("Time measured to perform preprocessing clock: %fs \n",
-          double((time_pre_function_finished - time_pre_function_start)) / CLOCKS_PER_SEC);
-    print("Time measured to perform preprocessing getTime: %fs \n", accum_pre);
-    print("Time measured to perform preprocessing chrono: %fs \n", time_pre / 1000000);
 
 #if LIVE == 1
     // reset all variables
@@ -206,6 +272,19 @@ void preprocess_circuit(std::string ips[])
     p_init.finalize(ips);
 #endif
 #endif
+
+    double time_pre =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - p).count();
+    /* searchComm__<Sharemind,DATATYPE>(protocol,*found); */
+    clock_gettime(CLOCK_REALTIME, &p2);
+    double accum_pre = (p2.tv_sec - p1.tv_sec) + (double)(p2.tv_nsec - p1.tv_nsec) / (double)1000000000L;
+    clock_t time_pre_function_finished = clock();
+
+    print("Time measured to perform preprocessing clock: %fs \n",
+          double((time_pre_function_finished - time_pre_function_start)) / CLOCKS_PER_SEC);
+    print("Time measured to perform preprocessing getTime: %fs \n", accum_pre);
+    print("Time measured to perform preprocessing chrono: %fs \n", time_pre / 1000000);
+
 #if TRUNC_DELAYED == 1
     delayed = false;
 #endif
@@ -267,8 +346,8 @@ void live_circuit()
     std::chrono::high_resolution_clock::time_point c1 = std::chrono::high_resolution_clock::now();
 
     /* auto p_live = PROTOCOL_LIVE(); */
-    auto result = new RESULTTYPE;
-    FUNCTION<PROTOCOL_LIVE<DATATYPE>>(result);
+    RESULTTYPE result;
+    FUNCTION<PROTOCOL_LIVE<DATATYPE>>(&result);
 #if MAL == 1
     compare_views();
     /* p_live.communicate(); */
@@ -302,9 +381,14 @@ void live_circuit()
     print("Time measured to perform computation getTime: %fs \n", accum);
     print("Time measured to perform computation chrono: %fs \n", time / 1000000);
     // Join threads to ensure closing of sockets
+#if BEAVER == 1
+    deinit_beaver();
+#endif
+
 #if FUNCTION_IDENTIFIER >= 70
     print_layer_stats();
 #endif
+    /* delete result; //alternatively do something with the result */
 }
 #endif
 
@@ -312,36 +396,8 @@ void live_circuit()
 void executeProgram(int argc, char* argv[], int process_id, int process_num)
 {
     clock_gettime(CLOCK_REALTIME, &i1);
-
     player_id = PARTY;
-#if num_players == 2
-    init_srng(PPREV, SRNG_SEED);
-    init_srng(PSELF, PARTY + 1 + SRNG_SEED);
-#elif num_players == 3
-/* init_srng(PPREV,SRNG_SEED); */
-/* init_srng(PNEXT,SRNG_SEED); */
-/* init_srng(PSELF,PARTY+1+SRNG_SEED); */
-#if PROTOCOL == 6 || PROTOCOL == 7  // TTP
-    init_srng(0, SRNG_SEED);
-    init_srng(1, SRNG_SEED);
-    init_srng(2, SRNG_SEED);
-#else
-    init_srng(PPREV, modulo((player_id - 1), num_players) * 101011 + 5000 + SRNG_SEED);
-    init_srng(PNEXT, player_id * 101011 + 5000 + SRNG_SEED);
-    init_srng(num_players - 1,
-              player_id * 291932 + 6000 + SRNG_SEED);  // used for sharing inputs
-#endif
-#elif num_players == 4
-    init_srng(0, SRNG_SEED);
-    init_srng(1, SRNG_SEED);
-    init_srng(2, SRNG_SEED);
-    init_srng(3, SRNG_SEED);
-    init_srng(4, SRNG_SEED);
-    init_srng(5, SRNG_SEED);
-    init_srng(6, SRNG_SEED);
-    init_srng(7, SRNG_SEED);
-#endif
-
+    init_srngs();
     /// Connecting to other Players
     std::string ips[num_players - 1];
 
@@ -360,7 +416,11 @@ void executeProgram(int argc, char* argv[], int process_id, int process_num)
 
     init_circuit(ips);
 
-#if PRE == 1
+#if BEAVER == 1
+    beaver(ips);
+#endif
+
+#if PRE == 1 && SKIP_PRE == 0
     preprocess_circuit(ips);
 #endif
 
@@ -385,8 +445,8 @@ void simulate_live()
     clock_gettime(CLOCK_REALTIME, &l1);
     std::chrono::high_resolution_clock::time_point c1 = std::chrono::high_resolution_clock::now();
 
-    auto result = new RESULTTYPE;
-    FUNCTION<PROTOCOL_LIVE<DATATYPE>>(result);
+    RESULTTYPE result;
+    FUNCTION<PROTOCOL_LIVE<DATATYPE>>(&result);
 
     double time =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - c1).count();

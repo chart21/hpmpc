@@ -19,7 +19,7 @@
 #elif FUNCTION_IDENTIFIER == 41
 #define FUNCTION batch_norm_bench
 #elif FUNCTION_IDENTIFIER == 42 || FUNCTION_IDENTIFIER == 43 || FUNCTION_IDENTIFIER == 44
-#include "../functions/adders/ppa_msb_4_way.hpp"
+#include "../functions/adders/ppa_msb_4way.hpp"
 #include "../functions/adders/ppa_msb_unsafe.hpp"
 #include "../functions/adders/rca_msb.hpp"
 #define FUNCTION boolean_adder_bench

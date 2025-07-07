@@ -3,6 +3,35 @@
 #include "../core/networking/buffers.h"
 #include "../core/utils/print.hpp"
 
+#if PRE == 1
+void send_pre_()
+{
+    for (int t = 0; t < num_players - 1; t++)
+    {
+        sending_args_pre[t].total_rounds += 1;
+        sending_args_pre[t].send_rounds += 1;
+        sending_args_pre[t].elements_to_send.push_back(0);
+        sending_args_pre[t].elements_to_send.push_back(0);
+    }
+}
+
+void receive_pre_()
+{
+    for (int t = 0; t < num_players - 1; t++)
+    {
+        receiving_args_pre[t].total_rounds += 1;
+        receiving_args_pre[t].rec_rounds += 1;
+        receiving_args_pre[t].elements_to_rec.push_back(0);
+    }
+    sockets_received.push_back(0);
+}
+void communicate_pre_()
+{
+    send_pre_();
+    receive_pre_();
+}
+#endif
+
 void send_()
 {
     for (int t = 0; t < num_players - 1; t++)
@@ -32,17 +61,49 @@ void receive_()
 }
 
 #if PRE == 1
+/* void pre_send_to_(int player_index) */
+/* { */
+/* #if SKIP_PRE == 1 */
+/*     return; */
+/* #endif */
+/* sending_args_pre[player_index].elements_to_send[0] += 1; */
+/* total_send_pre[player_index] += 1; */
+/* /1* sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] += 1; *1/ */
+/* } */
+
+/* void pre_receive_from_(int player_index) */
+/* { */
+/* #if SKIP_PRE == 1 */
+/*     return; */
+/* #endif */
+/* /1* receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1; *1/ */
+/* receiving_args_pre[player_index].elements_to_rec[0] += 1; */
+/* total_recv_pre[player_index] += 1; */
+/* } */
 void pre_send_to_(int player_index)
 {
-    sending_args_pre[player_index].elements_to_send[0] += 1;
+#if SEND_BUFFER > 0
+    if (sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] == SEND_BUFFER)
+    {
+        send_pre_();
+    }
+#endif
+    /* sending_args_pre[player_index].elements_to_send[num_round] += 1; */
+    sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] += 1;
     total_send_pre[player_index] += 1;
-    /* sending_args_pre[player_index].elements_to_send[sending_args_pre[player_index].send_rounds] += 1; */
 }
 
 void pre_receive_from_(int player_index)
 {
-    /* receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds -1] += 1; */
-    receiving_args_pre[player_index].elements_to_rec[0] += 1;
+#if RECV_BUFFER > 0
+    if (receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds - 1] ==
+        RECV_BUFFER)
+    {
+        receive_pre_();
+    }
+#endif
+    receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds - 1] += 1;
+    /* receiving_args_pre[player_index].elements_to_rec[num_round] += 1; */
     total_recv_pre[player_index] += 1;
 }
 #endif
@@ -233,7 +294,43 @@ void compare_views_init()
 
 #endif
 
-#if PRE == 1 && HAS_POST_PROTOCOL == 1
+#if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
+#if BEAVER == 1 && PRE == 1
+void store_output_share_bool_(int index = 0)
+{
+#if SKIP_PRE == 1
+    return;
+#endif
+    preprocessed_outputs_bool_input_index[index] += 1;
+}
+
+void store_output_share_arithmetic_(int index = 0)
+{
+#if SKIP_PRE == 1
+    return;
+#endif
+    preprocessed_outputs_arithmetic_input_index[index] += 1;
+}
+
+template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), OP_XOR>, int> = 0>
+void store_output_share_ab_(func_add ADD, int index = 0)
+{
+#if SKIP_PRE == 1
+    return;
+#endif
+    store_output_share_bool_(index);
+}
+
+template <typename func_add, typename std::enable_if_t<!std::is_same_v<func_add(), OP_XOR>, int> = 0>
+void store_output_share_ab_(func_add ADD, int index = 0)
+{
+#if SKIP_PRE == 1
+    return;
+#endif
+    store_output_share_arithmetic_(index);
+}
+
+#endif
 void store_output_share_()
 {
     preprocessed_outputs_index += 1;
@@ -289,8 +386,34 @@ void finalize_(std::string* ips)
     }
 #endif
 
-#if PRE == 1 && HAS_POST_PROTOCOL == 1
+#if SKIP_PRE == 0
+#if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
+#if BEAVER == 1 && PRE == 1
+    if (preprocessed_outputs_bool == nullptr)
+        preprocessed_outputs_bool = new DATATYPE* [1] { nullptr };
+    if (preprocessed_outputs_arithmetic == nullptr)
+        preprocessed_outputs_arithmetic = new DATATYPE* [1] { nullptr };
+    if (preprocessed_outputs_bool[0] == nullptr)
+    {
+        preprocessed_outputs_bool[0] = new DATATYPE[preprocessed_outputs_bool_index[0]];
+    }
+    if (preprocessed_outputs_arithmetic[0] == nullptr)
+    {
+        preprocessed_outputs_arithmetic[0] = new DATATYPE[preprocessed_outputs_arithmetic_index[0]];
+    }
+    preprocessed_outputs_bool_input_index[0] = 0;
+    preprocessed_outputs_bool_index[0] = 0;
+    preprocessed_outputs_arithmetic_input_index[0] = 0;
+    preprocessed_outputs_arithmetic_index[0] = 0;
+#endif
+    if (preprocessed_outputs == nullptr)
+    {
+        preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
+    }
     preprocessed_outputs_index = 0;  // reset index for post phase
+    preprocessed_outputs_input_index = 0;
+#endif
+>>>>>>> c1a5281 (Add Aby2)
 #endif
     rounds = 0;
     sending_rounds = 0;
@@ -319,6 +442,7 @@ void init()
 
 void finalize_(std::string* ips, receiver_args* ra, sender_args* sa)
 {
+    int max_rec_rounds = 0;
     for (int t = 0; t < (num_players - 1); t++)
     {
         int offset = 0;
@@ -336,14 +460,15 @@ void finalize_(std::string* ips, receiver_args* ra, sender_args* sa)
         ra[t].port = (int)base_port + (t + offset) * (num_players - 1) + player_id - 1 +
                      offset;  // e.g. P_0 sends on base port + num_players  for P_1, P_2 on base port + num_players for
                               // P_0 (6001,6000)
+        max_rec_rounds = std::max(max_rec_rounds, ra[t].rec_rounds);
     }
     for (int t = 0; t < (num_players - 1); t++)
     {
         int offset = 0;
         if (t >= player_id)
             offset = 1;  // player should not send to itself
-#if PRE == 1             // only in actual preprocessing phase
-        sa[t].send_rounds = 1;
+#if PRE == 1 && (BEAVER == 0 || SKIP_PRE == 1)
+        sa[t].send_rounds = 1;  // TODO: Can be deleted and replaced? -> Not yet
 #endif
 
         sa[t].sent_elements = new DATATYPE*[sa[t].send_rounds];
@@ -367,9 +492,31 @@ void finalize_(std::string* ips, receiver_args* ra, sender_args* sa)
     }
 #endif
 
-#if PRE == 1 && HAS_POST_PROTOCOL == 1
+#if SKIP_PRE == 0
+#if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
+#if BEAVER == 1 && PRE == 1
+    if (preprocessed_outputs_bool == nullptr)
+        preprocessed_outputs_bool = new DATATYPE* [max_rec_rounds] { nullptr };
+    if (preprocessed_outputs_arithmetic == nullptr)
+        preprocessed_outputs_arithmetic = new DATATYPE* [max_rec_rounds] { nullptr };
+    if (preprocessed_outputs_bool[0] == nullptr)
+    {
+        preprocessed_outputs_bool[0] = new DATATYPE[preprocessed_outputs_bool_input_index[0]];
+    }
+    if (preprocessed_outputs_arithmetic[0] == nullptr)
+    {
+        preprocessed_outputs_arithmetic[0] = new DATATYPE[preprocessed_outputs_arithmetic_input_index[0]];
+    }
+    preprocessed_outputs_bool_input_index[0] = 0;
+    preprocessed_outputs_bool_index[0] = 0;
+    preprocessed_outputs_arithmetic_input_index[0] = 0;
+    preprocessed_outputs_arithmetic_index[0] = 0;
+#endif
     preprocessed_outputs = new DATATYPE[preprocessed_outputs_index];
+    total_preprocessed_outputs = preprocessed_outputs_index;
     preprocessed_outputs_index = 0;
+    preprocessed_outputs_input_index = 0;
+#endif
 #endif
 
     rounds = 0;
@@ -377,5 +524,4 @@ void finalize_(std::string* ips, receiver_args* ra, sender_args* sa)
     rb = 0;
     sb = 0;
     current_phase = PHASE_PRE;
-    /* print_communication(); */
 }

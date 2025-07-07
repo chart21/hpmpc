@@ -12,10 +12,16 @@
 #ifndef FUNCTION
 #define FUNCTION test_comparisons
 #endif
-#define TEST_EQZ 1      // [a] == 0 ? [1] : [0]
-#define TEST_LTZ 1      // [a] < 0 ? [1] : [0]
-#define TEST_MAX_MIN 0  // [A] -> [max(A)] [min(A)]
-#define TEST_RELU 1     // [a] > 0 ? [a] : 0
+#define TEST_EQZ 1               // [a] == 0 ? [1] : [0]
+#define TEST_LTZ 1               // [a] < 0 ? [1] : [0]
+#define TEST_MAX_MIN 1           // [A] -> [max(A)] [min(A)]
+#define TEST_RELU 1              // [a] > 0 ? [a] : 0
+#define TEST_BOOLEAN_ADDITION 1  // [a]^B + [b]^B
+#define TEST_A2B_ADD 1           // Test A2B followed by addition when testing boolean addition
+#define TEST_A2B 1               // [a]^A -> [a]^B
+#define TEST_Bit2A 1             // [a]^b -> [a]^A
+#define TEST_BitInj 1            // [a]^A, [b]^b = [ab]^A
+
 #if TEST_EQZ == 1
 template <typename Share>
 bool test_EQZ()
@@ -59,15 +65,15 @@ bool test_LTZ()
     using A = Additive_Share<DATATYPE, Share>;
 
     // set shares from public values
-    A ltz_output[3];
-    A ltz_input[] = {A(0), A(1), A(-1)};
+    A ltz_output[6];
+    A ltz_input[] = {A(0), A(1), A(-1), A(1), A(-1), A(1)};
 
     // LTZ
-    pack_additive<0, BITLENGTH>(ltz_input, ltz_output, 3, LTZ<0, BITLENGTH, Share, DATATYPE>);
+    pack_additive<0, BITLENGTH>(ltz_input, ltz_output, 6, LTZ<0, BITLENGTH, Share, DATATYPE>);
 
     // reveal
-    alignas(sizeof(DATATYPE)) UINT_TYPE output[3][vectorization_factor];
-    reveal_and_store(ltz_output, output, 3);
+    alignas(sizeof(DATATYPE)) UINT_TYPE output[6][vectorization_factor];
+    reveal_and_store(ltz_output, output, 6);
 
     // compare
     for (int i = 0; i < vectorization_factor; i++)
@@ -75,8 +81,12 @@ bool test_LTZ()
         print_compare(0, output[0][i]);
         print_compare(0, output[1][i]);
         print_compare(1, output[2][i]);
+        print_compare(0, output[3][i]);
+        print_compare(1, output[4][i]);
+        print_compare(0, output[5][i]);
 
-        if (output[0][i] != 0 || output[1][i] != 0 || output[2][i] != 1)
+        if (output[0][i] != 0 || output[1][i] != 0 || output[2][i] != 1 || output[3][i] != 0 || output[4][i] != 1 ||
+            output[5][i] != 0)
         {
             return false;
         }
@@ -186,6 +196,331 @@ bool test_RELU()
 }
 #endif
 
+#if TEST_BOOLEAN_ADDITION == 1
+template <typename Share>
+bool test_boolean_addition()
+{
+    using S = XOR_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<BITLENGTH, S>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using sint = sint_t<A>;
+    const int vectorization_factor = DATTYPE / BITLENGTH;
+
+    // initialize plaintext inputs
+    UINT_TYPE a[BITLENGTH * vectorization_factor];
+    UINT_TYPE b[BITLENGTH * vectorization_factor];
+    for (int i = 0; i < BITLENGTH * vectorization_factor; i++)
+    {
+        a[i] = i;
+        b[i] = i;
+    }
+    DATATYPE vectorized_input_a[BITLENGTH];
+    DATATYPE vectorized_input_b[BITLENGTH];
+
+#if TEST_A2B_ADD == 0
+    orthogonalize_boolean(a, vectorized_input_a);
+    orthogonalize_boolean(b, vectorized_input_b);
+    // secret sharing
+    Bitset share_a;
+    Bitset share_b;
+#else
+    orthogonalize_arithmetic(a, vectorized_input_a, BITLENGTH);
+    orthogonalize_arithmetic(b, vectorized_input_b, BITLENGTH);
+    // secret sharing
+    sint share_a;
+    sint share_b;
+#endif
+    Bitset share_c;
+
+    share_a.template prepare_receive_from<P_0>(vectorized_input_a);
+    share_b.template prepare_receive_from<P_1>(vectorized_input_b);
+    Share::communicate();
+    share_a.template complete_receive_from<P_0>();
+    share_b.template complete_receive_from<P_1>();
+
+#if TEST_A2B_ADD == 1
+    // A2B
+    Bitset s1;
+    Bitset s2;
+
+    s1 = Bitset::prepare_A2B_S1(0, (S*)share_a.get_share_pointer());
+    s2 = Bitset::prepare_A2B_S2(0, (S*)share_a.get_share_pointer());
+
+    Share::communicate();
+
+    s1.complete_A2B_S1();
+    s2.complete_A2B_S2();
+    Share::communicate();
+#endif
+
+    // boolean addition
+    std::vector<BooleanAdder<BITLENGTH, S>> adders;
+
+    adders.reserve(1);
+    for (int i = 0; i < 1; i++)
+    {
+#if TEST_A2B_ADD == 0
+        adders.emplace_back(share_a, share_b, share_c);
+#else
+        adders.emplace_back(s1, s2, share_c);
+#endif
+    }
+    while (!adders[0].is_done())
+    {
+        for (int i = 0; i < 1; i++)
+        {
+            adders[i].step();
+        }
+        Share::communicate();
+    }
+    adders.clear();
+    adders.shrink_to_fit();
+
+    // reveal
+    UINT_TYPE output[BITLENGTH * vectorization_factor];
+    share_c.prepare_reveal_to_all();
+    Share::communicate();
+    share_c.complete_reveal_to_all(output);
+#if TEST_A2B_ADD == 1
+    /*     UINT_TYPE ortho_output[BITLENGTH]; //TODO: Check, another ortho should not be neccecary! */
+    /*     unorthogonalize_boolean( (DATATYPE*) output, ortho_output); */
+    /* for(int i = 0; i < DATTYPE; i++) */
+    /*     output[i] = ortho_output[i] * 2; */
+    for (int i = 0; i < DATTYPE; i++)
+        output[i] *= 2;
+#endif
+
+    // compare
+    for (int i = 0; i < BITLENGTH * vectorization_factor; i++)
+        print_compare(a[i] + b[i], output[i]);
+    for (int i = 0; i < BITLENGTH * vectorization_factor; i++)
+    {
+        if (output[i] != (a[i] + b[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+#endif
+
+#if TEST_A2B == 1
+template <typename Share>
+bool test_A2B()
+{
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<BITLENGTH, S>;
+    using sint = sint_t<A>;
+    const int vectorization_factor = DATTYPE / BITLENGTH;
+
+    // initialize plaintext inputs
+    UINT_TYPE a[BITLENGTH * vectorization_factor];
+    for (int i = 0; i < BITLENGTH * vectorization_factor; i++)
+    {
+        a[i] = i;
+    }
+    DATATYPE vectorized_input_a[BITLENGTH];
+    orthogonalize_arithmetic(a, vectorized_input_a, BITLENGTH);
+    // secret sharing
+    sint share_a;
+    share_a.template prepare_receive_from<P_0>(vectorized_input_a);
+    Share::communicate();
+    share_a.template complete_receive_from<P_0>();
+    Share::communicate();
+
+    // A2B
+    Bitset s1;
+    Bitset s2;
+
+    s1 = Bitset::prepare_A2B_S1(0, (S*)share_a.get_share_pointer());
+    s2 = Bitset::prepare_A2B_S2(0, (S*)share_a.get_share_pointer());
+
+    Share::communicate();
+
+    s1.complete_A2B_S1();
+    s2.complete_A2B_S2();
+    Share::communicate();
+
+    // reveal
+    UINT_TYPE a1_output[BITLENGTH * vectorization_factor];
+    UINT_TYPE a2_output[BITLENGTH * vectorization_factor];
+    UINT_TYPE a_output[BITLENGTH * vectorization_factor];
+    s1.prepare_reveal_to_all();
+    s2.prepare_reveal_to_all();
+    /* share_a.prepare_reveal_to_all(); */
+    Share::communicate();
+    s1.complete_reveal_to_all(a1_output);
+    s2.complete_reveal_to_all(a2_output);
+
+    // TODO: Check, another ortho should not be neccecary!
+    /* UINT_TYPE ortho_a1[BITLENGTH]; */
+    /* UINT_TYPE ortho_a2[BITLENGTH]; */
+    /* unorthogonalize_boolean( (DATATYPE*) a1_output, ortho_a1); */
+    /* unorthogonalize_boolean( (DATATYPE*) a2_output, ortho_a2); */
+
+    // compare
+    for (int i = 0; i < BITLENGTH * vectorization_factor; i++)
+        print_compare(a[i], a1_output[i] + a2_output[i]);
+    for (int i = 0; i < BITLENGTH * vectorization_factor; i++)
+    {
+        if (a[i] != a1_output[i] + a2_output[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+#endif
+
+#if TEST_Bit2A == 1
+template <typename Share>
+bool test_Bit2A()
+{
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<BITLENGTH, S>;
+    using sint = sint_t<A>;
+    const int vectorization_factor = DATTYPE / BITLENGTH;
+
+    S share_a = SET_ALL_ZERO();
+    S share_b = SET_ALL_ONE();
+    sint output_a;
+    sint output_b;
+
+    // Bit2A
+    share_a.prepare_bit2a(output_a.get_share_pointer());
+    share_b.prepare_bit2a(output_b.get_share_pointer());
+    Share::communicate();
+    output_a.complete_bit2a();
+    output_b.complete_bit2a();
+
+    // reveal
+    UINT_TYPE ortho_a[DATTYPE];
+    UINT_TYPE ortho_b[DATTYPE];
+    output_a.prepare_reveal_to_all();
+    output_b.prepare_reveal_to_all();
+    Share::communicate();
+    output_a.complete_reveal_to_all(ortho_a);
+    output_b.complete_reveal_to_all(ortho_b);
+    // compare
+
+    for (int i = 0; i < DATTYPE; i++)
+    {
+        print_compare(0, ortho_a[i]);
+        print_compare(1, ortho_b[i]);
+    }
+    for (int i = 0; i < DATTYPE; i++)
+    {
+        if (ortho_a[i] != 0 || ortho_b[i] != 1)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+#endif
+
+#if TEST_BitInj == 1
+template <typename Share>
+bool test_BitInj()
+{
+
+    using S = XOR_Share<DATATYPE, Share>;
+    using A = Additive_Share<DATATYPE, Share>;
+    using Bitset = sbitset_t<BITLENGTH, S>;
+    using sint = sint_t<A>;
+    const int vectorization_factor = DATTYPE / BITLENGTH;
+
+    S share_a = SET_ALL_ZERO();
+    S share_b = SET_ALL_ONE();
+    sint val_a = 25;
+    sint val_b = 25;
+    sint val_c = -10;
+    sint val_d = -10;
+    sint val_e = 0;
+    sint val_f = 0;
+    sint output_a;
+    sint output_b;
+    sint output_c;
+    sint output_d;
+    sint output_e;
+    sint output_f;
+    Share::communicate();
+    share_a = share_a & share_b;
+    share_b = share_b & share_b;
+    Share::communicate();
+    share_a.complete_and();
+    share_b.complete_and();
+
+    // Bit2A
+    share_a.prepare_opt_bit_injection(val_a.get_share_pointer(), val_a.get_share_pointer());
+    share_b.prepare_opt_bit_injection(val_b.get_share_pointer(), val_b.get_share_pointer());
+    share_a.prepare_opt_bit_injection(val_c.get_share_pointer(), val_c.get_share_pointer());
+    share_b.prepare_opt_bit_injection(val_d.get_share_pointer(), val_d.get_share_pointer());
+    share_a.prepare_opt_bit_injection(val_e.get_share_pointer(), val_e.get_share_pointer());
+    share_b.prepare_opt_bit_injection(val_f.get_share_pointer(), val_f.get_share_pointer());
+    Share::communicate();
+    val_a.complete_opt_bit_injection();
+    val_b.complete_opt_bit_injection();
+    val_c.complete_opt_bit_injection();
+    val_d.complete_opt_bit_injection();
+    val_e.complete_opt_bit_injection();
+    val_f.complete_opt_bit_injection();
+    output_a = val_a;
+    output_b = val_b;
+    output_c = val_c;
+    output_d = val_d;
+    output_e = val_e;
+    output_f = val_f;
+
+    // reveal
+    UINT_TYPE ortho_a[DATTYPE];
+    UINT_TYPE ortho_b[DATTYPE];
+    UINT_TYPE ortho_c[DATTYPE];
+    UINT_TYPE ortho_d[DATTYPE];
+    UINT_TYPE ortho_e[DATTYPE];
+    UINT_TYPE ortho_f[DATTYPE];
+
+    output_a.prepare_reveal_to_all();
+    output_b.prepare_reveal_to_all();
+    output_c.prepare_reveal_to_all();
+    output_d.prepare_reveal_to_all();
+    output_e.prepare_reveal_to_all();
+    output_f.prepare_reveal_to_all();
+
+    Share::communicate();
+    output_a.complete_reveal_to_all(ortho_a);
+    output_b.complete_reveal_to_all(ortho_b);
+    output_c.complete_reveal_to_all(ortho_c);
+    output_d.complete_reveal_to_all(ortho_d);
+    output_e.complete_reveal_to_all(ortho_e);
+    output_f.complete_reveal_to_all(ortho_f);
+    // compare
+
+    for (int i = 0; i < DATTYPE; i++)
+    {
+        print_compare(0, ortho_a[i]);
+        print_compare(25, ortho_b[i]);
+        print_compare(0, ortho_c[i]);
+        print_compare(-10, INT_TYPE(ortho_d[i]));
+        print_compare(0, ortho_e[i]);
+        print_compare(0, ortho_f[i]);
+    }
+    for (int i = 0; i < DATTYPE; i++)
+    {
+        if (ortho_a[i] != 0 || ortho_b[i] != 25 || ortho_c[i] != 0 || INT_TYPE(ortho_d[i]) != -10 || ortho_e[i] != 0 ||
+            ortho_f[i] != 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+#endif
+
 template <typename Share>
 bool test_comparisons(DATATYPE* res)
 {
@@ -206,6 +541,22 @@ bool test_comparisons(DATATYPE* res)
 
 #if TEST_RELU == 1
     test_function(num_tests, num_passed, "RELU", test_RELU<Share>);
+#endif
+
+#if TEST_BOOLEAN_ADDITION == 1
+    test_function(num_tests, num_passed, "BOOLEAN_ADDITION", test_boolean_addition<Share>);
+#endif
+
+#if TEST_A2B == 1
+    test_function(num_tests, num_passed, "A2B", test_A2B<Share>);
+#endif
+
+#if TEST_Bit2A == 1
+    test_function(num_tests, num_passed, "Bit2A", test_Bit2A<Share>);
+#endif
+
+#if TEST_BitInj == 1
+    test_function(num_tests, num_passed, "BitInj", test_BitInj<Share>);
 #endif
 
     print_stats(num_tests, num_passed);

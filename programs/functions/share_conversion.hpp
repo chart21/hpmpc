@@ -35,6 +35,15 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
         s2[i].complete_A2B_S2();
     }
 
+    /* for(int i = 0; i < len; i++) */
+    /* { */
+    /*     for(int j = 0; j < bk-bm; j++) */
+    /*     { */
+    /*         s1[i][j] = SET_ALL_ZERO(); */
+    /*         s2[i][j] = SET_ALL_ZERO(); */
+    /* } */
+    /* } */
+
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     std::vector<BooleanAdder_MSB<bk - bm, S>> adders;
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
