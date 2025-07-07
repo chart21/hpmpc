@@ -50,9 +50,9 @@ class Add_init
     Add_init prepare_mult(Add_init b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         if constexpr (std::is_same_v<func_add(), FUNC_XOR>)
-            num_boolean_triples++;
+            num_boolean_triples[0]++;
         else
-            num_arithmetic_triples++;
+            num_arithmetic_triples[0]++;
         Add_init c;
         send_to_(PNEXT);
         send_to_(PNEXT);

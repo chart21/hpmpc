@@ -22,6 +22,7 @@ class XOR_Share : public Share_Type
 
     XOR_Share operator&(const XOR_Share<Datatype, Share_Type>& b) const
     {
+
         return XOR_Share(
             Share_Type::prepare_mult(b, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }
