@@ -9,6 +9,54 @@ Neural network models can be imported from PyTorch as part of [PIGEON (Private I
 
 More extensive documentation can be found [here](https://c.harth-kitzerow.com/mkdocs-hpmpc/).
 
+## Publications and Artifacts
+
+HPMPC won the Best Artifact award at PoPETs 2025 and can be used to reproduce the results of the following publications:
+
+| Publication | Artifact Evaluation | Citation |
+| --- | --- | --- |
+[High Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings](https://eprint.iacr.org/2024/386.pdf) | [Link](#measurements/configs/artifacts/hpmpc/ARTIFACT_EVALUATION.md) | 
+```bibtex
+@article{HighThroughputMPC,
+  author={Christopher Harth-Kitzerow and Ajith Suresh and Yongqin Wang and Hossein Yalame and Georg Carle and Murali Annavaram},
+  title={High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings},
+  year={2025},
+  journal={Proceedings on Privacy Enhancing Technologies},
+  volume={2025},
+  number={1},
+  pages={250-272},
+  url={https://doi.org/10.56553/popets-2025-0015}
+}
+```
+| [PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](#measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) |
+```bibtex
+@article{PIGEON,
+  title={PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation},
+  author={Harth-Kitzerow, Christopher and Wang, Yongqin and Rajat, Rachit and Carle, Georg and Annavaram, Murali},
+  year={2025}
+  journal={Proceedings on Privacy Enhancing Technologies},
+  volume={2025},
+  number={3},
+  pages={88-105},
+  url={https://doi.org/10.56553/popets-2025-0090}
+}
+```
+| [SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets](https://eprint.iacr.org/2024/1953) | [Link](#measurements/configs/artifacts/truncation/ARTIFACT_EVALUATION.md) |
+```bibtex
+@article{TruncationUntangled,
+  title={SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets},
+  author={Harth-Kitzerow, Christopher and Suresh, Ajith and Carle, Georg},
+  year={2025},
+  journal={Proceedings on Privacy Enhancing Technologies},
+volume={2025},
+  number={4},
+  pages={369-391},
+  url={https://doi.org/10.56553/popets-2025-0135}
+}
+```
+ |
+
+
 
 
 ## Getting Started
