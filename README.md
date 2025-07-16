@@ -25,10 +25,12 @@ HPMPC won the Best Artifact award at PoPETs 2025 and can be used to reproduce th
 
 TLDR instructions can be found [here](#tldr).
 
-You can use the provided Dockerfile or set up the project manually. The only dependency is OpenSSL. Neural networks and other functions with matrix operations also require the Eigen library.
+You can use the provided Dockerfile or set up the project manually. 
 ```bash
 #Install Dependencies:
 sudo apt install libssl-dev libeigen3-dev
+#Initalize submodules
+git submodule update --init --recursive
 ```
 
 ```bash
