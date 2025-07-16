@@ -15,42 +15,10 @@ HPMPC won the Best Artifact award at PoPETs 2025 and can be used to reproduce th
 
 | Publication | Artifact Evaluation | Citation |
 | --- | --- | --- |
-| [High Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings](https://eprint.iacr.org/2024/386.pdf) | [Link](#measurements/configs/artifacts/hpmpc/ARTIFACT_EVALUATION.md) | ```bibtex
-@article{HighThroughputMPC,
-  author = {Christopher Harth-Kitzerow and Ajith Suresh and Yongqin Wang and Hossein Yalame and Georg Carle and Murali Annavaram},
-  title = {High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings},
-  journal = {Proceedings on Privacy Enhancing Technologies},
-  year = {2025},
-  volume = {2025},
-  number = {1},
-  pages = {250--272},
-  url = {https://doi.org/10.56553/popets-2025-0015}
-}
-``` |
-| [PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](#measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) | ```bibtex
-@article{PIGEON,
-  author = {Christopher Harth-Kitzerow and Yongqin Wang and Rachit Rajat and Georg Carle and Murali Annavaram},
-  title = {PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation},
-  journal = {Proceedings on Privacy Enhancing Technologies},
-  year = {2025},
-  volume = {2025},
-  number = {3},
-  pages = {88--105},
-  url = {https://doi.org/10.56553/popets-2025-0090}
-}
-``` |
-| [SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets](https://eprint.iacr.org/2024/1953) | [Link](#measurements/configs/artifacts/truncation/ARTIFACT_EVALUATION.md) | ```bibtex
-@article{TruncationUntangled,
-  author = {Christopher Harth-Kitzerow and Ajith Suresh and Georg Carle},
-  title = {SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets},
-  journal = {Proceedings on Privacy Enhancing Technologies},
-  year = {2025},
-  volume = {2025},
-  number = {4},
-  pages = {369--391},
-  url = {https://doi.org/10.56553/popets-2025-0135}
-}
-``` |
+| [High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings](https://eprint.iacr.org/2024/386.pdf) | [Link](#measurements/configs/artifacts/hpmpc/ARTIFACT_EVALUATION.md) | [BibTex](#high-throughput-secure-multiparty-computation-in-various-network-settings) |
+| [PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](#measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) | [BibTex](#pigeon-a-high-throughput-framework-for-private-inference-of-neural-networks-using-secure-multiparty-computation) |
+| [SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets](https://eprint.iacr.org/2024/1953) | [Link](#measurements/configs/artifacts/truncation/ARTIFACT_EVALUATION.md) | [BibTex](#truncation-untangled-scaling-fixed-point-arithmetic-for-privacy-preserving-machine-learning-to-large-models-and-datasets) |
+
 
 
 ## Getting Started
@@ -729,4 +697,48 @@ Our framework utilizes the following third-party implementations.
 - SHA-256 implementation adapted from [SHA-Intrinsics](https://github.com/noloader/SHA-Intrinsics/tree/master), No License.
 - CUDA GEMM and Convolution implementation adapted from [Cutlass](https://github.com/NVIDIA/cutlass), [LICENSE](https://raw.githubusercontent.com/NVIDIA/cutlass/main/LICENSE.txt) and [Piranha](https://github.com/ucbrise/piranha/tree/main), [MIT LICENSE](https://raw.githubusercontent.com/ucbrise/piranha/main/LICENSE).
 - Neural Network Inference engine adapted from [SimpleNN](https://github.com/stnamjef/SimpleNN), [MIT LICENSE](https://raw.githubusercontent.com/stnamjef/SimpleNN/master/LICENSE).
+
+## BibTeX
+
+<!-- | [High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings](https://eprint.iacr.org/2024/386.pdf) | [Link](#measurements/configs/artifacts/hpmpc/ARTIFACT_EVALUATION.md) | [BibTeX](#highthroughputmpc) | -->
+<!-- | [PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](#measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) | [BibTeX](#pigeon) | -->
+<!-- | [SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets](https://eprint.iacr.org/2024/1953) | [Link](#measurements/configs/artifacts/truncation/ARTIFACT_EVALUATION.md) | [BibTeX](#truncationuntangled) | -->
+### High Throughput Secure Multiparty Computation in Various Network Settings
+```bibtex
+@article{HighThroughputMPC,
+  author  = {Christopher Harth-Kitzerow and Ajith Suresh and Yongqin Wang and Hossein Yalame and Georg Carle and Murali Annavaram},
+  title   = {High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings},
+  journal = {Proceedings on Privacy Enhancing Technologies},
+  year    = {2025},
+  volume  = {2025},
+  number  = {1},
+  pages   = {250--272},
+  url     = {https://doi.org/10.56553/popets-2025-0015}
+}
+```
+### PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation
+@article{PIGEON,
+  author  = {Christopher Harth-Kitzerow and Yongqin Wang and Rachit Rajat and Georg Carle and Murali Annavaram},
+  title   = {PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation},
+  journal = {Proceedings on Privacy Enhancing Technologies},
+  year    = {2025},
+  volume  = {2025},
+  number  = {3},
+  pages   = {88--105},
+  url     = {https://doi.org/10.56553/popets-2025-0090}
+}
+### Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets
+```bibtex
+@article{TruncationUntangled,
+  author  = {Christopher Harth-Kitzerow and Ajith Suresh and Georg Carle},
+  title   = {SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets},
+  journal = {Proceedings on Privacy Enhancing Technologies},
+  year    = {2025},
+  volume  = {2025},
+  number  = {4},
+  pages   = {369--391},
+  url     = {https://doi.org/10.56553/popets-2025-0135}
+}
+```
+
 
