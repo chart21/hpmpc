@@ -703,7 +703,7 @@ Our framework utilizes the following third-party implementations.
 <!-- | [High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings](https://eprint.iacr.org/2024/386.pdf) | [Link](#measurements/configs/artifacts/hpmpc/ARTIFACT_EVALUATION.md) | [BibTeX](#highthroughputmpc) | -->
 <!-- | [PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](#measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) | [BibTeX](#pigeon) | -->
 <!-- | [SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets](https://eprint.iacr.org/2024/1953) | [Link](#measurements/configs/artifacts/truncation/ARTIFACT_EVALUATION.md) | [BibTeX](#truncationuntangled) | -->
-#### High Throughput Secure Multiparty Computation in Various Network Settings
+##### High Throughput Secure Multiparty Computation in Various Network Settings
 ```bibtex
 @article{HighThroughputMPC,
   author  = {Christopher Harth-Kitzerow and Ajith Suresh and Yongqin Wang and Hossein Yalame and Georg Carle and Murali Annavaram},
@@ -716,7 +716,7 @@ Our framework utilizes the following third-party implementations.
   url     = {https://doi.org/10.56553/popets-2025-0015}
 }
 ```
-#### PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation
+##### PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation
 ```bibtex
 @article{PIGEON,
   author  = {Christopher Harth-Kitzerow and Yongqin Wang and Rachit Rajat and Georg Carle and Murali Annavaram},
@@ -729,7 +729,7 @@ Our framework utilizes the following third-party implementations.
   url     = {https://doi.org/10.56553/popets-2025-0090}
 }
 ```
-#### Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets
+##### Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets
 ```bibtex
 @article{TruncationUntangled,
   author  = {Christopher Harth-Kitzerow and Ajith Suresh and Georg Carle},
