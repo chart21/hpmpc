@@ -27,8 +27,8 @@ HPMPC won the Best Artifact award at PoPETs 2025 and can be used to reproduce th
   pages={250-272},
   url={https://doi.org/10.56553/popets-2025-0015}
 }
-```
-| [PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](#measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) |
+``` |
+[PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](#measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) |
 ```bibtex
 @article{PIGEON,
   title={PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation},
