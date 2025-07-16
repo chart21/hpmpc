@@ -15,9 +15,9 @@ HPMPC won the Best Artifact award at PoPETs 2025 and can be used to reproduce th
 
 | Publication | Artifact Evaluation | Citation |
 | --- | --- | --- |
-| [High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings](https://eprint.iacr.org/2024/386.pdf) | [Link](#measurements/configs/artifacts/hpmpc/ARTIFACT_EVALUATION.md) | [BibTex](#high-throughput-secure-multiparty-computation-in-various-network-settings) |
-| [PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](#measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) | [BibTex](#pigeon-a-high-throughput-framework-for-private-inference-of-neural-networks-using-secure-multiparty-computation) |
-| [Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets](https://eprint.iacr.org/2024/1953.pdf) | [Link](#measurements/configs/artifacts/truncation/ARTIFACT_EVALUATION.md) | [BibTex](#truncation-untangled-scaling-fixed-point-arithmetic-for-privacy-preserving-machine-learning-to-large-models-and-datasets) |
+| [High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings](https://eprint.iacr.org/2024/386.pdf) | [Link](measurements/configs/artifacts/hpmpc/ARTIFACT_EVALUATION.md) | [BibTex](#high-throughput-secure-multiparty-computation-in-various-network-settings) |
+| [PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) | [BibTex](pigeon-a-high-throughput-framework-for-private-inference-of-neural-networks-using-secure-multiparty-computation) |
+| [Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets](https://eprint.iacr.org/2024/1953.pdf) | [Link](measurements/configs/artifacts/truncation/ARTIFACT_EVALUATION.md) | [BibTex](#truncation-untangled-scaling-fixed-point-arithmetic-for-privacy-preserving-machine-learning-to-large-models-and-datasets) |
 
 
 
