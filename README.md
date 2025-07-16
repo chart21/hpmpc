@@ -17,7 +17,7 @@ HPMPC won the Best Artifact award at PoPETs 2025 and can be used to reproduce th
 | --- | --- | --- |
 | [High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings](https://eprint.iacr.org/2024/386.pdf) | [Link](#measurements/configs/artifacts/hpmpc/ARTIFACT_EVALUATION.md) | [BibTex](#high-throughput-secure-multiparty-computation-in-various-network-settings) |
 | [PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation](https://eprint.iacr.org/2024/1371.pdf) | [Link](#measurements/configs/artifacts/pigeon/ARTIFACT_EVALUATION.md) | [BibTex](#pigeon-a-high-throughput-framework-for-private-inference-of-neural-networks-using-secure-multiparty-computation) |
-| [SoK: Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets](https://eprint.iacr.org/2024/1953) | [Link](#measurements/configs/artifacts/truncation/ARTIFACT_EVALUATION.md) | [BibTex](#truncation-untangled-scaling-fixed-point-arithmetic-for-privacy-preserving-machine-learning-to-large-models-and-datasets) |
+| [Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets](https://eprint.iacr.org/2024/1953.pdf) | [Link](#measurements/configs/artifacts/truncation/ARTIFACT_EVALUATION.md) | [BibTex](#truncation-untangled-scaling-fixed-point-arithmetic-for-privacy-preserving-machine-learning-to-large-models-and-datasets) |
 
 
 
@@ -717,6 +717,7 @@ Our framework utilizes the following third-party implementations.
 }
 ```
 ### PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation
+```bibtex
 @article{PIGEON,
   author  = {Christopher Harth-Kitzerow and Yongqin Wang and Rachit Rajat and Georg Carle and Murali Annavaram},
   title   = {PIGEON: A High Throughput Framework for Private Inference of Neural Networks using Secure Multiparty Computation},
@@ -727,6 +728,7 @@ Our framework utilizes the following third-party implementations.
   pages   = {88--105},
   url     = {https://doi.org/10.56553/popets-2025-0090}
 }
+```
 ### Truncation Untangled: Scaling Fixed-Point Arithmetic for Privacy-Preserving Machine Learning to Large Models and Datasets
 ```bibtex
 @article{TruncationUntangled,
