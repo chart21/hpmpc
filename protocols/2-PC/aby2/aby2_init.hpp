@@ -37,6 +37,23 @@ class ABY2_init
             send_in_last_round[PNEXT]++;
         }
     }
+    
+    template <typename func_add>
+    void generate_lxly_triple(func_add ADD, int num_round = 0) const
+    {
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+        {
+            num_boolean_triples[num_round]++;
+            store_output_share_bool_(num_round);
+            store_output_share_bool_(num_round);
+        }
+        else
+        {
+            num_arithmetic_triples[num_round]++;
+            store_output_share_arithmetic_(num_round);
+            store_output_share_arithmetic_(num_round);
+        }
+    }
 
     template <typename func_mul>
     ABY2_init mult_public(const Datatype b, func_mul MULT) const
@@ -77,7 +94,7 @@ class ABY2_init
 #if PARTY == 1
         receive_from_(PNEXT);
 #else
-        store_output_share_();
+        store_output_share_(helper_index);
 #endif
     }
 
@@ -113,7 +130,7 @@ class ABY2_init
     void prepare_reveal_to_all() const
     {
         pre_send_to_(PNEXT);
-        store_output_share_();
+        store_output_share_(helper_index);  
     }
 
     template <typename func_add, typename func_sub>
@@ -126,7 +143,7 @@ class ABY2_init
     ABY2_init prepare_mult(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         ABY2_init c;
-        generate_lxly_from_triple(ADD);
+        generate_lxly_triple(ADD);
         send_to_(PNEXT);
         return c;
     }
@@ -135,18 +152,18 @@ class ABY2_init
     ABY2_init prepare_dot(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         ABY2_init c;
-        generate_lxly_from_triple(ADD);
+        generate_lxly_triple(ADD);
         return c;
     }
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot3(const ABY2_init b, const ABY2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-        store_output_share_ab_(ADD);        // rxyz
-        generate_lxly_from_triple(ADD);     // rxy
-        generate_lxly_from_triple(ADD, 1);  // rxyz
-        generate_lxly_from_triple(ADD);     // rxz
-        b.generate_lxly_from_triple(ADD);   // ryz
+        store_output_share_ab_(ADD, helper_index);        // rxyz
+        generate_lxly_triple(ADD);     // rxy
+        generate_lxly_triple(ADD, 1);  // rxyz
+        generate_lxly_triple(ADD);     // rxz
+        b.generate_lxly_triple(ADD);   // ryz
         return ABY2_init();
     }
 
@@ -158,21 +175,21 @@ class ABY2_init
                            func_sub SUB,
                            func_mul MULT) const
     {
-        store_output_share_ab_(ADD);        // xzw
-        store_output_share_ab_(ADD);        // yzw
-        store_output_share_ab_(ADD);        // xyz
-        store_output_share_ab_(ADD);        // xyw
-        generate_lxly_from_triple(ADD);     // xy --> +2 stores
-        generate_lxly_from_triple(ADD);     // zw --> +2 stores
-        generate_lxly_from_triple(ADD, 1);  // xyw
-        generate_lxly_from_triple(ADD, 1);  // xzw
-        generate_lxly_from_triple(ADD, 1);  // yzw
-        generate_lxly_from_triple(ADD, 1);  // xyz
-        generate_lxly_from_triple(ADD, 1);  // xyzw
-        generate_lxly_from_triple(ADD);     // xz
-        generate_lxly_from_triple(ADD);     // xw
-        generate_lxly_from_triple(ADD);     // yz
-        generate_lxly_from_triple(ADD);     // yw
+        store_output_share_ab_(ADD, helper_index);        // xzw
+        store_output_share_ab_(ADD, helper_index);        // yzw
+        store_output_share_ab_(ADD, helper_index);        // xyz
+        store_output_share_ab_(ADD, helper_index);        // xyw
+        generate_lxly_triple(ADD);     // xy --> +2 stores
+        generate_lxly_triple(ADD);     // zw --> +2 stores
+        generate_lxly_triple(ADD, 1);  // xyw
+        generate_lxly_triple(ADD, 1);  // xzw
+        generate_lxly_triple(ADD, 1);  // yzw
+        generate_lxly_triple(ADD, 1);  // xyz
+        generate_lxly_triple(ADD, 1);  // xyzw
+        generate_lxly_triple(ADD);     // xz
+        generate_lxly_triple(ADD);     // xw
+        generate_lxly_triple(ADD);     // yz
+        generate_lxly_triple(ADD);     // yw
         return ABY2_init();
     }
 
@@ -250,7 +267,7 @@ class ABY2_init
 #if PARTY == 0
         for (int i = 0; i < k; i++)
         {
-            store_output_share_();
+            store_output_share_(helper_index);
         }
 #endif
     }
@@ -260,11 +277,7 @@ class ABY2_init
         for (int i = 0; i < BITLENGTH; i++)
         {
             num_arithmetic_triples[0]++;
-            store_output_share_arithmetic_();
-            store_output_share_arithmetic_();
-            store_output_share_arithmetic_();
-            pre_send_to_(PNEXT);
-            pre_send_to_(PNEXT);
+            generate_lxly_triple(OP_ADD);
             send_to_(PNEXT);
         }
     }
@@ -277,20 +290,10 @@ class ABY2_init
         {
             num_arithmetic_triples[0]++;
             num_arithmetic_triples[1]++;
-            store_output_share_arithmetic_();
-            store_output_share_arithmetic_();
-            store_output_share_arithmetic_();
-            store_output_share_arithmetic_();
-            store_output_share_arithmetic_();
-            store_output_share_arithmetic_(1);
-            store_output_share_arithmetic_(1);
-            store_output_share_arithmetic_(1);
-            pre_send_to_(PNEXT);
-            pre_send_to_(PNEXT);
-            /* pre_send_to_(PNEXT,1); //second round */
-            /* pre_send_to_(PNEXT,1); */
-            send_in_last_round[PNEXT]++;
-            send_in_last_round[PNEXT]++;
+            generate_lxly_triple(OP_ADD);
+            store_output_share_arithmetic_(helper_index);
+            store_output_share_arithmetic_(helper_index);
+            generate_lxly_triple(OP_ADD,1);
             send_to_(PNEXT);
         }
     }
@@ -352,7 +355,7 @@ class ABY2_init
 
 #if SKIP_PRE == 1
     template <typename func_add, typename func_sub, typename func_mul>
-    static void generate_zero_triples(uint64_t triple_num, func_add ADD, func_sub SUB, func_mul MULT)
+    static void generate_lxly_triple(uint64_t triple_num, func_add ADD, func_sub SUB, func_mul MULT)
     {
     }
 #endif
@@ -412,7 +415,7 @@ class ABY2_init
         const int n = dout;
         for (int i = 0; i < m * n * k; i++)
         {
-            ABY2_init().generate_lxly_from_triple(OP_ADD);
+            ABY2_init().generate_lxly_triple(OP_ADD);
         }
     }
 
@@ -437,7 +440,7 @@ class ABY2_init
         const int n = dout;
         for (int i = 0; i < m * n * k; i++)
         {
-            ABY2_init().generate_lxly_from_triple(OP_ADD);
+            ABY2_init().generate_lxly_triple(OP_ADD);
         }
     }
 #endif
@@ -448,7 +451,7 @@ class ABY2_init
     {
         for (int i = 0; i < m * n * k; i++)
         {
-            ABY2_init().generate_lxly_from_triple(OP_ADD);
+            ABY2_init().generate_lxly_triple(OP_ADD);
         }
     }
 #else
@@ -457,7 +460,7 @@ class ABY2_init
     {
         for (int i = 0; i < m * n * k; i++)
         {
-            ABY2_init().generate_lxly_from_triple(OP_ADD);
+            ABY2_init().generate_lxly_triple(OP_ADD);
         }
     }
 #endif
