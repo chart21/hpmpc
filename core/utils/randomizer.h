@@ -43,9 +43,11 @@ void init_buffers(int link_id)
 
 DATATYPE getRandomVal(int link_id)
 {
-#if SKIP_PRE == 1
+#if SKIP_PRE == 1 || (BEAVER ==1 && FAKE_TRIPLES == 1)
     return SET_ALL_ZERO();
 #endif
+
+
 
 #if RANDOM_ALGORITHM == 0
     if (num_generated[link_id] > 63)

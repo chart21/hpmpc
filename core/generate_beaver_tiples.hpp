@@ -1,6 +1,5 @@
 #pragma once
-#include <cstdint>
-#include <string>
+#include "include/pch.h"
 #if FAKE_TRIPLES == 0
 #define generateArithmeticTriples generateLibOTArithmeticTriples
 #define generateBooleanTriples generateLibOTBooleanTriples
@@ -47,6 +46,9 @@ void generateFakeArithmeticTriples(type a[],
     for (uint64_t i = 0; i < num_triples; i++)
     {
 /* #if num_players == 2 */
+#if FAKE_TRIPLES == 1
+        c[i] = SET_ALL_ZERO();
+#else
 #if PARTY == 0
         a[i] = PROMOTE(3);
         b[i] = PROMOTE(5);
@@ -55,6 +57,7 @@ void generateFakeArithmeticTriples(type a[],
         a[i] = PROMOTE(5);
         b[i] = PROMOTE(2);
         c[i] = PROMOTE(22);
+#endif
 #endif
         /* #else */
         /* a[i] = SET_ALL_ZERO(); */
@@ -79,7 +82,7 @@ void generateFakeBooleanTriples(type a[],
     num_triples /= DATTYPE;
     for (uint64_t i = 0; i < num_triples; i++)
     {
-#if num_paties == 2
+#if num_paties == 2 && FAKE_TRIPLES == 0
 #if PARTY == 0
         a[i] = SET_ALL_ZERO();
         b[i] = SET_ALL_ONE();

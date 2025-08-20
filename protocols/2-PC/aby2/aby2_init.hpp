@@ -94,7 +94,7 @@ class ABY2_init
 #if PARTY == 1
         receive_from_(PNEXT);
 #else
-        store_output_share_(helper_index);
+        store_output_share_();
 #endif
     }
 
@@ -130,7 +130,7 @@ class ABY2_init
     void prepare_reveal_to_all() const
     {
         pre_send_to_(PNEXT);
-        store_output_share_(helper_index);  
+        store_output_share_();
     }
 
     template <typename func_add, typename func_sub>
@@ -267,7 +267,7 @@ class ABY2_init
 #if PARTY == 0
         for (int i = 0; i < k; i++)
         {
-            store_output_share_(helper_index);
+            store_output_share_();
         }
 #endif
     }
@@ -331,17 +331,17 @@ class ABY2_init
         for (uint64_t j = 0; j < 2; j++)
         {
             communicate_pre_();
-            for (uint64_t i = 0; i < arithmetic_triple_num[j] + boolean_triple_num[j]; i++)
-            {
-                pre_receive_from_(PNEXT);
-                pre_receive_from_(PNEXT);
-            }
+            // for (uint64_t i = 0; i < arithmetic_triple_num[j] + boolean_triple_num[j]; i++)
+            // {
+            //     pre_receive_from_(PNEXT);
+            //     pre_receive_from_(PNEXT);
+            // }
             if (j == 0)
             {
                 for (uint64_t i = 0; i < num_output_shares; i++)
                     pre_receive_from_(PNEXT);
-                for (uint64_t i = 0; i < send_in_last_round[PNEXT]; i++)
-                    pre_send_to_(PNEXT);
+                // for (uint64_t i = 0; i < send_in_last_round[PNEXT]; i++)
+                //     pre_send_to_(PNEXT);
             }
         }
 #if SKIP_PRE == 1

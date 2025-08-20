@@ -295,6 +295,9 @@ int base_port = BASE_PORT;  // temporary solution
 #ifndef LX_TRIPLES
 #define LX_TRIPLES 1  // Generate lx ly shares directly
 #endif
+#ifndef AB2
+#define AB2 0
+#endif
 #if LX_TRIPLES == 1
 #define generate_triple generate_lxly_triple
 #define helper_index 2

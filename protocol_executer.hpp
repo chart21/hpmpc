@@ -82,10 +82,10 @@ void init_circuit(std::string ips[])
     num_arithmetic_triples.push_back(0);
     num_boolean_triples.push_back(0);
     num_boolean_triples.push_back(0);
-    boolean_triple_index.push_back(0);
-    boolean_triple_index.push_back(0);
-    arithmetic_triple_index.push_back(0);
-    arithmetic_triple_index.push_back(0);
+    // boolean_triple_index.push_back(0);
+    // boolean_triple_index.push_back(0);
+    // arithmetic_triple_index.push_back(0);
+    // arithmetic_triple_index.push_back(0);
     preprocessed_outputs_arithmetic_index = new uint64_t[2]{0};
     preprocessed_outputs_bool_index = new uint64_t[2]{0};
     preprocessed_outputs_arithmetic_input_index = new uint64_t[2]{0};
@@ -135,7 +135,11 @@ void beaver(std::string ips[])
 #if SKIP_PRE == 1
     print("SKIP_PRE set to 1, skipping preprocessing phase and Beaver triples generation ... \n");
     return;
-#elif FAKE_TRIPLES == 1
+#elif LX_TRIPLES == 1
+    return;
+#else
+
+#if FAKE_TRIPLES == 1
     print("Fake Triples set to 1, generating fake triples ... \n");
 #else
     print("Generating Beaver Triples ... \n");
@@ -156,8 +160,37 @@ void beaver(std::string ips[])
           double(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - p)
                      .count()) /
               1000000);
+#endif
 }
 #endif
+
+// #if BEAVER == 1 && LX_TRIPLES == 1
+// void generate_triples_from_lx_ly()
+// {
+// #if FAKE_TRIPLES == 1
+//     print("Fake Triples set to 1, generating fake triples ... \n");
+// #else
+//     print("Generating Beaver Triples ... \n");
+// #endif
+//     clock_t time_beaver_function_start = clock();
+//     clock_gettime(CLOCK_REALTIME, &p1);
+//     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
+
+//     generate_beaver_triples(ips, base_port, process_offset);
+
+//     clock_gettime(CLOCK_REALTIME, &p2);
+//     double accum_beaver = (p2.tv_sec - p1.tv_sec) + (double)(p2.tv_nsec - p1.tv_nsec) / (double)1000000000L;
+//     clock_t time_beaver_function_finished = clock();
+//     print("Time measured to perform beaver triple generation clock: %fs \n",
+//           double((time_beaver_function_finished - time_beaver_function_start)) / CLOCKS_PER_SEC);
+//     print("Time measured to perform beaver triple generation getTime: %fs \n", accum_beaver);
+//     print("Time measured to perform beaver triple generation chrono: %fs \n",
+//           double(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - p)
+//                      .count()) /
+//               1000000);
+
+// }
+// #endif
 
 #if PRE == 1 && SKIP_PRE == 0
 void preprocess_circuit(std::string ips[])
@@ -381,8 +414,14 @@ void live_circuit()
     print("Time measured to perform computation getTime: %fs \n", accum);
     print("Time measured to perform computation chrono: %fs \n", time / 1000000);
     // Join threads to ensure closing of sockets
-#if BEAVER == 1
+
+#if BEAVER == 1 
+
+#if LX_TRIPLES == 1
+    deinit_beaverC();
+#else
     deinit_beaver();
+#endif
 #endif
 
 #if FUNCTION_IDENTIFIER >= 70
@@ -422,6 +461,7 @@ void executeProgram(int argc, char* argv[], int process_id, int process_num)
 
 #if PRE == 1 && SKIP_PRE == 0
     preprocess_circuit(ips);
+
 #endif
 
 #if PRE == 1 && LIVE == 0
