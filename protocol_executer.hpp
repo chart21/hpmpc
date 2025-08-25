@@ -130,7 +130,11 @@ void beaver(std::string ips[])
         total_arithmetic_triples_num += i;
     for (auto i : num_boolean_triples)
         total_boolean_triples_num += i;
+#if LX_TRIPLES == 1
+    init_beaverAB(0);
+#else
     init_beaver();
+#endif
     print_num_triples();
 #if SKIP_PRE == 1
     print("SKIP_PRE set to 1, skipping preprocessing phase and Beaver triples generation ... \n");

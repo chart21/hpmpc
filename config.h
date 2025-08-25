@@ -300,7 +300,7 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 #if LX_TRIPLES == 1
 #define generate_triple generate_lxly_triple
-#define helper_index 2
+#define helper_index 0 // TODO: Check
 #else
 #define generate_triple generate_lxly_from_triple
 #define helper_index 0

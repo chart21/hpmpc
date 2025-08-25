@@ -1,5 +1,7 @@
 #include "../../beaver_triples.hpp"
+#include "../../../core/store_to_file.hpp"
 #include <cstdint>
+#include <string>
 template <typename Datatype>
 class ABY2_PRE_Share
 {
@@ -433,10 +435,41 @@ class ABY2_PRE_Share
 
     static void communicate() {}
 
+    static void get_triples_from_file(int tid, uint64_t* arithmetic_triple_num, uint64_t* boolean_triple_num)
+    {
+        save_triple_file(arithmetic_triple_a, arithmetic_triple_num[tid], arithmetic_triple_b, arithmetic_triple_num[tid], boolean_triple_a, boolean_triple_num[tid], boolean_triple_b, boolean_triple_num[tid], std::to_string(PARTY), "pre");
+        auto other_arithmetic_triple_a = new Datatype[arithmetic_triple_num[tid]];
+        auto other_arithmetic_triple_b = new Datatype[arithmetic_triple_num[tid]];
+        auto other_boolean_triple_a = new Datatype[boolean_triple_num[tid]];
+        auto other_boolean_triple_b = new Datatype[boolean_triple_num[tid]];
+        load_triple_file(other_arithmetic_triple_a, arithmetic_triple_num[tid], other_arithmetic_triple_b, arithmetic_triple_num[tid], other_boolean_triple_a, boolean_triple_num[tid], other_boolean_triple_b, boolean_triple_num[tid], std::to_string(1 - PARTY), "pre");
+        delete_triple_file(std::to_string(1 - PARTY), "pre");
+        for (uint64_t i = 0; i < arithmetic_triple_num[tid]; i++)
+        {
+#if PARTY == 0
+            arithmetic_triple_c[i] = OP_SUB( OP_MULT(OP_ADD(arithmetic_triple_a[i], other_arithmetic_triple_a[i]), OP_ADD(arithmetic_triple_b[i], other_arithmetic_triple_b[i])), getRandomVal(PNEXT));
+#else 
+            arithmetic_triple_c[i] = getRandomVal(PSELF);
+#endif
+
+        }
+        for (uint64_t i = 0; i < boolean_triple_num[tid]; i++)
+        {
+            boolean_triple_c[i] = OP_XOR( OP_AND(OP_XOR(boolean_triple_a[i], other_boolean_triple_a[i]), OP_XOR(boolean_triple_b[i], other_boolean_triple_b[i])), getRandomVal(PNEXT));
+        }
+    }
+
+
     static void complete_preprocessing(uint64_t* arithmetic_triple_num,
                                        uint64_t* boolean_triple_num,
                                        uint64_t num_output_shares)
     {
+#if LX_TRIPLES == 1 && FAKE_TRIPLES == 1
+        init_beaverC(0);
+        get_triples_from_file(0, arithmetic_triple_num, boolean_triple_num);
+        deinit_beaverAB();
+        init_beaverAB(1);
+#endif
         communicate_pre();
         //Trigger OTs, HE
         constexpr int num_rounds = 2;
@@ -451,9 +484,10 @@ class ABY2_PRE_Share
         preprocessed_outputs_arithmetic[1] = new Datatype[preprocessed_outputs_arithmetic_input_index[1]];
         preprocessed_outputs_arithmetic_input_index[1] = 0;
         preprocessed_outputs_bool_input_index[1] = 0;
-#if LX_TRIPLES == 1
+#if LX_TRIPLES == 1 && FAKE_TRIPLES == 0
+        std::string dummy_ips[2] = {"", ""};
         generate_beaver_triples(
-                {},{}, {}, arithmetic_triple_num[0], boolean_triple_num[0]);
+        dummy_ips,{}, {}, arithmetic_triple_num[0], boolean_triple_num[0]);
 #endif
 
         for (uint64_t i = 0; i < num_triples; i++)
@@ -591,10 +625,13 @@ class ABY2_PRE_Share
         preprocessed_outputs_arithmetic_input_index[1] = 0;
 
 
-        deinit_beaver();
         communicate_pre();
-       
-#if LX_TRIPLES == 1
+#if LX_TRIPLES == 1 && FAKE_TRIPLES == 1
+        init_beaverC(1);
+        get_triples_from_file(1, arithmetic_triple_num, boolean_triple_num);
+        deinit_beaverAB();
+#endif
+#if LX_TRIPLES == 1 && FAKE_TRIPLES == 0
         generate_beaver_triples(
                 {},{}, {}, arithmetic_triple_num[1], boolean_triple_num[1]);
 #endif

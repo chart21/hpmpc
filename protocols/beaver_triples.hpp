@@ -97,7 +97,33 @@ Datatype retrieveArithmeticLXLY()
 }
 
 
-
+#if LX_TRIPLES == 1
+void init_beaver(int rounds)
+{
+    /* arithmetic_triple_index = 0; */
+    /* boolean_triple_index = 0; */
+    arithmetic_triple_a = new DATATYPE[num_arithmetic_triples[rounds] ];
+    arithmetic_triple_b = new DATATYPE[num_arithmetic_triples[rounds] ];
+    arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
+    boolean_triple_a = new DATATYPE[num_boolean_triples[rounds] ];
+    boolean_triple_b = new DATATYPE[num_boolean_triples[rounds] ];
+    boolean_triple_c = new DATATYPE[num_boolean_triples[rounds] ];
+}
+void init_beaverAB(int rounds)
+{
+    /* arithmetic_triple_index = 0; */
+    /* boolean_triple_index = 0; */
+    arithmetic_triple_a = new DATATYPE[num_arithmetic_triples[rounds] ];
+    arithmetic_triple_b = new DATATYPE[num_arithmetic_triples[rounds] ];
+    boolean_triple_a = new DATATYPE[num_boolean_triples[rounds] ];
+    boolean_triple_b = new DATATYPE[num_boolean_triples[rounds] ];
+}
+void init_beaverC(int rounds)
+{
+    arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
+    boolean_triple_c = new DATATYPE[num_boolean_triples[rounds] ];
+}
+#else
 void init_beaver()
 {
     /* arithmetic_triple_index = 0; */
@@ -109,38 +135,38 @@ void init_beaver()
     boolean_triple_b = new DATATYPE[total_boolean_triples_num];
     boolean_triple_c = new DATATYPE[total_boolean_triples_num];
 }
+#endif
+
+template <typename T>
+void safeDeleteArray(T*& array) {
+    if (array != nullptr) {
+        delete[] array; // Delete the array
+        array = nullptr; // Set to nullptr after deletion
+    }
+}
+
 void deinit_beaver()
 {
-    if (!deinit)
-    {
-        delete[] arithmetic_triple_a;
-        delete[] arithmetic_triple_b;
-        delete[] arithmetic_triple_c;
-        delete[] boolean_triple_a;
-        delete[] boolean_triple_b;
-        delete[] boolean_triple_c;
-        deinit = true;
-    }
+        safeDeleteArray(arithmetic_triple_a);
+        safeDeleteArray(arithmetic_triple_b);
+        safeDeleteArray(arithmetic_triple_c);
+        safeDeleteArray(boolean_triple_a);
+        safeDeleteArray(boolean_triple_b);
+        safeDeleteArray(boolean_triple_c);
 }
 
 void deinit_beaverAB()
 {
-    if (!deinitAB)
-    {
-        delete[] arithmetic_triple_c;
-        delete[] boolean_triple_c;
-        deinit = true;
-    }
+    safeDeleteArray(arithmetic_triple_a);
+    safeDeleteArray(arithmetic_triple_b);
+    safeDeleteArray(boolean_triple_a);
+    safeDeleteArray(boolean_triple_b);
 }
 
 void deinit_beaverC()
 {
-    if (!deinitC)
-    {
-        delete[] arithmetic_triple_c;
-        delete[] boolean_triple_c;
-        deinit = true;
-    }
+    safeDeleteArray(arithmetic_triple_c);
+    safeDeleteArray(boolean_triple_c);
 }
 
 struct timespec k1, k2;

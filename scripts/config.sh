@@ -81,9 +81,9 @@ fi
 
 if [ "$ssl" = "1" ]
 then
-    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -lssl -lcrypto -I SimpleNN" # -lstdc++fs might be needed on some systems
+    flags="-w -march=native -g -fno-finite-math-only -std=c++20 -pthread -lssl -lcrypto -I SimpleNN" # -lstdc++fs might be needed on some systems
 else
-    flags="-w -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -I SimpleNN" # -lstdc++fs might be needed on some systems
+    flags="-w -march=native -g -fno-finite-math-only -std=c++20 -pthread -I SimpleNN" # -lstdc++fs might be needed on some systems
 fi
 
 if [ "$use_nvcc" -gt "0" ]
