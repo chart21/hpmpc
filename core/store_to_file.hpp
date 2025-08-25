@@ -54,10 +54,10 @@ void save_triple_file(T* arithmetic_triple_a, uint64_t size_a,
 }
 
 template <typename T>
-void load_triple_file(T*& arithmetic_triple_a, uint64_t& size_a, 
-                      T*& arithmetic_triple_b, uint64_t& size_b, 
-                      T*& boolean_triple_a, uint64_t& size_bool_a, 
-                      T*& boolean_triple_b, uint64_t& size_bool_b, 
+void load_triple_file(T*& o_arithmetic_triple_a, uint64_t& size_a, 
+                      T*& o_arithmetic_triple_b, uint64_t& size_b, 
+                      T*& o_boolean_triple_a, uint64_t& size_bool_a, 
+                      T*& o_boolean_triple_b, uint64_t& size_bool_b, 
                       const std::string& pother, 
                       const std::string& ending) {
     // Construct the filenames
@@ -78,21 +78,17 @@ void load_triple_file(T*& arithmetic_triple_a, uint64_t& size_a,
 
     // Read arithmetic triples
     infile.read(reinterpret_cast<char*>(&size_a), sizeof(size_a));
-    arithmetic_triple_a = new T[size_a];
-    infile.read(reinterpret_cast<char*>(arithmetic_triple_a), size_a * sizeof(T));
+    infile.read(reinterpret_cast<char*>(o_arithmetic_triple_a), size_a * sizeof(T));
     
     infile.read(reinterpret_cast<char*>(&size_b), sizeof(size_b));
-    arithmetic_triple_b = new T[size_b];
-    infile.read(reinterpret_cast<char*>(arithmetic_triple_b), size_b * sizeof(T));
+    infile.read(reinterpret_cast<char*>(o_arithmetic_triple_b), size_b * sizeof(T));
     
     // Read boolean triples
     infile.read(reinterpret_cast<char*>(&size_bool_a), sizeof(size_bool_a));
-    boolean_triple_a = new T[size_bool_a];
-    infile.read(reinterpret_cast<char*>(boolean_triple_a), size_bool_a * sizeof(T));
+    infile.read(reinterpret_cast<char*>(o_boolean_triple_a), size_bool_a * sizeof(T));
     
     infile.read(reinterpret_cast<char*>(&size_bool_b), sizeof(size_bool_b));
-    boolean_triple_b = new T[size_bool_b];
-    infile.read(reinterpret_cast<char*>(boolean_triple_b), size_bool_b * sizeof(T));
+    infile.read(reinterpret_cast<char*>(o_boolean_triple_b), size_bool_b * sizeof(T));
 
     infile.close();
     std::cout << "Data loaded from " << data_filename << std::endl;

@@ -36,11 +36,11 @@ class ABY2_PRE_Share
     {
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
-           storeArithmeticABTriple(l, b.l);
+           storeBooleanABTriple(l, b.l); 
         }
         else
         {
-           storeBooleanABTriple(l, b.l); 
+           storeArithmeticABTriple(l, b.l);
         }
     }
     
@@ -438,10 +438,10 @@ class ABY2_PRE_Share
     static void get_triples_from_file(int tid, uint64_t* arithmetic_triple_num, uint64_t* boolean_triple_num)
     {
         save_triple_file(arithmetic_triple_a, arithmetic_triple_num[tid], arithmetic_triple_b, arithmetic_triple_num[tid], boolean_triple_a, boolean_triple_num[tid], boolean_triple_b, boolean_triple_num[tid], std::to_string(PARTY), "pre");
-        auto other_arithmetic_triple_a = new Datatype[arithmetic_triple_num[tid]];
-        auto other_arithmetic_triple_b = new Datatype[arithmetic_triple_num[tid]];
-        auto other_boolean_triple_a = new Datatype[boolean_triple_num[tid]];
-        auto other_boolean_triple_b = new Datatype[boolean_triple_num[tid]];
+        Datatype* other_arithmetic_triple_a = new Datatype[arithmetic_triple_num[tid]];
+        Datatype* other_arithmetic_triple_b = new Datatype[arithmetic_triple_num[tid]];
+        Datatype* other_boolean_triple_a = new Datatype[boolean_triple_num[tid]];
+        Datatype* other_boolean_triple_b = new Datatype[boolean_triple_num[tid]];
         load_triple_file(other_arithmetic_triple_a, arithmetic_triple_num[tid], other_arithmetic_triple_b, arithmetic_triple_num[tid], other_boolean_triple_a, boolean_triple_num[tid], other_boolean_triple_b, boolean_triple_num[tid], std::to_string(1 - PARTY), "pre");
         delete_triple_file(std::to_string(1 - PARTY), "pre");
         for (uint64_t i = 0; i < arithmetic_triple_num[tid]; i++)
@@ -453,10 +453,14 @@ class ABY2_PRE_Share
 #endif
 
         }
+        delete[] other_arithmetic_triple_a;
+        delete[] other_arithmetic_triple_b;
         for (uint64_t i = 0; i < boolean_triple_num[tid]; i++)
         {
             boolean_triple_c[i] = OP_XOR( OP_AND(OP_XOR(boolean_triple_a[i], other_boolean_triple_a[i]), OP_XOR(boolean_triple_b[i], other_boolean_triple_b[i])), getRandomVal(PNEXT));
         }
+        delete[] other_boolean_triple_a;
+        delete[] other_boolean_triple_b;
     }
 
 
@@ -627,6 +631,7 @@ class ABY2_PRE_Share
 
         communicate_pre();
 #if LX_TRIPLES == 1 && FAKE_TRIPLES == 1
+        deinit_beaverC();
         init_beaverC(1);
         get_triples_from_file(1, arithmetic_triple_num, boolean_triple_num);
         deinit_beaverAB();
@@ -707,8 +712,7 @@ class ABY2_PRE_Share
 
         delete[] lxly_a;
         delete[] lxly_b;
-        deinit = false;
-        deinit_beaver();
+        deinit_beaverC();
         init_srngs();
     }
 

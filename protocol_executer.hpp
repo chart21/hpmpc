@@ -243,6 +243,7 @@ void preprocess_circuit(std::string ips[])
     clock_t time_pre_function_start = clock();
     clock_gettime(CLOCK_REALTIME, &p1);
     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
+    
 
 #if PROTOCOL_PRE == -1
     // receive only
@@ -422,7 +423,6 @@ void live_circuit()
 #if BEAVER == 1 
 
 #if LX_TRIPLES == 1
-    deinit_beaverC();
 #else
     deinit_beaver();
 #endif

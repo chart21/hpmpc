@@ -61,6 +61,10 @@ void AND_BENCH(DATATYPE* res)
     Share::communicate();
 
     dummy_reveal<Share>();
+
+    delete[] a;
+    delete[] b;
+    delete[] c;
 }
 #endif
 

@@ -22,15 +22,12 @@ uint64_t total_boolean_triples_index = 0;
 /* uint8_t* triple_type; */
 uint64_t arithmetic_triple_index = 0;
 uint64_t boolean_triple_index = 0;
-DATATYPE* arithmetic_triple_a;
-DATATYPE* arithmetic_triple_b;
-DATATYPE* arithmetic_triple_c;
-DATATYPE* boolean_triple_a;
-DATATYPE* boolean_triple_b;
-DATATYPE* boolean_triple_c;
-bool deinit = false;
-bool deinitAB = false;
-bool deinitC = false;
+DATATYPE* arithmetic_triple_a = nullptr;
+DATATYPE* arithmetic_triple_b = nullptr;
+DATATYPE* arithmetic_triple_c = nullptr;
+DATATYPE* boolean_triple_a = nullptr;
+DATATYPE* boolean_triple_b= nullptr;
+DATATYPE* boolean_triple_c = nullptr;
 
 template <typename Datatype>
 struct triple
@@ -98,30 +95,19 @@ Datatype retrieveArithmeticLXLY()
 
 
 #if LX_TRIPLES == 1
-void init_beaver(int rounds)
-{
-    /* arithmetic_triple_index = 0; */
-    /* boolean_triple_index = 0; */
-    arithmetic_triple_a = new DATATYPE[num_arithmetic_triples[rounds] ];
-    arithmetic_triple_b = new DATATYPE[num_arithmetic_triples[rounds] ];
-    arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
-    boolean_triple_a = new DATATYPE[num_boolean_triples[rounds] ];
-    boolean_triple_b = new DATATYPE[num_boolean_triples[rounds] ];
-    boolean_triple_c = new DATATYPE[num_boolean_triples[rounds] ];
-}
 void init_beaverAB(int rounds)
 {
-    /* arithmetic_triple_index = 0; */
-    /* boolean_triple_index = 0; */
     arithmetic_triple_a = new DATATYPE[num_arithmetic_triples[rounds] ];
     arithmetic_triple_b = new DATATYPE[num_arithmetic_triples[rounds] ];
     boolean_triple_a = new DATATYPE[num_boolean_triples[rounds] ];
     boolean_triple_b = new DATATYPE[num_boolean_triples[rounds] ];
+    std::cout << "Initialized beaver AB for round " << rounds << " with " << num_arithmetic_triples[rounds] << " arithmetic triples and " << num_boolean_triples[rounds] << " boolean triples." << std::endl;
 }
 void init_beaverC(int rounds)
 {
     arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
     boolean_triple_c = new DATATYPE[num_boolean_triples[rounds] ];
+    std::cout << "Initialized beaver C for round " << rounds << " with " << num_arithmetic_triples[rounds] << " arithmetic triples and " << num_boolean_triples[rounds] << " boolean triples." << std::endl;
 }
 #else
 void init_beaver()
@@ -137,36 +123,21 @@ void init_beaver()
 }
 #endif
 
-template <typename T>
-void safeDeleteArray(T*& array) {
-    if (array != nullptr) {
-        delete[] array; // Delete the array
-        array = nullptr; // Set to nullptr after deletion
-    }
-}
-
-void deinit_beaver()
-{
-        safeDeleteArray(arithmetic_triple_a);
-        safeDeleteArray(arithmetic_triple_b);
-        safeDeleteArray(arithmetic_triple_c);
-        safeDeleteArray(boolean_triple_a);
-        safeDeleteArray(boolean_triple_b);
-        safeDeleteArray(boolean_triple_c);
-}
 
 void deinit_beaverAB()
 {
-    safeDeleteArray(arithmetic_triple_a);
-    safeDeleteArray(arithmetic_triple_b);
-    safeDeleteArray(boolean_triple_a);
-    safeDeleteArray(boolean_triple_b);
+    std::cout << "Deleting beaver AB arrays." << std::endl;
+    delete[] arithmetic_triple_a;
+    delete[] arithmetic_triple_b;
+    delete[] boolean_triple_a;
+    delete[] boolean_triple_b;
 }
 
 void deinit_beaverC()
 {
-    safeDeleteArray(arithmetic_triple_c);
-    safeDeleteArray(boolean_triple_c);
+    std::cout << "Deleting beaver C arrays." << std::endl;
+    delete[] arithmetic_triple_c;
+    delete[] boolean_triple_c;
 }
 
 struct timespec k1, k2;
