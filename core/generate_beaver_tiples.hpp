@@ -114,6 +114,9 @@ struct FullyConnectedParameter
 #define generateMultiplexerTriples generateMultiplexerDummyTriples
 #define generateCOTTriples generateCOTDummyTriples
 
+#include <core/hpmpc_interface.hpp>
+
+
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
 // Input: ip and port of the other party to connect to
 // Output: [c] will be filled with triples
@@ -126,30 +129,29 @@ void generateArithmeticDummyTriples(type a[],
                                     std::string ip,
                                     int port)
 {
-    if(num_triples == 0) return;
+    assert(bitlength == 32);
+
+    if (ip == "")
+        ip = "127.0.0.1";
+    if (port == 0)
+        port = 6969;
+
+    std::cout << "Triples: " << bitlength << ", ARITH triples: " << num_triples << "\n";
+
+    if (num_triples == 0)
+        return;
 
     //convert SIMD variables to regular uints
-    const int vectorization_factor = DATTYPE / bitlength; 
+    const int vectorization_factor = DATTYPE / bitlength;
 
-    if(vectorization_factor == 1) // No need to unvectorize
-        {
-            UINT_TYPE* uint_a = (UINT_TYPE*) a;
-            UINT_TYPE* uint_b = (UINT_TYPE*) b;
-            UINT_TYPE* uint_c = (UINT_TYPE*) c;
-            return;
-        }
+    UINT_TYPE* uint_a = new UINT_TYPE[num_triples];
+    unorthogonalize_arithmetic(a, uint_a, num_triples / (DATTYPE / bitlength)); 
+    UINT_TYPE* uint_b = new UINT_TYPE[num_triples];
+    unorthogonalize_arithmetic(b, uint_b, num_triples / (DATTYPE / bitlength));
+    UINT_TYPE* uint_c = new UINT_TYPE[num_triples];
 
-    UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]);
-    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
-    UINT_TYPE* uint_b = NEW(UINT_TYPE[num_triples]);
-    unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
-    UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
-    
-    for (uint64_t i = 0; i < num_triples; i++)
-    {
-       uint_c[i] = uint_a[i] + uint_b[i]; // dummy assignment, replace with actual triple generation
-    }
-    
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, 1);
+
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
     DELETEARR(uint_a);
@@ -171,16 +173,20 @@ void generateBooleanDummyTriples(type a[],
                                  int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
 {
     if(num_triples == 0) return;
+
     //reinterpret SIMD bitstream as uint8 bitstream
     uint8_t* uint_a = (uint8_t*) a;
     uint8_t* uint_b = (uint8_t*) b;
     uint8_t* uint_c = (uint8_t*) c;
     
-    for (uint64_t i = 0; i < num_triples / 8; i++)
-    {
-       uint_c[i] = uint_a[i] ^ uint_b[i]; // dummy assignment, replace with actual triple generation
-    }
+    std::cout << "Triples: " << bitlength << ", BOOL triples: " << num_triples << "\n";
 
+    if (ip == "")
+        ip = "127.0.0.1";
+    if (port == 0)
+        port = 6969;
+
+    Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples / 8, ip, port, PARTY + 1, 1);
 }
 
 
