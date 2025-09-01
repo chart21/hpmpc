@@ -133,8 +133,13 @@ void beaver(std::string ips[])
         total_arithmetic_triples_num += i;
     for (auto i : num_boolean_triples)
         total_boolean_triples_num += i;
+    for (auto i : num_ab2_arithmetic_triples)
+        total_ab2_arithmetic_triples_num += i;
+    for (auto i : num_ab2_boolean_triples)
+        total_ab2_boolean_triples_num += i;
 #if LX_TRIPLES == 1
     init_beaverAB(0);
+    init_beaverAB2(0);
 #else
     init_beaver();
 #endif

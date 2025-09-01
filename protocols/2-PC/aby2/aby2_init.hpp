@@ -380,9 +380,9 @@ class ABY2_init
 #if SKIP_PRE == 1
         return;
 #endif
-        triple_type.push_back(new uint8_t[num_arithmetic_triples[0] + num_boolean_triples[0]] + num_ab2_arithmetic_triples[0] + num_ab2_boolean_triples[0] + preprocessed_outputs_index);
+        triple_type.push_back(new uint8_t[num_arithmetic_triples[0] + num_boolean_triples[0] + num_ab2_arithmetic_triples[0] + num_ab2_boolean_triples[0] + preprocessed_outputs_index]);
         triple_type_index.push_back(0);
-        triple_type.push_back(new uint8_t[num_arithmetic_triples[1] + num_boolean_triples[1]] + num_ab2_arithmetic_triples[1] + num_ab2_boolean_triples[1]);
+        triple_type.push_back(new uint8_t[num_arithmetic_triples[1] + num_boolean_triples[1] + num_ab2_arithmetic_triples[1] + num_ab2_boolean_triples[1]]);
         triple_type_index.push_back(0);
     }
 

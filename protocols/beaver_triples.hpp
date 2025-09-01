@@ -175,6 +175,13 @@ void init_beaver()
     boolean_triple_a = new DATATYPE[total_boolean_triples_num];
     boolean_triple_b = new DATATYPE[total_boolean_triples_num];
     boolean_triple_c = new DATATYPE[total_boolean_triples_num];
+
+    arithemtic_ab2_triple_a = new DATATYPE[total_ab2_arithmetic_triples_num];
+    arithmetic_ab2_triple_b = new DATATYPE[total_ab2_arithmetic_triples_num];
+    arithmetic_ab2_triple_c = new DATATYPE[total_ab2_arithmetic_triples_num];
+    boolean_ab2_triple_a = new DATATYPE[total_ab2_boolean_triples_num];
+    boolean_ab2_triple_b = new DATATYPE[total_ab2_boolean_triples_num];
+    boolean_ab2_triple_c = new DATATYPE[total_ab2_boolean_triples_num];
 }
 #endif
 

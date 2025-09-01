@@ -574,9 +574,9 @@ class ABY2_PRE_Share
         for (uint64_t i = 0; i < boolean_ab2_triple_num[tid]; i++)
         {
 #if PARTY == 0
-            boolean_triple_c[i] = OP_XOR( OP_AND(OP_XOR(boolean_triple_a[i], other_boolean_triple_a[i]), OP_XOR(boolean_triple_b[i], other_boolean_triple_b[i])), getRandomVal(PNEXT));
+            boolean_ab2_triple_c[i] = OP_XOR( OP_AND(OP_XOR(boolean_ab2_triple_a[i], other_boolean_triple_a[i]), OP_XOR(boolean_ab2_triple_b[i], other_boolean_triple_b[i])), getRandomVal(PNEXT));
 #else
-            boolean_triple_c[i] = getRandomVal(PNEXT);
+            boolean_ab2_triple_c[i] = getRandomVal(PNEXT);
 #endif
         }
         delete[] other_boolean_triple_a;
@@ -618,7 +618,7 @@ class ABY2_PRE_Share
         Datatype** lxly_a = new Datatype*[num_rounds];
         Datatype** lxly_b = new Datatype*[num_rounds];
         lxly_a[0] = new Datatype[num_arithmetic_triples[0] + num_ab2_arithmetic_triples[0]];
-        lxly_b[0] = new Datatype[num_ab2_boolean_triples[0] + num_ab2_boolean_triples[0]];
+        lxly_b[0] = new Datatype[num_boolean_triples[0] + num_ab2_boolean_triples[0]];
         uint64_t arithmetic_triple_counter[num_rounds]{0};
         uint64_t boolean_triple_counter[num_rounds]{0};
         
