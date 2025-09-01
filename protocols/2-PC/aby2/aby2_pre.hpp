@@ -15,8 +15,10 @@ class ABY2_PRE_Share
 #define CaseDot4Arithmetic 8
 #define CaseMatMulFirstDot 9
 #define CaseMatMul 10
-#define CaseMultAKnown 11
-#define CaseMatMulAKnown 12
+#define CaseANDAKnown 11
+#define CaseMultAKnown 12
+#define CaseScalarBoolAKnown 13
+#define CaseScalarArithAKnown 14
 #define CaseTripleAlreadyConsumed 99
 #define CaseDefault 2
 
@@ -55,6 +57,30 @@ class ABY2_PRE_Share
         else
             // return retrieve_output_share_arithmetic(num_round);
             return arithmetic_triple_c[curr_arithmetic_triple_index++];
+    }
+    
+    template <typename func_add>
+    void generate_lxly2_triple(ABY2_PRE_Share b, func_add ADD, int num_round = 0) const
+    {
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+        {
+           storeBooleanAB2Triple(l, b.l); 
+        }
+        else
+        {
+           storeArithmeticAB2Triple(l, b.l);
+        }
+    }
+    
+    template <typename func_add>
+    static Datatype receive_and_compute_lxly2_share(func_add ADD, int num_round = 0)
+    {
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+            // return retrieve_output_share_bool(num_round);
+            return boolean_ab2_triple_c[curr_boolean_ab2_triple_index++];
+        else
+            // return retrieve_output_share_arithmetic(num_round);
+            return arithmetic_ab2_triple_c[curr_arithmetic_ab2_triple_index++];
     }
 
 #endif
@@ -119,6 +145,21 @@ class ABY2_PRE_Share
         generate_triple(b, ADD);
         return ABY2_PRE_Share(getRandomVal(PSELF));  // new mask
     }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_mult_a_known(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+        {
+            triple_type[0][triple_type_index[0]++] = CaseANDAKnown;
+        }
+        else
+        {
+            triple_type[0][triple_type_index[0]++] = CaseMultAKnown;
+        }
+        generate_ab2_triple(b, ADD);
+        return ABY2_PRE_Share(getRandomVal(PSELF));  // new mask
+    }
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -134,16 +175,54 @@ class ABY2_PRE_Share
         generate_triple(b, ADD);
         return ABY2_PRE_Share();
     }
-
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_dot_ex_lxly(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return ABY2_PRE_Share();
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_dot_ex_lxly_a_known(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return ABY2_PRE_Share();
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_dot_a_known(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+        {
+            triple_type[0][triple_type_index[0]++] = CaseANDAKnown;
+        }
+        else
+        {
+            triple_type[0][triple_type_index[0]++] = CaseMultAKnown;
+        }
+        generate_ab2_triple(b, ADD);
+        return ABY2_PRE_Share();
+    }
 
     template <typename func_add, typename func_sub>
-
     void mask_and_send_dot(func_add ADD, func_sub SUB)
     {
         l = getRandomVal(PSELF);
     }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB)
+    {
+        l = getRandomVal(PSELF);
+    }
+
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+    {
+        l = getRandomVal(PSELF);
+    }
+    
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB)
     {
         l = getRandomVal(PSELF);
     }
@@ -471,37 +550,86 @@ class ABY2_PRE_Share
         delete[] other_boolean_triple_b;
     }
 
+    
+    static void get_ab2_triples_from_file(int tid, uint64_t* arithmetic_ab2_triple_num, uint64_t* boolean_ab2_triple_num)
+    {
+        save_triple_file(arithmetic_ab2_triple_a, arithmetic_ab2_triple_num[tid], arithmetic_ab2_triple_b, arithmetic_ab2_triple_num[tid], boolean_ab2_triple_a, boolean_ab2_triple_num[tid], boolean_ab2_triple_b, boolean_ab2_triple_num[tid], std::to_string(PARTY), "pre_ab2");
+        Datatype* other_arithmetic_triple_a = new Datatype[arithmetic_ab2_triple_num[tid]];
+        Datatype* other_arithmetic_triple_b = new Datatype[arithmetic_ab2_triple_num[tid]];
+        Datatype* other_boolean_triple_a = new Datatype[boolean_ab2_triple_num[tid]];
+        Datatype* other_boolean_triple_b = new Datatype[boolean_ab2_triple_num[tid]];
+        load_triple_file(other_arithmetic_triple_a, arithmetic_ab2_triple_num[tid], other_arithmetic_triple_b, arithmetic_ab2_triple_num[tid], other_boolean_triple_a, boolean_ab2_triple_num[tid], other_boolean_triple_b, boolean_ab2_triple_num[tid], std::to_string(1 - PARTY), "pre_ab2");
+        delete_triple_file(std::to_string(1 - PARTY), "pre_ab2");
+        for (uint64_t i = 0; i < arithmetic_ab2_triple_num[tid]; i++)
+        {
+#if PARTY == 0
+            arithmetic_ab2_triple_c[i] = OP_SUB( OP_MULT(OP_ADD(arithmetic_ab2_triple_a[i], other_arithmetic_triple_a[i]), other_arithmetic_triple_b[i]), getRandomVal(PNEXT));
+#else 
+            arithmetic_ab2_triple_c[i] = getRandomVal(PNEXT);
+#endif
 
-    static void complete_preprocessing(uint64_t* arithmetic_triple_num,
-                                       uint64_t* boolean_triple_num,
-                                       uint64_t num_output_shares)
+        }
+        delete[] other_arithmetic_triple_a;
+        delete[] other_arithmetic_triple_b;
+        for (uint64_t i = 0; i < boolean_ab2_triple_num[tid]; i++)
+        {
+#if PARTY == 0
+            boolean_triple_c[i] = OP_XOR( OP_AND(OP_XOR(boolean_triple_a[i], other_boolean_triple_a[i]), OP_XOR(boolean_triple_b[i], other_boolean_triple_b[i])), getRandomVal(PNEXT));
+#else
+            boolean_triple_c[i] = getRandomVal(PNEXT);
+#endif
+        }
+        delete[] other_boolean_triple_a;
+        delete[] other_boolean_triple_b;
+    }
+
+    static void complete_preprocessing(std::string ips[], int port, int process_offset)
     {
 #if LX_TRIPLES == 1
         init_beaverC(0);
 #if FAKE_TRIPLES == 1
-        get_triples_from_file(0, arithmetic_triple_num, boolean_triple_num);
+        get_triples_from_file(0, num_arithmetic_triples.data(), num_boolean_triples.data());
 #else
-        std::string dummy_ips[2] = {"", ""};
         generate_beaver_triples(
-                dummy_ips,{}, {}, arithmetic_triple_num[0], boolean_triple_num[0]);
+                ips, port, process_offset, num_arithmetic_triples[0], num_boolean_triples[0], "LXLY");
 #endif
         deinit_beaverAB();
         init_beaverAB(1);
+
+#if FAKE_TRIPLES == 1
+        init_beaverAB2C(0);
+        get_ab2_triples_from_file(0, num_ab2_arithmetic_triples.data(), num_ab2_boolean_triples.data());
+        generate_beaver_triples(
+                ips, port, process_offset, num_ab2_arithmetic_triples[0], num_ab2_boolean_triples[0], "LXLY2");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_ab2_arithmetic_triples[0], num_ab2_boolean_triples[0], "LXLY2");
 #endif
+        deinit_beaverAB2();
+        init_beaverAB2(1);
+
+
+#endif
+
+
         communicate_pre();
         //Trigger OTs, HE
         constexpr int num_rounds = 2;
         Datatype** lxly_a = new Datatype*[num_rounds];
         Datatype** lxly_b = new Datatype*[num_rounds];
-        lxly_a[0] = new Datatype[arithmetic_triple_num[0]];
-        lxly_b[0] = new Datatype[boolean_triple_num[0]];
+        lxly_a[0] = new Datatype[num_arithmetic_triples[0] + num_ab2_arithmetic_triples[0]];
+        lxly_b[0] = new Datatype[num_ab2_boolean_triples[0] + num_ab2_boolean_triples[0]];
         uint64_t arithmetic_triple_counter[num_rounds]{0};
         uint64_t boolean_triple_counter[num_rounds]{0};
-        auto num_triples = arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares;
+        
+
+        auto num_triples = num_arithmetic_triples[0] + num_boolean_triples[0] + num_ab2_arithmetic_triples[0] + num_ab2_boolean_triples[0] + total_preprocessed_outputs;
+       
         curr_arithmetic_triple_index = 0;
         curr_boolean_triple_index = 0;
         arithmetic_triple_index = 0;
         boolean_triple_index = 0;
+
         // preprocessed_outputs_bool[0] = boolean_triple_c;
         // preprocessed_outputs_arithmetic[0] = arithmetic_triple_c;
         preprocessed_outputs_bool[1] = new Datatype[preprocessed_outputs_bool_input_index[1]];
@@ -614,6 +742,18 @@ class ABY2_PRE_Share
                         OP_ADD(lxly_a[0][arithmetic_triple_counter[0] - 1], lxly);
                     break;
                 }
+                case CaseANDAKnown:
+                {
+                    auto lxly2 = receive_and_compute_lxly2_share(OP_XOR);
+                    lxly_b[0][boolean_triple_counter[0]++] = lxly2;
+                    break;
+                }
+                case CaseMultAKnown:
+                {
+                    auto lxly2 = receive_and_compute_lxly2_share(OP_ADD);
+                    lxly_a[0][arithmetic_triple_counter[0]++] = lxly2;
+                    break;
+                }
                 case CaseTripleAlreadyConsumed:  // Triple already consumed by previous case
                 {
                     break;
@@ -649,21 +789,29 @@ class ABY2_PRE_Share
         communicate_pre();
 #if LX_TRIPLES == 1 
         deinit_beaverC();
+        deinit_beaverAB2C();
         init_beaverC(1);
 #if FAKE_TRIPLES == 1
-        get_triples_from_file(1, arithmetic_triple_num, boolean_triple_num);
+        get_triples_from_file(1, num_arithmetic_triples.data(), num_boolean_triples.data());
+        init_beaverAB2C(1);
+        deinit_beaverAB();
+        get_ab2_triples_from_file(1, num_ab2_arithmetic_triples.data(), num_ab2_boolean_triples.data());
 #else
         generate_beaver_triples(
-             dummy_ips,{}, {}, arithmetic_triple_num[1], boolean_triple_num[1]);
-#endif
+             ips, port, process_offset, num_arithmetic_triples[1], num_boolean_triples[1], "LXLY");
+        init_beaverAB2C(1);
         deinit_beaverAB();
+        generate_beaver_triples(
+                ips, port, process_offset, num_ab2_arithmetic_triples[1], num_ab2_boolean_triples[1], "LXLY2");
+#endif
+        deinit_beaverAB2();
 #endif
 
-        lxly_a[1] = new Datatype[arithmetic_triple_num[1]];
-        lxly_b[1] = new Datatype[boolean_triple_num[1]];
+        lxly_a[1] = new Datatype[num_arithmetic_triples[1] + num_ab2_arithmetic_triples[1]];
+        lxly_b[1] = new Datatype[num_boolean_triples[1] + num_ab2_boolean_triples[1]];
         curr_arithmetic_triple_index = 0;
         curr_boolean_triple_index = 0;
-        num_triples = arithmetic_triple_num[1] + boolean_triple_num[1];
+        num_triples = num_arithmetic_triples[1] + num_boolean_triples[1];
         for (uint64_t i = 0; i < num_triples; i++)
         {
             switch (triple_type[1][i])
@@ -733,6 +881,7 @@ class ABY2_PRE_Share
         delete[] lxly_a;
         delete[] lxly_b;
         deinit_beaverC();
+        deinit_beaverAB2C();
         init_srngs();
     }
 

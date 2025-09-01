@@ -299,7 +299,11 @@ class ABY2_ONLINE_Share
     void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB)
     {
         l = getRandomVal(PSELF);
-        auto lxly = retrieve_matrix_share_ab(ADD);
+        Datatype lxly;
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+            lxly = retrieve_output_share_bool();
+        else
+            lxly = retrieve_output_share_arithmetic();
         m = ADD(ADD(m, l), lxly); 
         send_to_live(PNEXT, m);
     }
@@ -328,7 +332,12 @@ class ABY2_ONLINE_Share
         m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
 #else
         m = ADD(TRUNC(m), l);
-        atuo lxly = retrieve_matrix_share_ab(ADD);
+        // atuo lxly = retrieve_matrix_share_ab(ADD);
+        Datatype lxly;
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+            lxly = retrieve_output_share_bool();
+        else
+            lxly = retrieve_output_share_arithmetic();
         m = ADD(m, lxly);
         /* m = ADD(SUB(TRUNC(m), OP_MULT(OP_SHIFT_LOG_RIGHTF(m, BITLENGTH -1), PROMOTE(UINT_TYPE(1) << (BITLENGTH -
          * 1))))   ,l); // x2^t - (x2 > 1) * 2^l */
@@ -650,7 +659,7 @@ class ABY2_ONLINE_Share
             unorthogonalize_arithmetic(&X[i].m, temp, 1);
 #endif
             for (int j = 0; j < factor; j++)
-                x_p1[j * xSize + i] = temp[j];
+                x_p1[j * xSize + i] = temp[j]; 
 
             unorthogonalize_arithmetic(&X[i].l, temp, 1);
             for (int j = 0; j < factor; j++)
@@ -661,10 +670,10 @@ class ABY2_ONLINE_Share
         {
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
 #if PARTY == 0
-            auto tempml = OP_SUB(W[i].m, W[i].l);
+            auto tempml = OP_SUB(W[i].m, W[i].l); 
             unorthogonalize_arithmetic(&tempml, temp, 1);
 #else
-            unorthogonalize_arithmetic(&W[i].m, temp, 1);
+            unorthogonalize_arithmetic(&W[i].m, temp, 1); // mb
 #endif
             w_p1[i] = temp[0];
             unorthogonalize_arithmetic(&W[i].l, temp, 1);

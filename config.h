@@ -298,13 +298,16 @@ int base_port = BASE_PORT;  // temporary solution
 #ifndef AB2_TRIPLES
 #define AB2_TRIPLES 0
 #endif
-#if LX_TRIPLES == 1
+
 #define generate_triple generate_lxly_triple
+#define generate_ab2_triple generate_lxly2_triple
+#define generate_conv_triple generate_conv_lxly_triple
+#define generate_conv_ab2_triple generate_conv_lxly2_triple
+#define generate_batchnorm2d_triple generate_batchnorm2d_lxly_triple
+#define generate_batchnorm2d_ab2_triple generate_batchnorm2d_lxly2_triple
+#define generate_fully_connected_triple generate_fully_connected_lxly_triple
+#define generate_fully_connected_ab2_triple generate_fully_connected_lxly2_triple
 #define helper_index 0 // TODO: Check
-#else
-#define generate_triple generate_lxly_from_triple
-#define helper_index 0
-#endif
 
 #define HAS_POST_PROTOCOL 1
 #elif (PROTOCOL == 3 || PROTOCOL == 5) && PARTY == 0

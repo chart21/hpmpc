@@ -30,3 +30,4 @@ CMake*
 machines.json
 #preprocessing
 *.pre
+*.pre_ab2

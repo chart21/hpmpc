@@ -82,6 +82,10 @@ void init_circuit(std::string ips[])
     num_arithmetic_triples.push_back(0);
     num_boolean_triples.push_back(0);
     num_boolean_triples.push_back(0);
+    num_ab2_boolean_triples.push_back(0);
+    num_ab2_boolean_triples.push_back(0);
+    num_ab2_arithmetic_triples.push_back(0);
+    num_ab2_arithmetic_triples.push_back(0);
     // boolean_triple_index.push_back(0);
     // boolean_triple_index.push_back(0);
     // arithmetic_triple_index.push_back(0);
@@ -97,8 +101,7 @@ void init_circuit(std::string ips[])
     FUNCTION<PROTOCOL_INIT<DATATYPE>>(&garbage);
     /* delete garbage; */
 #if PRE == 1 && BEAVER == 1
-    PROTOCOL_INIT<DATATYPE>::complete_preprocessing(
-        num_arithmetic_triples.data(), num_boolean_triples.data(), preprocessed_outputs_index);
+    PROTOCOL_INIT<DATATYPE>::complete_preprocessing();
 #elif PRE == 1
     communicate_pre_();
 #endif
@@ -277,7 +280,7 @@ void preprocess_circuit(std::string ips[])
 
 #if BEAVER == 1
     PROTOCOL_PRE<DATATYPE>::complete_preprocessing(
-        num_arithmetic_triples.data(), num_boolean_triples.data(), total_preprocessed_outputs);
+        ips, base_port, process_offset);
 #else
     communicate_pre();
 #endif

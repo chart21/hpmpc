@@ -44,14 +44,23 @@ class ABY2_init
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
             num_boolean_triples[num_round]++;
-            // store_output_share_bool_(num_round);
-            // store_output_share_bool_(num_round);
         }
         else
         {
             num_arithmetic_triples[num_round]++;
-            // store_output_share_arithmetic_(num_round);
-            // store_output_share_arithmetic_(num_round);
+        }
+    }
+    
+    template <typename func_add>
+    void generate_lxly2_triple(func_add ADD, int num_round = 0) const
+    {
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+        {
+            num_ab2_boolean_triples[num_round]++;
+        }
+        else
+        {
+            num_ab2_arithmetic_triples[num_round]++;
         }
     }
 
@@ -142,18 +151,43 @@ class ABY2_init
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_mult(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-        ABY2_init c;
         generate_lxly_triple(ADD);
         send_to_(PNEXT);
-        return c;
+        return ABY2_init();
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_mult_a_known(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        generate_lxly2_triple(ADD);
+        send_to_(PNEXT);
+        return ABY2_init();
     }
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-        ABY2_init c;
         generate_lxly_triple(ADD);
-        return c;
+        return ABY2_init();
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_dot_ex_lxly(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return ABY2_init();
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_dot_ex_lxly_a_known(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return ABY2_init();
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_dot_a_known(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        generate_lxly2_triple(ADD);
+        return ABY2_init();
     }
 
     template <typename func_add, typename func_sub, typename func_mul>
@@ -226,8 +260,20 @@ class ABY2_init
     {
         send_to_(PNEXT);
     }
+    
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB)
+    {
+        send_to_(PNEXT);
+    }
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+    {
+        send_to_(PNEXT);
+    }
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC)
     {
         send_to_(PNEXT);
     }
@@ -324,38 +370,29 @@ class ABY2_init
 
     static void finalize(std::string* ips, receiver_args* ra, sender_args* sa) { finalize_(ips, ra, sa); }
 
-    static void complete_preprocessing(uint64_t* arithmetic_triple_num,
-                                       uint64_t* boolean_triple_num,
-                                       uint64_t num_output_shares)
+    static void complete_preprocessing()
     {
-        for (uint64_t j = 0; j < 2; j++)
-        {
             communicate_pre_();
-            // for (uint64_t i = 0; i < arithmetic_triple_num[j] + boolean_triple_num[j]; i++)
-            // {
-            //     pre_receive_from_(PNEXT);
-            //     pre_receive_from_(PNEXT);
-            // }
-            if (j == 0)
-            {
-                for (uint64_t i = 0; i < num_output_shares; i++)
+                for (uint64_t i = 0; i < preprocessed_outputs_index; i++)
                     pre_receive_from_(PNEXT);
-                // for (uint64_t i = 0; i < send_in_last_round[PNEXT]; i++)
-                //     pre_send_to_(PNEXT);
-            }
-        }
+            communicate_pre_();
+        
 #if SKIP_PRE == 1
         return;
 #endif
-        triple_type.push_back(new uint8_t[arithmetic_triple_num[0] + boolean_triple_num[0] + num_output_shares]);
+        triple_type.push_back(new uint8_t[num_arithmetic_triples[0] + num_boolean_triples[0]] + num_ab2_arithmetic_triples[0] + num_ab2_boolean_triples[0] + preprocessed_outputs_index);
         triple_type_index.push_back(0);
-        triple_type.push_back(new uint8_t[arithmetic_triple_num[1] + boolean_triple_num[1]]);
+        triple_type.push_back(new uint8_t[num_arithmetic_triples[1] + num_boolean_triples[1]] + num_ab2_arithmetic_triples[1] + num_ab2_boolean_triples[1]);
         triple_type_index.push_back(0);
     }
 
 #if SKIP_PRE == 1
     template <typename func_add, typename func_sub, typename func_mul>
     static void generate_lxly_triple(uint64_t triple_num, func_add ADD, func_sub SUB, func_mul MULT)
+    {
+    }
+    template <typename func_add, typename func_sub, typename func_mul>
+    static void generate_lxly2_triple(uint64_t triple_num, func_add ADD, func_sub SUB, func_mul MULT)
     {
     }
 #endif
@@ -408,15 +445,18 @@ class ABY2_init
                         int ww,
                         int padding,
                         int stride,
-                        int dilation = 1)
+                        int dilation = 1,
+                        bool ab2 = false)
     {
         const int m = out_h * out_w * batchSize;
         const int k = wh * ww * din;
         const int n = dout;
-        for (int i = 0; i < m * n * k; i++)
-        {
-            ABY2_init().generate_lxly_triple(OP_ADD);
-        }
+        if(ab2) 
+            for (int i = 0; i < m * n * k; i++)
+                ABY2_init().generate_lxly2_triple(OP_ADD);
+        else
+            for (int i = 0; i < m * n * k; i++)
+                ABY2_init().generate_lxly_triple(OP_ADD);
     }
 
 #elif USE_CUDA_GEMM == 4
@@ -433,35 +473,42 @@ class ABY2_init
                         int ww,
                         int padding,
                         int stride,
-                        int dilation = 1)
+                        int dilation = 1,
+                        bool ab2 = false)
     {
         const int m = out_h * out_w * batchSize;
         const int k = wh * ww * din;
         const int n = dout;
-        for (int i = 0; i < m * n * k; i++)
-        {
-            ABY2_init().generate_lxly_triple(OP_ADD);
-        }
+        if(ab2) 
+            for (int i = 0; i < m * n * k; i++)
+                ABY2_init().generate_lxly2_triple(OP_ADD);
+        else
+            for (int i = 0; i < m * n * k; i++)
+                ABY2_init().generate_lxly_triple(OP_ADD);
     }
 #endif
 #if USE_CUDA_GEMM > 0
 #if USE_CUDA_GEMM == 1
 
-    static void GEMM(ABY2_init* a, ABY2_init* b, ABY2_init* c, int m, int n, int k, bool a_fixed = false)
+    static void GEMM(ABY2_init* a, ABY2_init* b, ABY2_init* c, int m, int n, int k, bool a_fixed = false, bool ab2=false)
     {
+    if(ab2)
         for (int i = 0; i < m * n * k; i++)
-        {
+            ABY2_init().generate_lxly2_triple(OP_ADD);
+    else
+        for (int i = 0; i < m * n * k; i++)
             ABY2_init().generate_lxly_triple(OP_ADD);
-        }
     }
 #else
 
-    static void GEMM(ABY2_init* a, ABY2_init* b, ABY2_init* c, int m, int n, int k, bool a_fixed = false)
+    static void GEMM(ABY2_init* a, ABY2_init* b, ABY2_init* c, int m, int n, int k, bool a_fixed = false, bool ab2=false)
     {
+        if(ab2)
+            for (int i = 0; i < m * n * k; i++)
+                ABY2_init().generate_lxly2_triple(OP_ADD);
+        else
         for (int i = 0; i < m * n * k; i++)
-        {
             ABY2_init().generate_lxly_triple(OP_ADD);
-        }
     }
 #endif
 #endif

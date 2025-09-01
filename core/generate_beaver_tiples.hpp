@@ -69,6 +69,8 @@ void generateBooleanDummyTriples(type a[],
 
 #define generateArithmeticTriples generateFakeArithmeticTriples
 #define generateBooleanTriples generateFakeBooleanTriples
+#define generateArithmeticAB2Triples generateFakeArithmeticTriples
+#define generateBooleanAB2Triples generateFakeBooleanTriples
 
 template <typename type>
 void generateFakeArithmeticTriples(type a[],
@@ -83,6 +85,28 @@ void generateFakeArithmeticTriples(type a[],
 
 template <typename type>
 void generateFakeBooleanTriples(type a[],
+                                type b[],
+                                type c[],
+                                int bitlength,
+                                uint64_t num_triples,
+                                std::string ip,
+                                int port)
+{
+}
+
+    template <typename type>
+void generateFakeAB2ArithmeticTriples(type a[],
+                                   type b[],
+                                   type c[],
+                                   int bitlength,
+                                   uint64_t num_triples,
+                                   std::string ip,
+                                   int port)
+{
+}
+
+template <typename type>
+void generateFakeAB2BooleanTriples(type a[],
                                 type b[],
                                 type c[],
                                 int bitlength,

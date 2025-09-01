@@ -8,18 +8,22 @@
 // std::vector<uint64_t> arithmetic_triple_index;
 // std::vector<uint64_t> boolean_triple_index;
 std::vector<uint64_t> num_arithmetic_triples;
+std::vector<uint64_t> num_ab2_arithmetic_triples;
 std::vector<uint64_t> num_boolean_triples;
+std::vector<uint64_t> num_ab2_boolean_triples;
 std::vector<uint64_t> triple_type_index;
 std::vector<uint8_t*> triple_type;
-uint64_t total_arithmetic_triples_num = 0;
-uint64_t total_boolean_triples_num = 0;
-uint64_t total_arithmetic_triples_index = 0;
-uint64_t total_boolean_triples_index = 0;
 /* uint64_t boolean_triple_index = 0; */
 /* uint64_t num_arithmetic_triples = 0; */
 /* uint64_t num_boolean_triples = 0; */
 /* uint64_t triple_type_index = 0; */
 /* uint8_t* triple_type; */
+
+uint64_t total_arithmetic_triples_num = 0;
+uint64_t total_boolean_triples_num = 0;
+uint64_t total_arithmetic_triples_index = 0;
+uint64_t total_boolean_triples_index = 0;
+
 uint64_t arithmetic_triple_index = 0;
 uint64_t boolean_triple_index = 0;
 uint64_t curr_arithmetic_triple_index = 0;
@@ -30,6 +34,23 @@ DATATYPE* arithmetic_triple_c = nullptr;
 DATATYPE* boolean_triple_a = nullptr;
 DATATYPE* boolean_triple_b= nullptr;
 DATATYPE* boolean_triple_c = nullptr;
+
+uint64_t total_ab2_arithmetic_triples_num = 0;
+uint64_t total_ab2_boolean_triples_num = 0;
+uint64_t total_ab2_arithmetic_triples_index = 0;
+uint64_t total_ab2_boolean_triples_index = 0;
+
+uint64_t curr_arithmetic_ab2_triple_index = 0;
+uint64_t curr_boolean_ab2_triple_index = 0;
+uint64_t arithmetic_ab2_triple_index = 0;
+uint64_t boolean_ab2_triple_index = 0;
+DATATYPE* arithmetic_ab2_triple_a = nullptr;
+DATATYPE* arithmetic_ab2_triple_b = nullptr;
+DATATYPE* arithmetic_ab2_triple_c = nullptr;
+DATATYPE* boolean_ab2_triple_a = nullptr;
+DATATYPE* boolean_ab2_triple_b = nullptr;
+DATATYPE* boolean_ab2_triple_c = nullptr;
+
 
 template <typename Datatype>
 struct triple
@@ -58,14 +79,12 @@ triple<Datatype> retrieveBooleanTriple()
     /* return triple<Datatype>{boolean_triple_a[boolean_triple_index], boolean_triple_b[boolean_triple_index],
      * boolean_triple_c[boolean_triple_index++]}; */
 }
-
+    
     template <typename Datatype>
 void storeArithmeticABTriple(const Datatype a, const Datatype b)
 {
     arithmetic_triple_a[arithmetic_triple_index] = a;
-#if AB2_TRIPLES != 1 || PARTY != 1
-    arithmetic_triple_b[arithmetic_triple_index] = b; //B1 is not needed for the AB2 protocol
-#endif
+    arithmetic_triple_b[arithmetic_triple_index] = b;
     arithmetic_triple_index++;
 }
 
@@ -73,10 +92,28 @@ template <typename Datatype>
 void storeBooleanABTriple(const Datatype a, const Datatype b)
 {
     boolean_triple_a[boolean_triple_index] = a;
-#if AB2_TRIPLES != 1 || PARTY != 1
     boolean_triple_b[boolean_triple_index] = b; //B1 is not needed for the AB2 protocol
-#endif
     boolean_triple_index++;
+}
+
+    template <typename Datatype>
+void storeArithmeticAB2Triple(const Datatype a, const Datatype b)
+{
+    arithmetic_ab2_triple_a[arithmetic_ab2_triple_index] = a;
+#if AB2_TRIPLES != 1 || PARTY != 1
+    arithmetic_ab2_triple_b[arithmetic_ab2_triple_index] = b; //B1 is not needed for the AB2 protocol
+#endif
+    arithmetic_ab2_triple_index++;
+}
+
+template <typename Datatype>
+void storeBooleanAB2Triple(const Datatype a, const Datatype b)
+{
+    boolean_ab2_triple_a[boolean_ab2_triple_index] = a;
+#if AB2_TRIPLES != 1 || PARTY != 1
+    boolean_ab2_triple_b[boolean_ab2_triple_index] = b; //B1 is not needed for the AB2 protocol
+#endif
+    boolean_ab2_triple_index++;
 }
     
 
@@ -103,13 +140,29 @@ void init_beaverAB(int rounds)
     arithmetic_triple_b = new DATATYPE[num_arithmetic_triples[rounds] ];
     boolean_triple_a = new DATATYPE[num_boolean_triples[rounds] ];
     boolean_triple_b = new DATATYPE[num_boolean_triples[rounds] ];
-    std::cout << "Initialized beaver AB for round " << rounds << " with " << num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH << " arithmetic triples and " << num_boolean_triples[rounds] * DATTYPE << " boolean triples." << std::endl;
+    std::cout << "Initialized beaver AB for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 void init_beaverC(int rounds)
 {
     arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
     boolean_triple_c = new DATATYPE[num_boolean_triples[rounds] ];
-    std::cout << "Initialized beaver C for round " << rounds << " with " << num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH << " arithmetic triples and " << num_boolean_triples[rounds] * DATTYPE << " boolean triples." << std::endl;
+    std::cout << "Initialized beaver C for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
+}
+
+void init_beaverAB2(int rounds)
+{
+    arithmetic_ab2_triple_a = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
+    arithmetic_ab2_triple_b = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
+    boolean_ab2_triple_a = new DATATYPE[num_ab2_boolean_triples[rounds] ];
+    boolean_ab2_triple_b = new DATATYPE[num_ab2_boolean_triples[rounds] ];
+    std::cout << "Initialized beaver AB2 for round " + std::to_string(rounds) + " with " + std::to_string(num_ab2_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_ab2_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
+}
+
+void init_beaverAB2C(int rounds)
+{
+    arithmetic_ab2_triple_c = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
+    boolean_ab2_triple_c = new DATATYPE[num_ab2_boolean_triples[rounds] ];
+    std::cout << "Initialized beaver AB2 C for round " + std::to_string(rounds) + " with " + std::to_string(num_ab2_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_ab2_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 #else
 void init_beaver()
@@ -124,6 +177,22 @@ void init_beaver()
     boolean_triple_c = new DATATYPE[total_boolean_triples_num];
 }
 #endif
+
+void deinit_beaverAB2()
+{
+    print("Deleting beaver AB2 arrays.");
+    delete[] arithmetic_ab2_triple_a;
+    delete[] arithmetic_ab2_triple_b;
+    delete[] boolean_ab2_triple_a;
+    delete[] boolean_ab2_triple_b;
+}
+
+void deinit_beaverAB2C()
+{
+    print("Deleting beaver AB2 C arrays.");
+    delete[] arithmetic_ab2_triple_c;
+    delete[] boolean_ab2_triple_c;
+}
 
 
 void deinit_beaverAB()
@@ -144,20 +213,21 @@ void deinit_beaverC()
 
 struct timespec k1, k2;
 
-void generate_beaver_triples(std::string ips[], int base_port, int process_offset, uint64_t num_arith_triples, uint64_t num_bool_triples)
+void generate_beaver_triples(std::string ips[], int base_port, int process_offset, uint64_t num_arith_triples, uint64_t num_bool_triples, std::string triple_type)
 {
     uint64_t l_num_arithmetic_triples = num_arith_triples * DATTYPE / BITLENGTH;
     uint64_t l_num_boolean_triples = num_bool_triples * DATTYPE;
 #if FAKE_TRIPLES == 1
     print("Fake Triples set to 1, generating fake triples ... \n");
 #else
-    print("Generating Beaver Triples ... \n");
+    print("Generating " + triple_type + "  Triples ... \n");
 #endif
     clock_t time_beaver_function_start = clock();
     clock_gettime(CLOCK_REALTIME, &k1);
     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
 
 #if num_players == 2
+if(triple_type == "LXLY") {
     generateArithmeticTriples(arithmetic_triple_a,
                               arithmetic_triple_b,
                               arithmetic_triple_c,
@@ -172,6 +242,25 @@ void generate_beaver_triples(std::string ips[], int base_port, int process_offse
                            l_num_boolean_triples,
                            ips[0],
                            base_port + process_offset);
+} else if(triple_type == "LXLY2") {
+    generateArithmeticAB2Triples(arithmetic_ab2_triple_a,
+                                 arithmetic_ab2_triple_b,
+                                 arithmetic_ab2_triple_c,
+                                 BITLENGTH,
+                                 l_num_arithmetic_triples,
+                                 ips[0],
+                                 base_port + process_offset);
+    generateBooleanAB2Triples(boolean_ab2_triple_a,
+                                boolean_ab2_triple_b,
+                                boolean_ab2_triple_c,
+                                BITLENGTH,
+                                l_num_boolean_triples,
+                                ips[0],
+                                base_port + process_offset);
+} else {
+    std::cerr << "Unknown triple type: " << triple_type << std::endl;
+    exit(1);
+}
 #else
     std::cerr << "Beaver triples not implemented for more than 2 parties" << std::endl;
     exit(1);
@@ -199,5 +288,10 @@ void print_num_triples()
               << std::endl;
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
               << "Boolean Beaver Triples Required: " << total_boolean_triples_num * DATTYPE << std::endl;
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+              << "Arithmetic AB2 Beaver Triples Required: " << total_ab2_arithmetic_triples_num * DATTYPE / BITLENGTH
+              << std::endl;
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+                << "Boolean AB2 Beaver Triples Required: " << total_ab2_boolean_triples_num * DATTYPE << std::endl;
 #endif
 }
