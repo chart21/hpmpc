@@ -179,6 +179,26 @@ class ABY2_ONLINE_Share
         send_to_live(PNEXT, c.m);
         return c;
     }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_mult_a_known(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        Datatype lxly;
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+            lxly = retrieve_output_share_bool();
+        else
+            lxly = retrieve_output_share_arithmetic();
+        ABY2_ONLINE_Share c;
+        c.l = getRandomVal(PSELF);
+#if PARTY == 0
+        c.m = MULT(SUB(m,l), SUB(b.m,b.l)); // a (mb - lb1)
+#else
+        c.m = SUB(SET_ALL_ZERO(), MULT(m,b.l)); // - ma lb2
+#endif
+        c.m = ADD(ADD(c.m, lxly), c.l); // ... + lalb2 + [lc]
+        send_to_live(PNEXT, c.m);
+        return c;
+    }
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_dot(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -198,6 +218,53 @@ class ABY2_ONLINE_Share
         c.m = SUB(c.m, SUB(ADD(MULT(m, b.l), MULT(l, b.m)), lxly));  // mx my - (mx[ly] + my[lx] - [lxly])
         return c;
     }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_dot_a_known(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        Datatype lxly;
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+            lxly = retrieve_output_share_bool();
+        else
+            lxly = retrieve_output_share_arithmetic();
+        ABY2_ONLINE_Share c;
+/* c.l = getRandomVal(PSELF); */
+#if PARTY == 0
+        c.m = MULT(SUB(m,l), SUB(b.m,b.l)); // a (mb - lb1)
+#else
+        c.m = SUB(SET_ALL_ZERO(), MULT(m,b.l)); // - ma lb2
+#endif
+        c.m = ADD(c.m, lxly); // ... + lalb2
+        return c;
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_dot_ex_lxly(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        ABY2_ONLINE_Share c;
+/* c.l = getRandomVal(PSELF); */
+#if PARTY == 0
+        c.m = MULT(m, b.m);
+#else
+        c.m = SET_ALL_ZERO();
+#endif
+        c.m = SUB(c.m, SUB(ADD(MULT(m, b.l), MULT(l, b.m))));  // mx my - (mx[ly] + my[lx])
+        return c;
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_dot_ex_lxly_a_known(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        ABY2_ONLINE_Share c;
+/* c.l = getRandomVal(PSELF); */
+#if PARTY == 0
+        c.m = MULT(SUB(m,l), SUB(b.m,b.l)); // a (mb - lb1)
+#else
+        c.m = SUB(SET_ALL_ZERO(), MULT(m,b.l)); // - ma lb2
+#endif
+        return c;
+    }
+    
 
     /* template <typename func_add, typename func_sub, typename func_mul, typename func_trunc> */
     /*     ABY2_ONLINE_Share prepare_dot_with_trunc(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT,
@@ -227,6 +294,15 @@ class ABY2_ONLINE_Share
         m = ADD(m, l);
         send_to_live(PNEXT, m);
     }
+    
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB)
+    {
+        l = getRandomVal(PSELF);
+        auto lxly = retrieve_matrix_share_ab(ADD);
+        m = ADD(ADD(m, l), lxly); 
+        send_to_live(PNEXT, m);
+    }
 
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
@@ -237,6 +313,23 @@ class ABY2_ONLINE_Share
         m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
 #else
         m = ADD(TRUNC(m), l);
+        /* m = ADD(SUB(TRUNC(m), OP_MULT(OP_SHIFT_LOG_RIGHTF(m, BITLENGTH -1), PROMOTE(UINT_TYPE(1) << (BITLENGTH -
+         * 1))))   ,l); // x2^t - (x2 > 1) * 2^l */
+#endif
+        send_to_live(PNEXT, m);
+    }
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC)
+    {
+        l = getRandomVal(PSELF);
+#if PARTY == 0
+        /* m = ADD(TRUNC(m),l); */
+        m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
+#else
+        m = ADD(TRUNC(m), l);
+        atuo lxly = retrieve_matrix_share_ab(ADD);
+        m = ADD(m, lxly);
         /* m = ADD(SUB(TRUNC(m), OP_MULT(OP_SHIFT_LOG_RIGHTF(m, BITLENGTH -1), PROMOTE(UINT_TYPE(1) << (BITLENGTH -
          * 1))))   ,l); // x2^t - (x2 > 1) * 2^l */
 #endif

@@ -15,6 +15,8 @@ class ABY2_PRE_Share
 #define CaseDot4Arithmetic 8
 #define CaseMatMulFirstDot 9
 #define CaseMatMul 10
+#define CaseMultAKnown 11
+#define CaseMatMulAKnown 12
 #define CaseTripleAlreadyConsumed 99
 #define CaseDefault 2
 
