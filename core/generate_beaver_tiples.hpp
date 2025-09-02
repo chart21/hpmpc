@@ -1,6 +1,7 @@
 #pragma once
 #include "include/pch.h"
 #include "arch/DATATYPE.h"
+#define FAKE_TRIPLES 0
 
 // const ConvolutionParameter param(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
 struct ConvolutionParameter
@@ -129,15 +130,6 @@ void generateArithmeticDummyTriples(type a[],
                                     std::string ip,
                                     int port)
 {
-    assert(bitlength == 32);
-
-    if (ip == "")
-        ip = "127.0.0.1";
-    if (port == 0)
-        port = 6969;
-
-    std::cout << "Triples: " << bitlength << ", ARITH triples: " << num_triples << "\n";
-
     if (num_triples == 0)
         return;
 
@@ -178,13 +170,6 @@ void generateBooleanDummyTriples(type a[],
     uint8_t* uint_a = (uint8_t*) a;
     uint8_t* uint_b = (uint8_t*) b;
     uint8_t* uint_c = (uint8_t*) c;
-    
-    std::cout << "Triples: " << bitlength << ", BOOL triples: " << num_triples << "\n";
-
-    if (ip == "")
-        ip = "127.0.0.1";
-    if (port == 0)
-        port = 6969;
 
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples / 8, ip, port, PARTY + 1, 1);
 }
@@ -205,6 +190,8 @@ void generateArithmeticAB2DummyTriples(type a[],
 {
     if(num_triples == 0) return;
 
+    port = 6969;
+
     //convert SIMD variables to regular uints
     const int vectorization_factor = DATTYPE / bitlength; 
 
@@ -222,17 +209,13 @@ void generateArithmeticAB2DummyTriples(type a[],
 #if PARTY == 1
     UINT_TYPE* uint_b = NEW(UINT_TYPE[num_triples]);
     unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
+#else
+    UINT_TYPE* uint_b = nullptr;
 #endif // P_0 doesn't need b for AB2
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
     
-    for (uint64_t i = 0; i < num_triples; i++)
-    {
-#if PARTY == 1
-       uint_c[i] = uint_b[i]; // dummy assignment, replace with actual triple generation
-#else 
-       uint_c[i] = uint_a[i]; // dummy assignment, replace with actual triple generation 
-#endif 
-    }
+
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, 1, Utils::PROTO::AB2);
     
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
@@ -259,22 +242,21 @@ void generateBooleanAB2DummyTriples(type a[],
                                  int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
 {
     if(num_triples == 0) return;
+
+    port = 6969;
+
     //reinterpret SIMD bitstream as uint8 bitstream
     uint8_t* uint_a = (uint8_t*) a;
 #if PARTY == 1
     uint8_t* uint_b = (uint8_t*) b;
+#else
+    std::vector<uint8_t> tmp(num_triples/8, 0);
+    uint8_t* uint_b = tmp.data();
 #endif // P_0 doesn't need b for AB2
     uint8_t* uint_c = (uint8_t*) c;
     
-    for (uint64_t i = 0; i < num_triples / 8; i++)
-    {
-#if PARTY == 1
-       uint_c[i] = uint_b[i]; // dummy assignment, replace with actual triple generation
-#else
-       uint_c[i] = uint_a[i]; // dummy assignment, replace with actual triple generation 
-#endif 
-    }
-
+    Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
+            num_triples / 8, ip, port, PARTY + 1, 1);
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
