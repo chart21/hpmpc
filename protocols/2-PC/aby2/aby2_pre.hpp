@@ -553,12 +553,23 @@ class ABY2_PRE_Share
     
     static void get_ab2_triples_from_file(int tid, uint64_t* arithmetic_ab2_triple_num, uint64_t* boolean_ab2_triple_num)
     {
-        save_triple_file(arithmetic_ab2_triple_a, arithmetic_ab2_triple_num[tid], arithmetic_ab2_triple_b, arithmetic_ab2_triple_num[tid], boolean_ab2_triple_a, boolean_ab2_triple_num[tid], boolean_ab2_triple_b, boolean_ab2_triple_num[tid], std::to_string(PARTY), "pre_ab2");
+#if PARTY == 0
+        uint64_t arithemtic_b_triple_num = 0;
+        uint64_t boolean_b_triple_num = 0;
+        uint64_t other_arithmetic_b_triple_num = arithmetic_ab2_triple_num[tid];
+        uint64_t other_boolean_b_triple_num = boolean_ab2_triple_num[tid];
+#else 
+        uint64_t arithemtic_b_triple_num = arithmetic_ab2_triple_num[tid];
+        uint64_t boolean_b_triple_num = boolean_ab2_triple_num[tid];
+        uint64_t other_arithmetic_b_triple_num = 0;
+        uint64_t other_boolean_b_triple_num = 0;
+#endif
+        save_triple_file(arithmetic_ab2_triple_a, arithmetic_ab2_triple_num[tid], arithmetic_ab2_triple_b, arithemtic_b_triple_num, boolean_ab2_triple_a, boolean_ab2_triple_num[tid], boolean_ab2_triple_b, boolean_b_triple_num, std::to_string(PARTY), "pre_ab2");
         Datatype* other_arithmetic_triple_a = new Datatype[arithmetic_ab2_triple_num[tid]];
         Datatype* other_arithmetic_triple_b = new Datatype[arithmetic_ab2_triple_num[tid]];
         Datatype* other_boolean_triple_a = new Datatype[boolean_ab2_triple_num[tid]];
         Datatype* other_boolean_triple_b = new Datatype[boolean_ab2_triple_num[tid]];
-        load_triple_file(other_arithmetic_triple_a, arithmetic_ab2_triple_num[tid], other_arithmetic_triple_b, arithmetic_ab2_triple_num[tid], other_boolean_triple_a, boolean_ab2_triple_num[tid], other_boolean_triple_b, boolean_ab2_triple_num[tid], std::to_string(1 - PARTY), "pre_ab2");
+        load_triple_file(other_arithmetic_triple_a, arithmetic_ab2_triple_num[tid], other_arithmetic_triple_b, other_arithmetic_b_triple_num, other_boolean_triple_a, boolean_ab2_triple_num[tid], other_boolean_triple_b, other_boolean_b_triple_num, std::to_string(1 - PARTY), "pre_ab2");
         delete_triple_file(std::to_string(1 - PARTY), "pre_ab2");
         for (uint64_t i = 0; i < arithmetic_ab2_triple_num[tid]; i++)
         {
@@ -574,7 +585,7 @@ class ABY2_PRE_Share
         for (uint64_t i = 0; i < boolean_ab2_triple_num[tid]; i++)
         {
 #if PARTY == 0
-            boolean_ab2_triple_c[i] = OP_XOR( OP_AND(OP_XOR(boolean_ab2_triple_a[i], other_boolean_triple_a[i]), OP_XOR(boolean_ab2_triple_b[i], other_boolean_triple_b[i])), getRandomVal(PNEXT));
+            boolean_ab2_triple_c[i] = OP_XOR( OP_AND(OP_XOR(boolean_ab2_triple_a[i], other_boolean_triple_a[i]), other_boolean_triple_b[i]), getRandomVal(PNEXT));
 #else
             boolean_ab2_triple_c[i] = getRandomVal(PNEXT);
 #endif

@@ -100,7 +100,7 @@ void storeBooleanABTriple(const Datatype a, const Datatype b)
 void storeArithmeticAB2Triple(const Datatype a, const Datatype b)
 {
     arithmetic_ab2_triple_a[arithmetic_ab2_triple_index] = a;
-#if AB2_TRIPLES != 1 || PARTY != 1
+#if AB2_TRIPLES != 1 || PARTY != 0
     arithmetic_ab2_triple_b[arithmetic_ab2_triple_index] = b; //B1 is not needed for the AB2 protocol
 #endif
     arithmetic_ab2_triple_index++;
@@ -110,7 +110,7 @@ template <typename Datatype>
 void storeBooleanAB2Triple(const Datatype a, const Datatype b)
 {
     boolean_ab2_triple_a[boolean_ab2_triple_index] = a;
-#if AB2_TRIPLES != 1 || PARTY != 1
+#if AB2_TRIPLES != 1 || PARTY != 0
     boolean_ab2_triple_b[boolean_ab2_triple_index] = b; //B1 is not needed for the AB2 protocol
 #endif
     boolean_ab2_triple_index++;
@@ -152,9 +152,11 @@ void init_beaverC(int rounds)
 void init_beaverAB2(int rounds)
 {
     arithmetic_ab2_triple_a = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
-    arithmetic_ab2_triple_b = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
     boolean_ab2_triple_a = new DATATYPE[num_ab2_boolean_triples[rounds] ];
+#if PARTY == 1 // P0 doesn't need B1 for AB2
+    arithmetic_ab2_triple_b = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
     boolean_ab2_triple_b = new DATATYPE[num_ab2_boolean_triples[rounds] ];
+#endif
     std::cout << "Initialized beaver AB2 for round " + std::to_string(rounds) + " with " + std::to_string(num_ab2_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_ab2_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 
