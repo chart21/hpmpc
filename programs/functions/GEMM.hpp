@@ -13,7 +13,11 @@ void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_row
         {
 
 #if PUBLIC_WEIGHTS == 0
+#if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+            sum += W[i * w_cols + j].prepare_dot_a_known(A[j]);
+#else
             sum += W[i * w_cols + j].prepare_dot(A[j]);
+#endif
 #else
             sum += A[j].mult_public(W[i * w_cols + j]);
 #endif
@@ -76,13 +80,25 @@ void prepare_GEMM_CPU(const T* A, const T* B, T* C, const int m, const int p, co
 #if FUSE_DOT == 0
                                 for (int i = 0; i < T::getNumDotProducts(); ++i)
                                 {
+#if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+                                    temps[i] += A[iif + kk].prepare_dot_a_known(B[jjf + kk], i); 
+#else
                                     temps[i] += A[iif + kk].prepare_dot(B[jjf + kk], i);
+#endif
                                 }
                                 temp.join_dots(temps);
 #elif FUSE_DOT == 1
+#if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+                                temp += A[iif + kk].prepare_dot_a_known(B[jjf + kk]);
+#else
                                 temp += A[iif + kk].prepare_dot(B[jjf + kk]);
+#endif
 #elif FUSE_DOT == 2
+#if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+                                Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot_a_known(B[jjf + kk], t);
+#else
                                 Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot(B[jjf + kk], t);
+#endif
 #endif
 #else
 

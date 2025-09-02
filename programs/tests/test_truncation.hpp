@@ -10,9 +10,11 @@
 #define FUNCTION test_truncation
 #endif
 #define TEST_PROB_TRUNC 1                // [a] -> [a]^t
+#if PROTOCOL != 4 //Primitves not supported for 2PC yet
 #define TEST_PROB_TRUNC_REDUCED_SLACK 1  // [a] -> [a]^t
-#define TEST_EXACT_TRUNC 1               // [a] -> [a]^t
 #define TEST_EXACT_TRUNC_OPT 1           // [a] -> [a]^t
+#define TEST_EXACT_TRUNC 1               // [a] -> [a]^t
+#endif
 
 #if TEST_PROB_TRUNC == 1
 template <typename Share>

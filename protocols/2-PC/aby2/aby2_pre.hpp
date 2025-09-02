@@ -607,8 +607,8 @@ class ABY2_PRE_Share
         deinit_beaverAB();
         init_beaverAB(1);
 
-#if FAKE_TRIPLES == 1
         init_beaverAB2C(0);
+#if FAKE_TRIPLES == 1
         get_ab2_triples_from_file(0, num_ab2_arithmetic_triples.data(), num_ab2_boolean_triples.data());
         generate_beaver_triples(
                 ips, port, process_offset, num_ab2_arithmetic_triples[0], num_ab2_boolean_triples[0], "LXLY2");

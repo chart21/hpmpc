@@ -140,13 +140,13 @@ void init_beaverAB(int rounds)
     arithmetic_triple_b = new DATATYPE[num_arithmetic_triples[rounds] ];
     boolean_triple_a = new DATATYPE[num_boolean_triples[rounds] ];
     boolean_triple_b = new DATATYPE[num_boolean_triples[rounds] ];
-    std::cout << "Initialized beaver AB for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
+    // std::cout << "Initialized beaver AB for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 void init_beaverC(int rounds)
 {
     arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
     boolean_triple_c = new DATATYPE[num_boolean_triples[rounds] ];
-    std::cout << "Initialized beaver C for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
+    // std::cout << "Initialized beaver C for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 
 void init_beaverAB2(int rounds)
@@ -157,14 +157,14 @@ void init_beaverAB2(int rounds)
     arithmetic_ab2_triple_b = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
     boolean_ab2_triple_b = new DATATYPE[num_ab2_boolean_triples[rounds] ];
 #endif
-    std::cout << "Initialized beaver AB2 for round " + std::to_string(rounds) + " with " + std::to_string(num_ab2_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_ab2_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
+    // std::cout << "Initialized beaver AB2 for round " + std::to_string(rounds) + " with " + std::to_string(num_ab2_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_ab2_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 
 void init_beaverAB2C(int rounds)
 {
     arithmetic_ab2_triple_c = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
     boolean_ab2_triple_c = new DATATYPE[num_ab2_boolean_triples[rounds] ];
-    std::cout << "Initialized beaver AB2 C for round " + std::to_string(rounds) + " with " + std::to_string(num_ab2_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_ab2_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
+    // std::cout << "Initialized beaver AB2 C for round " + std::to_string(rounds) + " with " + std::to_string(num_ab2_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_ab2_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 #else
 void init_beaver()
@@ -189,7 +189,7 @@ void init_beaver()
 
 void deinit_beaverAB2()
 {
-    print("Deleting beaver AB2 arrays.");
+    // print("Deleting beaver AB2 arrays.");
     delete[] arithmetic_ab2_triple_a;
     delete[] arithmetic_ab2_triple_b;
     delete[] boolean_ab2_triple_a;
@@ -198,7 +198,7 @@ void deinit_beaverAB2()
 
 void deinit_beaverAB2C()
 {
-    print("Deleting beaver AB2 C arrays.");
+    // print("Deleting beaver AB2 C arrays.");
     delete[] arithmetic_ab2_triple_c;
     delete[] boolean_ab2_triple_c;
 }
@@ -206,7 +206,7 @@ void deinit_beaverAB2C()
 
 void deinit_beaverAB()
 {
-    std::cout << "Deleting beaver AB arrays." << std::endl;
+    // std::cout << "Deleting beaver AB arrays." << std::endl;
     delete[] arithmetic_triple_a;
     delete[] arithmetic_triple_b;
     delete[] boolean_triple_a;
@@ -215,7 +215,7 @@ void deinit_beaverAB()
 
 void deinit_beaverC()
 {
-    std::cout << "Deleting beaver C arrays." << std::endl;
+    // std::cout << "Deleting beaver C arrays." << std::endl;
     delete[] arithmetic_triple_c;
     delete[] boolean_triple_c;
 }
@@ -229,7 +229,7 @@ void generate_beaver_triples(std::string ips[], int base_port, int process_offse
 #if FAKE_TRIPLES == 1
     print("Fake Triples set to 1, generating fake triples ... \n");
 #else
-    print("Generating " + triple_type + "  Triples ... \n");
+    print("Generating ", triple_type.data(), "  Triples ... \n");
 #endif
     clock_t time_beaver_function_start = clock();
     clock_gettime(CLOCK_REALTIME, &k1);
