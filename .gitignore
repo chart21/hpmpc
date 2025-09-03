@@ -29,5 +29,4 @@ CMake*
 #credentials
 machines.json
 #preprocessing
-*.pre
-*.pre_ab2
+*.pre*

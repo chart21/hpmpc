@@ -380,9 +380,7 @@ class ABY2_init
 #if SKIP_PRE == 1
         return;
 #endif
-        uint64_t total_num_output_triples_round0 = num_arithmetic_triples[0] + num_boolean_triples[0] + num_ab2_arithmetic_triples[0] + num_ab2_boolean_triples[0] + preprocessed_outputs_index;
-        for (uint64_t i = 0; i < num_conv_c_triples; i++)
-            total_num_output_triples_round0 += i;
+        uint64_t total_num_output_triples_round0 = num_arithmetic_triples[0] + num_boolean_triples[0] + num_ab2_arithmetic_triples[0] + num_ab2_boolean_triples[0] + preprocessed_outputs_index + num_conv_c_triples;
         uint64_t total_num_output_triples_round1 = num_arithmetic_triples[1] + num_boolean_triples[1] + num_ab2_arithmetic_triples[1] + num_ab2_boolean_triples[1];
         triple_type.push_back(new uint8_t[total_num_output_triples_round0]);
         triple_type_index.push_back(0);

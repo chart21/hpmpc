@@ -618,6 +618,22 @@ class ABY2_ONLINE_Share
         m = SET_ALL_ZERO();
         l = getRandomVal(PSELF);
     }
+    
+    static void SetupConv2dTriples(const ABY2_ONLINE_Share* X,
+                                   const ABY2_ONLINE_Share* W,
+                                   ABY2_ONLINE_Share* Y,
+                                   int batchSize,
+                                   int inh,
+                                   int inw,
+                                   int din,
+                                   int dout,
+                                   int wh,
+                                   int ww,
+                                   int padding,
+                                   int stride,
+                                   int dilation = 1,
+                                   bool ab2 = false)
+    {}
 
 #if USE_CUDA_GEMM == 2
     static void CONV_2D(const ABY2_ONLINE_Share* X,

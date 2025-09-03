@@ -19,6 +19,7 @@ class ABY2_PRE_Share
 #define CaseMultAKnown 12
 #define CaseScalarBoolAKnown 13
 #define CaseScalarArithAKnown 14
+#define CaseConv 15
 #define CaseTripleAlreadyConsumed 99
 #define CaseDefault 2
 
@@ -593,6 +594,155 @@ class ABY2_PRE_Share
         delete[] other_boolean_triple_a;
         delete[] other_boolean_triple_b;
     }
+        
+// From Berkeley Vision's Caffe!
+// https://github.com/BVLC/caffe/blob/master/LICENSE
+
+template <typename T>
+static T im2col_get_pixel_l(const T* im, int height, int width, int channels, int row, int col, int channel, int pad)
+{
+    row -= pad;
+    col -= pad;
+
+    if (row < 0 || col < 0 || row >= height || col >= width)
+        return 0;
+    return im[col + width * (row + height * channel)];
+}
+
+
+    template <typename T>
+static void im2col_l(const T* data_im, int channels, int height, int width, int ksize, int stride, int pad, T* data_col)
+{
+    int c, h, w;
+    int height_col = (height + 2 * pad - ksize) / stride + 1;
+    int width_col = (width + 2 * pad - ksize) / stride + 1;
+
+    int channels_col = channels * ksize * ksize;
+    for (c = 0; c < channels_col; ++c)
+    {
+        int w_offset = c % ksize;
+        int h_offset = (c / ksize) % ksize;
+        int c_im = c / ksize / ksize;
+        for (h = 0; h < height_col; ++h)
+        {
+            for (w = 0; w < width_col; ++w)
+            {
+                int im_row = h_offset + h * stride;
+                int im_col = w_offset + w * stride;
+                int col_index = (c * height_col + h) * width_col + w;
+                data_col[col_index] = im2col_get_pixel_l(data_im, height, width, channels, im_row, im_col, c_im, pad);
+            }
+        }
+    }
+}
+
+    // GEMM_l(X_col, other_conv_triple_w, conv_triple_y[i], m, dout, k, true);
+static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int p, int f, bool a_fixed)
+{
+    const int TILE_SIZE = 64;
+  for (int i = 0; i < m; i += TILE_SIZE) {
+        for (int j = 0; j < f; j += TILE_SIZE) {
+            // Initialize local tile for C
+            for (int ii = i; ii < std::min(i + TILE_SIZE, m); ++ii) {
+                for (int jj = j; jj < std::min(j + TILE_SIZE, f); ++jj) {
+                    C[ii * f + jj] = 0;
+                }
+            }
+
+            // Loop over tiles of matrices A and B
+            for (int k = 0; k < p; k += TILE_SIZE) {
+                for (int ii = i; ii < std::min(i + TILE_SIZE, m); ++ii) {
+                    for (int kk = k; kk < std::min(k + TILE_SIZE, p); ++kk) {
+                        Datatype a_val = A[ii * p + kk];
+                        for (int jj = j; jj < std::min(j + TILE_SIZE, f); ++jj) {
+                            C[ii * f + jj] += a_val * B[kk * f + jj];
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+    static void get_conv_ab2_triples_from_file()
+    {
+
+        uint64_t curr_x_triple_index = 0;
+        uint64_t y_index_counter = 0;
+        for (uint64_t i = 0; i < conv_triple_params.size(); i++)
+        {
+    // const int m = out_h * out_w * batchSize;
+    // const int k = wh * ww * din;
+    // const int n = dout;
+        const int din = conv_triple_params[i].din;
+        const int inh = conv_triple_params[i].inh;
+        const int inw = conv_triple_params[i].inw;
+        const int wh = conv_triple_params[i].wh;
+        const int stride = conv_triple_params[i].stride;
+        const int padding = conv_triple_params[i].padding;
+        const int batchSize = conv_triple_params[i].batchSize;
+        const int dout = conv_triple_params[i].dout;
+
+        const int k = conv_triple_params[i].wh * conv_triple_params[i].ww * conv_triple_params[i].din;
+        const int m = conv_triple_params[i].out_h * conv_triple_params[i].out_w * 1;
+        const uint64_t w_size = wh * wh * din * dout;
+        const uint64_t x_size = batchSize * din * inh * inw;
+#if PARTY == 0
+        uint64_t own_w_size = w_size;
+        uint64_t own_x_size = 0;
+        uint64_t other_x_size = x_size;
+        uint64_t other_w_size = w_size;
+#else
+        uint64_t own_w_size = w_size;
+        uint64_t own_x_size = x_size;
+        uint64_t other_x_size = 0;
+        uint64_t other_w_size = w_size;
+#endif
+
+
+        std::string file_ending = "pre_conv";
+        file_ending += std::to_string(i);
+        Datatype* nullp = new Datatype[1];
+        uint64_t nulls = 1;
+        save_triple_file(conv_triple_x[i], own_x_size, conv_triple_w[i], own_w_size, nullp, nulls, nullp, nulls, std::to_string(PARTY), file_ending);
+        Datatype* other_conv_triple_x = new Datatype[other_x_size];
+        Datatype* other_conv_triple_w = new Datatype[other_w_size];
+        load_triple_file(other_conv_triple_x, other_x_size, other_conv_triple_w, other_w_size, nullp, nulls, nullp, nulls, std::to_string(1 - PARTY), file_ending);
+        delete_triple_file(std::to_string(1 - PARTY), file_ending);
+        delete[] nullp;
+        #if PARTY == 1
+        for (uint64_t j = 0; j < x_size; j++)
+        {
+            conv_triple_x[i][j] = OP_ADD(conv_triple_x[i][j], other_conv_triple_x[j]);
+        }
+        for (int n = 0; n < conv_triple_params[i].batchSize; n++)
+        {
+        auto X_col = new Datatype[k * m];
+        int x_offset = n * din * inh * inw;
+        int y_offset = n * m * dout;
+        im2col_l(conv_triple_x[i] + x_offset, din, inh, inw, wh, stride, padding, X_col);
+        GEMM_l(X_col, other_conv_triple_w, conv_triple_y + y_index_counter + y_offset,
+                m, dout, k, true);
+        delete[] X_col;
+        }
+        #endif
+        uint64_t y_size = batchSize * m * dout;
+        for (uint64_t j = 0; j < y_size; j++)
+        {
+#if PARTY == 1
+            conv_triple_y[y_index_counter + i * y_size + j] = OP_SUB( conv_triple_y[i * y_size + j], getRandomVal(PNEXT));
+#else
+            conv_triple_y[y_index_counter + i * y_size + j] = getRandomVal(PNEXT);
+#endif
+        }
+
+        y_index_counter += m * dout + batchSize;
+    }
+}
+
+
+
+
 
     static void complete_preprocessing(std::string ips[], int port, int process_offset)
     {
@@ -621,10 +771,12 @@ class ABY2_PRE_Share
 
         init_ConvC();
 #if FAKE_TRIPLES == 1
-        get_conv_triples_from_file();
-        generate_conv_triples(ips, port, process_offset);
+        get_conv_ab2_triples_from_file();
+        generate_beaver_triples(
+                ips, port, process_offset, num_conv_c_triples, 0, "CONV");
 #else
-        generate_conv_triples(ips, port, process_offset);
+        generate_beaver_triples(
+                ips, port, process_offset, num_conv_c_triples, 0, "CONV");
 #endif
         deinit_ConvAB();
 
@@ -636,7 +788,7 @@ class ABY2_PRE_Share
         constexpr int num_rounds = 2;
         Datatype** lxly_a = new Datatype*[num_rounds];
         Datatype** lxly_b = new Datatype*[num_rounds];
-        lxly_a[0] = new Datatype[num_arithmetic_triples[0] + num_ab2_arithmetic_triples[0]];
+        lxly_a[0] = new Datatype[num_arithmetic_triples[0] + num_ab2_arithmetic_triples[0] + num_conv_c_triples];
         lxly_b[0] = new Datatype[num_boolean_triples[0] + num_ab2_boolean_triples[0]];
         uint64_t arithmetic_triple_counter[num_rounds]{0};
         uint64_t boolean_triple_counter[num_rounds]{0};
@@ -646,6 +798,7 @@ class ABY2_PRE_Share
        
         curr_arithmetic_triple_index = 0;
         curr_boolean_triple_index = 0;
+        curr_conv_triple_index = 0;
         arithmetic_triple_index = 0;
         boolean_triple_index = 0;
 
@@ -773,7 +926,7 @@ class ABY2_PRE_Share
                     lxly_a[0][arithmetic_triple_counter[0]++] = lxly2;
                     break;
                 }
-                case Conv:
+                case CaseConv:
                 {
                     lxly_a[0][arithmetic_triple_counter[0]++] = conv_triple_y[curr_conv_triple_index++];
                     break;
@@ -951,6 +1104,10 @@ class ABY2_PRE_Share
 #endif
         for (int i = 0; i < batchSize * inh * inw * din; i++)
             conv_triple_x[curr_conv_triple_index][i] = X[i].l;
+
+        uint64_t num_conv_triples = conv_triple_params[curr_conv_triple_index].out_h * conv_triple_params[curr_conv_triple_index].out_w * batchSize * dout;
+        for(uint64_t i = 0; i < num_conv_triples; i++)
+            triple_type[0][triple_type_index[0]++] = CaseConv;
         curr_conv_triple_index++;
     }
 
@@ -1019,44 +1176,7 @@ class ABY2_PRE_Share
 };
 
 #if USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
-template <typename T>
-T im2col_get_pixel_l(const T* im, int height, int width, int channels, int row, int col, int channel, int pad)
-{
-    row -= pad;
-    col -= pad;
 
-    if (row < 0 || col < 0 || row >= height || col >= width)
-        return 0;
-    return im[col + width * (row + height * channel)];
-}
-
-// From Berkeley Vision's Caffe!
-// https://github.com/BVLC/caffe/blob/master/LICENSE
-template <typename T>
-void im2col_l(const T* data_im, int channels, int height, int width, int ksize, int stride, int pad, T* data_col)
-{
-    int c, h, w;
-    int height_col = (height + 2 * pad - ksize) / stride + 1;
-    int width_col = (width + 2 * pad - ksize) / stride + 1;
-
-    int channels_col = channels * ksize * ksize;
-    for (c = 0; c < channels_col; ++c)
-    {
-        int w_offset = c % ksize;
-        int h_offset = (c / ksize) % ksize;
-        int c_im = c / ksize / ksize;
-        for (h = 0; h < height_col; ++h)
-        {
-            for (w = 0; w < width_col; ++w)
-            {
-                int im_row = h_offset + h * stride;
-                int im_col = w_offset + w * stride;
-                int col_index = (c * height_col + h) * width_col + w;
-                data_col[col_index] = im2col_get_pixel_l(data_im, height, width, channels, im_row, im_col, c_im, pad);
-            }
-        }
-    }
-}
 
 /* struct CONV2D_args */
 /* { */

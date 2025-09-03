@@ -1,11 +1,55 @@
 #pragma once
 #include "include/pch.h"
 #include "arch/DATATYPE.h"
+
+// const ConvolutionParameter param(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+struct ConvolutionParameter
+{
+    int batchSize;
+    int inh;
+    int inw;
+    int din;
+    int dout;
+    int wh;
+    int ww;
+    int padding;
+    int stride;
+    int dilation;
+    int out_h;
+    int out_w;
+
+    ConvolutionParameter(int batchSize,
+                         int inh,
+                         int inw,
+                         int din,
+                         int dout,
+                         int wh,
+                         int ww,
+                         int padding,
+                         int stride,
+                         int dilation = 1)
+        : batchSize(batchSize),
+          inh(inh),
+          inw(inw),
+          din(din),
+          dout(dout),
+          wh(wh),
+          ww(ww),
+          padding(padding),
+          stride(stride),
+          dilation(dilation)
+    {
+        out_h = (inh + 2 * padding - dilation * (wh - 1) - 1) / stride + 1;
+        out_w = (inw + 2 * padding - dilation * (ww - 1) - 1) / stride + 1;
+    }
+};
+
 #if FAKE_TRIPLES == 0
 #define generateArithmeticTriples generateArithmeticDummyTriples
 #define generateBooleanTriples generateBooleanDummyTriples
 #define generateArithmeticAB2Triples generateArithmeticAB2DummyTriples
 #define generateBooleanAB2Triples generateBooleanAB2DummyTriples
+#define generateConvTriples generateConvDummyTriples
 
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
 // Input: ip and port of the other party to connect to
@@ -140,12 +184,27 @@ void generateBooleanAB2DummyTriples(type a[],
 
 }
 
+
+//Input: arrays of convolution triple shares [a], [b] with sizes predefined by convolution params
+//Output: Contigious array of convolution triple shares [c] storing the output
+template <typename type>
+void generateConvDummyTriples(type** a,
+                              type** b,
+                              type c[],
+                              int bitlength,
+                              std::vector<ConvolutionParameter> params,
+                              std::string ip,
+                              int port)
+{
+}
+
 #else
 
 #define generateArithmeticTriples generateFakeArithmeticTriples
 #define generateBooleanTriples generateFakeBooleanTriples
 #define generateArithmeticAB2Triples generateFakeArithmeticTriples
 #define generateBooleanAB2Triples generateFakeBooleanTriples
+#define generateConvTriples generateFakeConvTriples
 
 template <typename type>
 void generateFakeArithmeticTriples(type a[],
@@ -188,6 +247,17 @@ void generateFakeAB2BooleanTriples(type a[],
                                 uint64_t num_triples,
                                 std::string ip,
                                 int port)
+{
+}
+
+template <typename type>
+void generateFakeConvTriples(type** a,
+                             type** b,
+                             type c[],
+                             int bitlength,
+                             std::vector<ConvolutionParameter> params,
+                             std::string ip,
+                             int port)
 {
 }
 
