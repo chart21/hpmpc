@@ -4,4 +4,4 @@
 [submodule "nn/PIGEON"]
 	path = nn/PIGEON
     url = https://github.com/chart21/flexNN.git
-	branch = hpmpc
+	branch = aby2-merge
