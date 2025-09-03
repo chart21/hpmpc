@@ -140,6 +140,7 @@ void beaver(std::string ips[])
 #if LX_TRIPLES == 1
     init_beaverAB(0);
     init_beaverAB2(0);
+    init_Conv();
 #else
     init_beaver();
 #endif

@@ -619,6 +619,14 @@ class ABY2_PRE_Share
         deinit_beaverAB2();
         init_beaverAB2(1);
 
+        init_ConvC();
+#if FAKE_TRIPLES == 1
+        get_conv_triples_from_file();
+        generate_conv_triples(ips, port, process_offset);
+#else
+        generate_conv_triples(ips, port, process_offset);
+#endif
+        deinit_ConvAB();
 
 #endif
 
@@ -765,6 +773,11 @@ class ABY2_PRE_Share
                     lxly_a[0][arithmetic_triple_counter[0]++] = lxly2;
                     break;
                 }
+                case Conv:
+                {
+                    lxly_a[0][arithmetic_triple_counter[0]++] = conv_triple_y[curr_conv_triple_index++];
+                    break;
+                }
                 case CaseTripleAlreadyConsumed:  // Triple already consumed by previous case
                 {
                     break;
@@ -801,6 +814,7 @@ class ABY2_PRE_Share
 #if LX_TRIPLES == 1 
         deinit_beaverC();
         deinit_beaverAB2C();
+        deinit_ConvC();
         init_beaverC(1);
 #if FAKE_TRIPLES == 1
         get_triples_from_file(1, num_arithmetic_triples.data(), num_boolean_triples.data());
@@ -909,6 +923,37 @@ class ABY2_PRE_Share
     }
 
     void get_random_B2A() { l = getRandomVal(PSELF); }
+
+
+    static void SetupConv2dTriples(const ABY2_PRE_Share* X,
+                                   const ABY2_PRE_Share* W,
+                                   ABY2_PRE_Share* Y,
+                                   int batchSize,
+                                   int inh,
+                                   int inw,
+                                   int din,
+                                   int dout,
+                                   int wh,
+                                   int ww,
+                                   int padding,
+                                   int stride,
+                                   int dilation = 1,
+                                   bool ab2 = false)
+    {
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
+        conv_triple_w[curr_conv_triple_index] = new Datatype[wh * ww * din * dout];
+#endif
+
+        conv_triple_x[curr_conv_triple_index] = new Datatype[batchSize * inh * inw * din];
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
+        for (int i = 0; i < wh * ww * din * dout; i++)
+            conv_triple_w[curr_conv_triple_index][i] = W[i].l;
+#endif
+        for (int i = 0; i < batchSize * inh * inw * din; i++)
+            conv_triple_x[curr_conv_triple_index][i] = X[i].l;
+        curr_conv_triple_index++;
+    }
+
 
 #if USE_CUDA_GEMM > 0
 #if USE_CUDA_GEMM == 1

@@ -298,6 +298,9 @@ int base_port = BASE_PORT;  // temporary solution
 #ifndef AB2_TRIPLES
 #define AB2_TRIPLES 1
 #endif
+#ifndef CONV_TRIPLES
+#define CONV_TRIPLES 1
+#endif
 
 #define generate_triple generate_lxly_triple
 #define generate_ab2_triple generate_lxly2_triple

@@ -52,6 +52,56 @@ DATATYPE* boolean_ab2_triple_b = nullptr;
 DATATYPE* boolean_ab2_triple_c = nullptr;
 
 
+        
+
+// const ConvolutionParameter param(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+struct ConvolutionParameter
+{
+    int batchSize;
+    int inh;
+    int inw;
+    int din;
+    int dout;
+    int wh;
+    int ww;
+    int padding;
+    int stride;
+    int dilation;
+    int out_h;
+    int out_w;
+
+    ConvolutionParameter(int batchSize,
+                         int inh,
+                         int inw,
+                         int din,
+                         int dout,
+                         int wh,
+                         int ww,
+                         int padding,
+                         int stride,
+                         int dilation = 1)
+        : batchSize(batchSize),
+          inh(inh),
+          inw(inw),
+          din(din),
+          dout(dout),
+          wh(wh),
+          ww(ww),
+          padding(padding),
+          stride(stride),
+          dilation(dilation)
+    {
+        out_h = (inh + 2 * padding - dilation * (wh - 1) - 1) / stride + 1;
+        out_w = (inw + 2 * padding - dilation * (ww - 1) - 1) / stride + 1;
+    }
+};
+DATATYPE** conv_triple_w = nullptr;
+DATATYPE** conv_triple_x = nullptr;
+DATATYPE** conv_triple_y = nullptr;
+uint64_t curr_conv_triple_index = 0;
+uint64_t num_conv_c_triples = 0;
+std::vector<ConvolutionParameter> conv_triple_params;
+
 template <typename Datatype>
 struct triple
 {
@@ -147,6 +197,42 @@ void init_beaverC(int rounds)
     arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
     boolean_triple_c = new DATATYPE[num_boolean_triples[rounds] ];
     // std::cout << "Initialized beaver C for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
+}
+
+void init_Conv()
+{
+    conv_triple_w = new DATATYPE*[conv_triple_params.size()];
+    conv_triple_x = new DATATYPE*[conv_triple_params.size()];
+    conv_triple_y = new DATATYPE*[conv_triple_params.size()];
+}
+
+void init_ConvC()
+{
+    conv_triple_y = new DATATYPE*[conv_triple_params.size()];
+    for(int i = 0; i < conv_triple_params.size(); i++)
+    {
+        conv_triple_y[i] = new DATATYPE[conv_triple_params[i].batchSize * (((conv_triple_params[i].out_h + 0) / 1) * (((conv_triple_params[i].out_w + 0) / 1)) * conv_triple_params[i].dout];
+    }
+}
+
+void deinit_ConvAB()
+{
+    for(int i = 0; i < conv_triple_params.size(); i++)
+    {
+        delete[] conv_triple_w[i];
+        delete[] conv_triple_x[i];
+    }
+    delete[] conv_triple_w;
+    delete[] conv_triple_x;
+}
+
+void deinit_ConvC()
+{
+    for(int i = 0; i < conv_triple_params.size(); i++)
+    {
+        delete[] conv_triple_y[i];
+    }
+    delete[] conv_triple_y;
 }
 
 void init_beaverAB2(int rounds)
@@ -302,5 +388,12 @@ void print_num_triples()
               << std::endl;
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
                 << "Boolean AB2 Beaver Triples Required: " << total_ab2_boolean_triples_num * DATTYPE << std::endl;
+    for(int i = 0; i < conv_triple_params.size(); i++)
+    {
+        std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+                  << "Convolution Triples Required for layer " << i << ": " 
+                  << conv_triple_params[i].batchSize * (((conv_triple_params[i].out_h + 0) / 1) * (((conv_triple_params[i].out_w + 0) / 1)) * conv_triple_params[i].dout)
+                  << std::endl;
+    }
 #endif
 }

@@ -380,9 +380,13 @@ class ABY2_init
 #if SKIP_PRE == 1
         return;
 #endif
-        triple_type.push_back(new uint8_t[num_arithmetic_triples[0] + num_boolean_triples[0] + num_ab2_arithmetic_triples[0] + num_ab2_boolean_triples[0] + preprocessed_outputs_index]);
+        uint64_t total_num_output_triples_round0 = num_arithmetic_triples[0] + num_boolean_triples[0] + num_ab2_arithmetic_triples[0] + num_ab2_boolean_triples[0] + preprocessed_outputs_index;
+        for (uint64_t i = 0; i < num_conv_c_triples; i++)
+            total_num_output_triples_round0 += i;
+        uint64_t total_num_output_triples_round1 = num_arithmetic_triples[1] + num_boolean_triples[1] + num_ab2_arithmetic_triples[1] + num_ab2_boolean_triples[1];
+        triple_type.push_back(new uint8_t[total_num_output_triples_round0]);
         triple_type_index.push_back(0);
-        triple_type.push_back(new uint8_t[num_arithmetic_triples[1] + num_boolean_triples[1] + num_ab2_arithmetic_triples[1] + num_ab2_boolean_triples[1]]);
+        triple_type.push_back(new uint8_t[total_num_output_triples_round1]);
         triple_type_index.push_back(0);
     }
 
@@ -431,6 +435,26 @@ class ABY2_init
     }
 
     void get_random_B2A() {}
+
+        // T::SetupConv2dTriples(prev_out.data(), kernel.data(), this->output.data(),batch, ic, oc, ih, iw, kh, kw, stride, pad);
+    static void SetupConv2dTriples(const ABY2_init* X,
+                                   const ABY2_init* W,
+                                   ABY2_init* Y,
+                                   int batchSize,
+                                   int inh,
+                                   int inw,
+                                   int din,
+                                   int dout,
+                                   int wh,
+                                   int ww,
+                                   int padding,
+                                   int stride,
+                                   int dilation = 1,
+                                   bool ab2 = false)
+    {
+        conv_triple_params.push_back(ConvolutionParameter(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation));
+        num_conv_c_triples += batchSize * conv_triple_params.back().out_h * conv_triple_params.back().out_w * dout;
+    }
 
 #if USE_CUDA_GEMM == 2
     static void CONV_2D(const ABY2_init* X,
