@@ -23,7 +23,7 @@ HE_LIBS := -lHE -lgemini -lseal-4.0
 CHEETAH_FLAGS := $(HE_INCLUDE) $(HE_PATHS) $(HE_LIBS)
 
 # Base flags
-EXECFLAGS := -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -Wno-ignored-attributes
+EXECFLAGS := -march=native -g -fno-finite-math-only -std=c++20 -pthread -Wno-ignored-attributes
 LINKFLAGS := -lssl -lcrypto -I nn/PIGEON ${CHEETAH_FLAGS}
 
 CXXFLAGS := $(EXECFLAGS) $(LINKFLAGS)

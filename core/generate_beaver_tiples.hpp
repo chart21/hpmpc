@@ -130,10 +130,12 @@ void generateArithmeticDummyTriples(type a[],
                                     std::string ip,
                                     int port)
 {
+    std::cout << "ARITH AB\n";
+
     if (num_triples == 0)
         return;
 
-    port = 6969;
+    port += 10;
 
     //convert SIMD variables to regular uints
     const int vectorization_factor = DATTYPE / bitlength;
@@ -166,9 +168,11 @@ void generateBooleanDummyTriples(type a[],
                                  int port,
                                  int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
 {
+    std::cout << "ARITH AB\n";
+
     if(num_triples == 0) return;
 
-    port = 6969;
+    port += 10;
 
     //reinterpret SIMD bitstream as uint8 bitstream
     uint8_t* uint_a = (uint8_t*) a;
@@ -192,9 +196,11 @@ void generateArithmeticAB2DummyTriples(type a[],
                                     std::string ip,
                                     int port)
 {
+    std::cout << "ARITH AB2\n";
+
     if(num_triples == 0) return;
 
-    port = 6969;
+    port += 10;
 
     //convert SIMD variables to regular uints
     const int vectorization_factor = DATTYPE / bitlength; 
@@ -245,9 +251,11 @@ void generateBooleanAB2DummyTriples(type a[],
                                  int port,
                                  int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
 {
+    std::cout << "BOOL AB2\n";
+
     if(num_triples == 0) return;
 
-    port = 6969;
+    port += 10;
 
     //reinterpret SIMD bitstream as uint8 bitstream
     uint8_t* uint_a = (uint8_t*) a;
