@@ -20,6 +20,8 @@ class ABY2_PRE_Share
 #define CaseScalarBoolAKnown 13
 #define CaseScalarArithAKnown 14
 #define CaseConv 15
+#define CaseBatchNorm2D 16
+#define CaseFullyConnected 17
 #define CaseTripleAlreadyConsumed 99
 #define CaseDefault 2
 
@@ -799,6 +801,8 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
         curr_arithmetic_triple_index = 0;
         curr_boolean_triple_index = 0;
         curr_conv_triple_index = 0;
+        curr_fc_triple_index = 0;
+        curr_bc2D_triple_index = 0;
         arithmetic_triple_index = 0;
         boolean_triple_index = 0;
 
@@ -929,6 +933,16 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
                 case CaseConv:
                 {
                     lxly_a[0][arithmetic_triple_counter[0]++] = conv_triple_y[curr_conv_triple_index++];
+                    break;
+                }
+                case CaseBatchNorm2D:
+                {
+                    lxly_a[0][arithmetic_triple_counter[0]++] = bc2D_triple_y[curr_bc2D_triple_index++];
+                    break;
+                }
+                case CaseFullyConnected:
+                {
+                    lxly_a[0][arithmetic_triple_counter[0]++] = fc_triple_y[curr_fc_triple_index++];
                     break;
                 }
                 case CaseTripleAlreadyConsumed:  // Triple already consumed by previous case
@@ -1091,7 +1105,7 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
                                    int padding,
                                    int stride,
                                    int dilation = 1,
-                                   bool ab2 = false)
+                                   bool ab2 = true)
     {
 #if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         conv_triple_w[curr_conv_triple_index] = new Datatype[wh * ww * din * dout];
@@ -1111,6 +1125,62 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
         curr_conv_triple_index++;
     }
 
+    static void SetupFullyConnectedTriples(const ABY2_PRE_Share* X,
+                                   const ABY2_PRE_Share* W,
+                                   ABY2_PRE_Share* Y,
+                                   int batchSize,
+                                   int in_feat,
+                                   int out_feat
+                                   bool ab2 = true)
+    {
+        const uint64_t w_size = in_feat * out_feat;
+        const uint64_t y_size = out_feat * batchSize;
+        const uint64_t x_size = in_feat * batchSize;
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
+        fc_triple_w[curr_fc_triple_index] = new Datatype[w_size];
+#endif
+
+        fc_triple_x[curr_fc_triple_index] = new Datatype[batchSize * inh * inw * din];
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
+        for (int i = 0; i < w_size; i++)
+            fc_triple_w[curr_fc_triple_index][i] = W[i].l;
+#endif
+        for (int i = 0; i < x_size; i++)
+            fc_triple_x[curr_fc_triple_index][i] = X[i].l;
+
+        for(uint64_t i = 0; i < y_size; i++)
+            triple_type[0][triple_type_index[0]++] = CaseFullyConnected;
+        curr_fc_triple_index++;
+    }
+    
+    static void SetupBatchNorm2DTriples(const ABY2_PRE_Share* X,
+                                   const ABY2_PRE_Share* W,
+                                   ABY2_PRE_Share* Y,
+                                   int batchSize,
+                                   int ch,
+                                   int h,
+                                   int w,
+                                   bool ab2 = true)
+    {
+        const uint64_t w_size = in_feat * out_feat;
+        const uint64_t x_size = ch * h * w * batchSize
+        const uint64_t y_size = ch;
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
+        bc2D_triple_w[curr_bc2D_triple_index] = new Datatype[w_size];
+#endif
+
+        bc2D_triple_x[curr_bc2D_triple_index] = new Datatype[batchSize * inh * inw * din];
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
+        for (int i = 0; i < w_size; i++)
+            bc2D_triple_w[curr_bc2D_triple_index][i] = W[i].l;
+#endif
+        for (int i = 0; i < x_size; i++)
+            bc2D_triple_x[curr_bc2D_triple_index][i] = X[i].l;
+
+        for(uint64_t i = 0; i < y_size; i++)
+            triple_type[0][triple_type_index[0]++] = CaseBatchNorm2D;
+        curr_bc2D_triple_index++;
+    }
 
 #if USE_CUDA_GEMM > 0
 #if USE_CUDA_GEMM == 1

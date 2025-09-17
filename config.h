@@ -292,14 +292,25 @@ int base_port = BASE_PORT;  // temporary solution
 
 #if PROTOCOL == 4
 #define BEAVER 1
+
 #ifndef LX_TRIPLES
 #define LX_TRIPLES 1  // Generate lx ly shares directly
 #endif
+
 #ifndef AB2_TRIPLES
 #define AB2_TRIPLES 1
 #endif
+
 #ifndef CONV_TRIPLES
 #define CONV_TRIPLES 1
+#endif
+
+#ifndef BN2D_TRIPLES
+#define BN2D_TRIPLE 1
+#endif
+
+#ifndef FC_TRIPLES
+#define FC_TRIPLES 1
 #endif
 
 #define generate_triple generate_lxly_triple

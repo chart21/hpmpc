@@ -17,6 +17,10 @@ struct ConvolutionParameter
     int dilation;
     int out_h;
     int out_w;
+    int x_size_per_batch;
+    int w_size_per_batch;
+    int y_size_per_batch;
+
 
     ConvolutionParameter(int batchSize,
                          int inh,
@@ -41,8 +45,39 @@ struct ConvolutionParameter
     {
         out_h = (inh + 2 * padding - dilation * (wh - 1) - 1) / stride + 1;
         out_w = (inw + 2 * padding - dilation * (ww - 1) - 1) / stride + 1;
+        x_size_per_batch = inh * inw * din;
+        w_size_per_batch = wh * ww * dout;
+        y_size_per_batch = out_h * out_w * dout;
     }
 };
+
+struct BatchNorm2DParameter
+{
+		int batchSize;
+		int ch;
+		int h;
+		int w;
+		int hw;
+    int x_size_per_batch;
+    int w_size_per_batch;
+    int y_size_per_batch;
+        x_size_per_batch = ch * h * w;
+        w_size_per_batch = ch;
+        y_size_per_batch = x_size_per_batch;
+}
+
+struct FullyConnectedParameter
+{
+    int batch;
+    int in_feat;
+    int out_feat;
+    int x_size_per_batch;
+    int w_size_per_batch;
+    int y_size_per_batch;
+        x_size_per_batch = in_feat;
+        w_size_per_batch = in_feat * out_feat;
+        y_size_per_batch = out_feat;
+}
 
 #if FAKE_TRIPLES == 0
 #define generateArithmeticTriples generateArithmeticDummyTriples
@@ -67,6 +102,15 @@ void generateArithmeticDummyTriples(type a[],
 
     //convert SIMD variables to regular uints
     const int vectorization_factor = DATTYPE / bitlength; 
+
+    if(vectorization_factor == 1) // No need to unvectorize
+        {
+            UINT_TYPE* uint_a = a;
+            UINT_TYPE* uint_a = b;
+            UINT_TYPE* uint_a = c;
+            return;
+        }
+
     UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]);
     unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
     UINT_TYPE* uint_b = NEW(UINT_TYPE[num_triples]);
@@ -127,6 +171,14 @@ void generateArithmeticAB2DummyTriples(type a[],
 
     //convert SIMD variables to regular uints
     const int vectorization_factor = DATTYPE / bitlength; 
+
+    if(vectorization_factor == 1) // No need to unvectorize
+        {
+            UINT_TYPE* uint_a = a;
+            UINT_TYPE* uint_a = b;
+            UINT_TYPE* uint_a = c;
+            return;
+        }
     UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]);
     unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
 #if PARTY == 1
@@ -185,18 +237,83 @@ void generateBooleanAB2DummyTriples(type a[],
 }
 
 
-//Input: arrays of convolution triple shares [a], [b] with sizes predefined by convolution params
-//Output: Contigious array of convolution triple shares [c] storing the output
-template <typename type>
-void generateConvDummyTriples(type** a,
+//Input: arrays of layer triple shares [a], [b] with sizes predefined by convolution params
+//Output: Contigious array of clayer triple shares [c] storing the output
+template <typename type, typename LayerParams>
+void generateLayerDummyTriples(type** a,
                               type** b,
                               type c[],
                               int bitlength,
-                              std::vector<ConvolutionParameter> params,
+                              std::vector<LayerParams> params,
                               std::string ip,
                               int port)
 {
+
+    const int factor = DATTYPE/BITLENGTH;
+    if(factor == 1) // No need to unvectorize
+        {
+            UINT_TYPE* uint_w = a;
+            UINT_TYPE* uint_x = b;
+            UINT_TYPE* uint_y = c;
+        for(int n = 0; n < params.size(); n++)
+        {
+            auto p = params[i];
+           // Layer(w,x,y, p) // calculate Layer operation
+             
+        } 
+            return;
+        }
+
+        uint64_t c_index = 0;
+        for(int n = 0; n < params.size(); n++)
+        {
+            auto p = params[i];
+            const uint64_t x_size = p.x_size_per_batch * p.batchSize;
+            const uint64_t w_size = p.x_size_per_batch;
+            const uint64_t y_size = p.y_size_per_batch * p.batchSize;
+        
+            UINT_TYPE* x = new UINT_TYPE[factor * xSize];
+           #if AB2 == 0 || PARTY == 1 
+            UINT_TYPE* w = new UINT_TYPE[wSize];  // W is always constant
+            #else 
+            UINT_TYPE* w = nullptr; 
+           #endif 
+            UINT_TYPE* y = new UINT_TYPE[factor * ySize];
+
+        for (int i = 0; i < xSize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&a[n][i], temp, 1);
+            for (int j = 0; j < factor; j++)
+                x[j * xSize + i] = temp[j]; 
+        }
+        #if AB2 == 0 || PARTY == 1 
+        for (int i = 0; i < wSize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&tempml, temp, 1);
+            w[i] = temp[0];
+        }
+        #endif
+
+        p.batchSize *= factor;
+        // Conv2D(w,x,y, p) // calculate layer operation
+        for (int i = 0; i < ySize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            for (int j = 0; j < factor; j++)
+                temp[j] = y[j * ySize + i];
+            orthogonalize_arithmetic(temp, c + c_index + i, 1);
+        }
+        delete[] x;
+        delete[] w;
+        delete[] y;
+        c_index += ySize;
+        }
 }
+
+
+
 
 #else
 
@@ -204,7 +321,7 @@ void generateConvDummyTriples(type** a,
 #define generateBooleanTriples generateFakeBooleanTriples
 #define generateArithmeticAB2Triples generateFakeArithmeticTriples
 #define generateBooleanAB2Triples generateFakeBooleanTriples
-#define generateConvTriples generateFakeConvTriples
+#define generateConvTriples generateFakeLayerTriples
 
 template <typename type>
 void generateFakeArithmeticTriples(type a[],
@@ -250,8 +367,8 @@ void generateFakeAB2BooleanTriples(type a[],
 {
 }
 
-template <typename type>
-void generateFakeConvTriples(type** a,
+template <typename type, typeName LayerParams>
+void generateFakeLayerTriples(type** a,
                              type** b,
                              type c[],
                              int bitlength,

@@ -61,7 +61,22 @@ uint64_t curr_conv_triple_index = 0;
 uint64_t num_conv_c_triples = 0;
 std::vector<ConvolutionParameter> conv_triple_params;
 
-template <typename Datatype>
+DATATYPE** fc_triple_w = nullptr;
+DATATYPE** fc_triple_x = nullptr;
+DATATYPE* fc_triple_y = nullptr;
+uint64_t curr_fc_triple_index = 0;
+uint64_t num_fc_c_triples = 0;
+std::vector<FullyConnectedParameter> fc_triple_params;
+
+DATATYPE** bc2D_triple_w = nullptr;
+DATATYPE** bc2D_triple_x = nullptr;
+DATATYPE* bc2D_triple_y = nullptr;
+uint64_t curr_bc2D_triple_index = 0;
+uint64_t num_bc2D_c_triples = 0;
+std::vector<BatchNorm2DParameter> bc2D_triple_params;
+
+
+ <typename Datatype>
 struct triple
 {
     Datatype a;
@@ -158,12 +173,12 @@ void init_beaverC(int rounds)
     // std::cout << "Initialized beaver C for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 
-void init_Conv()
+void init_Layer(DATATYPE** x, DATATYPE** w, size)
 {
 #if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
-    conv_triple_x = new DATATYPE*[conv_triple_params.size()];
+   x = new DATATYPE*[size]
 #endif
-    conv_triple_w = new DATATYPE*[conv_triple_params.size()];
+   x = new DATATYPE*[size]
 }
 
 void init_ConvC()
