@@ -635,6 +635,26 @@ class ABY2_ONLINE_Share
                                    bool ab2 = false)
     {}
 
+    static void SetupFullyConnectedTriples(const ABY2_ONLINE_Share* X,
+                                   const ABY2_ONLINE_Share* W,
+                                   ABY2_ONLINE_Share* Y,
+                                   int batchSize,
+                                   int in_feat,
+                                   int out_feat,
+                                   bool ab2 = true)
+    {}
+    
+    static void SetupBatchNorm2DTriples(const ABY2_ONLINE_Share* X,
+                                   const ABY2_ONLINE_Share* W,
+                                   ABY2_ONLINE_Share* Y,
+                                   int batchSize,
+                                   int ch,
+                                   int h,
+                                   int w,
+                                   bool ab2 = true)
+    {}
+
+
 #if USE_CUDA_GEMM == 2
     static void CONV_2D(const ABY2_ONLINE_Share* X,
                         const ABY2_ONLINE_Share* W,

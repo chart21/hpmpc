@@ -454,6 +454,33 @@ class ABY2_init
         num_conv_c_triples += batchSize * conv_triple_params.back().out_h * conv_triple_params.back().out_w * dout;
     }
 
+    static void SetupFullyConnectedTriples(const ABY2_init* X,
+                                   const ABY2_init* W,
+                                   ABY2_init* Y,
+                                   int batchSize,
+                                   int in_feat,
+                                   int out_feat,
+                                   bool ab2 = true)
+    {
+        fc_triple_params.push_back(FullyConnectedParameter(batchSize, in_feat, out_feat));
+        num_fc_c_triples += batchSize * out_feat;
+    }
+    
+    static void SetupBatchNorm2DTriples(const ABY2_init* X,
+                                   const ABY2_init* W,
+                                   ABY2_init* Y,
+                                   int batchSize,
+                                   int ch,
+                                   int h,
+                                   int w,
+                                   bool ab2 = true)
+    {
+        bc2D_triple_params.push_back(BatchNorm2DParameter(batchSize, ch, h, w));
+        num_bc2D_c_triples += batchSize * ch * h * w;
+    }
+
+
+
 #if USE_CUDA_GEMM == 2
     static void CONV_2D(const ABY2_init* X,
                         const ABY2_init* W,

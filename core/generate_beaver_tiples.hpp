@@ -61,23 +61,44 @@ struct BatchNorm2DParameter
     int x_size_per_batch;
     int w_size_per_batch;
     int y_size_per_batch;
+    BatchNorm2DParameter(int batchSize,
+                         int ch,
+                         int h,
+                         int w)
+        : batchSize(batchSize),
+          ch(ch),
+          h(h),
+          w(w)
+    {
+        hw = h * w;
         x_size_per_batch = ch * h * w;
         w_size_per_batch = ch;
         y_size_per_batch = x_size_per_batch;
-}
+    }
+};
+
+
 
 struct FullyConnectedParameter
 {
-    int batch;
+    int batchSize;
     int in_feat;
     int out_feat;
     int x_size_per_batch;
     int w_size_per_batch;
     int y_size_per_batch;
+    FullyConnectedParameter(int batch,
+                            int in_feat,
+                            int out_feat)
+        : batchSize(batch),
+          in_feat(in_feat),
+          out_feat(out_feat)
+    {
         x_size_per_batch = in_feat;
         w_size_per_batch = in_feat * out_feat;
         y_size_per_batch = out_feat;
-}
+    }
+};
 
 #if FAKE_TRIPLES == 0
 #define generateArithmeticTriples generateArithmeticDummyTriples
@@ -367,12 +388,12 @@ void generateFakeAB2BooleanTriples(type a[],
 {
 }
 
-template <typename type, typeName LayerParams>
+template <typename type, typename LayerParams>
 void generateFakeLayerTriples(type** a,
                              type** b,
                              type c[],
                              int bitlength,
-                             std::vector<ConvolutionParameter> params,
+                             std::vector<LayerParams> params,
                              std::string ip,
                              int port)
 {

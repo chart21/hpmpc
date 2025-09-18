@@ -732,15 +732,154 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
         for (uint64_t j = 0; j < y_size; j++)
         {
 #if PARTY == 1
-            conv_triple_y[y_index_counter + i * y_size + j] = OP_SUB( conv_triple_y[i * y_size + j], getRandomVal(PNEXT));
+            conv_triple_y[y_index_counter + j] = OP_SUB( conv_triple_y[y_index_counter+ j], getRandomVal(PNEXT));
 #else
-            conv_triple_y[y_index_counter + i * y_size + j] = getRandomVal(PNEXT);
+            conv_triple_y[y_index_counter + j] = getRandomVal(PNEXT);
 #endif
         }
 
         y_index_counter += m * dout + batchSize;
     }
 }
+
+static void get_batchnorm2D_triples_from_file()
+    {
+        uint64_t curr_x_triple_index = 0;
+        uint64_t y_index_counter = 0;
+        for (uint64_t i = 0; i < bc2D_triple_params.size(); i++)
+        {
+    // const int m = out_h * out_w * batchSize;
+    // const int k = wh * ww * din;
+    // const int n = dout;
+        const int ch = bc2D_triple_params[i].ch;
+        const int h = bc2D_triple_params[i].h;
+        const int w = bc2D_triple_params[i].w;
+        const int hw = h * w;
+        const uint64_t w_size = bc2D_triple_params[i].w_size_per_batch;
+        const uint64_t x_size = bc2D_triple_params[i].batchSize * bc2D_triple_params[i].x_size_per_batch;
+        const uint64_t y_size = bc2D_triple_params[i].batchSize * bc2D_triple_params[i].y_size_per_batch;
+#if PARTY == 0
+        uint64_t own_w_size = 0;
+        uint64_t own_x_size = x_size;
+        uint64_t other_x_size = x_size;
+        uint64_t other_w_size = w_size;
+#else
+        uint64_t own_w_size = w_size;
+        uint64_t own_x_size = x_size;
+        uint64_t other_x_size = x_size;
+        uint64_t other_w_size = 0;
+#endif
+
+        std::string file_ending = "pre_batchnorm2D";
+        file_ending += std::to_string(i);
+        Datatype* nullp = new Datatype[1];
+        uint64_t nulls = 1;
+        save_triple_file(bc2D_triple_w[i], own_w_size, bc2D_triple_x[i], own_x_size, nullp, nulls, nullp, nulls, std::to_string(PARTY), file_ending);
+        Datatype* other_bc2D_triple_x = new Datatype[other_x_size];
+        Datatype* other_bc2D_triple_w = new Datatype[other_w_size];
+        load_triple_file(other_bc2D_triple_w, other_w_size, other_bc2D_triple_x, other_x_size, nullp, nulls, nullp, nulls, std::to_string(1 - PARTY), file_ending);
+        delete_triple_file(std::to_string(1 - PARTY), file_ending);
+        delete[] nullp;
+#if PARTY == 1
+        for (uint64_t j = 0; j < x_size; j++)
+        {
+            bc2D_triple_x[i][j] = OP_ADD(bc2D_triple_x[i][j], other_bc2D_triple_x[j]);
+        }
+        for (int n = 0; n < bc2D_triple_params[i].batchSize; n++)
+        {
+            int x_offset = n * ch * hw;
+            int y_offset = n * ch * hw;
+            for (int c = 0; c < ch; c++)
+            {
+                for (int hw_idx = 0; hw_idx < hw; hw_idx++)
+                {
+                    bc2D_triple_y[y_index_counter + y_offset + c * hw + hw_idx] = OP_MULT(bc2D_triple_x[i][x_offset + c * hw + hw_idx], bc2D_triple_w[i][c]);
+                }
+            }
+        }
+#endif 
+        for (uint64_t j = 0; j < y_size; j++)
+        {
+#if PARTY == 1
+            bc2D_triple_y[j + y_index_counter] = OP_SUB( bc2D_triple_y[y_index_counter + j], getRandomVal(PNEXT));
+#else
+            bc2D_triple_y[j + y_index_counter] = getRandomVal(PNEXT);
+#endif
+        }
+
+        y_index_counter += y_size;
+    }
+}
+
+static void get_fc_triples_from_file()
+    {
+        uint64_t curr_x_triple_index = 0;
+        uint64_t y_index_counter = 0;
+        for (uint64_t i = 0; i < fc_triple_params.size(); i++)
+        {
+            const int in_feat = fc_triple_params[i].in_feat;
+            const int out_feat = fc_triple_params[i].out_feat;
+            const int batchSize = fc_triple_params[i].batchSize;
+            const uint64_t x_size = fc_triple_params[i].x_size_per_batch * batchSize;
+            const uint64_t w_size = fc_triple_params[i].w_size_per_batch;
+            const uint64_t y_size = fc_triple_params[i].y_size_per_batch * batchSize;
+#if PARTY == 0
+            uint64_t own_w_size = 0;
+            uint64_t own_x_size = x_size;
+            uint64_t other_x_size = x_size;
+            uint64_t other_w_size = w_size;
+#else
+            uint64_t own_w_size = w_size;
+            uint64_t own_x_size = x_size;
+            uint64_t other_x_size = x_size;
+            uint64_t other_w_size = 0;
+#endif
+
+            std::string file_ending = "pre_fc";
+            file_ending += std::to_string(i);
+            Datatype* nullp = new Datatype[1];
+            uint64_t nulls = 1;
+            save_triple_file(fc_triple_w[i], own_w_size, fc_triple_x[i], own_x_size, nullp, nulls, nullp, nulls, std::to_string(PARTY), file_ending);
+            Datatype* other_fc_triple_x = new Datatype[other_x_size];
+            Datatype* other_fc_triple_w = new Datatype[other_w_size];
+            load_triple_file(other_fc_triple_w, other_w_size, other_fc_triple_x, other_x_size, nullp, nulls, nullp, nulls, std::to_string(1 - PARTY), file_ending);
+            delete_triple_file(std::to_string(1 - PARTY), file_ending);
+            delete[] nullp;
+#if PARTY == 1
+            for (uint64_t j = 0; j < x_size; j++)
+            {
+            fc_triple_x[i][j] = OP_ADD(fc_triple_x[i][j], other_fc_triple_x[j]);
+            }
+            for (int n = 0; n < batchSize; n++)
+            {
+                int x_offset = n * in_feat;
+                int y_offset = n * out_feat;
+                for (int o = 0; o < out_feat; o++)
+                {
+                    fc_triple_y[y_index_counter + y_offset + o] = PROMOTE(0);
+                    for (int in = 0; in < in_feat; in++)
+                    {
+                        fc_triple_y[y_index_counter + y_offset + o] = OP_ADD(fc_triple_y[y_index_counter + y_offset + o], OP_MULT(fc_triple_x[i][x_offset + in], fc_triple_w[i][o * in_feat + in]));
+                    }
+                }
+            }
+#endif
+            for (uint64_t j = 0; j < y_size; j++)
+            {
+#if PARTY == 1
+                fc_triple_y[y_index_counter + j] = OP_SUB( fc_triple_y[y_index_counter + j], getRandomVal(PNEXT));
+#else
+                fc_triple_y[y_index_counter + j] = getRandomVal(PNEXT);
+#endif
+            }
+
+            y_index_counter += y_size;
+        }
+    }
+
+
+
+
 
 
 
@@ -781,8 +920,33 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
                 ips, port, process_offset, num_conv_c_triples, 0, "CONV");
 #endif
         deinit_ConvAB();
-
 #endif
+
+        init_BatchNorm2DC();
+#if FAKE_TRIPLES == 1
+        get_batchnorm2D_triples_from_file();
+        generate_beaver_triples(
+                ips, port, process_offset, num_bc2D_c_triples, 0, "BATCHNORM2D");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_batchnorm2D_triples, 0, "BATCHNORM2D");
+#endif
+        deinit_BatchNorm2DAB();
+
+        init_FullyConnectedC();
+#if FAKE_TRIPLES == 1
+        get_fc_triples_from_file();
+        generate_beaver_triples(
+                ips, port, process_offset, num_fc_c_triples, 0, "FC");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_triples, 0, "FC");
+#endif
+
+
+        deinit_FullyConnectedAB();
+
+
 
 
         communicate_pre();
@@ -982,6 +1146,8 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
         deinit_beaverC();
         deinit_beaverAB2C();
         deinit_ConvC();
+        deinit_BatchNorm2DC();
+        deinit_FullyConnectedC();
         init_beaverC(1);
 #if FAKE_TRIPLES == 1
         get_triples_from_file(1, num_arithmetic_triples.data(), num_boolean_triples.data());
@@ -1130,7 +1296,7 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
                                    ABY2_PRE_Share* Y,
                                    int batchSize,
                                    int in_feat,
-                                   int out_feat
+                                   int out_feat,
                                    bool ab2 = true)
     {
         const uint64_t w_size = in_feat * out_feat;
@@ -1140,7 +1306,7 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
         fc_triple_w[curr_fc_triple_index] = new Datatype[w_size];
 #endif
 
-        fc_triple_x[curr_fc_triple_index] = new Datatype[batchSize * inh * inw * din];
+        fc_triple_x[curr_fc_triple_index] = new Datatype[x_size];
 #if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         for (int i = 0; i < w_size; i++)
             fc_triple_w[curr_fc_triple_index][i] = W[i].l;
@@ -1162,14 +1328,14 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
                                    int w,
                                    bool ab2 = true)
     {
-        const uint64_t w_size = in_feat * out_feat;
-        const uint64_t x_size = ch * h * w * batchSize
-        const uint64_t y_size = ch;
+        const uint64_t w_size = ch;
+        const uint64_t x_size = ch * h * w * batchSize;
+        const uint64_t y_size = ch * h * w * batchSize;
 #if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         bc2D_triple_w[curr_bc2D_triple_index] = new Datatype[w_size];
 #endif
 
-        bc2D_triple_x[curr_bc2D_triple_index] = new Datatype[batchSize * inh * inw * din];
+        bc2D_triple_x[curr_bc2D_triple_index] = new Datatype[x_size];
 #if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         for (int i = 0; i < w_size; i++)
             bc2D_triple_w[curr_bc2D_triple_index][i] = W[i].l;
