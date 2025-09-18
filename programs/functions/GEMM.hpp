@@ -14,7 +14,11 @@ void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_row
 
 #if PUBLIC_WEIGHTS == 0
 #if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if FC_TRIPLES == 1 
+            sum += W[i * w_cols + j].prepare_dot_ex_lxly_a_known(A[j]);
+#else
             sum += W[i * w_cols + j].prepare_dot_a_known(A[j]);
+#endif
 #else
             sum += W[i * w_cols + j].prepare_dot(A[j]);
 #endif
@@ -25,9 +29,17 @@ void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_row
 
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
+#if FC_TRIPLES == 1
+        sum.mask_and_send_dot_without_trunc_with_triple();  // send immediately to utilize network better
+#else
         sum.mask_and_send_dot_without_trunc();  // send immediately to utilize network better
+#endif
+#else
+#if FC_TRIPLES == 1
+        sum.mask_and_send_dot_with_triple();
 #else
         sum.mask_and_send_dot();
+#endif
 #endif
 #else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
@@ -81,7 +93,11 @@ void prepare_GEMM_CPU(const T* A, const T* B, T* C, const int m, const int p, co
                                 for (int i = 0; i < T::getNumDotProducts(); ++i)
                                 {
 #if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if CONV_TRIPLES == 1 
+                                    temps[i] += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk], i); 
+#else
                                     temps[i] += A[iif + kk].prepare_dot_a_known(B[jjf + kk], i); 
+#endif
 #else
                                     temps[i] += A[iif + kk].prepare_dot(B[jjf + kk], i);
 #endif
@@ -89,13 +105,21 @@ void prepare_GEMM_CPU(const T* A, const T* B, T* C, const int m, const int p, co
                                 temp.join_dots(temps);
 #elif FUSE_DOT == 1
 #if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if CONV_TRIPLES == 1 
+                                temp += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk]);
+#else
                                 temp += A[iif + kk].prepare_dot_a_known(B[jjf + kk]);
+#endif
 #else
                                 temp += A[iif + kk].prepare_dot(B[jjf + kk]);
 #endif
 #elif FUSE_DOT == 2
 #if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if CONV_TRIPLES == 1 
+                                Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk], t);
+#else
                                 Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot_a_known(B[jjf + kk], t);
+#endif
 #else
                                 Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot(B[jjf + kk], t);
 #endif
@@ -121,9 +145,18 @@ void prepare_GEMM_CPU(const T* A, const T* B, T* C, const int m, const int p, co
                     {
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
+#if CONV_TRIPLES == 1
+                        C[row + jj].mask_and_send_dot_without_trunc_with_triple();
+#else
                         C[row + jj].mask_and_send_dot_without_trunc();
+#endif
+#else
+#if CONV_TRIPLES == 1
+                        C[row + jj].mask_and_send_dot_with_triple();
 #else
                         C[row + jj].mask_and_send_dot();
+#endif
+
 #endif
 #else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
@@ -201,9 +234,17 @@ void send_GEMM_GPU(T* C, const int m, const int p)
     {
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
+#if FC_TRIPLES == 1
+        C[j].mask_and_send_dot_without_trunc_with_triple();
+#else
         C[j].mask_and_send_dot_without_trunc();
+#endif
+#else
+#if FC_TRIPLES == 1
+        C[j].mask_and_send_dot_with_triple();
 #else
         C[j].mask_and_send_dot();
+#endif
 #endif
 #else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0

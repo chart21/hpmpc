@@ -173,21 +173,6 @@ void init_beaverC(int rounds)
     // std::cout << "Initialized beaver C for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 
-template <typename LayerParameter>
-void init_LayerAB(DATATYPE** x, DATATYPE** w, std::vector<LayerParameter> p)
-{
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
-   w = new DATATYPE*[p.size()];
-#endif
-   x = new DATATYPE*[p.size()];
-   for(int i = 0; i < p.size(); i++)
-   {
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
-       w[i] = new DATATYPE[p[i].x_size_per_batch * p[i].batchSize];
-#endif
-       x[i] = new DATATYPE[p[i].w_size_per_batch];
-   }
-}
 
 template <typename LayerParameter>
 void deinit_LayerAB(DATATYPE** x, DATATYPE** w, std::vector<LayerParameter> p)
@@ -199,25 +184,26 @@ void deinit_LayerAB(DATATYPE** x, DATATYPE** w, std::vector<LayerParameter> p)
 #endif
         delete[] x[i];
     }
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
     delete[] w;
-#endif
     delete[] x;
 }
 
 void init_ConvAB()
 {
-    init_LayerAB(conv_triple_x, conv_triple_w, conv_triple_params);
+    conv_triple_w = new DATATYPE*[conv_triple_params.size()]; 
+    conv_triple_x = new DATATYPE*[conv_triple_params.size()];
 }
 
 void init_BatchNorm2DAB()
 {
-    init_LayerAB(bc2D_triple_x, bc2D_triple_w, bc2D_triple_params);
+    bc2D_triple_w = new DATATYPE*[bc2D_triple_params.size()];
+    bc2D_triple_x = new DATATYPE*[bc2D_triple_params.size()];
 }
 
 void init_FullyConnectedAB()
 {
-    init_LayerAB(fc_triple_x, fc_triple_w, fc_triple_params);
+    fc_triple_w = new DATATYPE*[fc_triple_params.size()];
+    fc_triple_x = new DATATYPE*[fc_triple_params.size()];
 }
 
 void init_ConvC()

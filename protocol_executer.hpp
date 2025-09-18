@@ -141,6 +141,8 @@ void beaver(std::string ips[])
     init_beaverAB(0);
     init_beaverAB2(0);
     init_ConvAB();
+    init_BatchNorm2DAB();
+    init_FullyConnectedAB();
 #else
     init_beaver();
 #endif

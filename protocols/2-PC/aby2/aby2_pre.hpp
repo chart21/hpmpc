@@ -224,8 +224,8 @@ class ABY2_PRE_Share
         l = getRandomVal(PSELF);
     }
     
-    template <typename func_add, typename func_sub>
-    void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB)
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC)
     {
         l = getRandomVal(PSELF);
     }
@@ -641,29 +641,38 @@ static void im2col_l(const T* data_im, int channels, int height, int width, int 
     // GEMM_l(X_col, other_conv_triple_w, conv_triple_y[i], m, dout, k, true);
 static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int p, int f, bool a_fixed)
 {
+    std::cout << "m: " << m << " p: " << p << " f: " << f << std::endl;
     const int TILE_SIZE = 64;
-  for (int i = 0; i < m; i += TILE_SIZE) {
-        for (int j = 0; j < f; j += TILE_SIZE) {
-            // Initialize local tile for C
-            for (int ii = i; ii < std::min(i + TILE_SIZE, m); ++ii) {
-                for (int jj = j; jj < std::min(j + TILE_SIZE, f); ++jj) {
-                    C[ii * f + jj] = 0;
-                }
-            }
+for (int i = 0; i < m; i += TILE_SIZE) {
+    int i_max = std::min(i + TILE_SIZE, m);
+    for (int j = 0; j < f; j += TILE_SIZE) {
+        int j_max = std::min(j + TILE_SIZE, f);
 
-            // Loop over tiles of matrices A and B
-            for (int k = 0; k < p; k += TILE_SIZE) {
-                for (int ii = i; ii < std::min(i + TILE_SIZE, m); ++ii) {
-                    for (int kk = k; kk < std::min(k + TILE_SIZE, p); ++kk) {
-                        Datatype a_val = A[ii * p + kk];
-                        for (int jj = j; jj < std::min(j + TILE_SIZE, f); ++jj) {
-                            C[ii * f + jj] += a_val * B[kk * f + jj];
-                        }
+        // Initialize tile of C to 0
+        for (int ii = i; ii < i_max; ++ii) {
+            for (int jj = j; jj < j_max; ++jj) {
+                C[ii * f + jj] = 0;
+            }
+        }
+
+        // Tile over k dimension
+        for (int k = 0; k < p; k += TILE_SIZE) {
+            int k_max = std::min(k + TILE_SIZE, p);
+
+            // Compute the product for the current tile (i..i_max, j..j_max) with k..k_max
+            for (int ii = i; ii < i_max; ++ii) {
+                for (int kk = k; kk < k_max; ++kk) {
+                    Datatype a = A[ii * p + kk];
+                    // Unroll the inner loop over j within the tile
+                    for (int jj = j; jj < j_max; ++jj) {
+                        C[ii * f + jj] += a * B[kk * f + jj];
                     }
                 }
             }
         }
     }
+
+}
 }
 
     static void get_conv_ab2_triples_from_file()
@@ -680,25 +689,30 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
         const int inh = conv_triple_params[i].inh;
         const int inw = conv_triple_params[i].inw;
         const int wh = conv_triple_params[i].wh;
+        const int ww = conv_triple_params[i].ww;
         const int stride = conv_triple_params[i].stride;
         const int padding = conv_triple_params[i].padding;
         const int batchSize = conv_triple_params[i].batchSize;
         const int dout = conv_triple_params[i].dout;
 
-        const int k = conv_triple_params[i].wh * conv_triple_params[i].ww * conv_triple_params[i].din;
-        const int m = conv_triple_params[i].out_h * conv_triple_params[i].out_w * 1;
+        // const int lm = conv_triple_params[i].dout;
+        // const int lp = conv_triple_params[i].out_h * conv_triple_params[i].out_w;
+        // const int lf = conv_triple_params[i].wh * conv_triple_params[i].wh * conv_triple_params[i].din;
+        const int lm = conv_triple_params[i].dout;
+        const int lp = wh * ww * din;
+        const int lf = conv_triple_params[i].out_h * conv_triple_params[i].out_w * 1;
         const uint64_t w_size = wh * wh * din * dout;
         const uint64_t x_size = batchSize * din * inh * inw;
 #if PARTY == 0
-        uint64_t own_w_size = w_size;
-        uint64_t own_x_size = 0;
+        uint64_t own_w_size = 0;
+        uint64_t own_x_size = x_size;
         uint64_t other_x_size = x_size;
         uint64_t other_w_size = w_size;
 #else
         uint64_t own_w_size = w_size;
         uint64_t own_x_size = x_size;
-        uint64_t other_x_size = 0;
-        uint64_t other_w_size = w_size;
+        uint64_t other_x_size = x_size;
+        uint64_t other_w_size = 0;
 #endif
 
 
@@ -719,16 +733,16 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
         }
         for (int n = 0; n < conv_triple_params[i].batchSize; n++)
         {
-        auto X_col = new Datatype[k * m];
+        auto X_col = new Datatype[lp * lf];
         int x_offset = n * din * inh * inw;
-        int y_offset = n * m * dout;
+        int y_offset = n * lm * dout;
         im2col_l(conv_triple_x[i] + x_offset, din, inh, inw, wh, stride, padding, X_col);
-        GEMM_l(X_col, other_conv_triple_w, conv_triple_y + y_index_counter + y_offset,
-                m, dout, k, true);
+        GEMM_l(X_col, conv_triple_w[i], conv_triple_y + y_index_counter + y_offset,
+                lm, lp, lf, true);
         delete[] X_col;
         }
         #endif
-        uint64_t y_size = batchSize * m * dout;
+        uint64_t y_size = batchSize * lm * dout;
         for (uint64_t j = 0; j < y_size; j++)
         {
 #if PARTY == 1
@@ -738,7 +752,7 @@ static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int
 #endif
         }
 
-        y_index_counter += m * dout + batchSize;
+        y_index_counter += lm * dout * batchSize;
     }
 }
 
