@@ -526,7 +526,6 @@ void store_output_share(DATATYPE val)
     return;
 #endif
     preprocessed_outputs[preprocessed_outputs_input_index] = val;
-    std::cout << "storeoutput" << preprocessed_outputs[preprocessed_outputs_input_index] << std::endl;
     preprocessed_outputs_input_index += 1;
 }
 
@@ -536,7 +535,6 @@ DATATYPE retrieve_output_share()
     return SET_ALL_ZERO();
 #endif
     preprocessed_outputs_index += 1;
-    std::cout << "outputshare" << preprocessed_outputs[preprocessed_outputs_index - 1] << std::endl;
     return preprocessed_outputs[preprocessed_outputs_index - 1];
 }
 #endif
