@@ -106,6 +106,8 @@ struct FullyConnectedParameter
 #define generateArithmeticAB2Triples generateArithmeticAB2DummyTriples
 #define generateBooleanAB2Triples generateBooleanAB2DummyTriples
 #define generateConvTriples generateConvDummyTriples
+#define generateFCTriples generateFCDummyTriples
+#define generateBatchNorm2DTriples generateBatchNorm2DDummyTriples
 
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
 // Input: ip and port of the other party to connect to
@@ -343,6 +345,8 @@ void generateLayerDummyTriples(type** a,
 #define generateArithmeticAB2Triples generateFakeArithmeticTriples
 #define generateBooleanAB2Triples generateFakeBooleanTriples
 #define generateConvTriples generateFakeLayerTriples
+#define generateFCTriples generateFakeLayerTriples
+#define generateBatchNorm2DTriples generateFakeLayerTriples
 
 template <typename type>
 void generateFakeArithmeticTriples(type a[],

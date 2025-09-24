@@ -19,6 +19,10 @@ std::vector<uint8_t*> triple_type;
 /* uint64_t triple_type_index = 0; */
 /* uint8_t* triple_type; */
 
+std::vector<uint64_t> total_num_boolean_output_triples;
+std::vector<uint64_t> total_num_arithmetic_output_triples;
+
+
 uint64_t total_arithmetic_triples_num = 0;
 uint64_t total_boolean_triples_num = 0;
 uint64_t total_arithmetic_triples_index = 0;
@@ -379,6 +383,25 @@ else if (triple_type == "CONV") {
                         ips[0],
                         base_port + process_offset);
 }
+else if (triple_type == "FC") {
+    generateFCTriples(fc_triple_w,
+                     fc_triple_x,
+                     fc_triple_y,
+                     BITLENGTH,
+                     fc_triple_params,
+                     ips[0],
+                     base_port + process_offset);
+}
+else if (triple_type == "BATCHNORM2D") {
+    generateBatchNorm2DTriples(bc2D_triple_w,
+                              bc2D_triple_x,
+                              bc2D_triple_y,
+                              BITLENGTH,
+                              bc2D_triple_params,
+                              ips[0],
+                              base_port + process_offset);
+}
+
 
 else {
     std::cerr << "Unknown triple type: " << triple_type << std::endl;

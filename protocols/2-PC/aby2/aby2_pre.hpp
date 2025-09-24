@@ -665,7 +665,8 @@ for (int i = 0; i < m; i += TILE_SIZE) {
                     Datatype a = A[ii * p + kk];
                     // Unroll the inner loop over j within the tile
                     for (int jj = j; jj < j_max; ++jj) {
-                        C[ii * f + jj] += a * B[kk * f + jj];
+                        Datatype b = B[kk * f + jj];
+                        C[ii * f + jj] += a * b;
                     }
                 }
             }
@@ -737,11 +738,13 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         int x_offset = n * din * inh * inw;
         int y_offset = n * lm * dout;
         im2col_l(conv_triple_x[i] + x_offset, din, inh, inw, wh, stride, padding, X_col);
-        GEMM_l(X_col, conv_triple_w[i], conv_triple_y + y_index_counter + y_offset,
+        GEMM_l(conv_triple_w[i], X_col, conv_triple_y + y_index_counter + y_offset,
                 lm, lp, lf, true);
         delete[] X_col;
         }
         #endif
+        delete[] other_conv_triple_x;
+        delete[] other_conv_triple_w;
         uint64_t y_size = batchSize * lm * dout;
         for (uint64_t j = 0; j < y_size; j++)
         {
@@ -812,6 +815,8 @@ static void get_batchnorm2D_triples_from_file()
             }
         }
 #endif 
+        delete[] other_bc2D_triple_w;
+        delete[] other_bc2D_triple_x;
         for (uint64_t j = 0; j < y_size; j++)
         {
 #if PARTY == 1
@@ -878,6 +883,9 @@ static void get_fc_triples_from_file()
                 }
             }
 #endif
+            delete[] other_fc_triple_x;
+            delete[] other_fc_triple_w;
+
             for (uint64_t j = 0; j < y_size; j++)
             {
 #if PARTY == 1
@@ -968,8 +976,8 @@ static void get_fc_triples_from_file()
         constexpr int num_rounds = 2;
         Datatype** lxly_a = new Datatype*[num_rounds];
         Datatype** lxly_b = new Datatype*[num_rounds];
-        lxly_a[0] = new Datatype[num_arithmetic_triples[0] + num_ab2_arithmetic_triples[0] + num_conv_c_triples];
-        lxly_b[0] = new Datatype[num_boolean_triples[0] + num_ab2_boolean_triples[0]];
+        lxly_a[0] = new Datatype[total_num_arithmetic_output_triples[0]];
+        lxly_b[0] = new Datatype[total_num_boolean_output_triples[0]];
         uint64_t arithmetic_triple_counter[num_rounds]{0};
         uint64_t boolean_triple_counter[num_rounds]{0};
         
@@ -1179,8 +1187,8 @@ static void get_fc_triples_from_file()
         deinit_beaverAB2();
 #endif
 
-        lxly_a[1] = new Datatype[num_arithmetic_triples[1] + num_ab2_arithmetic_triples[1]];
-        lxly_b[1] = new Datatype[num_boolean_triples[1] + num_ab2_boolean_triples[1]];
+        lxly_a[1] = new Datatype[total_num_arithmetic_output_triples[1]];
+        lxly_b[1] = new Datatype[total_num_boolean_output_triples[1]];
         curr_arithmetic_triple_index = 0;
         curr_boolean_triple_index = 0;
         num_triples = num_arithmetic_triples[1] + num_boolean_triples[1];
