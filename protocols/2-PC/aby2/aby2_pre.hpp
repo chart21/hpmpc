@@ -982,7 +982,7 @@ static void get_fc_triples_from_file()
         uint64_t boolean_triple_counter[num_rounds]{0};
         
 
-        auto num_triples = num_arithmetic_triples[0] + num_boolean_triples[0] + num_ab2_arithmetic_triples[0] + num_ab2_boolean_triples[0] + total_preprocessed_outputs;
+        auto num_triples = total_num_arithmetic_output_triples[0] + total_num_boolean_output_triples[0] + total_preprocessed_outputs;
        
         curr_arithmetic_triple_index = 0;
         curr_boolean_triple_index = 0;
@@ -1191,7 +1191,7 @@ static void get_fc_triples_from_file()
         lxly_b[1] = new Datatype[total_num_boolean_output_triples[1]];
         curr_arithmetic_triple_index = 0;
         curr_boolean_triple_index = 0;
-        num_triples = num_arithmetic_triples[1] + num_boolean_triples[1];
+        num_triples = total_num_arithmetic_output_triples[1] + total_num_boolean_output_triples[1];
         for (uint64_t i = 0; i < num_triples; i++)
         {
             switch (triple_type[1][i])

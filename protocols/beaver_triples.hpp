@@ -446,5 +446,19 @@ void print_num_triples()
                   << conv_triple_params[i].batchSize * (((conv_triple_params[i].out_h + 0) / 1) * (((conv_triple_params[i].out_w + 0) / 1)) * conv_triple_params[i].dout)
                   << std::endl;
     }
+    for(int i = 0; i < fc_triple_params.size(); i++)
+    {
+        std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+                  << "Fully Connected Triples Required for layer " << i << ": " 
+                  << fc_triple_params[i].out_feat * fc_triple_params[i].batchSize
+                  << std::endl;
+    }
+    for(int i = 0; i < bc2D_triple_params.size(); i++)
+    {
+        std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+                  << "BatchNorm2D Triples Required for layer " << i << ": " 
+                  << bc2D_triple_params[i].batchSize * bc2D_triple_params[i].ch * bc2D_triple_params[i].h * bc2D_triple_params[i].w
+                  << std::endl;
+    }
 #endif
 }

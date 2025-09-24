@@ -53,6 +53,9 @@ void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_row
     }
 }
 
+// A is a m x f matrix
+// B is a f x p matrix
+// C is a m x p matrix
 template <typename T>
 void prepare_GEMM_CPU(const T* A, const T* B, T* C, const int m, const int p, const int f, bool is_A_fixed)
 {

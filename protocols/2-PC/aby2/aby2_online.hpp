@@ -328,10 +328,11 @@ class ABY2_ONLINE_Share
     {
         l = getRandomVal(PSELF);
 #if PARTY == 0
-        /* m = ADD(TRUNC(m),l); */
-        m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
+        m = ADD(TRUNC(m),l);
+        // m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
 #else
         m = ADD(TRUNC(m), l);
+#endif
         // atuo lxly = retrieve_matrix_share_ab(ADD);
         Datatype lxly;
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
@@ -341,7 +342,6 @@ class ABY2_ONLINE_Share
         m = ADD(m, lxly);
         /* m = ADD(SUB(TRUNC(m), OP_MULT(OP_SHIFT_LOG_RIGHTF(m, BITLENGTH -1), PROMOTE(UINT_TYPE(1) << (BITLENGTH -
          * 1))))   ,l); // x2^t - (x2 > 1) * 2^l */
-#endif
         send_to_live(PNEXT, m);
     }
 

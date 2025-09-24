@@ -138,22 +138,26 @@ bool mat_mul_fixed_test()
     const int m = 3;
     const int k = 2;
     const int n = 1;
-    float x[m * k] = {3.2, 5.4, 7.6, 11.8, 2.1, 4.3};  // initialize plaintext inputs for comparison
-    float w[k * n] = {2.1, 4.3};
+    float w[m * k] = {3.2, 5.4, 7.6, 11.8, 2.1, 4.3};  // initialize plaintext inputs for comparison
+    float x[k * n] = {2.1, 4.3};
     float y[m * n] = {0};
-    auto X = new A[m * k]{A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(3.2)),
+    auto X = new A[k * n]{A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(2.1)),
+                          A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(4.3))};
+    auto W = new A[m * k]{A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(3.2)),
                           A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(5.4)),
                           A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(7.6)),
                           A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(11.8)),
                           A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(2.1)),
                           A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(4.3))};
-    auto W = new A[k * n]{A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(2.1)),
-                          A(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(4.3))};
     auto Y = new A[m * n]{A(0), A(0), A(0)};
 
     Share::communicate();
+#if CONV_TRIPLES == 1 && PROTOCOL == 4     
+    // Share::SetupFullyConnectedTriples(prev_out.data(), W.data(), this->output.data(), batch, in_feat, out_feat);
+    Share::SetupFullyConnectedTriples(X, W, Y, 1, n*k, m*n);
+#endif
 
-    prepare_GEMM(X, W, Y, m, n, k, false);
+    prepare_GEMM(W, X, Y, m, n, k, false);
     Share::communicate();
     complete_GEMM(Y, m * n);
 
@@ -164,7 +168,7 @@ bool mat_mul_fixed_test()
         {
             for (int q = 0; q < k; q++)
             {
-                y[i * n + j] += x[i * k + q] * w[q * n + j];
+                y[i * n + j] += w[i * k + q] * x[q * n + j];
             }
         }
     }
@@ -174,8 +178,8 @@ bool mat_mul_fixed_test()
     {
         for (int j = 0; j < vectorization_factor; j++)
         {
-            print_compare(FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::ufixed_to_float(output[i][j]),
-                          y[i],
+            print_compare(y[i],
+                         FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::ufixed_to_float(output[i][j]),
                           epsilon);
             if (FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>::ufixed_to_float(output[i][j]) - y[i] >
                     epsilon ||
