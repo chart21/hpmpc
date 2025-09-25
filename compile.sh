@@ -74,7 +74,7 @@ while [[ $# -gt 0 ]]; do
             make -j PARTY=all PROTOCOL=4 FUNCTION_IDENTIFIER=${FUNC} \
                 BITLENGTH=32 PRE=1 DATTYPE=${DATTYPE} NUM_INPUTS=1 \
                 SPLITROLES=0 PROCESS_NUM=${PROCESS_NUM} USE_CUDA_GEMM=0 \
-                SKIP_PRE=0 FAKE_TRIPLES=0
+                SKIP_PRE=0 FAKE_TRIPLES=0 AB2_TRIPLES=1 BN2D_TRIPLES=0 FC_TRIPLES=0 CONV_TRIPLES=1
 
             ./scripts/run.sh -p all -n 2
             ;;

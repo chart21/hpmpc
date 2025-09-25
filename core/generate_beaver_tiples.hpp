@@ -205,24 +205,28 @@ void generateArithmeticAB2DummyTriples(type a[],
     //convert SIMD variables to regular uints
     const int vectorization_factor = DATTYPE / bitlength; 
 
+    UINT_TYPE* uint_a;
+    UINT_TYPE* uint_b;
+    UINT_TYPE* uint_c;
+
     if(vectorization_factor == 1) // No need to unvectorize
-        {
-            UINT_TYPE* uint_a = (UINT_TYPE*) a;
-            UINT_TYPE* uint_b = (UINT_TYPE*) b;
-            UINT_TYPE* uint_c = (UINT_TYPE*) c;
-            return;
-        }
+    {
+        uint_a = (UINT_TYPE*) a;
+        uint_b = (UINT_TYPE*) b;
+        uint_c = (UINT_TYPE*) c;
+    } else  {
 #if PARTY == 0
     UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]);
     unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
 #endif
 #if PARTY == 1
-    UINT_TYPE* uint_b = NEW(UINT_TYPE[num_triples]);
-    unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
+        uint_b = NEW(UINT_TYPE[num_triples]);
+        unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
 #else
-    UINT_TYPE* uint_b = nullptr;
+        uint_b = nullptr;
 #endif // P_0 doesn't need b for AB2
-    UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
+        uint_c = NEW(UINT_TYPE[num_triples]);
+    }
     
 
     Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, 1, Utils::PROTO::AB2);
@@ -233,9 +237,10 @@ void generateArithmeticAB2DummyTriples(type a[],
     DELETEARR(uint_a);
 #endif
 #if PARTY == 1
-    DELETEARR(uint_b);
+        DELETEARR(uint_b);
 #endif
-    DELETEARR(uint_c);
+        DELETEARR(uint_c);
+    }
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
