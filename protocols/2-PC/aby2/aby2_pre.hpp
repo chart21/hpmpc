@@ -735,7 +735,7 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         {
         auto X_col = new Datatype[lp * lf];
         int x_offset = n * din * inh * inw;
-        int y_offset = n * lm * dout;
+        int y_offset = n * lf * dout;
         im2col_l(conv_triple_x[i] + x_offset, din, inh, inw, wh, stride, padding, X_col);
         GEMM_l(conv_triple_w[i], X_col, conv_triple_y + y_index_counter + y_offset,
                 lm, lp, lf, true);
@@ -744,7 +744,7 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         #endif
         delete[] other_conv_triple_x;
         delete[] other_conv_triple_w;
-        uint64_t y_size = batchSize * lm * dout;
+        uint64_t y_size = batchSize * lf * dout;
         for (uint64_t j = 0; j < y_size; j++)
         {
 #if PARTY == 1
@@ -754,7 +754,7 @@ for (int i = 0; i < m; i += TILE_SIZE) {
 #endif
         }
 
-        y_index_counter += lm * dout * batchSize;
+        y_index_counter += lf * dout * batchSize;
     }
 }
 
@@ -1291,6 +1291,8 @@ static void get_fc_triples_from_file()
                                    int ww,
                                    int padding,
                                    int stride,
+                                   int oh,
+                                   int ow,
                                    int dilation = 1,
                                    bool ab2 = true)
     {

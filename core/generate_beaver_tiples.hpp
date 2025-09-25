@@ -31,6 +31,8 @@ struct ConvolutionParameter
                          int ww,
                          int padding,
                          int stride,
+                         int oh,
+                         int ow,
                          int dilation = 1)
         : batchSize(batchSize),
           inh(inh),
@@ -43,8 +45,8 @@ struct ConvolutionParameter
           stride(stride),
           dilation(dilation)
     {
-        out_h = (inh + 2 * padding - dilation * (wh - 1) - 1) / stride + 1;
-        out_w = (inw + 2 * padding - dilation * (ww - 1) - 1) / stride + 1;
+        out_h = oh;
+        out_w = ow;
         x_size_per_batch = inh * inw * din;
         w_size_per_batch = wh * ww * dout;
         y_size_per_batch = out_h * out_w * dout;

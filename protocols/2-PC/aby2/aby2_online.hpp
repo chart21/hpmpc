@@ -631,6 +631,8 @@ class ABY2_ONLINE_Share
                                    int ww,
                                    int padding,
                                    int stride,
+                                   int oh,
+                                   int ow,
                                    int dilation = 1,
                                    bool ab2 = false)
     {}

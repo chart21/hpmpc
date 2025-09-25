@@ -451,11 +451,13 @@ class ABY2_init
                                    int ww,
                                    int padding,
                                    int stride,
+                                   int oh,
+                                   int ow,
                                    int dilation = 1,
                                    bool ab2 = false)
     {
-        conv_triple_params.push_back(ConvolutionParameter(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation));
-        num_conv_c_triples += batchSize * conv_triple_params.back().out_h * conv_triple_params.back().out_w * dout;
+        conv_triple_params.push_back(ConvolutionParameter(batchSize, inh, inw, din, dout, wh, ww, padding, stride, oh, ow, dilation));
+        num_conv_c_triples += batchSize * oh * ow * dout;
     }
 
     static void SetupFullyConnectedTriples(const ABY2_init* X,
