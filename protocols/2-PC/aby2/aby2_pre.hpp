@@ -607,7 +607,7 @@ static T im2col_get_pixel_l(const T* im, int height, int width, int channels, in
     col -= pad;
 
     if (row < 0 || col < 0 || row >= height || col >= width)
-        return 0;
+        return SET_ALL_ZERO();
     return im[col + width * (row + height * channel)];
 }
 
@@ -641,7 +641,6 @@ static void im2col_l(const T* data_im, int channels, int height, int width, int 
     // GEMM_l(X_col, other_conv_triple_w, conv_triple_y[i], m, dout, k, true);
 static void GEMM_l(const Datatype* A, const Datatype* B, Datatype* C, int m, int p, int f, bool a_fixed)
 {
-    std::cout << "m: " << m << " p: " << p << " f: " << f << std::endl;
     const int TILE_SIZE = 64;
 for (int i = 0; i < m; i += TILE_SIZE) {
     int i_max = std::min(i + TILE_SIZE, m);
@@ -651,7 +650,7 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         // Initialize tile of C to 0
         for (int ii = i; ii < i_max; ++ii) {
             for (int jj = j; jj < j_max; ++jj) {
-                C[ii * f + jj] = 0;
+                C[ii * f + jj] = SET_ALL_ZERO();
             }
         }
 
@@ -951,7 +950,7 @@ static void get_fc_triples_from_file()
                 ips, port, process_offset, num_bc2D_c_triples, 0, "BATCHNORM2D");
 #else
         generate_beaver_triples(
-                ips, port, process_offset, num_batchnorm2D_triples, 0, "BATCHNORM2D");
+                ips, port, process_offset, num_bc2D_c_triples, 0, "BATCHNORM2D");
 #endif
         deinit_BatchNorm2DAB();
 
@@ -962,7 +961,7 @@ static void get_fc_triples_from_file()
                 ips, port, process_offset, num_fc_c_triples, 0, "FC");
 #else
         generate_beaver_triples(
-                ips, port, process_offset, num_triples, 0, "FC");
+                ips, port, process_offset, num_fc_c_triples, 0, "FC");
 #endif
 
 

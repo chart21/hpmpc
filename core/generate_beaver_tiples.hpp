@@ -105,9 +105,9 @@ struct FullyConnectedParameter
 #define generateBooleanTriples generateBooleanDummyTriples
 #define generateArithmeticAB2Triples generateArithmeticAB2DummyTriples
 #define generateBooleanAB2Triples generateBooleanAB2DummyTriples
-#define generateConvTriples generateConvDummyTriples
-#define generateFCTriples generateFCDummyTriples
-#define generateBatchNorm2DTriples generateBatchNorm2DDummyTriples
+#define generateConvTriples generateLayerDummyTriples
+#define generateFCTriples generateLayerDummyTriples
+#define generateBatchNorm2DTriples generateLayerDummyTriples
 
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
 // Input: ip and port of the other party to connect to
@@ -128,9 +128,9 @@ void generateArithmeticDummyTriples(type a[],
 
     if(vectorization_factor == 1) // No need to unvectorize
         {
-            UINT_TYPE* uint_a = a;
-            UINT_TYPE* uint_a = b;
-            UINT_TYPE* uint_a = c;
+            UINT_TYPE* uint_a = (UINT_TYPE*) a;
+            UINT_TYPE* uint_b = (UINT_TYPE*) b;
+            UINT_TYPE* uint_c = (UINT_TYPE*) c;
             return;
         }
 
@@ -197,9 +197,9 @@ void generateArithmeticAB2DummyTriples(type a[],
 
     if(vectorization_factor == 1) // No need to unvectorize
         {
-            UINT_TYPE* uint_a = a;
-            UINT_TYPE* uint_a = b;
-            UINT_TYPE* uint_a = c;
+            UINT_TYPE* uint_a = (UINT_TYPE*) a;
+            UINT_TYPE* uint_b = (UINT_TYPE*) b;
+            UINT_TYPE* uint_c = (UINT_TYPE*) c;
             return;
         }
     UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]);
@@ -260,7 +260,7 @@ void generateBooleanAB2DummyTriples(type a[],
 }
 
 
-//Input: arrays of layer triple shares [a], [b] with sizes predefined by convolution params
+//Input: arrays of layer triple shares [a], [b] with sizes predefined by convolution/Fc/Batchnorm params
 //Output: Contigious array of clayer triple shares [c] storing the output
 template <typename type, typename LayerParams>
 void generateLayerDummyTriples(type** a,
@@ -275,13 +275,15 @@ void generateLayerDummyTriples(type** a,
     const int factor = DATTYPE/BITLENGTH;
     if(factor == 1) // No need to unvectorize
         {
-            UINT_TYPE* uint_w = a;
-            UINT_TYPE* uint_x = b;
-            UINT_TYPE* uint_y = c;
+            UINT_TYPE** uint_w = (UINT_TYPE**) a;
+            UINT_TYPE** uint_x = (UINT_TYPE**) b;
+            UINT_TYPE* uint_y = (UINT_TYPE*) c;
+            uint64_t y_index_counter = 0;
         for(int n = 0; n < params.size(); n++)
         {
-            auto p = params[i];
-           // Layer(w,x,y, p) // calculate Layer operation
+            auto p = params[n];
+           // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
+            y_index_counter += p.y_size_per_batch * p.batchSize;
              
         } 
             return;
@@ -290,48 +292,48 @@ void generateLayerDummyTriples(type** a,
         uint64_t c_index = 0;
         for(int n = 0; n < params.size(); n++)
         {
-            auto p = params[i];
+            auto p = params[n];
             const uint64_t x_size = p.x_size_per_batch * p.batchSize;
-            const uint64_t w_size = p.x_size_per_batch;
+            const uint64_t w_size = p.w_size_per_batch;
             const uint64_t y_size = p.y_size_per_batch * p.batchSize;
         
-            UINT_TYPE* x = new UINT_TYPE[factor * xSize];
-           #if AB2 == 0 || PARTY == 1 
-            UINT_TYPE* w = new UINT_TYPE[wSize];  // W is always constant
+            UINT_TYPE* x = new UINT_TYPE[factor * x_size];
+           #if AB2_TRIPLES == 0 || PARTY == 1 
+            UINT_TYPE* w = new UINT_TYPE[w_size];  // W is always constant
             #else 
             UINT_TYPE* w = nullptr; 
            #endif 
-            UINT_TYPE* y = new UINT_TYPE[factor * ySize];
+            UINT_TYPE* y = new UINT_TYPE[factor * y_size];
 
-        for (int i = 0; i < xSize; i++)
+        for (int i = 0; i < x_size; i++)
         {
-            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&a[n][i], temp, 1);
+            alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&b[n][i], temp, 1);
             for (int j = 0; j < factor; j++)
-                x[j * xSize + i] = temp[j]; 
+                x[j * x_size + i] = temp[j]; 
         }
-        #if AB2 == 0 || PARTY == 1 
-        for (int i = 0; i < wSize; i++)
+        #if AB2_TRIPLES == 0 || PARTY == 1 
+        for (int i = 0; i < w_size; i++)
         {
-            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&tempml, temp, 1);
+            alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&a[n][i], temp, 1);
             w[i] = temp[0];
         }
         #endif
 
         p.batchSize *= factor;
         // Conv2D(w,x,y, p) // calculate layer operation
-        for (int i = 0; i < ySize; i++)
+        for (int i = 0; i < y_size; i++)
         {
-            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
             for (int j = 0; j < factor; j++)
-                temp[j] = y[j * ySize + i];
+                temp[j] = y[j * y_size + i];
             orthogonalize_arithmetic(temp, c + c_index + i, 1);
         }
         delete[] x;
         delete[] w;
         delete[] y;
-        c_index += ySize;
+        c_index += y_size;
         }
 }
 

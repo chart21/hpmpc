@@ -328,8 +328,8 @@ class ABY2_ONLINE_Share
     {
         l = getRandomVal(PSELF);
 #if PARTY == 0
-        m = ADD(TRUNC(m),l);
-        // m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
+        // m = ADD(TRUNC(m),l);
+        m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
 #else
         m = ADD(TRUNC(m), l);
 #endif
