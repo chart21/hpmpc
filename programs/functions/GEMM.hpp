@@ -3,8 +3,8 @@
 #include "prob_truncation.hpp"
 #include <algorithm>
 
-template <typename T>
-void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_rows, const int w_cols)
+template <typename T, typename U>
+void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_rows, const int w_cols)
 {
     for (int i = 0; i < w_rows; ++i)
     {
@@ -56,8 +56,8 @@ void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_row
 // A is a m x f matrix
 // B is a f x p matrix
 // C is a m x p matrix
-template <typename T>
-void prepare_GEMM_CPU(const T* A, const T* B, T* C, const int m, const int p, const int f, bool is_A_fixed)
+template <typename T, typename U>
+void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, const int f, bool is_A_fixed)
 {
     const int TILE_SIZE = 64;
 
@@ -221,7 +221,7 @@ void complete_GEMM_CPU(T* C, const int m, const int p)
 #else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #else
-                    C[row + jj].complete_mult_public_fixed();
+                    C[row + jj].complete_public_mult_fixed();
 #endif
 #endif
                 }
@@ -273,14 +273,14 @@ void complete_GEMM(T* C, const int len)
 #else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #else
-        C[i].complete_mult_public_fixed();
+        C[i].complete_public_mult_fixed();
 #endif
 #endif
     }
 }
 
-template <typename T>
-void prepare_GEMM(T* A, T* B, T* C, const int m, const int p, const int f, bool is_A_fixed)
+template <typename T, typename U>
+void prepare_GEMM(U* A, T* B, T* C, const int m, const int p, const int f, bool is_A_fixed)
 {
 #if USE_CUDA_GEMM == 0
     prepare_GEMM_CPU(A, B, C, m, p, f, is_A_fixed);
@@ -301,8 +301,8 @@ void complete_GEMM(T* C, const int m, const int p)
 #endif
 }
 
-template <typename T>
-void add_bias(T& C, const T& bias)
+template <typename T, typename U>
+void add_bias(T& C, const U& bias)
 {
 #if TRUNC_DELAYED == 0
     C += bias;
