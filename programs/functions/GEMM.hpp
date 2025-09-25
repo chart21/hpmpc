@@ -29,13 +29,13 @@ void prepare_Matrix_Vector_Product(const T* W, const T* A, T* C, const int w_row
 
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
-#if FC_TRIPLES == 1
+#if FC_TRIPLES == 1 && PROTOCOL == 4
         sum.mask_and_send_dot_without_trunc_with_triple();  // send immediately to utilize network better
 #else
         sum.mask_and_send_dot_without_trunc();  // send immediately to utilize network better
 #endif
 #else
-#if FC_TRIPLES == 1
+#if FC_TRIPLES == 1 && PROTOCOL == 4 
         sum.mask_and_send_dot_with_triple();
 #else
         sum.mask_and_send_dot();
@@ -148,13 +148,13 @@ void prepare_GEMM_CPU(const T* A, const T* B, T* C, const int m, const int p, co
                     {
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
-#if CONV_TRIPLES == 1
+#if CONV_TRIPLES == 1 && PROTOCOL == 4
                         C[row + jj].mask_and_send_dot_without_trunc_with_triple();
 #else
                         C[row + jj].mask_and_send_dot_without_trunc();
 #endif
 #else
-#if CONV_TRIPLES == 1
+#if CONV_TRIPLES == 1 && PROTOCOL == 4
                         C[row + jj].mask_and_send_dot_with_triple();
 #else
                         C[row + jj].mask_and_send_dot();
