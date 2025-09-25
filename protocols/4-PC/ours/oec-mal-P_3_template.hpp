@@ -287,7 +287,7 @@ class OEC_MAL3_Share
                                              func_add ADD,
                                              func_sub SUB,
                                              func_trunc TRUNC,
-                                             int fractional_bits) const
+                                             int fractional_bits = FRACTIONAL) const
     {
         /* #if TRUNC_THEN_MULT == 1 */
         /*     auto result = MULT(TRUNC(r1,fractional_bits),b); */
