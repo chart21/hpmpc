@@ -501,6 +501,15 @@ void generateLayerDummyTriples(type** a,
 {
 
     const int factor = DATTYPE/BITLENGTH;
+    if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
+        std::cout << params.size() << "CONVOLUTION\n";
+    } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
+        std::cout << params.size() << "FullyConnected\n";
+    } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
+        std::cout << params.size() << "BatchNorm\n";
+    } else {
+        std::cout << params.size() << "UNKNOWN\n";
+    }
     if(factor == 1) // No need to unvectorize
         {
             UINT_TYPE** uint_w = (UINT_TYPE**) a;
@@ -510,6 +519,7 @@ void generateLayerDummyTriples(type** a,
         for(int n = 0; n < params.size(); n++)
         {
             auto p = params[n];
+
            // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
             y_index_counter += p.y_size_per_batch * p.batchSize;
              
