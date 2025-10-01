@@ -704,15 +704,15 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         const uint64_t w_size = wh * wh * din * dout;
         const uint64_t x_size = batchSize * din * inh * inw;
 #if PARTY == 0
-        uint64_t own_w_size = 0;
-        uint64_t own_x_size = x_size;
+        uint64_t own_x_size = 0;
+        uint64_t own_w_size = x_size;
         uint64_t other_x_size = x_size;
         uint64_t other_w_size = w_size;
 #else
         uint64_t own_w_size = w_size;
         uint64_t own_x_size = x_size;
-        uint64_t other_x_size = x_size;
-        uint64_t other_w_size = 0;
+        uint64_t other_w_size = x_size;
+        uint64_t other_x_size = 0;
 #endif
 
 
@@ -729,7 +729,7 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         #if PARTY == 1
         for (uint64_t j = 0; j < x_size; j++)
         {
-            conv_triple_x[i][j] = OP_ADD(conv_triple_x[i][j], other_conv_triple_x[j]);
+            conv_triple_w[i][j] = OP_ADD(conv_triple_w[i][j], other_conv_triple_w[j]);
         }
         for (int n = 0; n < conv_triple_params[i].batchSize; n++)
         {
@@ -775,15 +775,15 @@ static void get_batchnorm2D_triples_from_file()
         const uint64_t x_size = bc2D_triple_params[i].batchSize * bc2D_triple_params[i].x_size_per_batch;
         const uint64_t y_size = bc2D_triple_params[i].batchSize * bc2D_triple_params[i].y_size_per_batch;
 #if PARTY == 0
-        uint64_t own_w_size = 0;
-        uint64_t own_x_size = x_size;
+        uint64_t own_x_size = 0;
+        uint64_t own_w_size = x_size;
         uint64_t other_x_size = x_size;
         uint64_t other_w_size = w_size;
 #else
         uint64_t own_w_size = w_size;
         uint64_t own_x_size = x_size;
-        uint64_t other_x_size = x_size;
-        uint64_t other_w_size = 0;
+        uint64_t other_w_size = x_size;
+        uint64_t other_x_size = 0;
 #endif
 
         std::string file_ending = "pre_batchnorm2D";
@@ -799,7 +799,7 @@ static void get_batchnorm2D_triples_from_file()
 #if PARTY == 1
         for (uint64_t j = 0; j < x_size; j++)
         {
-            bc2D_triple_x[i][j] = OP_ADD(bc2D_triple_x[i][j], other_bc2D_triple_x[j]);
+            bc2D_triple_w[i][j] = OP_ADD(bc2D_triple_w[i][j], other_bc2D_triple_w[j]);
         }
         for (int n = 0; n < bc2D_triple_params[i].batchSize; n++)
         {
@@ -842,17 +842,16 @@ static void get_fc_triples_from_file()
             const uint64_t w_size = fc_triple_params[i].w_size_per_batch;
             const uint64_t y_size = fc_triple_params[i].y_size_per_batch * batchSize;
 #if PARTY == 0
-            uint64_t own_w_size = 0;
-            uint64_t own_x_size = x_size;
-            uint64_t other_x_size = x_size;
-            uint64_t other_w_size = w_size;
+        uint64_t own_x_size = 0;
+        uint64_t own_w_size = x_size;
+        uint64_t other_x_size = x_size;
+        uint64_t other_w_size = w_size;
 #else
-            uint64_t own_w_size = w_size;
-            uint64_t own_x_size = x_size;
-            uint64_t other_x_size = x_size;
-            uint64_t other_w_size = 0;
+        uint64_t own_w_size = w_size;
+        uint64_t own_x_size = x_size;
+        uint64_t other_w_size = x_size;
+        uint64_t other_x_size = 0;
 #endif
-
             std::string file_ending = "pre_fc";
             file_ending += std::to_string(i);
             Datatype* nullp = new Datatype[1];
@@ -866,7 +865,7 @@ static void get_fc_triples_from_file()
 #if PARTY == 1
             for (uint64_t j = 0; j < x_size; j++)
             {
-            fc_triple_x[i][j] = OP_ADD(fc_triple_x[i][j], other_fc_triple_x[j]);
+            fc_triple_w[i][j] = OP_ADD(fc_triple_w[i][j], other_fc_triple_w[j]);
             }
             for (int n = 0; n < batchSize; n++)
             {
@@ -1000,7 +999,6 @@ static void get_fc_triples_from_file()
 
         for (uint64_t i = 0; i < num_triples; i++)
         {
-
 
             switch (triple_type[0][i])
             {
@@ -1296,17 +1294,19 @@ static void get_fc_triples_from_file()
                                    int dilation = 1,
                                    bool ab2 = true)
     {
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         conv_triple_w[curr_conv_triple_index] = new Datatype[wh * ww * din * dout];
+
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
+        conv_triple_x[curr_conv_triple_index] = new Datatype[batchSize * inh * inw * din];
 #endif
 
-        conv_triple_x[curr_conv_triple_index] = new Datatype[batchSize * inh * inw * din];
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         for (int i = 0; i < wh * ww * din * dout; i++)
             conv_triple_w[curr_conv_triple_index][i] = W[i].l;
-#endif
+
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         for (int i = 0; i < batchSize * inh * inw * din; i++)
             conv_triple_x[curr_conv_triple_index][i] = X[i].l;
+#endif
 
         uint64_t num_conv_triples = conv_triple_params[curr_conv_triple_index].out_h * conv_triple_params[curr_conv_triple_index].out_w * batchSize * dout;
         for(uint64_t i = 0; i < num_conv_triples; i++)
@@ -1325,17 +1325,18 @@ static void get_fc_triples_from_file()
         const uint64_t w_size = in_feat * out_feat;
         const uint64_t y_size = out_feat * batchSize;
         const uint64_t x_size = in_feat * batchSize;
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         fc_triple_w[curr_fc_triple_index] = new Datatype[w_size];
+
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
+        fc_triple_x[curr_fc_triple_index] = new Datatype[x_size];
 #endif
 
-        fc_triple_x[curr_fc_triple_index] = new Datatype[x_size];
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         for (int i = 0; i < w_size; i++)
             fc_triple_w[curr_fc_triple_index][i] = W[i].l;
-#endif
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         for (int i = 0; i < x_size; i++)
             fc_triple_x[curr_fc_triple_index][i] = X[i].l;
+#endif
 
         for(uint64_t i = 0; i < y_size; i++)
             triple_type[0][triple_type_index[0]++] = CaseFullyConnected;

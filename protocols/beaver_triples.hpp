@@ -183,10 +183,10 @@ void deinit_LayerAB(DATATYPE** x, DATATYPE** w, std::vector<LayerParameter> p)
 {
     for(int i = 0; i < p.size(); i++)
     {
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         delete[] w[i];
-#endif
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party 0 does not need X triples in AB2 setting
         delete[] x[i];
+#endif
     }
     delete[] w;
     delete[] x;
