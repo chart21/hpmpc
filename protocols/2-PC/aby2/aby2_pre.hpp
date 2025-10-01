@@ -561,23 +561,31 @@ class ABY2_PRE_Share
         uint64_t boolean_b_triple_num = 0;
         uint64_t other_arithmetic_b_triple_num = arithmetic_ab2_triple_num[tid];
         uint64_t other_boolean_b_triple_num = boolean_ab2_triple_num[tid];
+        uint64_t arithemtic_a_triple_num = arithmetic_ab2_triple_num[tid];
+        uint64_t boolean_a_triple_num = boolean_ab2_triple_num[tid];
+        uint64_t other_arithmetic_a_triple_num = 0;
+        uint64_t other_boolean_a_triple_num = 0;
 #else 
         uint64_t arithemtic_b_triple_num = arithmetic_ab2_triple_num[tid];
         uint64_t boolean_b_triple_num = boolean_ab2_triple_num[tid];
         uint64_t other_arithmetic_b_triple_num = 0;
         uint64_t other_boolean_b_triple_num = 0;
+        uint64_t arithemtic_a_triple_num = 0;
+        uint64_t boolean_a_triple_num = 0;
+        uint64_t other_arithmetic_a_triple_num = arithmetic_ab2_triple_num[tid];
+        uint64_t other_boolean_a_triple_num = boolean_ab2_triple_num[tid];
 #endif
-        save_triple_file(arithmetic_ab2_triple_a, arithmetic_ab2_triple_num[tid], arithmetic_ab2_triple_b, arithemtic_b_triple_num, boolean_ab2_triple_a, boolean_ab2_triple_num[tid], boolean_ab2_triple_b, boolean_b_triple_num, std::to_string(PARTY), "pre_ab2");
-        Datatype* other_arithmetic_triple_a = new Datatype[arithmetic_ab2_triple_num[tid]];
-        Datatype* other_arithmetic_triple_b = new Datatype[arithmetic_ab2_triple_num[tid]];
-        Datatype* other_boolean_triple_a = new Datatype[boolean_ab2_triple_num[tid]];
-        Datatype* other_boolean_triple_b = new Datatype[boolean_ab2_triple_num[tid]];
-        load_triple_file(other_arithmetic_triple_a, arithmetic_ab2_triple_num[tid], other_arithmetic_triple_b, other_arithmetic_b_triple_num, other_boolean_triple_a, boolean_ab2_triple_num[tid], other_boolean_triple_b, other_boolean_b_triple_num, std::to_string(1 - PARTY), "pre_ab2");
+        save_triple_file(arithmetic_ab2_triple_a, arithemtic_a_triple_num, arithmetic_ab2_triple_b, arithemtic_b_triple_num, boolean_ab2_triple_a, boolean_a_triple_num, boolean_ab2_triple_b, boolean_b_triple_num, std::to_string(PARTY), "pre_ab2");
+        Datatype* other_arithmetic_triple_a = new Datatype[other_arithmetic_a_triple_num];
+        Datatype* other_arithmetic_triple_b = new Datatype[other_arithmetic_b_triple_num];
+        Datatype* other_boolean_triple_a = new Datatype[other_boolean_a_triple_num];
+        Datatype* other_boolean_triple_b = new Datatype[other_boolean_b_triple_num];
+        load_triple_file(other_arithmetic_triple_a, other_arithmetic_a_triple_num, other_arithmetic_triple_b, other_arithmetic_b_triple_num, other_boolean_triple_a, other_boolean_a_triple_num, other_boolean_triple_b, other_boolean_b_triple_num, std::to_string(1 - PARTY), "pre_ab2");
         delete_triple_file(std::to_string(1 - PARTY), "pre_ab2");
         for (uint64_t i = 0; i < arithmetic_ab2_triple_num[tid]; i++)
         {
 #if PARTY == 0
-            arithmetic_ab2_triple_c[i] = OP_SUB( OP_MULT(OP_ADD(arithmetic_ab2_triple_a[i], other_arithmetic_triple_a[i]), other_arithmetic_triple_b[i]), getRandomVal(PNEXT));
+            arithmetic_ab2_triple_c[i] = OP_SUB( OP_MULT(arithmetic_ab2_triple_a[i], other_arithmetic_triple_b[i]), getRandomVal(PNEXT));
 #else 
             arithmetic_ab2_triple_c[i] = getRandomVal(PNEXT);
 #endif
@@ -588,7 +596,7 @@ class ABY2_PRE_Share
         for (uint64_t i = 0; i < boolean_ab2_triple_num[tid]; i++)
         {
 #if PARTY == 0
-            boolean_ab2_triple_c[i] = OP_XOR( OP_AND(OP_XOR(boolean_ab2_triple_a[i], other_boolean_triple_a[i]), other_boolean_triple_b[i]), getRandomVal(PNEXT));
+            boolean_ab2_triple_c[i] = OP_XOR( OP_AND(boolean_ab2_triple_a[i], other_boolean_triple_b[i]), getRandomVal(PNEXT));
 #else
             boolean_ab2_triple_c[i] = getRandomVal(PNEXT);
 #endif
@@ -707,9 +715,9 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         uint64_t own_x_size = 0;
         uint64_t own_w_size = w_size;
         uint64_t other_x_size = x_size;
-        uint64_t other_w_size = w_size;
+        uint64_t other_w_size = 0;
 #else
-        uint64_t own_w_size = w_size;
+        uint64_t own_w_size = 0;
         uint64_t own_x_size = x_size;
         uint64_t other_w_size = w_size;
         uint64_t other_x_size = 0;
@@ -727,17 +735,13 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         delete_triple_file(std::to_string(1 - PARTY), file_ending);
         delete[] nullp;
         #if PARTY == 1
-        for (uint64_t j = 0; j < w_size; j++)
-        {
-            conv_triple_w[i][j] = OP_ADD(conv_triple_w[i][j], other_conv_triple_w[j]);
-        }
         for (int n = 0; n < conv_triple_params[i].batchSize; n++)
         {
         auto X_col = new Datatype[lp * lf];
         int x_offset = n * din * inh * inw;
         int y_offset = n * lf * dout;
         im2col_l(conv_triple_x[i] + x_offset, din, inh, inw, wh, stride, padding, X_col);
-        GEMM_l(conv_triple_w[i], X_col, conv_triple_y + y_index_counter + y_offset,
+        GEMM_l(other_conv_triple_w, X_col, conv_triple_y + y_index_counter + y_offset,
                 lm, lp, lf, true);
         delete[] X_col;
         }
@@ -778,9 +782,9 @@ static void get_batchnorm2D_triples_from_file()
         uint64_t own_x_size = 0;
         uint64_t own_w_size = w_size;
         uint64_t other_x_size = x_size;
-        uint64_t other_w_size = w_size;
+        uint64_t other_w_size = 0;
 #else
-        uint64_t own_w_size = w_size;
+        uint64_t own_w_size = 0;
         uint64_t own_x_size = x_size;
         uint64_t other_w_size = w_size;
         uint64_t other_x_size = 0;
@@ -797,10 +801,6 @@ static void get_batchnorm2D_triples_from_file()
         delete_triple_file(std::to_string(1 - PARTY), file_ending);
         delete[] nullp;
 #if PARTY == 1
-        for (uint64_t j = 0; j < w_size; j++)
-        {
-            bc2D_triple_w[i][j] = OP_ADD(bc2D_triple_w[i][j], other_bc2D_triple_w[j]);
-        }
         for (int n = 0; n < bc2D_triple_params[i].batchSize; n++)
         {
             int x_offset = n * ch * hw;
@@ -809,7 +809,7 @@ static void get_batchnorm2D_triples_from_file()
             {
                 for (int hw_idx = 0; hw_idx < hw; hw_idx++)
                 {
-                    bc2D_triple_y[y_index_counter + y_offset + c * hw + hw_idx] = OP_MULT(bc2D_triple_x[i][x_offset + c * hw + hw_idx], bc2D_triple_w[i][c]);
+                    bc2D_triple_y[y_index_counter + y_offset + c * hw + hw_idx] = OP_MULT(bc2D_triple_x[i][x_offset + c * hw + hw_idx], other_bc2D_triple_w[c]);
                 }
             }
         }
@@ -845,9 +845,9 @@ static void get_fc_triples_from_file()
         uint64_t own_x_size = 0;
         uint64_t own_w_size = w_size;
         uint64_t other_x_size = x_size;
-        uint64_t other_w_size = w_size;
+        uint64_t other_w_size = 0;
 #else
-        uint64_t own_w_size = w_size;
+        uint64_t own_w_size = 0;
         uint64_t own_x_size = x_size;
         uint64_t other_w_size = w_size;
         uint64_t other_x_size = 0;
@@ -863,10 +863,6 @@ static void get_fc_triples_from_file()
             delete_triple_file(std::to_string(1 - PARTY), file_ending);
             delete[] nullp;
 #if PARTY == 1
-            for (uint64_t j = 0; j < w_size; j++)
-            {
-            fc_triple_w[i][j] = OP_ADD(fc_triple_w[i][j], other_fc_triple_w[j]);
-            }
             for (int n = 0; n < batchSize; n++)
             {
                 int x_offset = n * in_feat;
@@ -876,7 +872,7 @@ static void get_fc_triples_from_file()
                     fc_triple_y[y_index_counter + y_offset + o] = PROMOTE(0);
                     for (int in = 0; in < in_feat; in++)
                     {
-                        fc_triple_y[y_index_counter + y_offset + o] = OP_ADD(fc_triple_y[y_index_counter + y_offset + o], OP_MULT(fc_triple_x[i][x_offset + in], fc_triple_w[i][o * in_feat + in]));
+                        fc_triple_y[y_index_counter + y_offset + o] = OP_ADD(fc_triple_y[y_index_counter + y_offset + o], OP_MULT(fc_triple_x[i][x_offset + in], other_fc_triple_w[o * in_feat + in]));
                     }
                 }
             }
@@ -1294,16 +1290,14 @@ static void get_fc_triples_from_file()
                                    int dilation = 1,
                                    bool ab2 = true)
     {
+#if PARTY == 0 || AB2_TRIPLES == 0 // Party0 holds W in plain in AB2 setting
         conv_triple_w[curr_conv_triple_index] = new Datatype[wh * ww * din * dout];
+        for (int i = 0; i < wh * ww * din * dout; i++)
+            conv_triple_w[curr_conv_triple_index][i] = W[i].l;
+#endif
 
 #if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         conv_triple_x[curr_conv_triple_index] = new Datatype[batchSize * inh * inw * din];
-#endif
-
-        for (int i = 0; i < wh * ww * din * dout; i++)
-            conv_triple_w[curr_conv_triple_index][i] = W[i].l;
-
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         for (int i = 0; i < batchSize * inh * inw * din; i++)
             conv_triple_x[curr_conv_triple_index][i] = X[i].l;
 #endif
@@ -1325,18 +1319,19 @@ static void get_fc_triples_from_file()
         const uint64_t w_size = in_feat * out_feat;
         const uint64_t y_size = out_feat * batchSize;
         const uint64_t x_size = in_feat * batchSize;
+
+#if PARTY == 0 || AB2_TRIPLES == 0 // Party0 holds W in plain in AB2 setting
         fc_triple_w[curr_fc_triple_index] = new Datatype[w_size];
+        for (int i = 0; i < w_size; i++)
+            fc_triple_w[curr_fc_triple_index][i] = W[i].l;
+#endif
 
 #if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         fc_triple_x[curr_fc_triple_index] = new Datatype[x_size];
-#endif
-
-        for (int i = 0; i < w_size; i++)
-            fc_triple_w[curr_fc_triple_index][i] = W[i].l;
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         for (int i = 0; i < x_size; i++)
             fc_triple_x[curr_fc_triple_index][i] = X[i].l;
 #endif
+
 
         for(uint64_t i = 0; i < y_size; i++)
             triple_type[0][triple_type_index[0]++] = CaseFullyConnected;
@@ -1355,14 +1350,14 @@ static void get_fc_triples_from_file()
         const uint64_t w_size = ch;
         const uint64_t x_size = ch * h * w * batchSize;
         const uint64_t y_size = ch * h * w * batchSize;
+#if PARTY == 0 || AB2_TRIPLES == 0 // Party0 holds W in plain in AB2 setting
         bc2D_triple_w[curr_bc2D_triple_index] = new Datatype[w_size];
+        for (int i = 0; i < w_size; i++)
+            bc2D_triple_w[curr_bc2D_triple_index][i] = W[i].l;
+#endif
 
 #if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         bc2D_triple_x[curr_bc2D_triple_index] = new Datatype[x_size];
-#endif
-        for (int i = 0; i < w_size; i++)
-            bc2D_triple_w[curr_bc2D_triple_index][i] = W[i].l;
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         for (int i = 0; i < x_size; i++)
             bc2D_triple_x[curr_bc2D_triple_index][i] = X[i].l;
 #endif

@@ -127,7 +127,9 @@ void storeBooleanABTriple(const Datatype a, const Datatype b)
     template <typename Datatype>
 void storeArithmeticAB2Triple(const Datatype a, const Datatype b)
 {
-    arithmetic_ab2_triple_a[arithmetic_ab2_triple_index] = a;
+#if AB2_TRIPLES == 1 && PARTY == 0
+    arithmetic_ab2_triple_a[arithmetic_ab2_triple_index] = a; //P0 holds A0 in plain in AB2 setting
+#endif
 #if AB2_TRIPLES != 1 || PARTY != 0
     arithmetic_ab2_triple_b[arithmetic_ab2_triple_index] = b; //B1 is not needed for the AB2 protocol
 #endif
@@ -137,7 +139,9 @@ void storeArithmeticAB2Triple(const Datatype a, const Datatype b)
 template <typename Datatype>
 void storeBooleanAB2Triple(const Datatype a, const Datatype b)
 {
+#if AB2_TRIPLES == 1 && PARTY == 0
     boolean_ab2_triple_a[boolean_ab2_triple_index] = a;
+#endif
 #if AB2_TRIPLES != 1 || PARTY != 0
     boolean_ab2_triple_b[boolean_ab2_triple_index] = b; //B1 is not needed for the AB2 protocol
 #endif
@@ -183,7 +187,9 @@ void deinit_LayerAB(DATATYPE** x, DATATYPE** w, std::vector<LayerParameter> p)
 {
     for(int i = 0; i < p.size(); i++)
     {
+#if PARTY == 0 || AB2_TRIPLES == 0 // Party0 holds W in plain in AB2 setting
         delete[] w[i];
+#endif
 #if PARTY == 1 || AB2_TRIPLES == 0 // Party 0 does not need X triples in AB2 setting
         delete[] x[i];
 #endif
@@ -257,8 +263,10 @@ void deinit_FullyConnectedC()
 
 void init_beaverAB2(int rounds)
 {
+#if PARTY == 0 // P0 holds a in plain in AB2 setting
     arithmetic_ab2_triple_a = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
     boolean_ab2_triple_a = new DATATYPE[num_ab2_boolean_triples[rounds] ];
+#endif
 #if PARTY == 1 // P0 doesn't need B1 for AB2
     arithmetic_ab2_triple_b = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
     boolean_ab2_triple_b = new DATATYPE[num_ab2_boolean_triples[rounds] ];
@@ -296,10 +304,13 @@ void init_beaver()
 void deinit_beaverAB2()
 {
     // print("Deleting beaver AB2 arrays.");
+#if PARTY == 0 
     delete[] arithmetic_ab2_triple_a;
-    delete[] arithmetic_ab2_triple_b;
     delete[] boolean_ab2_triple_a;
+#elif PARTY == 1
+    delete[] arithmetic_ab2_triple_b;
     delete[] boolean_ab2_triple_b;
+#endif
 }
 
 void deinit_beaverAB2C()

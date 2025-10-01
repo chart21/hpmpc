@@ -89,7 +89,6 @@
 #define SHIFT_LEFT32F __mm_sla_epi32_wrapperF
 #define SHIFT_LEFT64F __mm_sla_epi64_wrapperF
 
-}
 
 template <int n>
 inline __m128i __mm_sra_epi16_wrapper(__m128i a)

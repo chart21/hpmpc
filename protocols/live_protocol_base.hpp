@@ -57,7 +57,7 @@ void receive_live()
         if (rounds > 2)
             if (receiving_args[t].rec_rounds > 1)
                 /* if(receiving_args[t].received_elements[rounds - 2] != NULL) */
-                delete[] receiving_args[t].received_elements[rounds - 2];  // delete memory of last round
+               DELETEARR(receiving_args[t].received_elements[rounds - 2]);  // delete memory of last round
         /* printf("Time spent waiting for data chrono: %fs \n", time / 1000000); */
     }
     rb = 0;
@@ -174,7 +174,7 @@ void receive_pre()
         if (rounds > 2)
             if (receiving_args_pre[t].rec_rounds > 1)
                 /* if(receiving_args[t].received_elements[rounds - 2] != NULL) */
-                delete[] receiving_args_pre[t].received_elements[rounds - 2];  // delete memory of last round
+                DELETEARR(receiving_args_pre[t].received_elements[rounds - 2]);  // delete memory of last round
         /* printf("Time spent waiting for data chrono: %fs \n", time / 1000000); */
     }
     rb = 0;
