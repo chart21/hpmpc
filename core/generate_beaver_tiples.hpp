@@ -546,8 +546,8 @@ void generateLayerDummyTriples(type** a,
                 std::cout << params.size() << "FullyConnected\n";
                 std::cout << p.in_feat << ", ";
                 std::cout << p.out_feat << ", ";
-                std::cout << p.x_size_per_batch << ", ";
-                std::cout << p.w_size_per_batch << "\n";
+                std::cout << "x_size: " << p.x_size_per_batch << ", ";
+                std::cout << "w_size: " << p.w_size_per_batch << "\n";
                 Iface::generateFCTriplesCheetah(uint_x[n], uint_w[n], uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
                         PARTY + 1, ip, port, 1,
