@@ -500,16 +500,8 @@ void generateLayerDummyTriples(type** a,
                               int port)
 {
 
+    port += 10;
     const int factor = DATTYPE/BITLENGTH;
-    if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
-        std::cout << params.size() << "CONVOLUTION\n";
-    } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
-        std::cout << params.size() << "FullyConnected\n";
-    } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
-        std::cout << params.size() << "BatchNorm\n";
-    } else {
-        std::cout << params.size() << "UNKNOWN\n";
-    }
     if(factor == 1) // No need to unvectorize
         {
             UINT_TYPE** uint_w = (UINT_TYPE**) a;
@@ -520,6 +512,51 @@ void generateLayerDummyTriples(type** a,
         {
             auto p = params[n];
 
+            if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
+                if (p.dilation != 1) {
+                    std::cerr << "DILATION != 1 is not supported\n";
+                }
+                Utils::ConvParm conv{
+                    .ic = (size_t)p.din,
+                    .iw = (size_t)p.inw,
+                    .ih = (size_t)p.inh,
+                    .fc = (size_t)p.din,
+                    .fw = (size_t)p.ww,
+                    .fh = (size_t)p.wh,
+                    .n_filters = (size_t)p.dout,
+                    .stride = (size_t)p.stride,
+                    .padding = (size_t)p.padding,
+                };
+                std::cout << "CONVOLUTION" << "\n";
+                std::cout << conv.ih << " x ";
+                std::cout << conv.iw << " x ";
+                std::cout << conv.ic << ", ";
+                std::cout << p.x_size_per_batch << ", ";
+                std::cout << conv.fh << " x ";
+                std::cout << conv.fw << " x ";
+                std::cout << conv.fc << " x ";
+                std::cout << conv.n_filters << ", ";
+                std::cout << p.w_size_per_batch << "\n";
+
+                Iface::generateConvTriplesCheetahWrapper(uint_x[n], uint_w[n], uint_y + y_index_counter,
+                        conv, p.batchSize,
+                        ip, port, PARTY + 1, 1,
+                        AB2_TRIPLES == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2);
+            } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
+                std::cout << params.size() << "FullyConnected\n";
+                std::cout << p.in_feat << ", ";
+                std::cout << p.out_feat << ", ";
+                std::cout << p.x_size_per_batch << ", ";
+                std::cout << p.w_size_per_batch << "\n";
+                Iface::generateFCTriplesCheetah(uint_x[n], uint_w[n], uint_y + y_index_counter,
+                        p.batchSize, p.in_feat, p.out_feat,
+                        PARTY + 1, ip, port, 1,
+                        AB2_TRIPLES == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2);
+            } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
+                std::cout << params.size() << "BatchNorm\n";
+            } else {
+                std::cout << params.size() << "UNKNOWN\n";
+            }
            // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
             y_index_counter += p.y_size_per_batch * p.batchSize;
              

@@ -4,17 +4,20 @@ set -e
 
 FUNC=182
 DATTYPE=32
-NUM_INPUTS=10
+NUM_INPUTS=1
 PROCESS_NUM=1
 
 STD="standard"
 
-export MODEL_FILE=nn/Pygeon/models/pretrained/MNIST_LeNet5/LeNet5_MNIST_${STD}_best.bin
-# export MODEL_FILE=nn/Pygeon/models/pretrained/Cifar_adam_001/ResNet18_avg_CIFAR-10_standard_best.bin
-export SAMPLES_FILE=nn/Pygeon/data/datasets/MNIST_${STD}_test_images.bin
-# export SAMPLES_FILE=nn/Pygeon/data/datasets/CIFAR-10_standard_test_images.bin
-export LABELS_FILE=nn/Pygeon/data/datasets/MNIST_${STD}_test_labels.bin
-# export LABELS_FILE=nn/Pygeon/data/datasets/CIFAR-10_standard_test_labels.bin
+if (( $FUNC == 182 )); then
+    export MODEL_FILE=nn/Pygeon/models/pretrained/MNIST_LeNet5/LeNet5_MNIST_${STD}_best.bin
+    export SAMPLES_FILE=nn/Pygeon/data/datasets/MNIST_${STD}_test_images.bin
+    export LABELS_FILE=nn/Pygeon/data/datasets/MNIST_${STD}_test_labels.bin
+else
+    export MODEL_FILE=nn/Pygeon/models/pretrained/Cifar_adam_001/ResNet18_avg_CIFAR-10_standard_best.bin
+    export SAMPLES_FILE=nn/Pygeon/data/datasets/CIFAR-10_standard_test_images.bin
+    export LABELS_FILE=nn/Pygeon/data/datasets/CIFAR-10_standard_test_labels.bin
+fi
 export MODEL_DIR=.
 export DATA_DIR=.
 
@@ -60,7 +63,7 @@ while [[ $# -gt 0 ]]; do
                 DATAOWNER=P_1 DATTYPE=${DATTYPE} PROTOCOL=4 \
                 NUM_INPUTS=${NUM_INPUTS} BITLENGTH=32 \
                 PROCESS_NUM=1 PRE=1 FAKE_TRIPLES=0 AB2_TRIPLES=1 BN2D_TRIPLES=0 \
-                FC_TRIPLES=0 CONV_TRIPLES=1
+                FC_TRIPLES=1 CONV_TRIPLES=1
 
             ./scripts/run.sh -p all -n 2
             ;;
