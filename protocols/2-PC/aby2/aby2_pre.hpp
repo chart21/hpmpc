@@ -705,13 +705,13 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         const uint64_t x_size = batchSize * din * inh * inw;
 #if PARTY == 0
         uint64_t own_x_size = 0;
-        uint64_t own_w_size = x_size;
+        uint64_t own_w_size = w_size;
         uint64_t other_x_size = x_size;
         uint64_t other_w_size = w_size;
 #else
         uint64_t own_w_size = w_size;
         uint64_t own_x_size = x_size;
-        uint64_t other_w_size = x_size;
+        uint64_t other_w_size = w_size;
         uint64_t other_x_size = 0;
 #endif
 
@@ -727,7 +727,7 @@ for (int i = 0; i < m; i += TILE_SIZE) {
         delete_triple_file(std::to_string(1 - PARTY), file_ending);
         delete[] nullp;
         #if PARTY == 1
-        for (uint64_t j = 0; j < x_size; j++)
+        for (uint64_t j = 0; j < w_size; j++)
         {
             conv_triple_w[i][j] = OP_ADD(conv_triple_w[i][j], other_conv_triple_w[j]);
         }
@@ -776,13 +776,13 @@ static void get_batchnorm2D_triples_from_file()
         const uint64_t y_size = bc2D_triple_params[i].batchSize * bc2D_triple_params[i].y_size_per_batch;
 #if PARTY == 0
         uint64_t own_x_size = 0;
-        uint64_t own_w_size = x_size;
+        uint64_t own_w_size = w_size;
         uint64_t other_x_size = x_size;
         uint64_t other_w_size = w_size;
 #else
         uint64_t own_w_size = w_size;
         uint64_t own_x_size = x_size;
-        uint64_t other_w_size = x_size;
+        uint64_t other_w_size = w_size;
         uint64_t other_x_size = 0;
 #endif
 
@@ -797,7 +797,7 @@ static void get_batchnorm2D_triples_from_file()
         delete_triple_file(std::to_string(1 - PARTY), file_ending);
         delete[] nullp;
 #if PARTY == 1
-        for (uint64_t j = 0; j < x_size; j++)
+        for (uint64_t j = 0; j < w_size; j++)
         {
             bc2D_triple_w[i][j] = OP_ADD(bc2D_triple_w[i][j], other_bc2D_triple_w[j]);
         }
@@ -843,13 +843,13 @@ static void get_fc_triples_from_file()
             const uint64_t y_size = fc_triple_params[i].y_size_per_batch * batchSize;
 #if PARTY == 0
         uint64_t own_x_size = 0;
-        uint64_t own_w_size = x_size;
+        uint64_t own_w_size = w_size;
         uint64_t other_x_size = x_size;
         uint64_t other_w_size = w_size;
 #else
         uint64_t own_w_size = w_size;
         uint64_t own_x_size = x_size;
-        uint64_t other_w_size = x_size;
+        uint64_t other_w_size = w_size;
         uint64_t other_x_size = 0;
 #endif
             std::string file_ending = "pre_fc";
@@ -863,7 +863,7 @@ static void get_fc_triples_from_file()
             delete_triple_file(std::to_string(1 - PARTY), file_ending);
             delete[] nullp;
 #if PARTY == 1
-            for (uint64_t j = 0; j < x_size; j++)
+            for (uint64_t j = 0; j < w_size; j++)
             {
             fc_triple_w[i][j] = OP_ADD(fc_triple_w[i][j], other_fc_triple_w[j]);
             }
@@ -1355,17 +1355,17 @@ static void get_fc_triples_from_file()
         const uint64_t w_size = ch;
         const uint64_t x_size = ch * h * w * batchSize;
         const uint64_t y_size = ch * h * w * batchSize;
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
         bc2D_triple_w[curr_bc2D_triple_index] = new Datatype[w_size];
-#endif
 
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         bc2D_triple_x[curr_bc2D_triple_index] = new Datatype[x_size];
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need W triples in AB2 setting
+#endif
         for (int i = 0; i < w_size; i++)
             bc2D_triple_w[curr_bc2D_triple_index][i] = W[i].l;
-#endif
+#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
         for (int i = 0; i < x_size; i++)
             bc2D_triple_x[curr_bc2D_triple_index][i] = X[i].l;
+#endif
 
         for(uint64_t i = 0; i < y_size; i++)
             triple_type[0][triple_type_index[0]++] = CaseBatchNorm2D;
