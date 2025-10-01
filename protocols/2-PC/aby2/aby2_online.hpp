@@ -326,23 +326,13 @@ class ABY2_ONLINE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC)
     {
-        l = getRandomVal(PSELF);
-#if PARTY == 0
-        // m = ADD(TRUNC(m),l);
-        m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
-#else
-        m = ADD(TRUNC(m), l);
-#endif
-        // atuo lxly = retrieve_matrix_share_ab(ADD);
         Datatype lxly;
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
             lxly = retrieve_output_share_bool();
         else
             lxly = retrieve_output_share_arithmetic();
         m = ADD(m, lxly);
-        /* m = ADD(SUB(TRUNC(m), OP_MULT(OP_SHIFT_LOG_RIGHTF(m, BITLENGTH -1), PROMOTE(UINT_TYPE(1) << (BITLENGTH -
-         * 1))))   ,l); // x2^t - (x2 > 1) * 2^l */
-        send_to_live(PNEXT, m);
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
     }
 
     template <typename func_add, typename func_sub>
