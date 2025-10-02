@@ -257,7 +257,7 @@ void generateBooleanAB2DummyTriples(type a[],
     for (uint64_t i = 0; i < num_triples / 8; i++)
     {
 #if PARTY == 1
-       uint_c[i] = uint_a[i] ^ uint_b[i]; // dummy assignment, replace with actual triple generation
+       uint_c[i] = uint_b[i]; // dummy assignment, replace with actual triple generation
 #else
        uint_c[i] = uint_a[i]; // dummy assignment, replace with actual triple generation 
 #endif 
