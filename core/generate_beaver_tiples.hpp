@@ -538,20 +538,25 @@ void generateLayerDummyTriples(type** a,
                 std::cout << conv.n_filters << ", ";
                 std::cout << p.w_size_per_batch << "\n";
 
-                Iface::generateConvTriplesCheetahWrapper(uint_x[n], uint_w[n], uint_y + y_index_counter,
+                Iface::generateConvTriplesCheetahWrapper(uint_w[n], uint_x[n], uint_y + y_index_counter,
                         conv, p.batchSize,
                         ip, port, PARTY + 1, 1,
-                        AB2_TRIPLES == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2);
+                        AB2_TRIPLES == 0 ? Utils::PROTO::AB2 : Utils::PROTO::AB2);
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
                 std::cout << params.size() << "FullyConnected\n";
                 std::cout << p.in_feat << ", ";
                 std::cout << p.out_feat << ", ";
-                std::cout << "x_size: " << p.x_size_per_batch << ", ";
-                std::cout << "w_size: " << p.w_size_per_batch << "\n";
-                Iface::generateFCTriplesCheetah(uint_x[n], uint_w[n], uint_y + y_index_counter,
+                std::cout << "x_size: " << p.x_size_per_batch << ", "; // smol
+                std::cout << "w_size: " << p.w_size_per_batch << "\n"; // big
+
+                Iface::generateFCTriplesCheetah(uint_w[n], uint_x[n], uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
                         PARTY + 1, ip, port, 1,
-                        AB2_TRIPLES == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2);
+                        Utils::PROTO::AB2);
+
+                if (p.out_feat == 10)
+                    for (int i = 0; i < p.out_feat; ++i)
+                        std::cout << PARTY << " " << *(uint_y + y_index_counter + i) << "\n";
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
                 std::cout << params.size() << "BatchNorm\n";
             } else {

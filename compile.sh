@@ -9,17 +9,18 @@ PROCESS_NUM=1
 
 STD="standard"
 
+export MODEL_DIR=nn/Pygeon/models/pretrained
+export DATA_DIR=nn/Pygeon/data/datasets
+
 if (( $FUNC == 182 )); then
-    export MODEL_FILE=nn/Pygeon/models/pretrained/MNIST_LeNet5/LeNet5_MNIST_${STD}_best.bin
-    export SAMPLES_FILE=nn/Pygeon/data/datasets/MNIST_${STD}_test_images.bin
-    export LABELS_FILE=nn/Pygeon/data/datasets/MNIST_${STD}_test_labels.bin
+    export MODEL_FILE=MNIST_LeNet5/LeNet5_MNIST_${STD}_best.bin
+    export SAMPLES_FILE=MNIST_${STD}_test_images.bin
+    export LABELS_FILE=MNIST_${STD}_test_labels.bin
 else
-    export MODEL_FILE=nn/Pygeon/models/pretrained/Cifar_adam_001/ResNet18_avg_CIFAR-10_standard_best.bin
-    export SAMPLES_FILE=nn/Pygeon/data/datasets/CIFAR-10_standard_test_images.bin
-    export LABELS_FILE=nn/Pygeon/data/datasets/CIFAR-10_standard_test_labels.bin
+    export MODEL_FILE=Cifar_adam_001/ResNet18_avg_CIFAR-10_standard_best.bin
+    export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
+    export LABELS_FILE=CIFAR-10_standard_test_labels.bin
 fi
-export MODEL_DIR=.
-export DATA_DIR=.
 
 terminate() {
     echo "TERMINATING..."
