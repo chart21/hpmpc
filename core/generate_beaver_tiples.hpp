@@ -1,7 +1,9 @@
 #pragma once
 #include "include/pch.h"
 #include "arch/DATATYPE.h"
+
 #define FAKE_TRIPLES 0
+#define C_THREADS 1
 
 // const ConvolutionParameter param(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
 struct ConvolutionParameter
@@ -558,7 +560,7 @@ void generateLayerDummyTriples(type** a,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         conv, p.batchSize,
-                        ip, port, PARTY + 1, 1,
+                        ip, port, PARTY + 1, C_THREADS,
                         AB2_TRIPLES == 0 ? Utils::PROTO::AB2 : Utils::PROTO::AB2
                 );
 
@@ -574,7 +576,7 @@ void generateLayerDummyTriples(type** a,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
-                        PARTY + 1, ip, port, 8,
+                        PARTY + 1, ip, port, C_THREADS,
                         Utils::PROTO::AB2
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
@@ -588,7 +590,7 @@ void generateLayerDummyTriples(type** a,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.ch, p.hw,
-                        ip, port, PARTY + 1, 1, Utils::PROTO::AB2
+                        ip, port, PARTY + 1, C_THREADS, Utils::PROTO::AB2
                 );
             } else {
                 std::cout << params.size() << "UNKNOWN\n";
@@ -639,6 +641,15 @@ void generateLayerDummyTriples(type** a,
         #endif
 
         p.batchSize *= factor;
+        if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
+            std::cout << p.batchSize << ", " << factor << "\n";
+            Iface::generateFCTriplesCheetah(
+                    x, w, y,
+                    p.batchSize, p.in_feat, p.out_feat,
+                    PARTY + 1, ip, port, C_THREADS,
+                    Utils::PROTO::AB2
+            );
+        }
         // Conv2D(w,x,y, p) // calculate layer operation
         for (int i = 0; i < y_size; i++)
         {
