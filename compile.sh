@@ -63,8 +63,8 @@ while [[ $# -gt 0 ]]; do
             make -j PARTY=all FUNCTION_IDENTIFIER=${FUNC} MODELOWNER=P_0 \
                 DATAOWNER=P_1 DATTYPE=${DATTYPE} PROTOCOL=4 \
                 NUM_INPUTS=${NUM_INPUTS} BITLENGTH=32 \
-                PROCESS_NUM=1 PRE=1 FAKE_TRIPLES=1 AB2_TRIPLES=1 BN2D_TRIPLES=0 \
-                FC_TRIPLES=0 CONV_TRIPLES=0
+                PROCESS_NUM=1 PRE=1 FAKE_TRIPLES=0 AB2_TRIPLES=1 BN2D_TRIPLES=0 \
+                FC_TRIPLES=1 CONV_TRIPLES=0
 
             ./scripts/run.sh -p all -n 2
             ;;
