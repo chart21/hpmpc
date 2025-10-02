@@ -196,10 +196,24 @@ class Additive_Share : public Share_Type
         Share_Type::mask_and_send_dot_with_triple(OP_ADD, OP_SUB);
     }
 
+    
+
     void mask_and_send_dot_with_triple()
     {
         Share_Type::mask_and_send_dot_with_trunc_with_triple(OP_ADD, OP_SUB, FUNC_TRUNC);
     }
+    
+# if PROTOCOL == 4 && PRE == 1
+    void mask_and_send_dot_without_trunc_with_triple(int index)
+    {
+        Share_Type::mask_and_send_dot_with_triple(OP_ADD, OP_SUB, index);
+    }
+
+    void mask_and_send_dot_with_triple(int index)
+    {
+        Share_Type::mask_and_send_dot_with_trunc_with_triple(OP_ADD, OP_SUB, FUNC_TRUNC, index);
+    }
+#endif
 
 #if AB2_TRIPLES == 1
 

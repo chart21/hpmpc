@@ -149,13 +149,15 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if CONV_TRIPLES == 1 && PROTOCOL == 4
-                        C[row + jj].mask_and_send_dot_without_trunc_with_triple();
+                        // C[row + jj].mask_and_send_dot_without_trunc_with_triple();
+                        C[row + jj].mask_and_send_dot_without_trunc_with_triple(row + jj);
 #else
                         C[row + jj].mask_and_send_dot_without_trunc();
 #endif
 #else
 #if CONV_TRIPLES == 1 && PROTOCOL == 4
-                        C[row + jj].mask_and_send_dot_with_triple();
+                        // C[row + jj].mask_and_send_dot_with_triple();
+                        C[row + jj].mask_and_send_dot_with_triple(row + jj);
 #else
                         C[row + jj].mask_and_send_dot();
 #endif
@@ -201,6 +203,10 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
         C[i].mask_and_send_dot();
 #endif
 #endif
+#endif
+#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && AB2_TRIPLES == 1
+        if(current_phase == PHASE_LIVE)
+            preprocessed_outputs_arithmetic_index[0] += m * p;
 #endif
 }
 

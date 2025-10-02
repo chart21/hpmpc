@@ -308,6 +308,16 @@ class ABY2_ONLINE_Share
         m = ADD(ADD(m, l), lxly); 
         send_to_live(PNEXT, m);
     }
+    
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB, int index)
+    {
+        l = getRandomVal(PSELF);
+        Datatype lxly;
+        lxly = retrieve_output_share_arithmetic(0, index);
+        m = ADD(ADD(m, l), lxly); 
+        send_to_live(PNEXT, m);
+    }
 
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
@@ -332,6 +342,15 @@ class ABY2_ONLINE_Share
             lxly = retrieve_output_share_bool();
         else
             lxly = retrieve_output_share_arithmetic();
+        m = ADD(m, lxly);
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
+    }
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
+    {
+        Datatype lxly;
+        lxly = retrieve_output_share_arithmetic(0, index);
         m = ADD(m, lxly);
         mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
     }

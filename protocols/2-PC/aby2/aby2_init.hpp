@@ -266,6 +266,13 @@ class ABY2_init
     {
         send_to_(PNEXT);
     }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB, int index)
+    {
+        send_to_(PNEXT);
+    }
+
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
     {
@@ -274,6 +281,12 @@ class ABY2_init
     
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC)
+    {
+        send_to_(PNEXT);
+    }
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
         send_to_(PNEXT);
     }

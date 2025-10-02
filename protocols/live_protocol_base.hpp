@@ -485,6 +485,14 @@ DATATYPE retrieve_output_share_arithmetic(int index = 0)
     return preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index] - 1];
 }
 
+DATATYPE retrieve_output_share_arithmetic(int index, int index2)
+{
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#endif
+    return preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index] + index2];
+}
+
 template <typename func_add, typename std::enable_if_t<std::is_same_v<func_add(), OP_XOR>, int> = 0>
 void store_output_share_ab(DATATYPE val, func_add ADD, int index = 0)
 {
