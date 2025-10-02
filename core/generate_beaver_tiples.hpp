@@ -214,10 +214,17 @@ void generateArithmeticAB2DummyTriples(type a[],
         uint_a = (UINT_TYPE*) a;
         uint_b = (UINT_TYPE*) b;
         uint_c = (UINT_TYPE*) c;
+#if PARTY == 1
+        uint_a = nullptr;
+#else
+        uint_b = nullptr;
+#endif
     } else  {
 #if PARTY == 0
-    UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]);
+    uint_a = NEW(UINT_TYPE[num_triples]);
     unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
+#else
+    uint_a = nullptr;
 #endif
 #if PARTY == 1
         uint_b = NEW(UINT_TYPE[num_triples]);
@@ -227,14 +234,14 @@ void generateArithmeticAB2DummyTriples(type a[],
 #endif // P_0 doesn't need b for AB2
         uint_c = NEW(UINT_TYPE[num_triples]);
     }
-    
 
     Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, 1, Utils::PROTO::AB2);
     
     // convert UINT triple to SIMD type
-    orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
+    if (vectorization_factor != 1) {
+        orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
 #if PARTY == 0
-    DELETEARR(uint_a);
+        DELETEARR(uint_a);
 #endif
 #if PARTY == 1
         DELETEARR(uint_b);
@@ -258,12 +265,17 @@ void generateBooleanAB2DummyTriples(type a[],
 {
     std::cout << "BOOL AB2\n";
 
-    if(num_triples == 0) return;
+    if (num_triples == 0) return;
 
     port += 10;
-
+    
     //reinterpret SIMD bitstream as uint8 bitstream
+#if PARTY == 0
     uint8_t* uint_a = (uint8_t*) a;
+#else
+    std::vector<uint8_t> zerosa(num_triples/8, 0);
+    uint8_t* uint_a = zerosa.data();
+#endif
 #if PARTY == 1
     uint8_t* uint_b = (uint8_t*) b;
 #else
