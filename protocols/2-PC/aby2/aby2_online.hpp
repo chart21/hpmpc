@@ -17,6 +17,7 @@ class ABY2_ONLINE_Share
         this->m = x;
         this->l = l;
     }
+    
 
     template <typename func_mul>
     ABY2_ONLINE_Share mult_public(const Datatype b, func_mul MULT) const

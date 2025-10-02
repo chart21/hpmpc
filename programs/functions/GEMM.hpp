@@ -185,13 +185,21 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
             temps[t] = Q[i + t * m * p];
         }
         C[i].join_dots(temps);
+#if PROTOCOL == 4 && CONV_TRIPLES == 1 && AB2_TRIPLES == 1
+        C[i].mask_and_send_dot_with_triple();
+#else
         C[i].mask_and_send_dot();
+#endif
     }
     delete[] Q;
 #else
 #if INTERLEAVE_COMM == 0
     for (int i = 0; i < m * p; ++i)
+#if PROTOCOL == 4 && CONV_TRIPLES == 1 && AB2_TRIPLES == 1
+        C[i].mask_and_send_dot_with_triple();
+#else
         C[i].mask_and_send_dot();
+#endif
 #endif
 #endif
 }
@@ -294,7 +302,7 @@ void prepare_GEMM(U* A, T* B, T* C, const int m, const int p, const int f, bool 
 template <typename T>
 void complete_GEMM(T* C, const int m, const int p)
 {
-#if USE_CUDA_GEMM == 0
+#if USE_CUDA_GEMM == 0 && INTERLEAVE_COMM == 1
     complete_GEMM_CPU(C, m, p);
 #else
     complete_GEMM(C, m * p);

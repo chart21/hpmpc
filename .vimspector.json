@@ -5,7 +5,7 @@
             "configuration": {
                 "request": "launch",
                 "program": "executables/run-P1.o",
-                "cwd": "~/workspace/hpmpc_new/",
+                "cwd": "~/workspace/hpmpc_latest/",
                 "externalConsole":true,
                 "MiMode": "gdb",
                 "args": []

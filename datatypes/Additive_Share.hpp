@@ -12,6 +12,7 @@ class Additive_Share : public Share_Type
 
     static Additive_Share get_share_from_public_dat(Datatype a) { return Share_Type::public_val(a); }
 
+
     Additive_Share operator+(const Additive_Share<Datatype, Share_Type>& b) const
     {
 #if PROTOCOL == 2
