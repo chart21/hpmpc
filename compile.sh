@@ -2,24 +2,36 @@
 
 set -e
 
-FUNC=182
+FUNC=170 # 170 or 182
 DATTYPE=32
-NUM_INPUTS=10
+NUM_INPUTS=3
 PROCESS_NUM=1
+
+FC_TRIPLES=1
+CONV_TRIPLES=0
+BN_TRIPLES=1
+FAKE=0
 
 STD="standard"
 
 export MODEL_DIR=nn/Pygeon/models/pretrained
 export DATA_DIR=nn/Pygeon/data/datasets
 
+error() {
+    echo -e "\033[31m$@\033[0m"
+    exit -1
+}
+
 if (( $FUNC == 182 )); then
     export MODEL_FILE=MNIST_LeNet5/LeNet5_MNIST_${STD}_best.bin
     export SAMPLES_FILE=MNIST_${STD}_test_images.bin
     export LABELS_FILE=MNIST_${STD}_test_labels.bin
-else
+elif (( $FUNC == 170 )); then
     export MODEL_FILE=Cifar_adam_001/ResNet18_avg_CIFAR-10_standard_best.bin
     export SAMPLES_FILE=CIFAR-10_standard_test_images.bin
     export LABELS_FILE=CIFAR-10_standard_test_labels.bin
+else
+    error "Unknown Function '$FUNC'"
 fi
 
 terminate() {
@@ -29,11 +41,6 @@ terminate() {
 
 log() {
     echo -e "\033[35m$@\033[0m"
-}
-
-error() {
-    echo -e "\033[31m$@\033[0m"
-    exit -1
 }
 
 trap terminate SIGINT
@@ -63,8 +70,8 @@ while [[ $# -gt 0 ]]; do
             make -j PARTY=all FUNCTION_IDENTIFIER=${FUNC} MODELOWNER=P_0 \
                 DATAOWNER=P_1 DATTYPE=${DATTYPE} PROTOCOL=4 \
                 NUM_INPUTS=${NUM_INPUTS} BITLENGTH=32 \
-                PROCESS_NUM=1 PRE=1 FAKE_TRIPLES=0 AB2_TRIPLES=1 BN2D_TRIPLES=0 \
-                FC_TRIPLES=1 CONV_TRIPLES=1 INTERLEAVE_COMM=0
+                PROCESS_NUM=1 PRE=1 FAKE_TRIPLES=${FAKE} AB2_TRIPLES=1 BN2D_TRIPLES=${BN_TRIPLES} \
+                FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES} INTERLEAVE_COMM=0
 
             ./scripts/run.sh -p all -n 2
             ;;
@@ -81,7 +88,7 @@ while [[ $# -gt 0 ]]; do
             make -j PARTY=all PROTOCOL=4 FUNCTION_IDENTIFIER=${FUNC} \
                 BITLENGTH=32 PRE=1 DATTYPE=${DATTYPE} NUM_INPUTS=1 \
                 SPLITROLES=0 PROCESS_NUM=${PROCESS_NUM} USE_CUDA_GEMM=0 \
-                SKIP_PRE=0 FAKE_TRIPLES=0 AB2_TRIPLES=1 BN2D_TRIPLES=0 FC_TRIPLES=0 CONV_TRIPLES=0
+                SKIP_PRE=0 FAKE_TRIPLES=0 AB2_TRIPLES=1 BN2D_TRIPLES=${BN_TRIPLES} FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES}
 
             ./scripts/run.sh -p all -n 2
             ;;
