@@ -2,8 +2,7 @@
 #include "include/pch.h"
 #include "arch/DATATYPE.h"
 
-#define FAKE_TRIPLES 0
-#define C_THREADS 1
+#define C_THREADS 8
 
 // const ConvolutionParameter param(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
 struct ConvolutionParameter
@@ -616,7 +615,7 @@ void generateLayerDummyTriples(type** a,
             UINT_TYPE* x = nullptr;
             #endif
            #if A_KNOWN == 0 || PARTY == 0 
-            UINT_TYPE* w = new UINT_TYPE[w_size];  // W is always constant
+            UINT_TYPE* w = new UINT_TYPE[w_size * factor];  // W is always constant
             #else 
             UINT_TYPE* w = nullptr; 
            #endif 
@@ -636,7 +635,9 @@ void generateLayerDummyTriples(type** a,
         {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
             unorthogonalize_arithmetic(&a[n][i], temp, 1);
-            w[i] = temp[0];
+            for (int j = 0; j < factor; ++j) {
+                w[j * w_size + i] = temp[j];
+            }
         }
         #endif
 
@@ -647,7 +648,8 @@ void generateLayerDummyTriples(type** a,
                     x, w, y,
                     p.batchSize, p.in_feat, p.out_feat,
                     PARTY + 1, ip, port, C_THREADS,
-                    Utils::PROTO::AB2
+                    Utils::PROTO::AB2,
+                    factor
             );
         }
         // Conv2D(w,x,y, p) // calculate layer operation
