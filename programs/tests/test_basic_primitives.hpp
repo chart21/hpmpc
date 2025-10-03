@@ -18,7 +18,8 @@ bool test_secret_sharing_and_revealing()
     const int vectorization_factor = DATTYPE / BITLENGTH;
 
     // initialize plaintext inputs
-    UINT_TYPE inputs[vectorization_factor];
+    
+    alignas(sizeof(DATATYPE)) UINT_TYPE inputs[vectorization_factor];
     for (int i = 0; i < vectorization_factor; i++)
     {
         inputs[i] = 20 + i;
@@ -39,7 +40,7 @@ bool test_secret_sharing_and_revealing()
     vecotrized_output = share.complete_reveal_to_all();
 
     // unorthogonalize
-    UINT_TYPE output[vectorization_factor];
+    alignas(sizeof(DATATYPE)) UINT_TYPE output[vectorization_factor];
     unorthogonalize_arithmetic(&vecotrized_output, output, 1);
 
     // compare
@@ -64,7 +65,7 @@ bool test_add_mult_consants()
     const int vectorization_factor = DATTYPE / BITLENGTH;
 
     // initialize plaintext inputs
-    UINT_TYPE inputs[vectorization_factor];
+    alignas(sizeof(DATATYPE)) UINT_TYPE inputs[vectorization_factor];
     for (int i = 0; i < vectorization_factor; i++)
     {
         inputs[i] = 20 + i;
@@ -89,7 +90,7 @@ bool test_add_mult_consants()
     vecotrized_output = share.complete_reveal_to_all();
 
     // unorthogonalize
-    UINT_TYPE output[vectorization_factor];
+    alignas(sizeof(DATATYPE)) UINT_TYPE output[vectorization_factor];
     unorthogonalize_arithmetic(&vecotrized_output, output, 1);
 
     // compare
@@ -113,8 +114,8 @@ bool test_multiplication()
     const int vectorization_factor = DATTYPE / BITLENGTH;
 
     // initialize plaintext inputs
-    UINT_TYPE a[vectorization_factor];
-    UINT_TYPE b[vectorization_factor];
+    alignas(sizeof(DATATYPE)) UINT_TYPE a[vectorization_factor];
+    alignas(sizeof(DATATYPE)) UINT_TYPE b[vectorization_factor];
     for (int i = 0; i < vectorization_factor; i++)
     {
         a[i] = 20 + i;
@@ -152,7 +153,7 @@ bool test_multiplication()
     vecotrized_output = share_c.complete_reveal_to_all();
 
     // unorthogonalize
-    UINT_TYPE output[vectorization_factor];
+    alignas(sizeof(DATATYPE)) UINT_TYPE output[vectorization_factor];
     unorthogonalize_arithmetic(&vecotrized_output, output, 1);
 
     // compare
