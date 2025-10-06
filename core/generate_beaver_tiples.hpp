@@ -10,8 +10,8 @@ struct ConvolutionParameter
     int batchSize;
     int inh;
     int inw;
-    int din;
-    int dout;
+    int din; // channel
+    int dout; // n filters
     int wh;
     int ww;
     int padding;
@@ -50,7 +50,7 @@ struct ConvolutionParameter
           dilation(dilation)
     {
         x_size_per_batch = inh * inw * din;
-        w_size_per_batch = wh * ww * dout;
+        w_size_per_batch = wh * ww * dout * din;
         y_size_per_batch = out_h * out_w * dout;
     }
 };
@@ -141,19 +141,19 @@ void generateArithmeticDummyTriples(type a[],
     //convert SIMD variables to regular uints
     const int vectorization_factor = DATTYPE / bitlength;
 
-    UINT_TYPE* uint_a = new UINT_TYPE[num_triples];
-    unorthogonalize_arithmetic(a, uint_a, num_triples / (DATTYPE / bitlength)); 
-    UINT_TYPE* uint_b = new UINT_TYPE[num_triples];
+    UINT_TYPE* uint_a = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
+    unorthogonalize_arithmetic(a, uint_a, num_triples / (DATTYPE / bitlength));
+    UINT_TYPE* uint_b = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
     unorthogonalize_arithmetic(b, uint_b, num_triples / (DATTYPE / bitlength));
-    UINT_TYPE* uint_c = new UINT_TYPE[num_triples];
+    UINT_TYPE* uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
 
     Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, 1);
 
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
-    DELETEARR(uint_a);
-    DELETEARR(uint_b);
-    DELETEARR(uint_c);
+    std::free(uint_a);
+    std::free(uint_b);
+    std::free(uint_c);
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
@@ -204,7 +204,7 @@ void generateArithmeticAB2DummyTriples(type a[],
     port += 10;
 
     //convert SIMD variables to regular uints
-    const int vectorization_factor = DATTYPE / bitlength; 
+    const int vectorization_factor = DATTYPE / bitlength;
 
     UINT_TYPE* uint_a;
     UINT_TYPE* uint_b;
@@ -222,32 +222,32 @@ void generateArithmeticAB2DummyTriples(type a[],
 #endif
     } else  {
 #if PARTY == 0
-    uint_a = NEW(UINT_TYPE[num_triples]);
-    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
+        uint_a = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
+        unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor));
 #else
-    uint_a = nullptr;
+        uint_a = nullptr;
 #endif
 #if PARTY == 1
-        uint_b = NEW(UINT_TYPE[num_triples]);
+        uint_b = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
         unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
 #else
         uint_b = nullptr;
 #endif // P_0 doesn't need b for AB2
-        uint_c = NEW(UINT_TYPE[num_triples]);
+        uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
     }
 
     Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, 1, Utils::PROTO::AB2);
-    
+
     // convert UINT triple to SIMD type
     if (vectorization_factor != 1) {
         orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
 #if PARTY == 0
-        DELETEARR(uint_a);
+        std::free(uint_a);
 #endif
 #if PARTY == 1
-        DELETEARR(uint_b);
+        std::free(uint_b);
 #endif
-        DELETEARR(uint_c);
+        std::free(uint_c);
     }
 }
 
@@ -269,7 +269,7 @@ void generateBooleanAB2DummyTriples(type a[],
     if (num_triples == 0) return;
 
     port += 10;
-    
+
     //reinterpret SIMD bitstream as uint8 bitstream
 #if PARTY == 0
     uint8_t* uint_a = (uint8_t*) a;
@@ -284,7 +284,7 @@ void generateBooleanAB2DummyTriples(type a[],
     uint8_t* uint_b = zeros.data();
 #endif // P_0 doesn't need b for AB2
     uint8_t* uint_c = (uint8_t*) c;
-    
+
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
             num_triples / 8, ip, port, PARTY + 1, 1);
 }
@@ -515,14 +515,13 @@ void generateLayerDummyTriples(type** a,
 
     port += 10;
     const int factor = DATTYPE/BITLENGTH;
-    if(factor == 1) // No need to unvectorize
-        {
-            UINT_TYPE** uint_w = (UINT_TYPE**) a;
-            UINT_TYPE** uint_x = (UINT_TYPE**) b;
-            UINT_TYPE* uint_y = (UINT_TYPE*) c;
-            uint64_t y_index_counter = 0;
-        for(int n = 0; n < params.size(); n++)
-        {
+    if(factor == 1) { // No need to unvectorize
+        UINT_TYPE** uint_w = (UINT_TYPE**) a;
+        UINT_TYPE** uint_x = (UINT_TYPE**) b;
+        UINT_TYPE* uint_y = (UINT_TYPE*) c;
+        uint64_t y_index_counter = 0;
+
+        for(int n = 0; n < params.size(); n++) {
             auto p = params[n];
 
             if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
@@ -530,30 +529,32 @@ void generateLayerDummyTriples(type** a,
                     std::cerr << "DILATION != 1 is not supported\n";
                 }
                 Utils::ConvParm conv{
-                    .ic = (size_t)p.din,
-                    .iw = (size_t)p.inw,
-                    .ih = (size_t)p.inh,
-                    .fc = (size_t)p.din,
-                    .fw = (size_t)p.ww,
-                    .fh = (size_t)p.wh,
-                    .n_filters = (size_t)p.dout,
-                    .stride = (size_t)p.stride,
-                    .padding = (size_t)p.padding,
+                    .ic = p.din,
+                    .iw = p.inw,
+                    .ih = p.inh,
+                    .fc = p.din,
+                    .fw = p.ww,
+                    .fh = p.wh,
+                    .n_filters = p.dout,
+                    .stride = p.stride,
+                    .padding = p.padding,
                 };
-                std::cout << "CONVOLUTION" << "\n";
-                std::cout << conv.ih << " x ";
-                std::cout << conv.iw << " x ";
-                std::cout << conv.ic << ", ";
-                std::cout << p.x_size_per_batch << ", ";
-                std::cout << conv.fh << " x ";
-                std::cout << conv.fw << " x ";
-                std::cout << conv.fc << " x ";
-                std::cout << conv.n_filters << ", ";
-                std::cout << p.w_size_per_batch << ", ";
-                std::cout << p.stride << ", ";
-                std::cout << p.padding << ", ";
-                std::cout << p.out_h << ", ";
-                std::cout << p.out_w << "\n";
+                /**
+                 * std::cout << "CONVOLUTION" << "\n";
+                 * std::cout << conv.ih << " x ";
+                 * std::cout << conv.iw << " x ";
+                 * std::cout << conv.ic << ", ";
+                 * std::cout << p.x_size_per_batch << ", ";
+                 * std::cout << conv.fh << " x ";
+                 * std::cout << conv.fw << " x ";
+                 * std::cout << conv.fc << " x ";
+                 * std::cout << conv.n_filters << ", ";
+                 * std::cout << p.w_size_per_batch << ", ";
+                 * std::cout << p.stride << ", ";
+                 * std::cout << p.padding << ", ";
+                 * std::cout << p.out_h << ", ";
+                 * std::cout << p.out_w << "\n";
+                 */
 
                 Iface::generateConvTriplesCheetahWrapper(
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
@@ -564,12 +565,14 @@ void generateLayerDummyTriples(type** a,
                 );
 
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
-                std::cout << params.size() << "FullyConnected\n";
-                std::cout << p.batchSize << ", ";
-                std::cout << p.in_feat << ", ";
-                std::cout << p.out_feat << ", ";
-                std::cout << "x_size: " << p.x_size_per_batch << ", "; // smol
-                std::cout << "w_size: " << p.w_size_per_batch << "\n"; // big
+                /**
+                 * std::cout << params.size() << "FullyConnected\n";
+                 * std::cout << p.batchSize << ", ";
+                 * std::cout << p.in_feat << ", ";
+                 * std::cout << p.out_feat << ", ";
+                 * std::cout << "x_size: " << p.x_size_per_batch << ", "; // smol
+                 * std::cout << "w_size: " << p.w_size_per_batch << "\n"; // big
+                 */
 
                 Iface::generateFCTriplesCheetah(
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
@@ -588,61 +591,83 @@ void generateLayerDummyTriples(type** a,
                 Iface::generateBNTriplesCheetah(
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
-                        p.batchSize, p.ch, p.hw,
-                        ip, port, PARTY + 1, C_THREADS, Utils::PROTO::AB2
+                        p.batchSize, p.ch, p.h, p.w,
+                        ip, port, PARTY + 1, C_THREADS,
+                        Utils::PROTO::AB2
                 );
             } else {
-                std::cout << params.size() << "UNKNOWN\n";
+                std::cerr << "Unsupported Param type\n";
             }
            // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
             y_index_counter += p.y_size_per_batch * p.batchSize;
-             
-        } 
-            return;
-        }
 
-        uint64_t c_index = 0;
-        for(int n = 0; n < params.size(); n++)
-        {
-            auto p = params[n];
-            const uint64_t x_size = p.x_size_per_batch * p.batchSize;
-            const uint64_t w_size = p.w_size_per_batch;
-            const uint64_t y_size = p.y_size_per_batch * p.batchSize;
-       
-           #if A_KNOWN == 0 || PARTY == 1
-            UINT_TYPE* x = new UINT_TYPE[factor * x_size]; // Party1 holds X2 in plain in AB2 setting
-            #else
-            UINT_TYPE* x = nullptr;
-            #endif
-           #if A_KNOWN == 0 || PARTY == 0 
-            UINT_TYPE* w = new UINT_TYPE[w_size * factor];  // W is always constant
-            #else 
-            UINT_TYPE* w = nullptr; 
-           #endif 
-            UINT_TYPE* y = new UINT_TYPE[factor * y_size];
+            }
+        return;
+    }
 
-        #if A_KNOWN == 0 || PARTY == 1
-        for (int i = 0; i < x_size; i++)
-        {
+    uint64_t c_index = 0;
+    for(int n = 0; n < params.size(); n++) {
+        auto p = params[n];
+        const uint64_t x_size = p.x_size_per_batch * p.batchSize;
+        const uint64_t w_size = p.w_size_per_batch;
+        const uint64_t y_size = p.y_size_per_batch * p.batchSize;
+
+#if AB2_TRIPLES == 0 || PARTY == 1
+        UINT_TYPE* x = new UINT_TYPE[factor * x_size]; // Party1 holds X2 in plain in AB2 setting
+#else
+        UINT_TYPE* x = nullptr;
+#endif
+#if AB2_TRIPLES == 0 || PARTY == 0
+        UINT_TYPE* w = new UINT_TYPE[w_size * factor];  // W is always constant
+#else
+        UINT_TYPE* w = nullptr;
+#endif
+        UINT_TYPE* y = new UINT_TYPE[factor * y_size];
+
+#if AB2_TRIPLES == 0 || PARTY == 1
+        for (int i = 0; i < x_size; i++) {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
             unorthogonalize_arithmetic(&b[n][i], temp, 1);
             for (int j = 0; j < factor; j++)
-                x[j * x_size + i] = temp[j]; 
+                x[j * x_size + i] = temp[j];
         }
-        #endif
-        #if A_KNOWN == 0 || PARTY == 0 
-        for (int i = 0; i < w_size; i++)
-        {
+#endif
+#if A_KNOWN == 0 || PARTY == 0
+        for (int i = 0; i < w_size; i++) {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
             unorthogonalize_arithmetic(&a[n][i], temp, 1);
             for (int j = 0; j < factor; ++j) {
                 w[j * w_size + i] = temp[j];
             }
         }
-        #endif
+#endif
 
         p.batchSize *= factor;
-        if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
+
+        if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
+            if (p.dilation != 1) {
+                std::cerr << "DILATION != 1 is not supported\n";
+            }
+            Utils::ConvParm conv{
+                .ic = p.din,
+                .iw = p.inw,
+                .ih = p.inh,
+                .fc = p.din,
+                .fw = p.ww,
+                .fh = p.wh,
+                .n_filters = p.dout,
+                .stride = p.stride,
+                .padding = p.padding,
+            };
+
+            Iface::generateConvTriplesCheetahWrapper(
+                    x, w, y,
+                    conv, p.batchSize,
+                    ip, port, PARTY + 1, C_THREADS,
+                    Utils::PROTO::AB2,
+                    factor
+            );
+        } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
             std::cout << p.batchSize << ", " << factor << "\n";
             Iface::generateFCTriplesCheetah(
                     x, w, y,
@@ -651,20 +676,30 @@ void generateLayerDummyTriples(type** a,
                     Utils::PROTO::AB2,
                     factor
             );
+        } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
+            Iface::generateBNTriplesCheetah(
+                    x, w, y,
+                    p.batchSize, p.ch, p.h, p.w,
+                    ip, port, PARTY + 1, C_THREADS,
+                    Utils::PROTO::AB2,
+                    factor
+            );
+        } else {
+            std::cerr << "Unsupported Param type\n";
         }
         // Conv2D(w,x,y, p) // calculate layer operation
-        for (int i = 0; i < y_size; i++)
-        {
+        for (int i = 0; i < y_size; i++) {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
             for (int j = 0; j < factor; j++)
                 temp[j] = y[j * y_size + i];
             orthogonalize_arithmetic(temp, c + c_index + i, 1);
         }
+
         delete[] x;
         delete[] w;
         delete[] y;
         c_index += y_size;
-        }
+    }
 }
 
 
