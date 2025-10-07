@@ -17,6 +17,9 @@ uint64_t total_send_pre[num_players - 1] = {0};
 uint64_t total_recv_pre[num_players - 1] = {0};
 #endif
 
+#if FUSE_RELU_AVG == 1
+int curr_denom = 1;
+#endif
 
 int rounds;
 int rb;

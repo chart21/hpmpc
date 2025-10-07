@@ -175,6 +175,17 @@ class OECL1_Share
         res.p1 = SUB(result, res.p2);
         return res;
     }
+    
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+        OECL1_Share local_mult_and_trunc(const Datatype b,
+                                        func_mul MULT,
+                                        func_add ADD,
+                                        func_sub SUB,
+                                        func_trunc TRUNC,
+                                        int fractional_bits = FRACTIONAL) const
+        {
+            return OECL1_Share(TRUNC(MULT(p1, b), fractional_bits), p2);
+        }
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
     OECL1_Share prepare_trunc_share(func_mul MULT,

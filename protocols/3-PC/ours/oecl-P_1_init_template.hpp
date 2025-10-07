@@ -132,6 +132,16 @@ class OECL1_init
     {
         return OECL1_init();
     }
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+        OECL1_init local_mult_and_trunc(const Datatype b,
+                                        func_mul MULT,
+                                        func_add ADD,
+                                        func_sub SUB,
+                                        func_trunc TRUNC,
+                                        int fractional_bits = FRACTIONAL) const
+        {
+            return OECL1_init();
+        }
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
     OECL1_init prepare_trunc_share(func_mul MULT,

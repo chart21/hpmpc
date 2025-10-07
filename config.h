@@ -244,6 +244,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define FUSE_DOT 1  // Fuse multiple dot products into one
 #endif
 
+#ifndef FUSE_RELU_AVG
+#define FUSE_RELU_AVG 0  // Fuse ReLU and Average Pooling into one operation
+#endif
+
 #ifndef INTERLEAVE_COMM
 #define INTERLEAVE_COMM 1  // Interleave communication
 #endif

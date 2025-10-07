@@ -150,6 +150,18 @@ class OECL2_init
     {
         return OECL2_init();
     }
+
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+        OECL2_init local_mult_and_trunc(const Datatype b,
+                                        func_mul MULT,
+                                        func_add ADD,
+                                        func_sub SUB,
+                                        func_trunc TRUNC,
+                                        int fractional_bits = FRACTIONAL) const
+        {
+            return OECL2_init();
+        }
+
     template <typename func_add, typename func_sub>
     void complete_public_mult_fixed(func_add ADD, func_sub SUB)
     {

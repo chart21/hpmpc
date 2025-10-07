@@ -81,6 +81,17 @@ class OECL0_POST_Share
     {
         return OECL0_POST_Share();
     }
+    
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+        OECL0_POST_Share local_mult_and_trunc(const Datatype b,
+                                        func_mul MULT,
+                                        func_add ADD,
+                                        func_sub SUB,
+                                        func_trunc TRUNC,
+                                        int fractional_bits = FRACTIONAL) const
+        {
+            return OECL0_POST_Share();
+        }
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
     OECL0_POST_Share prepare_trunc_share(func_mul MULT,

@@ -311,6 +311,17 @@ class OEC_MAL1_Share
         res.r = getRandomVal(P_013);
         return res;
     }
+    
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+        OEC_MAL1_Share local_mult_and_trunc(const Datatype b,
+                                        func_mul MULT,
+                                        func_add ADD,
+                                        func_sub SUB,
+                                        func_trunc TRUNC,
+                                        int fractional_bits = FRACTIONAL) const
+        {
+            return OEC_MAL1_Share(TRUNC(MULT(m, b), fractional_bits), r);
+        }
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
     OEC_MAL1_Share prepare_trunc_share(func_mul MULT,

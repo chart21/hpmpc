@@ -63,6 +63,13 @@ class Additive_Share : public Share_Type
         return Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, OP_TRUNCF, fractional_bits);
     }
 
+#if FUSE_RELU_AVG == 1
+    Additive_Share local_mult_and_trunc(const UINT_TYPE b, int fractional_bits = FRACTIONAL) const
+    {
+        return Share_Type::local_mult_and_trunc(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, OP_TRUNCF, fractional_bits);
+    }        
+#endif
+
     Additive_Share prepare_trunc_share(int fractional_bits = FRACTIONAL) const
     {
         return Share_Type::prepare_trunc_share(OP_MULT, OP_ADD, OP_SUB, OP_TRUNCF, fractional_bits);
