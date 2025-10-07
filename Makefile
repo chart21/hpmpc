@@ -12,19 +12,19 @@ HE_INCLUDE := -I${CHEETAH}/src/include \
 			  -I${CHEETAH}/src \
 			  -isystem ${CHEETAH}/deps/include \
 			  -isystem ${CHEETAH}/deps/include/SEAL-4.0 \
-			  -isystem ${CHEETAH}/deps/include/eigen3
+			  -isystem /usr/include/eigen3
 
 HE_PATHS := -Wl,-rpath,${CHEETAH}/build/lib \
 			-L${CHEETAH}/build/lib \
-			-L${CHEETAH}/deps/lib \
+			-L${CHEETAH}/deps/lib
 
 HE_LIBS := -lHE -lgemini -lseal-4.0
 
 CHEETAH_FLAGS := $(HE_INCLUDE) $(HE_PATHS) $(HE_LIBS)
 
 # Base flags
-EXECFLAGS := -march=native -g -fno-finite-math-only -std=c++20 -pthread -Wno-ignored-attributes
-LINKFLAGS := -lssl -lcrypto -I nn/PIGEON ${CHEETAH_FLAGS}
+EXECFLAGS := -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -Wno-ignored-attributes
+LINKFLAGS := ${CHEETAH_FLAGS} -lssl -lcrypto -I nn/PIGEON
 
 CXXFLAGS := $(EXECFLAGS) $(LINKFLAGS)
 NVCCFLAGS := -Xptxas -O3
