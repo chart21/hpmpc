@@ -6,12 +6,6 @@
 template <typename T, typename U>
 void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_rows, const int w_cols)
 {
-#if FUSE_CONV_BN_SIM == 1
-    const auto dummy_sigma = T(0);
-    const auto dummy_mu = T(0);
-    const auto dummy_beta = T(0);
-    const auto sigma_mu = dummy_sigma.prepare_dot(dummy_mu);
-#endif
     for (int i = 0; i < w_rows; ++i)
     {
         T sum = T(0);
@@ -19,10 +13,6 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
         {
 
 #if PUBLIC_WEIGHTS == 0
-#if FUSE_CONV_BN_SIM == 1 //Only a simulation of fused Conv+BN implementation. Assumes pre-truncated shares of previous layer and dummy fixed-point BN parameters
-            const auto dummy_sigma = T(0);
-            sum += W[i * w_cols + j].prepare_dot3(A[j], dummy_sigma);
-#else
 #if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
 #if FC_TRIPLES == 1 
             sum += W[i * w_cols + j].prepare_dot_ex_lxly_a_known(A[j]);
@@ -32,18 +22,12 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
 #else
             sum += W[i * w_cols + j].prepare_dot(A[j]);
 #endif
-#endif
 #else
             sum += A[j].mult_public(W[i * w_cols + j]);
 #endif
         }
 
 #if PUBLIC_WEIGHTS == 0
-#if FUSE_CONV_BN_SIM == 1
-        sum += sigma_mu;
-        sum.mask_and_send_dot();
-        sum = dummy_beta - sum;
-#else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if FC_TRIPLES == 1 && PROTOCOL == 4
         sum.mask_and_send_dot_without_trunc_with_triple();  // send immediately to utilize network better
@@ -55,7 +39,6 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
         sum.mask_and_send_dot_with_triple();
 #else
         sum.mask_and_send_dot();
-#endif
 #endif
 #endif
 #else
@@ -77,6 +60,12 @@ template <typename T, typename U>
 void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, const int f, bool is_A_fixed)
 {
     const int TILE_SIZE = 64;
+#if FUSE_CONV_BN_SIM == 1
+    const auto dummy_sigma = T(0);
+    const auto dummy_mu = T(0);
+    const auto dummy_beta = T(0);
+    const auto sigma_mu = dummy_sigma.prepare_dot(dummy_mu);
+#endif
 
 #if FUSE_DOT == 2
     T* Q = new T[m * p * T::getNumDotProducts()];
@@ -124,6 +113,9 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
                                 }
                                 temp.join_dots(temps);
 #elif FUSE_DOT == 1
+#if FUSE_CONV_BN_SIM == 1 //Only a simulation of fused Conv+BN implementation. Assumes pre-truncated shares of previous layer and dummy fixed-point BN parameters
+                                temp += A[iif + kk].prepare_dot3(B[jjf + kk], dummy_sigma);
+#else
 #if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
 #if CONV_TRIPLES == 1 
                                 temp += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk]);
@@ -132,6 +124,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #endif
 #else
                                 temp += A[iif + kk].prepare_dot(B[jjf + kk]);
+#endif
 #endif
 #elif FUSE_DOT == 2
 #if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
@@ -164,6 +157,13 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
                     for (int jj = j; jj < j_max; ++jj)
                     {
 #if PUBLIC_WEIGHTS == 0
+#if FUSE_CONV_BN_SIM == 1
+        auto sum = C[row + jj];
+        sum += sigma_mu;
+        sum.mask_and_send_dot();
+        sum = dummy_beta - sum;
+#else
+
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if CONV_TRIPLES == 1 && PROTOCOL == 4
                         // C[row + jj].mask_and_send_dot_without_trunc_with_triple();
@@ -179,6 +179,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
                         C[row + jj].mask_and_send_dot();
 #endif
 
+#endif
 #endif
 #else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
