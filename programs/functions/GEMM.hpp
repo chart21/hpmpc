@@ -6,6 +6,12 @@
 template <typename T, typename U>
 void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_rows, const int w_cols)
 {
+#if FUSE_CONV_BN_SIM == 1
+    const auto dummy_sigma = T(0);
+    const auto dummy_mu = T(0);
+    const auto dummy_beta = T(0);
+    const auto sigma_mu = dummy_sigma.prepare_dot(dummy_mu);
+#endif
     for (int i = 0; i < w_rows; ++i)
     {
         T sum = T(0);
@@ -13,6 +19,10 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
         {
 
 #if PUBLIC_WEIGHTS == 0
+#if FUSE_CONV_BN_SIM == 1 //Only a simulation of fused Conv+BN implementation. Assumes pre-truncated shares of previous layer and dummy fixed-point BN parameters
+            const auto dummy_sigma = T(0);
+            sum += W[i * w_cols + j].prepare_dot3(A[j], dummy_sigma);
+#else
 #if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
 #if FC_TRIPLES == 1 
             sum += W[i * w_cols + j].prepare_dot_ex_lxly_a_known(A[j]);
@@ -22,12 +32,18 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
 #else
             sum += W[i * w_cols + j].prepare_dot(A[j]);
 #endif
+#endif
 #else
             sum += A[j].mult_public(W[i * w_cols + j]);
 #endif
         }
 
 #if PUBLIC_WEIGHTS == 0
+#if FUSE_CONV_BN_SIM == 1
+        sum += sigma_mu;
+        sum.mask_and_send_dot();
+        sum = dummy_beta - sum;
+#else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if FC_TRIPLES == 1 && PROTOCOL == 4
         sum.mask_and_send_dot_without_trunc_with_triple();  // send immediately to utilize network better
@@ -39,6 +55,7 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
         sum.mask_and_send_dot_with_triple();
 #else
         sum.mask_and_send_dot();
+#endif
 #endif
 #endif
 #else

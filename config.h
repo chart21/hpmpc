@@ -252,6 +252,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define FUSE_RELU_MAX 0  // Fuse ReLU and Average Pooling into one operation
 #endif
 
+#ifndef FUSE_CONV_BN_SIM
+#define FUSE_CONV_BN_SIM 0  // Fuse Convolution and BatchNorm into one operation (Only Simulated)
+#endif
+
 #ifndef INTERLEAVE_COMM
 #define INTERLEAVE_COMM 1  // Interleave communication
 #endif
