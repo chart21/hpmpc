@@ -314,7 +314,7 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef BN2D_TRIPLES
-#define BN2D_TRIPLE 1
+#define BN2D_TRIPLES 1
 #endif
 
 #ifndef FC_TRIPLES
