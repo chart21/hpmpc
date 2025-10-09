@@ -238,6 +238,20 @@ class OECL0_POST_Share
     {
     }
 
+#if FUSE_CONV_BN_SIM == 1
+    template <typename func_add, typename func_sub, typename func_mul>
+    void prepare_Conv_BN_Accum(const OECL0_POST_Share x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul, typename func_trunc>
+    void calculate_conv_bn(const OECL0_POST_Share mu, const OECL0_POST_Share sigma, const Datatype* accum, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC)
+    {
+    }
+    
+    static int get_conv_bn_size() { return 3; }
+#endif
+
     template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
     void prepare_trunc_2k_inputs(func_add ADD,
                                  func_sub SUB,

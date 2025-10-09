@@ -64,7 +64,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
     const auto dummy_sigma = T(0);
     const auto dummy_mu = T(0);
     const auto dummy_beta = T(0);
-    const auto sigma_mu = dummy_sigma.prepare_dot(dummy_mu);
+    auto C_Accum = new DATATYPE[m * p * T::get_conv_bn_size()]();
 #endif
 
 #if FUSE_DOT == 2
@@ -90,7 +90,12 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
                         for (int jj = j; jj < j_max; ++jj)
                         {
                             const int jjf = jj * f;
+#if FUSE_CONV_BN_SIM == 1
+                            DATATYPE temp[T::get_conv_bn_size()] = {0};
+#else
                             auto temp = T(0);
+#endif
+
 #if FUSE_DOT == 0
                             T temps[T::getNumDotProducts()] = {T(0)};
 #endif
@@ -114,7 +119,8 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
                                 temp.join_dots(temps);
 #elif FUSE_DOT == 1
 #if FUSE_CONV_BN_SIM == 1 //Only a simulation of fused Conv+BN implementation. Assumes pre-truncated shares of previous layer and dummy fixed-point BN parameters
-                                temp += A[iif + kk].prepare_dot3(B[jjf + kk], dummy_sigma);
+                                // temp += A[iif + kk].prepare_dot3(B[jjf + kk], dummy_sigma);
+                                A[iif + kk].prepare_Conv_BN_Accum(B[jjf + kk], temp);
 #else
 #if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
 #if CONV_TRIPLES == 1 
@@ -145,7 +151,15 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #if FUSE_DOT == 2
                             Q[iip + jj + t * m * p] = temp;
 #else
+#if FUSE_CONV_BN_SIM == 1
+                            for (int idx = 0; idx < T::get_conv_bn_size(); ++idx)
+                            {
+                                auto& c = C_Accum[(iip + jj) * T::get_conv_bn_size() + idx];
+                                c = OP_ADD(c, temp[idx]);
+                            }
+#else
                         C[iip + jj] += temp;
+#endif
 #endif
                         }
                     }
@@ -158,10 +172,9 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
                     {
 #if PUBLIC_WEIGHTS == 0
 #if FUSE_CONV_BN_SIM == 1
-        auto sum = C[row + jj];
-        sum += sigma_mu;
-        sum.mask_and_send_dot();
-        sum = dummy_beta - sum;
+        auto idx = (row + jj) * T::get_conv_bn_size();
+        C[row + jj].calculate_conv_bn(dummy_mu, dummy_sigma, &C_Accum[idx]);
+        C[row + jj] = dummy_beta - C[row + jj]; 
 #else
 
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
@@ -225,6 +238,9 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && AB2_TRIPLES == 1
         if(current_phase == PHASE_LIVE)
             preprocessed_outputs_arithmetic_index[0] += m * p;
+#endif
+#if FUSE_CONV_BN_SIM == 1
+    delete[] C_Accum;
 #endif
 }
 

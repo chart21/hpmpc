@@ -141,6 +141,19 @@ class Additive_Share : public Share_Type
         Share_Type::complete_trunc_2k_inputs(OP_ADD, OP_SUB, OP_XOR, OP_AND, FUNC_TRUNC, rmk2, rmsb, c, c_prime);
     }
 
+#if FUSE_CONV_BN_SIM == 1
+    void prepare_Conv_BN_Accum(const Additive_Share<Datatype, Share_Type> x, Datatype* result) const
+    {
+        Share_Type::prepare_Conv_BN_Accum(x, result, OP_ADD, OP_SUB, OP_MULT);
+    }
+
+    void calculate_conv_bn(const Additive_Share<Datatype, Share_Type> mu, const Additive_Share<Datatype, Share_Type> sigma, const Datatype* accum)
+    {
+        Share_Type::calculate_conv_bn(mu, sigma, accum, OP_ADD, OP_SUB, OP_MULT, FUNC_TRUNC);
+    }
+
+#endif
+
     Datatype complete_reveal_to_all() const { return Share_Type::complete_Reveal(OP_ADD, OP_SUB); }
 
     void complete_reveal_to_all(UINT_TYPE output[]) const

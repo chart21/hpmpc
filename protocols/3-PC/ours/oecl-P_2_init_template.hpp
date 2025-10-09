@@ -322,6 +322,30 @@ class OECL2_init
         }
     }
 
+#if FUSE_CONV_BN_SIM == 1
+    template <typename func_add, typename func_sub, typename func_mul>
+    void prepare_Conv_BN_Accum(const OECL2_init x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul, typename func_trunc>
+    void calculate_conv_bn(const OECL2_init mu, const OECL2_init sigma, const Datatype* accum, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC)
+    {
+#if PRE == 1
+        pre_receive_from_(P_0);
+        pre_receive_from_(P_0);
+        pre_receive_from_(P_0);
+#else
+        receive_from_(P_0);
+        receive_from_(P_0);
+        receive_from_(P_0);
+#endif
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
+    }
+    
+    static int get_conv_bn_size() { return 7; }
+#endif
+
     template <typename func_add, typename func_sub, typename func_mul>
     OECL2_init prepare_dot3(OECL2_init b, OECL2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
     {

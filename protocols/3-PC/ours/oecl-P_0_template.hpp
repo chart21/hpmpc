@@ -746,6 +746,44 @@ class OECL0_Share
         return OECL0_Share(lxmodt, SET_ALL_ZERO());
     }
 
+#if FUSE_CONV_BN_SIM == 1
+    template <typename func_add, typename func_sub, typename func_mul>
+    void prepare_Conv_BN_Accum(const OECL0_Share x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        result[0] = ADD(result[0], ADD(p1, p2)); //  sum(lw)
+        result[1] = ADD(result[1], ADD(x.p1, x.p2)); //  sum(lx)
+        result[2] = ADD(result[2], MULT(ADD(p1, p2), ADD(x.p1, x.p2))); // sum(lw*lx)                                                     
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul, typename func_trunc>
+    void calculate_conv_bn(const OECL0_Share mu, const OECL0_Share sigma, const Datatype* accum, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) 
+    {
+        const auto lw = accum[0];
+        const auto lx = accum[1];
+        const auto lwx = accum[2];
+        const auto lo = ADD(sigma.p1, sigma.p2);
+        const auto lw_lsigma = SUB(MULT(lw, lo), getRandomVal(P_1));
+        const auto lx_lsigma = SUB(MULT(lx, lo), getRandomVal(P_1));
+        const auto lx_lw = SUB(MULT(lx, lw), getRandomVal(P_1));
+        const auto lwx_lsigma = MULT(lwx, lo);
+           
+#if PRE == 1
+        pre_send_to_live(P_2, lw_lsigma);
+        pre_send_to_live(P_2, lx_lsigma);
+        pre_send_to_live(P_2, lx_lw);
+#else
+        send_to_live(P_2, lw_lsigma);
+        send_to_live(P_2, lx_lsigma);
+        send_to_live(P_2, lx_lw);
+#endif
+        *this = mu.prepare_dot(sigma, ADD, SUB, MULT);
+        p1 = ADD(p1,lwx_lsigma);
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
+    }
+    
+    static int get_conv_bn_size() { return 3; }
+
+#endif
     /* #if USE_CUDA_GEMM == 1 */
 
     /*     template <typename func_add, typename func_sub, typename func_mul> */
