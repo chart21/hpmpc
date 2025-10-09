@@ -6,6 +6,12 @@
 #include "prob_truncation.hpp"
 /* #include "boolean_adder_bandwidth.hpp" */
 
+#if OPTIMIZED_BIT_INJECTION_RELU == 1
+#define RELU_range_in_place RELU_range_in_place_opt
+#else
+#define RELU_range_in_place RELU_range_in_place_optB2A
+#endif
+
 #if TTP_PROTOCOL == 0 || SIMULATE_MPC_FUNCTIONS == 1
 
 #if TRUNC_APPROACH == 2 || TRUNC_APPROACH == 3
@@ -243,9 +249,9 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
 #endif
     }
     else
-        pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm, rk, Share, Datatype>);
+        pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place<rm, rk, Share, Datatype>);
 #else
-        pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_opt<rm, rk, Share, Datatype>);
+        pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place<rm, rk, Share, Datatype>);
 #endif
 
 #if TRUNC_DELAYED == 1
@@ -271,15 +277,15 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>* begin,
         RELU_range_in_place_exact<m, k, Share, Datatype>(output, len);
 #else
         isReLU = true;
-        RELU_range_in_place_opt<m, k, Share, Datatype>(output, len);
+        RELU_range_in_place<m, k, Share, Datatype>(output, len);
         trunc_exact_opt_in_place<m, k, Share, Datatype>(output, len, true);
         isReLU = false;
 #endif
     }
     else
-        RELU_range_in_place_opt<m, k, Share, Datatype>(output, len);
+        RELU_range_in_place<m, k, Share, Datatype>(output, len);
 #else
-        RELU_range_in_place_opt<m, k, Share, Datatype>(output, len);
+        RELU_range_in_place<m, k, Share, Datatype>(output, len);
 #endif
 
 #if TRUNC_DELAYED == 1

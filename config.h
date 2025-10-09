@@ -256,6 +256,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define FUSE_CONV_BN_SIM 0  // Fuse Convolution and BatchNorm into one operation (Only Simulated)
 #endif
 
+#ifndef OPTIMIZED_BIT_INJECTION_RELU 
+#define OPTIMIZED_BIT_INJECTION_RELU 1  // Use optimized bit injection for ReLU
+#endif
+
 #ifndef INTERLEAVE_COMM
 #define INTERLEAVE_COMM 1  // Interleave communication
 #endif
