@@ -305,6 +305,10 @@ int base_port = BASE_PORT;  // temporary solution
 #if PROTOCOL == 4
 #define BEAVER 1
 
+#ifndef CHEETAH_THREADS
+#define CHEETAH_THREADS 32  // Number of threads to use for Cheetah triples generation
+#endif
+
 #ifndef LX_TRIPLES
 #define LX_TRIPLES 1  // Generate lx ly shares directly
 #endif

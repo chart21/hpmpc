@@ -118,6 +118,11 @@ void inference(DATATYPE* res)
     // VGG16 PyTorch, ImageNet
     int n_test = NUM_INPUTS * BASE_DIV, ch = 3, h = 224, w = 224, num_classes = 1000;
     auto model = VGG16_PyTorch<modeltype>(num_classes);
+#elif FUNCTION_IDENTIFIER == 87 || FUNCTION_IDENTIFIER == 187 || FUNCTION_IDENTIFIER == 287 || \
+    FUNCTION_IDENTIFIER == 387
+    // ResNet50, Cheetah
+    int n_test = NUM_INPUTS * BASE_DIV, ch = 3, h = 230, w = 230, num_classes = 1000;
+    auto model = Cheetah_ResNet<modeltype>(num_classes);
 #endif
 
     // === Read Labels and Images ===
