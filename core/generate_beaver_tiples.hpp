@@ -182,7 +182,7 @@ void generateBooleanDummyTriples(type a[],
     uint8_t* uint_b = (uint8_t*) b;
     uint8_t* uint_c = (uint8_t*) c;
 
-    Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples / 8, ip, port, PARTY + 1, CHECHEETAH_THREADS);
+    Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples / 8, ip, port, PARTY + 1, CHEETAH_THREADS);
 }
 
 
