@@ -22,6 +22,10 @@ BUILD=1
 
 STD="standard" # standard or custom
 
+make clean
+
+rm -rf data/*
+
 export MODEL_DIR=nn/Pygeon/models/pretrained
 export DATA_DIR=nn/Pygeon/data/datasets
 
@@ -40,6 +44,12 @@ terminate() {
     pkill -9 -f run-P
 }
 
+log_info() {
+    echo "FUNC: $FUNC"
+    echo "DATTYPE: $DATTYPE"
+    echo "THREADS: $THREADS"
+}
+
 log() {
     echo -e "\033[35m$@\033[0m"
 }
@@ -49,6 +59,7 @@ print_help() {
     echo -e "\t-a, --host <IP>"
     echo -e "\t-b, --bench <FUNC>"
     echo -e "\t-c, --compile"
+    echo -e "\t-ct, --cheetah-threads"
     echo -e "\t-nc, --no-compile"
     echo -e "\t-d, --dattype <DAT>"
     echo -e "\t-k, --kill"
@@ -71,6 +82,10 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         -c|--compile)
             RUN=0
+            ;;
+        -ct|--cheetah-threads)
+            THREADS=$2
+            shift
             ;;
         -nc|--no-compile)
             BUILD=0
@@ -113,7 +128,7 @@ while [[ $# -gt 0 ]]; do
             fi
 
             if [[ $RUN = "1" ]]; then
-                ./scripts/run.sh -a ${IP_HOST} -p ${PARTY} -n 2
+                ./scripts/run.sh -a "${IP_HOST}" -p ${PARTY} -n 2
             fi
             shift
             ;;
@@ -121,11 +136,14 @@ while [[ $# -gt 0 ]]; do
             log "Input: $(( $NUM_INPUTS * DATTYPE / 32 ))"
             log "Process_num: ${PROCESS_NUM}"
 
+            log_info
+
             make -j PARTY=${PARTY} FUNCTION_IDENTIFIER=${FUNC} MODELOWNER=P_0 \
                 DATAOWNER=P_1 DATTYPE=${DATTYPE} PROTOCOL=4 \
                 NUM_INPUTS=${NUM_INPUTS} BITLENGTH=32 \
                 PROCESS_NUM=${PROCESS_NUM} PRE=1 FAKE_TRIPLES=${FAKE} AB2_TRIPLES=1 BN2D_TRIPLES=${BN_TRIPLES} \
-                FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES} INTERLEAVE_COMM=1
+                FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES} INTERLEAVE_COMM=1 \
+                CHEETAH_THREADS=${THREADS}
 
             ./scripts/run.sh -a ${IP_HOST} -p ${PARTY} -n 2
             ;;
