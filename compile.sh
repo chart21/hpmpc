@@ -2,7 +2,7 @@
 
 set -e
 
-THREADS=32
+THREADS=16
 
 FUNC=182 # 182 or 170 or (176 for bench)
 DATTYPE=32
