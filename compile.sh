@@ -117,6 +117,8 @@ while [[ $# -gt 0 ]]; do
             terminate
             ;;
         -b|--bench)
+            log_info
+
             if [[ $BUILD = "1" ]]; then
                 make -j PARTY=${PARTY} FUNCTION_IDENTIFIER=$2 MODELOWNER=-1 \
                     DATAOWNER=-1 DATTYPE=${DATTYPE} PROTOCOL=4 \
