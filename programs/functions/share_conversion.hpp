@@ -62,6 +62,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
         /* adder[i].set_values(s1[i], s2[i], y[i]); */
         adders.emplace_back(s1[i], s2[i], msb[i]);
     }
+    
     while (!adders[0].is_done())
     {
         for (int i = 0; i < len; i++)
