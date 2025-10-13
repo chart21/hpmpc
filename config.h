@@ -314,7 +314,7 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef CHEETAH_BOOL_OT_TYPE
-#define CHEETAH_BOOL_OT_TYPE 3  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 4: _2COT
+#define CHEETAH_BOOL_OT_TYPE 3  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 3: _2COT
 #endif
 
 #ifndef STORE_PREPROCESSING
