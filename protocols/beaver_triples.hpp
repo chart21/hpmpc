@@ -346,7 +346,8 @@ void generate_beaver_triples(std::string ips[], int base_port, int process_offse
 #if FAKE_TRIPLES == 1
     print("Fake Triples set to 1, generating fake triples ... \n");
 #else
-    print("Generating ", triple_type.data(), "  Triples ... \n");
+    // print("Generating ", triple_type.data(), "  Triples ... \n");
+    print("Generating %s Triples ... \n", triple_type.c_str());
 #endif
     clock_t time_beaver_function_start = clock();
     clock_gettime(CLOCK_REALTIME, &k1);

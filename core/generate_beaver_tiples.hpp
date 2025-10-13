@@ -164,7 +164,8 @@ void generateBooleanDummyTriples(type a[],
                                  int bitlength,
                                  uint64_t num_triples,
                                  std::string ip,
-                                 int port)
+                                 int port,
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
 {
     if(num_triples == 0) return;
     //reinterpret SIMD bitstream as uint8 bitstream
@@ -244,7 +245,8 @@ void generateBooleanAB2DummyTriples(type a[],
                                  int bitlength,
                                  uint64_t num_triples,
                                  std::string ip,
-                                 int port)
+                                 int port,
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
 {
     if(num_triples == 0) return;
     //reinterpret SIMD bitstream as uint8 bitstream
@@ -416,5 +418,6 @@ void generateFakeLayerTriples(type** a,
                              int port)
 {
 }
+
 
 #endif

@@ -313,6 +313,18 @@ int base_port = BASE_PORT;  // temporary solution
 #define CHEETAH_THREADS 32  // Number of threads to use for Cheetah triples generation
 #endif
 
+#ifndef CHEETAH_BOOL_OT_TYPE
+#define CHEETAH_BOOL_OT_TYPE 3  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 4: _2COT
+#endif
+
+#ifndef STORE_PREPROCESSING
+#define STORE_PREPROCESSING 0  // Save preprocessing data to file
+#endif 
+
+#ifndef LOAD_PREPROCESSING
+#define LOAD_PREPROCESSING 0  // Load preprocessing data from file
+#endif
+
 #ifndef LX_TRIPLES
 #define LX_TRIPLES 1  // Generate lx ly shares directly
 #endif

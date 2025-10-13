@@ -454,6 +454,27 @@ void compare_views()
 #endif
 
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
+
+void store_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_triples_round0,
+                            DATATYPE* arithmetic_triples_round0, uint64_t size_arithmetic_triples_round0,
+                            DATATYPE* bool_triples_round1, uint64_t size_bool_triples_round1,
+                            DATATYPE* arithmetic_triples_round1, uint64_t size_arithmetic_triples_round1,
+                            DATATYPE* preprocessing_material, uint64_t size_preprocessing_material)
+{
+    //store all to file
+}
+
+void load_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_triples_round0,
+                            DATATYPE* arithmetic_triples_round0, uint64_t size_arithmetic_triples_round0,
+                            DATATYPE* bool_triples_round1, uint64_t size_bool_triples_round1,
+                            DATATYPE* arithmetic_triples_round1, uint64_t size_arithmetic_triples_round1,
+                            DATATYPE* preprocessing_material, uint64_t size_preprocessing_material)
+{
+    //load all from file
+}
+
+
+
 #if BEAVER == 1 && PRE == 1
 void store_output_share_bool(DATATYPE val, int index = 0)
 {

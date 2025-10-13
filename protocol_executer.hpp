@@ -3,6 +3,7 @@
 #include "core/init.hpp"
 #include "core/networking/buffers.h"
 #include "protocols/Protocols.h"
+#include "protocols/live_protocol_base.hpp"
 #include <sys/ucontext.h>
 #if BEAVER == 1
 #include "protocols/beaver_triples.hpp"
@@ -206,6 +207,54 @@ void beaver(std::string ips[])
 
 // }
 // #endif
+#if STORE_PREPROCESSING == 1
+void store_preprocessed_data() 
+{
+    std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
+    store_preprocessed_data(preprocessed_outputs_bool[0], total_num_boolean_output_triples[0],
+                            preprocessed_outputs_arithmetic[0], total_num_arithmetic_output_triples[0],
+                            preprocessed_outputs_bool[1], total_num_boolean_output_triples[1],
+                            preprocessed_outputs_arithmetic[1], total_num_arithmetic_output_triples[1],
+                            preprocessed_outputs, total_preprocessed_outputs);
+    delete[] preprocessed_outputs_bool[0];
+    delete[] preprocessed_outputs_bool[1];
+    delete[] preprocessed_outputs_arithmetic[0];
+    delete[] preprocessed_outputs_arithmetic[1];
+    delete[] preprocessed_outputs;
+    delete[] preprocessed_outputs_bool;
+    delete[] preprocessed_outputs_arithmetic;
+    print("Time measured to store preprocessing data chrono: %fs \n",
+          double(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - p)
+                     .count()) /
+              1000000);
+}
+
+
+
+#endif
+#if LOAD_PREPROCESSING == 1
+void load_preprocessed_data()
+{
+    std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
+    preprocessed_outputs_bool = new DATATYPE*[2];
+    preprocessed_outputs_arithmetic = new DATATYPE*[2];
+    preprocessed_outputs_bool[0] = new DATATYPE[total_num_boolean_output_triples[0]];
+    preprocessed_outputs_bool[1] = new DATATYPE[total_num_boolean_output_triples[1]];
+    preprocessed_outputs_arithmetic[0] = new DATATYPE[total_num_arithmetic_output_triples[0]];
+    preprocessed_outputs_arithmetic[1] = new DATATYPE[total_num_arithmetic_output_triples[1]];
+    preprocessed_outputs = new DATATYPE[total_preprocessed_outputs];
+    load_preprocessed_data(preprocessed_outputs_bool[0], total_num_boolean_output_triples[0],
+                            preprocessed_outputs_arithmetic[0], total_num_arithmetic_output_triples[0],
+                            preprocessed_outputs_bool[1], total_num_boolean_output_triples[1],
+                            preprocessed_outputs_arithmetic[1], total_num_arithmetic_output_triples[1],
+                            preprocessed_outputs, total_preprocessed_outputs);
+    print("Time measured to load preprocessing data chrono: %fs \n",
+          double(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - p)
+                     .count()) /
+              1000000);
+}
+#endif
+
 
 #if PRE == 1 && SKIP_PRE == 0
 void preprocess_circuit(std::string ips[])
@@ -339,6 +388,8 @@ void preprocess_circuit(std::string ips[])
 #endif
 }
 #endif
+
+
 
 #if LIVE == 1
 void live_circuit()
@@ -479,6 +530,14 @@ void executeProgram(int argc, char* argv[], int process_id, int process_num)
 
 #endif
 
+
+#if STORE_PREPROCESSING == 1 && SKIP_PRE == 0
+store_preprocessed_data();
+#endif
+#if LOAD_PREPROCESSING == 1 && SKIP_PRE == 0
+load_preprocessed_data();
+#endif
+
 #if PRE == 1 && LIVE == 0
     double dummy_time = 0.00;
     print("Time measured to initialize program: %fs \n", dummy_time);
@@ -486,6 +545,7 @@ void executeProgram(int argc, char* argv[], int process_id, int process_num)
     print("Time measured to perform computation getTime: %fs \n", dummy_time);
     print("Time measured to perform computation chrono: %fs \n", dummy_time);
 #endif
+
 
 #if LIVE == 1
     live_circuit();
