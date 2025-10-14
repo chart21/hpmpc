@@ -117,10 +117,11 @@ while [[ $# -gt 0 ]]; do
             terminate
             ;;
         -b|--bench)
+            FUNC=$2
             log_info
 
             if [[ $BUILD = "1" ]]; then
-                make -j PARTY=${PARTY} FUNCTION_IDENTIFIER=$2 MODELOWNER=-1 \
+                make -j PARTY=${PARTY} FUNCTION_IDENTIFIER=${FUNC} MODELOWNER=-1 \
                     DATAOWNER=-1 DATTYPE=${DATTYPE} PROTOCOL=4 \
                     NUM_INPUTS=${NUM_INPUTS} BITLENGTH=32 \
                     PROCESS_NUM=${PROCESS_NUM} PRE=1 FAKE_TRIPLES=${FAKE} \
@@ -130,7 +131,7 @@ while [[ $# -gt 0 ]]; do
             fi
 
             if [[ $RUN = "1" ]]; then
-                ./scripts/run.sh -a "${IP_HOST}" -p ${PARTY} -n 2
+                ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
             fi
             shift
             ;;
@@ -147,7 +148,7 @@ while [[ $# -gt 0 ]]; do
                 FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES} INTERLEAVE_COMM=1 \
                 CHEETAH_THREADS=${THREADS}
 
-            ./scripts/run.sh -a ${IP_HOST} -p ${PARTY} -n 2
+            ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
             ;;
         -t|--test)
             if (( "$2" < 54 || "$2" > 59 )); then
@@ -165,7 +166,7 @@ while [[ $# -gt 0 ]]; do
                 SKIP_PRE=0 FAKE_TRIPLES=0 AB2_TRIPLES=1 \
                 BN2D_TRIPLES=${BN_TRIPLES} FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES}
 
-            ./scripts/run.sh -a ${IP_HOST} -p ${PARTY} -n 2
+            ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
             ;;
         -h|--help)
             print_help

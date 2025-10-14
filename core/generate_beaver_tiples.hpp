@@ -184,7 +184,20 @@ void generateBooleanDummyTriples(type a[],
     uint8_t* uint_b = (uint8_t*) b;
     uint8_t* uint_c = (uint8_t*) c;
 
-    Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples / 8, ip, port, PARTY + 1, CHEETAH_THREADS);
+    auto ot = _16KKOT_to_4OT;
+    switch (CHEETAH_BOOL_OT_TYPE) {
+        case 0: ot = _2ROT;
+        case 1: ot = _8KKOT;
+        case 2: ot = _16KKOT_to_4OT;
+        case 3: ot = _2COT;
+        default: ot = _2ROT;
+    };
+
+    Iface::generateBoolTriplesCheetah(
+            uint_a, uint_b, uint_c,
+            bitlength, num_triples / 8, ip, port, PARTY + 1,
+            CHEETAH_THREADS,
+            ot);
 }
 
 
@@ -289,8 +302,17 @@ void generateBooleanAB2DummyTriples(type a[],
 #endif // P_0 doesn't need b for AB2
     uint8_t* uint_c = (uint8_t*) c;
 
+    auto ot = _16KKOT_to_4OT;
+    switch (CHEETAH_BOOL_OT_TYPE) {
+        case 0: ot = _2ROT;
+        case 1: ot = _8KKOT;
+        case 2: ot = _16KKOT_to_4OT;
+        case 3: ot = _2COT;
+        default: ot = _2ROT;
+    };
+
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
-            num_triples / 8, ip, port, PARTY + 1, CHEETAH_THREADS);
+            num_triples / 8, ip, port, PARTY + 1, CHEETAH_THREADS, ot);
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
