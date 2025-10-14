@@ -4,8 +4,8 @@
             "adapter": "vscode-cpptools",
             "configuration": {
                 "request": "launch",
-                "program": "executables/run-P1.o",
-                "cwd": "~/workspace/hpmpc_latest/",
+                "program": "executables/run-P2.o",
+                "cwd": "~/workspace/hpmpc_new/",
                 "externalConsole":true,
                 "MiMode": "gdb",
                 "args": []

@@ -123,7 +123,7 @@ class XOR_Share : public Share_Type
 
 #if PROTOCOL == 4 
     
-    XOR_Share prepare_dot_ex_lxly(const Additive_Share<Datatype, Share_Type>& b, int i) const
+    XOR_Share prepare_dot_ex_lxly(const XOR_Share<Datatype, Share_Type>& b, int i) const
     {
         return XOR_Share(Share_Type::prepare_dot_ex_lxly(b, i, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }
@@ -136,17 +136,17 @@ class XOR_Share : public Share_Type
 
 #if AB2_TRIPLES == 1
 
-    XOR_Share prepare_and_a_known(const Additive_Share<Datatype, Share_Type>& b) const
+    XOR_Share prepare_and_a_known(const XOR_Share<Datatype, Share_Type>& b) const
     {
         return XOR_Share(Share_Type::prepare_mult_a_known(b, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }
 
-    XOR_Share prepare_dot_a_known(const Additive_Share<Datatype, Share_Type>& b) const
+    XOR_Share prepare_dot_a_known(const XOR_Share<Datatype, Share_Type>& b) const
     {
         return XOR_Share(Share_Type::prepare_dot_a_known(b, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }
     
-    XOR_Share prepare_dot_ex_lxly_a_known(const Additive_Share<Datatype, Share_Type>& b) const
+    XOR_Share prepare_dot_ex_lxly_a_known(const XOR_Share<Datatype, Share_Type>& b) const
     {
         return XOR_Share(Share_Type::prepare_dot_ex_lxly_a_known(b, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }

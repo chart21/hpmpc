@@ -95,6 +95,7 @@ void pre_send_to_(int player_index)
 
 void pre_receive_from_(int player_index)
 {
+#if PROTOCOL ==4
 #if RECV_BUFFER > 0
     if (receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds - 1] ==
         RECV_BUFFER)
@@ -105,6 +106,10 @@ void pre_receive_from_(int player_index)
     receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds - 1] += 1;
     /* receiving_args_pre[player_index].elements_to_rec[num_round] += 1; */
     total_recv_pre[player_index] += 1;
+#else
+    receiving_args_pre[player_index].elements_to_rec[0] += 1;
+    total_recv_pre[player_index] += 1;
+#endif
 }
 #endif
 
@@ -466,9 +471,9 @@ void finalize_(std::string* ips, receiver_args* ra, sender_args* sa)
         int offset = 0;
         if (t >= player_id)
             offset = 1;  // player should not send to itself
-#if PRE == 1 && (BEAVER == 0 || SKIP_PRE == 1)
-        sa[t].send_rounds = 1;  // TODO: Can be deleted and replaced? -> Not yet
-#endif
+// #if PRE == 1 && (BEAVER == 0 || SKIP_PRE == 1)
+//         sa[t].send_rounds = 1;  // TODO: Can be deleted and replaced? -> Not yet
+// #endif
 
         sa[t].sent_elements = new DATATYPE*[sa[t].send_rounds];
         /* sending_args[t].elements_to_send[0] = 0; //input sharing with SRNGs */

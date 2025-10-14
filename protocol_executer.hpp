@@ -67,15 +67,12 @@ void init_circuit(std::string ips[])
 #if PRE == 1
         receiving_args_pre[t].elements_to_rec.push_back(0);
         sending_args_pre[t].elements_to_send.push_back(0);
-#if BEAVER == 1 && SKIP_PRE == 0
-        /* sending_args_pre[t].elements_to_send.push_back(0); //second preprocessing round TODO: generalize and get
-         * number of rounds */
         receiving_args_pre[t].rec_rounds = 0;
         sending_args_pre[t].send_rounds = 0;
-#else
-        receiving_args_pre[t].rec_rounds = 1;
-        sending_args_pre[t].send_rounds = 1;
-#endif
+// #if PROTOCOL != 4
+//         receiving_args_pre[t].total_rounds += 1;
+//         receiving_args_pre[t].rec_rounds += 1;
+// #endif
 #endif
     }
 #if PRE == 1 && BEAVER == 1
