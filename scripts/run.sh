@@ -1,4 +1,8 @@
 #!/bin/bash
+
+rm -f data/*
+
+
 helpFunction()
 {
    echo "Script to run a n-PC protocol in a distributed setting"
