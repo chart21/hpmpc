@@ -669,7 +669,63 @@ class OEC_MAL1_Share
 
     static void complete_bit_injection_S2(OEC_MAL1_Share out[]) {}
 
+
+
+
 #if MULTI_INPUT == 1
+
+#if FUSE_CONV_BN_SIM == 1
+    template <typename func_add, typename func_sub, typename func_mul>
+    void prepare_Conv_BN_Accum(const OECL1_Share x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        const auto mw = ADD(v,m);
+        const auto lw = ADD(r,m);
+        const auto mx = ADD(x.v, x.m);
+        const auto lx = ADD(x.r, x.m);
+        result[0] = ADD(result[0], mv);
+        result[1] = ADD(result[1], lw);
+        result[2] = ADD(result[2], mx);
+        result[3] = ADD(result[3], lx);
+        result[4] = ADD(result[4], MULT(mx, mw));               // sum(mx*mw)
+        result[5] = ADD(result[5], MULT(mx, lw));               // sum(mx*lw)
+        result[6] = ADD(result[6], MULT(mw, lx));               // sum(mw*lx)
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul, typename func_trunc>
+    void calculate_conv_bn(const OECL1_Share mu, const OECL1_Share sigma, const Datatype* accum, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC)
+    {
+        //assume share is set to prepare.dot(sigma * mu)
+        const auto mw = accum[0]; 
+        const auto lw = accum[1];
+        const auto mx = accum[2];
+        const auto lx = accum[3];
+        const auto mx_mw = accum[4];
+        const auto mx_lw = accum[5];
+        const auto mw_lx = accum[6];
+        const auto msigma = ADD(sigma.v, sigma.m);
+        const auto lsigma_i = ADD(sigma.r, sigma.m);
+        
+        const auto lx_lw = getRandomVal(P_013); //random mask for lx*lw
+        const auto lw_lsigma = getRandomVal(P_013);
+        const auto lx_lsigma = getRandomVal(P_013);
+        // const auto msigma_mx_mw = MULT(m_sigma, mx_mw);
+        // const auto msgima_mw_lx = MULT(m_sigma, mw_lx);
+        // const auto msigma_mx_lw = MULT(m_sigma, mx_lw);
+        // const auto msigma_lx_lw = MULT(m_sigma, lx_lw);
+        const auto mx_mw_lsigma = MULT(mx_mw, lsigma_i);
+        const auto mx_lw_lsigma = MULT(mx, lw_lsigma);
+        const auto mw_lx_lsigma = MULT(mw, lx_lsigma);
+
+        const auto msigma_terms = MULT(msigma, ADD(lx_lw, SUB(mx_mw, ADD( MULT(mx,lw), MULT(mw,mx))))); // mo [lxlw] + mo (mx mw) - mo mx lw - mo mw lx
+        const auto remaining_terms = SUB(ADD(msigma_terms, ADD(mx_lw_lsigma, mw_lx_lsigma)), mx_mw_lsigma); // msigma_terms + mx [lw lo] + mw [lx lo] - (mx mw) [lo], last term gets handled in mask and send: [lw lx lo]
+        OECL1_Share three_terms = OECL1_Share(ADD(msigma_terms, remaining_terms));
+        OECL1_Share sigma_mu = mu.prepare_dot(sigma, ADD, SUB, MULT);
+        p1 = ADD(three_terms.p1, sigma_mu.p1);
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
+    }
+    
+    static int get_conv_bn_size() { return 7; }
+#endif
 
     template <typename func_add, typename func_sub, typename func_mul>
     OEC_MAL1_Share prepare_dot3(const OEC_MAL1_Share b,
