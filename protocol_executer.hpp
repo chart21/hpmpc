@@ -207,6 +207,12 @@ void beaver(std::string ips[])
 #if STORE_PREPROCESSING == 1
 void store_preprocessed_data() 
 {
+    float total_ouputs_MB = (total_num_boolean_output_triples[0] + total_num_arithmetic_output_triples[0] +
+                             total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1] +
+                             total_preprocessed_outputs)/1000000 * sizeof(DATATYPE);
+
+    std::cout << "Storing " << total_ouputs_MB << " MB of preprocessing data to file ... \n";
+    
     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
     store_preprocessed_data(preprocessed_outputs_bool[0], total_num_boolean_output_triples[0],
                             preprocessed_outputs_arithmetic[0], total_num_arithmetic_output_triples[0],
@@ -232,6 +238,11 @@ void store_preprocessed_data()
 #if LOAD_PREPROCESSING == 1
 void load_preprocessed_data()
 {
+    float total_ouputs_MB = (total_num_boolean_output_triples[0] + total_num_arithmetic_output_triples[0] +
+                             total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1] +
+                             total_preprocessed_outputs)/1000000 * sizeof(DATATYPE);
+    std::cout << "Loading " << total_ouputs_MB << " MB of preprocessing data from file ... \n";
+
     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
     preprocessed_outputs_bool = new DATATYPE*[2];
     preprocessed_outputs_arithmetic = new DATATYPE*[2];
