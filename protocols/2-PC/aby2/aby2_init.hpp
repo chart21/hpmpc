@@ -199,6 +199,28 @@ class ABY2_init
         generate_lxly2_triple(ADD);
         return ABY2_init();
     }
+#if FUSE_CONV_BN_SIM == 1
+    template <typename func_add, typename func_sub, typename func_mul>
+    void prepare_Conv_BN_Accum(const ABY2_PRE x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul, typename func_trunc>
+    void calculate_conv_bn(const ABY2_PRE mu, const ABY2_PRE sigma, const Datatype* accum, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) 
+    {
+    #if BN2D_TRIPLES == 0 //otherwise triples are generated via Batchnorm triples
+        store_output_share_ab(ADD, helper_index);
+        //lx lw should be generated via conv triple
+        generate_lxly_triple(ADD);     // lw lsigma
+        generate_lxly_triple(ADD);     // lx lsigma
+        generate_lxly_triple(ADD, 1);  // (lw lx) lsigma
+    #endif
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
+    }
+    
+    static int get_conv_bn_size() { return 0; }
+
+#endif
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot3(const ABY2_init b, const ABY2_init c, func_add ADD, func_sub SUB, func_mul MULT) const

@@ -22,6 +22,7 @@ class ABY2_PRE_Share
 #define CaseConv 15
 #define CaseBatchNorm2D 16
 #define CaseFullyConnected 17
+#define CaseConvBN 18
 #define CaseTripleAlreadyConsumed 99
 #define CaseDefault 2
 
@@ -190,6 +191,40 @@ class ABY2_PRE_Share
     {
         return ABY2_PRE_Share();
     }
+#if FUSE_CONV_BN_SIM == 1
+    template <typename func_add, typename func_sub, typename func_mul>
+    void prepare_Conv_BN_Accum(const ABY2_PRE x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        result[0] = ADD(result[0], l); // sum(lw_i)
+        result[1] = ADD(result[1], x.l); // sum(lx_i)
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul, typename func_trunc>
+    void calculate_conv_bn(const ABY2_PRE mu, const ABY2_PRE sigma, const Datatype* accum, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) 
+    {
+        const auto lw = ABY2_PRE_Share(accum[0]);
+        const auto lx = ABY2_PRE_Share(accum[1]);
+        const auto lsigma = ABY2_PRE_Share(sigma.l);
+        
+#if BN2D_TRIPLES == 0 //otherwise use 3x BatchNorm triples
+        triple_type[0][triple_type_index[0]++] = CaseMultAKnown;
+        triple_type[0][triple_type_index[0]++] = CaseMultAKnown;
+        triple_type[0][triple_type_index[0]++] = CaseConvBN;
+        triple_type[1][triple_type_index[1]++] = CaseConvBN;
+        
+        store_output_share_ab(lsigma, ADD, helper_index);
+        lw.generate_ab2_triple(sigma, ADD);
+        lx.generate_ab2_triple(sigma, ADD);
+#endif
+        //lx lw should be generated via conv triple
+        //we also need lsigma * lmu -> shared by modelowner
+
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
+    }
+    
+    static int get_conv_bn_size() { return 2; }
+
+#endif
     
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot_a_known(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -1170,6 +1205,14 @@ static void get_fc_triples_from_file()
                     lxly_a[0][arithmetic_triple_counter[0]++] = fc_triple_y[curr_fc_triple_index++];
                     break;
                 }
+                case CaseConvBN:
+                {
+                    auto lxly = conv_triple_y[curr_conv_triple_index++];
+                    auto third = retrieve_output_share_arithmetic(helper_index);
+                    lxly_a[0][arithmetic_triple_counter[0]++] = lxly;
+                    ABY2_PRE_Share<Datatype>(lxly).generate_ab2_triple(third, OP_ADD, 1);
+                    break;
+                }
                 case CaseTripleAlreadyConsumed:  // Triple already consumed by previous case
                 {
                     break;
@@ -1250,6 +1293,12 @@ static void get_fc_triples_from_file()
                 case CaseDot3Arithmetic:
                 {
                     auto lxly = receive_and_compute_lxly_share(OP_ADD, 1);
+                    lxly_a[1][arithmetic_triple_counter[1]++] = lxly;
+                    break;
+                }
+                case CaseConvBN:
+                {
+                    auto lxly = receive_and_compute_lxly2_share(OP_ADD, 1);
                     lxly_a[1][arithmetic_triple_counter[1]++] = lxly;
                     break;
                 }

@@ -258,7 +258,7 @@ class OECL0_init
         mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
     }
     
-    static int get_conv_bn_size() { return 3; }
+    static int get_conv_bn_size() { return 0; }
 #endif
 
     static void complete_B2A(OECL0_init out[], OECL0_init z[])

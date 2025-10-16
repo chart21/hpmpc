@@ -252,8 +252,12 @@ int base_port = BASE_PORT;  // temporary solution
 #define FUSE_RELU_MAX 0  // Fuse ReLU and Average Pooling into one operation
 #endif
 
+#ifndef FUSE_CONV_BN
+#define FUSE_CONV_BN 0  // Fuse Convolution and BatchNorm into one operation via secret-sharing optimization
+#endif
+
 #ifndef FUSE_CONV_BN_SIM
-#define FUSE_CONV_BN_SIM 0  // Fuse Convolution and BatchNorm into one operation (Only Simulated)
+#define FUSE_CONV_BN_SIM 0  // Fuse Convolution and BatchNorm into one operation via multi-input optimization (Only Simulated)
 #endif
 
 #ifndef OPTIMIZED_BIT_INJECTION_RELU 

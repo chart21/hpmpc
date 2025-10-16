@@ -472,6 +472,53 @@ class ABY2_ONLINE_Share
 
     void complete_opt_bit_injection() { m = OP_ADD(m, receive_from_live(PNEXT)); }
 
+#if FUSE_CONV_BN_SIM == 1
+    template <typename func_add, typename func_sub, typename func_mul>
+    void prepare_Conv_BN_Accum(const ABY2_ONLINE_Share x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        result[0] = ADD(result[0], m); // sum(mw_i)
+        result[1] = ADD(result[1], l); // sum(lw_i)
+        result[2] = ADD(result[2], x.m); //  sum(mx)
+        result[3] = ADD(result[3], x.l); // sum(lx_i)
+        result[4] = ADD(result[4], MULT(m, x.m)); // sum(mw*mx_i)
+        result[5] = ADD(result[5], MULT(x.m, l)); // sum(mx*lw_i)
+        result[6] = ADD(result[6], MULT(m, x.l)); // sum(mw*lx_i)
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul, typename func_trunc>
+    void calculate_conv_bn(const ABY2_ONLINE_Share mu, const ABY2_ONLINE_Share sigma, const Datatype* accum, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) 
+    {
+        const auto lw = accum[0];
+        const auto lx = accum[1];
+        const auto lwx = accum[2];
+        const auto lo = ADD(sigma.p1, sigma.p2);
+        const auto lw_lsigma = SUB(MULT(lw, lo), getRandomVal(P_1));
+        const auto lx_lsigma = SUB(MULT(lx, lo), getRandomVal(P_1));
+        const auto lx_lw = SUB(MULT(lx, lw), getRandomVal(P_1));
+        const auto lwx_lsigma = MULT(lwx, lo);
+        
+        Datatype lx_lw = retrieve_output_share_ab(ADD);
+        Datatype lw_lsgima = retrieve_output_share_ab(ADD);
+        Datatype lx_lsigma = retrieve_output_share_ab(ADD);
+#if BN2D_TRIPLES == 1
+        Datatype lw_lx_lsigma = retrieve_output_share_ab(ADD, 0); // simulation uses the first round for now
+#else
+        Datatype lw_lx_lsigma = retrieve_output_share_ab(ADD, 1);
+#endif
+        //we also need lsigma * lmu -> is computed by modelowner
+        // *this = mu.prepare_dot(sigma, ADD, SUB, MULT); -> this line needs to be before
+
+        const auto msigma_terms = MULT(msigma, ADD(lx_lw, SUB(mx_mw, ADD( MULT(mx,lw), MULT(mw,mx))))); // mo [lxlw] + mo (mx mw) - mo mx lw - mo mw lx
+        const auto remaining_terms = SUB(ADD(msigma_terms, ADD(mx_lw_lsigma, mw_lx_lsigma)), mx_mw_lsigma); // msigma_terms + mx [lw lo] + mw [lx lo] - (mx mw) [lo], last term gets handled in mask and send: [lw lx lo]
+        ABY2_ONLINE three_terms = ABY2_ONLINE_Share(ADD(msigma_terms, remaining_terms));
+        m = ADD(three_terms.m, m);
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
+    }
+    
+    static int get_conv_bn_size() { return 7; }
+
+#endif
+
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_dot3(const ABY2_ONLINE_Share b,
                                    const ABY2_ONLINE_Share c,

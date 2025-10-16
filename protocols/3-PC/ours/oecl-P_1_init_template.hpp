@@ -118,7 +118,7 @@ class OECL1_init
         mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
     }
     
-    static int get_conv_bn_size() { return 7; }
+    static int get_conv_bn_size() { return 0; }
 #endif
 
     static void send() { send_(); }
