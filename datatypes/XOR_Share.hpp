@@ -134,7 +134,7 @@ class XOR_Share : public Share_Type
     }
 
 
-#if AB2_TRIPLES == 1
+#if A_KNOWN == 1
 
     XOR_Share prepare_and_a_known(const XOR_Share<Datatype, Share_Type>& b) const
     {

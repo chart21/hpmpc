@@ -29,6 +29,12 @@ class OECL1_Share
                    MULT(b.p1, p2));  // ab_2, e_1 = x1 y2 + x2 y1 -> since substraction: e_1 = - x1 y2 - x2 y1
         return c;
     }
+    template <typename func_add, typename func_sub, typename func_mul>
+    OECL1_Share prepare_dot_a_known(OECL1_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return OECL1_Share(MULT(p1, b.p2)); // a mb2
+    }
+
 #if FUSE_DOT != 1
     template <typename func_add, typename func_sub, typename func_mul>
     OECL1_Share prepare_dot(const OECL1_Share b, int i, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -781,7 +787,39 @@ class OECL1_Share
         const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
         const int ySize = out_h * out_w * dout * batchSize;
         batchSize *= factor;
+#if A_KNOWN == 1 // w mx2
+        UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
+        UINT_TYPE* w_p1 = new UINT_TYPE[wSize];  // W is always constant
+        UINT_TYPE* y_p1 = new UINT_TYPE[wSize]; 
 
+        for (int i = 0; i < xSize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&X[i].p1, temp, 1);
+            for (int j = 0; j < factor; j++)
+                x_p1[j * xSize + i] = temp[j];
+        }
+
+        for (int i = 0; i < wSize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&W[i].p1, temp, 1);
+            w_p1[i] = temp[0];
+        }
+
+        conv2d_cutlass(x_p1, w_p1, y_p1, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+
+        for (int i = 0; i < ySize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            for (int j = 0; j < factor; j++)
+                temp[j] = y_p1[j * ySize + i];
+            orthogonalize_arithmetic(temp, &Y[i].p1, 1);
+        }
+        delete[] x_p1;
+        delete[] w_p1;
+        delete[] y_p1;
+#else
         UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
         UINT_TYPE* x_p2 = new UINT_TYPE[factor * xSize];
         UINT_TYPE* w_p1 = new UINT_TYPE[wSize];  // W is always constant
@@ -826,6 +864,7 @@ class OECL1_Share
         delete[] w_p2;
         delete[] y_p1;
         delete[] y_p1_2;
+#endif
     }
 
 #elif USE_CUDA_GEMM == 4
@@ -851,7 +890,36 @@ class OECL1_Share
         const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
         const int ySize = out_h * out_w * dout * batchSize;
         batchSize *= factor;
+#if A_KNOWN == 1
+        alignas(sizeof(Datatype)) UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
+        alignas(sizeof(Datatype)) UINT_TYPE* w_p1 = new UINT_TYPE[wSize];  // W is always constant
+        alignas(sizeof(Datatype)) UINT_TYPE* y_p1 = new UINT_TYPE[factor * ySize];
 
+        for (int i = 0; i < xSize; i++)
+        {
+            unorthogonalize_arithmetic(&X[i].p1, x_p1 + i * factor, 1);
+        }
+
+        for (int i = 0; i < wSize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            unorthogonalize_arithmetic(&W[i].p1, temp, 1);
+            w_p1[i] = temp[0];
+        }
+
+        conv2d_cutlass(x_p1, w_p1, y_p1, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+
+        for (int i = 0; i < ySize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            for (int j = 0; j < factor; j++)
+                temp[j] = y_p1[i * factor + j];
+            orthogonalize_arithmetic(temp, &Y[i].p1, 1);
+        }
+        delete[] x_p1;
+        delete[] w_p1;
+        delete[] y_p1;
+#else
         alignas(sizeof(Datatype)) UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
         alignas(sizeof(Datatype)) UINT_TYPE* x_p2 = new UINT_TYPE[factor * xSize];
         alignas(sizeof(Datatype)) UINT_TYPE* w_p1 = new UINT_TYPE[wSize];  // W is always constant
@@ -891,6 +959,7 @@ class OECL1_Share
         delete[] w_p2;
         delete[] y_p1;
         delete[] y_p1_2;
+#endif
     }
 #endif
 #if USE_CUDA_GEMM > 0

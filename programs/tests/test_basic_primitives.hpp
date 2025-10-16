@@ -138,7 +138,7 @@ bool test_multiplication()
     share_b.template complete_receive_from<P_1>();
 
     // multiplication
-#if PROTOCOL == 4 && AB2_TRIPLES == 1
+#if PROTOCOL == 4 && A_KNOWN == 1
     share_c = share_a.prepare_mult_a_known(share_b);
 #else
     share_c = share_a.prepare_mult(share_b);
@@ -191,7 +191,7 @@ bool test_and()
     share_b.template complete_receive_from<P_1>();
 
     // multiplication
-#if PROTOCOL == 4 && AB2_TRIPLES == 1 
+#if PROTOCOL == 4 && A_KNOWN == 1 
     share_c = share_a.prepare_and_a_known(share_b);
 #else
     share_c = share_a.prepare_and(share_b);

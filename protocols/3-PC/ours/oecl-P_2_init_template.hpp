@@ -19,6 +19,13 @@ class OECL2_init
     void prepare_dot_add(OECL2_init a, OECL2_init b, OECL2_init& c, func_add ADD, func_sub SUB, func_mul MULT)
     {
     }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    OECL2_init prepare_dot_a_known(OECL2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return OECL2_init();
+    }
+    
     template <typename func_add, typename func_sub, typename func_mul>
     OECL2_init prepare_dot(const OECL2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
     {

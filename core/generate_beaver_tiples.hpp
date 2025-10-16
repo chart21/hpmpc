@@ -305,19 +305,19 @@ void generateLayerDummyTriples(type** a,
             const uint64_t w_size = p.w_size_per_batch;
             const uint64_t y_size = p.y_size_per_batch * p.batchSize;
        
-           #if AB2_TRIPLES == 0 || PARTY == 1
+           #if A_KNOWN == 0 || PARTY == 1
             UINT_TYPE* x = new UINT_TYPE[factor * x_size]; // Party1 holds X2 in plain in AB2 setting
             #else
             UINT_TYPE* x = nullptr;
             #endif
-           #if AB2_TRIPLES == 0 || PARTY == 0 
+           #if A_KNOWN == 0 || PARTY == 0 
             UINT_TYPE* w = new UINT_TYPE[w_size];  // W is always constant
             #else 
             UINT_TYPE* w = nullptr; 
            #endif 
             UINT_TYPE* y = new UINT_TYPE[factor * y_size];
 
-        #if AB2_TRIPLES == 0 || PARTY == 1
+        #if A_KNOWN == 0 || PARTY == 1
         for (int i = 0; i < x_size; i++)
         {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
@@ -326,7 +326,7 @@ void generateLayerDummyTriples(type** a,
                 x[j * x_size + i] = temp[j]; 
         }
         #endif
-        #if AB2_TRIPLES == 0 || PARTY == 0 
+        #if A_KNOWN == 0 || PARTY == 0 
         for (int i = 0; i < w_size; i++)
         {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];

@@ -221,12 +221,20 @@ class ABY2_ONLINE_Share
             lxly = retrieve_output_share_arithmetic();
         ABY2_ONLINE_Share c;
 /* c.l = getRandomVal(PSELF); */
+#if OPTIMIZED_COMPUTATION_MULT == 0 // 5 mult
 #if PARTY == 0
         c.m = MULT(m, b.m);
 #else
         c.m = SET_ALL_ZERO();
 #endif
-        c.m = SUB(c.m, SUB(ADD(MULT(m, b.l), MULT(l, b.m)), lxly));  // mx my - (mx[ly] + my[lx] - [lxly])
+        c.m = SUB(c.m, SUB(ADD(MULT(m, b.l), MULT(l, b.m)), lxly));  // mx my - (mx[ly] + my[lx] - [lxly]) 
+#else // 4 mult, oen could be shiftet to preprocessing
+#if PARTY == 0
+        c.m = SUB(MULT(SUB(m,l), SUB(b.m,b.l)),MULT(l,bl));   // ma2 - mb2 - la1 lb1
+#else 
+        c.m = SUB(SET_ALL_ZERO(), ADD(MULT(m,b.l),MULT(l,b.m))); // - ma lb2 - mb la2
+#endif
+#endif
         return c;
     }
     
@@ -725,6 +733,9 @@ class ABY2_ONLINE_Share
 
 
 #if USE_CUDA_GEMM == 2
+
+
+
     static void CONV_2D(const ABY2_ONLINE_Share* X,
                         const ABY2_ONLINE_Share* W,
                         ABY2_ONLINE_Share* Y,
@@ -746,14 +757,53 @@ class ABY2_ONLINE_Share
         const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
         const int ySize = out_h * out_w * dout * batchSize;
         batchSize *= factor;
-
+#if A_KNOWN == 1
+        UINT_TYPE* w_p1 = new UINT_TYPE[wSize];  // W is always constant
+        UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
+        UINT_TYPE* y_p1 = new UINT_TYPE[factor * ySize];
+        for (int i = 0; i < wSize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+#if PARTY == 0 // w
+            auto tempml = OP_SUB(W[i].m, W[i].l);
+            unorthogonalize_arithmetic(&tempml, temp, 1);
+#else // mw
+            unorthogonalize_arithmetic(&W[i].m, temp, 1);
+#endif
+            w_p1[i] = temp[0];
+        }
+        for (int i = 0; i < xSize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+#if PARTY == 0 // mx - lx1
+            auto tempml = OP_SUB(X[i].m, X[i].l);
+            unorthogonalize_arithmetic(&tempml, temp, 1);
+#else // lx2
+            unorthogonalize_arithmetic(&X[i].m, temp, 1);
+#endif
+            for (int j = 0; j < factor; j++)
+                x_p1[j * xSize + i] = temp[j];
+        }
+        conv2d_cutlass(x_p1, w_p1, y_p1, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+        for (int i = 0; i < ySize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            for (int j = 0; j < factor; j++)
+                temp[j] = y_p1[j * ySize + i];
+            orthogonalize_arithmetic(temp, &Y[i].m, 1)
+            auto lxly = retrieve_output_share_arithmetic();
+            Y[i].m = OP_ADD(Y[i].m, lxly);
+        }
+        delete[] w_p1;
+        delete[] x_p1;
+        delete[] y_p1;
+#else
         UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
         UINT_TYPE* x_p2 = new UINT_TYPE[factor * xSize];
         UINT_TYPE* w_p1 = new UINT_TYPE[wSize];  // W is always constant
         UINT_TYPE* w_p2 = new UINT_TYPE[wSize];
         UINT_TYPE* y_p1 = new UINT_TYPE[factor * ySize];
         UINT_TYPE* y_p1_2 = new UINT_TYPE[factor * ySize];
-
         for (int i = 0; i < xSize; i++)
         {
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
@@ -784,6 +834,7 @@ class ABY2_ONLINE_Share
             unorthogonalize_arithmetic(&W[i].l, temp, 1);
             w_p2[i] = temp[0];
         }
+
 #if PARTY == 0  // (mx - lx0) (mw - lw0) - l0w0
         conv2d_cutlass(x_p1, w_p1, y_p1, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
         conv2d_cutlass(x_p2, w_p2, y_p1_2, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
@@ -812,6 +863,7 @@ class ABY2_ONLINE_Share
         delete[] w_p2;
         delete[] y_p1;
         delete[] y_p1_2;
+#endif
     }
 
 #elif USE_CUDA_GEMM == 4
@@ -837,7 +889,48 @@ class ABY2_ONLINE_Share
         const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
         const int ySize = out_h * out_w * dout * batchSize;
         batchSize *= factor;
+#if A_KNOWN == 1
+        alignas(sizeof(Datatype)) UINT_TYPE* w_p1 = new UINT_TYPE[wSize];  // W is always constant
+        alignas(sizeof(Datatype)) UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
+        alignas(sizeof(Datatype)) UINT_TYPE* y_p1 = new UINT_TYPE[factor * ySize];
 
+        for (int i = 0; i < wSize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+#if PARTY == 0 // w
+            auto tempml = OP_SUB(W[i].m, W[i].l);
+            unorthogonalize_arithmetic(&tempml, temp, 1);
+#else // mw
+            unorthogonalize_arithmetic(&W[i].m, temp, 1);
+#endif
+            w_p1[i] = temp[0];
+        }
+        for (int i = 0; i < xSize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+#if PARTY == 0 // mx - lx1
+            auto tempml = OP_SUB(X[i].m, X[i].l);
+            unorthogonalize_arithmetic(&tempml, temp, 1);
+#else // lx2
+            unorthogonalize_arithmetic(&X[i].m, temp, 1);
+#endif
+            for (int j = 0; j < factor; j++)
+                x_p1[j * xSize + i] = temp[j];
+        }
+        conv2d_cutlass(x_p1, w_p1, y_p1, batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
+        for (int i = 0; i < ySize; i++)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+            for (int j = 0; j < factor; j++)
+                temp[j] = y_p1[j * ySize + i];
+            orthogonalize_arithmetic(temp, &Y[i].m, 1)
+            auto lxly = retrieve_output_share_arithmetic();
+            Y[i].m = OP_ADD(Y[i].m, lxly);
+        }
+        delete[] w_p1;
+        delete[] x_p1;
+        delete[] y_p1;
+#else
         alignas(sizeof(Datatype)) UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
         alignas(sizeof(Datatype)) UINT_TYPE* x_p2 = new UINT_TYPE[factor * xSize];
         alignas(sizeof(Datatype)) UINT_TYPE* w_p1 = new UINT_TYPE[wSize];  // W is always constant
@@ -897,6 +990,7 @@ class ABY2_ONLINE_Share
         delete[] w_p2;
         delete[] y_p1;
         delete[] y_p1_2;
+#endif
     }
 #endif
 #if USE_CUDA_GEMM > 0

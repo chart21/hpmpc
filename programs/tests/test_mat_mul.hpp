@@ -28,7 +28,7 @@ bool dot_product_int_test()
     UINT_TYPE y = 0;
     for (int i = 0; i < l; i++)
     {
-#if PROTOCOL == 4 && AB2_TRIPLES == 1
+#if PROTOCOL == 4 && A_KNOWN == 1
         Y[0] += X[i].prepare_dot_a_known(W[i]);
 #else
         Y[0] += X[i].prepare_dot(W[i]);
@@ -97,7 +97,7 @@ bool dot_product_fixed_test()
     float y = 0;
     for (int i = 0; i < l; i++)
     {
-#if PROTOCOL == 4 && AB2_TRIPLES == 1
+#if PROTOCOL == 4 && A_KNOWN == 1
         Y[0] += X[i].prepare_dot_a_known(W[i]);
 #else
         Y[0] += X[i].prepare_dot(W[i]);

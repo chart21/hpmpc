@@ -13,7 +13,7 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
         {
 
 #if PUBLIC_WEIGHTS == 0
-#if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if A_KNOWN == 1 //TODO: Add parameter to allow GEMM with unknown A
 #if FC_TRIPLES == 1 
             sum += W[i * w_cols + j].prepare_dot_ex_lxly_a_known(A[j]);
 #else
@@ -106,7 +106,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #if FUSE_DOT == 0
                                 for (int i = 0; i < T::getNumDotProducts(); ++i)
                                 {
-#if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if A_KNOWN == 1 //TODO: Add parameter to allow GEMM with unknown A
 #if CONV_TRIPLES == 1 
                                     temps[i] += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk], i); 
 #else
@@ -122,7 +122,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
                                 // temp += A[iif + kk].prepare_dot3(B[jjf + kk], dummy_sigma);
                                 A[iif + kk].prepare_Conv_BN_Accum(B[jjf + kk], temp);
 #else
-#if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if A_KNOWN == 1 //TODO: Add parameter to allow GEMM with unknown A
 #if CONV_TRIPLES == 1 
                                 temp += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk]);
 #else
@@ -133,7 +133,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #endif
 #endif
 #elif FUSE_DOT == 2
-#if PROTOCOL == 4 && AB2_TRIPLES == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if A_KNOWN == 1 //TODO: Add parameter to allow GEMM with unknown A
 #if CONV_TRIPLES == 1 
                                 Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk], t);
 #else
@@ -218,7 +218,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
             temps[t] = Q[i + t * m * p];
         }
         C[i].join_dots(temps);
-#if PROTOCOL == 4 && CONV_TRIPLES == 1 && AB2_TRIPLES == 1
+#if PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1
         C[i].mask_and_send_dot_with_triple();
 #else
         C[i].mask_and_send_dot();
@@ -228,14 +228,14 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #else
 #if INTERLEAVE_COMM == 0
     for (int i = 0; i < m * p; ++i)
-#if PROTOCOL == 4 && CONV_TRIPLES == 1 && AB2_TRIPLES == 1
+#if PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1
         C[i].mask_and_send_dot_with_triple();
 #else
         C[i].mask_and_send_dot();
 #endif
 #endif
 #endif
-#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && AB2_TRIPLES == 1
+#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1
         if(current_phase == PHASE_LIVE)
             preprocessed_outputs_arithmetic_index[0] += m * p;
 #endif

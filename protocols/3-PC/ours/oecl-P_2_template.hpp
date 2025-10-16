@@ -28,6 +28,12 @@ class OECL2_Share
         c.p1 = MULT(p1, b.p1);  // ab_2 + e_2, e_2 = x1 y_1
         return c;
     }
+    template <typename func_add, typename func_sub, typename func_mul>
+    OECL2_Share prepare_dot_a_known(OECL2_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return OECL2_Share(MULT(p1, b.p2)); // ma lb2, ma1 = ma since la = 0
+    }
+
 #if FUSE_DOT != 1
     template <typename func_add, typename func_sub, typename func_mul>
     OECL2_Share prepare_dot(const OECL2_Share b, int i, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -874,7 +880,11 @@ class OECL2_Share
         for (int i = 0; i < xSize; i++)
         {
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+#if A_KNOWN == 1
+            unorthogonalize_arithmetic(&X[i].p2, temp, 1);
+#else
             unorthogonalize_arithmetic(&X[i].p1, temp, 1);
+#endif
             for (int j = 0; j < factor; j++)
                 x_p1[j * xSize + i] = temp[j];
         }
@@ -930,7 +940,11 @@ class OECL2_Share
 
         for (int i = 0; i < xSize; i++)
         {
+#if A_KNOWN == 1
+            unorthogonalize_arithmetic(&X[i].p2, x_p1 + i * factor, 1);
+#else
             unorthogonalize_arithmetic(&X[i].p1, x_p1 + i * factor, 1);
+#endif
         }
 
         for (int i = 0; i < wSize; i++)

@@ -131,6 +131,12 @@ class OECL0_POST_Share
     {
         return OECL0_POST_Share();
     }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    OECL0_POST_Share prepare_dot_a_known(OECL0_POST_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return OECL0_POST_Share();
+    }
 
     template <typename func_add, typename func_sub>
     void mask_and_send_dot(func_add ADD, func_sub SUB)

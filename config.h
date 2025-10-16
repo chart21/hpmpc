@@ -264,6 +264,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define OPTIMIZED_BIT_INJECTION_RELU 1  // Use optimized bit injection for ReLU
 #endif
 
+#ifndef OPTIMIZED_COMPUTATION_MULT
+#define OPTIMIZED_COMPUTATION_MULT 0 // Use fewer instructions for multiplications
+#endif
+
 #ifndef INTERLEAVE_COMM
 #define INTERLEAVE_COMM 1  // Interleave communication
 #endif
@@ -333,20 +337,36 @@ int base_port = BASE_PORT;  // temporary solution
 #define LX_TRIPLES 1  // Generate lx ly shares directly
 #endif
 
-#ifndef AB2_TRIPLES
-#define AB2_TRIPLES 1
+#ifndef A_KNOWN
+#if PROTOCOL == 4
+#define A_KNOWN 1
+#else 
+#define A_KNOWN 0
+#endif
 #endif
 
 #ifndef CONV_TRIPLES
+#if PROTOCOL == 4
 #define CONV_TRIPLES 1
+#else
+#define CONV_TRIPLES 0
+#endif
 #endif
 
 #ifndef BN2D_TRIPLES
+#if PROTOCOL == 4
 #define BN2D_TRIPLES 1
+#else
+#define BN2D_TRIPLES 0
+#endif
 #endif
 
 #ifndef FC_TRIPLES
+#if PROTOCOL == 4
 #define FC_TRIPLES 1
+#else
+#define FC_TRIPLES 0
+#endif
 #endif
 
 #define generate_triple generate_lxly_triple

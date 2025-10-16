@@ -1385,13 +1385,13 @@ static void get_fc_triples_from_file()
                                    int dilation = 1,
                                    bool ab2 = true)
     {
-#if PARTY == 0 || AB2_TRIPLES == 0 // Party0 holds W in plain in AB2 setting
+#if PARTY == 0 || A_KNOWN == 0 // Party0 holds W in plain in AB2 setting
         conv_triple_w[curr_conv_triple_index] = new Datatype[wh * ww * din * dout];
         for (int i = 0; i < wh * ww * din * dout; i++)
             conv_triple_w[curr_conv_triple_index][i] = W[i].l;
 #endif
 
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
+#if PARTY == 1 || A_KNOWN == 0 // Party0 does not need X triples in AB2 setting
         conv_triple_x[curr_conv_triple_index] = new Datatype[batchSize * inh * inw * din];
         for (int i = 0; i < batchSize * inh * inw * din; i++)
             conv_triple_x[curr_conv_triple_index][i] = X[i].l;
@@ -1415,13 +1415,13 @@ static void get_fc_triples_from_file()
         const uint64_t y_size = out_feat * batchSize;
         const uint64_t x_size = in_feat * batchSize;
 
-#if PARTY == 0 || AB2_TRIPLES == 0 // Party0 holds W in plain in AB2 setting
+#if PARTY == 0 || A_KNOWN == 0 // Party0 holds W in plain in AB2 setting
         fc_triple_w[curr_fc_triple_index] = new Datatype[w_size];
         for (int i = 0; i < w_size; i++)
             fc_triple_w[curr_fc_triple_index][i] = W[i].l;
 #endif
 
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
+#if PARTY == 1 || A_KNOWN == 0 // Party0 does not need X triples in AB2 setting
         fc_triple_x[curr_fc_triple_index] = new Datatype[x_size];
         for (int i = 0; i < x_size; i++)
             fc_triple_x[curr_fc_triple_index][i] = X[i].l;
@@ -1445,13 +1445,13 @@ static void get_fc_triples_from_file()
         const uint64_t w_size = ch;
         const uint64_t x_size = ch * h * w * batchSize;
         const uint64_t y_size = ch * h * w * batchSize;
-#if PARTY == 0 || AB2_TRIPLES == 0 // Party0 holds W in plain in AB2 setting
+#if PARTY == 0 || A_KNOWN == 0 // Party0 holds W in plain in AB2 setting
         bc2D_triple_w[curr_bc2D_triple_index] = new Datatype[w_size];
         for (int i = 0; i < w_size; i++)
             bc2D_triple_w[curr_bc2D_triple_index][i] = W[i].l;
 #endif
 
-#if PARTY == 1 || AB2_TRIPLES == 0 // Party0 does not need X triples in AB2 setting
+#if PARTY == 1 || A_KNOWN == 0 // Party0 does not need X triples in AB2 setting
         bc2D_triple_x[curr_bc2D_triple_index] = new Datatype[x_size];
         for (int i = 0; i < x_size; i++)
             bc2D_triple_x[curr_bc2D_triple_index][i] = X[i].l;
