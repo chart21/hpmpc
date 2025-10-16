@@ -185,11 +185,23 @@ void generateBooleanDummyTriples(type a[],
     uint8_t* uint_c = (uint8_t*) c;
 
     auto ot = _16KKOT_to_4OT;
-    switch (CHEETAH_BOOL_OT_TYPE) {
-        case 0: ot = _2ROT;
-        case 1: ot = _8KKOT;
-        case 2: ot = _16KKOT_to_4OT;
-        case 3: ot = _2COT;
+    switch (cheetah_ot_type) {
+        case 0: {
+            ot = _2ROT;
+            break;
+        }
+        case 1: {
+            ot = _8KKOT;
+            break;
+        }
+        case 2: {
+            ot = _16KKOT_to_4OT;
+            break;
+        }
+        case 3: {
+            ot = _2COT;
+            break;
+        }
         default: ot = _2ROT;
     };
 
@@ -303,11 +315,23 @@ void generateBooleanAB2DummyTriples(type a[],
     uint8_t* uint_c = (uint8_t*) c;
 
     auto ot = _16KKOT_to_4OT;
-    switch (CHEETAH_BOOL_OT_TYPE) {
-        case 0: ot = _2ROT;
-        case 1: ot = _8KKOT;
-        case 2: ot = _16KKOT_to_4OT;
-        case 3: ot = _2COT;
+    switch (cheetah_ot_type) {
+        case 0: {
+            ot = _2ROT;
+            break;
+        }
+        case 1: {
+            ot = _8KKOT;
+            break;
+        }
+        case 2: {
+            ot = _16KKOT_to_4OT;
+            break;
+        }
+        case 3: {
+            ot = _2COT;
+            break;
+        }
         default: ot = _2ROT;
     };
 
