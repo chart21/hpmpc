@@ -6,8 +6,6 @@
 #define CHEETAH_THREADS 8
 #endif
 
-#define PORT_OFFSET 10'000
-
 // const ConvolutionParameter param(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
 struct ConvolutionParameter
 {
@@ -140,7 +138,7 @@ void generateArithmeticDummyTriples(type a[],
     if (num_triples == 0)
         return;
 
-    port += PORT_OFFSET;
+    port += CHEETAH_PORT_OFFSET;
 
     //convert SIMD variables to regular uints
     const int vectorization_factor = DATTYPE / bitlength;
@@ -177,7 +175,7 @@ void generateBooleanDummyTriples(type a[],
 
     if(num_triples == 0) return;
 
-    port += PORT_OFFSET;
+    port += CHEETAH_PORT_OFFSET;
 
     //reinterpret SIMD bitstream as uint8 bitstream
     uint8_t* uint_a = (uint8_t*) a;
@@ -230,7 +228,7 @@ void generateArithmeticAB2DummyTriples(type a[],
 
     if(num_triples == 0) return;
 
-    port += PORT_OFFSET;
+    port += CHEETAH_PORT_OFFSET;
 
     //convert SIMD variables to regular uints
     const int vectorization_factor = DATTYPE / bitlength;
@@ -297,7 +295,7 @@ void generateBooleanAB2DummyTriples(type a[],
 
     if (num_triples == 0) return;
 
-    port += PORT_OFFSET;
+    port += CHEETAH_PORT_OFFSET;
 
     //reinterpret SIMD bitstream as uint8 bitstream
 #if PARTY == 0
@@ -570,7 +568,7 @@ void generateLayerDummyTriples(type** a,
         std::cout << "BATCHNORM ";
     }
 
-    port += PORT_OFFSET;
+    port += CHEETAH_PORT_OFFSET;
     const int factor = DATTYPE/BITLENGTH;
     if(factor == 1) { // No need to unvectorize
         UINT_TYPE** uint_w = (UINT_TYPE**) a;

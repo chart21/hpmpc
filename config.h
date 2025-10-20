@@ -337,20 +337,24 @@ int base_port = BASE_PORT;  // temporary solution
 #if PROTOCOL == 4
 #define BEAVER 1
 
+#ifndef CHEETAH_PORT_OFFSET
+#define CHEETAH_PORT_OFFSET 10'000  // Port offset for cheetah
+#endif
+
 #ifndef CHEETAH_THREADS
 #define CHEETAH_THREADS 32  // Number of threads to use for Cheetah triples generation
 #endif
 
 #ifndef CHEETAH_BOOL_OT_TYPE
-#define CHEETAH_BOOL_OT_TYPE 3  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 3: _2COT
+#define CHEETAH_BOOL_OT_TYPE 2  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 3: _2COT
 #endif
 
 #ifndef STORE_PREPROCESSING
-#define STORE_PREPROCESSING 0  // Save preprocessing data to file
+#define STORE_PREPROCESSING 1  // Save preprocessing data to file
 #endif 
 
 #ifndef LOAD_PREPROCESSING
-#define LOAD_PREPROCESSING 0  // Load preprocessing data from file
+#define LOAD_PREPROCESSING 1  // Load preprocessing data from file
 #endif
 
 #ifndef LX_TRIPLES

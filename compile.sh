@@ -148,7 +148,9 @@ while [[ $# -gt 0 ]]; do
                 FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES} INTERLEAVE_COMM=1 \
                 CHEETAH_THREADS=${THREADS}
 
-            ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
+            if [[ $RUN = "1" ]]; then
+                ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
+            fi
             ;;
         -t|--test)
             if (( "$2" < 54 || "$2" > 59 )); then
