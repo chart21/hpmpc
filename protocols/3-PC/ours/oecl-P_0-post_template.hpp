@@ -70,6 +70,18 @@ class OECL0_POST_Share
     {
         return OECL0_POST_Share();
     }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    OECL0_POST_Share prepare_dot_a_known(OECL0_POST_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return OECL0_POST_Share();
+    }
+    
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+    OECL0_POST_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
+    {
+        return OECL0_POST_Share();
+    }
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
     OECL0_POST_Share prepare_mult_public_fixed(const Datatype b,
@@ -128,12 +140,6 @@ class OECL0_POST_Share
 
     template <typename func_add, typename func_sub, typename func_mul>
     OECL0_POST_Share prepare_dot(const OECL0_POST_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
-    {
-        return OECL0_POST_Share();
-    }
-    
-    template <typename func_add, typename func_sub, typename func_mul>
-    OECL0_POST_Share prepare_dot_a_known(OECL0_POST_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         return OECL0_POST_Share();
     }
