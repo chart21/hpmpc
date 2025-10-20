@@ -422,7 +422,7 @@ class ABY2_init
                     pre_receive_from_(PNEXT);
             communicate_pre_();
         
-#if SKIP_PRE == 1
+#if SKIP_PRE == 1 && LOAD_PREPROCESSING == 0
         return;
 #endif
         total_num_boolean_output_triples.push_back(num_boolean_triples[0] + num_ab2_boolean_triples[0]);
@@ -431,6 +431,9 @@ class ABY2_init
         total_num_arithmetic_output_triples.push_back(num_arithmetic_triples[1] + num_ab2_arithmetic_triples[1]);
         uint64_t total_num_output_triples_round0 = preprocessed_outputs_index + total_num_boolean_output_triples[0] + total_num_arithmetic_output_triples[0];
         uint64_t total_num_output_triples_round1 = total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1];
+#if SKIP_PRE == 1
+        return;
+#endif
         triple_type.push_back(new uint8_t[total_num_output_triples_round0]);
         triple_type_index.push_back(0);
         triple_type.push_back(new uint8_t[total_num_output_triples_round1]);

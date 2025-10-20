@@ -211,7 +211,7 @@ void store_preprocessed_data()
                              total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1] +
                              total_preprocessed_outputs)/1000000 * sizeof(DATATYPE);
 
-    std::cout << "Storing " << total_ouputs_MB << " MB of preprocessing data to file ... \n";
+    print("Storing %f MB of preprocessing data to file \n", total_ouputs_MB);
     
     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
     store_preprocessed_data(preprocessed_outputs_bool[0], total_num_boolean_output_triples[0],
@@ -241,8 +241,7 @@ void load_preprocessed_data()
     float total_ouputs_MB = (total_num_boolean_output_triples[0] + total_num_arithmetic_output_triples[0] +
                              total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1] +
                              total_preprocessed_outputs)/1000000 * sizeof(DATATYPE);
-    std::cout << "Loading " << total_ouputs_MB << " MB of preprocessing data from file ... \n";
-
+    print("Loading %f MB of preprocessing data from file \n", total_ouputs_MB);
     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
     preprocessed_outputs_bool = new DATATYPE*[2];
     preprocessed_outputs_arithmetic = new DATATYPE*[2];
@@ -542,7 +541,7 @@ void executeProgram(int argc, char* argv[], int process_id, int process_num)
 #if STORE_PREPROCESSING == 1 && SKIP_PRE == 0
 store_preprocessed_data();
 #endif
-#if LOAD_PREPROCESSING == 1 && SKIP_PRE == 0
+#if LOAD_PREPROCESSING == 1 
 load_preprocessed_data();
 #endif
 

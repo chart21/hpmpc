@@ -7,7 +7,7 @@
 #if INIT == 1
 #include "init_protocol_base.hpp"
 #endif
-#if LIVE == 1
+#if LIVE == 1 || PRE == 1
 #include "live_protocol_base.hpp"
 #endif
 #if USE_CUDA_GEMM > 0
