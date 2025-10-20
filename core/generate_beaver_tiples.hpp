@@ -2,9 +2,7 @@
 #include "include/pch.h"
 #include "arch/DATATYPE.h"
 
-#ifndef CHEETAH_THREADS
-#define CHEETAH_THREADS 8
-#endif
+#define FAKE_TRIPLES 0
 
 // const ConvolutionParameter param(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
 struct ConvolutionParameter
@@ -149,7 +147,7 @@ void generateArithmeticDummyTriples(type a[],
     unorthogonalize_arithmetic(b, uint_b, num_triples / (DATTYPE / bitlength));
     UINT_TYPE* uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
 
-    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS);
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB, PROCESS_NUM);
 
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
@@ -207,7 +205,7 @@ void generateBooleanDummyTriples(type a[],
             uint_a, uint_b, uint_c,
             bitlength, num_triples / 8, ip, port, PARTY + 1,
             CHEETAH_THREADS,
-            ot);
+            ot, PROCESS_NUM);
 }
 
 
@@ -263,7 +261,7 @@ void generateArithmeticAB2DummyTriples(type a[],
         uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
     }
 
-    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB2);
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB2, PROCESS_NUM);
 
     // convert UINT triple to SIMD type
     if (vectorization_factor != 1) {
@@ -334,7 +332,7 @@ void generateBooleanAB2DummyTriples(type a[],
     };
 
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
-            num_triples / 8, ip, port, PARTY + 1, CHEETAH_THREADS, ot);
+            num_triples / 8, ip, port, PARTY + 1, CHEETAH_THREADS, ot, PROCESS_NUM);
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
@@ -615,7 +613,8 @@ void generateLayerDummyTriples(type** a,
                         uint_y + y_index_counter,
                         conv, p.batchSize,
                         ip, port, PARTY + 1, CHEETAH_THREADS,
-                        A_KNOWN == 0 ? Utils::PROTO::AB2 : Utils::PROTO::AB2
+                        A_KNOWN == 0 ? Utils::PROTO::AB2 : Utils::PROTO::AB2, 1,
+                        PROCESS_NUM
                 );
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
                 /**
@@ -632,7 +631,8 @@ void generateLayerDummyTriples(type** a,
                         uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
                         PARTY + 1, ip, port, CHEETAH_THREADS,
-                        Utils::PROTO::AB2
+                        Utils::PROTO::AB2, 1,
+                        PROCESS_NUM
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
                 // std::cout << params.size() << "BatchNorm\n";
@@ -646,7 +646,8 @@ void generateLayerDummyTriples(type** a,
                         uint_y + y_index_counter,
                         p.batchSize, p.ch, p.h, p.w,
                         ip, port, PARTY + 1, CHEETAH_THREADS,
-                        Utils::PROTO::AB2
+                        Utils::PROTO::AB2, 1,
+                        PROCESS_NUM
                 );
             } else {
                 std::cerr << "Unsupported Param type\n";
@@ -718,7 +719,7 @@ void generateLayerDummyTriples(type** a,
                     conv, p.batchSize,
                     ip, port, PARTY + 1, CHEETAH_THREADS,
                     Utils::PROTO::AB2,
-                    factor
+                    factor, PROCESS_NUM
             );
         } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
             Iface::generateFCTriplesCheetah(
@@ -726,7 +727,7 @@ void generateLayerDummyTriples(type** a,
                     p.batchSize, p.in_feat, p.out_feat,
                     PARTY + 1, ip, port, CHEETAH_THREADS,
                     Utils::PROTO::AB2,
-                    factor
+                    factor, PROCESS_NUM
             );
         } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
             Iface::generateBNTriplesCheetah(
@@ -734,7 +735,7 @@ void generateLayerDummyTriples(type** a,
                     p.batchSize, p.ch, p.h, p.w,
                     ip, port, PARTY + 1, CHEETAH_THREADS,
                     Utils::PROTO::AB2,
-                    factor
+                    factor, PROCESS_NUM
             );
         } else {
             std::cerr << "Unsupported Param type\n";
