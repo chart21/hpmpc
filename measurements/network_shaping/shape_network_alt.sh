@@ -2,7 +2,7 @@
 set -e
 
 # Default values (can be passed via CLI or environment)
-LATENCY_MS=${LATENCY_MS:-40}       # e.g. 100 for 100ms, -1 to disable
+LATENCY_MS=${LATENCY_MS:-20}       # e.g. 100 for 100ms, -1 to disable
 BANDWIDTH_MBIT=${BANDWIDTH_MBIT:-200}  # e.g. 100 for 100mbit, -1 to disable
 
 # Collect all non-loopback, non-virtual interfaces
