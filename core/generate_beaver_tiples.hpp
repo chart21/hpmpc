@@ -574,7 +574,7 @@ void generateLayerDummyTriples(type** a,
         UINT_TYPE* uint_y = (UINT_TYPE*) c;
         uint64_t y_index_counter = 0;
 
-        for(int n = 0; n < params.size(); n++) {
+        for(size_t n = 0; n < params.size(); n++) {
             auto p = params[n];
 
             if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
@@ -660,7 +660,7 @@ void generateLayerDummyTriples(type** a,
     }
 
     uint64_t c_index = 0;
-    for(int n = 0; n < params.size(); n++) {
+    for(size_t n = 0; n < params.size(); n++) {
         auto p = params[n];
         const uint64_t x_size = p.x_size_per_batch * p.batchSize;
         const uint64_t w_size = p.w_size_per_batch;
@@ -679,7 +679,7 @@ void generateLayerDummyTriples(type** a,
         UINT_TYPE* y = new UINT_TYPE[factor * y_size];
 
 #if A_KNOWN == 0 || PARTY == 1
-        for (int i = 0; i < x_size; i++) {
+        for (uint64_t i = 0; i < x_size; i++) {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
             unorthogonalize_arithmetic(&b[n][i], temp, 1);
             for (int j = 0; j < factor; j++)
@@ -687,7 +687,7 @@ void generateLayerDummyTriples(type** a,
         }
 #endif
 #if A_KNOWN == 0 || PARTY == 0
-        for (int i = 0; i < w_size; i++) {
+        for (uint64_t i = 0; i < w_size; i++) {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
             unorthogonalize_arithmetic(&a[n][i], temp, 1);
             for (int j = 0; j < factor; ++j) {
@@ -741,7 +741,7 @@ void generateLayerDummyTriples(type** a,
             std::cerr << "Unsupported Param type\n";
         }
         // Conv2D(w,x,y, p) // calculate layer operation
-        for (int i = 0; i < y_size; i++) {
+        for (uint64_t i = 0; i < y_size; i++) {
             alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
             for (int j = 0; j < factor; j++)
                 temp[j] = y[j * y_size + i];
