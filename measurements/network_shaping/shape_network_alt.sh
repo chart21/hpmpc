@@ -1,162 +1,52 @@
 #!/bin/bash
+set -e
 
-# Function to parse JSON and extract data using jq
-parse_json() {
-  local json_file="${1}"
-  local party_index="${2}"
+# Default values (can be passed via CLI or environment)
+LATENCY_MS=${LATENCY_MS:-100}       # e.g. 100 for 100ms, -1 to disable
+BANDWIDTH_MBIT=${BANDWIDTH_MBIT:-100}  # e.g. 100 for 100mbit, -1 to disable
 
-  # Extract latencies and bandwidth data for the given party index
-  latencies=$(jq -r ".latencies[${party_index}][]" "${json_file}")
-  bandwidth=$(jq -r ".bandwidth[${party_index}][]" "${json_file}")
-
-  if [[ -z "${latencies}" || -z "${bandwidth}" ]]; then
-      echo "Error parsing latencies or bandwidth for party index ${party_index}"
-      exit 1
-  fi
-}
-
-# Function to initialize tc rules on a network interface
-initialize_tc() {
-  local iface="${1}"
-
-  echo "Initializing tc on interface: ${iface}"
-
-  # Initialize by clearing existing rules
-  echo "Executing: tc qdisc del dev ${iface} root 2>/dev/null"
-  tc qdisc del dev "${iface}" root 2>/dev/null
-
-  # Add the root qdisc
-  echo "Executing: tc qdisc add dev ${iface} root handle 1: htb default 30"
-  tc qdisc add dev "${iface}" root handle 1: htb default 30
-  if [ $? -eq 0 ]; then
-    echo "Successfully added root qdisc to ${iface}"
-  else
-    echo "Error adding root qdisc to ${iface}"
-  fi
-}
-
-# Function to apply tc rules to a specific IP on a network interface
-apply_tc_ip_specific() {
-  local iface="${1}"
-  local ip="${2}"
-  local latency="${3}"
-  local bw="${4}"
-  local classid="${5}"  # Unique class ID for each IP
-
-  echo "Applying settings for IP ${ip} on interface ${iface}:"
-# 1. Create a class for this IP
-  tc class del dev "${iface}" classid 1:${classid} 2>/dev/null
-  tc class add dev "${iface}" parent 1: classid 1:${classid} htb rate ${bw}mbit ceil ${bw}mbit
-
-  # 2. Attach netem (delay) to that class
-  tc qdisc del dev "${iface}" parent 1:${classid} handle ${classid}0: netem 2>/dev/null
-  if (( $(echo "$latency > 0" | bc -l) )); then
-    tc qdisc add dev "${iface}" parent 1:${classid} handle ${classid}0: netem delay ${latency}ms
-  else
-    tc qdisc add dev "${iface}" parent 1:${classid} handle ${classid}0: netem
-  fi
-
-  # 3. Add a filter to send packets for that IP through this class
-  tc filter del dev "${iface}" protocol ip parent 1: prio 1 u32 match ip dst "${ip}" flowid 1:${classid} 2>/dev/null
-  tc filter add dev "${iface}" protocol ip parent 1: prio 1 u32 match ip dst "${ip}" flowid 1:${classid}
-}
-
-# Default values for input arguments
-PARTY=-1
-JSON_FILE=""
-LATENCY_DIVISOR=1
-IPS=()
-LATENCY_OVERRIDE=""
-BANDWIDTH_OVERRIDE=""
-
-# Parse input arguments
-while getopts ":a:b:c:d:p:f:l:L:B:" opt; do
-  case $opt in
-    a) IPS[0]=$OPTARG ;;
-    b) IPS[1]=$OPTARG ;;
-    c) IPS[2]=$OPTARG ;;
-    d) IPS[3]=$OPTARG ;;
-    p) PARTY=$OPTARG ;;
-    f) JSON_FILE=$OPTARG ;;
-    l) LATENCY_DIVISOR=$OPTARG ;;
-    L) LATENCY_OVERRIDE=$OPTARG ;;
-    B) BANDWIDTH_OVERRIDE=$OPTARG ;;
-    \?) echo "Invalid option -$OPTARG" >&2; exit 1 ;;
-  esac
-done
-
-
-# Ensure the party index is valid
-if [[ ${PARTY} -lt 0 ]]; then
-  echo "Error: Please provide a valid party index."
-  exit 1
-fi
-
-if [[ ${PARTY} = "all" ]]; then
-    echo "Parties set to all, skipping network shaping"
-    exit
-fi
-
-#Check if 127.0.0.1 is in the list of IPs and exit if it is
-for ip in "${IPS[@]}"; do
-  if [[ "${ip}" == "127.0.0.1" ]]; then
-    echo "IP set to localhost, skipping network shaping"
-    exit
-    fi
-done
-
-
-
-# If neither L nor B is provided, read from the JSON file
-if [[ -z "${LATENCY_OVERRIDE}" && -z "${BANDWIDTH_OVERRIDE}" ]]; then
-  if [[ -z "${JSON_FILE}" ]]; then
-    echo "Error: Please provide a valid JSON file."
-    exit 1
-  fi
-  # Parse the JSON file and extract latencies and bandwidths for the given party
-  parse_json "${JSON_FILE}" "${PARTY}"
-fi
-
-# Get network interfaces on the system
+# Collect all non-loopback, non-virtual interfaces
 IFACES=$(ip -o -4 link show | awk -F': ' '{print $2}' | grep -v -e lo -e vir -e docker)
 
-# Initialize tc, then apply latencies and bandwidths to each specified IP
-for IFACE in ${IFACES}; do
-  initialize_tc "${IFACE}" # Initialize tc root qdisc once for each interface
-  
-  config_index=0  # Index to track latency and bandwidth configuration
-  for (( i = 0; i < 4; i++ )); do
-    if [ "${i}" -eq "${PARTY}" ]; then
-      echo "Skipping self configuration for index ${i}"
-      continue
-    fi
+echo "Detected interfaces: $IFACES"
+echo "Target latency: ${LATENCY_MS}ms | Target bandwidth: ${BANDWIDTH_MBIT}mbit"
 
-    IP=${IPS[i]}
-    if [ -z "${IP}" ]; then
-      echo "Skipping unspecified IP at index ${i}"
-      continue
-    fi
+for IFACE in $IFACES; do
+  echo "Configuring interface: $IFACE"
 
-    if [[ -n "${LATENCY_OVERRIDE}" ]]; then
-      RAW_LATENCY="${LATENCY_OVERRIDE}"
-      if [[ "${RAW_LATENCY}" -lt 0 ]]; then
-        LATENCY=-1
-      else
-        LATENCY=$(echo "scale=2; ${RAW_LATENCY} / ${LATENCY_DIVISOR}" | bc)
-      fi
-    else
-      RAW_LATENCY=$(echo "${latencies}" | sed -n "$((config_index+1))p")
-      LATENCY=$(echo "scale=2; ${RAW_LATENCY} / ${LATENCY_DIVISOR}" | bc)
-    fi
+  # Remove any existing qdisc
+  tc qdisc del dev "$IFACE" root 2>/dev/null || true
 
-    if [[ -n "${BANDWIDTH_OVERRIDE}" ]]; then
-      BW="${BANDWIDTH_OVERRIDE}"
-    else
-      BW=$(echo "${bandwidth}" | sed -n "$((config_index+1))p")
-    fi
+  # -------------------------------
+  # CASE 1: both latency and bandwidth shaping
+  # -------------------------------
+  if (( LATENCY_MS > 0 )) && (( BANDWIDTH_MBIT > 0 )); then
+    echo " → Adding HTB + NETEM (latency + bandwidth)"
+    tc qdisc add dev "$IFACE" root handle 1: htb default 10
+    tc class add dev "$IFACE" parent 1: classid 1:10 htb rate ${BANDWIDTH_MBIT}mbit ceil ${BANDWIDTH_MBIT}mbit
+    tc qdisc add dev "$IFACE" parent 1:10 handle 10: netem delay ${LATENCY_MS}ms
 
-    apply_tc_ip_specific "${IFACE}" "${IP}" "${LATENCY}" "${BW}" "$((10 + i))"
-    config_index=$((config_index + 1))
-  done
+  # -------------------------------
+  # CASE 2: only latency shaping
+  # -------------------------------
+  elif (( LATENCY_MS > 0 )) && (( BANDWIDTH_MBIT <= 0 )); then
+    echo " → Adding NETEM only (latency)"
+    tc qdisc add dev "$IFACE" root netem delay ${LATENCY_MS}ms
+
+  # -------------------------------
+  # CASE 3: only bandwidth shaping
+  # -------------------------------
+  elif (( LATENCY_MS <= 0 )) && (( BANDWIDTH_MBIT > 0 )); then
+    echo " → Adding HTB only (bandwidth)"
+    tc qdisc add dev "$IFACE" root handle 1: htb default 10
+    tc class add dev "$IFACE" parent 1: classid 1:10 htb rate ${BANDWIDTH_MBIT}mbit ceil ${BANDWIDTH_MBIT}mbit
+
+  # -------------------------------
+  # CASE 4: both disabled
+  # -------------------------------
+  else
+    echo " → Skipping shaping (latency=-1, bandwidth=-1)"
+  fi
 done
 
+echo "✅ Network shaping applied."
