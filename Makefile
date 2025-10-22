@@ -10,17 +10,18 @@ CHEETAH := ../ConvTriple
 
 HE_INCLUDE := -I${CHEETAH}/src/include \
 			  -I${CHEETAH}/src \
-			  -isystem ${CHEETAH}/deps/include/troy \
 			  -isystem ${CHEETAH}/deps/include \
 			  -isystem ${CHEETAH}/deps/include/SEAL-4.0 \
 			  -isystem /usr/include/eigen3
+# -isystem ${CHEETAH}/deps/include/troy \
 
 HE_PATHS := -Wl,-rpath,${CHEETAH}/build/lib:${CHEETAH}/deps/lib \
 			-L${CHEETAH}/build/lib \
-			-L${CHEETAH}/deps/lib \
-			-L/opt/cuda/targets/x86_64-linux/lib
+			-L${CHEETAH}/deps/lib
+# -L/opt/cuda/targets/x86_64-linux/lib
 
-HE_LIBS := -lHE -lgemini -lseal-4.0 -lcudart -ltroy
+HE_LIBS := -lHE -lgemini -lseal-4.0
+# -lcudart -ltroy
 
 CHEETAH_FLAGS := $(HE_INCLUDE) $(HE_PATHS) $(HE_LIBS)
 
