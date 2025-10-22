@@ -350,11 +350,11 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef STORE_PREPROCESSING
-#define STORE_PREPROCESSING 1  // Save preprocessing data to file
+#define STORE_PREPROCESSING 0  // Save preprocessing data to file
 #endif 
 
 #ifndef LOAD_PREPROCESSING
-#define LOAD_PREPROCESSING 1  // Load preprocessing data from file
+#define LOAD_PREPROCESSING 0  // Load preprocessing data from file
 #endif
 
 #ifndef LX_TRIPLES
