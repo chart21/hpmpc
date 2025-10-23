@@ -575,7 +575,7 @@ void generateLayerDummyTriples(type** a,
     if (PARTY == 0)
         addr = nullptr;
 
-    IO::NetIO** ios = Utils::init_ios<IO::NetIO>(addr, port, CHEETAH_THREADS, factor);
+    IO::NetIO** ios = Utils::init_ios<IO::NetIO>(addr, port, CHEETAH_THREADS, PROCESS_NUM);
 
     if(factor == 1) { // No need to unvectorize
         UINT_TYPE** uint_w = (UINT_TYPE**) a;
@@ -622,7 +622,7 @@ void generateLayerDummyTriples(type** a,
                         uint_y + y_index_counter,
                         conv, p.batchSize,
                         ip, port, PARTY + 1, CHEETAH_THREADS,
-                        A_KNOWN == 0 ? Utils::PROTO::AB2 : Utils::PROTO::AB2, 1,
+                        A_KNOWN == 0 ? Utils::PROTO::AB2 : Utils::PROTO::AB2, factor,
                         PROCESS_NUM
                 );
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
@@ -640,7 +640,7 @@ void generateLayerDummyTriples(type** a,
                         uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
                         PARTY + 1, ip, port, CHEETAH_THREADS,
-                        Utils::PROTO::AB2, 1,
+                        Utils::PROTO::AB2, factor,
                         PROCESS_NUM
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
@@ -655,7 +655,7 @@ void generateLayerDummyTriples(type** a,
                         uint_y + y_index_counter,
                         p.batchSize, p.ch, p.h, p.w,
                         ip, port, PARTY + 1, CHEETAH_THREADS,
-                        Utils::PROTO::AB2, 1,
+                        Utils::PROTO::AB2, factor,
                         PROCESS_NUM
                 );
             } else {
