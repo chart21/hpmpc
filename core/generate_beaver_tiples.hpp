@@ -566,8 +566,17 @@ void generateLayerDummyTriples(type** a,
         std::cout << "BATCHNORM ";
     }
 
-    port += CHEETAH_PORT_OFFSET;
+
     const int factor = DATTYPE/BITLENGTH;
+
+    port += CHEETAH_PORT_OFFSET;
+    const char* addr = ip.c_str();
+
+    if (PARTY == 0)
+        addr = nullptr;
+
+    IO::NetIO** ios = Utils::init_ios<IO::NetIO>(addr, port, CHEETAH_THREADS, factor);
+
     if(factor == 1) { // No need to unvectorize
         UINT_TYPE** uint_w = (UINT_TYPE**) a;
         UINT_TYPE** uint_x = (UINT_TYPE**) b;
@@ -608,7 +617,7 @@ void generateLayerDummyTriples(type** a,
                  * std::cout << p.out_w << "\n";
                  */
 
-                Iface::generateConvTriplesCheetahWrapper(
+                Iface::generateConvTriplesCheetahWrapper(ios,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         conv, p.batchSize,
@@ -626,7 +635,7 @@ void generateLayerDummyTriples(type** a,
                  * std::cout << "w_size: " << p.w_size_per_batch << "\n"; // big
                  */
 
-                Iface::generateFCTriplesCheetah(
+                Iface::generateFCTriplesCheetah(ios,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
@@ -641,7 +650,7 @@ void generateLayerDummyTriples(type** a,
                 // std::cout << p.w << ", ";
                 // std::cout << p.hw << "\n";
 
-                Iface::generateBNTriplesCheetah(
+                Iface::generateBNTriplesCheetah(ios,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.ch, p.h, p.w,
@@ -656,6 +665,11 @@ void generateLayerDummyTriples(type** a,
             y_index_counter += p.y_size_per_batch * p.batchSize;
 
             }
+
+        for (size_t i = 0; i < CHEETAH_THREADS; ++i) {
+            delete ios[i];
+        }
+        delete[] ios;
         return;
     }
 
@@ -714,7 +728,7 @@ void generateLayerDummyTriples(type** a,
                 .padding = p.padding,
             };
 
-            Iface::generateConvTriplesCheetahWrapper(
+            Iface::generateConvTriplesCheetahWrapper(ios,
                     x, w, y,
                     conv, p.batchSize,
                     ip, port, PARTY + 1, CHEETAH_THREADS,
@@ -722,7 +736,7 @@ void generateLayerDummyTriples(type** a,
                     factor, PROCESS_NUM
             );
         } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
-            Iface::generateFCTriplesCheetah(
+            Iface::generateFCTriplesCheetah(ios,
                     x, w, y,
                     p.batchSize, p.in_feat, p.out_feat,
                     PARTY + 1, ip, port, CHEETAH_THREADS,
@@ -730,7 +744,7 @@ void generateLayerDummyTriples(type** a,
                     factor, PROCESS_NUM
             );
         } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
-            Iface::generateBNTriplesCheetah(
+            Iface::generateBNTriplesCheetah(ios,
                     x, w, y,
                     p.batchSize, p.ch, p.h, p.w,
                     ip, port, PARTY + 1, CHEETAH_THREADS,
@@ -753,6 +767,11 @@ void generateLayerDummyTriples(type** a,
         delete[] y;
         c_index += y_size;
     }
+
+    for (size_t i = 0; i < CHEETAH_THREADS; ++i) {
+        delete ios[i];
+    }
+    delete[] ios;
 }
 
 
