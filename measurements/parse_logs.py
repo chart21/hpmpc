@@ -44,6 +44,7 @@ def parse_log_file(file_path, debug=False):
                 print(f"Parsed parameters: {dict(params)}")
 
         # Initialize counters and lists for calculations
+        triple_gen_total = 0.0
         pre_received = pre_sent = online_received = online_sent = 0
         pre_times = []
         online_times = []
@@ -51,6 +52,10 @@ def parse_log_file(file_path, debug=False):
         tests_passed = tests_total = 0
 
         for line in lines:
+            if 'data[MiB]:' in line:
+                triple_match = re.search(r'data\[MiB\]:\s*([\d.e+-]+)', line)
+                if triple_match:
+                    triple_gen_total += float(triple_match.group(1))
             if 'Sending' in line or 'Receiving' in line:
                 match = re.search(r'(Sending|Receiving).*?:(.*?)(?=\s*$)', line)
                 if match:
@@ -66,12 +71,14 @@ def parse_log_file(file_path, debug=False):
                         else:
                             online_received += sizes
             elif 'Time measured to perform' in line:
-                match = re.search(r'Time measured to perform (\w+).*?:\s*([\d.e+-]+)s', line)
+                match = re.search(r'Time measure[d]? to perform ([\w\s]+?):\s*([\d.e+-]+)s', line)
                 if match:
-                    if match.group(1) == 'preprocessing':
-                        pre_times.append(float(match.group(2)))
-                    elif match.group(1) in ['computation', 'chrono']:
-                        online_times.append(float(match.group(2)))
+                    label = match.group(1).strip()
+                    value = float(match.group(2))
+                    if label == 'preprocessing chrono':
+                        pre_times.append(value)
+                    elif label == 'computation chrono':
+                        online_times.append(value)
             
             # Parse accuracy
             accuracy_match = re.search(r'accuracy\((\d+) images\): ([\d.]+)%', line)
@@ -91,6 +98,7 @@ def parse_log_file(file_path, debug=False):
         online_max = max(online_times) if online_times else 0
 
         run_data.update({
+            'TRPLE_GEN(MB)': triple_gen_total,
             'PRE_RECEIVED(MB)': pre_received,
             'PRE_SENT(MB)': pre_sent,
             'PRE_MAX(s)': pre_max,
