@@ -235,7 +235,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #endif
 #endif
 #endif
-#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1
+#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1 && PUBLIC_WEIGHTS == 0
         if(current_phase == PHASE_LIVE)
             preprocessed_outputs_arithmetic_index[0] += m * p;
 #endif
