@@ -381,7 +381,7 @@ class ABY2_init
         {
             // num_arithmetic_triples[0]++;
             // num_arithmetic_triples[1]++;
-            generate_lxly_triple(OP_ADD);
+            generate_lxly2_triple(OP_ADD);
             store_output_share_arithmetic_(helper_index);
             store_output_share_arithmetic_(helper_index);
             generate_lxly_triple(OP_ADD,1);

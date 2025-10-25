@@ -237,7 +237,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #endif
 #if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1 && PUBLIC_WEIGHTS == 0
         if(current_phase == PHASE_LIVE)
-            preprocessed_outputs_arithmetic_index[0] += m * p;
+            preprocessed_outputs_arithmetic_index[0] += m * p; //TODO: Check if this is correct and neccessary
 #endif
 #if FUSE_CONV_BN_SIM == 1
     delete[] C_Accum;

@@ -440,9 +440,12 @@ class ABY2_PRE_Share
             ABY2_PRE_Share b1{SET_ALL_ZERO()};
             ABY2_PRE_Share b2{lb[i]};
 #endif
-            b1.generate_triple(
-                b2,
+            b2.generate_lxly2_triple(
+                b1,
                 OP_ADD);  // communication can be cut in half if triple of type x(P_0),y(P_1),[z] is used
+            // b1.generate_triple(
+            //     b2,
+            //     OP_ADD);  // communication can be cut in half if triple of type x(P_0),y(P_1),[z] is used
             store_output_share_arithmetic(lb[i],helper_index);
             store_output_share_arithmetic(x[i].l, helper_index);
             out[i].l = getRandomVal(PSELF);
@@ -1107,7 +1110,7 @@ static void get_fc_triples_from_file()
                 }
                 case CaseBitInjection:
                 {
-                    auto lxly = receive_and_compute_lxly_share(OP_ADD);
+                    auto lxly = receive_and_compute_lxly2_share(OP_ADD);
                     lxly = OP_SUB(retrieve_output_share_arithmetic(helper_index), OP_ADD(lxly, lxly));
                     lxly_a[0][arithmetic_triple_counter[0]++] = lxly;  // [lb] - 2[lb1lb2]
 
