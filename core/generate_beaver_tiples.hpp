@@ -601,21 +601,6 @@ void generateLayerDummyTriples(type** a,
                     .stride = p.stride,
                     .padding = p.padding,
                 };
-                /**
-                 * std::cout << conv.ih << " x ";
-                 * std::cout << conv.iw << " x ";
-                 * std::cout << conv.ic << ", ";
-                 * std::cout << p.x_size_per_batch << ", ";
-                 * std::cout << conv.fh << " x ";
-                 * std::cout << conv.fw << " x ";
-                 * std::cout << conv.fc << " x ";
-                 * std::cout << conv.n_filters << ", ";
-                 * std::cout << p.w_size_per_batch << ", ";
-                 * std::cout << p.stride << ", ";
-                 * std::cout << p.padding << ", ";
-                 * std::cout << p.out_h << ", ";
-                 * std::cout << p.out_w << "\n";
-                 */
 
                 Iface::generateConvTriplesCheetahWrapper(ios,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
@@ -625,15 +610,6 @@ void generateLayerDummyTriples(type** a,
                         A_KNOWN == 0 ? Utils::PROTO::AB2 : Utils::PROTO::AB2, factor
                 );
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
-                /**
-                 * std::cout << params.size() << "FullyConnected\n";
-                 * std::cout << p.batchSize << ", ";
-                 * std::cout << p.in_feat << ", ";
-                 * std::cout << p.out_feat << ", ";
-                 * std::cout << "x_size: " << p.x_size_per_batch << ", "; // smol
-                 * std::cout << "w_size: " << p.w_size_per_batch << "\n"; // big
-                 */
-
                 Iface::generateFCTriplesCheetah(ios,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
@@ -642,12 +618,6 @@ void generateLayerDummyTriples(type** a,
                         Utils::PROTO::AB2, factor
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
-                // std::cout << params.size() << "BatchNorm\n";
-                // std::cout << p.ch << ", ";
-                // std::cout << p.h << ", ";
-                // std::cout << p.w << ", ";
-                // std::cout << p.hw << "\n";
-
                 Iface::generateBNTriplesCheetah(ios,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
@@ -663,106 +633,101 @@ void generateLayerDummyTriples(type** a,
 
             }
 
-        for (size_t i = 0; i < CHEETAH_THREADS; ++i) {
-            delete ios[i];
-        }
-        delete[] ios;
-        return;
-    }
-
-    uint64_t c_index = 0;
-    for(size_t n = 0; n < params.size(); n++) {
-        auto p = params[n];
-        const uint64_t x_size = p.x_size_per_batch * p.batchSize;
-        const uint64_t w_size = p.w_size_per_batch;
-        const uint64_t y_size = p.y_size_per_batch * p.batchSize;
+    } else {
+        uint64_t c_index = 0;
+        for(size_t n = 0; n < params.size(); n++) {
+            auto p = params[n];
+            const uint64_t x_size = p.x_size_per_batch * p.batchSize;
+            const uint64_t w_size = p.w_size_per_batch;
+            const uint64_t y_size = p.y_size_per_batch * p.batchSize;
 
 #if A_KNOWN == 0 || PARTY == 1
-        UINT_TYPE* x = new UINT_TYPE[factor * x_size]; // Party1 holds X2 in plain in AB2 setting
+            UINT_TYPE* x = new UINT_TYPE[factor * x_size]; // Party1 holds X2 in plain in AB2 setting
 #else
-        UINT_TYPE* x = nullptr;
+            UINT_TYPE* x = nullptr;
 #endif
 #if A_KNOWN == 0 || PARTY == 0
-        UINT_TYPE* w = new UINT_TYPE[w_size * factor];  // W is always constant
+            UINT_TYPE* w = new UINT_TYPE[w_size * factor];  // W is always constant
 #else
-        UINT_TYPE* w = nullptr;
+            UINT_TYPE* w = nullptr;
 #endif
-        UINT_TYPE* y = new UINT_TYPE[factor * y_size];
+            UINT_TYPE* y = new UINT_TYPE[factor * y_size];
 
 #if A_KNOWN == 0 || PARTY == 1
-        for (uint64_t i = 0; i < x_size; i++) {
-            alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&b[n][i], temp, 1);
-            for (int j = 0; j < factor; j++)
-                x[j * x_size + i] = temp[j];
-        }
+            for (uint64_t i = 0; i < x_size; i++) {
+                alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+                unorthogonalize_arithmetic(&b[n][i], temp, 1);
+                for (int j = 0; j < factor; j++)
+                    x[j * x_size + i] = temp[j];
+            }
 #endif
 #if A_KNOWN == 0 || PARTY == 0
-        for (uint64_t i = 0; i < w_size; i++) {
-            alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&a[n][i], temp, 1);
-            for (int j = 0; j < factor; ++j) {
-                w[j * w_size + i] = temp[j];
+            for (uint64_t i = 0; i < w_size; i++) {
+                alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+                unorthogonalize_arithmetic(&a[n][i], temp, 1);
+                for (int j = 0; j < factor; ++j) {
+                    w[j * w_size + i] = temp[j];
+                }
             }
-        }
 #endif
 
-        p.batchSize *= factor;
+            p.batchSize *= factor;
 
-        if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
-            if (p.dilation != 1) {
-                std::cerr << "DILATION != 1 is not supported\n";
+            if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
+                if (p.dilation != 1) {
+                    std::cerr << "DILATION != 1 is not supported\n";
+                }
+                Utils::ConvParm conv{
+                    .ic = p.din,
+                    .iw = p.inw,
+                    .ih = p.inh,
+                    .fc = p.din,
+                    .fw = p.ww,
+                    .fh = p.wh,
+                    .n_filters = p.dout,
+                    .stride = p.stride,
+                    .padding = p.padding,
+                };
+
+                Iface::generateConvTriplesCheetahWrapper(ios,
+                        x, w, y,
+                        conv, p.batchSize,
+                        PARTY + 1, CHEETAH_THREADS,
+                        Utils::PROTO::AB2,
+                        factor
+                );
+            } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
+                Iface::generateFCTriplesCheetah(ios,
+                        x, w, y,
+                        p.batchSize, p.in_feat, p.out_feat,
+                        PARTY + 1, CHEETAH_THREADS,
+                        Utils::PROTO::AB2,
+                        factor
+                );
+            } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
+                Iface::generateBNTriplesCheetah(ios,
+                        x, w, y,
+                        p.batchSize, p.ch, p.h, p.w,
+                        PARTY + 1, CHEETAH_THREADS,
+                        Utils::PROTO::AB2,
+                        factor
+                );
+            } else {
+                std::cerr << "Unsupported Param type\n";
             }
-            Utils::ConvParm conv{
-                .ic = p.din,
-                .iw = p.inw,
-                .ih = p.inh,
-                .fc = p.din,
-                .fw = p.ww,
-                .fh = p.wh,
-                .n_filters = p.dout,
-                .stride = p.stride,
-                .padding = p.padding,
-            };
+            // Conv2D(w,x,y, p) // calculate layer operation
+            for (uint64_t i = 0; i < y_size; i++) {
+                alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+                for (int j = 0; j < factor; j++)
+                    temp[j] = y[j * y_size + i];
+                orthogonalize_arithmetic(temp, c + c_index + i, 1);
+            }
 
-            Iface::generateConvTriplesCheetahWrapper(ios,
-                    x, w, y,
-                    conv, p.batchSize,
-                    PARTY + 1, CHEETAH_THREADS,
-                    Utils::PROTO::AB2,
-                    factor
-            );
-        } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
-            Iface::generateFCTriplesCheetah(ios,
-                    x, w, y,
-                    p.batchSize, p.in_feat, p.out_feat,
-                    PARTY + 1, CHEETAH_THREADS,
-                    Utils::PROTO::AB2,
-                    factor
-            );
-        } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
-            Iface::generateBNTriplesCheetah(ios,
-                    x, w, y,
-                    p.batchSize, p.ch, p.h, p.w,
-                    PARTY + 1, CHEETAH_THREADS,
-                    Utils::PROTO::AB2,
-                    factor
-            );
-        } else {
-            std::cerr << "Unsupported Param type\n";
+            delete[] x;
+            delete[] w;
+            delete[] y;
+            c_index += y_size;
         }
-        // Conv2D(w,x,y, p) // calculate layer operation
-        for (uint64_t i = 0; i < y_size; i++) {
-            alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
-            for (int j = 0; j < factor; j++)
-                temp[j] = y[j * y_size + i];
-            orthogonalize_arithmetic(temp, c + c_index + i, 1);
-        }
-
-        delete[] x;
-        delete[] w;
-        delete[] y;
-        c_index += y_size;
     }
 
     for (size_t i = 0; i < CHEETAH_THREADS; ++i) {

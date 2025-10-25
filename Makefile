@@ -8,20 +8,25 @@ $(shell mkdir -p executables/flags)
 
 CHEETAH := ../ConvTriple
 
+CHEETAH_GPU ?= 0
+
 HE_INCLUDE := -I${CHEETAH}/src/include \
 			  -I${CHEETAH}/src \
 			  -isystem ${CHEETAH}/deps/include \
 			  -isystem ${CHEETAH}/deps/include/SEAL-4.0 \
 			  -isystem /usr/include/eigen3
-# -isystem ${CHEETAH}/deps/include/troy \
 
 HE_PATHS := -Wl,-rpath,${CHEETAH}/build/lib:${CHEETAH}/deps/lib \
 			-L${CHEETAH}/build/lib \
 			-L${CHEETAH}/deps/lib
-# -L/opt/cuda/targets/x86_64-linux/lib
 
 HE_LIBS := -lHE -lgemini -lseal-4.0
-# -lcudart -ltroy
+
+ifeq (${CHEETAH_GPU}, 1)
+HE_INCLUDE += -isystem ${CHEETAH}/deps/include/troy
+HE_PATHS += -L/opt/cuda/targets/x86_64-linux/lib
+HE_LIBS += -lcudart -ltroy
+endif
 
 CHEETAH_FLAGS := $(HE_INCLUDE) $(HE_PATHS) $(HE_LIBS)
 

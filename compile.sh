@@ -15,6 +15,8 @@ BN_TRIPLES=1
 FAKE=0
 A_KNOWN=1
 
+GPU=0
+
 PARTY=all
 IP_HOST="127.0.0.1"
 
@@ -122,13 +124,14 @@ while [[ $# -gt 0 ]]; do
             log_info
 
             if [[ $BUILD = "1" ]]; then
-                make -j PARTY=${PARTY} FUNCTION_IDENTIFIER=${FUNC} MODELOWNER=-1 \
-                    DATAOWNER=-1 DATTYPE=${DATTYPE} PROTOCOL=4 \
-                    NUM_INPUTS=${NUM_INPUTS} BITLENGTH=32 \
-                    PROCESS_NUM=${PROCESS_NUM} PRE=1 FAKE_TRIPLES=${FAKE} \
+                make -j PARTY=${PARTY} FUNCTION_IDENTIFIER=${FUNC} \
+                    MODELOWNER=-1 DATAOWNER=-1 DATTYPE=${DATTYPE} PROTOCOL=4 \
+                    NUM_INPUTS=${NUM_INPUTS} BITLENGTH=32 PRE=1 \
+                    PROCESS_NUM=${PROCESS_NUM} FAKE_TRIPLES=${FAKE} \
                     A_KNOWN=${A_KNOWN} BN2D_TRIPLES=${BN_TRIPLES} \
-                    FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES} INTERLEAVE_COMM=1 \
-                    CHEETAH_THREADS=${THREADS}
+                    INTERLEAVE_COMM=1 CHEETAH_THREADS=${THREADS} \
+                    CHEETAH_GPU=${GPU} FC_TRIPLES=${FC_TRIPLES} \
+                    CONV_TRIPLES=${CONV_TRIPLES}
             fi
 
             if [[ $RUN = "1" ]]; then
@@ -145,9 +148,10 @@ while [[ $# -gt 0 ]]; do
             make -j PARTY=${PARTY} FUNCTION_IDENTIFIER=${FUNC} MODELOWNER=P_0 \
                 DATAOWNER=P_1 DATTYPE=${DATTYPE} PROTOCOL=4 \
                 NUM_INPUTS=${NUM_INPUTS} BITLENGTH=32 \
-                PROCESS_NUM=${PROCESS_NUM} PRE=1 FAKE_TRIPLES=${FAKE} A_KNOWN=${A_KNOWN} BN2D_TRIPLES=${BN_TRIPLES} \
-                FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES} INTERLEAVE_COMM=1 \
-                CHEETAH_THREADS=${THREADS}
+                PROCESS_NUM=${PROCESS_NUM} PRE=1 FAKE_TRIPLES=${FAKE} \
+                A_KNOWN=${A_KNOWN} BN2D_TRIPLES=${BN_TRIPLES} \
+                FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES} \
+                INTERLEAVE_COMM=1 CHEETAH_THREADS=${THREADS} CHEETAH_GPU=${GPU}
 
             if [[ $RUN = "1" ]]; then
                 ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
@@ -167,7 +171,8 @@ while [[ $# -gt 0 ]]; do
                 BITLENGTH=32 PRE=1 DATTYPE=${DATTYPE} NUM_INPUTS=1 \
                 SPLITROLES=0 PROCESS_NUM=${PROCESS_NUM} USE_CUDA_GEMM=0 \
                 SKIP_PRE=0 FAKE_TRIPLES=0 A_KNOWN=${A_KNOWN} \
-                BN2D_TRIPLES=${BN_TRIPLES} FC_TRIPLES=${FC_TRIPLES} CONV_TRIPLES=${CONV_TRIPLES}
+                BN2D_TRIPLES=${BN_TRIPLES} FC_TRIPLES=${FC_TRIPLES} \
+                CONV_TRIPLES=${CONV_TRIPLES} CHEETAH_GPU=${GPU}
 
             ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
             ;;
