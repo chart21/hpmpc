@@ -621,9 +621,8 @@ void generateLayerDummyTriples(type** a,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         conv, p.batchSize,
-                        ip, port, PARTY + 1, CHEETAH_THREADS,
-                        A_KNOWN == 0 ? Utils::PROTO::AB2 : Utils::PROTO::AB2, factor,
-                        PROCESS_NUM
+                        PARTY + 1, CHEETAH_THREADS,
+                        A_KNOWN == 0 ? Utils::PROTO::AB2 : Utils::PROTO::AB2, factor
                 );
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
                 /**
@@ -639,9 +638,8 @@ void generateLayerDummyTriples(type** a,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
-                        PARTY + 1, ip, port, CHEETAH_THREADS,
-                        Utils::PROTO::AB2, factor,
-                        PROCESS_NUM
+                        PARTY + 1, CHEETAH_THREADS,
+                        Utils::PROTO::AB2, factor
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
                 // std::cout << params.size() << "BatchNorm\n";
@@ -654,9 +652,8 @@ void generateLayerDummyTriples(type** a,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.ch, p.h, p.w,
-                        ip, port, PARTY + 1, CHEETAH_THREADS,
-                        Utils::PROTO::AB2, factor,
-                        PROCESS_NUM
+                        PARTY + 1, CHEETAH_THREADS,
+                        Utils::PROTO::AB2, factor
                 );
             } else {
                 std::cerr << "Unsupported Param type\n";
@@ -731,25 +728,25 @@ void generateLayerDummyTriples(type** a,
             Iface::generateConvTriplesCheetahWrapper(ios,
                     x, w, y,
                     conv, p.batchSize,
-                    ip, port, PARTY + 1, CHEETAH_THREADS,
+                    PARTY + 1, CHEETAH_THREADS,
                     Utils::PROTO::AB2,
-                    factor, PROCESS_NUM
+                    factor
             );
         } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
             Iface::generateFCTriplesCheetah(ios,
                     x, w, y,
                     p.batchSize, p.in_feat, p.out_feat,
-                    PARTY + 1, ip, port, CHEETAH_THREADS,
+                    PARTY + 1, CHEETAH_THREADS,
                     Utils::PROTO::AB2,
-                    factor, PROCESS_NUM
+                    factor
             );
         } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
             Iface::generateBNTriplesCheetah(ios,
                     x, w, y,
                     p.batchSize, p.ch, p.h, p.w,
-                    ip, port, PARTY + 1, CHEETAH_THREADS,
+                    PARTY + 1, CHEETAH_THREADS,
                     Utils::PROTO::AB2,
-                    factor, PROCESS_NUM
+                    factor
             );
         } else {
             std::cerr << "Unsupported Param type\n";
