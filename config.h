@@ -342,7 +342,7 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef CHEETAH_CONV_TYPE
-#define CHEETAH_CONV_TYPE 1  // 1: standard, 0: experimental
+#define CHEETAH_CONV_TYPE 0  // 0: standard, 1: experimental
 #endif
 
 #ifndef CHEETAH_THREADS

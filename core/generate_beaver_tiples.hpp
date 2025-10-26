@@ -566,19 +566,8 @@ void generateLayerDummyTriples(type** a,
 
     IO::NetIO** ios = Utils::init_ios<IO::NetIO>(addr, port, CHEETAH_THREADS, PROCESS_NUM);
 
-#if CHEETAH_CONV_TYPE == 0
-    gemini::HomConv2DSS hom_conv;
-    std::vector<std::vector<seal::Plaintext>> encoded_x;
-    std::vector<std::vector<std::vector<seal::Plaintext>>> encoded_w;
-    std::vector<std::vector<seal::Ciphertext>> encrypted_x2;
-    std::vector<Utils::ConvParm> parms(params.size());
-    size_t total_batches = 0;
-#endif
     if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
         std::cout << "CONVOLUTION ";
-#if CHEETAH_CONV_TYPE == 0
-        hom_conv = Iface::setupConv(ios, PARTY + 1);
-#endif
     } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
         std::cout << "FC ";
     } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
@@ -589,6 +578,13 @@ void generateLayerDummyTriples(type** a,
     const int factor = DATTYPE/BITLENGTH;
 
     if(factor == 1) { // No need to unvectorize
+#if CHEETAH_CONV_TYPE == 1
+        gemini::HomConv2DSS hom_conv;
+        std::vector<Utils::ConvParm> parms(params.size());
+        size_t total_batches = 0;
+        if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>)
+            hom_conv = Iface::setupConv(ios, PARTY + 1);
+#endif
         UINT_TYPE** uint_w = (UINT_TYPE**) a;
         UINT_TYPE** uint_x = (UINT_TYPE**) b;
         UINT_TYPE* uint_y = (UINT_TYPE*) c;
@@ -614,7 +610,7 @@ void generateLayerDummyTriples(type** a,
                     .padding = p.padding,
                 };
 
-#if CHEETAH_CONV_TYPE == 1
+#if CHEETAH_CONV_TYPE == 0
                 Iface::generateConvTriplesCheetahWrapper(ios,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
@@ -623,20 +619,8 @@ void generateLayerDummyTriples(type** a,
                         Utils::PROTO::AB2, factor
                 );
 #else
-                parms.add(conv);
+                parms[n] = conv;
                 total_batches += conv.batchsize;
-                std::vector<std::vector<seal::Plaintext>> encoded_x_wrap(p.batchSize);
-                std::vector<std::vector<std::vector<seal::Plaintext>>> encoded_w_wrap(p.batchSize);
-                std::vector<std::vector<seal::Ciphertext>> encrypted_x2_wrap(p.batchSize);
-
-                Iface::generateConvTriplesCheetahPhase1(ios, hom_conv,
-                        PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
-                        conv, encoded_x_wrap, encoded_w_wrap, encrypted_x2_wrap,
-                        PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB2, factor
-                );
-                encoded_x.insert(encoded_x.end(), encoded_x_wrap.begin(), encoded_x_wrap.end());
-                encoded_w.insert(encoded_w.end(), encoded_w_wrap.begin(), encoded_w_wrap.end());
-                encrypted_x2.insert(encrypted_x2.end(), encrypted_x2_wrap.begin(), encrypted_x2_wrap.end());
 #endif
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
                 Iface::generateFCTriplesCheetah(ios,
@@ -661,81 +645,12 @@ void generateLayerDummyTriples(type** a,
             y_index_counter += p.y_size_per_batch * p.batchSize;
 
         }
-#if CHEETAH_CONV_TYPE == 0
-        size_t cur = 0;
-        if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
-            std::vector<std::vector<seal::Ciphertext>> M;
-            std::vector<gemini::Tensor<uint64_t>> C;
-            ////////////////////////////////////////////////////////////////////
-            // 2. Phase
-            ////////////////////////////////////////////////////////////////////
-            for(size_t n = 0; n < params.size(); n++) {
-                auto p = params[n];
-
-                std::vector<std::vector<seal::Plaintext>> encoded_x_wrap(encoded_x.begin() + cur, encoded_x.begin() + cur + p.batchSize);
-                std::vector<std::vector<std::vector<seal::Plaintext>>> encoded_w_wrap(encoded_w.begin() + cur, encoded_w.begin() + cur + p.batchSize);
-                std::vector<std::vector<seal::Ciphertext>> encrypted_x2_wrap(encrypted_x2.begin() + cur, encrypted_x2.begin() + cur + p.batchSize);
-                cur += p.batchSize;
-
-                Utils::ConvParm conv{
-                    .batchsize = p.batchSize,
-                    .ic = p.din,
-                    .iw = p.inw,
-                    .ih = p.inh,
-                    .fc = p.din,
-                    .fw = p.ww,
-                    .fh = p.wh,
-                    .n_filters = p.dout,
-                    .stride = p.stride,
-                    .padding = p.padding,
-                };
-
-                std::vector<std::vector<seal::Ciphertext>> M_wrap(p.batchSize);
-                std::vector<gemini::Tensor<uint64_t>> C_wrap(p.batchSize);
-
-                Iface::generateConvTriplesCheetahPhase2(ios, hom_conv,
-                        encrypted_x2_wrap, encoded_x_wrap, encoded_w_wrap, C_wrap, M_wrap, conv,
-                        PARTY + 1, CHEETAH_THREADS,
-                        Utils::PROTO::AB2, factor);
-                M.insert(M.end(), M_wrap.begin(), M_wrap.end());
-                C.insert(C.end(), C_wrap.begin(), C_wrap.end());
-            }
-            encoded_x.clear();
-            encoded_w.clear();
-            encrypted_x2.clear();
-
-            ////////////////////////////////////////////////////////////////////
-            // 3. Phase
-            ////////////////////////////////////////////////////////////////////
-            y_index_counter = 0;
-            cur = 0;
-            for(size_t n = 0; n < params.size(); n++) {
-                auto p = params[n];
-
-                std::vector<std::vector<seal::Ciphertext>> M_wrap(M.begin() + cur, M.begin() + cur + p.batchSize);
-                std::vector<gemini::Tensor<uint64_t>> C_wrap(C.begin() + cur, C.begin() + cur + p.batchSize);
-                cur += p.batchSize;
-
-                Utils::ConvParm conv{
-                    .batchsize = p.batchSize,
-                    .ic = p.din,
-                    .iw = p.inw,
-                    .ih = p.inh,
-                    .fc = p.din,
-                    .fw = p.ww,
-                    .fh = p.wh,
-                    .n_filters = p.dout,
-                    .stride = p.stride,
-                    .padding = p.padding,
-                };
-
-                Iface::generateConvTriplesCheetahPhase3(ios, hom_conv, M_wrap,
-                        uint_y + y_index_counter, C_wrap, conv, PARTY + 1,
-                        CHEETAH_THREADS, Utils::PROTO::AB2, factor);
-
-                y_index_counter += p.y_size_per_batch * p.batchSize;
-            }
-        }
+#if CHEETAH_CONV_TYPE == 1
+        Iface::generateConvTriplesCheetah(ios, hom_conv, total_batches, parms,
+                PARTY == 1 ? uint_x : nullptr, PARTY == 0 ? uint_w : nullptr,
+                uint_y, Utils::PROTO::AB2, PARTY + 1,
+                CHEETAH_THREADS, factor
+        );
 #endif
     } else {
         uint64_t c_index = 0;
