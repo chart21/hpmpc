@@ -341,6 +341,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define CHEETAH_PORT_OFFSET 10'000  // Port offset for cheetah
 #endif
 
+#ifndef CHEETAH_CONV_TYPE
+#define CHEETAH_CONV_TYPE 1  // 1: standard, 0: experimental
+#endif
+
 #ifndef CHEETAH_THREADS
 #define CHEETAH_THREADS 32  // Number of threads to use for Cheetah triples generation
 #endif
