@@ -147,7 +147,7 @@ void generateArithmeticDummyTriples(type a[],
     unorthogonalize_arithmetic(b, uint_b, num_triples / (DATTYPE / bitlength));
     UINT_TYPE* uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
 
-    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB, PROCESS_NUM);
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB, PROCESS_NUM);
 
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
@@ -261,7 +261,7 @@ void generateArithmeticAB2DummyTriples(type a[],
         uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
     }
 
-    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, 1, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB2, PROCESS_NUM);
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB2, PROCESS_NUM);
 
     // convert UINT triple to SIMD type
     if (vectorization_factor != 1) {
@@ -579,11 +579,8 @@ void generateLayerDummyTriples(type** a,
 
     if(factor == 1) { // No need to unvectorize
 #if CHEETAH_CONV_TYPE == 1
-        gemini::HomConv2DSS hom_conv;
         std::vector<Utils::ConvParm> parms(params.size());
         size_t total_batches = 0;
-        if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>)
-            hom_conv = Iface::setupConv(ios, PARTY + 1);
 #endif
         UINT_TYPE** uint_w = (UINT_TYPE**) a;
         UINT_TYPE** uint_x = (UINT_TYPE**) b;
@@ -646,11 +643,13 @@ void generateLayerDummyTriples(type** a,
 
         }
 #if CHEETAH_CONV_TYPE == 1
-        Iface::generateConvTriplesCheetah(ios, hom_conv, total_batches, parms,
-                PARTY == 1 ? uint_x : nullptr, PARTY == 0 ? uint_w : nullptr,
-                uint_y, Utils::PROTO::AB2, PARTY + 1,
-                CHEETAH_THREADS, factor
-        );
+        if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
+            Iface::generateConvTriplesCheetah(ios, total_batches, parms,
+                    PARTY == 1 ? uint_x : nullptr, PARTY == 0 ? uint_w : nullptr,
+                    uint_y, Utils::PROTO::AB2, PARTY + 1,
+                    CHEETAH_THREADS, factor
+            );
+        }
 #endif
     } else {
         uint64_t c_index = 0;
