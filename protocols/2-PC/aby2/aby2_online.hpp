@@ -349,9 +349,6 @@ class ABY2_ONLINE_Share
         /* m = ADD(SUB(TRUNC(m), OP_MULT(OP_SHIFT_LOG_RIGHTF(m, BITLENGTH -1), PROMOTE(UINT_TYPE(1) << (BITLENGTH -
          * 1))))   ,l); // x2^t - (x2 > 1) * 2^l */
 #endif
-#if A2B_OPT == 1
-        // Store m as mx for S(P), lx will be l
-#endif
         send_to_live(PNEXT, m);
     }
     
@@ -375,6 +372,8 @@ class ABY2_ONLINE_Share
         m = ADD(m, lxly);
         mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
     }
+    
+
 
     template <typename func_add, typename func_sub>
     void complete_mult(func_add ADD, func_sub SUB)

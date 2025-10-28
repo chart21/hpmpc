@@ -26,6 +26,8 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
     using sint = sint_t<A>;
     Bitset* s1 = new Bitset[len];
     Bitset* s2 = new Bitset[len];
+#if A2B_ROUND_OPT_SIM == 0 && A2B_ONLINE_OPT_SIM == 0
+    //Skip if we are simulating A2B with round optimization
     for (int i = 0; i < len; i++)
     {
         s1[i] = Bitset::prepare_A2B_S1(bm, (S*)val[i].get_share_pointer());
@@ -37,6 +39,15 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
         s1[i].complete_A2B_S1();
         s2[i].complete_A2B_S2();
     }
+#endif
+#if ABY2_ONLINE_OPT_SIM == 1 //Simulate len boolean triples consumption for A2B
+    for (int i = 0; i < len; i++)
+    {
+        Bitset dummy_a, dummy_b, dummy_c;
+        dummy_c = dummy_a.prepare_dot(dummy_b);
+    }
+#endif
+
 
     /* for(int i = 0; i < len; i++) */
     /* { */

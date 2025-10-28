@@ -260,6 +260,14 @@ int base_port = BASE_PORT;  // temporary solution
 #define FUSE_CONV_BN_SIM 0  // Fuse Convolution and BatchNorm into one operation via multi-input optimization (Only Simulated)
 #endif
 
+#ifndef A2B_ROUND_OPT_SIM
+#define A2B_ROUND_OPT_SIM 0  // Simulate round-optimized A2B, by reconstructing both ab + lc and ab xor lc in the Online Phase
+#endif
+
+#ifndef A2B_ONLINE_OPT_SIM
+#define A2B_ONLINE_OPT_SIM 0  // Simulate online-optimized A2B, by calculating [lc]^B in preprocessing to skip communication in the Online Phase
+#endif
+
 #ifndef OPTIMIZED_BIT_INJECTION_RELU 
 #define OPTIMIZED_BIT_INJECTION_RELU 1  // Use optimized bit injection for ReLU
 #endif

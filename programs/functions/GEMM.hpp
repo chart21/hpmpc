@@ -180,7 +180,11 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if CONV_TRIPLES == 1 && PROTOCOL == 4
                         // C[row + jj].mask_and_send_dot_without_trunc_with_triple();
+#if A2B_ROUND_OPT_SIM == 1
+                        C[row + jj].mask_and_send_dot(); // Simulate second send for XOR Share
+#endif
                         C[row + jj].mask_and_send_dot_without_trunc_with_triple(row + jj);
+
 #else
                         C[row + jj].mask_and_send_dot_without_trunc();
 #endif
@@ -264,6 +268,9 @@ void complete_GEMM_CPU(T* C, const int m, const int p)
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
                     C[row + jj].complete_mult_without_trunc();
 #else
+#if A2B_ROUND_OPT_SIM == 1
+                    C[row + jj].complete_mult(); // simulate second receive for XOR Share
+#endif
                     C[row + jj].complete_mult();
 #endif
 #else
