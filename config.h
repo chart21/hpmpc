@@ -257,7 +257,7 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef FUSE_CONV_BN
-#define FUSE_CONV_BN 0  // Fuse Convolution and BatchNorm into one operation via secret-sharing optimization
+#define FUSE_CONV_BN 1  // Fuse Convolution and BatchNorm into one operation via secret-sharing optimization
 #endif
 
 #ifndef FUSE_CONV_BN_SIM
