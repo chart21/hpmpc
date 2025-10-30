@@ -257,7 +257,7 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef FUSE_CONV_BN
-#define FUSE_CONV_BN 1  // Fuse Convolution and BatchNorm into one operation via secret-sharing optimization
+#define FUSE_CONV_BN 0  // Fuse Convolution and BatchNorm into one operation via secret-sharing optimization
 #endif
 
 #ifndef FUSE_CONV_BN_SIM
@@ -342,7 +342,7 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef CHEETAH_CONV_TYPE
-#define CHEETAH_CONV_TYPE 0  // 0: standard, 1: experimental
+#define CHEETAH_CONV_TYPE 1  // 0: standard, 1: experimental
 #endif
 
 #ifndef CHEETAH_THREADS
