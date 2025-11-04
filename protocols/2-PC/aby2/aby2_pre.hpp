@@ -440,8 +440,8 @@ class ABY2_PRE_Share
             ABY2_PRE_Share b1{SET_ALL_ZERO()};
             ABY2_PRE_Share b2{lb[i]};
 #endif
-            b2.generate_lxly2_triple(
-                b1,
+            b1.generate_lxly2_triple(
+                b2,
                 OP_ADD);  // communication can be cut in half if triple of type x(P_0),y(P_1),[z] is used
             // b1.generate_triple(
             //     b2,
@@ -518,6 +518,10 @@ class ABY2_PRE_Share
             triple_type[0][triple_type_index[0]++] = CaseAND;   // yz
             triple_type[0][triple_type_index[0]++] = CaseAND;   // yw
             triple_type[1][triple_type_index[1]++] = CaseDot4Bool;   // xyzw
+            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
+            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
+            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
+            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
         }
         else
         {
@@ -528,6 +532,10 @@ class ABY2_PRE_Share
             triple_type[0][triple_type_index[0]++] = CaseMult;   // yz
             triple_type[0][triple_type_index[0]++] = CaseMult;   // yw
             triple_type[1][triple_type_index[1]++] = CaseDot4Arithmetic;   // xyzw
+            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
+            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
+            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
+            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
         }
 
         store_output_share_ab(l, ADD, helper_index);                   // xzw
@@ -1331,6 +1339,10 @@ static void get_fc_triples_from_file()
                     lxly_a[1][arithmetic_triple_counter[1]++] = lzlw_lx;
                     lxly_a[1][arithmetic_triple_counter[1]++] = lzlw_ly;
                     lxly_a[1][arithmetic_triple_counter[1]++] = lxly_lzlw;
+                    break;
+                }
+                case CaseTripleAlreadyConsumed:  // Triple already consumed by previous case
+                {
                     break;
                 }
             }

@@ -276,8 +276,10 @@ void init_beaverAB2(int rounds)
 
 void init_beaverAB2C(int rounds)
 {
-    arithmetic_ab2_triple_c = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
-    boolean_ab2_triple_c = new DATATYPE[num_ab2_boolean_triples[rounds] ];
+    if(num_ab2_arithmetic_triples[rounds] > 0)
+        arithmetic_ab2_triple_c = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
+    if(num_ab2_boolean_triples[rounds] > 0)
+        boolean_ab2_triple_c = new DATATYPE[num_ab2_boolean_triples[rounds] ];
     // std::cout << "Initialized beaver AB2 C for round " + std::to_string(rounds) + " with " + std::to_string(num_ab2_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_ab2_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 #else
@@ -316,8 +318,16 @@ void deinit_beaverAB2()
 void deinit_beaverAB2C()
 {
     // print("Deleting beaver AB2 C arrays.");
-    delete[] arithmetic_ab2_triple_c;
-    delete[] boolean_ab2_triple_c;
+    if(arithmetic_ab2_triple_c != nullptr) 
+    {
+        delete[] arithmetic_ab2_triple_c;
+        arithmetic_ab2_triple_c = nullptr;
+    }
+    if(boolean_ab2_triple_c != nullptr)
+    {
+        delete[] boolean_ab2_triple_c;
+        boolean_ab2_triple_c = nullptr;
+    }
 }
 
 

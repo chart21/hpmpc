@@ -395,9 +395,9 @@ void finalize_(std::string* ips)
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 #if BEAVER == 1 && PRE == 1
     if (preprocessed_outputs_bool == nullptr)
-        preprocessed_outputs_bool = new DATATYPE* [1] { nullptr };
+        preprocessed_outputs_bool = new DATATYPE* [2] { nullptr };
     if (preprocessed_outputs_arithmetic == nullptr)
-        preprocessed_outputs_arithmetic = new DATATYPE* [1] { nullptr };
+        preprocessed_outputs_arithmetic = new DATATYPE* [2] { nullptr };
     if (preprocessed_outputs_bool[0] == nullptr)
     {
         preprocessed_outputs_bool[0] = new DATATYPE[preprocessed_outputs_bool_index[0]];

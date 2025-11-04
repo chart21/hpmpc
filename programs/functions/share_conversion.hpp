@@ -272,11 +272,15 @@ static void pack_additive(const Additive_Share<Datatype, Share>* input,
     int counter = 0;
     while (m > (BITLENGTH - 1))
     {
-        tmp[counter++] = sint::load_shares(input + counter * BITLENGTH);
+        tmp[counter] = sint::load_shares(input + counter * BITLENGTH);
+        counter++;
         m -= BITLENGTH;
     }
     if (m > 0)
-        tmp[counter++] = sint::load_shares(m, input + counter * BITLENGTH);
+    {
+        tmp[counter] = sint::load_shares(m, input + counter * BITLENGTH);
+        counter++;
+    }
     op(tmp, tmp_output, counter);
     counter = 0;
     m = len;
@@ -313,11 +317,15 @@ static void pack_additive_inplace(const Additive_Share<Datatype, Share>* input,
     int counter = 0;
     while (m > (BITLENGTH - 1))
     {
-        tmp[counter++] = sint::load_shares(input + counter * BITLENGTH);
+        tmp[counter] = sint::load_shares(input + counter * BITLENGTH);
+        counter++;
         m -= BITLENGTH;
     }
     if (m > 0)
-        tmp[counter++] = sint::load_shares(m, input + counter * BITLENGTH);
+    {
+        tmp[counter] = sint::load_shares(m, input + counter * BITLENGTH);
+        counter++;
+    }
     op(tmp, counter);
     counter = 0;
     m = len;
@@ -349,11 +357,15 @@ static void pack_additive_inplace(Additive_Share<Datatype, Share>* val, const in
     int counter = 0;
     while (m > BITLENGTH - 1)
     {
-        tmp[counter++] = sint::load_shares(val + counter * BITLENGTH);
+        tmp[counter] = sint::load_shares(val + counter * BITLENGTH);
+        counter++;
         m -= BITLENGTH;
     }
     if (m > 0)
-        tmp[counter++] = sint::load_shares(m, val + counter * BITLENGTH);
+    {
+        tmp[counter] = sint::load_shares(m, val + counter * BITLENGTH);
+        counter++;
+    }
     /* RELU_range_in_place<rm,rk,Share>(tmp, counter); */
     op(tmp, counter);
     counter = 0;
@@ -389,11 +401,15 @@ static void pack_additive_inplace(Additive_Share<Datatype, Share>* val,
     int counter = 0;
     while (m > BITLENGTH - 1)
     {
-        tmp[counter++] = sint::load_shares(val + counter * BITLENGTH);
+        tmp[counter] = sint::load_shares(val + counter * BITLENGTH);
+        counter++;
         m -= BITLENGTH;
     }
     if (m > 0)
-        tmp[counter++] = sint::load_shares(m, val + counter * BITLENGTH);
+    {
+        tmp[counter] = sint::load_shares(m, val + counter * BITLENGTH);
+        counter++;
+    }
     /* RELU_range_in_place<rm,rk,Share>(tmp, counter); */
     op(tmp, counter, fractiona_bits);
     counter = 0;

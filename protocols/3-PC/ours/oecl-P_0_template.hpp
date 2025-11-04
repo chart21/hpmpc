@@ -47,7 +47,8 @@ class OECL0_Share
     template <typename func_add, typename func_sub, typename func_mul>
     OECL0_Share prepare_dot_a_known(OECL0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-        return OECL0_Share(MULT(ADD(p1, p2), b.p1)); // la lb2
+        // return OECL0_Share(MULT(ADD(p1, p2), b.p2)); // la lb2
+        return OECL0_Share(MULT(p1, b.p2)); // la1 lb2 = la lb2 (since a is known)
     }
 #if FUSE_DOT != 1
     template <typename func_add, typename func_sub, typename func_mul>
