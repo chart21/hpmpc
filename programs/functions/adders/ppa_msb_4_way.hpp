@@ -1,6 +1,7 @@
 #pragma once
 #include "../../../datatypes/k_bitset.hpp"
 #include "../../../protocols/Protocols.h"
+//TODO: Could save around 25% of total 2PC boolean preprocessing by using A_KNOWN optimization for the first layer of gates
 template <int k, typename Share>
 class PPA_MSB_4Way
 {

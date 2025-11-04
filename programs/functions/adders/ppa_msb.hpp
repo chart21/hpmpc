@@ -1,7 +1,7 @@
 #pragma once
 #include "../../../datatypes/k_bitset.hpp"
 #include "../../../protocols/Protocols.h"
-
+//TODO: Could save around 25% of total 2PC boolean preprocessing by using A_KNOWN optimization for the first layer of gates
 template <int k, typename Share>
 class PPA_MSB
 {
@@ -84,7 +84,7 @@ class PPA_MSB
                 {
                     P[i] = a[i] ^ b[i];
                     /* G[i - 1] = a[i - 1] & b[i - 1]; */
-                    G[i] = a[i] & b[i];  // possibly wrong and above is correct
+                    G[i] = a[i] & b[i];  // possibly wrong and above is correct, Mini optimization: a_known. 
                 }
                 level++;
                 break;
