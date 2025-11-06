@@ -380,7 +380,7 @@ void finalize_(std::string* ips)
             NEW(DATATYPE[sending_args[t].elements_to_send[0]]);  // Allocate memory for first round
     }
 
-#if MAL == 1 && PRE == 0
+#if MAL == 1 && (PRE == 0 || SKIP_PRE == 1)
     for (int t = 0; t < (num_players * player_multiplier); t++)
     {
 #if VERIFY_BUFFER > 0
