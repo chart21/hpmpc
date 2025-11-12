@@ -795,9 +795,11 @@ class ABY2_ONLINE_Share
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
             for (int j = 0; j < factor; j++)
                 temp[j] = y_p1[j * ySize + i];
-            orthogonalize_arithmetic(temp, &Y[i].m, 1)
+            orthogonalize_arithmetic(temp, &Y[i].m, 1);
+#if CONV_TRIPLES == 0
             auto lxly = retrieve_output_share_arithmetic();
             Y[i].m = OP_ADD(Y[i].m, lxly);
+#endif
         }
         delete[] w_p1;
         delete[] x_p1;
@@ -858,8 +860,10 @@ class ABY2_ONLINE_Share
                 temp[j] = -y_p1[j * ySize + i] + y_p1_2[j * ySize + i];
 #endif
             orthogonalize_arithmetic(temp, &Y[i].m, 1);
+#if CONV_TRIPLES == 0
             auto lxly = retrieve_output_share_arithmetic();
             Y[i].m = OP_SUB(Y[i].m, lxly);
+#endif
         }
 
         delete[] x_p1;
@@ -928,9 +932,11 @@ class ABY2_ONLINE_Share
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
             for (int j = 0; j < factor; j++)
                 temp[j] = y_p1[j * ySize + i];
-            orthogonalize_arithmetic(temp, &Y[i].m, 1)
+#if CONV_TRIPLES == 0
+            orthogonalize_arithmetic(temp, &Y[i].m, 1);
             auto lxly = retrieve_output_share_arithmetic();
             Y[i].m = OP_ADD(Y[i].m, lxly);
+#endif
         }
         delete[] w_p1;
         delete[] x_p1;
@@ -985,8 +991,10 @@ class ABY2_ONLINE_Share
                 temp[j] = -y_p1[j * ySize + i] - y_p1_2[j * ySize + i];
 #endif
             orthogonalize_arithmetic(temp, &Y[i].m, 1);
+#if CONV_TRIPLES == 0
             auto lxly = retrieve_output_share_arithmetic();
             Y[i].m = OP_SUB(Y[i].m, lxly);
+#endif
         }
 
         delete[] x_p1;

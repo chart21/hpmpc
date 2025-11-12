@@ -551,6 +551,9 @@ class ABY2_init
                         int dilation = 1,
                         bool ab2 = false)
     {
+#if CONV_TRIPLES == 0
+        const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+        const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
         const int m = out_h * out_w * batchSize;
         const int k = wh * ww * din;
         const int n = dout;
@@ -560,6 +563,7 @@ class ABY2_init
         else
             for (int i = 0; i < m * n * k; i++)
                 ABY2_init().generate_lxly_triple(OP_ADD);
+#endif
     }
 
 #elif USE_CUDA_GEMM == 4
@@ -579,6 +583,7 @@ class ABY2_init
                         int dilation = 1,
                         bool ab2 = false)
     {
+#if CONV_TRIPLES == 0
         const int m = out_h * out_w * batchSize;
         const int k = wh * ww * din;
         const int n = dout;
@@ -588,6 +593,7 @@ class ABY2_init
         else
             for (int i = 0; i < m * n * k; i++)
                 ABY2_init().generate_lxly_triple(OP_ADD);
+#endif
     }
 #endif
 #if USE_CUDA_GEMM > 0

@@ -292,13 +292,13 @@ void send_GEMM_GPU(T* C, const int m, const int p)
     {
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
-#if FC_TRIPLES == 1
+#if CONV_TRIPLES == 1
         C[j].mask_and_send_dot_without_trunc_with_triple();
 #else
         C[j].mask_and_send_dot_without_trunc();
 #endif
 #else
-#if FC_TRIPLES == 1
+#if CONV_TRIPLES == 1
         C[j].mask_and_send_dot_with_triple();
 #else
         C[j].mask_and_send_dot();

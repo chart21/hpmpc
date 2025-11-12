@@ -1509,19 +1509,19 @@ static void get_fc_triples_from_file()
 
 #else
 
-    static void GEMM(ABY2_PRE_Share* a, ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m, int n, int k, bool a_fixed = false)
+    static void GEMM(const ABY2_PRE_Share* a, const ABY2_PRE_Share* b, ABY2_PRE_Share* c, int m, int n, int k, bool a_fixed = false)
     {
-        if (a_fixed == true)
-        {
-            const int factor = DATTYPE / BITLENGTH;
-            if (factor > 1)
-                for (int i = 0; i < m * k; i++)
-                {
-                    alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
-                    unorthogonalize_arithmetic(&a[i].l, temp, 1);
-                    a[i].l = PROMOTE(temp[0]);
-                }
-        }
+        // if (a_fixed == true)
+        // {
+        //     const int factor = DATTYPE / BITLENGTH;
+        //     if (factor > 1)
+        //         for (int i = 0; i < m * k; i++)
+        //         {
+        //             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
+        //             unorthogonalize_arithmetic(&a[i].l, temp, 1);
+        //             a[i].l = PROMOTE(temp[0]);
+        //         }
+        // }
         for (int i = 0; i < m; i++)
         {
             for (int j = 0; j < n; j++)
@@ -1538,66 +1538,41 @@ static void get_fc_triples_from_file()
 
 #endif
 #endif
-};
 
 #if USE_CUDA_GEMM == 2 || USE_CUDA_GEMM == 4
 
-
-/* struct CONV2D_args */
-/* { */
-/*     int batchSize; */
-/*     int inh; */
-/*     int inw; */
-/*     int din; */
-/*     int dout; */
-/*     int wh; */
-/*     int ww; */
-/*     int padding; */
-/*     int stride; */
-/*     int dilation; */
-/*     int m; */
-/*     int n; */
-/*     int k; */
-/* }; */
-
-/* std::queue<CONV2D_args> CONV2D_args_queue; */
-
-/* static void COMPLETE_CONV_2D(const ABY2_PRE_Share* X, const ABY2_PRE_Share* W, ABY2_PRE_Share* Y, int batchSize, int
- * inh, int inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation = 1) */
-/* { */
-/* } */
-
-template <typename Datatype>
-static void ABY2_PRE_Share<Datatype>::CONV_2D(const ABY2_PRE_Share* X,
-                                              const ABY2_PRE_Share* W,
-                                              ABY2_PRE_Share* Y,
-                                              int batchSize,
-                                              int inh,
-                                              int inw,
-                                              int din,
-                                              int dout,
-                                              int wh,
-                                              int ww,
-                                              int padding,
-                                              int stride,
-                                              int dilation = 1)
+static void CONV_2D(const ABY2_PRE_Share* X,
+                          const ABY2_PRE_Share* W,
+                          ABY2_PRE_Share* Y,
+                          int batchSize,
+                          int inh,
+                          int inw,
+                          int din,
+                          int dout,
+                          int wh,
+                          int ww,
+                          int padding,
+                          int stride,
+                          int dilation = 1)
 {
+#if CONV_TRIPLES == 0
     const int factor = DATTYPE / BITLENGTH;
+    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
+    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
     const int xSize = inh * inw * din * batchSize;
     const int wSize = wh * ww * din * dout;
     const int ySize = out_h * out_w * dout * batchSize;
-    const int out_h = (inh + 2 * padding - wh - (wh - 1) * (dilation - 1)) / stride + 1;
-    const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
 
     const int m = out_h * out_w * batchSize;
     const int k = wh * ww * din;
     const int n = dout;
     batchSize *= factor;
 
-    X_col = new Datatype[k * m];
+    auto X_col = new ABY2_PRE_Share[m * k];
     im2col_l(X, din, inh, inw, wh, stride, padding, X_col);
-    ABY2_PRE_Share<T>::GEMM(X_col, W, Y, m, n, k, true);
+    GEMM(X_col, W, Y, m, n, k, true);
     delete[] X_col;
+#endif
 }
 #endif
 
@@ -2209,3 +2184,5 @@ static void ABY2_PRE_Share<Datatype>::CONV_2D(const ABY2_PRE_Share* X,
 //#endif
 
 #endif
+};
+
