@@ -1,17 +1,12 @@
 #pragma once
 
 #include <cuda_runtime.h>
+#include "cutlass/conv/conv2d_problem_size.h"
 #include <cutlass/conv/device/implicit_gemm_convolution.h>
-#include <cutlass/conv/kernel/default_conv2d_dgrad.h>
 #include <cutlass/conv/kernel/default_conv2d_fprop.h>
-#include <cutlass/conv/kernel/default_conv2d_wgrad.h>
 #include <cutlass/cutlass.h>
-#include <cutlass/gemm/device/gemm.h>
 #include <cutlass/util/device_memory.h>
-#include <thrust/device_vector.h>
 #include <utils.cuh>
-#include <math.h>
-#include <stdlib.h>
 
 template <typename T>
 inline cutlass::TensorRef<T, cutlass::layout::TensorNHWC> toTensorRef(T* ptr, int n, int h, int w, int c)

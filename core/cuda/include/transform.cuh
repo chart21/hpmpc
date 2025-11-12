@@ -1,9 +1,5 @@
 #pragma once
-#include "cutlass/cutlass.h"
-#include "cutlass/layout/tensor.h"
-#include "cutlass/numeric_types.h"
-#include "cutlass/tensor_coord.h"
-#include "cutlass/tensor_ref.h"
+#include <cuda_runtime.h>
 #include <cutlass/util/device_nchw_to_nhwc.h>
 #include <cutlass/util/device_nhwc_to_nchw.h>
 
