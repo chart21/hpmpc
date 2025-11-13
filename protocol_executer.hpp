@@ -84,6 +84,7 @@ void init_circuit(std::string ips[])
     num_ab2_boolean_triples.push_back(0);
     num_ab2_arithmetic_triples.push_back(0);
     num_ab2_arithmetic_triples.push_back(0);
+    num_boolean_addition_triples.push_back(0);
     // boolean_triple_index.push_back(0);
     // boolean_triple_index.push_back(0);
     // arithmetic_triple_index.push_back(0);
@@ -141,6 +142,9 @@ void beaver(std::string ips[])
     init_ConvAB();
     init_BatchNorm2DAB();
     init_FullyConnectedAB();
+#if A2B_ONLINE_OPT_SIM == 1
+    init_booleanAdditionBeaverAB();
+#endif
 #else
     init_beaver();
 #endif

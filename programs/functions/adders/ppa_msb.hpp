@@ -84,14 +84,24 @@ class PPA_MSB
                 {
                     P[i] = a[i] ^ b[i];
                     /* G[i - 1] = a[i - 1] & b[i - 1]; */
-                    G[i] = a[i] & b[i];  // possibly wrong and above is correct, Mini optimization: a_known. 
+#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1 
+                    G[i] = a[i].mult_a_known_to_evaluators(b[i]);
+                    G[i].prepare_remask();
+
+#else
+                    G[i] = a[i] & b[i];  
+#endif
                 }
                 level++;
                 break;
             case -1:
                 for (int i = 1; i < k; ++i)
                     // G[i - 1].complete_and();
-                    G[i].complete_and();  // possibly wrong and above is correct
+#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+                    G[i].complete_remask(); 
+#else
+                    G[i].complete_and();  
+#endif
 
                 level++;
                 prepare_step();

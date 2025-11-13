@@ -46,6 +46,33 @@ class ABY2_ONLINE_Share
 #endif
         return c;
     }
+    
+    template <typename func_mul>
+    ABY2_ONLINE_Share mult_a_known_to_evaluators(const ABY2_ONLINE_Share b,
+                                                func_mul MULT) const
+    {
+        return ABY2_ONLINE_Share(MULT(m, b.m), MULT(m, b.l));
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            auto new_l = getRandomVal(PSELF);
+            send_to_live(PNEXT, SUB(new_l, l)); // replace old mask with new mask
+            m = ADD(SUB(m, l),new_l); //mv' = mv - lvi + lni
+            l = new_l; // lvi' = lni
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+            auto old_l = receive_from_live(PNEXT);
+            m = ADD(m, old_l); // lnj + lvj to completely reconstruct
+        }
+
+
+
+
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
         ABY2_ONLINE_Share local_mult_and_trunc(const Datatype b,
                                         func_mul MULT,
@@ -392,6 +419,19 @@ class ABY2_ONLINE_Share
 
     static void prepare_A2B_S1(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Share out[])
     {
+#if A2B_ONLINE_OPT_SIM == 1
+        Datatype temp_p1[BITLENGTH];
+        for (int i = 0; i < BITLENGTH; i++)
+            temp_p1[i] = in[i].m;  // set first share to mv
+        alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+        unorthogonalize_arithmetic(temp_p1, temp2);
+        orthogonalize_boolean(temp2, temp_p1);
+        for (int i = m; i < k; i++)
+        {
+            out[i - m].l = SET_ALL_ZERO();
+            out[i - m].m = temp_p1[i];
+        }
+#else
 #if PARTY == 0
         Datatype temp_p1[BITLENGTH];
         for (int i = 0; i < BITLENGTH; i++)
@@ -409,10 +449,18 @@ class ABY2_ONLINE_Share
             send_to_live(PNEXT, out[i - m].m);
         }
 #endif
+#endif
     }
 
     static void prepare_A2B_S2(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Share out[])
     {
+#if A2B_ONLINE_OPT_SIM == 1
+        for (int i = m; i < k; i++)
+        {
+            out[i - m].l = retrieve_output_share_bool(); 
+            out[i - m].m = SET_ALL_ZERO(); // v = lv = 0 xor lv1 xor lv2
+        }
+#else
 #if PARTY == 1
         Datatype temp_p1[BITLENGTH];
         for (int i = 0; i < BITLENGTH; i++)
@@ -429,10 +477,12 @@ class ABY2_ONLINE_Share
             out[i - m].m = OP_XOR(temp_p1[i], out[i - m].l);
         }
 #endif
+#endif
     }
 
     static void complete_A2B_S1(int k, ABY2_ONLINE_Share out[])
     {
+#if A2B_ONLINE_OPT_SIM == 0
 #if PARTY == 1
         for (int i = 0; i < k; i++)
         {
@@ -440,16 +490,19 @@ class ABY2_ONLINE_Share
             out[i].l = SET_ALL_ZERO();
         }
 #endif
+#endif
     }
 
     static void complete_A2B_S2(int k, ABY2_ONLINE_Share out[])
     {
+#if A2B_ONLINE_OPT_SIM == 0
 #if PARTY == 0
         for (int i = 0; i < k; i++)
         {
             out[i].m = retrieve_output_share();
             out[i].l = SET_ALL_ZERO();
         }
+#endif
 #endif
     }
 

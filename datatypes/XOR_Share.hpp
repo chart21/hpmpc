@@ -151,6 +151,26 @@ class XOR_Share : public Share_Type
         return XOR_Share(Share_Type::prepare_dot_ex_lxly_a_known(b, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }
 #endif
+    
+#endif
+
+#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+
+    XOR_Share mult_a_known_to_evaluators(const XOR_Share b) const
+    {
+        return XOR_Share(Share_Type::mult_a_known_to_evaluators(b, std::bit_and<Datatype>()));    
+    }
+
+    void prepare_remask()
+    {
+        Share_Type::prepare_remask(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
+    }
+
+    void complete_remask()
+    {
+        Share_Type::complete_remask(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
+    }
+
 #endif
 
 };

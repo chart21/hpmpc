@@ -110,6 +110,7 @@ struct FullyConnectedParameter
 #define generateConvTriples generateLayerDummyTriples
 #define generateFCTriples generateLayerDummyTriples
 #define generateBatchNorm2DTriples generateLayerDummyTriples
+#define generateBooleanAdditionTriples generateBooleanAdditionDummyTriples
 
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
 // Input: ip and port of the other party to connect to
@@ -159,6 +160,32 @@ void generateArithmeticDummyTriples(type a[],
 // Output: [c] will be filled with triples
 template <typename type>
 void generateBooleanDummyTriples(type a[],
+                                 type b[],
+                                 type c[],
+                                 int bitlength,
+                                 uint64_t num_triples,
+                                 std::string ip,
+                                 int port,
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+{
+    if(num_triples == 0) return;
+    //reinterpret SIMD bitstream as uint8 bitstream
+    uint8_t* uint_a = (uint8_t*) a;
+    uint8_t* uint_b = (uint8_t*) b;
+    uint8_t* uint_c = (uint8_t*) c;
+    
+    for (uint64_t i = 0; i < num_triples / 8; i++)
+    {
+       uint_c[i] = uint_a[i] ^ uint_b[i]; // dummy assignment, replace with actual triple generation
+    }
+
+}
+
+// Input: array of boolean triple shares [a], [b], [c] with size num_triples
+// Input: ip and port of the other party to connect to
+// Output: [c] will be filled with shares of a + b
+template <typename type>
+void generateBooleanAdditionDummyTriples(type a[],
                                  type b[],
                                  type c[],
                                  int bitlength,
@@ -363,6 +390,7 @@ void generateLayerDummyTriples(type** a,
 #define generateConvTriples generateFakeLayerTriples
 #define generateFCTriples generateFakeLayerTriples
 #define generateBatchNorm2DTriples generateFakeLayerTriples
+#define generateBooleanAdditionTriples generateFakeBooleanAdditionTriples
 
 template <typename type>
 void generateFakeArithmeticTriples(type a[],
@@ -399,6 +427,17 @@ void generateFakeAB2ArithmeticTriples(type a[],
 
 template <typename type>
 void generateFakeAB2BooleanTriples(type a[],
+                                type b[],
+                                type c[],
+                                int bitlength,
+                                uint64_t num_triples,
+                                std::string ip,
+                                int port)
+{
+}
+
+    template <typename type>
+void generateFakeBooleanAdditionTriples(type a[],
                                 type b[],
                                 type c[],
                                 int bitlength,

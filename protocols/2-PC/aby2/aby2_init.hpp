@@ -106,6 +106,25 @@ class ABY2_init
 #endif
         return ABY2_init();
     }
+    
+    template <typename func_mul>
+    ABY2_init mult_a_known_to_evaluators(const ABY2_ONLINE_Share b,
+                                                func_mul MULT) const
+    {
+        return ABY2_init();
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            send_to_(PNEXT);
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+            receive_from_(PNEXT);
+        }
 
     template <typename func_add, typename func_sub>
     void complete_public_mult_fixed(func_add ADD, func_sub SUB)
@@ -425,7 +444,7 @@ class ABY2_init
 #if SKIP_PRE == 1 && LOAD_PREPROCESSING == 0
         return;
 #endif
-        total_num_boolean_output_triples.push_back(num_boolean_triples[0] + num_ab2_boolean_triples[0]);
+        total_num_boolean_output_triples.push_back(num_boolean_triples[0] + num_ab2_boolean_triples[0] + num_boolean_addition_triples[0]);
         total_num_boolean_output_triples.push_back(num_boolean_triples[1] + num_ab2_boolean_triples[1]);
         total_num_arithmetic_output_triples.push_back(num_arithmetic_triples[0] + num_ab2_arithmetic_triples[0] + num_conv_c_triples + num_fc_c_triples + num_bc2D_c_triples);
         total_num_arithmetic_output_triples.push_back(num_arithmetic_triples[1] + num_ab2_arithmetic_triples[1]);

@@ -147,9 +147,29 @@ class PPA_MSB_4Way
     Share prepare_W3L1(Share x1, Share y1, Share x2, Share y2, Share x3, Share y3)
     {
         /* return (x1 & y1) ^ (x1^y1).prepare_and3(x2, y2) ^ (x1^y1).prepare_and4((x2^y2), x3, y3); */
+#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
         auto val = x1.prepare_dot(y1) ^ (x1 ^ y1).prepare_dot3(x2, y2) ^ (x1 ^ y1).prepare_dot4((x2 ^ y2), x3, y3);
         val.mask_and_send_dot();
-        return val;
+#else
+        auto y1y2 = y1.prepare_dot(y2); // dot2
+        auto y1y2y3 = y1.prepare_dot3(y2, y3);
+        auto x1x2 = x1.mult_a_known_to_evaluators(x2); //should work since l=0
+        auto t1 = x1.mult_a_known_to_evaluators(y1);
+        auto t2_1 = x1x2.mult_a_known_to_evaluators(y2);
+        auto t2_2 = x2.mult_a_known_to_evaluators(y1y2);
+        auto x1x2x3 = x1x2.mult_a_known_to_evaluators(x3);
+        auto x1x3 = x1.mult_a_known_to_evaluators(x3); 
+        auto x2x3 = x2.mult_a_known_to_evaluators(x3);
+        auto y2y3 = y2.prepare_dot(y3); //dot1
+        auto y1y3 = y1.prepare_dot(y3); //dot1
+        auto t3_1 = x1x2x3.mult_a_known_to_evaluators(y3);
+        auto t3_2 = x1x3.mult_a_known_to_evaluators(y2y3);
+        auto t3_3 = x2x3.mult_a_known_to_evaluators(y1y3);
+        auto t3_4 = x3.mult_a_known_to_evaluators(y1y2y3);
+        auto val = t1 ^ t2_1 ^ t2_2 ^ t3_1 ^ t3_2 ^ t3_3 ^ t3_4;
+        val.mask_and_send_dot();
+        return val; //cost saving: dot4, but 2 additional dot2
+#endif
     }
     void complete_W3L1(Share& val)
 
@@ -170,7 +190,32 @@ class PPA_MSB_4Way
     // p1p2p3
     Share prepare_B3L1_P(Share x1, Share y1, Share x2, Share y2, Share x3, Share y3)
     {
+#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+        //optimization: Y terms could be precomputed by preceeding B3L1_G gate
+        // auto y1y2 = y1.prepare_dot(y2); 
+        // auto y1y3 = y1.prepare_dot(y3); 
+        // auto y2y3 = y2.prepare_dot(y3);
+        // auto y1y2y3 = y1.prepare_dot3(y2, y3); 
+        Share y1y2; // Sim
+        Share y1y3; // Sim 
+        Share y2y3; // Sim 
+        Share y1y2y3; // Sim 
+        auto x1x2 = x1.mult_a_known_to_evaluators(x2); 
+        auto x2x3 = x2.mult_a_known_to_evaluators(x3);
+        auto x1x3 = x1.mult_a_known_to_evaluators(x3);
+        auto t1 = x1x2.mult_a_known_to_evaluators(x3); //x1x2x3
+        auto t2 = x1x2.mult_a_known_to_evaluators(y3); //x1x2y3
+        auto t3 = x1x3.mult_a_known_to_evaluators(y2); //x1y2x3
+        auto t4 = x2x3.mult_a_known_to_evaluators(y1); //x1y2y3
+        auto t5 = x2.mult_a_known_to_evaluators(y1y3);
+        auto t6 = x3.mult_a_known_to_evaluators(y1y2);
+        auto t7 = y1y2y3;
+        auto t8 = x1.mult_a_known_to_evaluators(y2y3);
+        auto val = t1 ^ t2 ^ t3 ^ t4 ^ t5 ^ t6 ^ t7 ^ t8;
+        val.mask_and_send_dot();
+#else
         return (x1 ^ y1).prepare_and3((x2 ^ y2), (x3 ^ y3));
+#endif
     }
 
     void complete_B3L1_P(Share& val) { val.complete_and3(); }
@@ -246,7 +291,8 @@ class PPA_MSB_4Way
                 v.push_back(prepare_B3L1_G(a[2], b[2], a[3], b[3], a[4], b[4]));
                 v.push_back(prepare_B3L1_P(a[2], b[2], a[3], b[3], a[4], b[4]));
                 v.push_back(prepare_W3L1(a[5], b[5], a[6], b[6], a[7], b[7]));
-
+// cost savings 2x4 1x dot3. Original cost: 3x dot3, 2 x dot 4
+// cost savings per GP block: 1x dot 4, 1x dot 3 from 1x dot 4, 2x dot 3 -> roughly 50%
                 break;
             case 1:
                 msb = prepare_W3_S(a[1], b[1], v[0], v[1], v[2]);

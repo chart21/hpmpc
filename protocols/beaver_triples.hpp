@@ -10,6 +10,7 @@
 std::vector<uint64_t> num_arithmetic_triples;
 std::vector<uint64_t> num_ab2_arithmetic_triples;
 std::vector<uint64_t> num_boolean_triples;
+std::vector<uint64_t> num_boolean_addition_triples;
 std::vector<uint64_t> num_ab2_boolean_triples;
 std::vector<uint64_t> triple_type_index;
 std::vector<uint8_t*> triple_type;
@@ -174,6 +175,32 @@ void init_beaverAB(int rounds)
     boolean_triple_b = new DATATYPE[num_boolean_triples[rounds] ];
     // std::cout << "Initialized beaver AB for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
+
+#if A2B_ONLINE_OPT_SIM == 1
+void init_booleanAdditionBeaverAB(int rounds)
+{
+    boolean_triple_a = new DATATYPE[num_boolean_addition_triples[rounds] ];
+    boolean_triple_b = new DATATYPE[num_boolean_addition_triples[rounds] ];
+}
+
+void init_booleanAdditionBeaverC(int rounds)
+{
+    boolean_triple_c = new DATATYPE[num_boolean_addition_triples[rounds] ];
+}
+
+void deinit_booleanAdditionBeaverAB()
+{
+    delete[] boolean_triple_a;
+    delete[] boolean_triple_b;
+}
+
+void deinit_booleanAdditionBeaverC()
+{
+    delete[] boolean_triple_c;
+}
+#endif
+
+
 void init_beaverC(int rounds)
 {
     arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
@@ -423,8 +450,16 @@ else if (triple_type == "BATCHNORM2D") {
                               ips[0],
                               base_port + process_offset);
 }
-
-
+#if A2B_ONLINE_OPT_SIM == 1
+else if (triple_type == "BooleanAddition") {
+    generateBooleanAdditionTriples(boolean_triple_a,
+                                   boolean_triple_b,
+                                   boolean_triple_c,
+                                   BITLENGTH,
+                                   l_num_boolean_triples,
+                                   ips[0],
+}
+#endif
 else {
     std::cerr << "Unknown triple type: " << triple_type << std::endl;
     exit(1);

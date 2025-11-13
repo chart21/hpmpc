@@ -23,6 +23,7 @@ class ABY2_PRE_Share
 #define CaseBatchNorm2D 16
 #define CaseFullyConnected 17
 #define CaseConvBN 18
+#define CaseBooleanAddition 19
 #define CaseTripleAlreadyConsumed 99
 #define CaseDefault 2
 
@@ -297,6 +298,26 @@ class ABY2_PRE_Share
         return c;
 #endif
     }
+
+    template <typename func_mul>
+    ABY2_PRE_Share mult_a_known_to_evaluators(const ABY2_ONLINE_Share b,
+                                                func_mul MULT) const
+    {
+        return ABY2_PRE_Share();
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            l = getRandomVal(PSELF); 
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+        }
+
+
     
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
         ABY2_PRE_Share local_mult_and_trunc(const Datatype b,
@@ -1050,9 +1071,20 @@ static void get_fc_triples_from_file()
         generate_beaver_triples(
                 ips, port, process_offset, num_fc_c_triples, 0, "FC");
 #endif
-
-
         deinit_FullyConnectedAB();
+
+#if A2B_ONLINE_OPT_SIM == 1
+        init_booleanAdditionC();
+#if FAKE_TRIPLES == 1
+        get_booleanAddition_triples_from_file();
+        generate_beaver_triples(
+                ips, port, process_offset, num_boolean_addition_triples, 0, "BOOLEANADDITION");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_boolean_addition_triples, 0, "BOOLEANADDITION");
+#endif
+        deinit_booleanAdditionBeaverAB();
+#endif
 
 
 
@@ -1224,6 +1256,12 @@ static void get_fc_triples_from_file()
                     ABY2_PRE_Share<Datatype>(lxly).generate_ab2_triple(third, OP_ADD, 1);
                     break;
                 }
+                case CaseBooleanAddition:
+                {
+                    auto lxly = boolean_addition_triple_c[boolean_addition_triple_index++];
+                    store_output_share_bool(lxly);
+                    break;
+                }
                 case CaseTripleAlreadyConsumed:  // Triple already consumed by previous case
                 {
                     break;
@@ -1260,6 +1298,7 @@ static void get_fc_triples_from_file()
 #if LX_TRIPLES == 1 
         deinit_beaverC();
         deinit_beaverAB2C();
+        deinit_booleanAdditionBeaverC();
         deinit_ConvC();
         deinit_BatchNorm2DC();
         deinit_FullyConnectedC();
