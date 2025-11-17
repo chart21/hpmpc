@@ -559,13 +559,6 @@ void generateLayerDummyTriples(type** a,
                               int port)
 {
     port += CHEETAH_PORT_OFFSET;
-    const char* addr = ip.c_str();
-
-    if (PARTY == 0)
-        addr = nullptr;
-
-    IO::NetIO** ios = Utils::init_ios<IO::NetIO>(addr, port, CHEETAH_THREADS, PROCESS_NUM);
-
     if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
         std::cout << "CONVOLUTION ";
     } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
@@ -608,7 +601,7 @@ void generateLayerDummyTriples(type** a,
                 };
 
 #if CHEETAH_CONV_TYPE == 0
-                Iface::generateConvTriplesCheetahWrapper(ios,
+                Iface::generateConvTriplesCheetahWrapper(ip, port, PROCESS_NUM,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         conv,
@@ -620,7 +613,7 @@ void generateLayerDummyTriples(type** a,
                 total_batches += conv.batchsize;
 #endif
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
-                Iface::generateFCTriplesCheetah(ios,
+                Iface::generateFCTriplesCheetah(ip, port, PROCESS_NUM,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
@@ -628,7 +621,7 @@ void generateLayerDummyTriples(type** a,
                         Utils::PROTO::AB2, factor
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
-                Iface::generateBNTriplesCheetah(ios,
+                Iface::generateBNTriplesCheetah(ip, port, PROCESS_NUM,
                         PARTY == 1 ? uint_x[n] : nullptr, PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.ch, p.h, p.w,
@@ -644,7 +637,7 @@ void generateLayerDummyTriples(type** a,
         }
 #if CHEETAH_CONV_TYPE == 1
         if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
-            Iface::generateConvTriplesCheetah(ios, total_batches, parms,
+            Iface::generateConvTriplesCheetah(ip, port, PROCESS_NUM, total_batches, parms,
                     PARTY == 1 ? uint_x : nullptr, PARTY == 0 ? uint_w : nullptr,
                     uint_y, Utils::PROTO::AB2, PARTY + 1,
                     CHEETAH_THREADS, factor
@@ -708,7 +701,7 @@ void generateLayerDummyTriples(type** a,
                     .padding = p.padding,
                 };
 
-                Iface::generateConvTriplesCheetahWrapper(ios,
+                Iface::generateConvTriplesCheetahWrapper(ip, port, PROCESS_NUM,
                         x, w, y,
                         conv,
                         PARTY + 1, CHEETAH_THREADS,
@@ -716,7 +709,7 @@ void generateLayerDummyTriples(type** a,
                         factor
                 );
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
-                Iface::generateFCTriplesCheetah(ios,
+                Iface::generateFCTriplesCheetah(ip, port, PROCESS_NUM,
                         x, w, y,
                         p.batchSize, p.in_feat, p.out_feat,
                         PARTY + 1, CHEETAH_THREADS,
@@ -724,7 +717,7 @@ void generateLayerDummyTriples(type** a,
                         factor
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
-                Iface::generateBNTriplesCheetah(ios,
+                Iface::generateBNTriplesCheetah(ip, port, PROCESS_NUM,
                         x, w, y,
                         p.batchSize, p.ch, p.h, p.w,
                         PARTY + 1, CHEETAH_THREADS,
@@ -748,11 +741,6 @@ void generateLayerDummyTriples(type** a,
             c_index += y_size;
         }
     }
-
-    for (size_t i = 0; i < CHEETAH_THREADS; ++i) {
-        delete ios[i];
-    }
-    delete[] ios;
 }
 
 
