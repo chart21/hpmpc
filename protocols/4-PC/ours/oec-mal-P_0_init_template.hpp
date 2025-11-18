@@ -175,6 +175,32 @@ class OEC_MAL0_init
     {
         return OEC_MAL0_init();
     }
+    
+    template <typename func_mul>
+    OEC_MAL0_init mult_a_known_to_evaluators(const OEC_MAL0_init b,
+                                                func_mul MULT) const
+    {
+        return OEC_MAL0_init();
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+#if PRE == 1
+            pre_receive_from_(P_3);
+#else
+            receive_from_(P_3);
+#endif 
+            store_compare_view_init(P_012);
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+            receive_from_(P_2);
+            store_compare_view_init(P_1);
+        }
+    
 
     template <typename func_add, typename func_sub, typename func_xor, typename func_and, typename func_trunc>
     void prepare_trunc_2k_inputs(func_add ADD,

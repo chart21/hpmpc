@@ -147,7 +147,7 @@ class PPA_MSB_4Way
     Share prepare_W3L1(Share x1, Share y1, Share x2, Share y2, Share x3, Share y3)
     {
         /* return (x1 & y1) ^ (x1^y1).prepare_and3(x2, y2) ^ (x1^y1).prepare_and4((x2^y2), x3, y3); */
-#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 0
         auto val = x1.prepare_dot(y1) ^ (x1 ^ y1).prepare_dot3(x2, y2) ^ (x1 ^ y1).prepare_dot4((x2 ^ y2), x3, y3);
         val.mask_and_send_dot();
 #else
@@ -168,8 +168,8 @@ class PPA_MSB_4Way
         auto t3_4 = x3.mult_a_known_to_evaluators(y1y2y3);
         auto val = t1 ^ t2_1 ^ t2_2 ^ t3_1 ^ t3_2 ^ t3_3 ^ t3_4;
         val.mask_and_send_dot();
-        return val; //cost saving: dot4, but 2 additional dot2
 #endif
+        return val; //cost saving: dot4, but 2 additional dot2
     }
     void complete_W3L1(Share& val)
 
@@ -213,6 +213,7 @@ class PPA_MSB_4Way
         auto t8 = x1.mult_a_known_to_evaluators(y2y3);
         auto val = t1 ^ t2 ^ t3 ^ t4 ^ t5 ^ t6 ^ t7 ^ t8;
         val.mask_and_send_dot();
+        return val;
 #else
         return (x1 ^ y1).prepare_and3((x2 ^ y2), (x3 ^ y3));
 #endif

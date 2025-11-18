@@ -157,6 +157,25 @@ class OECL2_init
     {
         return OECL2_init();
     }
+    
+    template <typename func_mul>
+    OECL2_init mult_a_known_to_evaluators(const OECL2_init b,
+                                                func_mul MULT) const
+    {
+        return OECL2_init();
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            send_to_(P_1);
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+            receive_from_(P_1);
+        }
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
         OECL2_init local_mult_and_trunc(const Datatype b,

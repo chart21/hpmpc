@@ -42,10 +42,19 @@ class BooleanAdder
         {
             case k - 1:  // special case for lsbs
                 z[k - 1] = x[k - 1] ^ y[k - 1];
+#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1 
+                    carry_last = x[k - 1].mult_a_known_to_evaluators(y[k -1]);
+                    carry_last.prepare_remask();
+#else
                 carry_last = x[k - 1] & y[k - 1];
+#endif
                 break;
             case k - 2:
+#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+                carry_last.complete_remask();
+#else
                 carry_last.complete_and();  // get carry from lsb
+#endif
                 update_z();
                 prepare_carry();
                 break;

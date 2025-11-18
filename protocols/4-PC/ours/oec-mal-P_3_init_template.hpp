@@ -304,6 +304,28 @@ class OEC_MAL3_init
     void complete_public_mult_fixed(func_add ADD, func_sub SUB)
     {
     }
+    
+    template <typename func_mul>
+    OEC_MAL3_init mult_a_known_to_evaluators(const OEC_MAL3_init b,
+                                                func_mul MULT) const
+    {
+        return OEC_MAL3_init();
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+#if PRE == 1
+            pre_send_to_(P_0);
+#else
+            send_to_(P_0);
+#endif
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+        }
 
     static void prepare_B2A(OEC_MAL3_init z[], OEC_MAL3_init random_mask[], OEC_MAL3_init out[])
     {

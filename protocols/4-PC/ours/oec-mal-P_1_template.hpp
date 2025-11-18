@@ -312,6 +312,39 @@ class OEC_MAL1_Share
         return res;
     }
     
+    template <typename func_mul>
+    OEC_MAL1_Share mult_a_known_to_evaluators(const OEC_MAL1_Share b,
+                                                func_mul MULT) const
+    {
+        return OEC_MAL1_Share(MULT(v, b.v), MULT(v, b.r));
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            auto new_l = getRandomVal(P_013);
+            send_to_live(P_2, SUB(new_l, r)); // replace old mask with new mask
+            v = ADD(SUB(m, r),new_l); 
+#if MULTI_INPUT == 1
+            m = SUB(new_l, r); // Store for verification
+#endif
+            r = new_l; 
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+            auto old_l = receive_from_live(P_2);
+#if MULTI_INPUT == 1
+            store_compare_view(P_012, ADD(SUB(m, old_l)), getRandomVal(P_123)); // lc - ma lb + r123
+            m = getRandomVal(P_123); 
+            store_compare_view(P_0, ADD(v, m));  // verify new v + m with P_0
+#endif
+            v = ADD(v, old_l); 
+            // sum of messages: ln - ma lb. P0 can verify ma' lb with remainder la* lb -> P_3
+        }
+
+    
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
         OEC_MAL1_Share local_mult_and_trunc(const Datatype b,
                                         func_mul MULT,

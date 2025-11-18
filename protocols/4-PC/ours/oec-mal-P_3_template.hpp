@@ -347,6 +347,33 @@ class OEC_MAL3_Share
     void complete_public_mult_fixed(func_add ADD, func_sub SUB)
     {
     }
+    
+    template <typename func_mul>
+    OEC_MAL3_Share mult_a_known_to_evaluators(const OEC_MAL3_Share b,
+                                                func_mul MULT) const
+    {
+        return OEC_MAL3_Share(MULT(r0, b.r1));
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            auto new_l1 = getRandomVal(P_013);
+            auto new_l2 = getRandomVal(P_023);
+            auto new_lm = getRandomVal(P_123);
+            r1 = ADD(new_l1, new_l2);
+#if PRE == 1
+            pre_send_to_live(P_0, ADD(r0, new_lm)); // la* lb + r_123
+#else
+            send_to_live(P_0, ADD(r0, new_lm)); // la* lb + r_123
+#endif 
+            r0 = new_lm;
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+        }
 
     template <typename func_add, typename func_sub, typename func_trunc>
     void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)

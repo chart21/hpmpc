@@ -182,6 +182,28 @@ class OECL1_Share
         return res;
     }
     
+    template <typename func_mul>
+    OECL1_Share mult_a_known_to_evaluators(const OECL1_Share b,
+                                                func_mul MULT) const
+    {
+        return OECL1_Share(MULT(p1, b.p1), MULT(p1, b.p2)); // mb_i (a) = ab + lb_i * a
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            auto new_l = getRandomVal(P_0);
+            send_to_live(P_2, SUB(new_l, p2)); // replace old mask with new mask
+            p2 = new_l; // lvi' = lni
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+            auto old_l = receive_from_live(P_2);
+            p1 = ADD(p1, old_l); // mab + a lbi - a lbi + lc = mab + lc 
+        }
+    
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
         OECL1_Share local_mult_and_trunc(const Datatype b,
                                         func_mul MULT,

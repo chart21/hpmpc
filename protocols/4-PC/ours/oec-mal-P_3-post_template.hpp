@@ -78,6 +78,23 @@ class OECL_MAL3_POST_Share
         return OECL_MAL3_POST_Share();
     }
     
+    template <typename func_mul>
+    OECL_MAL3_POST_Share mult_a_known_to_evaluators(const OECL_MAL3_POST_Share b,
+                                                func_mul MULT) const
+    {
+        return OECL_MAL3_POST_Share();
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+        }
+    
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
         OECL_MAL3_POST_Share local_mult_and_trunc(const Datatype b,
                                         func_mul MULT,

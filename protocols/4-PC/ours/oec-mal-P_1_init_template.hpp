@@ -234,6 +234,27 @@ class OEC_MAL1_init
     void complete_public_mult_fixed(func_add ADD, func_sub SUB)
     {
     }
+    
+    template <typename func_mul>
+    OEC_MAL1_init mult_a_known_to_evaluators(const OEC_MAL1_init b,
+                                                func_mul MULT) const
+    {
+        return OEC_MAL1_init();
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            send_to_(P_2);
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+            receive_from_(P_2);
+            store_compare_view_init(P_012);
+            store_compare_view_init(P_0);
+        }
 
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)

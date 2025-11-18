@@ -238,6 +238,26 @@ class OECL0_Share
 #endif
         return res;
     }
+    
+    template <typename func_mul>
+    OECL0_Share mult_a_known_to_evaluators(const OECL0_Share b,
+                                                func_mul MULT) const
+    {
+        return OECL0_Share(p1,p2);
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            p1 = getRandomVal(P_2);
+            p2 = getRandomVal(P_1);
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+        }
+
 
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
         OECL0_Share local_mult_and_trunc(const Datatype b,

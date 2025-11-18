@@ -388,6 +388,38 @@ class OEC_MAL2_Share
 #endif
         /* v = ADD(v,val); */
     }
+    
+    template <typename func_mul>
+    OEC_MAL2_Share mult_a_known_to_evaluators(const OEC_MAL2_Share b,
+                                                func_mul MULT) const
+    {
+        return OEC_MAL2_Share(MULT(v, b.v), MULT(v, b.r));
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            auto new_l = getRandomVal(P_013);
+            send_to_live(P_1, SUB(new_l, r)); // replace old mask with new mask
+            v = ADD(SUB(m, r),new_l); 
+#if MULTI_INPUT == 1
+            m = SUB(new_l, r); // Store for verification
+#endif
+            r = new_l; 
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+            auto old_l = receive_from_live(P_1);
+#if MULTI_INPUT == 1
+            store_compare_view(P_012, ADD(SUB(m, old_l)), getRandomVal(P_123)); // lc - ma lb + r123
+            m = getRandomVal(P_123); 
+            send_to_live(P_0, ADD(v, m));  
+#endif
+            v = ADD(v, old_l); 
+            // sum of messages: ln - ma lb. P0 can verify ma' lb with remainder la* lb -> P_3
+        }
 
 #if FRACTIONAL > 0
 

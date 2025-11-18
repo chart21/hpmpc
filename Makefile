@@ -42,7 +42,7 @@ CONFIG_OPTIONS := PROTOCOL PRE PARTY BITLENGTH FRACTIONAL FUNCTION_IDENTIFIER NU
 				SRNG_SEED BASE_PORT SPLIT_ROLES_OFFSET CONNECTION_TIMEOUT CONNECTION_RETRY \
 				AVG_OPT AVG_OPT_THRESHOLD MSB0_OPT AVG1_OPT \
 				FUSE_DOT INTERLEAVE_COMM FUSE_RELU_AVG FUSE_RELU_MAX FUSE_CONV_BN_SIM FUSE_CONV_BN OPTIMIZED_BIT_INJECTION_RELU \
-				A2B_ROUND_OPT_SIM A2B_ONLINE_OPT_SIM \
+				A2B_ROUND_OPT_SIM A2B_ONLINE_OPT_SIM A_KNOWN_TO_EVALUATORS_OPT_SIM \
 				SKIP_PRE FAKE_TRIPLES OPT_SHARE \
 				ONLINE_OPTIMIZED BANDWIDTH_OPTIMIZED \
 
@@ -104,15 +104,24 @@ do_compile_player_%:
 	$(update_config)
 	@PREV_MACRO_FLAGS_FILE=./executables/flags/$(EXEC_NAME).macro_flags; \
 	CURRENT_FLAGS="$(MACRO_FLAGS) -DPARTY=$(LPARTY) -DSPLIT_ROLES_OFFSET=$(SPLIT_ROLES_OFFSET)"; \
-	if [ -f ./$(NEXEC_NAME).o ] && \
-   [ -f $$PREV_MACRO_FLAGS_FILE ] && \
-   cmp -s <(echo "$$CURRENT_FLAGS") $$PREV_MACRO_FLAGS_FILE && \
-   [ ./$(NEXEC_NAME).o -nt Makefile ] && \
-   [ ./$(NEXEC_NAME).o -nt main.cpp ] && \
-   [ ./$(NEXEC_NAME).o -nt $(PCH) ] && \
-   [ ./$(NEXEC_NAME).o -nt $(CONFIG) ] && \
-   [ ./$(NEXEC_NAME).o -nt $(PCH_OBJ) ] && \
-   $(foreach header,$(HEADER_FILES),[ ./$(NEXEC_NAME).o -nt $(header) ] &&) true; then \
+	NEEDS_REBUILD=0; \
+	if [ ! -f ./$(NEXEC_NAME).o ] || \
+   [ ! -f $$PREV_MACRO_FLAGS_FILE ] || \
+   ! cmp -s <(echo "$$CURRENT_FLAGS") $$PREV_MACRO_FLAGS_FILE || \
+   [ ./$(NEXEC_NAME).o -ot Makefile ] || \
+   [ ./$(NEXEC_NAME).o -ot main.cpp ] || \
+   [ ./$(NEXEC_NAME).o -ot $(PCH) ] || \
+   [ ./$(NEXEC_NAME).o -ot $(CONFIG) ] || \
+   [ ./$(NEXEC_NAME).o -ot $(PCH_OBJ) ]; then \
+		NEEDS_REBUILD=1; \
+	fi; \
+	if [ $$NEEDS_REBUILD -eq 0 ]; then \
+		NEWER_HEADERS=$$(find . -path ./nn/Pygeon -prune -o \( -name '*.h' -o -name '*.hpp' \) -newer ./$(NEXEC_NAME).o -print | head -1); \
+		if [ ! -z "$$NEWER_HEADERS" ]; then \
+			NEEDS_REBUILD=1; \
+		fi; \
+	fi; \
+	if [ $$NEEDS_REBUILD -eq 0 ]; then \
 		echo "Nothing to do for $(EXEC_NAME)"; \
 	else \
 		echo "Compiling executable $(EXEC_NAME)" ; \

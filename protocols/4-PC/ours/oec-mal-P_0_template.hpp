@@ -299,6 +299,36 @@ class OEC_MAL0_Share
         return OEC_MAL0_Share(SET_ALL_ZERO(), result);
     }
     
+    template <typename func_mul>
+    OEC_MAL0_Share mult_a_known_to_evaluators(const OEC_MAL0_Share b,
+                                                func_mul MULT) const
+    {
+        return OEC_MAL0_Share(SET_ALL_ZERO(), MULT(v, b.r));
+    }
+
+    template <typename func_add, typename func_sub>
+        void prepare_remask(func_add ADD, func_sub SUB)
+        {
+            auto new_l1 = getRandomVal(P_013);
+            auto new_l2 = getRandomVal(P_023);
+            v = SUB(ADD(new_l1, new_l2), r); //  ln - ma' lb
+#if PRE == 1
+            auto mask = pre_receive_from_live(P_3); // la* lb + r_123
+#else
+            auto mask = receive_from_live(P_3); // la* lb + r_123
+#endif 
+            store_compare_view(P_012, ADD(v, mask)); // lc - ma lb + r123
+            r = ADD(new_l1, new_l2);
+        }
+
+    template <typename func_add, typename func_sub>
+        void complete_remask(func_add ADD, func_sub SUB)
+        {
+            v = receive_from_live(P_2); // mab + ln + r_123
+            store_compare_view(P_1, v); // mab + r_123 
+            v = SUB(v, r); // mab + r_123 
+        }
+    
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
         OEC_MAL0_Share local_mult_and_trunc(const Datatype b,
                                         func_mul MULT,
