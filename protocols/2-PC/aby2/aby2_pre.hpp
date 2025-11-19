@@ -300,7 +300,7 @@ class ABY2_PRE_Share
     }
 
     template <typename func_mul>
-    ABY2_PRE_Share mult_a_known_to_evaluators(const ABY2_ONLINE_Share b,
+    ABY2_PRE_Share mult_a_known_to_evaluators(const ABY2_PRE_Share b,
                                                 func_mul MULT) const
     {
         return ABY2_PRE_Share();
@@ -1074,7 +1074,7 @@ static void get_fc_triples_from_file()
         deinit_FullyConnectedAB();
 
 #if A2B_ONLINE_OPT_SIM == 1
-        init_booleanAdditionC();
+        init_booleanAdditionBeaverC();
 #if FAKE_TRIPLES == 1
         get_booleanAddition_triples_from_file();
         generate_beaver_triples(
