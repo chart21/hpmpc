@@ -365,7 +365,7 @@ class ABY2_PRE_Share
 
     static void prepare_A2B_S1(int m, int k, ABY2_PRE_Share in[], ABY2_PRE_Share out[])
     {
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
         for (int i = m; i < k; i++)
         {
             out[i - m].l = SET_ALL_ZERO(); // mv has mask 0
@@ -382,7 +382,7 @@ class ABY2_PRE_Share
 
     static void prepare_A2B_S2(int m, int k, ABY2_PRE_Share in[], ABY2_PRE_Share out[])
     {
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
         Datatype temp_p1[BITLENGTH];
         for (int i = 0; i < BITLENGTH; i++)
         {
@@ -497,7 +497,7 @@ class ABY2_PRE_Share
     }
     static void complete_A2B_S1(int k, ABY2_PRE_Share out[])
     {
-#if A2B_ONLINE_OPT_SIM == 0
+#if A2B_ONLINE_OPT == 0
 #if PARTY == 1
         for (int i = 0; i < k; i++)
         {
@@ -509,7 +509,7 @@ class ABY2_PRE_Share
 
     static void complete_A2B_S2(int k, ABY2_PRE_Share out[])
     {
-#if A2B_ONLINE_OPT_SIM == 0
+#if A2B_ONLINE_OPT == 0
 #if PARTY == 0
         for (int i = 0; i < k; i++)
         {
@@ -1100,7 +1100,7 @@ static void get_fc_triples_from_file()
 #endif
         deinit_FullyConnectedAB();
 
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
         init_booleanAdditionBeaverC();
 #if FAKE_TRIPLES == 1
         get_booleanAddition_triples_from_file();
@@ -1325,7 +1325,7 @@ static void get_fc_triples_from_file()
 #if LX_TRIPLES == 1 
         deinit_beaverC();
         deinit_beaverAB2C();
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
         deinit_booleanAdditionBeaverC();
 #endif
         deinit_ConvC();

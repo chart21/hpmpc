@@ -181,31 +181,6 @@ void generateBooleanDummyTriples(type a[],
 
 }
 
-// Input: array of boolean triple shares [a], [b], [c] with size num_triples
-// Input: ip and port of the other party to connect to
-// Output: [c] will be filled with shares of a + b
-template <typename type>
-void generateBooleanAdditionDummyTriples(type a[],
-                                 type b[],
-                                 type c[],
-                                 int bitlength,
-                                 uint64_t num_triples,
-                                 std::string ip,
-                                 int port,
-                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
-{
-    if(num_triples == 0) return;
-    //reinterpret SIMD bitstream as uint8 bitstream
-    uint8_t* uint_a = (uint8_t*) a;
-    uint8_t* uint_b = (uint8_t*) b;
-    uint8_t* uint_c = (uint8_t*) c;
-    
-    for (uint64_t i = 0; i < num_triples / 8; i++)
-    {
-       uint_c[i] = uint_a[i] ^ uint_b[i]; // dummy assignment, replace with actual triple generation
-    }
-
-}
 
 
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
@@ -292,6 +267,97 @@ void generateBooleanAB2DummyTriples(type a[],
 #endif 
     }
 
+}
+
+// Input: array of boolean triple shares [a], [b], [c] with size num_triples
+// Input: ip and port of the other party to connect to
+// Output: [c] will be filled with shares of a + b
+template <typename type>
+void generateBooleanAdditionDummyTriples(type a[],
+                                 type b[],
+                                 type c[],
+                                 int bitlength,
+                                 uint64_t num_triples,
+                                 std::string ip,
+                                 int port,
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+{
+    constexpr int num_bits_per_input = REDUCED_BITLENGTH_k - REDUCED_BITLENGTH_m;
+    if(num_triples == 0) return;
+    if(num_bits_per_input <= 0) return;
+    //reinterpret SIMD bitstream as uint8 bitstream
+    auto av = reinterpret_cast<type (*)[num_bits_per_input]> (a); 
+    auto bv = reinterpret_cast<type (*)[num_bits_per_input]> (b);
+    auto cv = reinterpret_cast<type (*)[num_bits_per_input]> (c);
+    num_triples = num_triples / num_bits_per_input;
+    type* carry_last = new type[num_triples];
+    type* carry_this = new type[num_triples];
+    type* ot_a = new type[num_triples];
+    type* ot_b = new type[num_triples]; 
+    int r = num_bits_per_input;
+    const int k = num_bits_per_input;
+    while(r > 0)
+    {
+        r--;
+        switch(r)
+        {
+            case k - 1:
+                for (uint64_t i = 0; i < num_triples ; i++)
+                {
+                    cv[i][r] = av[i][r] ^ bv[i][r]; 
+                    ot_a[i] = av[i][r];
+                    ot_b[i] = bv[i][r];
+                }
+                generateBooleanAB2Triples(ot_a, ot_b, carry_last, bitlength, num_triples, ip, port, cheetah_ot_type);
+                break;
+            case k - 2:
+                for (uint64_t i = 0; i < num_triples ; i++)
+                {
+                    //update
+                    cv[i][r] = av[i][r] ^ bv[i][r] ^ carry_last[i];
+                    //prepare
+                    ot_a[i] = av[i][r] ^ carry_last[i];
+                    ot_b[i] = bv[i][r] ^ carry_last[i];
+                }
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples, ip, port, cheetah_ot_type);
+                break;
+            default:
+                // complete_carry
+                for (uint64_t i = 0; i < num_triples ; i++)
+                {
+                    carry_this[i] = carry_this[i] ^ carry_last[i];
+                    carry_last[i] = carry_this[i];
+                }
+                // update result
+                for (uint64_t i = 0; i < num_triples ; i++)
+                        cv[i][r] = av[i][r] ^ bv[i][r] ^ carry_last[i];
+
+                // prepare_carry
+                for (uint64_t i = 0; i < num_triples ; i++)
+                {
+                    ot_a[i] = av[i][r] ^ carry_last[i];
+                    ot_b[i] = bv[i][r] ^ carry_last[i];
+                }
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples, ip, port, cheetah_ot_type);
+                break;
+            case 0:
+                // complete_carry
+                for (uint64_t i = 0; i < num_triples ; i++)
+                {
+                    carry_this[i] = carry_this[i] ^ carry_last[i];
+                    carry_last[i] = carry_this[i];
+                }
+                // update result
+                for (uint64_t i = 0; i < num_triples ; i++)
+                        cv[i][r] = av[i][r] ^ bv[i][r] ^ carry_last[i];
+                delete[] carry_last;
+                delete[] carry_this;
+                delete[] ot_a;
+                delete[] ot_b;
+                return;
+                    
+        }
+    }
 }
 
 

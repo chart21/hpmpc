@@ -80,7 +80,7 @@ class PPA
                 for (int i = 1; i < k; ++i)
                 {
                     P[i] = a[i] ^ b[i];
-#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1 
+#if A_KNOWN_TO_EVALUATORS_OPT == 1 
                     G[i] = a[i].mult_a_known_to_evaluators(b[i]);
                     G[i].prepare_remask();
 #else
@@ -93,7 +93,7 @@ class PPA
                 break;
             case -1:
                 for (int i = 1; i < k; ++i)
-#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
                     G[i].complete_remask(); 
 #else
                     G[i].complete_and();  

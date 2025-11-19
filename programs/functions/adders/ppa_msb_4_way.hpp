@@ -147,7 +147,7 @@ class PPA_MSB_4Way
     Share prepare_W3L1(Share x1, Share y1, Share x2, Share y2, Share x3, Share y3)
     {
         /* return (x1 & y1) ^ (x1^y1).prepare_and3(x2, y2) ^ (x1^y1).prepare_and4((x2^y2), x3, y3); */
-#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 0
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
         auto val = x1.prepare_dot(y1) ^ (x1 ^ y1).prepare_dot3(x2, y2) ^ (x1 ^ y1).prepare_dot4((x2 ^ y2), x3, y3);
         val.mask_and_send_dot();
 #else
@@ -190,7 +190,7 @@ class PPA_MSB_4Way
     // p1p2p3
     Share prepare_B3L1_P(Share x1, Share y1, Share x2, Share y2, Share x3, Share y3)
     {
-#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
         //optimization: Y terms could be precomputed by preceeding B3L1_G gate
         // auto y1y2 = y1.prepare_dot(y2); 
         // auto y1y3 = y1.prepare_dot(y3); 

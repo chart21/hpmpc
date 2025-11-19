@@ -182,7 +182,7 @@ void init_beaverAB(int rounds)
     // std::cout << "Initialized beaver AB for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
 void init_booleanAdditionBeaverAB()
 {
     if(num_boolean_addition_triples == 0)
@@ -458,7 +458,7 @@ else if (triple_type == "BATCHNORM2D") {
                               ips[0],
                               base_port + process_offset);
 }
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
 else if (triple_type == "BOOLEANADDITION") {
     generateBooleanAdditionTriples(boolean_triple_a,
                                    boolean_triple_b,

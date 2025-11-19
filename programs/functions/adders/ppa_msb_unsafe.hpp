@@ -84,7 +84,7 @@ class PPA_MSB_Unsafe
                     Share tmp = a[i] ^ b[i];
                     tmp = a[i] ^ b[i];
                     /* G[i - 1] = a[i - 1] & b[i - 1]; */
-#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
                     b[i] = a[i].mult_a_known_to_evaluators(b[i]);
                     b[i].prepare_remask();
 #else
@@ -97,7 +97,7 @@ class PPA_MSB_Unsafe
             case -1:
                 for (int i = 1; i < k; ++i)
                     // G[i - 1].complete_and();
-#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
                     b[i].complete_remask();
 #else
                     b[i].complete_and();  // possibly wrong and above is correct

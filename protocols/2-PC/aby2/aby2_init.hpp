@@ -344,7 +344,7 @@ class ABY2_init
 
     static void prepare_A2B_S1(int m, int k, ABY2_init in[], ABY2_init out[])
     {
-#if A2B_ONLINE_OPT_SIM == 0
+#if A2B_ONLINE_OPT == 0
 #if PARTY == 0
         for (int i = m; i < k; i++)
         {
@@ -356,7 +356,7 @@ class ABY2_init
 
     static void prepare_A2B_S2(int m, int k, ABY2_init in[], ABY2_init out[])
     {
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
         for (int i = m; i < k; i++)
         {
             num_boolean_addition_triples++;
@@ -373,7 +373,7 @@ class ABY2_init
 
     static void complete_A2B_S1(int k, ABY2_init out[])
     {
-#if A2B_ONLINE_OPT_SIM == 0
+#if A2B_ONLINE_OPT == 0
 #if PARTY == 1
         for (int i = 0; i < k; i++)
         {
@@ -385,7 +385,7 @@ class ABY2_init
 
     static void complete_A2B_S2(int k, ABY2_init out[])
     {
-#if A2B_ONLINE_OPT_SIM == 0
+#if A2B_ONLINE_OPT == 0
 #if PARTY == 0
         for (int i = 0; i < k; i++)
         {

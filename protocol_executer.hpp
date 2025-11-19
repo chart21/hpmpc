@@ -142,7 +142,7 @@ void beaver(std::string ips[])
     init_ConvAB();
     init_BatchNorm2DAB();
     init_FullyConnectedAB();
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
     init_booleanAdditionBeaverAB();
 #endif
 #else

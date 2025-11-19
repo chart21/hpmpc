@@ -419,7 +419,7 @@ class ABY2_ONLINE_Share
 
     static void prepare_A2B_S1(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Share out[])
     {
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
         Datatype temp_p1[BITLENGTH];
         for (int i = 0; i < BITLENGTH; i++)
             temp_p1[i] = in[i].m;  // set first share to mv
@@ -454,7 +454,7 @@ class ABY2_ONLINE_Share
 
     static void prepare_A2B_S2(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Share out[])
     {
-#if A2B_ONLINE_OPT_SIM == 1
+#if A2B_ONLINE_OPT == 1
         for (int i = m; i < k; i++)
         {
             out[i - m].l = retrieve_output_share_bool(); 
@@ -482,7 +482,7 @@ class ABY2_ONLINE_Share
 
     static void complete_A2B_S1(int k, ABY2_ONLINE_Share out[])
     {
-#if A2B_ONLINE_OPT_SIM == 0
+#if A2B_ONLINE_OPT == 0
 #if PARTY == 1
         for (int i = 0; i < k; i++)
         {
@@ -495,7 +495,7 @@ class ABY2_ONLINE_Share
 
     static void complete_A2B_S2(int k, ABY2_ONLINE_Share out[])
     {
-#if A2B_ONLINE_OPT_SIM == 0
+#if A2B_ONLINE_OPT == 0
 #if PARTY == 0
         for (int i = 0; i < k; i++)
         {

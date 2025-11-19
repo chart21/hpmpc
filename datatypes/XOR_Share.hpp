@@ -154,7 +154,7 @@ class XOR_Share : public Share_Type
     
 #endif
 
-#if A_KNOWN_TO_EVALUATORS_OPT_SIM == 1
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
 
     XOR_Share mult_a_known_to_evaluators(const XOR_Share b) const
     {
