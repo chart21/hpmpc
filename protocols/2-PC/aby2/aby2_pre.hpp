@@ -365,16 +365,38 @@ class ABY2_PRE_Share
 
     static void prepare_A2B_S1(int m, int k, ABY2_PRE_Share in[], ABY2_PRE_Share out[])
     {
+#if A2B_ONLINE_OPT_SIM == 1
+        for (int i = m; i < k; i++)
+        {
+            out[i - m].l = SET_ALL_ZERO(); // mv has mask 0
+        }
+#else
 #if PARTY == 0
         for (int i = m; i < k; i++)
         {
             out[i - m].l = getRandomVal(PSELF);
         }
 #endif
+#endif
     }
 
     static void prepare_A2B_S2(int m, int k, ABY2_PRE_Share in[], ABY2_PRE_Share out[])
     {
+#if A2B_ONLINE_OPT_SIM == 1
+        Datatype temp_p1[BITLENGTH];
+        for (int i = 0; i < BITLENGTH; i++)
+        {
+            temp_p1[i] = OP_SUB(SET_ALL_ZERO(), in[i].l);  // set share to -lvi
+        }
+        alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+        unorthogonalize_arithmetic(temp_p1, temp2);
+        orthogonalize_boolean(temp2, temp_p1);
+        for (int i = m; i < k; i++)
+        {
+            out[i - m].l = temp_p1[i]; // input shares for boolean additions are -lvi
+            triple_type[0][triple_type_index[0]++] = CaseBooleanAddition;
+        }
+#else
 #if PARTY == 1
         Datatype temp_p1[BITLENGTH];
         for (int i = 0; i < BITLENGTH; i++)
@@ -396,6 +418,7 @@ class ABY2_PRE_Share
         {
             triple_type[0][triple_type_index[0]++] = CaseDefault;
         }
+#endif
 #endif
     }
 
@@ -474,21 +497,25 @@ class ABY2_PRE_Share
     }
     static void complete_A2B_S1(int k, ABY2_PRE_Share out[])
     {
+#if A2B_ONLINE_OPT_SIM == 0
 #if PARTY == 1
         for (int i = 0; i < k; i++)
         {
             out[i].l = SET_ALL_ZERO();
         }
 #endif
+#endif
     }
 
     static void complete_A2B_S2(int k, ABY2_PRE_Share out[])
     {
+#if A2B_ONLINE_OPT_SIM == 0
 #if PARTY == 0
         for (int i = 0; i < k; i++)
         {
             out[i].l = SET_ALL_ZERO();
         }
+#endif
 #endif
     }
 
@@ -1259,7 +1286,7 @@ static void get_fc_triples_from_file()
                 case CaseBooleanAddition:
                 {
                     auto lxly = boolean_addition_triple_c[boolean_addition_triple_index++];
-                    store_output_share_bool(lxly);
+                    lxly_b[0][boolean_triple_counter[0]++] = lxly;
                     break;
                 }
                 case CaseTripleAlreadyConsumed:  // Triple already consumed by previous case
@@ -1298,7 +1325,9 @@ static void get_fc_triples_from_file()
 #if LX_TRIPLES == 1 
         deinit_beaverC();
         deinit_beaverAB2C();
+#if A2B_ONLINE_OPT_SIM == 1
         deinit_booleanAdditionBeaverC();
+#endif
         deinit_ConvC();
         deinit_BatchNorm2DC();
         deinit_FullyConnectedC();

@@ -57,9 +57,6 @@ DATATYPE* boolean_ab2_triple_b = nullptr;
 DATATYPE* boolean_ab2_triple_c = nullptr;
 
 
-uint64_t total_boolean_addition_triples_num = 0;
-uint64_t total_boolean_addition_triples_index = 0;
-
 uint64_t curr_boolean_addition_triple_index = 0;
 uint64_t boolean_addition_triple_index = 0;
 DATATYPE* boolean_addition_triple_a = nullptr;
@@ -190,30 +187,24 @@ void init_booleanAdditionBeaverAB()
 {
     if(num_boolean_addition_triples == 0)
         return;
-    boolean_triple_a = new DATATYPE[num_boolean_addition_triples];
-    boolean_triple_b = new DATATYPE[num_boolean_addition_triples];
+    boolean_addition_triple_a = new DATATYPE[num_boolean_addition_triples];
+    boolean_addition_triple_b = new DATATYPE[num_boolean_addition_triples];
 }
 
 void init_booleanAdditionBeaverC()
 {
-    if(num_boolean_addition_triples == 0)
-        return;
-    boolean_triple_c = new DATATYPE[num_boolean_addition_triples];
+    boolean_addition_triple_c = new DATATYPE[num_boolean_addition_triples];
 }
 
 void deinit_booleanAdditionBeaverAB()
 {
-    if(num_boolean_addition_triples == 0)
-        return;
-    delete[] boolean_triple_a;
-    delete[] boolean_triple_b;
+    delete[] boolean_addition_triple_a;
+    delete[] boolean_addition_triple_b;
 }
 
 void deinit_booleanAdditionBeaverC()
 {
-    if(num_boolean_addition_triples == 0)
-        return;
-    delete[] boolean_triple_c;
+    delete[] boolean_addition_triple_c;
 }
 #endif
 
@@ -515,7 +506,7 @@ void print_num_triples()
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
                 << "Boolean AB2 Beaver Triples Required: " << total_ab2_boolean_triples_num * DATTYPE << std::endl;
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
-              << "Boolean Addition Triples Required: " << total_boolean_addition_triples_num * DATTYPE << std::endl;
+              << "Boolean Addition Triples Required: " << num_boolean_addition_triples * DATTYPE << std::endl;
     for(int i = 0; i < conv_triple_params.size(); i++)
     {
         std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
