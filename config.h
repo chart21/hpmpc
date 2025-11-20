@@ -323,7 +323,7 @@ int base_port = BASE_PORT;  // temporary solution
 // === Internal Settings, do not change ===
 
 #ifndef FAKE_TRIPLES
-#define FAKE_TRIPLES 1
+#define FAKE_TRIPLES 0
 #endif
 
 #ifndef SKIP_PRE

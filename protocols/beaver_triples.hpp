@@ -464,6 +464,9 @@ void generate_beaver_triples(std::string ips[], int base_port, int process_offse
 {
     uint64_t l_num_arithmetic_triples = num_arith_triples * DATTYPE / BITLENGTH;
     uint64_t l_num_boolean_triples = num_bool_triples * DATTYPE;
+    uint64_t l_num_multiplexer_triples = num_multiplexer_triples * DATTYPE / BITLENGTH;
+    uint64_t l_num_cot_triples = num_cot_triples * DATTYPE / BITLENGTH;
+    uint64_t l_num_boolean_addition_triples = num_boolean_addition_triples * DATTYPE;
 #if FAKE_TRIPLES == 1
     print("Fake Triples set to 1, generating fake triples ... \n");
 #else
@@ -540,7 +543,7 @@ else if (triple_type == "BOOLEANADDITION") {
                                    boolean_triple_b,
                                    boolean_triple_c,
                                    BITLENGTH,
-                                   l_num_boolean_triples,
+                                   l_num_boolean_addition_triples,
                                    ips[0],
                                    base_port + process_offset);
 }
@@ -551,7 +554,7 @@ else if (triple_type == "MULTIPLEXER") {
                                multiplexer_triple_b,
                                multiplexer_triple_c,
                                BITLENGTH,
-                               num_multiplexer_triples,
+                               l_num_multiplexer_triples,
                                ips[0],
                                base_port + process_offset);
 }
@@ -560,7 +563,7 @@ else if (triple_type == "COT") {
                        cot_triple_b,
                        cot_triple_c,
                        BITLENGTH,
-                       num_cot_triples,
+                       l_num_cot_triples,
                        ips[0],
                        base_port + process_offset);
 }
