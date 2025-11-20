@@ -24,6 +24,8 @@ class ABY2_PRE_Share
 #define CaseFullyConnected 17
 #define CaseConvBN 18
 #define CaseBooleanAddition 19
+#define CaseMultiplexer 20
+#define CaseCOT 21
 #define CaseTripleAlreadyConsumed 99
 #define CaseDefault 2
 
@@ -395,6 +397,11 @@ class ABY2_PRE_Share
         {
             out[i - m].l = temp_p1[i]; // input shares for boolean additions are -lvi
             triple_type[0][triple_type_index[0]++] = CaseBooleanAddition;
+#if PARTY == 0
+            boolean_addition_triple_a[boolean_addition_triple_index++] = temp_p1[i];
+#else
+            boolean_addition_triple_b[boolean_addition_triple_index++] = temp_p1[i];
+#endif
         }
 #else
 #if PARTY == 1
@@ -468,6 +475,36 @@ class ABY2_PRE_Share
 
     void prepare_opt_bit_injection(ABY2_PRE_Share x[], ABY2_PRE_Share out[])
     {
+#if BIT_INJECTION_PREPROCESSING_OPT == 1
+        for (int i = 0; i < BITLENGTH; i++)
+        {
+            triple_type[0][triple_type_index[0]++] = CaseMultiplexer;
+            triple_type[0][triple_type_index[0]++] = CaseCOT;
+            multiplexer_triple_a[arithmetic_multiplexer_triple_index++] = x[i].l;
+        }
+            multiplexer_triple_b[boolean_multiplexer_triple_index++] = l;
+#if PARTY == 0
+        alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+        Datatype lb[BITLENGTH]{0};
+        lb[BITLENGTH - 1] = l;
+        unorthogonalize_boolean(lb, temp2);
+        orthogonalize_arithmetic(temp2, lb);
+        for (int i = 0; i < BITLENGTH; i++)
+        {
+           cot_triple_a[arithmetic_cot_triple_index+i] = lb[i];  //msg1
+        }
+        lb[BITLENGTH - 1] = FUNC_NOT(l);
+        unorthogonalize_boolean(lb, temp2);
+        orthogonalize_arithmetic(temp2, lb);
+        for (int i = 0; i < BITLENGTH; i++)
+        {
+           cot_triple_b[arithmetic_cot_triple_index++] = lb[i];  //msg2
+        }
+#else
+       cot_triple_a[boolean_cot_triple_index++] = l;  //choice bit
+#endif
+
+#else
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
         Datatype lb[BITLENGTH]{0};
         lb[BITLENGTH - 1] = l;
@@ -494,6 +531,7 @@ class ABY2_PRE_Share
             store_output_share_arithmetic(x[i].l, helper_index);
             out[i].l = getRandomVal(PSELF);
         }
+#endif
     }
     static void complete_A2B_S1(int k, ABY2_PRE_Share out[])
     {
@@ -1113,6 +1151,34 @@ static void get_fc_triples_from_file()
         deinit_booleanAdditionBeaverAB();
 #endif
 
+#if BIT_INJECTION_PREPROCESSING_OPT == 1
+        init_cotBeaverC();
+#if FAKE_TRIPLES == 1
+        get_cot_triples_from_file();
+        generate_beaver_triples(
+                ips, port, process_offset, num_cot_triples, 0, "COT");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_cot_triples, 0, "COT");
+#endif
+        deinit_cotBeaverAB();
+
+
+        init_multiplexerBeaverC();
+#if FAKE_TRIPLES == 1
+        get_booleanMultiplexer_triples_from_file();
+        generate_beaver_triples(
+                ips, port, process_offset, num_multiplexer_triples, 0, "MULTIPLEXER");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_multiplexer_triples, 0, "MULTIPLEXER");
+#endif
+        deinit_multiplexerBeaverAB();
+
+
+#endif
+
+
 
 
 
@@ -1285,8 +1351,20 @@ static void get_fc_triples_from_file()
                 }
                 case CaseBooleanAddition:
                 {
-                    auto lxly = boolean_addition_triple_c[boolean_addition_triple_index++];
+                    auto lxly = boolean_addition_triple_c[curr_boolean_addition_triple_index++];
                     lxly_b[0][boolean_triple_counter[0]++] = lxly;
+                    break;
+                }
+                case CaseMultiplexer:
+                {
+                    auto lxly = multiplexer_triple_c[curr_multiplexer_triple_index++];
+                    lxly_a[0][arithmetic_triple_counter[0]++] = lxly;
+                    break;
+                }
+                case CaseCOT:
+                {
+                    auto lxly = cot_triple_c[curr_cot_triple_index++];
+                    lxly_a[0][arithmetic_triple_counter[0]++] = lxly;
                     break;
                 }
                 case CaseTripleAlreadyConsumed:  // Triple already consumed by previous case

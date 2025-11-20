@@ -11,6 +11,8 @@ std::vector<uint64_t> num_arithmetic_triples;
 std::vector<uint64_t> num_ab2_arithmetic_triples;
 std::vector<uint64_t> num_boolean_triples;
 uint64_t num_boolean_addition_triples;
+uint64_t num_multiplexer_triples;
+uint64_t num_cot_triples;
 std::vector<uint64_t> num_ab2_boolean_triples;
 std::vector<uint64_t> triple_type_index;
 std::vector<uint8_t*> triple_type;
@@ -63,6 +65,19 @@ DATATYPE* boolean_addition_triple_a = nullptr;
 DATATYPE* boolean_addition_triple_b= nullptr;
 DATATYPE* boolean_addition_triple_c = nullptr;
 
+uint64_t curr_multiplexer_triple_index = 0;
+uint64_t arithmetic_multiplexer_triple_index = 0;
+uint64_t boolean_multiplexer_triple_index = 0;
+DATATYPE* multiplexer_triple_a = nullptr;
+DATATYPE* multiplexer_triple_b= nullptr;
+DATATYPE* multiplexer_triple_c = nullptr;
+
+uint64_t curr_cot_triple_index = 0;
+uint64_t arithmetic_cot_triple_index = 0;
+uint64_t boolean_cot_triple_index = 0;
+DATATYPE* cot_triple_a = nullptr;
+DATATYPE* cot_triple_b= nullptr;
+DATATYPE* cot_triple_c = nullptr;
         
 
 DATATYPE** conv_triple_w = nullptr;
@@ -187,8 +202,11 @@ void init_booleanAdditionBeaverAB()
 {
     if(num_boolean_addition_triples == 0)
         return;
+#if PARTY == 0
     boolean_addition_triple_a = new DATATYPE[num_boolean_addition_triples];
+#else
     boolean_addition_triple_b = new DATATYPE[num_boolean_addition_triples];
+#endif
 }
 
 void init_booleanAdditionBeaverC()
@@ -198,14 +216,72 @@ void init_booleanAdditionBeaverC()
 
 void deinit_booleanAdditionBeaverAB()
 {
+#if PARTY == 0
     delete[] boolean_addition_triple_a;
+#else
     delete[] boolean_addition_triple_b;
+#endif
 }
 
 void deinit_booleanAdditionBeaverC()
 {
     delete[] boolean_addition_triple_c;
 }
+#endif
+
+#if BIT_INJECTION_PREPROCESSING_OPT == 1
+
+void init_multiplexerBeaverAB()
+{
+    multiplexer_triple_a = new DATATYPE[num_multiplexer_triples];
+    multiplexer_triple_b = new DATATYPE[num_multiplexer_triples / BITLENGTH];
+}
+
+void init_multiplexerBeaverC()
+{
+    multiplexer_triple_c = new DATATYPE[num_multiplexer_triples];
+}
+
+void deinit_multiplexerBeaverAB()
+{
+    delete[] multiplexer_triple_a;
+    delete[] multiplexer_triple_b;
+}
+
+
+void deinit_multiplexerBeaverC()
+{
+    delete[] multiplexer_triple_c;
+}
+
+void init_cotBeaverAB()
+{
+#if PARTY == 0
+    cot_triple_a = new DATATYPE[num_cot_triples];
+    cot_triple_b = new DATATYPE[num_cot_triples];
+#else
+    cot_triple_a = new DATATYPE[num_cot_triples / BITLENGTH];
+#endif
+}
+
+void init_cotBeaverC()
+{
+    cot_triple_c = new DATATYPE[num_cot_triples];
+}
+
+void deinit_cotBeaverAB()
+{
+    delete[] cot_triple_a;
+#if PARTY == 0
+    delete[] cot_triple_b;
+#endif
+}
+
+void deinit_cotBeaverC()
+{
+    delete[] cot_triple_c;
+}
+
 #endif
 
 
@@ -469,6 +545,26 @@ else if (triple_type == "BOOLEANADDITION") {
                                    base_port + process_offset);
 }
 #endif
+#if BIT_INJECTION_PREPROCESSING_OPT == 1
+else if (triple_type == "MULTIPLEXER") {
+    generateMultiplexerTriples(multiplexer_triple_a,
+                               multiplexer_triple_b,
+                               multiplexer_triple_c,
+                               BITLENGTH,
+                               num_multiplexer_triples,
+                               ips[0],
+                               base_port + process_offset);
+}
+else if (triple_type == "COT") {
+    generateCOTTriples(cot_triple_a,
+                       cot_triple_b,
+                       cot_triple_c,
+                       BITLENGTH,
+                       num_cot_triples,
+                       ips[0],
+                       base_port + process_offset);
+}
+#endif
 else {
     std::cerr << "Unknown triple type: " << triple_type << std::endl;
     exit(1);
@@ -507,6 +603,10 @@ void print_num_triples()
                 << "Boolean AB2 Beaver Triples Required: " << total_ab2_boolean_triples_num * DATTYPE << std::endl;
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
               << "Boolean Addition Triples Required: " << num_boolean_addition_triples * DATTYPE << std::endl;
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+              << "Multiplexer Triples Required: " << num_multiplexer_triples * DATTYPE / BITLENGTH << std::endl;
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": " 
+              << "COT Triples Required: " << num_cot_triples * DATTYPE / BITLENGTH << std::endl;
     for(int i = 0; i < conv_triple_params.size(); i++)
     {
         std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "

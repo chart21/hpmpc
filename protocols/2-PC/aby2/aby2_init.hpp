@@ -413,10 +413,15 @@ class ABY2_init
         {
             // num_arithmetic_triples[0]++;
             // num_arithmetic_triples[1]++;
+#if BIT_INJECTION_PREPROCESSING_OPT == 1 
+            num_multiplexer_triples++;
+            num_cot_triples++;
+#else
             generate_lxly2_triple(OP_ADD);
             store_output_share_arithmetic_(helper_index);
             store_output_share_arithmetic_(helper_index);
             generate_lxly_triple(OP_ADD,1);
+#endif
             send_to_(PNEXT);
         }
     }
@@ -459,7 +464,7 @@ class ABY2_init
 #endif
         total_num_boolean_output_triples.push_back(num_boolean_triples[0] + num_ab2_boolean_triples[0] + num_boolean_addition_triples);
         total_num_boolean_output_triples.push_back(num_boolean_triples[1] + num_ab2_boolean_triples[1]);
-        total_num_arithmetic_output_triples.push_back(num_arithmetic_triples[0] + num_ab2_arithmetic_triples[0] + num_conv_c_triples + num_fc_c_triples + num_bc2D_c_triples);
+        total_num_arithmetic_output_triples.push_back(num_arithmetic_triples[0] + num_ab2_arithmetic_triples[0] + num_conv_c_triples + num_fc_c_triples + num_bc2D_c_triples + num_multiplexer_triples + num_cot_triples);
         total_num_arithmetic_output_triples.push_back(num_arithmetic_triples[1] + num_ab2_arithmetic_triples[1]);
         uint64_t total_num_output_triples_round0 = preprocessed_outputs_index + total_num_boolean_output_triples[0] + total_num_arithmetic_output_triples[0];
         uint64_t total_num_output_triples_round1 = total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1];

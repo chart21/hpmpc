@@ -132,8 +132,13 @@ class ABY2_ONLINE_Share
         orthogonalize_arithmetic(temp2, lb);
         for (int i = 0; i < BITLENGTH; i++)
         {
+#if BIT_INJECTION_PREPROCESSING_OPT == 1
+            Datatype lb = retrieve_output_share_arithmetic();
+            Datatype lalb = retrieve_output_share_arithmetic();
+#else
             Datatype lb = retrieve_output_share_arithmetic();
             Datatype lalb = retrieve_output_share_arithmetic(1);
+#endif
             auto xim = x[i].m;
             auto xil = x[i].l;
 #if PARTY == 0

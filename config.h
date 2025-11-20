@@ -272,6 +272,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define A2B_ONLINE_OPT 0  // Online-optimized A2B, by calculating [lc]^B in preprocessing to skip communication in the Online Phase
 #endif
 
+#ifndef BIT_INJECTION_PREPROCESSING_OPT
+#define BIT_INJECTION_PREPROCESSING_OPT 0  // Use optimized bit injection preprocessing via COT and multiplexing
+#endif
+
 #ifndef OPTIMIZED_BIT_INJECTION_RELU 
 #define OPTIMIZED_BIT_INJECTION_RELU 1  // Use optimized bit injection for ReLU
 #endif

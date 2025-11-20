@@ -1,4 +1,5 @@
 #pragma once
+#include "arch/STD.h"
 #include "include/pch.h"
 #include "arch/DATATYPE.h"
 
@@ -111,6 +112,8 @@ struct FullyConnectedParameter
 #define generateFCTriples generateLayerDummyTriples
 #define generateBatchNorm2DTriples generateLayerDummyTriples
 #define generateBooleanAdditionTriples generateBooleanAdditionDummyTriples
+#define generateMultiplexerTriples generateMultiplexerDummyTriples
+#define generateCOTTriples generateCOTDummyTriples
 
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
 // Input: ip and port of the other party to connect to
@@ -286,8 +289,11 @@ void generateBooleanAdditionDummyTriples(type a[],
     if(num_triples == 0) return;
     if(num_bits_per_input <= 0) return;
     //reinterpret SIMD bitstream as uint8 bitstream
+#if PARTY == 0
     auto av = reinterpret_cast<type (*)[num_bits_per_input]> (a); 
+#else
     auto bv = reinterpret_cast<type (*)[num_bits_per_input]> (b);
+#endif
     auto cv = reinterpret_cast<type (*)[num_bits_per_input]> (c);
     num_triples = num_triples / num_bits_per_input;
     type* carry_last = new type[num_triples];
@@ -304,9 +310,15 @@ void generateBooleanAdditionDummyTriples(type a[],
             case k - 1:
                 for (uint64_t i = 0; i < num_triples ; i++)
                 {
-                    cv[i][r] = av[i][r] ^ bv[i][r]; 
+#if PARTY == 0
+                    cv[i][r] = av[i][r];
                     ot_a[i] = av[i][r];
+                    ot_b[i] = SET_ALL_ZERO();
+#else
+                    cv[i][r] = bv[i][r];
                     ot_b[i] = bv[i][r];
+                    ot_a[i] = SET_ALL_ZERO();
+#endif
                 }
                 generateBooleanAB2Triples(ot_a, ot_b, carry_last, bitlength, num_triples, ip, port, cheetah_ot_type);
                 break;
@@ -314,10 +326,19 @@ void generateBooleanAdditionDummyTriples(type a[],
                 for (uint64_t i = 0; i < num_triples ; i++)
                 {
                     //update
-                    cv[i][r] = av[i][r] ^ bv[i][r] ^ carry_last[i];
+#if PARTY == 0
+                    cv[i][r] = av[i][r] ^ carry_last[i];
+#else
+                    cv[i][r] = bv[i][r] ^ carry_last[i];
+#endif
                     //prepare
+#if PARTY == 0 
                     ot_a[i] = av[i][r] ^ carry_last[i];
+                    ot_b[i] = carry_last[i];
+#else
                     ot_b[i] = bv[i][r] ^ carry_last[i];
+                    ot_a[i] = carry_last[i];
+#endif
                 }
                 generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples, ip, port, cheetah_ot_type);
                 break;
@@ -330,13 +351,22 @@ void generateBooleanAdditionDummyTriples(type a[],
                 }
                 // update result
                 for (uint64_t i = 0; i < num_triples ; i++)
-                        cv[i][r] = av[i][r] ^ bv[i][r] ^ carry_last[i];
+#if PARTY == 0
+                        cv[i][r] = av[i][r] ^ carry_last[i];
+#else
+                        cv[i][r] = bv[i][r] ^ carry_last[i];
+#endif
 
                 // prepare_carry
                 for (uint64_t i = 0; i < num_triples ; i++)
                 {
+#if PARTY == 0
                     ot_a[i] = av[i][r] ^ carry_last[i];
+                    ot_b[i] = carry_last[i];
+#else
                     ot_b[i] = bv[i][r] ^ carry_last[i];
+                    ot_a[i] = carry_last[i];
+#endif
                 }
                 generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples, ip, port, cheetah_ot_type);
                 break;
@@ -349,7 +379,11 @@ void generateBooleanAdditionDummyTriples(type a[],
                 }
                 // update result
                 for (uint64_t i = 0; i < num_triples ; i++)
-                        cv[i][r] = av[i][r] ^ bv[i][r] ^ carry_last[i];
+#if PARTY == 0
+                    cv[i][r] = av[i][r] ^ carry_last[i];
+#else
+                    cv[i][r] = bv[i][r] ^ carry_last[i];
+#endif
                 delete[] carry_last;
                 delete[] carry_this;
                 delete[] ot_a;
@@ -359,6 +393,98 @@ void generateBooleanAdditionDummyTriples(type a[],
         }
     }
 }
+
+// Input: For Party 0: Array of messages m0 stored in a[] and m1 stored in b[]
+// Input: For Party 1: Array of selection bits stored in a[], b[] is unused
+// Output: [c] will be filled with shares of mb, i.e. P0 holds r and P1 holds m0/m1 - r
+template <typename type>
+void generateCOTDummyTriples(type a[],
+                                 type b[],
+                                 type c[],
+                                 int bitlength,
+                                 uint64_t num_triples,
+                                 std::string ip,
+                                 int port,
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+{
+    if(num_triples == 0) return;
+    const int vectorization_factor = DATTYPE / bitlength; 
+#if PARTY == 0
+
+    if(vectorization_factor == 1) // No need to unvectorize
+        {
+            UINT_TYPE* uint_a = (UINT_TYPE*) a;
+            UINT_TYPE* uint_b = (UINT_TYPE*) b;
+            UINT_TYPE* uint_c = (UINT_TYPE*) c;
+            return;
+        }
+    
+    UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]); //stores m0
+    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
+    
+    UINT_TYPE* uint_b = NEW(UINT_TYPE[num_triples]); //stores m1
+    unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
+#else  //PARTY 1
+    uint8_t* uint_a = (uint8_t*) a; //stores choice bit (packed)
+#endif
+
+
+    UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
+    for (uint64_t i = 0; i < num_triples; i++)
+    {
+       uint_c[i] = 0; // dummy assignment, replace with actual triple generation
+    }
+    
+    // convert UINT triple to SIMD type
+    orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
+#if PARTY == 0
+    DELETEARR(uint_a);
+    DELETEARR(uint_b);
+#endif
+    DELETEARR(uint_c);
+}
+
+// Input: Arithmetic shares stored in a[] and shared bits stored in b[]
+// Output: [c] will be filled with shares ab
+template <typename type>
+void generateMultiplexerDummyTriples(type a[],
+                                 type b[],
+                                 type c[],
+                                 int bitlength,
+                                 uint64_t num_triples,
+                                 std::string ip,
+                                 int port,
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+{
+    if(num_triples == 0) return;
+    const int vectorization_factor = DATTYPE / bitlength; 
+    
+    uint8_t* uint_b = (uint8_t*) b; //stores choice bit (packed)
+
+    if(vectorization_factor == 1) // No need to unvectorize
+        {
+            UINT_TYPE* uint_a = (UINT_TYPE*) a;
+            UINT_TYPE* uint_c = (UINT_TYPE*) c;
+            return;
+        }
+    
+    UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]); //stores arithmetic share
+    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
+    
+    UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
+    for (uint64_t i = 0; i < num_triples; i++)
+    {
+       uint_c[i] = uint_a[i]; // dummy assignment, replace with actual triple generation
+    }
+    
+    // convert UINT triple to SIMD type
+    orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
+    DELETEARR(uint_a);
+    DELETEARR(uint_c);
+}
+
+
+
 
 
 //Input: arrays of layer triple shares [a], [b] with sizes predefined by convolution/Fc/Batchnorm params
@@ -457,6 +583,8 @@ void generateLayerDummyTriples(type** a,
 #define generateFCTriples generateFakeLayerTriples
 #define generateBatchNorm2DTriples generateFakeLayerTriples
 #define generateBooleanAdditionTriples generateFakeBooleanAdditionTriples
+#define generateMultiplexerTriples generateFakeMultiplexerTriples
+#define generateCOTTriples generateCOTDummyTriples
 
 template <typename type>
 void generateFakeArithmeticTriples(type a[],
@@ -513,6 +641,28 @@ void generateFakeBooleanAdditionTriples(type a[],
 {
 }
 
+template <typename type>
+void generateFakeMultiplexerTriples(type a[],
+                                type b[],
+                                type c[],
+                                int bitlength,
+                                uint64_t num_triples,
+                                std::string ip,
+                                int port)
+{
+}
+
+template <typename type>
+void generateFakeCOTTriples(type a[],
+                                type b[],
+                                type c[],
+                                int bitlength,
+                                uint64_t num_triples,
+                                std::string ip,
+                                int port)
+{
+}
+
 template <typename type, typename LayerParams>
 void generateFakeLayerTriples(type** a,
                              type** b,
@@ -523,6 +673,7 @@ void generateFakeLayerTriples(type** a,
                              int port)
 {
 }
+
 
 
 #endif
