@@ -124,6 +124,8 @@ void inference(DATATYPE* res)
     int n_test = NUM_INPUTS * BASE_DIV, ch = 3, h = 230, w = 230, num_classes = 1000;
     auto model = Cheetah_ResNet<modeltype>(num_classes);
 #endif
+    
+    modeltype::communicate();
 
     // === Read Labels and Images ===
 
