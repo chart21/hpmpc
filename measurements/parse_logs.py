@@ -4,8 +4,8 @@ import os
 import sys
 import argparse
 from collections import defaultdict
-            
-bool_functions=[1,13,14,15,25,32,42,43,44] # List of function identifiers that are boolean-only functions
+
+bool_functions = [1, 13, 14, 15, 25, 32, 42, 43, 44]  # List of function identifiers that are boolean-only functions
 
 def parse_size(size_str):
     values = [s.strip().rstrip('MB') for s in size_str.split(',')]
@@ -40,8 +40,11 @@ def parse_log_file(file_path, debug=False):
         if running_line:
             params = re.findall(r'(\w+)=(\w+)', running_line)
             run_data.update(params)
-            if debug:
-                print(f"Parsed parameters: {dict(params)}")
+
+        # --- Triples Accumulator Init ---
+        triples_accumulators = defaultdict(int)
+        parties_seen = set()
+        # -------------------------------------
 
         # Initialize counters and lists for calculations
         triple_gen_total = 0.0
@@ -52,6 +55,18 @@ def parse_log_file(file_path, debug=False):
         tests_passed = tests_total = 0
 
         for line in lines:
+            # --- Triples Parsing Logic ---
+            if 'Triples Required' in line:
+                triple_match = re.search(r'P(\d+).*?:\s*(.*?)\s*Triples Required.*:\s*(\d+)', line)
+                if triple_match:
+                    party_id = triple_match.group(1)
+                    triple_type = triple_match.group(2).strip()
+                    count = int(triple_match.group(3))
+                    
+                    parties_seen.add(party_id)
+                    triples_accumulators[triple_type] += count
+            # ----------------------------------
+
             if 'data[MiB]:' in line:
                 triple_match = re.search(r'data\[MiB\]:\s*([\d.e+-]+)', line)
                 if triple_match:
@@ -90,6 +105,15 @@ def parse_log_file(file_path, debug=False):
             if tests_match:
                 tests_passed += int(tests_match.group(1))
                 tests_total += int(tests_match.group(2))
+
+        # --- Calculate Final Triple Stats ---
+        num_parties = len(parties_seen) if len(parties_seen) > 0 else 1
+        for t_type, t_count in triples_accumulators.items():
+            # Sum of all layers / number of parties / 10^6
+            val_normalized = (t_count / num_parties) / 1_000_000
+            col_name = f"{t_type} Triples (#10^6)"
+            run_data[col_name] = val_normalized
+        # -----------------------------------------
 
         # Calculate statistics
         pre_avg = sum(pre_times) / len(pre_times) if pre_times else 0
@@ -163,7 +187,7 @@ def write_csv(parsed_data, output_file):
         print(f"No data to write to CSV: {output_file}")
         return
     
-    # Define the fixed headers in the desired order
+    # Define the fixed headers
     fixed_headers = [
         'ACCURACY(%)', 'TESTS_PASSED',
         'PRE_RECEIVED(MB)', 'PRE_SENT(MB)', 'ONLINE_RECEIVED(MB)', 'ONLINE_SENT(MB)',
@@ -177,23 +201,33 @@ def write_csv(parsed_data, output_file):
     for run in parsed_data:
         all_keys.update(run.keys())
     
-    # Separate dynamic headers from fixed headers and sort them
-    dynamic_headers = sorted([key for key in all_keys if key not in fixed_headers])
+    # --- NEW SORTING LOGIC ---
+    # 1. Identify Triples headers (to go to the far right)
+    triple_headers = sorted([k for k in all_keys if 'Triples' in k])
+
+    # 2. Identify "Other" dynamic headers (Input params like BITLENGTH, etc.)
+    #    These are keys that are NOT fixed headers AND NOT triple headers
+    other_headers = sorted([k for k in all_keys if k not in fixed_headers and k not in triple_headers])
     
-    # Filter out headers with no data
-    dynamic_headers = [header for header in dynamic_headers if any(run.get(header) for run in parsed_data)]
-    fixed_headers = [header for header in fixed_headers if any(run.get(header) for run in parsed_data)]
+    # 3. Filter out empty columns (Checking `if v` to exclude 0s and Nones)
+    triple_headers = [h for h in triple_headers if any(run.get(h) for run in parsed_data)]
+    other_headers = [h for h in other_headers if any(run.get(h) for run in parsed_data)]
+    fixed_headers = [h for h in fixed_headers if any(run.get(h) for run in parsed_data)]
     
-    # Combine headers in the desired order: sorted dynamic headers first, then fixed headers
-    fieldnames = dynamic_headers + fixed_headers
+    # 4. Combine in order: [Params/Misc] -> [Fixed Stats] -> [Triple Stats]
+    fieldnames = other_headers + fixed_headers + triple_headers
+    # -------------------------
 
     with open(output_file, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for run in parsed_data:
             # Convert scientific notation to normal numbers and filter out empty values
-            formatted_run = {k: f"{float(v):.6f}" if isinstance(v, (int, float)) and k != 'TESTS_PASSED' else v 
-                             for k, v in run.items() if v and k in fieldnames}
+            formatted_run = {
+                k: f"{float(v):.6f}" if isinstance(v, (int, float)) and k != 'TESTS_PASSED' else v 
+                for k, v in run.items() 
+                if v and k in fieldnames
+            }
             writer.writerow(formatted_run)
     print(f"CSV file has been created: {output_file}")
 
@@ -221,3 +255,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
