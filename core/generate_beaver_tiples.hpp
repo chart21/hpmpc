@@ -295,7 +295,7 @@ void generateBooleanAdditionDummyTriples(type a[],
     auto bv = reinterpret_cast<type (*)[num_bits_per_input]> (b);
 #endif
     auto cv = reinterpret_cast<type (*)[num_bits_per_input]> (c);
-    num_triples = num_triples / num_bits_per_input;
+    num_triples = num_triples / (num_bits_per_input * DATTYPE);
     type* carry_last = new type[num_triples];
     type* carry_this = new type[num_triples];
     type* ot_a = new type[num_triples];
@@ -320,7 +320,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     ot_a[i] = SET_ALL_ZERO();
 #endif
                 }
-                generateBooleanAB2Triples(ot_a, ot_b, carry_last, bitlength, num_triples, ip, port, cheetah_ot_type);
+                generateBooleanAB2Triples(ot_a, ot_b, carry_last, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type);
                 break;
             case k - 2:
                 for (uint64_t i = 0; i < num_triples ; i++)
@@ -340,7 +340,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     ot_a[i] = carry_last[i];
 #endif
                 }
-                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples, ip, port, cheetah_ot_type);
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type);
                 break;
             default:
                 // complete_carry
@@ -368,7 +368,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     ot_a[i] = carry_last[i];
 #endif
                 }
-                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples, ip, port, cheetah_ot_type);
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type);
                 break;
             case 0:
                 // complete_carry

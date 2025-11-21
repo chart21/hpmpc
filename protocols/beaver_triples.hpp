@@ -539,9 +539,9 @@ else if (triple_type == "BATCHNORM2D") {
 }
 #if A2B_ONLINE_OPT == 1
 else if (triple_type == "BOOLEANADDITION") {
-    generateBooleanAdditionTriples(boolean_triple_a,
-                                   boolean_triple_b,
-                                   boolean_triple_c,
+    generateBooleanAdditionTriples(boolean_addition_triple_a,
+                                   boolean_addition_triple_b,
+                                   boolean_addition_triple_c,
                                    BITLENGTH,
                                    l_num_boolean_addition_triples,
                                    ips[0],
