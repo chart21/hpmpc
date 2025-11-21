@@ -610,24 +610,29 @@ void print_num_triples()
               << "Multiplexer Triples Required: " << num_multiplexer_triples * DATTYPE / BITLENGTH << std::endl;
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": " 
               << "COT Triples Required: " << num_cot_triples * DATTYPE / BITLENGTH << std::endl;
+#if A_KNOWN == 0
+    std::string triple_type_str = "AB";
+#else
+    std::string triple_type_str = "AB2";
+#endif
     for(int i = 0; i < conv_triple_params.size(); i++)
     {
         std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
-                  << "Convolution Triples Required for Conv layer " << i << ": " 
+            << "Convolution " << triple_type_str << " Triples Required for Conv layer " << i << ": " 
                   << conv_triple_params[i].batchSize * (((conv_triple_params[i].out_h + 0) / 1) * (((conv_triple_params[i].out_w + 0) / 1)) * conv_triple_params[i].dout)
                   << std::endl;
     }
     for(int i = 0; i < fc_triple_params.size(); i++)
     {
         std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
-                  << "Fully Connected Triples Required for FC layer " << i << ": " 
+                  << "Fully Connected " << triple_type_str << " Triples Required for FC layer " << i << ": " 
                   << fc_triple_params[i].out_feat * fc_triple_params[i].batchSize
                   << std::endl;
     }
     for(int i = 0; i < bc2D_triple_params.size(); i++)
     {
         std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
-                  << "BatchNorm2D Triples Required for BN2D layer " << i << ": " 
+                  << "BatchNorm2D " << triple_type_str << " Triples Required for BN2D layer " << i << ": " 
                   << bc2D_triple_params[i].batchSize * bc2D_triple_params[i].ch * bc2D_triple_params[i].h * bc2D_triple_params[i].w
                   << std::endl;
     }
