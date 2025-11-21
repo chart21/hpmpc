@@ -336,7 +336,7 @@ class OEC_MAL1_Share
         {
             auto old_l = receive_from_live(P_2);
 #if MULTI_INPUT == 1
-            store_compare_view(P_012, ADD(SUB(m, old_l)), getRandomVal(P_123)); // lc - ma lb + r123
+            store_compare_view(P_012, ADD(SUB(m, old_l), getRandomVal(P_123))); // lc - ma lb + r123
             m = getRandomVal(P_123); 
             store_compare_view(P_0, ADD(v, m));  // verify new v + m with P_0
 #endif
