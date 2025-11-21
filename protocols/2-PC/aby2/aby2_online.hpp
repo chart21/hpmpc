@@ -126,17 +126,19 @@ class ABY2_ONLINE_Share
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
         unorthogonalize_boolean(b0, temp2);
         orthogonalize_arithmetic(temp2, b0);
-        Datatype lb[BITLENGTH]{0};
-        lb[BITLENGTH - 1] = l;
-        unorthogonalize_boolean(lb, temp2);
-        orthogonalize_arithmetic(temp2, lb);
+        Datatype lbi[BITLENGTH]{0};
+        lbi[BITLENGTH - 1] = l;
+        unorthogonalize_boolean(lbi, temp2);
+        orthogonalize_arithmetic(temp2, lbi);
         for (int i = 0; i < BITLENGTH; i++)
         {
 #if BIT_INJECTION_PREPROCESSING_OPT == 1
-            Datatype lb = retrieve_output_share_arithmetic();
+            Datatype lb1lb2 = retrieve_output_share_arithmetic();
+            Datatype lb = OP_ADD(lbi[i], lb1lb2);
             Datatype lalb = retrieve_output_share_arithmetic();
 #else
-            Datatype lb = retrieve_output_share_arithmetic();
+            Datatype lb1lb2 = retrieve_output_share_arithmetic();
+            Datatype lb = OP_ADD(lbi[i], lb1lb2);
             Datatype lalb = retrieve_output_share_arithmetic(1);
 #endif
             auto xim = x[i].m;

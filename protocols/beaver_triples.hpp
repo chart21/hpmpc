@@ -258,9 +258,8 @@ void init_cotBeaverAB()
 {
 #if PARTY == 0
     cot_triple_a = new DATATYPE[num_cot_triples];
-    cot_triple_b = new DATATYPE[num_cot_triples];
 #else
-    cot_triple_a = new DATATYPE[num_cot_triples / BITLENGTH];
+    cot_triple_a = multiplexer_triple_b; //reuse lb share
 #endif
 }
 
@@ -271,9 +270,10 @@ void init_cotBeaverC()
 
 void deinit_cotBeaverAB()
 {
-    delete[] cot_triple_a;
 #if PARTY == 0
-    delete[] cot_triple_b;
+    delete[] cot_triple_a;
+#else
+    cot_triple_a = nullptr; // no need to delet since multiplexer is reused
 #endif
 }
 
@@ -560,7 +560,6 @@ else if (triple_type == "MULTIPLEXER") {
 }
 else if (triple_type == "COT") {
     generateCOTTriples(cot_triple_a,
-                       cot_triple_b,
                        cot_triple_c,
                        BITLENGTH,
                        l_num_cot_triples,

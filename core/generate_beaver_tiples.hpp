@@ -393,12 +393,11 @@ void generateBooleanAdditionDummyTriples(type a[],
     }
 }
 
-// Input: For Party 0: Array of messages m0 stored in a[] and m1 stored in b[]
-// Input: For Party 1: Array of selection bits stored in a[], b[] is unused
-// Output: [c] will be filled with shares of mb, i.e. P0 holds r and P1 holds m0/m1 - r
+// Input: For Party 0: Array of messages m0 stored in a[]
+// Input: For Party 1: Array of selection bits stored in a[]
+// Output: [c] will be filled with shares of mb, i.e. P0 holds -r and P1 holds m0/m1 + r
 template <typename type>
 void generateCOTDummyTriples(type a[],
-                                 type b[],
                                  type c[],
                                  int bitlength,
                                  uint64_t num_triples,
@@ -408,21 +407,22 @@ void generateCOTDummyTriples(type a[],
 {
     if(num_triples == 0) return;
     const int vectorization_factor = DATTYPE / bitlength; 
-#if PARTY == 0
 
     if(vectorization_factor == 1) // No need to unvectorize
         {
+#if PARTY == 0
             UINT_TYPE* uint_a = (UINT_TYPE*) a;
-            UINT_TYPE* uint_b = (UINT_TYPE*) b;
+#else
+            uint8_t* uint_a = (uint8_t*) a;
+#endif
             UINT_TYPE* uint_c = (UINT_TYPE*) c;
             return;
         }
     
+#if PARTY == 0
     UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]); //stores m0
     unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
     
-    UINT_TYPE* uint_b = NEW(UINT_TYPE[num_triples]); //stores m1
-    unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
 #else  //PARTY 1
     uint8_t* uint_a = (uint8_t*) a; //stores choice bit (packed)
 #endif
@@ -438,7 +438,6 @@ void generateCOTDummyTriples(type a[],
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
 #if PARTY == 0
     DELETEARR(uint_a);
-    DELETEARR(uint_b);
 #endif
     DELETEARR(uint_c);
 }

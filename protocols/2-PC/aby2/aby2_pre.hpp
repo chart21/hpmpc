@@ -491,17 +491,10 @@ class ABY2_PRE_Share
         orthogonalize_arithmetic(temp2, lb);
         for (int i = 0; i < BITLENGTH; i++)
         {
-           cot_triple_a[arithmetic_cot_triple_index+i] = lb[i];  //msg1
-        }
-        lb[BITLENGTH - 1] = FUNC_NOT(l);
-        unorthogonalize_boolean(lb, temp2);
-        orthogonalize_arithmetic(temp2, lb);
-        for (int i = 0; i < BITLENGTH; i++)
-        {
-           cot_triple_b[arithmetic_cot_triple_index++] = lb[i];  //msg2
+           cot_triple_a[arithmetic_cot_triple_index+i] = lb[i];  //corr
         }
 #else
-       cot_triple_a[boolean_cot_triple_index++] = l;  //choice bit
+       // cot_triple_a[boolean_cot_triple_index++] = l;  //choice bit -> already set by multiplexer
 #endif
 
 #else
