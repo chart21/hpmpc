@@ -140,13 +140,13 @@ class ABY2_init
     template <int id, typename func_add, typename func_sub>
     void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
     {
-        if constexpr (id == PSELF)
 #if SHARE_PREP == 0
+        if constexpr (id == PSELF)
         {
             send_to_(PNEXT);
         }
-    }
 #endif
+    }
 
     template <int id, typename func_add, typename func_sub>
     void prepare_receive_from(func_add ADD, func_sub SUB)
