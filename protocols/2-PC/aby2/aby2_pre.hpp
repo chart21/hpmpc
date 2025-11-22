@@ -104,7 +104,11 @@ class ABY2_PRE_Share
     void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
     {
         if constexpr (id == PSELF)
+#if SHARE_PREP == 1
+            l = OP_SUB(SET_ALL_ZERO(), val);
+#else
             l = getRandomVal(PSELF);
+#endif
         else
             l = SET_ALL_ZERO();
     }

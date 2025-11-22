@@ -240,6 +240,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define CONNECTION_RETRY 5
 #endif
 
+#ifndef WEIGHT_SHARING_OPT_SIM
+#define WEIGHT_SHARING_OPT_SIM 0  // Skip Secret Sharing of biases as they can be integrated in multiplication protocol (Only Simulated)
+#endif
+
 #ifndef FUSE_DOT
 #define FUSE_DOT 1  // Fuse multiple dot products into one
 #endif

@@ -164,9 +164,14 @@ class ABY2_ONLINE_Share
     {
         if constexpr (id == PSELF)
         {
+#if SHARE_PREP == 1
+            l = SUB(SET_ALL_ZERO(), val);
+            m = SET_ALL_ZERO();
+#else
             l = getRandomVal(PSELF);
             m = ADD(val, l);
             send_to_live(PNEXT, m);
+#endif
         }
         else
         {
@@ -186,8 +191,10 @@ class ABY2_ONLINE_Share
     template <int id, typename func_add, typename func_sub>
     void complete_receive_from(func_add ADD, func_sub SUB)
     {
+#if SHARE_PREP == 0
         if constexpr (id != PSELF)
             m = receive_from_live(id);
+#endif
     }
 
     template <typename func_add>
