@@ -402,8 +402,7 @@ void generateCOTDummyTriples(type a[],
                                  int bitlength,
                                  uint64_t num_triples,
                                  std::string ip,
-                                 int port,
-                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+                                 int port)
 {
     if(num_triples == 0) return;
     const int vectorization_factor = DATTYPE / bitlength; 
@@ -451,8 +450,7 @@ void generateMultiplexerDummyTriples(type a[],
                                  int bitlength,
                                  uint64_t num_triples,
                                  std::string ip,
-                                 int port,
-                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+                                 int port)
 {
     if(num_triples == 0) return;
     const int vectorization_factor = DATTYPE / bitlength; 
