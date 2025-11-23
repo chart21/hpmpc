@@ -469,6 +469,9 @@ void generateCOTDummyTriples(type a[],
                                  int port)
 {
     if(num_triples == 0) return;
+
+    port += CHEETAH_PORT_OFFSET;
+
     const int vectorization_factor = DATTYPE / bitlength; 
 
     if(vectorization_factor == 1) // No need to unvectorize
@@ -479,6 +482,14 @@ void generateCOTDummyTriples(type a[],
             uint8_t* uint_a = (uint8_t*) a;
 #endif
             UINT_TYPE* uint_c = (UINT_TYPE*) c;
+
+#if PARTY == 0
+            Iface::generateCOT(PARTY + 1, uint_a, nullptr, uint_c, num_triples,
+                ip, port, CHEETAH_THREADS, PROCESS_NUM);
+#else
+            Iface::generateCOT(PARTY + 1, nullptr, uint_a, uint_c, num_triples,
+                ip, port, CHEETAH_THREADS, PROCESS_NUM);
+#endif
             return;
         }
     
@@ -492,10 +503,14 @@ void generateCOTDummyTriples(type a[],
 
 
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
-    for (uint64_t i = 0; i < num_triples; i++)
-    {
-       uint_c[i] = 0; // dummy assignment, replace with actual triple generation
-    }
+
+#if PARTY == 0
+    Iface::generateCOT(PARTY + 1, uint_a, nullptr, uint_c, num_triples,
+        ip, port, CHEETAH_THREADS, PROCESS_NUM);
+#else
+    Iface::generateCOT(PARTY + 1, nullptr, uint_a, uint_c, num_triples,
+        ip, port, CHEETAH_THREADS, PROCESS_NUM);
+#endif
     
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
@@ -517,6 +532,8 @@ void generateMultiplexerDummyTriples(type a[],
                                  int port)
 {
     if(num_triples == 0) return;
+
+    port += CHEETAH_PORT_OFFSET;
     const int vectorization_factor = DATTYPE / bitlength; 
     
     uint8_t* uint_b = (uint8_t*) b; //stores choice bit (packed)
@@ -525,6 +542,10 @@ void generateMultiplexerDummyTriples(type a[],
         {
             UINT_TYPE* uint_a = (UINT_TYPE*) a;
             UINT_TYPE* uint_c = (UINT_TYPE*) c;
+
+            Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, PARTY + 1,
+                    ip, port, PROCESS_NUM, CHEETAH_THREADS);
+
             return;
         }
     
@@ -532,10 +553,9 @@ void generateMultiplexerDummyTriples(type a[],
     unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
     
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
-    for (uint64_t i = 0; i < num_triples; i++)
-    {
-       uint_c[i] = uint_a[i]; // dummy assignment, replace with actual triple generation
-    }
+
+    Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, PARTY + 1,
+            ip, port, PROCESS_NUM, CHEETAH_THREADS);
     
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
