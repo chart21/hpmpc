@@ -146,8 +146,8 @@ void beaver(std::string ips[])
     init_booleanAdditionBeaverAB();
 #endif
 #if BIT_INJECTION_PREPROCESSING_OPT == 1
-    init_cotBeaverAB();
     init_multiplexerBeaverAB();
+    init_cotBeaverAB();
 #endif
 #else
     init_beaver();
