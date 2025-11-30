@@ -2,7 +2,9 @@
 #include "include/pch.h"
 #include "arch/DATATYPE.h"
 
+#ifndef FAKE_TRIPLES
 #define FAKE_TRIPLES 0
+#endif
 
 // const ConvolutionParameter param(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
 struct ConvolutionParameter
