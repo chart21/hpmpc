@@ -2,13 +2,33 @@
 
 set -e
 
-run() {
-    string=$(echo "$@" | tr -s ' ')
-    printf "\e[35m"
-    printf "%s" "$string"
-    printf "\e[0m\n"
+: "${COLORTERM:=false}"
 
-    eval $string
+PURPLE=""
+CLR=""
+
+if [[ $COLORTERM = "truecolor" ]]; then
+    PURPLE="\e[35m"
+    CLR="\e[0m"
+fi
+log() {
+    echo -e "$PURPLE$@$CLR"
+}
+
+build() {
+    string=$(echo "$@" | tr -s ' ')
+    log "$string"
+
+    if [[ $BUILD = "1" ]]; then
+        make clean
+        eval $string
+    fi
+}
+
+run() {
+    if [[ $RUN = "1" ]]; then
+        ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
+    fi
 }
 
 THREADS=16
@@ -72,10 +92,6 @@ get_var() {
     echo $STATIC_VARIABLES
 }
 
-make clean
-
-rm -rf data/*
-
 export MODEL_DIR=nn/Pygeon/models/pretrained
 export DATA_DIR=nn/Pygeon/data/datasets
 
@@ -94,30 +110,25 @@ terminate() {
     pkill -9 -f run-P
 }
 
-log_info() {
-    echo "FUNC: $FUNC"
-    echo "DATTYPE: $DATTYPE"
-    echo "THREADS: $THREADS"
-}
-
-log() {
-    echo -e "\033[35m$@\033[0m"
-}
-
 print_help() {
     echo "OPTIONS"
-    echo -e "\t-a, --host <IP>"
-    echo -e "\t-b, --bench <FUNC>"
-    echo -e "\t-c, --compile"
-    echo -e "\t-ct, --cheetah-threads"
-    echo -e "\t-nc, --no-compile"
-    echo -e "\t-d, --dattype <DAT>"
-    echo -e "\t-k, --kill"
-    echo -e "\t-n, --num-process <PROCESS_NUM>"
-    echo -e "\t-p, --party <ID>"
-    echo -e "\t-r, --run"
-    echo -e "\t-t, --test <FUNC>"
-    echo -e "\t-h, --help"
+    TAB="  "
+    SPACING="\t\t"
+    echo -e "$TAB--fuse:\tenables 'FUSE_CONV_BN' and 'FUSE_RELU_AVG'"
+    echo -e "$TAB--injection\tenables 'BIT_INJECTION_PREPROCESSING_OPT'"
+    echo -e "$TAB--online\tenables 'A2B_ONLINE_OPT' and 'A_KNOWN_TO_EVALUATORS_OPT'"
+    echo -e "$TAB-a, --host <IP>"
+    echo -e "$TAB-b, --bench <FUNC>"
+    echo -e "$TAB-c, --compile"
+    echo -e "$TAB-ct, --cheetah-threads"
+    echo -e "$TAB-nc, --no-compile"
+    echo -e "$TAB-d, --dattype <DAT>"
+    echo -e "$TAB-k, --kill"
+    echo -e "$TAB-n, --num-process <PROCESS_NUM>"
+    echo -e "$TAB-p, --party <ID>"
+    echo -e "$TAB-r, --run"
+    echo -e "$TAB-t, --test <FUNC>"
+    echo -e "$TAB-h, --help"
 }
 
 error() {
@@ -177,28 +188,20 @@ while [[ $# -gt 0 ]]; do
             ;;
         -b|--bench)
             FUNC=$2
-            log_info
 
-            if [[ $BUILD = "1" ]]; then
-                run "make -j $(get_var) MODELOWNER=-1 DATAOWNER=-1"
-            fi
+            build "make -j $(get_var) MODELOWNER=-1 DATAOWNER=-1"
 
-            if [[ $RUN = "1" ]]; then
-                ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
-            fi
+            run
+
             shift
             ;;
         -r|--run)
             log "Input: $(( $NUM_INPUTS * DATTYPE / 32 ))"
             log "Process_num: ${PROCESS_NUM}"
 
-            log_info
+            build "make -j $(get_var) MODELOWNER=P_0 DATAOWNER=P_1"
 
-            run "make -j $(get_var) MODELOWNER=P_0 DATAOWNER=P_1"
-
-            if [[ $RUN = "1" ]]; then
-                ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
-            fi
+            run
             ;;
         -t|--test)
             if (( "$2" < 54 || "$2" > 59 )); then
@@ -210,9 +213,9 @@ while [[ $# -gt 0 ]]; do
 
             log "RUNNING TEST $FUNC..."
 
-            run "make -j $(get_var) SPLITROLES=0 USE_CUDA_GEMM=0"
+            build "make -j $(get_var) SPLITROLES=0 USE_CUDA_GEMM=0"
 
-            ./scripts/run.sh -a "${IP_HOST}" -b "${IP_HOST}" -p ${PARTY} -n 2
+            run
             ;;
         -h|--help)
             print_help
