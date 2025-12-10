@@ -149,10 +149,10 @@ void storeBooleanABTriple(const Datatype a, const Datatype b)
     template <typename Datatype>
 void storeArithmeticAB2Triple(const Datatype a, const Datatype b)
 {
-#if A_KNOWN == 1 && PARTY == 0
+#if PARTY == 0
     arithmetic_ab2_triple_a[arithmetic_ab2_triple_index] = a; //P0 holds A0 in plain in AB2 setting
 #endif
-#if A_KNOWN != 1 || PARTY != 0
+#if PARTY != 0
     arithmetic_ab2_triple_b[arithmetic_ab2_triple_index] = b; //B1 is not needed for the AB2 protocol
 #endif
     arithmetic_ab2_triple_index++;
@@ -161,10 +161,10 @@ void storeArithmeticAB2Triple(const Datatype a, const Datatype b)
 template <typename Datatype>
 void storeBooleanAB2Triple(const Datatype a, const Datatype b)
 {
-#if A_KNOWN == 1 && PARTY == 0
+#if PARTY == 0
     boolean_ab2_triple_a[boolean_ab2_triple_index] = a;
 #endif
-#if A_KNOWN != 1 || PARTY != 0
+#if PARTY != 0
     boolean_ab2_triple_b[boolean_ab2_triple_index] = b; //B1 is not needed for the AB2 protocol
 #endif
     boolean_ab2_triple_index++;
