@@ -170,7 +170,7 @@ void generateBooleanDummyTriples(type a[],
                                  uint64_t num_triples,
                                  std::string ip,
                                  int port,
-                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE, bool disconnect = true)
 {
     std::cout << "BOOL AB\n";
 
@@ -210,7 +210,8 @@ void generateBooleanDummyTriples(type a[],
             CHEETAH_THREADS,
             ot, PROCESS_NUM);
 
-    Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    if (disconnect)
+        Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
 
@@ -292,7 +293,7 @@ void generateBooleanAB2DummyTriples(type a[],
                                  uint64_t num_triples,
                                  std::string ip,
                                  int port,
-                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE, bool disconnect = true)
 {
     std::cout << "BOOL AB2\n";
 
@@ -339,7 +340,8 @@ void generateBooleanAB2DummyTriples(type a[],
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
             num_triples / 8, ip, port, PARTY + 1, CHEETAH_THREADS, ot, PROCESS_NUM);
 
-    Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    if (disconnect)
+        Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
@@ -390,7 +392,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     ot_a[i] = SET_ALL_ZERO();
 #endif
                 }
-                generateBooleanAB2Triples(ot_a, ot_b, carry_last, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type);
+                generateBooleanAB2Triples(ot_a, ot_b, carry_last, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type, false);
                 break;
             case k - 2:
                 for (uint64_t i = 0; i < num_triples ; i++)
@@ -410,7 +412,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     ot_a[i] = carry_last[i];
 #endif
                 }
-                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type);
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type, false);
                 break;
             default:
                 // complete_carry
@@ -438,7 +440,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     ot_a[i] = carry_last[i];
 #endif
                 }
-                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type);
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type, false);
                 break;
             case 0:
                 // complete_carry
