@@ -209,6 +209,8 @@ void generateBooleanDummyTriples(type a[],
             bitlength, num_triples / 8, ip, port, PARTY + 1,
             CHEETAH_THREADS,
             ot, PROCESS_NUM);
+
+    Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
 
@@ -336,6 +338,8 @@ void generateBooleanAB2DummyTriples(type a[],
 
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
             num_triples / 8, ip, port, PARTY + 1, CHEETAH_THREADS, ot, PROCESS_NUM);
+
+    Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
@@ -454,6 +458,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                 delete[] carry_this;
                 delete[] ot_a;
                 delete[] ot_b;
+                Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
                 return;
                     
         }
