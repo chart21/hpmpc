@@ -6,7 +6,7 @@ NVCC ?= nvcc
 #make executable and flags directories if they don't exist
 $(shell mkdir -p executables/flags)
 
-CHEETAH := ../ConvTriple
+CHEETAH := nn/ConvTriple
 
 CHEETAH_GPU ?= 0
 

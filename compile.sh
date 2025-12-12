@@ -16,6 +16,18 @@ log() {
 }
 
 build() {
+    cd "$CONVTRIPLE_PATH"
+    if [[ ! -d "deps" ]]; then
+        if [[ $GPU == 1 ]]; then
+            ./deps.sh -gpu
+        else
+            ./deps.sh
+        fi
+    fi
+
+    ./build.sh
+    cd -
+
     string=$(echo "$@" | tr -s ' ')
     log "$string"
 
@@ -31,6 +43,7 @@ run() {
     fi
 }
 
+CONVTRIPLE_PATH="nn/ConvTriple"
 THREADS=16
 
 OPTIMIZED_BIT_INJECTION_RELU=1
@@ -149,6 +162,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         --injection)
             BIT_INJECTION_PREPROCESSING_OPT=1
+            ;;
+        -g|--gpu)
+            GPU=1
             ;;
         -c|--compile)
             RUN=0
