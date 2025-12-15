@@ -121,6 +121,8 @@ struct FullyConnectedParameter
 #include <core/hpmpc_interface.hpp>
 #include <core/keys.hpp>
 
+#define CHEETAH_PARTY (PARTY+1)
+
 
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
 // Input: ip and port of the other party to connect to
@@ -150,7 +152,7 @@ void generateArithmeticDummyTriples(type a[],
     unorthogonalize_arithmetic(b, uint_b, num_triples / (DATTYPE / bitlength));
     UINT_TYPE* uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
 
-    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB, PROCESS_NUM);
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB, PROCESS_NUM);
 
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
@@ -206,12 +208,12 @@ void generateBooleanDummyTriples(type a[],
 
     Iface::generateBoolTriplesCheetah(
             uint_a, uint_b, uint_c,
-            bitlength, num_triples / 8, ip, port, PARTY + 1,
+            bitlength, num_triples / 8, ip, port, CHEETAH_PARTY,
             CHEETAH_THREADS,
             ot, PROCESS_NUM);
 
     if (disconnect)
-        Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
 
@@ -267,7 +269,7 @@ void generateArithmeticAB2DummyTriples(type a[],
         uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
     }
 
-    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, PARTY + 1, CHEETAH_THREADS, Utils::PROTO::AB2, PROCESS_NUM);
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB2, PROCESS_NUM);
 
     // convert UINT triple to SIMD type
     if (vectorization_factor != 1) {
@@ -338,10 +340,10 @@ void generateBooleanAB2DummyTriples(type a[],
     };
 
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
-            num_triples / 8, ip, port, PARTY + 1, CHEETAH_THREADS, ot, PROCESS_NUM);
+            num_triples / 8, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, ot, PROCESS_NUM);
 
     if (disconnect)
-        Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
@@ -460,7 +462,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                 delete[] carry_this;
                 delete[] ot_a;
                 delete[] ot_b;
-                Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+                Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
                 return;
                     
         }
@@ -494,10 +496,10 @@ void generateCOTDummyTriples(type a[],
             UINT_TYPE* uint_c = (UINT_TYPE*) c;
 
 #if PARTY == 0
-            Iface::generateCOT(PARTY + 1, uint_a, nullptr, uint_c, num_triples,
+            Iface::generateCOT(CHEETAH_PARTY, uint_a, nullptr, uint_c, num_triples,
                 ip, port, CHEETAH_THREADS, PROCESS_NUM);
 #else
-            Iface::generateCOT(PARTY + 1, nullptr, uint_a, uint_c, num_triples,
+            Iface::generateCOT(CHEETAH_PARTY, nullptr, uint_a, uint_c, num_triples,
                 ip, port, CHEETAH_THREADS, PROCESS_NUM);
 #endif
             return;
@@ -515,10 +517,10 @@ void generateCOTDummyTriples(type a[],
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
 
 #if PARTY == 0
-    Iface::generateCOT(PARTY + 1, uint_a, nullptr, uint_c, num_triples,
+    Iface::generateCOT(CHEETAH_PARTY, uint_a, nullptr, uint_c, num_triples,
         ip, port, CHEETAH_THREADS, PROCESS_NUM);
 #else
-    Iface::generateCOT(PARTY + 1, nullptr, uint_a, uint_c, num_triples,
+    Iface::generateCOT(CHEETAH_PARTY, nullptr, uint_a, uint_c, num_triples,
         ip, port, CHEETAH_THREADS, PROCESS_NUM);
 #endif
     
@@ -553,7 +555,7 @@ void generateMultiplexerDummyTriples(type a[],
             UINT_TYPE* uint_a = (UINT_TYPE*) a;
             UINT_TYPE* uint_c = (UINT_TYPE*) c;
 
-            Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, PARTY + 1,
+            Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, CHEETAH_PARTY,
                     ip, port, PROCESS_NUM, CHEETAH_THREADS);
 
             return;
@@ -564,7 +566,7 @@ void generateMultiplexerDummyTriples(type a[],
     
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
 
-    Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, PARTY + 1,
+    Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, CHEETAH_PARTY,
             ip, port, PROCESS_NUM, CHEETAH_THREADS);
     
     // convert UINT triple to SIMD type
@@ -598,7 +600,7 @@ void generateLayerDummyTriples(type** a,
     }
 
 
-    auto& keys = Iface::Keys<IO::NetIO>::instance(PARTY + 1, ip, port, CHEETAH_THREADS, PROCESS_NUM);
+    auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM);
     const int factor = DATTYPE/BITLENGTH;
 
     if(factor == 1) { // No need to unvectorize
@@ -637,7 +639,7 @@ void generateLayerDummyTriples(type** a,
                         A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         conv,
-                        PARTY + 1, CHEETAH_THREADS,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
                         A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
                         factor
                 );
@@ -651,7 +653,7 @@ void generateLayerDummyTriples(type** a,
                         A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
-                        PARTY + 1, CHEETAH_THREADS,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
                         A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
                         factor
                 );
@@ -661,7 +663,7 @@ void generateLayerDummyTriples(type** a,
                         A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
                         uint_y + y_index_counter,
                         p.batchSize, p.ch, p.h, p.w,
-                        PARTY + 1, CHEETAH_THREADS,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
                         A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
                         factor
                 );
@@ -676,7 +678,7 @@ void generateLayerDummyTriples(type** a,
         if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
             Iface::generateConvTriplesCheetah(keys, total_batches, parms,
                     PARTY == 1 ? uint_x : nullptr, PARTY == 0 ? uint_w : nullptr,
-                    uint_y, Utils::PROTO::AB2, PARTY + 1,
+                    uint_y, Utils::PROTO::AB2, CHEETAH_PARTY,
                     CHEETAH_THREADS, factor
             );
         }
@@ -741,7 +743,7 @@ void generateLayerDummyTriples(type** a,
                 Iface::generateConvTriplesCheetahWrapper(keys,
                         x, w, y,
                         conv,
-                        PARTY + 1, CHEETAH_THREADS,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
                         A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
                         factor
                 );
@@ -749,7 +751,7 @@ void generateLayerDummyTriples(type** a,
                 Iface::generateFCTriplesCheetah(keys,
                         x, w, y,
                         p.batchSize, p.in_feat, p.out_feat,
-                        PARTY + 1, CHEETAH_THREADS,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
                         A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
                         factor
                 );
@@ -757,7 +759,7 @@ void generateLayerDummyTriples(type** a,
                 Iface::generateBNTriplesCheetah(keys,
                         x, w, y,
                         p.batchSize, p.ch, p.h, p.w,
-                        PARTY + 1, CHEETAH_THREADS,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
                         A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
                         factor
                 );
