@@ -212,7 +212,7 @@ void generateBooleanDummyTriples(type a[],
             CHEETAH_THREADS,
             ot, PROCESS_NUM);
 
-    if (disconnect || true)
+    if (disconnect)
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
@@ -342,7 +342,7 @@ void generateBooleanAB2DummyTriples(type a[],
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
             num_triples / 8, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, ot, PROCESS_NUM);
 
-    if (disconnect || true)
+    if (disconnect)
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
