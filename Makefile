@@ -13,14 +13,14 @@ CHEETAH_GPU ?= 0
 HE_INCLUDE := -I${CHEETAH}/src/include \
 			  -I${CHEETAH}/src \
 			  -isystem ${CHEETAH}/deps/include \
-			  -isystem ${CHEETAH}/deps/include/SEAL-4.0 \
+			  -isystem ${CHEETAH}/deps/include/SEAL-4.1 \
 			  -isystem /usr/include/eigen3
 
 HE_PATHS := -Wl,-rpath,${CHEETAH}/build/lib:${CHEETAH}/deps/lib \
 			-L${CHEETAH}/build/lib \
 			-L${CHEETAH}/deps/lib
 
-HE_LIBS := -lHE -lgemini -lseal-4.0
+HE_LIBS := -lHE -lgemini -lseal-4.1
 
 ifeq (${CHEETAH_GPU}, 1)
 HE_INCLUDE += -isystem ${CHEETAH}/deps/include/troy
