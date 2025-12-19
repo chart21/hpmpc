@@ -136,6 +136,7 @@ print_help() {
     echo -e "$TAB-ct, --cheetah-threads"
     echo -e "$TAB-nc, --no-compile"
     echo -e "$TAB-d, --dattype <DAT>"
+    echo -e "$TAB-i, --input <num>"
     echo -e "$TAB-k, --kill"
     echo -e "$TAB-n, --num-process <PROCESS_NUM>"
     echo -e "$TAB-p, --party <ID>"
@@ -175,6 +176,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         -nc|--no-compile)
             BUILD=0
+            ;;
+        -i|--input)
+            NUM_INPUTS=$2
+            log "NUM_INPUTS '${NUM_INPUTS}'"
+            shift
             ;;
         -a|--host)
             IP_HOST="$2"
