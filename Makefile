@@ -31,7 +31,7 @@ endif
 CHEETAH_FLAGS := $(HE_INCLUDE) $(HE_PATHS) $(HE_LIBS)
 
 # Base flags
-EXECFLAGS := -march=native -Ofast -fsanitize=address -fno-finite-math-only -std=c++20 -pthread -Wno-ignored-attributes
+EXECFLAGS := -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -Wno-ignored-attributes
 LINKFLAGS := ${CHEETAH_FLAGS} -lssl -lcrypto -I nn/PIGEON
 
 CXXFLAGS := $(EXECFLAGS) $(LINKFLAGS)
