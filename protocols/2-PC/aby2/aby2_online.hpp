@@ -137,8 +137,7 @@ class ABY2_ONLINE_Share
             Datatype lb = OP_ADD(lbi[i], lb1lb2);
             Datatype lalb = retrieve_output_share_arithmetic();
 #else
-            Datatype lb1lb2 = retrieve_output_share_arithmetic();
-            Datatype lb = OP_ADD(lbi[i], lb1lb2);
+            Datatype lb = retrieve_output_share_arithmetic();
             Datatype lalb = retrieve_output_share_arithmetic(1);
 #endif
             auto xim = x[i].m;
