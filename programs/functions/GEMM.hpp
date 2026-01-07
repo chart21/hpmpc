@@ -13,14 +13,18 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
         {
 
 #if PUBLIC_WEIGHTS == 0
-#if A_KNOWN == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if A_KNOWN == 1 
 #if FC_TRIPLES == 1 
             sum += W[i * w_cols + j].prepare_dot_ex_lxly_a_known(A[j]);
 #else
             sum += W[i * w_cols + j].prepare_dot_a_known(A[j]);
 #endif
 #else
+#if FC_TRIPLES == 1 
+            sum += W[i * w_cols + j].prepare_dot_ex_lxly(A[j]);
+#else
             sum += W[i * w_cols + j].prepare_dot(A[j]);
+#endif
 #endif
 #else
             sum += A[j].mult_public(W[i * w_cols + j]);
@@ -106,14 +110,18 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #if FUSE_DOT == 0
                                 for (int i = 0; i < T::getNumDotProducts(); ++i)
                                 {
-#if A_KNOWN == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if A_KNOWN == 1 
 #if CONV_TRIPLES == 1 
                                     temps[i] += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk], i); 
 #else
                                     temps[i] += A[iif + kk].prepare_dot_a_known(B[jjf + kk], i); 
 #endif
 #else
+#if CONV_TRIPLES == 1 
+                                    temps[i] += A[iif + kk].prepare_dot_ex_lxly(B[jjf + kk], i); 
+#else
                                     temps[i] += A[iif + kk].prepare_dot(B[jjf + kk], i);
+#endif
 #endif
                                 }
                                 temp.join_dots(temps);
@@ -122,25 +130,33 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
                                 // temp += A[iif + kk].prepare_dot3(B[jjf + kk], dummy_sigma);
                                 A[iif + kk].prepare_Conv_BN_Accum(B[jjf + kk], temp);
 #else
-#if A_KNOWN == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if A_KNOWN == 1 
 #if CONV_TRIPLES == 1 
                                 temp += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk]);
 #else
                                 temp += A[iif + kk].prepare_dot_a_known(B[jjf + kk]);
 #endif
 #else
+#if CONV_TRIPLES == 1 
+                                temp += A[iif + kk].prepare_dot_ex_lxly(B[jjf + kk]);
+#else
                                 temp += A[iif + kk].prepare_dot(B[jjf + kk]);
 #endif
 #endif
+#endif
 #elif FUSE_DOT == 2
-#if A_KNOWN == 1 //TODO: Add parameter to allow GEMM with unknown A
+#if A_KNOWN == 1 
 #if CONV_TRIPLES == 1 
                                 Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk], t);
 #else
                                 Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot_a_known(B[jjf + kk], t);
 #endif
 #else
+#if CONV_TRIPLES == 1 
+                                Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot_ex_lxly(B[jjf + kk], t);
+#else
                                 Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot(B[jjf + kk], t);
+#endif
 #endif
 #endif
 #else

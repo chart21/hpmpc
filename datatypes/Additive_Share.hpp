@@ -210,6 +210,11 @@ class Additive_Share : public Share_Type
     {
         return Additive_Share(Share_Type::prepare_dot_ex_lxly(b, i, OP_ADD, OP_SUB, OP_MULT));
     }
+    
+    Additive_Share prepare_dot_ex_lxly(const Additive_Share<Datatype, Share_Type>& b) const
+    {
+        return Additive_Share(Share_Type::prepare_dot_ex_lxly(b, OP_ADD, OP_SUB, OP_MULT));
+    }
 
     void mask_and_send_dot_without_trunc_with_triple()
     {

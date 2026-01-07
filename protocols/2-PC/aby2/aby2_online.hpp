@@ -311,7 +311,7 @@ class ABY2_ONLINE_Share
 #else
         c.m = SET_ALL_ZERO();
 #endif
-        c.m = SUB(c.m, SUB(ADD(MULT(m, b.l), MULT(l, b.m))));  // mx my - (mx[ly] + my[lx])
+        c.m = SUB(c.m, ADD(MULT(m, b.l), MULT(l, b.m)));  // mx my - (mx[ly] + my[lx])
         return c;
     }
     
