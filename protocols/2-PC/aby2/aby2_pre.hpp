@@ -105,7 +105,7 @@ class ABY2_PRE_Share
     {
         if constexpr (id == PSELF)
 #if SHARE_PREP == 1
-            l = OP_SUB(SET_ALL_ZERO(), val);
+            l = SUB(SET_ALL_ZERO(), val);
 #else
             l = getRandomVal(PSELF);
 #endif

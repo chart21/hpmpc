@@ -176,6 +176,9 @@ class ABY2_ONLINE_Share
         else
         {
             l = SET_ALL_ZERO();
+#if SHARE_PREP == 1
+            m = SET_ALL_ZERO();
+#endif
         }
     }
 
