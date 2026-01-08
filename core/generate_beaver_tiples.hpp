@@ -364,7 +364,7 @@ void generateBooleanAdditionDummyTriples(type a[],
     if(num_bits_per_input <= 0) return;
     //reinterpret SIMD bitstream as uint8 bitstream
 #if PARTY == 0
-    auto av = reinterpret_cast<type (*)[num_bits_per_input]> (a); 
+    auto av = reinterpret_cast<type (*)[num_bits_per_input]> (a);
 #else
     auto bv = reinterpret_cast<type (*)[num_bits_per_input]> (b);
 #endif
@@ -373,7 +373,7 @@ void generateBooleanAdditionDummyTriples(type a[],
     type* carry_last = new type[num_triples];
     type* carry_this = new type[num_triples];
     type* ot_a = new type[num_triples];
-    type* ot_b = new type[num_triples]; 
+    type* ot_b = new type[num_triples];
     int r = num_bits_per_input;
     const int k = num_bits_per_input;
     while(r > 0)
@@ -406,7 +406,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     cv[i][r] = bv[i][r] ^ carry_last[i];
 #endif
                     //prepare
-#if PARTY == 0 
+#if PARTY == 0
                     ot_a[i] = av[i][r] ^ carry_last[i];
                     ot_b[i] = carry_last[i];
 #else
@@ -464,7 +464,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                 delete[] ot_b;
                 Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
                 return;
-                    
+
         }
     }
 }
@@ -484,7 +484,7 @@ void generateCOTDummyTriples(type a[],
 
     port += CHEETAH_PORT_OFFSET;
 
-    const int vectorization_factor = DATTYPE / bitlength; 
+    const int vectorization_factor = DATTYPE / bitlength;
 
     if(vectorization_factor == 1) // No need to unvectorize
         {
@@ -504,11 +504,11 @@ void generateCOTDummyTriples(type a[],
 #endif
             return;
         }
-    
+
 #if PARTY == 0
     UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]); //stores m0
-    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
-    
+    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor));
+
 #else  //PARTY 1
     uint8_t* uint_a = (uint8_t*) a; //stores choice bit (packed)
 #endif
@@ -523,7 +523,7 @@ void generateCOTDummyTriples(type a[],
     Iface::generateCOT(CHEETAH_PARTY, nullptr, uint_a, uint_c, num_triples,
         ip, port, CHEETAH_THREADS, PROCESS_NUM);
 #endif
-    
+
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
 #if PARTY == 0
@@ -546,8 +546,8 @@ void generateMultiplexerDummyTriples(type a[],
     if(num_triples == 0) return;
 
     port += CHEETAH_PORT_OFFSET;
-    const int vectorization_factor = DATTYPE / bitlength; 
-    
+    const int vectorization_factor = DATTYPE / bitlength;
+
     uint8_t* uint_b = (uint8_t*) b; //stores choice bit (packed)
 
     if(vectorization_factor == 1) // No need to unvectorize
@@ -560,15 +560,15 @@ void generateMultiplexerDummyTriples(type a[],
 
             return;
         }
-    
+
     UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]); //stores arithmetic share
-    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
-    
+    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor));
+
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
 
     Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, CHEETAH_PARTY,
             ip, port, PROCESS_NUM, CHEETAH_THREADS);
-    
+
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
     DELETEARR(uint_a);
@@ -641,7 +641,7 @@ void generateLayerDummyTriples(type** a,
                         conv,
                         CHEETAH_PARTY, CHEETAH_THREADS,
                         A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
-                        factor
+                        factor, A_KNOWN == 0
                 );
 #else
                 parms[n] = conv;
