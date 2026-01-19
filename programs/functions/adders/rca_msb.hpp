@@ -67,13 +67,29 @@ class BooleanAdder_MSB
         }
     }
 
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
     void prepare_carry() { carry_this = (carry_last ^ x[r]) & (carry_last ^ y[r]); }
+#else
+    void prepare_carry() { 
+        if(current_phase == PHASE_LIVE)
+            carry_this = (carry_last ^ x[r]) & (carry_last ^ y[r]);
+        else
+            carry_this = carry_last & (!y[r]); 
+    }
+#endif
 
     void complete_carry()
     {
         carry_this.complete_and();
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
         carry_this = carry_this ^ carry_last;
         carry_last = carry_this;
+#else
+     if(current_phase == PHASE_LIVE)
+        carry_this = carry_this ^ carry_last;
+        carry_last = carry_this;
+#endif
+
     }
 
     void update_z() { z = x[0] ^ y[0] ^ carry_last; }

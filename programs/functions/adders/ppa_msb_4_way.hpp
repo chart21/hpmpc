@@ -114,7 +114,11 @@ class PPA_MSB_4Way
     Share prepare_W3_S(Share x1, Share y1, Share g2, Share p2, Share g3)
     {
         /* return g1 ^ (p1 & g2) ^ p1.prepare_and3(p2, g3); */
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
         auto val = x1.prepare_dot(y1) ^ (x1 ^ y1).prepare_dot(g2) ^ (x1 ^ y1).prepare_dot3(p2, g3);
+#else
+        auto val = x1.mult_a_known_to_evaluators(y1) ^ (x1 ^ y1).prepare_dot(g2) ^ (x1 ^ y1).prepare_dot3(p2, g3); 
+#endif
         val.mask_and_send_dot();
         return val;
     }
