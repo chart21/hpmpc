@@ -49,10 +49,20 @@ class BooleanAdder_MSB_Carry
         switch (r)
         {
             case k - 1:  // special case for lsbs
+#if A_KNOWN_TO_EVALUATORS_OPT == 1 
+                    carry_last = x[k - 1].mult_a_known_to_evaluators(y[k -1]);
+                    carry_last.prepare_remask();
+#else
                 carry_last = x[k - 1] & y[k - 1];
+#endif
+
                 break;
             case k - 2:
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
+                carry_last.complete_remask();
+#else
                 carry_last.complete_and();  // get carry from lsb
+#endif
                 prepare_carry();
                 break;
             case 0:
@@ -119,12 +129,30 @@ class BooleanAdder_MSB_Carry
         }
     }
 
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
     void prepare_carry() { carry_this = (carry_last ^ x[r]) & (carry_last ^ y[r]); }
+#else
+    void prepare_carry() { 
+        if(current_phase == PHASE_LIVE)
+            carry_this = (carry_last ^ x[r]) & (carry_last ^ y[r]);
+        else
+            carry_this = carry_last & (!y[r]); 
+    }
+#endif
 
     void complete_carry()
     {
         carry_this.complete_and();
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
         carry_this = carry_this ^ carry_last;
         carry_last = carry_this;
-    }
+#else
+     if(current_phase == PHASE_LIVE)
+     {
+        carry_this = carry_this ^ carry_last;
+        carry_last = carry_this;
+     }
+#endif
+    }        
+
 };

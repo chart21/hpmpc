@@ -86,10 +86,11 @@ class BooleanAdder_MSB
         carry_last = carry_this;
 #else
      if(current_phase == PHASE_LIVE)
+     {
         carry_this = carry_this ^ carry_last;
         carry_last = carry_this;
+     }
 #endif
-
     }
 
     void update_z() { z = x[0] ^ y[0] ^ carry_last; }
