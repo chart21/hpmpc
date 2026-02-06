@@ -96,7 +96,7 @@
     #define WAIT_AFTER_MESSAGES_IF_AHEAD -1  // In case of interleaved computation, the preprocessing party will at most be x messages ahead to save RAM
     #endif
 #else
-    #ifndef WAIT_AFTER_MESSAGES_IF_AHEAD 
+    #ifndef WAIT_AFTER_MESSAGES_IF_AHEAD
     #define WAIT_AFTER_MESSAGES_IF_AHEAD -1  // In case of preprocessing, this option is deactivated
     #endif
 #endif
@@ -280,7 +280,7 @@ int base_port = BASE_PORT;  // temporary solution
 #define BIT_INJECTION_PREPROCESSING_OPT 1  // Use optimized bit injection preprocessing via COT and multiplexing
 #endif
 
-#ifndef OPTIMIZED_BIT_INJECTION_RELU 
+#ifndef OPTIMIZED_BIT_INJECTION_RELU
 #define OPTIMIZED_BIT_INJECTION_RELU 1  // Use optimized bit injection for ReLU
 #endif
 
@@ -355,7 +355,7 @@ int base_port = BASE_PORT;  // temporary solution
 
 #ifndef STORE_PREPROCESSING
 #define STORE_PREPROCESSING 0  // Save preprocessing data to file
-#endif 
+#endif
 
 #ifndef LOAD_PREPROCESSING
 #define LOAD_PREPROCESSING 0  // Load preprocessing data from file
@@ -368,7 +368,7 @@ int base_port = BASE_PORT;  // temporary solution
 #ifndef A_KNOWN
 #if PROTOCOL == 4
 #define A_KNOWN 1
-#else 
+#else
 #define A_KNOWN 0
 #endif
 #endif

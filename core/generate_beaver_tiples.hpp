@@ -676,7 +676,7 @@ void generateLayerDummyTriples(type** a,
         }
 #if CHEETAH_CONV_TYPE == 1
         if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
-            Iface::generateConvTriplesCheetah(keys, total_batches, parms,
+            Iface::generateConvTriplesCheetah2(keys, total_batches, parms,
                     PARTY == 1 ? uint_x : nullptr, PARTY == 0 ? uint_w : nullptr,
                     uint_y, Utils::PROTO::AB2, CHEETAH_PARTY,
                     CHEETAH_THREADS, factor
