@@ -57,8 +57,8 @@ class OEC_MAL1_NO_CV_Share
         Datatype m_3 = receive_from_live(P_2);
         v = SUB(v, m_3);
         m = getRandomVal(P_123);               
-        send_to_(P_0, ADD(v, m));  
-        send_to_(P_2, ADD(v, m));
+        send_to_live(P_0, ADD(v, m));  
+        send_to_live(P_2, ADD(v, m));
     }
     
     template <typename func_add, typename func_sub>
@@ -140,7 +140,7 @@ class OEC_MAL1_NO_CV_Share
 #endif
 
             if constexpr (id != P_0)
-                send_to_(P_0, val);
+                send_to_live(P_0, val);
             v = SUB(val, v);  // convert locally to a + x_0
         }
     }
@@ -151,14 +151,14 @@ class OEC_MAL1_NO_CV_Share
         if constexpr (id != PSELF)
         {
             Datatype local = ADD(v, m);
-            if constexpr (id != P_0))
+            if constexpr (id != P_0)
             {
-            Datatype val = receive_from_(P_0);
+            Datatype val = receive_from_live(P_0);
             check_eqs(local, val);
             }
             if constexpr (id != P_2)
             {
-            Datatype valp = receive_from_(P_2);
+            Datatype valp = receive_from_live(P_2);
             check_eqs(local, valp);
             }
         }

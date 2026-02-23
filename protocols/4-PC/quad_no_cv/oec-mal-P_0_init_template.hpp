@@ -64,7 +64,7 @@ class OEC_MAL0_NO_CV_init
     }
 
     template <int id, typename func_add, typename func_sub>
-    void prepare_receive_from(func_add ADD, func_sub SUB)
+    void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
     {
 
         if constexpr (id == PSELF)
@@ -92,6 +92,17 @@ class OEC_MAL0_NO_CV_init
             if constexpr (id != P_2)
                 receive_from_(P_2);
         }
+    }
+    
+    template <int id, typename func_add, typename func_sub>
+    void complete_receive_from2(func_add ADD, func_sub SUB)
+    {
+    }
+    
+    template <typename func_mul>
+    OEC_MAL0_NO_CV_init mult_public(const Datatype b, func_mul MULT) const
+    {
+        return OEC_MAL0_NO_CV_init();
     }
 
     static void send() { send_(); }

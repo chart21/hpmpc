@@ -23,6 +23,7 @@
 #define Quad_het 11
 #define Quad_OffOn 12
 #define Simulate 13
+#define Quad_no_cv 14
 #if PROTOCOL == rep3
 #define PROTOCOL_LIVE Replicated_Share
 #define PROTOCOL_INIT Replicated_init
@@ -300,6 +301,43 @@
 #define PROTOCOL_LIVE Fantastic_Four_Share
 #include "4-PC/fantastic/Fantastic_Four_template.hpp"
 #endif
+#elif PROTOCOL == Quad_no_cv
+#if INIT == 1
+#if PARTY == 0
+#define PROTOCOL_INIT OEC_MAL0_NO_CV_init
+#include "4-PC/quad_no_cv/oec-mal-P_0_init_template.hpp"
+#elif PARTY == 1
+#define PROTOCOL_INIT OEC_MAL1_NO_CV_init
+#include "4-PC/quad_no_cv/oec-mal-P_1_init_template.hpp"
+#elif PARTY == 2
+#define PROTOCOL_INIT OEC_MAL2_NO_CV_init
+#include "4-PC/quad_no_cv/oec-mal-P_2_init_template.hpp"
+#elif PARTY == 3
+#define PROTOCOL_INIT OEC_MAL3_NO_CV_init
+#include "4-PC/quad_no_cv/oec-mal-P_3_init_template.hpp"
+#endif
+#if LIVE == 1
+#if PARTY == 0
+#define PROTOCOL_LIVE OEC_MAL0_NO_CV_Share
+#include "4-PC/quad_no_cv/oec-mal-P_0_template.hpp"
+#elif PARTY == 1
+#define PROTOCOL_LIVE OEC_MAL1_NO_CV_Share
+#include "4-PC/quad_no_cv/oec-mal-P_1_template.hpp"
+#elif PARTY == 2
+#define PROTOCOL_LIVE OEC_MAL2_NO_CV_Share
+#include "4-PC/quad_no_cv/oec-mal-P_2_template.hpp"
+#elif PARTY == 3
+#if PRE == 1
+#define PROTOCOL_LIVE OECL_MAL3_NO_CV_POST_Share
+#include "4-PC/quad_no_cv/oec-mal-P_3-post_template.hpp"
+#else
+#define PROTOCOL_LIVE OEC_MAL3_NO_CV_Share
+#include "4-PC/quad_no_cv/oec-mal-P_3_template.hpp"
+#endif
+#endif
+#endif
+#endif
 
 #endif
+
 

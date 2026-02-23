@@ -57,7 +57,7 @@ class OEC_MAL2_NO_CV_Share
         Datatype m2 = receive_from_live(P_1);
         v = SUB(v, m2);
         m = getRandomVal(P_123);
-        send_to_(P_0, ADD(v, m));
+        send_to_live(P_0, ADD(v, m));
     }
 
     template <typename func_add, typename func_sub>
@@ -138,6 +138,17 @@ class OEC_MAL2_NO_CV_Share
                 send_to_(P_1);
             v = SUB(val, v);  // convert locally to a + x_0
         }
+    }
+    
+    template <int id, typename func_add, typename func_sub>
+    void complete_receive_from2(func_add ADD, func_sub SUB)
+    {
+    }
+    
+    template <typename func_mul>
+    OEC_MAL2_NO_CV_Share mult_public(const Datatype b, func_mul MULT) const
+    {
+        return OEC_MAL2_NO_CV_Share(MULT(v, b), MULT(r, b), MULT(m, b));
     }
 
     static void send() { send_live(); }

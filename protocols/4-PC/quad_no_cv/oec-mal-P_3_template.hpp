@@ -1,33 +1,34 @@
 #pragma once
 #include "../../generic_share.hpp"
-#define PRE_SHARE OEC_MAL3_Share
+#define PRE_SHARE OEC_MAL3_NO_CV_Share
 template <typename Datatype>
-class OEC_MAL3_Share
+class OEC_MAL3_NO_CV_Share
 {
   private:
     Datatype r0;
     Datatype r1;
 
   public:
-    OEC_MAL3_Share() {}
-    OEC_MAL3_Share(Datatype r0, Datatype r1) : r0(r0), r1(r1) {}
-    OEC_MAL3_Share(Datatype r0) : r0(r0) {}
+    OEC_MAL3_NO_CV_Share() {}
+    OEC_MAL3_NO_CV_Share(Datatype r0, Datatype r1) : r0(r0), r1(r1) {}
+    OEC_MAL3_NO_CV_Share(Datatype r0) : r0(r0) {}
 
-    static OEC_MAL3_Share public_val(Datatype a) { return OEC_MAL3_Share(SET_ALL_ZERO(), SET_ALL_ZERO()); }
+    static OEC_MAL3_NO_CV_Share public_val(Datatype a) { return OEC_MAL3_NO_CV_Share(SET_ALL_ZERO(), SET_ALL_ZERO()); }
 
-    OEC_MAL3_Share Not() const { return *this; }
+    OEC_MAL3_NO_CV_Share Not() const { return *this; }
 
     template <typename func_add>
-    OEC_MAL3_Share Add(OEC_MAL3_Share b, func_add ADD) const
+    OEC_MAL3_NO_CV_Share Add(OEC_MAL3_NO_CV_Share b, func_add ADD) const
     {
-        return OEC_MAL3_Share(ADD(r0, b.r0), ADD(r1, b.r1));
+        return OEC_MAL3_NO_CV_Share(ADD(r0, b.r0), ADD(r1, b.r1));
     }
 
     template <typename func_add, typename func_sub, typename func_mul>
-    OEC_MAL3_Share prepare_mult(OEC_MAL3_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    OEC_MAL3_NO_CV_Share prepare_mult(OEC_MAL3_NO_CV_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-        OEC_MAL3_Share c;
+        OEC_MAL3_NO_CV_Share c;
         c.r1 = ADD(getRandomVal(P_023), getRandomVal(P_013));  // x1
+        Datatype o1 = ADD(c.r1, ADD(MULT(r1, b.r1), getRandomVal(P_013)));
         Datatype o4 = ADD(SUB(MULT(r1, SUB(b.r1, b.r0)), MULT(b.r1, r0)), getRandomVal(P_123));  // r123_2
         c.r0 = o4;
 #if PRE == 1
@@ -135,6 +136,11 @@ class OEC_MAL3_Share
     {
     }
     
+    template <typename func_mul>
+    OEC_MAL3_NO_CV_Share mult_public(const Datatype b, func_mul MULT) const
+    {
+        return OEC_MAL3_NO_CV_Share(MULT(r0, b), MULT(r1, b));
+    }
 
     static void send() { send_live(); }
 

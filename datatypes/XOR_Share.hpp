@@ -172,5 +172,18 @@ class XOR_Share : public Share_Type
     }
 
 #endif
+    
+#if CV_FIX == 1
+    void complete_and2()
+    {
+        Share_Type::complete_mult2(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
+    }
+
+    template <int id>
+    void complete_receive_from2()
+    {
+        Share_Type::template complete_receive_from2<id>(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
+    }
+#endif
 
 };

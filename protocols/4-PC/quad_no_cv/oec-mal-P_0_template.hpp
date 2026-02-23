@@ -137,6 +137,12 @@ class OEC_MAL0_NO_CV_Share
         }
     }
 
+    template <typename func_mul>
+    OEC_MAL0_NO_CV_Share mult_public(const Datatype b, func_mul MULT) const
+    {
+        return OEC_MAL0_NO_CV_Share(MULT(v, b), MULT(r, b));
+    }
+
     static void send() { send_live(); }
 
     static void receive() { receive_live(); }
@@ -146,6 +152,10 @@ class OEC_MAL0_NO_CV_Share
         /* #if PRE == 0 */
         communicate_live();
         /* #endif */
+    }
+    template <int id, typename func_add, typename func_sub>
+    void complete_receive_from2(func_add ADD, func_sub SUB)
+    {
     }
 
 };

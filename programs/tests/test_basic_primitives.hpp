@@ -33,6 +33,11 @@ bool test_secret_sharing_and_revealing()
     Share::communicate();
     share.template complete_receive_from<party_id>();
 
+    #if PROTOCOL == 14
+    Share::communicate();
+    share.template complete_receive_from2<party_id>();
+    #endif
+
     // reveal
     DATATYPE vecotrized_output;
     share.prepare_reveal_to_all();
@@ -78,6 +83,11 @@ bool test_add_mult_consants()
     share.template prepare_receive_from<P_0>(vectorized_input);
     Share::communicate();
     share.template complete_receive_from<P_0>();
+
+    #if PROTOCOL == 14
+    Share::communicate();
+    share.template complete_receive_from2<P_0>();
+    #endif
 
     // constant addition
     share += A(constant);
@@ -137,6 +147,12 @@ bool test_multiplication()
     share_a.template complete_receive_from<P_0>();
     share_b.template complete_receive_from<P_1>();
 
+    #if PROTOCOL == 14
+    Share::communicate();
+    share_a.template complete_receive_from2<P_0>();
+    share_b.template complete_receive_from2<P_1>();
+    #endif
+
     // multiplication
 #if PROTOCOL == 4 && A_KNOWN == 1
     share_c = share_a.prepare_mult_a_known(share_b);
@@ -145,6 +161,11 @@ bool test_multiplication()
 #endif
     Share::communicate();
     share_c.complete_mult_without_trunc();
+
+    #if PROTOCOL == 14
+    Share::communicate();
+    share_c.complete_mult2();
+    #endif
 
     // reveal
     DATATYPE vecotrized_output;
@@ -190,6 +211,12 @@ bool test_and()
     share_a.template complete_receive_from<P_0>();
     share_b.template complete_receive_from<P_1>();
 
+    #if PROTOCOL == 14
+    Share::communicate();
+    share_a.template complete_receive_from2<P_0>();
+    share_b.template complete_receive_from2<P_1>();
+    #endif
+
     // multiplication
 #if PROTOCOL == 4 && A_KNOWN == 1 
     share_c = share_a.prepare_and_a_known(share_b);
@@ -198,6 +225,11 @@ bool test_and()
 #endif
     Share::communicate();
     share_c.complete_and();
+
+    #if PROTOCOL == 14
+    Share::communicate();
+    share_c.complete_and2();
+    #endif
 
     // reveal
     DATATYPE vecotrized_output;

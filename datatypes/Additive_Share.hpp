@@ -319,6 +319,7 @@ class Additive_Share : public Share_Type
 #endif
     }
 
+
     void complete_mult_without_trunc()
     {
 #if PROTOCOL == 1 || (PROTOCOL == 4 && PRE == 0)  // Sharemind and Additive need custom overload
@@ -336,4 +337,18 @@ class Additive_Share : public Share_Type
     {
         return Share_Type::prepare_trunc_exact_xmod2t(OP_ADD, OP_SUB, OP_TRUNCF, OP_AND, fractional_bits);
     }
+
+    #if CV_FIX == 1
+    void complete_mult2()
+    {
+        Share_Type::complete_mult2(OP_ADD, OP_SUB);
+    }
+
+    template <int id>
+    void complete_receive_from2()
+    {
+        Share_Type::template complete_receive_from2<id>(OP_ADD, OP_SUB);
+    }
+    #endif
+
 };
