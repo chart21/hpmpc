@@ -763,3 +763,10 @@ __m256i relu_epi(__m256i v)
 }
 
 #endif
+
+#if CV_FIX == 1
+static inline bool dat_equal(__m256i a, __m256i b) {
+    const __m256i x = _mm256_xor_si256(a, b);
+    return _mm256_testz_si256(x, x) != 0; 
+}
+#endif

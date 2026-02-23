@@ -426,6 +426,10 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 #endif
 
+#ifndef CV_FIX
+#define CV_FIX 0  // Fix attacks of batched CV consistency check
+#endif
+
 #if num_players == 2
 #define PNEXT 0
 #define PPREV 0
@@ -481,7 +485,9 @@ int base_port = BASE_PORT;  // temporary solution
 #define P_2 1
 #define P_3 2
 #define PPREV 0
+#define PPREV_EX_0 2
 #define PNEXT 1
+#define PNEXT_EX_0 1
 #define PMIDDLE 2
 #elif PARTY == 2
 #define P_0 0
@@ -489,7 +495,9 @@ int base_port = BASE_PORT;  // temporary solution
 #define P_2 3
 #define P_3 2
 #define PPREV 1
+#define PPREV_EX_0 1
 #define PNEXT 2
+#define PNEXT_EX_0 2
 #define PMIDDLE 0
 #elif PARTY == 3
 #define P_0 0
@@ -497,7 +505,9 @@ int base_port = BASE_PORT;  // temporary solution
 #define P_2 2
 #define P_3 3
 #define PPREV 2
+#define PPREV_EX_0 2
 #define PNEXT 0
+#define PNEXT_EX_0 1
 #define PMIDDLE 1
 #endif
 #endif

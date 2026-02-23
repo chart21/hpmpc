@@ -72,6 +72,8 @@
 #define SHIFT_LOG_RIGHT32F SET_ZERO
 #define SHIFT_LOG_RIGHT64F SET_ZERO
 
+#define dat_equal(a, b) ((a) == (b))
+
 template <int n>
 bool SET_ZERO(bool value)
 {

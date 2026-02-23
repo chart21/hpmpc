@@ -614,3 +614,10 @@ __m128i relu_epi(__m128i v)
 }
 
 #endif
+
+#if CV_FIX == 1
+static inline bool dat_equal(__m128i a, __m128i b) {
+    const __m128i x = _mm_xor_si128(a, b);
+    return _mm_test_all_zeros(x, x) != 0;
+}
+#endif

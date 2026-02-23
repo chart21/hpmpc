@@ -107,6 +107,8 @@
 #define SHIFT_LEFT32F logical_left_shift_32F
 #define SHIFT_LEFT64F logical_left_shift_64F
 
+#define dat_equal(a, b) ((a) == (b))
+
 #if BITLENGTH == 64
 template <int n>
 uint64_t arithmetic_right_shift_64(uint64_t value)

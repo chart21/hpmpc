@@ -1119,3 +1119,10 @@ __m256i relu_epi(__m256i v)
 }
 
 #endif
+
+#if CV_FIX == 1
+static inline bool dat_equal(__m512i a, __m512i b) {
+    const __m512i x = _mm512_xor_si512(a, b);
+    return _mm512_testz_si512(x, x) != 0; 
+}
+#endif
