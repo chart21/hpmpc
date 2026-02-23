@@ -58,7 +58,7 @@ class OEC_MAL1_NO_CV_Share
         v = SUB(v, m_3);
         m = getRandomVal(P_123);               
         send_to_live(P_0, ADD(v, m));  
-        send_to_live(P_2, ADD(v, m));
+        // send_to_live(P_2, ADD(v, m));
     }
     
     template <typename func_add, typename func_sub>
@@ -73,7 +73,7 @@ class OEC_MAL1_NO_CV_Share
     }
 
     void prepare_reveal_to_all() const { 
-        send_to_live(v, P_3);
+        send_to_live(P_3, v);
     }
 
     template <typename func_add, typename func_sub>
@@ -151,11 +151,11 @@ class OEC_MAL1_NO_CV_Share
         if constexpr (id != PSELF)
         {
             Datatype local = ADD(v, m);
-            if constexpr (id != P_0)
-            {
-            Datatype val = receive_from_live(P_0);
-            check_eqs(local, val);
-            }
+            // if constexpr (id != P_0)
+            // {
+            // Datatype val = receive_from_live(P_0);
+            // check_eqs(local, val);
+            // }
             if constexpr (id != P_2)
             {
             Datatype valp = receive_from_live(P_2);

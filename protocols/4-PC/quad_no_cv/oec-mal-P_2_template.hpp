@@ -68,7 +68,10 @@ class OEC_MAL2_NO_CV_Share
         // check_eqs(mv1, local);
     }
 
-    void prepare_reveal_to_all() const {}
+    void prepare_reveal_to_all() const {
+        send_to_live(P_0, m);
+        send_to_live(P_3, v);
+    }
 
     template <typename func_add, typename func_sub>
     Datatype complete_Reveal(func_add ADD, func_sub SUB) const
@@ -133,9 +136,9 @@ class OEC_MAL2_NO_CV_Share
             Datatype val = receive_from_live(id);
 #endif
             if constexpr (id != P_0)
-                send_to_(P_0);
+                send_to_live(P_0, val);
             if constexpr (id != P_1)
-                send_to_(P_1);
+                send_to_live(P_1, val);
             v = SUB(val, v);  // convert locally to a + x_0
         }
     }

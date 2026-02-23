@@ -29,7 +29,7 @@ class OEC_MAL1_NO_CV_init
     {
         receive_from_(P_2);
         send_to_(P_0);
-        send_to_(P_2);
+        // send_to_(P_2);
     }
 
     template <typename func_add, typename func_sub>
@@ -89,8 +89,8 @@ class OEC_MAL1_NO_CV_init
     {
         if constexpr (id != PSELF)
         {
-            if constexpr(id != P_0)
-                receive_from_(P_0);
+            // if constexpr(id != P_0)
+            //     receive_from_(P_0);
             if constexpr(id != P_2)
                 receive_from_(P_2);
         }

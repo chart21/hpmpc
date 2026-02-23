@@ -43,7 +43,10 @@ class OEC_MAL2_NO_CV_init
         // receive_from_(P_0);
     }
 
-    void prepare_reveal_to_all() const {}
+    void prepare_reveal_to_all() const {
+        send_to_(P_0);
+        send_to_(P_3);
+    }
 
     template <typename func_add, typename func_sub>
     Datatype complete_Reveal(func_add ADD, func_sub SUB) const

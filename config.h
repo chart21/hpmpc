@@ -427,7 +427,7 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef CV_FIX
-#define CV_FIX 1  // Fix attacks of batched CV consistency check
+#define CV_FIX 0  // Fix attacks of batched CV consistency check
 #endif
 
 #if num_players == 2
