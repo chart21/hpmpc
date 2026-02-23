@@ -37,6 +37,12 @@ class Trident0_Share
     template <typename func_add, typename func_sub, typename func_mul>
     Trident0_Share prepare_mult(Trident0_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
+        const Datatype k1 = getRandomVal(P_013);
+        const Datatype k2 = getRandomVal(P_012);
+        const Datatype k3 = getRandomVal(P_023);
+        const Datatype za = SUB(k2,k1); //P0,1
+        const Datatype zb = SUB(k3,k2); //P0,2
+        const Datatype ztau = SUB(k1,k3); //P0,3
         Trident0_Share c;
         Datatype yx2 = ADD(ADD(MULT(l2, b.l2), MULT(l2, b.l3)), MULT(l3, b.l2));  
         Datatype yx3 = ADD(ADD(MULT(l3, b.l3), MULT(l3, b.l1)), MULT(l1, b.l3));

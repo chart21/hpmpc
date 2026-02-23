@@ -60,6 +60,17 @@ void print_result(T* var)
     printf("\n");
 }
 
+#if CV_FIX == 1
+template <typename T>
+void check_eqs(T a, T b)
+    {
+        if (! dat_equal(a, b))
+        {
+            printf("P%i, PID%i: Compareviews failed! \n", PARTY, process_offset);
+        }
+    }
+#endif
+
 #if FUNCTION_IDENTIFIER >= 35
 struct Layer_Timing
 {
