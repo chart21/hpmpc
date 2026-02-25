@@ -107,6 +107,9 @@ void init_circuit(std::string ips[])
 
 #if MAL == 1
     compare_views_init();
+#if CV_FIX == 1 && PROTOCOL == 12
+    compare_views_init_quad();
+#endif
 #endif
 
 #if PRE == 1 && SKIP_PRE == 0
@@ -325,6 +328,9 @@ void preprocess_circuit(std::string ips[])
 #else
     RESULTTYPE garbage_PRE;
     FUNCTION<PROTOCOL_PRE<DATATYPE>>(&garbage_PRE);
+    #if CV_FIX == 1 && PROTOCOL == 12
+        check_eqs_quad_pre();
+    #endif
 #endif
     // manual send
 
@@ -464,7 +470,11 @@ void live_circuit()
     RESULTTYPE result;
     FUNCTION<PROTOCOL_LIVE<DATATYPE>>(&result);
 #if MAL == 1
+#if CV_FIX == 1 && PROTOCOL == 12
+    check_eqs_quad_live();
+#else
     compare_views();
+#endif
     /* p_live.communicate(); */
 #endif
 
