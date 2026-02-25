@@ -8,6 +8,9 @@
 #if BEAVER == 1
 #include "protocols/beaver_triples.hpp"
 #endif
+#if CV_FIX == 1 && PROTOCOL == 12
+#include "programs/functions/check_eqs.hpp"
+#endif
 
 #if FUNCTION_IDENTIFIER < 8
 #include "programs/benchmarks/bench_basic_primitives.hpp"
@@ -108,7 +111,7 @@ void init_circuit(std::string ips[])
 #if MAL == 1
     compare_views_init();
 #if CV_FIX == 1 && PROTOCOL == 12
-    compare_views_init_quad();
+    check_eqs_quad_init();
 #endif
 #endif
 
