@@ -223,7 +223,6 @@ void check_eqs(const char hash[k][sha_bytes], const int ph1[], const int ph2[])
     chash[0][0].prepare_reveal_to_all();
     Share::communicate();
     Datatype result = chash[0][0].complete_reveal_to_all();
-    std::cout << "Checkeqs result: " << result << std::endl;
     if(current_phase == PHASE_LIVE)
     {
     if(dat_equal(result, ONES))
@@ -286,14 +285,6 @@ void compare_view_check_eqs_quad(const int ph1[], const int ph2[])
     std::memcpy(hashes[1], hash_val[P_0], len);
 #endif
 
-#if PARTY == 0
-    std::fill(hashes[0], hashes[0] + len, 0);
-    std::fill(hashes[1], hashes[1] + len, 1);
-#elif PARTY == 1
-    std::fill(hashes[0], hashes[0] + len, 0);
-#elif PARTY == 2
-    std::fill(hashes[1], hashes[1] + len, 1);
-#endif
     check_eqs<Datatype, Share, num_comparisons_quad>(hashes, ph1_quad, ph2_quad);
 }
 
