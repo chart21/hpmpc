@@ -49,7 +49,7 @@ void check_eqs(const char hash[k][sha_bytes], const int ph1[], const int ph2[])
             Datatype dhash[len];
             for (int j = 0; j < len; j++)
             {
-            dhash[j] = (hash[i][j] >> 7) & 1 ? ZERO : ONES;
+            dhash[j] = (hash[i][j/8] >> (j%8)) & 1 ? ONES : ZERO;
             shash1[i][j].template prepare_receive_from<PSELF>(dhash[j]);
             }
         }
@@ -81,9 +81,9 @@ void check_eqs(const char hash[k][sha_bytes], const int ph1[], const int ph2[])
             Datatype dhash[len];
             for (int j = 0; j < len; j++)
             {
-            dhash[i] = (hash[i][j] >> 7) & 1 ? ZERO : ONES;
-            shash2[i][j].template prepare_receive_from<PSELF>(dhash[i]);
-        }
+            dhash[j] = (hash[i][j/8] >> (j%8)) & 1 ? ONES : ZERO;
+            shash2[i][j].template prepare_receive_from<PSELF>(dhash[j]);
+            }
         }
         else
         {
@@ -283,6 +283,7 @@ void compare_view_check_eqs_quad(const int ph1[], const int ph2[])
     std::memcpy(hashes[0], hash_val[P_0], len);
 #elif PARTY == 2
     std::memcpy(hashes[1], hash_val[P_0], len);
+    // hashes[1][0] ^= 1; // introduce error to let checkeqs fail for all parties
 #endif
 
     check_eqs<Datatype, Share, num_comparisons_quad>(hashes, ph1_quad, ph2_quad);
