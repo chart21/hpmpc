@@ -21,7 +21,7 @@
 #if PRE == 1
 #include "../../protocols/4-PC/quad_no_cv/oec-mal-P_3-post_template.hpp"
 #define CV_PRE OEC_MAL3_NO_CV_Share<DATATYPE>
-#define CV_LIVE OEC_MAL3_POST_NO_CV_Share<DATATYPE>  
+#define CV_LIVE OECL_MAL3_NO_CV_POST_Share<DATATYPE>  
 #else
 #define CV_LIVE OEC_MAL3_NO_CV_Share<DATATYPE>
 #endif
@@ -298,7 +298,7 @@ void check_eqs_quad_init()
 void check_eqs_quad_pre()
 {
     #ifdef CV_PRE
-    const char hash[num_comparisons_quad][sha_bytes];
+    char hash[num_comparisons_quad][sha_bytes];
     check_eqs<DATATYPE, CV_PRE, num_comparisons_quad>(hash, ph1_quad, ph2_quad);
     #endif
 }
