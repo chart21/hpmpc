@@ -87,16 +87,19 @@ class OEC_MAL0_NO_CV_init
 #else
             receive_from_(id);
 #endif
-            if constexpr (id != P_1)
-                receive_from_(P_1);
-            if constexpr (id != P_2)
-                receive_from_(P_2);
         }
     }
     
     template <int id, typename func_add, typename func_sub>
     void complete_receive_from2(func_add ADD, func_sub SUB)
     {
+        if constexpr (id != PSELF)
+        {
+            if constexpr (id != P_1)
+                receive_from_(P_1);
+            if constexpr (id != P_2)
+                receive_from_(P_2);
+        }
     }
     
     template <typename func_mul>

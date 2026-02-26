@@ -102,17 +102,17 @@ void init_circuit(std::string ips[])
     RESULTTYPE garbage;
     FUNCTION<PROTOCOL_INIT<DATATYPE>>(&garbage);
     /* delete garbage; */
+#if CV_FIX == 1 && PROTOCOL == 12
+    check_eqs_quad_init();
+#endif
 #if PRE == 1 && BEAVER == 1
     PROTOCOL_INIT<DATATYPE>::complete_preprocessing();
 #elif PRE == 1
     communicate_pre_();
 #endif
 
-#if MAL == 1
+#if MAL == 1 && (CV_FIX == 0 || PROTOCOL != 12)
     compare_views_init();
-#if CV_FIX == 1 && PROTOCOL == 12
-    check_eqs_quad_init();
-#endif
 #endif
 
 #if PRE == 1 && SKIP_PRE == 0

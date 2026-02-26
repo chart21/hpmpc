@@ -23,7 +23,7 @@
 #define CV_PRE OEC_MAL3_NO_CV_Share<DATATYPE>
 #define CV_LIVE OEC_MAL3_POST_NO_CV_Share<DATATYPE>  
 #else
-#define CV_LIVE OEC_MAL3_NO_CV_PRE_Share<DATATYPE>
+#define CV_LIVE OEC_MAL3_NO_CV_Share<DATATYPE>
 #endif
 #endif
 
@@ -50,7 +50,7 @@ void check_eqs(const char hash[k][sha_bytes], const int ph1[], const int ph2[])
             for (int j = 0; j < len; j++)
             {
             dhash[j] = (hash[i][j] >> 7) & 1 ? ZERO : ONES;
-            shash1[i][j].template prepare_receive_from<PARTY>(dhash[j]);
+            shash1[i][j].template prepare_receive_from<PSELF>(dhash[j]);
             }
         }
         else
@@ -82,7 +82,7 @@ void check_eqs(const char hash[k][sha_bytes], const int ph1[], const int ph2[])
             for (int j = 0; j < len; j++)
             {
             dhash[i] = (hash[i][j] >> 7) & 1 ? ZERO : ONES;
-            shash2[i][j].template prepare_receive_from<PARTY>(dhash[i]);
+            shash2[i][j].template prepare_receive_from<PSELF>(dhash[i]);
         }
         }
         else
@@ -223,13 +223,17 @@ void check_eqs(const char hash[k][sha_bytes], const int ph1[], const int ph2[])
     chash[0][0].prepare_reveal_to_all();
     Share::communicate();
     Datatype result = chash[0][0].complete_reveal_to_all();
-    if(dat_equal(result, ZERO))
+    std::cout << "Checkeqs result: " << result << std::endl;
+    if(current_phase == PHASE_LIVE)
     {
-        print("Checkeqs passed!");
+    if(dat_equal(result, ONES))
+    {
+        print("Checkeqs passed! \n");
     }
     else
     {
-        print("Checkeqs failed!");
+        print("Checkeqs failed! \n");
+    }
     }
 }
 
@@ -237,7 +241,7 @@ constexpr int ph1_quad[] = {0, 0};
 constexpr int ph2_quad[] = {1, 2};
 constexpr int num_comparisons_quad = 2;
 
-template <typename Share, typename Datatype>
+template <typename Datatype, typename Share>
 void compare_view_check_eqs_quad(const int ph1[], const int ph2[])
 {
     //perform final hashes
@@ -281,6 +285,15 @@ void compare_view_check_eqs_quad(const int ph1[], const int ph2[])
 #elif PARTY == 2
     std::memcpy(hashes[1], hash_val[P_0], len);
 #endif
+
+#if PARTY == 0
+    std::fill(hashes[0], hashes[0] + len, 0);
+    std::fill(hashes[1], hashes[1] + len, 1);
+#elif PARTY == 1
+    std::fill(hashes[0], hashes[0] + len, 0);
+#elif PARTY == 2
+    std::fill(hashes[1], hashes[1] + len, 1);
+#endif
     check_eqs<Datatype, Share, num_comparisons_quad>(hashes, ph1_quad, ph2_quad);
 }
 
@@ -300,6 +313,6 @@ void check_eqs_quad_pre()
 
 void check_eqs_quad_live()
 {
-    compare_view_check_eqs_quad<XOR_Share<DATATYPE, CV_LIVE>, DATATYPE>(ph1_quad, ph2_quad);
+    compare_view_check_eqs_quad<DATATYPE, CV_LIVE>(ph1_quad, ph2_quad);
 }
 

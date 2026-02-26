@@ -128,12 +128,6 @@ class OEC_MAL0_NO_CV_Share
             v = receive_from_live(id);
 #endif
 
-            if constexpr (id != P_1)
-                check_eqs(v, receive_from_live(P_1));
-            if constexpr (id != P_2)
-                check_eqs(v, receive_from_live(P_2));
-
-            v = SUB(v, r);  // convert locally to a + u
         }
     }
 
@@ -156,6 +150,15 @@ class OEC_MAL0_NO_CV_Share
     template <int id, typename func_add, typename func_sub>
     void complete_receive_from2(func_add ADD, func_sub SUB)
     {
+        if constexpr (id != PSELF)
+        {
+            if constexpr (id != P_1)
+                check_eqs(v, receive_from_live(P_1));
+            if constexpr (id != P_2)
+                check_eqs(v, receive_from_live(P_2));
+
+            v = SUB(v, r);  // convert locally to a + u
+        }
     }
 
 };

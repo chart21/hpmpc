@@ -1,6 +1,8 @@
 #pragma once
 #include "../../generic_share.hpp"
+#ifndef PRE_SHARE
 #define PRE_SHARE OEC_MAL3_NO_CV_Share
+#endif
 template <typename Datatype>
 class OEC_MAL3_NO_CV_Share
 {
