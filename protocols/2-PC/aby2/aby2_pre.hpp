@@ -148,6 +148,9 @@ class ABY2_PRE_Share
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
             triple_type[0][triple_type_index[0]++] = CaseAND;
+            #if ROT_PREPROCESSING_OPT == 1
+            return ABY2_PRE_Share();
+            #endif
         }
         else
         {
@@ -155,6 +158,24 @@ class ABY2_PRE_Share
         }
         generate_triple(b, ADD);
         return ABY2_PRE_Share(getRandomVal(PSELF));  // new mask
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, Datatype mask, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+        {
+            triple_type[0][triple_type_index[0]++] = CaseAND;
+            #if ROT_PREPROCESSING_OPT == 1
+            return ABY2_PRE_Share(mask);
+            #endif
+        }
+        else
+        {
+            triple_type[0][triple_type_index[0]++] = CaseMult;
+        }
+        generate_triple(b, ADD);
+        return ABY2_PRE_Share(mask);  // new mask
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
@@ -178,6 +199,9 @@ class ABY2_PRE_Share
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
             triple_type[0][triple_type_index[0]++] = CaseAND;
+            #if ROT_PREPROCESSING_OPT == 1
+            return ABY2_PRE_Share();
+            #endif
         }
         else
         {
@@ -187,6 +211,24 @@ class ABY2_PRE_Share
         return ABY2_PRE_Share();
     }
     
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_dot(ABY2_PRE_Share b, Datatype mask, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+        {
+            triple_type[0][triple_type_index[0]++] = CaseAND;
+            #if ROT_PREPROCESSING_OPT == 1
+            return ABY2_PRE_Share(mask);
+            #endif
+        }
+        else
+        {
+            triple_type[0][triple_type_index[0]++] = CaseMult;
+        }
+        generate_triple(b, ADD);
+        return ABY2_PRE_Share(mask);
+    }
+
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot_ex_lxly(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
@@ -252,6 +294,11 @@ class ABY2_PRE_Share
     void mask_and_send_dot(func_add ADD, func_sub SUB)
     {
         l = getRandomVal(PSELF);
+    }
+    
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_mask(func_add ADD, func_sub SUB)
+    {
     }
 
     template <typename func_add, typename func_sub>
@@ -577,10 +624,16 @@ class ABY2_PRE_Share
             triple_type[0][triple_type_index[0]++] = CaseMult;
             triple_type[1][triple_type_index[1]++] = CaseDot3Arithmetic;
         }
+        #if ROT_PREPROCESSING_OPT == 0
         store_output_share_ab(c.l, ADD, helper_index);
         generate_triple(b, ADD);    // rxy
         generate_triple(c, ADD);    // rxz
         b.generate_triple(c, ADD);  // ryz
+        #else 
+        generate_triple(c, ADD);    // rxy
+        b.generate_triple(c, ADD);    // ryz
+        auto ab = get_beaver_C(); //TODO: implement 
+        ab.generate_triple(c, ADD);    // rxz
         return ABY2_PRE_Share();
     }
 
@@ -1078,6 +1131,8 @@ static void get_fc_triples_from_file()
 
     static void complete_preprocessing(std::string ips[], int port, int process_offset)
     {
+    
+#if ROT_PREPROCESSING_OPT == 0
 #if LX_TRIPLES == 1
         init_beaverC(0);
 #if FAKE_TRIPLES == 1
@@ -1088,6 +1143,19 @@ static void get_fc_triples_from_file()
 #endif
         deinit_beaverAB();
         init_beaverAB(1);
+#else
+#if LX_TRIPLES == 1
+        init_beaverC_arithmetic(0);
+#if FAKE_TRIPLES == 1
+        get_triples_from_file(0, num_arithmetic_triples.data(), num_boolean_triples.data());
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_arithmetic_triples[0], 0, "LXLY");
+#endif
+        deinit_beaverAB_arithmetic();
+        init_beaverAB_arithmetic(1);
+#endif
+
 
         init_beaverAB2C(0);
 #if FAKE_TRIPLES == 1
@@ -1135,7 +1203,7 @@ static void get_fc_triples_from_file()
 #endif
         deinit_FullyConnectedAB();
 
-#if A2B_ONLINE_OPT == 1
+#if A2B_ONLINE_OPT == 1 && ROT_PREPROCESSING_OPT == 0
         init_booleanAdditionBeaverC();
 #if FAKE_TRIPLES == 1
         get_booleanAddition_triples_from_file();
@@ -1398,9 +1466,13 @@ static void get_fc_triples_from_file()
 
         communicate_pre();
 #if LX_TRIPLES == 1 
+#if BIT_INJECTION_PREPROCESSING_OPT == 0
         deinit_beaverC();
         deinit_beaverAB2C();
-#if A2B_ONLINE_OPT == 1
+#else
+        deinit_beaverC_arithmetic();
+#endif
+#if A2B_ONLINE_OPT == 1 && ROT_PREPROCESSING_OPT == 0
         deinit_booleanAdditionBeaverC();
 #endif
         deinit_ConvC();
@@ -1416,12 +1488,20 @@ static void get_fc_triples_from_file()
         generate_beaver_triples(
              ips, port, process_offset, num_arithmetic_triples[1], num_boolean_triples[1], "LXLY");
         init_beaverAB2C(1);
+        #if ROT_PREPROCESSING_OPT == 0
         deinit_beaverAB();
+        #else
+        deinit_beaverAB_arithmetic();
+        #endif
         generate_beaver_triples(
                 ips, port, process_offset, num_ab2_arithmetic_triples[1], num_ab2_boolean_triples[1], "LXLY2");
 #endif
+#if ROT_PREPROCESSING_OPT == 0
         deinit_beaverAB2();
+#else
+        deinit_beaverAB2_arithmetic();
 #endif
+
 
         lxly_a[1] = new Datatype[total_num_arithmetic_output_triples[1]];
         lxly_b[1] = new Datatype[total_num_boolean_output_triples[1]];
@@ -1438,12 +1518,14 @@ static void get_fc_triples_from_file()
                     lxly_a[1][arithmetic_triple_counter[1]++] = lxly;
                     break;
                 }
+                #if ROT_PREPROCESSING_OPT == 0
                 case CaseDot3Bool:
                 {
                     auto lxly = receive_and_compute_lxly_share(OP_XOR, 1);
                     lxly_b[1][boolean_triple_counter[1]++] = lxly;
                     break;
                 }
+                #endif
                 case CaseDot3Arithmetic:
                 {
                     auto lxly = receive_and_compute_lxly_share(OP_ADD, 1);
@@ -1456,6 +1538,7 @@ static void get_fc_triples_from_file()
                     lxly_a[1][arithmetic_triple_counter[1]++] = lxly;
                     break;
                 }
+                #if ROT_PREPROCESSING_OPT == 0
                 case CaseDot4Bool:
                 {
                     auto lxly_lz = receive_and_compute_lxly_share(OP_XOR, 1);
@@ -1470,6 +1553,7 @@ static void get_fc_triples_from_file()
                     lxly_b[1][boolean_triple_counter[1]++] = lxly_lzlw;
                     break;
                 }
+                #endif
                 case CaseDot4Arithmetic:
                 {
                     auto lxly_lz = receive_and_compute_lxly_share(OP_ADD, 1);

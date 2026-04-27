@@ -426,6 +426,14 @@ void deinit_beaverAB2()
 #endif
 }
 
+void deinit_beaverAB2_arithmetic()
+{
+#if PARTY == 0 
+    delete[] arithmetic_ab2_triple_a;
+#elif PARTY == 1
+    delete[] arithmetic_ab2_triple_b;
+#endif
+}
 void deinit_beaverAB2C()
 {
     // print("Deleting beaver AB2 C arrays.");
