@@ -2,14 +2,18 @@
 #include "include/pch.h"
 #include "arch/DATATYPE.h"
 
+#ifndef FAKE_TRIPLES
+#define FAKE_TRIPLES 0
+#endif
+
 // const ConvolutionParameter param(batchSize, inh, inw, din, dout, wh, ww, padding, stride, dilation);
 struct ConvolutionParameter
 {
     int batchSize;
     int inh;
     int inw;
-    int din;
-    int dout;
+    int din; // channel
+    int dout; // n filters
     int wh;
     int ww;
     int padding;
@@ -48,7 +52,7 @@ struct ConvolutionParameter
           dilation(dilation)
     {
         x_size_per_batch = inh * inw * din;
-        w_size_per_batch = wh * ww * dout;
+        w_size_per_batch = wh * ww * dout * din;
         y_size_per_batch = out_h * out_w * dout;
     }
 };
@@ -114,6 +118,12 @@ struct FullyConnectedParameter
 #define generateMultiplexerTriples generateMultiplexerDummyTriples
 #define generateCOTTriples generateCOTDummyTriples
 
+#include <core/hpmpc_interface.hpp>
+#include <core/keys.hpp>
+
+#define CHEETAH_PARTY (PARTY+1)
+
+
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
 // Input: ip and port of the other party to connect to
 // Output: [c] will be filled with triples
@@ -126,35 +136,29 @@ void generateArithmeticDummyTriples(type a[],
                                     std::string ip,
                                     int port)
 {
-    if(num_triples == 0) return;
+    std::cout << "ARITH AB\n";
+
+    if (num_triples == 0)
+        return;
+
+    port += CHEETAH_PORT_OFFSET;
 
     //convert SIMD variables to regular uints
-    const int vectorization_factor = DATTYPE / bitlength; 
+    const int vectorization_factor = DATTYPE / bitlength;
 
-    if(vectorization_factor == 1) // No need to unvectorize
-        {
-            UINT_TYPE* uint_a = (UINT_TYPE*) a;
-            UINT_TYPE* uint_b = (UINT_TYPE*) b;
-            UINT_TYPE* uint_c = (UINT_TYPE*) c;
-            return;
-        }
+    UINT_TYPE* uint_a = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
+    unorthogonalize_arithmetic(a, uint_a, num_triples / (DATTYPE / bitlength));
+    UINT_TYPE* uint_b = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
+    unorthogonalize_arithmetic(b, uint_b, num_triples / (DATTYPE / bitlength));
+    UINT_TYPE* uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
 
-    UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]);
-    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
-    UINT_TYPE* uint_b = NEW(UINT_TYPE[num_triples]);
-    unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
-    UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
-    
-    for (uint64_t i = 0; i < num_triples; i++)
-    {
-       uint_c[i] = uint_a[i] + uint_b[i]; // dummy assignment, replace with actual triple generation
-    }
-    
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB, PROCESS_NUM);
+
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
-    DELETEARR(uint_a);
-    DELETEARR(uint_b);
-    DELETEARR(uint_c);
+    std::free(uint_a);
+    std::free(uint_b);
+    std::free(uint_c);
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
@@ -168,19 +172,48 @@ void generateBooleanDummyTriples(type a[],
                                  uint64_t num_triples,
                                  std::string ip,
                                  int port,
-                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE, bool disconnect = true)
 {
+    std::cout << "BOOL AB\n";
+
     if(num_triples == 0) return;
+
+    port += CHEETAH_PORT_OFFSET;
+
     //reinterpret SIMD bitstream as uint8 bitstream
     uint8_t* uint_a = (uint8_t*) a;
     uint8_t* uint_b = (uint8_t*) b;
     uint8_t* uint_c = (uint8_t*) c;
-    
-    for (uint64_t i = 0; i < num_triples / 8; i++)
-    {
-       uint_c[i] = uint_a[i] ^ uint_b[i]; // dummy assignment, replace with actual triple generation
-    }
 
+    auto ot = _16KKOT_to_4OT;
+    switch (cheetah_ot_type) {
+        case 0: {
+            ot = _2ROT;
+            break;
+        }
+        case 1: {
+            ot = _8KKOT;
+            break;
+        }
+        case 2: {
+            ot = _16KKOT_to_4OT;
+            break;
+        }
+        case 3: {
+            ot = _2COT;
+            break;
+        }
+        default: ot = _2ROT;
+    };
+
+    Iface::generateBoolTriplesCheetah(
+            uint_a, uint_b, uint_c,
+            bitlength, num_triples / 8, ip, port, CHEETAH_PARTY,
+            CHEETAH_THREADS,
+            ot, PROCESS_NUM);
+
+    if (disconnect)
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
 
@@ -197,46 +230,58 @@ void generateArithmeticAB2DummyTriples(type a[],
                                     std::string ip,
                                     int port)
 {
+    std::cout << "ARITH AB2\n";
+
     if(num_triples == 0) return;
 
+    port += CHEETAH_PORT_OFFSET;
+
     //convert SIMD variables to regular uints
-    const int vectorization_factor = DATTYPE / bitlength; 
+    const int vectorization_factor = DATTYPE / bitlength;
+
+    UINT_TYPE* uint_a;
+    UINT_TYPE* uint_b;
+    UINT_TYPE* uint_c;
 
     if(vectorization_factor == 1) // No need to unvectorize
-        {
-            UINT_TYPE* uint_a = (UINT_TYPE*) a;
-            UINT_TYPE* uint_b = (UINT_TYPE*) b;
-            UINT_TYPE* uint_c = (UINT_TYPE*) c;
-            return;
-        }
-#if PARTY == 0
-    UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]);
-    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
-#endif
-#if PARTY == 1
-    UINT_TYPE* uint_b = NEW(UINT_TYPE[num_triples]);
-    unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
-#endif // P_0 doesn't need b for AB2
-    UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
-    
-    for (uint64_t i = 0; i < num_triples; i++)
     {
+        uint_a = (UINT_TYPE*) a;
+        uint_b = (UINT_TYPE*) b;
+        uint_c = (UINT_TYPE*) c;
 #if PARTY == 1
-       uint_c[i] = uint_b[i]; // dummy assignment, replace with actual triple generation
-#else 
-       uint_c[i] = uint_a[i]; // dummy assignment, replace with actual triple generation 
-#endif 
-    }
-    
-    // convert UINT triple to SIMD type
-    orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
+        uint_a = nullptr;
+#else
+        uint_b = nullptr;
+#endif
+    } else  {
 #if PARTY == 0
-    DELETEARR(uint_a);
+        uint_a = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
+        unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor));
+#else
+        uint_a = nullptr;
 #endif
 #if PARTY == 1
-    DELETEARR(uint_b);
+        uint_b = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
+        unorthogonalize_arithmetic(b, uint_b, num_triples / (vectorization_factor));
+#else
+        uint_b = nullptr;
+#endif // P_0 doesn't need b for AB2
+        uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
+    }
+
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB2, PROCESS_NUM);
+
+    // convert UINT triple to SIMD type
+    if (vectorization_factor != 1) {
+        orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
+#if PARTY == 0
+        std::free(uint_a);
 #endif
-    DELETEARR(uint_c);
+#if PARTY == 1
+        std::free(uint_b);
+#endif
+        std::free(uint_c);
+    }
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
@@ -250,25 +295,55 @@ void generateBooleanAB2DummyTriples(type a[],
                                  uint64_t num_triples,
                                  std::string ip,
                                  int port,
-                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE)
+                                 int cheetah_ot_type = CHEETAH_BOOL_OT_TYPE, bool disconnect = true)
 {
-    if(num_triples == 0) return;
+    std::cout << "BOOL AB2\n";
+
+    if (num_triples == 0) return;
+
+    port += CHEETAH_PORT_OFFSET;
+
     //reinterpret SIMD bitstream as uint8 bitstream
+#if PARTY == 0
     uint8_t* uint_a = (uint8_t*) a;
+#else
+    std::vector<uint8_t> zerosa(num_triples/8, 0);
+    uint8_t* uint_a = zerosa.data();
+#endif
 #if PARTY == 1
     uint8_t* uint_b = (uint8_t*) b;
+#else
+    std::vector<uint8_t> zeros(num_triples/8, 0);
+    uint8_t* uint_b = zeros.data();
 #endif // P_0 doesn't need b for AB2
     uint8_t* uint_c = (uint8_t*) c;
-    
-    for (uint64_t i = 0; i < num_triples / 8; i++)
-    {
-#if PARTY == 1
-       uint_c[i] = uint_b[i]; // dummy assignment, replace with actual triple generation
-#else
-       uint_c[i] = uint_a[i]; // dummy assignment, replace with actual triple generation 
-#endif 
-    }
 
+    auto ot = _16KKOT_to_4OT;
+    switch (cheetah_ot_type) {
+        case 0: {
+            ot = _2ROT;
+            break;
+        }
+        case 1: {
+            ot = _8KKOT;
+            break;
+        }
+        case 2: {
+            ot = _16KKOT_to_4OT;
+            break;
+        }
+        case 3: {
+            ot = _2COT;
+            break;
+        }
+        default: ot = _2ROT;
+    };
+
+    Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
+            num_triples / 8, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, ot, PROCESS_NUM);
+
+    if (disconnect)
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
@@ -289,7 +364,7 @@ void generateBooleanAdditionDummyTriples(type a[],
     if(num_bits_per_input <= 0) return;
     //reinterpret SIMD bitstream as uint8 bitstream
 #if PARTY == 0
-    auto av = reinterpret_cast<type (*)[num_bits_per_input]> (a); 
+    auto av = reinterpret_cast<type (*)[num_bits_per_input]> (a);
 #else
     auto bv = reinterpret_cast<type (*)[num_bits_per_input]> (b);
 #endif
@@ -298,7 +373,7 @@ void generateBooleanAdditionDummyTriples(type a[],
     type* carry_last = new type[num_triples];
     type* carry_this = new type[num_triples];
     type* ot_a = new type[num_triples];
-    type* ot_b = new type[num_triples]; 
+    type* ot_b = new type[num_triples];
     int r = num_bits_per_input;
     const int k = num_bits_per_input;
     while(r > 0)
@@ -319,7 +394,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     ot_a[i] = SET_ALL_ZERO();
 #endif
                 }
-                generateBooleanAB2Triples(ot_a, ot_b, carry_last, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type);
+                generateBooleanAB2Triples(ot_a, ot_b, carry_last, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type, false);
                 break;
             case k - 2:
                 for (uint64_t i = 0; i < num_triples ; i++)
@@ -331,7 +406,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     cv[i][r] = bv[i][r] ^ carry_last[i];
 #endif
                     //prepare
-#if PARTY == 0 
+#if PARTY == 0
                     ot_a[i] = av[i][r] ^ carry_last[i];
                     ot_b[i] = carry_last[i];
 #else
@@ -339,7 +414,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     ot_a[i] = carry_last[i];
 #endif
                 }
-                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type);
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type, false);
                 break;
             default:
                 // complete_carry
@@ -367,7 +442,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                     ot_a[i] = carry_last[i];
 #endif
                 }
-                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type);
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type, false);
                 break;
             case 0:
                 // complete_carry
@@ -387,8 +462,9 @@ void generateBooleanAdditionDummyTriples(type a[],
                 delete[] carry_this;
                 delete[] ot_a;
                 delete[] ot_b;
+                Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
                 return;
-                    
+
         }
     }
 }
@@ -405,7 +481,10 @@ void generateCOTDummyTriples(type a[],
                                  int port)
 {
     if(num_triples == 0) return;
-    const int vectorization_factor = DATTYPE / bitlength; 
+
+    port += CHEETAH_PORT_OFFSET;
+
+    const int vectorization_factor = DATTYPE / bitlength;
 
     if(vectorization_factor == 1) // No need to unvectorize
         {
@@ -415,24 +494,36 @@ void generateCOTDummyTriples(type a[],
             uint8_t* uint_a = (uint8_t*) a;
 #endif
             UINT_TYPE* uint_c = (UINT_TYPE*) c;
+
+#if PARTY == 0
+            Iface::generateCOT(CHEETAH_PARTY, uint_a, nullptr, uint_c, num_triples,
+                ip, port, CHEETAH_THREADS, PROCESS_NUM);
+#else
+            Iface::generateCOT(CHEETAH_PARTY, nullptr, uint_a, uint_c, num_triples,
+                ip, port, CHEETAH_THREADS, PROCESS_NUM);
+#endif
             return;
         }
-    
+
 #if PARTY == 0
     UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]); //stores m0
-    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
-    
+    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor));
+
 #else  //PARTY 1
     uint8_t* uint_a = (uint8_t*) a; //stores choice bit (packed)
 #endif
 
 
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
-    for (uint64_t i = 0; i < num_triples; i++)
-    {
-       uint_c[i] = 0; // dummy assignment, replace with actual triple generation
-    }
-    
+
+#if PARTY == 0
+    Iface::generateCOT(CHEETAH_PARTY, uint_a, nullptr, uint_c, num_triples,
+        ip, port, CHEETAH_THREADS, PROCESS_NUM);
+#else
+    Iface::generateCOT(CHEETAH_PARTY, nullptr, uint_a, uint_c, num_triples,
+        ip, port, CHEETAH_THREADS, PROCESS_NUM);
+#endif
+
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
 #if PARTY == 0
@@ -453,26 +544,31 @@ void generateMultiplexerDummyTriples(type a[],
                                  int port)
 {
     if(num_triples == 0) return;
-    const int vectorization_factor = DATTYPE / bitlength; 
-    
+
+    port += CHEETAH_PORT_OFFSET;
+    const int vectorization_factor = DATTYPE / bitlength;
+
     uint8_t* uint_b = (uint8_t*) b; //stores choice bit (packed)
 
     if(vectorization_factor == 1) // No need to unvectorize
         {
             UINT_TYPE* uint_a = (UINT_TYPE*) a;
             UINT_TYPE* uint_c = (UINT_TYPE*) c;
+
+            Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, CHEETAH_PARTY,
+                    ip, port, PROCESS_NUM, CHEETAH_THREADS);
+
             return;
         }
-    
+
     UINT_TYPE* uint_a = NEW(UINT_TYPE[num_triples]); //stores arithmetic share
-    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor)); 
-    
+    unorthogonalize_arithmetic(a, uint_a, num_triples / (vectorization_factor));
+
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
-    for (uint64_t i = 0; i < num_triples; i++)
-    {
-       uint_c[i] = uint_a[i]; // dummy assignment, replace with actual triple generation
-    }
-    
+
+    Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, CHEETAH_PARTY,
+            ip, port, PROCESS_NUM, CHEETAH_THREADS);
+
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
     DELETEARR(uint_a);
@@ -494,76 +590,197 @@ void generateLayerDummyTriples(type** a,
                               std::string ip,
                               int port)
 {
+    port += CHEETAH_PORT_OFFSET;
+    if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
+        std::cout << "CONVOLUTION ";
+    } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
+        std::cout << "FC ";
+    } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
+        std::cout << "BATCHNORM ";
+    }
 
+
+    auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM);
     const int factor = DATTYPE/BITLENGTH;
-    if(factor == 1) // No need to unvectorize
-        {
-            UINT_TYPE** uint_w = (UINT_TYPE**) a;
-            UINT_TYPE** uint_x = (UINT_TYPE**) b;
-            UINT_TYPE* uint_y = (UINT_TYPE*) c;
-            uint64_t y_index_counter = 0;
-        for(int n = 0; n < params.size(); n++)
-        {
-            auto p = params[n];
-           // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
-            y_index_counter += p.y_size_per_batch * p.batchSize;
-             
-        } 
-            return;
-        }
 
+    if(factor == 1) { // No need to unvectorize
+#if CHEETAH_CONV_TYPE == 1
+        std::vector<Utils::ConvParm> parms(params.size());
+        size_t total_batches = 0;
+#endif
+        UINT_TYPE** uint_w = (UINT_TYPE**) a;
+        UINT_TYPE** uint_x = (UINT_TYPE**) b;
+        UINT_TYPE* uint_y = (UINT_TYPE*) c;
+        uint64_t y_index_counter = 0;
+
+        for(size_t n = 0; n < params.size(); n++) {
+            auto p = params[n];
+
+            if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
+                if (p.dilation != 1) {
+                    std::cerr << "DILATION != 1 is not supported\n";
+                }
+                Utils::ConvParm conv{
+                    .batchsize = p.batchSize,
+                    .ic = p.din,
+                    .iw = p.inw,
+                    .ih = p.inh,
+                    .fc = p.din,
+                    .fw = p.ww,
+                    .fh = p.wh,
+                    .n_filters = p.dout,
+                    .stride = p.stride,
+                    .padding = p.padding,
+                };
+
+#if CHEETAH_CONV_TYPE == 0
+                Iface::generateConvTriplesCheetahWrapper(keys,
+                        A_KNOWN == 0 || PARTY == 1 ? uint_x[n] : nullptr,
+                        A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
+                        uint_y + y_index_counter,
+                        conv,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
+                        A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
+                        factor, A_KNOWN == 0
+                );
+#else
+                parms[n] = conv;
+                total_batches += conv.batchsize;
+#endif
+            } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
+                Iface::generateFCTriplesCheetah(keys,
+                        A_KNOWN == 0 || PARTY == 1 ? uint_x[n] : nullptr,
+                        A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
+                        uint_y + y_index_counter,
+                        p.batchSize, p.in_feat, p.out_feat,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
+                        A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
+                        factor
+                );
+            } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
+                Iface::generateBNTriplesCheetah(keys,
+                        A_KNOWN == 0 || PARTY == 1 ? uint_x[n] : nullptr,
+                        A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
+                        uint_y + y_index_counter,
+                        p.batchSize, p.ch, p.h, p.w,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
+                        A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
+                        factor
+                );
+            } else {
+                std::cerr << "Unsupported Param type\n";
+            }
+            // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
+            y_index_counter += p.y_size_per_batch * p.batchSize;
+
+        }
+#if CHEETAH_CONV_TYPE == 1
+        if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
+            Iface::generateConvTriplesCheetah2(keys, total_batches, parms,
+                    PARTY == 1 ? uint_x : nullptr, PARTY == 0 ? uint_w : nullptr,
+                    uint_y, Utils::PROTO::AB2, CHEETAH_PARTY,
+                    CHEETAH_THREADS, factor
+            );
+        }
+#endif
+    } else {
         uint64_t c_index = 0;
-        for(int n = 0; n < params.size(); n++)
-        {
+        for(size_t n = 0; n < params.size(); n++) {
             auto p = params[n];
             const uint64_t x_size = p.x_size_per_batch * p.batchSize;
             const uint64_t w_size = p.w_size_per_batch;
             const uint64_t y_size = p.y_size_per_batch * p.batchSize;
-       
-           #if A_KNOWN == 0 || PARTY == 1
+
+#if A_KNOWN == 0 || PARTY == 1
             UINT_TYPE* x = new UINT_TYPE[factor * x_size]; // Party1 holds X2 in plain in AB2 setting
-            #else
+#else
             UINT_TYPE* x = nullptr;
-            #endif
-           #if A_KNOWN == 0 || PARTY == 0 
-            UINT_TYPE* w = new UINT_TYPE[w_size];  // W is always constant
-            #else 
-            UINT_TYPE* w = nullptr; 
-           #endif 
+#endif
+#if A_KNOWN == 0 || PARTY == 0
+            UINT_TYPE* w = new UINT_TYPE[w_size * factor];  // W is always constant
+#else
+            UINT_TYPE* w = nullptr;
+#endif
             UINT_TYPE* y = new UINT_TYPE[factor * y_size];
 
-        #if A_KNOWN == 0 || PARTY == 1
-        for (int i = 0; i < x_size; i++)
-        {
-            alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&b[n][i], temp, 1);
-            for (int j = 0; j < factor; j++)
-                x[j * x_size + i] = temp[j]; 
-        }
-        #endif
-        #if A_KNOWN == 0 || PARTY == 0 
-        for (int i = 0; i < w_size; i++)
-        {
-            alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
-            unorthogonalize_arithmetic(&a[n][i], temp, 1);
-            w[i] = temp[0];
-        }
-        #endif
+#if A_KNOWN == 0 || PARTY == 1
+            for (uint64_t i = 0; i < x_size; i++) {
+                alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+                unorthogonalize_arithmetic(&b[n][i], temp, 1);
+                for (int j = 0; j < factor; j++)
+                    x[j * x_size + i] = temp[j];
+            }
+#endif
+#if A_KNOWN == 0 || PARTY == 0
+            for (uint64_t i = 0; i < w_size; i++) {
+                alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+                unorthogonalize_arithmetic(&a[n][i], temp, 1);
+                for (int j = 0; j < factor; ++j) {
+                    w[j * w_size + i] = temp[j];
+                }
+            }
+#endif
 
-        p.batchSize *= factor;
-        // Conv2D(w,x,y, p) // calculate layer operation
-        for (int i = 0; i < y_size; i++)
-        {
-            alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
-            for (int j = 0; j < factor; j++)
-                temp[j] = y[j * y_size + i];
-            orthogonalize_arithmetic(temp, c + c_index + i, 1);
+            p.batchSize *= factor;
+
+            if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
+                if (p.dilation != 1) {
+                    std::cerr << "DILATION != 1 is not supported\n";
+                }
+                Utils::ConvParm conv{
+                    .batchsize = p.batchSize,
+                    .ic = p.din,
+                    .iw = p.inw,
+                    .ih = p.inh,
+                    .fc = p.din,
+                    .fw = p.ww,
+                    .fh = p.wh,
+                    .n_filters = p.dout,
+                    .stride = p.stride,
+                    .padding = p.padding,
+                };
+
+                Iface::generateConvTriplesCheetahWrapper(keys,
+                        x, w, y,
+                        conv,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
+                        A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
+                        factor
+                );
+            } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
+                Iface::generateFCTriplesCheetah(keys,
+                        x, w, y,
+                        p.batchSize, p.in_feat, p.out_feat,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
+                        A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
+                        factor
+                );
+            } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
+                Iface::generateBNTriplesCheetah(keys,
+                        x, w, y,
+                        p.batchSize, p.ch, p.h, p.w,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
+                        A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
+                        factor
+                );
+            } else {
+                std::cerr << "Unsupported Param type\n";
+            }
+            // Conv2D(w,x,y, p) // calculate layer operation
+            for (uint64_t i = 0; i < y_size; i++) {
+                alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+                for (int j = 0; j < factor; j++)
+                    temp[j] = y[j * y_size + i];
+                orthogonalize_arithmetic(temp, c + c_index + i, 1);
+            }
+
+            delete[] x;
+            delete[] w;
+            delete[] y;
+            c_index += y_size;
         }
-        delete[] x;
-        delete[] w;
-        delete[] y;
-        c_index += y_size;
-        }
+    }
+    keys.disconnect();
 }
 
 

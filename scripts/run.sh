@@ -1,4 +1,5 @@
 #!/bin/bash
+
 helpFunction()
 {
    echo "Script to run a n-PC protocol in a distributed setting"

@@ -96,7 +96,7 @@
     #define WAIT_AFTER_MESSAGES_IF_AHEAD -1  // In case of interleaved computation, the preprocessing party will at most be x messages ahead to save RAM
     #endif
 #else
-    #ifndef WAIT_AFTER_MESSAGES_IF_AHEAD 
+    #ifndef WAIT_AFTER_MESSAGES_IF_AHEAD
     #define WAIT_AFTER_MESSAGES_IF_AHEAD -1  // In case of preprocessing, this option is deactivated
     #endif
 #endif
@@ -273,14 +273,14 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef A2B_ONLINE_OPT
-#define A2B_ONLINE_OPT 0  // Online-optimized A2B, by calculating [lc]^B in preprocessing to skip communication in the Online Phase
+#define A2B_ONLINE_OPT 1  // Online-optimized A2B, by calculating [lc]^B in preprocessing to skip communication in the Online Phase
 #endif
 
 #ifndef BIT_INJECTION_PREPROCESSING_OPT
-#define BIT_INJECTION_PREPROCESSING_OPT 0  // Use optimized bit injection preprocessing via COT and multiplexing
+#define BIT_INJECTION_PREPROCESSING_OPT 1  // Use optimized bit injection preprocessing via COT and multiplexing
 #endif
 
-#ifndef OPTIMIZED_BIT_INJECTION_RELU 
+#ifndef OPTIMIZED_BIT_INJECTION_RELU
 #define OPTIMIZED_BIT_INJECTION_RELU 1  // Use optimized bit injection for ReLU
 #endif
 
@@ -337,17 +337,25 @@ int base_port = BASE_PORT;  // temporary solution
 #if PROTOCOL == 4
 #define BEAVER 1
 
+#ifndef CHEETAH_PORT_OFFSET
+#define CHEETAH_PORT_OFFSET 10'000  // Port offset for cheetah
+#endif
+
+#ifndef CHEETAH_CONV_TYPE
+#define CHEETAH_CONV_TYPE 0  // 0: standard, 1: experimental
+#endif
+
 #ifndef CHEETAH_THREADS
 #define CHEETAH_THREADS 32  // Number of threads to use for Cheetah triples generation
 #endif
 
 #ifndef CHEETAH_BOOL_OT_TYPE
-#define CHEETAH_BOOL_OT_TYPE 3  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 3: _2COT
+#define CHEETAH_BOOL_OT_TYPE 2  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 3: _2COT
 #endif
 
 #ifndef STORE_PREPROCESSING
 #define STORE_PREPROCESSING 0  // Save preprocessing data to file
-#endif 
+#endif
 
 #ifndef LOAD_PREPROCESSING
 #define LOAD_PREPROCESSING 0  // Load preprocessing data from file
@@ -360,7 +368,7 @@ int base_port = BASE_PORT;  // temporary solution
 #ifndef A_KNOWN
 #if PROTOCOL == 4
 #define A_KNOWN 1
-#else 
+#else
 #define A_KNOWN 0
 #endif
 #endif

@@ -463,6 +463,8 @@ void compare_views()
 
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 
+#include <io/file_io.hpp>
+
 void store_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_triples_round0,
                             DATATYPE* arithmetic_triples_round0, uint64_t size_arithmetic_triples_round0,
                             DATATYPE* bool_triples_round1, uint64_t size_bool_triples_round1,
@@ -470,6 +472,17 @@ void store_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_t
                             DATATYPE* preprocessing_material, uint64_t size_preprocessing_material)
 {
     //store all to file
+    // (int)base_port + player_id * (num_players - 1)
+    auto UID = base_port + player_id * (num_players - 1);
+    auto path = "data/preprocessing_" + std::to_string(UID) + ".triple";
+    if (!IO::save_to_file(path.c_str(),
+            bool_triples_round0, size_bool_triples_round0,
+            arithmetic_triples_round0, size_arithmetic_triples_round0,
+            bool_triples_round1, size_bool_triples_round1,
+            arithmetic_triples_round1, size_arithmetic_triples_round1,
+            preprocessing_material, size_preprocessing_material)) {
+        std::cout << "P" << player_id << ": [store_preprocessed_data] failed storing data\n";
+    }
 }
 
 void load_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_triples_round0,
@@ -479,6 +492,16 @@ void load_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_tr
                             DATATYPE* preprocessing_material, uint64_t size_preprocessing_material)
 {
     //load all from file
+    auto UID = base_port + player_id * (num_players - 1);
+    auto path = "data/preprocessing_" + std::to_string(UID) + ".triple";
+    if (!IO::read_from_file(path.c_str(),
+            bool_triples_round0, size_bool_triples_round0,
+            arithmetic_triples_round0, size_arithmetic_triples_round0,
+            bool_triples_round1, size_bool_triples_round1,
+            arithmetic_triples_round1, size_arithmetic_triples_round1,
+            preprocessing_material, size_preprocessing_material, true)) {
+        std::cout << "P" << player_id << ": [load_preprocessed_data] failed loading data\n";
+    }
 }
 
 

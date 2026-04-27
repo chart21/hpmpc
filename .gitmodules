@@ -5,3 +5,6 @@
 	path = nn/PIGEON
     url = https://github.com/chart21/flexNN.git
 	branch = aby2-merge
+[submodule "nn/ConvTriple"]
+	path = nn/ConvTriple
+	url = https://github.com/aSlunk/ConvTriple

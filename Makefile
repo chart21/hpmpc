@@ -6,9 +6,34 @@ NVCC ?= nvcc
 #make executable and flags directories if they don't exist
 $(shell mkdir -p executables/flags)
 
+CHEETAH := nn/ConvTriple
+
+CHEETAH_GPU ?= 0
+
+HE_INCLUDE := -I${CHEETAH}/src/include \
+			  -I${CHEETAH}/src \
+			  -isystem ${CHEETAH}/deps/include \
+			  -isystem ${CHEETAH}/deps/include/SEAL-4.1 \
+			  -isystem /usr/include/eigen3
+
+HE_PATHS := -Wl,-rpath,${CHEETAH}/build/lib:${CHEETAH}/deps/lib \
+			-L${CHEETAH}/build/lib \
+			-L${CHEETAH}/deps/lib
+
+HE_LIBS := -lHE -lgemini -lseal-4.1
+
+ifeq (${CHEETAH_GPU}, 1)
+HE_INCLUDE += -isystem ${CHEETAH}/deps/include/troy
+HE_PATHS += -L/opt/cuda/targets/x86_64-linux/lib
+HE_LIBS += -lcudart -ltroy
+endif
+
+CHEETAH_FLAGS := $(HE_INCLUDE) $(HE_PATHS) $(HE_LIBS)
+
 # Base flags
 EXECFLAGS := -march=native -Ofast -fno-finite-math-only -std=c++20 -pthread -Wno-ignored-attributes
-LINKFLAGS := -lssl -lcrypto -I nn/PIGEON
+LINKFLAGS := ${CHEETAH_FLAGS} -lssl -lcrypto -I nn/PIGEON
+
 CXXFLAGS := $(EXECFLAGS) $(LINKFLAGS)
 NVCCFLAGS := -Xptxas -O3
 
@@ -45,8 +70,6 @@ CONFIG_OPTIONS := PROTOCOL PRE PARTY BITLENGTH FRACTIONAL FUNCTION_IDENTIFIER NU
 				A2B_ROUND_OPT_SIM A2B_ONLINE_OPT A_KNOWN_TO_EVALUATORS_OPT BIT_INJECTION_PREPROCESSING_OPT WEIGHT_SHARING_OPT_SIM \
 				SKIP_PRE FAKE_TRIPLES OPT_SHARE SHARE_PREP \
 				ONLINE_OPTIMIZED BANDWIDTH_OPTIMIZED \
-
-
 
 
 # Targets
