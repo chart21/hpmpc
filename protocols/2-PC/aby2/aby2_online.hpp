@@ -489,8 +489,8 @@ class ABY2_ONLINE_Share
 
         for (int i = m; i < k; i++)
         {
-            out[i - m].l = getRandomVal(PSELF);
-            out[i - m].m = OP_XOR(temp_p1[i], out[i - m].l);
+            out[i - m].l = temp_p1[i];
+            out[i - m].m = SET_ALL_ZERO();
         }
 #endif
 #endif
@@ -515,7 +515,7 @@ class ABY2_ONLINE_Share
 #if PARTY == 0
         for (int i = 0; i < k; i++)
         {
-            out[i].m = retrieve_output_share();
+            out[i].m = SET_ALL_ZERO();
             out[i].l = SET_ALL_ZERO();
         }
 #endif

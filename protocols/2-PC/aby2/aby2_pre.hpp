@@ -467,14 +467,7 @@ class ABY2_PRE_Share
 
         for (int i = m; i < k; i++)
         {
-            out[i - m].l = getRandomVal(PSELF);
-            Datatype out_m = OP_XOR(temp_p1[i], out[i - m].l);
-            pre_send_to_live(PNEXT, out_m);
-        }
-#else
-        for (int i = m; i < k; i++)
-        {
-            triple_type[0][triple_type_index[0]++] = CaseDefault;
+            out[i - m].l = temp_p1[i];
         }
 #endif
 #endif

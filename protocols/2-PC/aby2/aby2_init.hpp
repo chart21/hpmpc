@@ -365,13 +365,6 @@ class ABY2_init
         {
             num_boolean_addition_triples++;
         }
-#else
-#if PARTY == 1
-        for (int i = m; i < k; i++)
-        {
-            pre_send_to_(PNEXT);
-        }
-#endif
 #endif
     }
 
@@ -389,14 +382,6 @@ class ABY2_init
 
     static void complete_A2B_S2(int k, ABY2_init out[])
     {
-#if A2B_ONLINE_OPT == 0
-#if PARTY == 0
-        for (int i = 0; i < k; i++)
-        {
-            store_output_share_();
-        }
-#endif
-#endif
     }
 
     void prepare_bit2a(ABY2_init out[])
