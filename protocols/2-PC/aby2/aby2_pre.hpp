@@ -627,6 +627,7 @@ class ABY2_PRE_Share
         b.generate_triple(c, ADD);    // ryz
         auto ab = get_beaver_C(); //TODO: implement 
         ab.generate_triple(c, ADD);    // rxz
+        #endif 
         return ABY2_PRE_Share();
     }
 
@@ -1126,7 +1127,6 @@ static void get_fc_triples_from_file()
     {
     
 #if ROT_PREPROCESSING_OPT == 0
-#if LX_TRIPLES == 1
         init_beaverC(0);
 #if FAKE_TRIPLES == 1
         get_triples_from_file(0, num_arithmetic_triples.data(), num_boolean_triples.data());
@@ -1137,7 +1137,6 @@ static void get_fc_triples_from_file()
         deinit_beaverAB();
         init_beaverAB(1);
 #else
-#if LX_TRIPLES == 1
         init_beaverC_arithmetic(0);
 #if FAKE_TRIPLES == 1
         get_triples_from_file(0, num_arithmetic_triples.data(), num_boolean_triples.data());
@@ -1172,7 +1171,6 @@ static void get_fc_triples_from_file()
                 ips, port, process_offset, num_conv_c_triples, 0, "CONV");
 #endif
         deinit_ConvAB();
-#endif
 
         init_BatchNorm2DC();
 #if FAKE_TRIPLES == 1
@@ -1458,8 +1456,7 @@ static void get_fc_triples_from_file()
 
 
         communicate_pre();
-#if LX_TRIPLES == 1 
-#if BIT_INJECTION_PREPROCESSING_OPT == 0
+#if ROT_PREPROCESSING_OPT == 0
         deinit_beaverC();
         deinit_beaverAB2C();
 #else
