@@ -273,11 +273,11 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef A2B_ONLINE_OPT
-#define A2B_ONLINE_OPT 1  // Online-optimized A2B, by calculating [lc]^B in preprocessing to skip communication in the Online Phase
+#define A2B_ONLINE_OPT 0  // Online-optimized A2B, by calculating [lc]^B in preprocessing to skip communication in the Online Phase
 #endif
 
 #ifndef BIT_INJECTION_PREPROCESSING_OPT
-#define BIT_INJECTION_PREPROCESSING_OPT 1  // Use optimized bit injection preprocessing via COT and multiplexing
+#define BIT_INJECTION_PREPROCESSING_OPT 0  // Use optimized bit injection preprocessing via COT and multiplexing
 #endif
 
 #ifndef OPTIMIZED_BIT_INJECTION_RELU
@@ -338,7 +338,7 @@ int base_port = BASE_PORT;  // temporary solution
 #define BEAVER 1
 
 #ifndef CHEETAH_PORT_OFFSET
-#define CHEETAH_PORT_OFFSET 10'000  // Port offset for cheetah
+#define CHEETAH_PORT_OFFSET 100  // Port offset for cheetah
 #endif
 
 #ifndef CHEETAH_CONV_TYPE

@@ -133,9 +133,10 @@ class ABY2_ONLINE_Share
         for (int i = 0; i < BITLENGTH; i++)
         {
 #if BIT_INJECTION_PREPROCESSING_OPT == 1
-            Datatype lb1lb2 = retrieve_output_share_arithmetic();
-            Datatype lb = OP_ADD(lbi[i], lb1lb2);
             Datatype lalb = retrieve_output_share_arithmetic();
+            Datatype lb1lb2 = retrieve_output_share_arithmetic();
+            // Datatype lb = OP_ADD(lbi[i], lb1lb2);
+            Datatype lb = OP_SUB(lbi[i], OP_ADD(lb1lb2,lb1lb2)); 
 #else
             Datatype lb = retrieve_output_share_arithmetic();
             Datatype lalb = retrieve_output_share_arithmetic(1);

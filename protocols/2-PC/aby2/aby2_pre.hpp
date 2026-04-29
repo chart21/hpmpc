@@ -525,6 +525,7 @@ class ABY2_PRE_Share
             triple_type[0][triple_type_index[0]++] = CaseMultiplexer;
             triple_type[0][triple_type_index[0]++] = CaseCOT;
             multiplexer_triple_a[arithmetic_multiplexer_triple_index++] = x[i].l;
+            out[i].l = getRandomVal(PSELF);
         }
             multiplexer_triple_b[boolean_multiplexer_triple_index++] = l;
 #if PARTY == 0
@@ -535,7 +536,7 @@ class ABY2_PRE_Share
         orthogonalize_arithmetic(temp2, lb);
         for (int i = 0; i < BITLENGTH; i++)
         {
-           cot_triple_a[arithmetic_cot_triple_index+i] = lb[i];  //corr
+           cot_triple_a[arithmetic_cot_triple_index++] = lb[i];  //corr
         }
 #else
        // cot_triple_a[boolean_cot_triple_index++] = l;  //choice bit -> already set by multiplexer

@@ -471,7 +471,7 @@ void generateBooleanAdditionDummyTriples(type a[],
 
 // Input: For Party 0: Array of messages m0 stored in a[]
 // Input: For Party 1: Array of selection bits stored in a[]
-// Output: [c] will be filled with shares of mb, i.e. P0 holds -r and P1 holds m0/m1 + r
+// Output: [c] will be filled with shares of mb, i.e. P0 holds -r and P1 holds m0 * b + r
 template <typename type>
 void generateCOTDummyTriples(type a[],
                                  type c[],
