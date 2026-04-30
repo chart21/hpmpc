@@ -88,7 +88,12 @@ class PPA_MSB_Unsafe
                     b[i] = a[i].mult_a_known_to_evaluators(b[i]);
                     b[i].prepare_remask();
 #else
+#if A_KNOWN == 1
+                    b[i] = a[i].prepare_and_a_known(b[i]);
+#else
                     b[i] = a[i] & b[i];
+#endif
+
 #endif
                     a[i] = tmp;
                 }

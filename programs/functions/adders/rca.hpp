@@ -46,7 +46,11 @@ class BooleanAdder
                     carry_last = x[k - 1].mult_a_known_to_evaluators(y[k -1]);
                     carry_last.prepare_remask();
 #else
+#if A_KNOWN == 1
+                carry_last = x[k - 1].prepare_and_a_known(y[k - 1]);
+#else
                 carry_last = x[k - 1] & y[k - 1];
+#endif
 #endif
                 break;
             case k - 2:

@@ -74,8 +74,18 @@ class PPA_MSB_4Way
     Share prepare_W4_S(Share a1, Share b1, Share g2, Share p2, Share g3, Share p3, Share g4)
     {
         /* return g1 ^ (p1 & g2) ^ p1.prepare_and3(p2, g3) ^ p1.prepare_and4(p2, p3, g4); */
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
+#if A_KNOWN == 1
+        auto val = a1.prepare_dot_a_known(b1) ^ (a1 ^ b1).prepare_dot(g2) ^ (a1 ^ b1).prepare_dot3(p2, g3) ^
+                   (a1 ^ b1).prepare_dot4(p2, p3, g4);
+#else
         auto val = a1.prepare_dot(b1) ^ (a1 ^ b1).prepare_dot(g2) ^ (a1 ^ b1).prepare_dot3(p2, g3) ^
                    (a1 ^ b1).prepare_dot4(p2, p3, g4);
+#endif
+#else
+        auto val = a1.mult_a_known_to_evaluators(b1) ^ (a1 ^ b1).prepare_dot(g2) ^ (a1 ^ b1).prepare_dot3(p2, g3) ^
+                   (a1 ^ b1).prepare_dot4(p2, p3, g4);
+#endif
         val.mask_and_send_dot();
         return val;
     }
@@ -115,7 +125,11 @@ class PPA_MSB_4Way
     {
         /* return g1 ^ (p1 & g2) ^ p1.prepare_and3(p2, g3); */
 #if A_KNOWN_TO_EVALUATORS_OPT == 0
+#if A_KNOWN == 1
+        auto val = x1.prepare_dot_a_known(y1) ^ (x1 ^ y1).prepare_dot(g2) ^ (x1 ^ y1).prepare_dot3(p2, g3);
+#else
         auto val = x1.prepare_dot(y1) ^ (x1 ^ y1).prepare_dot(g2) ^ (x1 ^ y1).prepare_dot3(p2, g3);
+#endif
 #else
         auto val = x1.mult_a_known_to_evaluators(y1) ^ (x1 ^ y1).prepare_dot(g2) ^ (x1 ^ y1).prepare_dot3(p2, g3); 
 #endif
@@ -152,7 +166,11 @@ class PPA_MSB_4Way
     {
         /* return (x1 & y1) ^ (x1^y1).prepare_and3(x2, y2) ^ (x1^y1).prepare_and4((x2^y2), x3, y3); */
 #if A_KNOWN_TO_EVALUATORS_OPT == 0
+#if A_KNOWN == 1
+        auto val = x1.prepare_dot_a_known(y1) ^ (x1 ^ y1).prepare_dot3(x2, y2) ^ (x1 ^ y1).prepare_dot4((x2 ^ y2), x3, y3);
+#else
         auto val = x1.prepare_dot(y1) ^ (x1 ^ y1).prepare_dot3(x2, y2) ^ (x1 ^ y1).prepare_dot4((x2 ^ y2), x3, y3);
+#endif
         val.mask_and_send_dot();
 #else
         auto y1y2 = y1.prepare_dot(y2); // dot2
@@ -235,7 +253,12 @@ class PPA_MSB_4Way
     Share prepare_B2L1_G(Share x1, Share y1, Share x2, Share y2)
     {
         /* return (x1 & y1) ^ (x1^y1).prepare_and3( x2, y2); */
-        auto val = x1.prepare_dot(y1) ^ (x1 ^ y1).prepare_dot3(x2, y2);
+
+#if A_KNOWN == 1
+        auto val = x1.prepare_dot_a_known(y1) ^ (x1 ^ y1).prepare_dot3(x2, y2);
+#else
+        auto val = x1.prepare_dot_a_known(y1) ^ (x1 ^ y1).prepare_dot3(x2, y2);
+#endif
         val.mask_and_send_dot();
         return val;
     }
