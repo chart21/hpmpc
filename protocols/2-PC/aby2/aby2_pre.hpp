@@ -527,9 +527,21 @@ class ABY2_PRE_Share
             multiplexer_triple_a[arithmetic_multiplexer_triple_index++] = x[i].l;
             out[i].l = getRandomVal(PSELF);
         }
-            multiplexer_triple_b[boolean_multiplexer_triple_index++] = l;
-#if PARTY == 0
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+        Datatype ll[BITLENGTH]{0};
+        ll[BITLENGTH - 1] = l;
+        unorthogonalize_boolean(ll, temp2);
+        const int vectorization_factor = DATTYPE / BITLENGTH;
+        alignas(sizeof(Datatype)) UINT_TYPE lo[vectorization_factor]{0};
+        for(int i = 0; i < vectorization_factor; i++) {
+            for(int j = 0; j < BITLENGTH; j++) {
+                lo[i] |= (temp2[i * BITLENGTH + j] & 1) << j;
+            }
+        }
+        Datatype dlo;
+        orthogonalize_arithmetic(lo, &dlo);
+        multiplexer_triple_b[boolean_multiplexer_triple_index++] = dlo;
+#if PARTY == 0
         Datatype lb[BITLENGTH]{0};
         lb[BITLENGTH - 1] = l;
         unorthogonalize_boolean(lb, temp2);
