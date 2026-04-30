@@ -436,18 +436,44 @@ bool test_BitInj()
 
     S share_a = SET_ALL_ZERO();
     S share_b = SET_ALL_ONE();
+    UINT_TYPE a[DATTYPE];
+    for (int i = 0; i < DATTYPE; i++)
+    {
+        a[i] = i + 1;
+    }
+
+    // Create a diverse bit pattern: even elements = 0, odd elements = 1
+    UINT_TYPE bits[DATTYPE];
+    for (int i = 0; i < DATTYPE; i++)
+    {
+        bits[i] = (i % 5 == 0) ? 0 : 1;
+    }
+    DATATYPE vectorized_bits[BITLENGTH];
+    orthogonalize_boolean(bits, vectorized_bits);
+    Bitset b_vec;
+    b_vec.template prepare_receive_from<P_0>(vectorized_bits);
+    Share::communicate();
+    b_vec.template complete_receive_from<P_0>();
+    S share_c = b_vec[BITLENGTH - 1];  
+    
     sint val_a = 25;
     sint val_b = 25;
     sint val_c = -10;
     sint val_d = -10;
     sint val_e = 0;
     sint val_f = 0;
+    sint val_g;  // varying values, bit=0
+    sint val_h;  // varying values, bit=1
+    sint val_m;  // varying values, mixed bit pattern
     sint output_a;
     sint output_b;
     sint output_c;
     sint output_d;
     sint output_e;
     sint output_f;
+    sint output_g;
+    sint output_h;
+    sint output_m;
     Share::communicate();
     share_a = share_a & share_b;
     share_b = share_b & share_b;
@@ -455,13 +481,27 @@ bool test_BitInj()
     share_a.complete_and();
     share_b.complete_and();
 
-    // Bit2A
+    // Initialize varying sint values from a[i]
+    DATATYPE vectorized_a[BITLENGTH];
+    orthogonalize_arithmetic(a, vectorized_a);
+    val_g.template prepare_receive_from<P_0>(vectorized_a);
+    val_h.template prepare_receive_from<P_0>(vectorized_a);
+    val_m.template prepare_receive_from<P_0>(vectorized_a);
+    Share::communicate();
+    val_g.template complete_receive_from<P_0>();
+    val_h.template complete_receive_from<P_0>();
+    val_m.template complete_receive_from<P_0>();
+
+    // Bit injection
     share_a.prepare_opt_bit_injection(val_a.get_share_pointer(), val_a.get_share_pointer());
     share_b.prepare_opt_bit_injection(val_b.get_share_pointer(), val_b.get_share_pointer());
     share_a.prepare_opt_bit_injection(val_c.get_share_pointer(), val_c.get_share_pointer());
     share_b.prepare_opt_bit_injection(val_d.get_share_pointer(), val_d.get_share_pointer());
     share_a.prepare_opt_bit_injection(val_e.get_share_pointer(), val_e.get_share_pointer());
     share_b.prepare_opt_bit_injection(val_f.get_share_pointer(), val_f.get_share_pointer());
+    share_a.prepare_opt_bit_injection(val_g.get_share_pointer(), val_g.get_share_pointer());  // 0 * a[i]
+    share_b.prepare_opt_bit_injection(val_h.get_share_pointer(), val_h.get_share_pointer());  // 1 * a[i]
+    share_c.prepare_opt_bit_injection(val_m.get_share_pointer(), val_m.get_share_pointer());  // mixed * a[i]
     Share::communicate();
     val_a.complete_opt_bit_injection();
     val_b.complete_opt_bit_injection();
@@ -469,12 +509,18 @@ bool test_BitInj()
     val_d.complete_opt_bit_injection();
     val_e.complete_opt_bit_injection();
     val_f.complete_opt_bit_injection();
+    val_g.complete_opt_bit_injection();
+    val_h.complete_opt_bit_injection();
+    val_m.complete_opt_bit_injection();
     output_a = val_a;
     output_b = val_b;
     output_c = val_c;
     output_d = val_d;
     output_e = val_e;
     output_f = val_f;
+    output_g = val_g;
+    output_h = val_h;
+    output_m = val_m;
 
     // reveal
     UINT_TYPE ortho_a[DATTYPE];
@@ -483,6 +529,9 @@ bool test_BitInj()
     UINT_TYPE ortho_d[DATTYPE];
     UINT_TYPE ortho_e[DATTYPE];
     UINT_TYPE ortho_f[DATTYPE];
+    UINT_TYPE ortho_g[DATTYPE];
+    UINT_TYPE ortho_h[DATTYPE];
+    UINT_TYPE ortho_m[DATTYPE];
 
     output_a.prepare_reveal_to_all();
     output_b.prepare_reveal_to_all();
@@ -490,6 +539,9 @@ bool test_BitInj()
     output_d.prepare_reveal_to_all();
     output_e.prepare_reveal_to_all();
     output_f.prepare_reveal_to_all();
+    output_g.prepare_reveal_to_all();
+    output_h.prepare_reveal_to_all();
+    output_m.prepare_reveal_to_all();
 
     Share::communicate();
     output_a.complete_reveal_to_all(ortho_a);
@@ -498,7 +550,17 @@ bool test_BitInj()
     output_d.complete_reveal_to_all(ortho_d);
     output_e.complete_reveal_to_all(ortho_e);
     output_f.complete_reveal_to_all(ortho_f);
+    output_g.complete_reveal_to_all(ortho_g);
+    output_h.complete_reveal_to_all(ortho_h);
+    output_m.complete_reveal_to_all(ortho_m);
     // compare
+
+    // Compute expected values for mixed bit pattern
+    UINT_TYPE expected_m[DATTYPE];
+    for (int i = 0; i < DATTYPE; i++)
+    {
+        expected_m[i] = bits[i] ? a[i] : 0;  // 0 for false, a[i] for true
+    }
 
     for (int i = 0; i < DATTYPE; i++)
     {
@@ -508,11 +570,15 @@ bool test_BitInj()
         print_compare(-10, INT_TYPE(ortho_d[i]));
         print_compare(0, ortho_e[i]);
         print_compare(0, ortho_f[i]);
+        print_compare(0, ortho_g[i]);
+        print_compare(a[i], ortho_h[i]);
+        print_compare(expected_m[i], ortho_m[i]);
     }
     for (int i = 0; i < DATTYPE; i++)
     {
-        if (ortho_a[i] != 0 || ortho_b[i] != 25 || ortho_c[i] != 0 || INT_TYPE(ortho_d[i]) != -10 || ortho_e[i] != 0 ||
-            ortho_f[i] != 0)
+        if (ortho_a[i] != 0 || ortho_b[i] != 25 || ortho_c[i] != 0 || INT_TYPE(ortho_d[i]) != -10 ||
+            ortho_e[i] != 0 || ortho_f[i] != 0 ||
+            ortho_g[i] != 0 || ortho_h[i] != a[i] || ortho_m[i] != expected_m[i])
         {
             return false;
         }
