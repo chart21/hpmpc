@@ -527,21 +527,35 @@ class ABY2_PRE_Share
             multiplexer_triple_a[arithmetic_multiplexer_triple_index++] = x[i].l;
             out[i].l = getRandomVal(PSELF);
         }
-        alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
-        Datatype ll[BITLENGTH]{0};
-        ll[BITLENGTH - 1] = l;
-        unorthogonalize_boolean(ll, temp2);
-        const int vectorization_factor = DATTYPE / BITLENGTH;
-        alignas(sizeof(Datatype)) UINT_TYPE lo[vectorization_factor]{0};
-        for(int i = 0; i < vectorization_factor; i++) {
-            for(int j = 0; j < BITLENGTH; j++) {
-                lo[i] |= (temp2[i * BITLENGTH + j] & 1) << j;
-            }
+        // Bit-reverse each lane using SIMD butterfly
+        // Two-level indirection to force BITLENGTH expansion before ## token pasting
+#define RSHIFT_BL_INNER(a, b, c) R_SHIFT(a, b, c)
+#define LSHIFT_BL_INNER(a, b, c) L_SHIFT(a, b, c)
+#define RSHIFT_BL(a, b) RSHIFT_BL_INNER(a, b, BITLENGTH)
+#define LSHIFT_BL(a, b) LSHIFT_BL_INNER(a, b, BITLENGTH)
+        Datatype dlo = l;
+        for (int s = 0; s < LOG2_BITLENGTH; s++) {
+            Datatype mr = PROMOTE((UINT_TYPE)mask_r[s]);
+            dlo = FUNC_OR(FUNC_AND(RSHIFT_BL(dlo, (1 << s)), mr),
+                          LSHIFT_BL(FUNC_AND(dlo, mr), (1 << s)));
         }
-        Datatype dlo;
-        orthogonalize_arithmetic(lo, &dlo);
+#undef RSHIFT_BL
+#undef LSHIFT_BL
+#undef RSHIFT_BL_INNER
+#undef LSHIFT_BL_INNER
+        // Reverse lane order (boolean-to-arithmetic layout)
+        const int vectorization_factor = DATTYPE / BITLENGTH;
+        alignas(sizeof(Datatype)) UINT_TYPE lanes[vectorization_factor];
+        unorthogonalize_arithmetic(&dlo, lanes, 1);
+        for (int i = 0; i < vectorization_factor / 2; i++) {
+            UINT_TYPE tmp = lanes[i];
+            lanes[i] = lanes[vectorization_factor - 1 - i];
+            lanes[vectorization_factor - 1 - i] = tmp;
+        }
+        orthogonalize_arithmetic(lanes, &dlo, 1);
         multiplexer_triple_b[boolean_multiplexer_triple_index++] = dlo;
 #if PARTY == 0
+        alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
         Datatype lb[BITLENGTH]{0};
         lb[BITLENGTH - 1] = l;
         unorthogonalize_boolean(lb, temp2);
