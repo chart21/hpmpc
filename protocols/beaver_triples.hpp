@@ -197,6 +197,19 @@ void init_beaverAB(int rounds)
     // std::cout << "Initialized beaver AB for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 
+void init_beaverAB_arithmetic(int rounds)
+{
+    arithmetic_triple_a = new DATATYPE[num_arithmetic_triples[rounds] ];
+    arithmetic_triple_b = new DATATYPE[num_arithmetic_triples[rounds] ];
+}
+
+void init_beaverAB_boolean(int rounds)
+{
+    boolean_triple_a = new DATATYPE[num_boolean_triples[rounds] ];
+    boolean_triple_b = new DATATYPE[num_boolean_triples[rounds] ];
+}
+
+
 #if A2B_ONLINE_OPT == 1
 void init_booleanAdditionBeaverAB()
 {
@@ -290,6 +303,16 @@ void init_beaverC(int rounds)
     arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
     boolean_triple_c = new DATATYPE[num_boolean_triples[rounds] ];
     // std::cout << "Initialized beaver C for round " + std::to_string(rounds) + " with " + std::to_string(num_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
+}
+
+void init_beaverC_arithmetic(int rounds)
+{
+    arithmetic_triple_c = new DATATYPE[num_arithmetic_triples[rounds] ];
+}
+
+void init_beaverC_boolean(int rounds)
+{
+    boolean_triple_c = new DATATYPE[num_boolean_triples[rounds] ];
 }
 
 
@@ -414,13 +437,13 @@ void init_beaverAB2C(int rounds)
     // std::cout << "Initialized beaver AB2 C for round " + std::to_string(rounds) + " with " + std::to_string(num_ab2_arithmetic_triples[rounds] * DATTYPE/BITLENGTH) + " arithmetic triples and " + std::to_string(num_ab2_boolean_triples[rounds] * DATTYPE) + " boolean triples.\n";
 }
 
-init_beaverAB2C_arithmetic(int rounds)
+void init_beaverAB2C_arithmetic(int rounds)
 {
     if(num_ab2_arithmetic_triples[rounds] > 0)
         arithmetic_ab2_triple_c = new DATATYPE[num_ab2_arithmetic_triples[rounds] ];
 }
 
-init_beaverAB2C_boolean(int rounds)
+void init_beaverAB2C_boolean(int rounds)
 {
     if(num_ab2_boolean_triples[rounds] > 0)
         boolean_ab2_triple_c = new DATATYPE[num_ab2_boolean_triples[rounds] ];
@@ -467,7 +490,7 @@ void deinit_beaverAB2_arithmetic()
 #endif
 }
 
-deinit_beaverAB2_boolean()
+void deinit_beaverAB2_boolean()
 {
 #if PARTY == 0
     delete[] boolean_ab2_triple_a;

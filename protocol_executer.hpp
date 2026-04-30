@@ -281,10 +281,12 @@ void load_preprocessed_data()
 void preprocess_circuit(std::string ips[])
 {
 #if ROT_PREPROCESSING_OPT == 1
-        init_beaverAB_boolean(0);
         init_beaverC_boolean(0);
+        init_beaverAB2C_boolean(0);
         generate_beaver_triples(
-                ips, port, process_offset, 0, num_boolean_triples[0], "ROT_BOOL", 0);
+                ips, base_port, process_offset, 0, num_boolean_triples[0], "LXLY");
+        generate_beaver_triples(
+                ips, base_port, process_offset, 0, num_ab2_boolean_triples[0], "LXLY2");
 #endif
     pthread_t sending_Threads_pre[num_players - 1];
     pthread_t receiving_threads_pre[num_players - 1];

@@ -652,8 +652,8 @@ class ABY2_PRE_Share
         #else 
         generate_triple(c, ADD);    // rxy
         b.generate_triple(c, ADD);    // ryz
-        auto ab = get_beaver_C(); //TODO: implement 
-        ab.generate_triple(c, ADD);    // rxz
+        // auto ab = get_beaver_C(); //TODO: implement 
+        // ab.generate_triple(c, ADD);    // rxz
         #endif 
         return ABY2_PRE_Share();
     }

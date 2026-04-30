@@ -350,7 +350,7 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef CHEETAH_BOOL_OT_TYPE
-#define CHEETAH_BOOL_OT_TYPE 2  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 3: _2COT
+#define CHEETAH_BOOL_OT_TYPE 0  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 3: _2COT
 #endif
 
 #ifndef STORE_PREPROCESSING
@@ -395,6 +395,10 @@ int base_port = BASE_PORT;  // temporary solution
 #else
 #define FC_TRIPLES 0
 #endif
+#endif
+
+#ifndef ROT_PREPROCESSING_OPT
+#define ROT_PREPROCESSING_OPT 1  // Use optimized preprocessing using ROTs
 #endif
 
 #define generate_triple generate_lxly_triple
