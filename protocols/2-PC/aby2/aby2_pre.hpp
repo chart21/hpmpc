@@ -1175,7 +1175,7 @@ static void get_fc_triples_from_file()
         init_beaverAB_arithmetic(1);
 #endif
 
-
+#if ROT_PREPROCESSING_OPT == 0
         init_beaverAB2C(0);
 #if FAKE_TRIPLES == 1
         get_ab2_triples_from_file(0, num_ab2_arithmetic_triples.data(), num_ab2_boolean_triples.data());
@@ -1187,6 +1187,19 @@ static void get_fc_triples_from_file()
 #endif
         deinit_beaverAB2();
         init_beaverAB2(1);
+#else
+        init_beaverAB2C_arithmetic(0);
+#if FAKE_TRIPLES == 1
+        get_ab2_triples_from_file(0, num_ab2_arithmetic_triples.data(), num_ab2_boolean_triples.data());
+        generate_beaver_triples(
+                ips, port, process_offset, num_ab2_arithmetic_triples[0], 0, "LXLY2");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_ab2_arithmetic_triples[0], 0, "LXLY2");
+#endif
+        deinit_beaverAB2_arithmetic();
+        init_beaverAB2_arithmetic(1);
+#endif
 
         init_ConvC();
 #if FAKE_TRIPLES == 1
@@ -1488,6 +1501,7 @@ static void get_fc_triples_from_file()
         deinit_beaverAB2C();
 #else
         deinit_beaverC_arithmetic();
+        deinit_beaverAB2C_arithmetic();
 #endif
 #if A2B_ONLINE_OPT == 1 && ROT_PREPROCESSING_OPT == 0
         deinit_booleanAdditionBeaverC();
@@ -1502,21 +1516,23 @@ static void get_fc_triples_from_file()
         deinit_beaverAB();
         get_ab2_triples_from_file(1, num_ab2_arithmetic_triples.data(), num_ab2_boolean_triples.data());
 #else
+        #if ROT_PREPROCESSING_OPT == 0
         generate_beaver_triples(
              ips, port, process_offset, num_arithmetic_triples[1], num_boolean_triples[1], "LXLY");
-        init_beaverAB2C(1);
-        #if ROT_PREPROCESSING_OPT == 0
         deinit_beaverAB();
-        #else
-        deinit_beaverAB_arithmetic();
-        #endif
+        init_beaverAB2C(1);
         generate_beaver_triples(
                 ips, port, process_offset, num_ab2_arithmetic_triples[1], num_ab2_boolean_triples[1], "LXLY2");
-#endif
-#if ROT_PREPROCESSING_OPT == 0
         deinit_beaverAB2();
-#else
+        #else
+        generate_beaver_triples(
+             ips, port, process_offset, num_arithmetic_triples[1], 0, "LXLY");
+        deinit_beaverAB_arithmetic();
+        init_beaverAB2C_arithmetic(1);
+        generate_beaver_triples(
+                ips, port, process_offset, num_ab2_arithmetic_triples[1], 0, "LXLY2");
         deinit_beaverAB2_arithmetic();
+        #endif
 #endif
 
 
