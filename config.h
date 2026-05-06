@@ -122,6 +122,10 @@
         // sharing). Important: Use "P_0" not "0"!
 #endif
 
+#ifndef MODELWEIGHTS_KNOWN_DURING_PREPROCESSING
+#define MODELWEIGHTS_KNOWN_DURING_PREPROCESSING 1 //Assumes Model Weights are known by P_0 during preprocessing
+#endif
+
 #ifndef TRUNC_THEN_MULT
 #define TRUNC_THEN_MULT 0  // 0: Truncate after multiplication, 1: Truncate before multiplication
 #endif

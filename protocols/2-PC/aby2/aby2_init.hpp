@@ -203,6 +203,11 @@ class ABY2_init
         generate_lxly_triple(ADD);
         return ABY2_init();
     }
+
+    ABY2_init prepare_dot_and_assign(ABY2_init b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return ABY2_init();
+    }
     
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot_ex_lxly(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -222,6 +227,13 @@ class ABY2_init
         generate_lxly2_triple(ADD);
         return ABY2_init();
     }
+
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_dot_ex_lxly_a_known_pre(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return ABY2_init();
+    }
+
 #if FUSE_CONV_BN_SIM == 1
     template <typename func_add, typename func_sub, typename func_mul>
     void prepare_Conv_BN_Accum(const ABY2_PRE x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -345,6 +357,14 @@ class ABY2_init
     {
         send_to_(PNEXT);
     }
+    
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
+    {
+#if PARTY == 0
+        send_to_(PNEXT);
+#endif
+    }
 
     static void prepare_A2B_S1(int m, int k, ABY2_init in[], ABY2_init out[])
     {
@@ -421,6 +441,14 @@ class ABY2_init
     void complete_mult(func_add ADD, func_sub SUB)
     {
         receive_from_(PNEXT);
+    }
+    
+    template <typename func_add, typename func_sub>
+    void complete_mult_a_known_pre(func_add ADD, func_sub SUB)
+    {
+#if PARTY == 1
+        receive_from_(PNEXT);
+#endif
     }
 
     template <typename func_add, typename func_sub, typename func_trunc>

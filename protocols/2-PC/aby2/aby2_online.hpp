@@ -328,6 +328,19 @@ class ABY2_ONLINE_Share
         return c;
     }
     
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_dot_ex_lxly_a_known_pre(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        ABY2_ONLINE_Share c;
+/* c.l = getRandomVal(PSELF); */
+#if PARTY == 0
+        c.m = MULT(b.m, l); // mb * -a
+#else
+        // lalb2 is the error
+#endif
+        return c;
+    }
+    
 
     /* template <typename func_add, typename func_sub, typename func_mul, typename func_trunc> */
     /*     ABY2_ONLINE_Share prepare_dot_with_trunc(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT,
@@ -357,6 +370,14 @@ class ABY2_ONLINE_Share
         m = ADD(m, l);
         send_to_live(PNEXT, m);
     }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_and_assign(Datatype assign, func_add ADD, func_sub SUB)
+    {
+        l = assign;
+        m = ADD(m, l);
+        send_to_live(PNEXT, m);
+    }
     
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB)
@@ -379,6 +400,21 @@ class ABY2_ONLINE_Share
         lxly = retrieve_output_share_arithmetic(0, index);
         m = ADD(ADD(m, l), lxly); 
         send_to_live(PNEXT, m);
+    }
+    
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, int index)
+    {
+        Datatype lxly;
+        lxly = retrieve_output_share_arithmetic(0, index);
+#if PARTY == 0
+        l = getRandomVal(PSELF); 
+        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);  //ToDO: Check whether SET_ALL_ZERO modification is needed, ab - [lxlw2] 
+        send_to_live(PNEXT, m);
+#else
+        l = TRUNC(lxly);
+        // Party1 sends nothing, defines mask as lxly2 share
+#endif
     }
 
     template <typename func_add, typename func_sub, typename func_trunc>
@@ -417,6 +453,14 @@ class ABY2_ONLINE_Share
         mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
     }
     
+    
+    template <typename func_add, typename func_sub>
+    void complete_mult_a_known_pre(func_add ADD, func_sub SUB)
+    {
+#if PARTY == 1
+        m = receive_from_live(PNEXT);
+#endif
+    }
 
 
     template <typename func_add, typename func_sub>
