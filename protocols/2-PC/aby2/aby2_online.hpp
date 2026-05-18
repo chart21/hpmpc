@@ -236,6 +236,23 @@ class ABY2_ONLINE_Share
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_mult(ABY2_ONLINE_Share b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        Datatype lxly = retrieve_output_share_bool();
+        ABY2_ONLINE_Share c;
+        c.l = assign;
+#if PARTY == 0
+        c.m = MULT(m, b.m);
+#else
+        c.m = SET_ALL_ZERO();
+#endif
+        c.m = SUB(c.m,
+                  SUB(ADD(MULT(m, b.l), MULT(l, b.m)), ADD(lxly, c.l)));  // mx my - (mx[ly] + my[lx] - [lxly] - [lz])
+        send_to_live(PNEXT, c.m);
+        return c;
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_mult_a_known(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         Datatype lxly;

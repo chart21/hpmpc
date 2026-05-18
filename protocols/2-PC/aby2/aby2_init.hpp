@@ -199,6 +199,14 @@ class ABY2_init
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_mult(ABY2_init b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        generate_lxly_triple(ADD);
+        send_to_(PNEXT);
+        return ABY2_init();
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_mult_a_known(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         generate_lxly2_triple(ADD);

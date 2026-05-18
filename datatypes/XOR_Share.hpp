@@ -138,6 +138,12 @@ class XOR_Share : public Share_Type
         Share_Type::zero_add(assign, std::bit_xor<Datatype>());
     }
 
+    XOR_Share prepare_and(const XOR_Share<Datatype, Share_Type>& b, Datatype assign) const
+    {
+        return XOR_Share(
+            Share_Type::prepare_mult(b, assign, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
+    }
+
 
 #if A_KNOWN == 1
 

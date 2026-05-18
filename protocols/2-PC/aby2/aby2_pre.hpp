@@ -149,7 +149,7 @@ class ABY2_PRE_Share
         {
             triple_type[0][triple_type_index[0]++] = CaseAND;
             #if ROT_PREPROCESSING_OPT == 1
-            return ABY2_PRE_Share();
+            return ABY2_PRE_Share(getRandomVal(PSELF));
             #endif
         }
         else
@@ -158,6 +158,13 @@ class ABY2_PRE_Share
         }
         generate_triple(b, ADD);
         return ABY2_PRE_Share(getRandomVal(PSELF));  // new mask
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+            triple_type[0][triple_type_index[0]++] = CaseAND;
+            return ABY2_PRE_Share(assign);  // new mask
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
