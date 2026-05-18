@@ -210,6 +210,13 @@ class ABY2_PRE_Share
         generate_triple(b, ADD);
         return ABY2_PRE_Share();
     }
+    
+    template <typename func_add>
+    ABY2_PRE zero_add(Datatype assign, func_add ADD) const
+    {
+        pre_send_to_live(PNEXT, ADD(l, assign));
+        return ABY2_PRE(assign);
+    }
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot_and_assign(ABY2_PRE_Share b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const

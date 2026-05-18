@@ -133,6 +133,11 @@ class XOR_Share : public Share_Type
         Share_Type::mask_and_send_dot_with_triple(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
     }
 
+    void zero_add(Datatype assign)
+    {
+        Share_Type::zero_add(assign, std::bit_xor<Datatype>());
+    }
+
 
 #if A_KNOWN == 1
 

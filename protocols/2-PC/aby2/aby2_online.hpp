@@ -341,6 +341,15 @@ class ABY2_ONLINE_Share
         return c;
     }
     
+    template <typename func_add>
+    ABY2_ONLINE_Share zero_add(Datatype assign, func_add ADD) const
+    {
+        ABY2_ONLINE_Share c;
+        c.m = ADD(ADD(assign,l),ADD(m,pre_receive_from_live(PNEXT)));
+        c.l = assign;
+        return c;
+    }
+    
 
     /* template <typename func_add, typename func_sub, typename func_mul, typename func_trunc> */
     /*     ABY2_ONLINE_Share prepare_dot_with_trunc(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT,
@@ -876,7 +885,14 @@ class ABY2_ONLINE_Share
         const int out_w = (inw + 2 * padding - ww - (ww - 1) * (dilation - 1)) / stride + 1;
         const int ySize = out_h * out_w * dout * batchSize;
         batchSize *= factor;
+
+
+
 #if A_KNOWN == 1
+
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 && PARTY == 1
+return;
+#else
         UINT_TYPE* w_p1 = new UINT_TYPE[wSize];  // W is always constant
         UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
         UINT_TYPE* y_p1 = new UINT_TYPE[factor * ySize];
@@ -884,7 +900,11 @@ class ABY2_ONLINE_Share
         {
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
 #if PARTY == 0 // w
-            auto tempml = OP_SUB(W[i].m, W[i].l);
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+auto templ = W[i].l;
+#else
+auto tempml = OP_SUB(W[i].m, W[i].l);
+#endif
             unorthogonalize_arithmetic(&tempml, temp, 1);
 #else // mw
             unorthogonalize_arithmetic(&W[i].m, temp, 1);
@@ -895,7 +915,11 @@ class ABY2_ONLINE_Share
         {
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
 #if PARTY == 0 // mx - lx1
-            auto tempml = OP_SUB(X[i].m, X[i].l);
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1     
+auto templ = X[i].m;
+#else
+auto tempml = OP_SUB(X[i].m, X[i].l);
+#endif
             unorthogonalize_arithmetic(&tempml, temp, 1);
 #else // lx2
             unorthogonalize_arithmetic(&X[i].m, temp, 1);
@@ -918,6 +942,7 @@ class ABY2_ONLINE_Share
         delete[] w_p1;
         delete[] x_p1;
         delete[] y_p1;
+#endif
 #else
         UINT_TYPE* x_p1 = new UINT_TYPE[factor * xSize];
         UINT_TYPE* x_p2 = new UINT_TYPE[factor * xSize];
