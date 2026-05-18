@@ -204,6 +204,7 @@ class ABY2_init
         return ABY2_init();
     }
 
+    template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot_and_assign(ABY2_init b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         return ABY2_init();

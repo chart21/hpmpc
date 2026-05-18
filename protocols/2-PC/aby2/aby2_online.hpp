@@ -334,7 +334,7 @@ class ABY2_ONLINE_Share
         ABY2_ONLINE_Share c;
 /* c.l = getRandomVal(PSELF); */
 #if PARTY == 0
-        c.m = MULT(b.m, l); // mb * -a
+        c.m = MULT(b.m, l); // -wx - [lw1lx]
 #else
         // lalb2 is the error
 #endif

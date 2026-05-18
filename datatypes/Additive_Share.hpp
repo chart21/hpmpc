@@ -228,7 +228,6 @@ class Additive_Share : public Share_Type
         Share_Type::mask_and_send_dot_with_trunc_with_triple(OP_ADD, OP_SUB, FUNC_TRUNC);
     }
     
-# if PROTOCOL == 4 && PRE == 1
     void mask_and_send_dot_without_trunc_with_triple(int index)
     {
         Share_Type::mask_and_send_dot_with_triple(OP_ADD, OP_SUB, index);
@@ -238,12 +237,30 @@ class Additive_Share : public Share_Type
     {
         Share_Type::mask_and_send_dot_with_trunc_with_triple(OP_ADD, OP_SUB, FUNC_TRUNC, index);
     }
-#endif
+
     
     Additive_Share prepare_dot_ex_lxly_a_known(const Additive_Share<Datatype, Share_Type>& b) const
     {
         return Additive_Share(Share_Type::prepare_dot_ex_lxly_a_known(b, OP_ADD, OP_SUB, OP_MULT));
     }
+
+    #if MDOELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+    Additive_Share prepare_dot_ex_lxly_a_known_pre(const Additive_Share<Datatype, Share_Type>& b) const
+    {        return Additive_Share(Share_Type::prepare_dot_ex_lxly_a_known_pre(b, OP_ADD, OP_SUB, OP_MULT));
+    }   
+
+    void mask_and_send_dot_a_known_pre_with_triple()
+    {
+        Share_Type::mask_and_send_dot_a_known_pre_with_triple_with_trunc(OP_ADD, OP_SUB, FUNC_TRUNC);
+    }
+
+    void complete_mult_a_known_pre()
+    {
+        Share_Type::complete_mult_a_known_pre(OP_ADD, OP_SUB);
+    }
+#endif
+
+
 #endif
 
 #if A_KNOWN == 1

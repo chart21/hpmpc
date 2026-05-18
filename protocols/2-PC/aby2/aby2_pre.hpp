@@ -211,6 +211,7 @@ class ABY2_PRE_Share
         return ABY2_PRE_Share();
     }
 
+    template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot_and_assign(ABY2_PRE_Share b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         return ABY2_PRE_Share();  // new mask
@@ -349,7 +350,8 @@ class ABY2_PRE_Share
 #if PARTY == 0
         l = getRandomVal(PSELF);
 #else
-        l = TRUNC(lxly);
+        l = TRUNC(l);
+        // l = TRUNC(lxly); // TODO: Needs to be assigned
 #endif
 
     }
