@@ -133,15 +133,15 @@ class XOR_Share : public Share_Type
         Share_Type::mask_and_send_dot_with_triple(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
     }
 
-    void zero_add(Datatype assign)
+    XOR_Share zero_add(Datatype assign)
     {
-        Share_Type::zero_add(assign, std::bit_xor<Datatype>());
+        return XOR_Share(Share_Type::zero_add(assign, std::bit_xor<Datatype>()));
     }
 
-    XOR_Share prepare_and(const XOR_Share<Datatype, Share_Type>& b, Datatype assign) const
+    XOR_Share prepare_and(const XOR_Share<Datatype, Share_Type>& b, Datatype assign, Datatype triple_c) const
     {
         return XOR_Share(
-            Share_Type::prepare_mult(b, assign, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
+            Share_Type::prepare_mult(b, assign, triple_c, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }
 
 
@@ -183,7 +183,12 @@ class XOR_Share : public Share_Type
     }
 
 #endif
-    
+   #if PROTOCOL ==4 && ROT_PREPROCESSING_OPT ==1
+   Datatype get_mask() const
+   {
+       return Share_Type::get_mask();
+   }
+   #endif
 #if CV_FIX == 1
     void complete_and2()
     {

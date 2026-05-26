@@ -5,12 +5,16 @@
 #include "../../datatypes/k_sint.hpp"
 #include "../../protocols/Protocols.h"
 #include "adders/rca.hpp"
+#if ROT_PREPROCESSING_OPT == 1
+#include "adders/rca_msb_and_ab_32bit.hpp"
+#else
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
 #include "adders/rca_msb.hpp"
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
 #include "adders/ppa_msb_4_way.hpp"
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
 #include "adders/ppa_msb_unsafe.hpp"
+#endif
 #endif
 #if FUSE_RELU_AVG == 1 && TRUNC_APPROACH == 4 && TRUNC_DELAYED == 0
 #include "../../datatypes/float_fixed_converter.hpp"
@@ -51,6 +55,9 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
     /* } */
     /* } */
 
+#if ROT_PREPROCESSING_OPT == 1
+std::vector<RCA_MSB_AB_32bit<S>> adders;
+#else
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     std::vector<BooleanAdder_MSB<bk - bm, S>> adders;
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
@@ -59,7 +66,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 #elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
     std::vector<PPA_MSB_4Way<bk - bm, S>> adders;
 #endif
-
+#endif
     adders.reserve(len);
     for (int i = 0; i < len; i++)
     {

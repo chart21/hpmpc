@@ -214,6 +214,13 @@ class ABY2_ONLINE_Share
         return SUB(m, ADD(retrieve_output_share(), l));
     }
 
+    #if PROTOCOL ==4 && ROT_PREPROCESSING_OPT ==1
+   Datatype get_mask() const
+   {
+       return l;
+   }
+    #endif
+
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_mult(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
     {
@@ -236,9 +243,9 @@ class ABY2_ONLINE_Share
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_ONLINE_Share prepare_mult(ABY2_ONLINE_Share b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_ONLINE_Share prepare_mult(ABY2_ONLINE_Share b, Datatype assign, Datatype triple_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-        Datatype lxly = retrieve_output_share_bool();
+        Datatype lxly = triple_c;
         ABY2_ONLINE_Share c;
         c.l = assign;
 #if PARTY == 0
@@ -362,7 +369,8 @@ class ABY2_ONLINE_Share
     ABY2_ONLINE_Share zero_add(Datatype assign, func_add ADD) const
     {
         ABY2_ONLINE_Share c;
-        c.m = ADD(ADD(assign,l),ADD(m,pre_receive_from_live(PNEXT)));
+        auto retrieved = retrieve_output_share();
+        c.m = ADD(ADD(assign,l),ADD(m,retrieved));
         c.l = assign;
         return c;
     }

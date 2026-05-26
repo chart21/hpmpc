@@ -63,12 +63,17 @@ class ABY2_init
             num_ab2_arithmetic_triples[num_round]++;
         }
     }
-    
+  #if PROTOCOL ==4 && ROT_PREPROCESSING_OPT ==1
+   Datatype get_mask() const
+   {
+       return SET_ALL_ZERO();
+   }
+   #endif 
     template <typename func_add>
     ABY2_init zero_add(Datatype assign, func_add ADD) const
     {
         pre_send_to_(PNEXT);
-        pre_receive_from_(PNEXT);
+        store_output_share_();
         return ABY2_init();
     }
 
@@ -199,7 +204,7 @@ class ABY2_init
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_init prepare_mult(ABY2_init b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_init prepare_mult(ABY2_init b, Datatype assign, Datatype triple_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         generate_lxly_triple(ADD);
         send_to_(PNEXT);

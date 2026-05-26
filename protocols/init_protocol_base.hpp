@@ -96,14 +96,16 @@ void pre_send_to_(int player_index)
 void pre_receive_from_(int player_index)
 {
 #if PROTOCOL ==4
+    int round_idx = receiving_args_pre[player_index].rec_rounds > 0 ? receiving_args_pre[player_index].rec_rounds - 1 : 0;
 #if RECV_BUFFER > 0
-    if (receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds - 1] ==
+    if (receiving_args_pre[player_index].elements_to_rec[round_idx] ==
         RECV_BUFFER)
     {
         receive_pre_();
+        round_idx = receiving_args_pre[player_index].rec_rounds - 1;
     }
 #endif
-    receiving_args_pre[player_index].elements_to_rec[receiving_args_pre[player_index].rec_rounds - 1] += 1;
+    receiving_args_pre[player_index].elements_to_rec[round_idx] += 1;
     /* receiving_args_pre[player_index].elements_to_rec[num_round] += 1; */
     total_recv_pre[player_index] += 1;
 #else

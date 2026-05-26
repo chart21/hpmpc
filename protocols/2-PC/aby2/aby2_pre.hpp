@@ -141,6 +141,13 @@ class ABY2_PRE_Share
     {
         return SET_ALL_ZERO();
     }
+  
+#if PROTOCOL ==4 && ROT_PREPROCESSING_OPT ==1
+   Datatype get_mask() const
+   {
+       return l;
+   }
+#endif
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -161,29 +168,11 @@ class ABY2_PRE_Share
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, Datatype assign, Datatype triple_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-            triple_type[0][triple_type_index[0]++] = CaseAND;
             return ABY2_PRE_Share(assign);  // new mask
     }
     
-    template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, Datatype mask, func_add ADD, func_sub SUB, func_mul MULT) const
-    {
-        if constexpr (std::is_same_v<func_add(), OP_XOR>)
-        {
-            triple_type[0][triple_type_index[0]++] = CaseAND;
-            #if ROT_PREPROCESSING_OPT == 1
-            return ABY2_PRE_Share(mask);
-            #endif
-        }
-        else
-        {
-            triple_type[0][triple_type_index[0]++] = CaseMult;
-        }
-        generate_triple(b, ADD);
-        return ABY2_PRE_Share(mask);  // new mask
-    }
     
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_mult_a_known(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -219,10 +208,11 @@ class ABY2_PRE_Share
     }
     
     template <typename func_add>
-    ABY2_PRE zero_add(Datatype assign, func_add ADD) const
+    ABY2_PRE_Share zero_add(Datatype assign, func_add ADD) const
     {
         pre_send_to_live(PNEXT, ADD(l, assign));
-        return ABY2_PRE(assign);
+        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        return ABY2_PRE_Share(assign);
     }
 
     template <typename func_add, typename func_sub, typename func_mul>
@@ -268,14 +258,14 @@ class ABY2_PRE_Share
     }
 #if FUSE_CONV_BN_SIM == 1
     template <typename func_add, typename func_sub, typename func_mul>
-    void prepare_Conv_BN_Accum(const ABY2_PRE x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
+    void prepare_Conv_BN_Accum(const ABY2_PRE_Share x, Datatype* result, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         result[0] = ADD(result[0], l); // sum(lw_i)
         result[1] = ADD(result[1], x.l); // sum(lx_i)
     }
     
     template <typename func_add, typename func_sub, typename func_mul, typename func_trunc>
-    void calculate_conv_bn(const ABY2_PRE mu, const ABY2_PRE sigma, const Datatype* accum, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) 
+    void calculate_conv_bn(const ABY2_PRE_Share mu, const ABY2_PRE_Share sigma, const Datatype* accum, func_add ADD, func_sub SUB, func_mul MULT, func_trunc TRUNC) 
     {
         const auto lw = ABY2_PRE_Share(accum[0]);
         const auto lx = ABY2_PRE_Share(accum[1]);
@@ -1338,10 +1328,12 @@ static void get_fc_triples_from_file()
         uint64_t boolean_triple_counter[num_rounds]{0};
         
 
-        auto num_triples = total_num_arithmetic_output_triples[0] + total_num_boolean_output_triples[0] + total_preprocessed_outputs;
+        auto num_triples = triple_type_index[0];
        
         curr_arithmetic_triple_index = 0;
-        curr_boolean_triple_index = 0;
+        // Note: curr_boolean_triple_index is NOT reset to 0 here.
+        // The RCA adder constructor consumes boolean triples before complete_preprocessing,
+        // so the index must continue from where it left off.
         curr_conv_triple_index = 0;
         curr_fc_triple_index = 0;
         curr_bc2D_triple_index = 0;
@@ -1355,6 +1347,7 @@ static void get_fc_triples_from_file()
         preprocessed_outputs_arithmetic_input_index[1] = 0;
         preprocessed_outputs_bool_input_index[1] = 0;
 
+        uint64_t case_default_count = 0;
         for (uint64_t i = 0; i < num_triples; i++)
         {
 
@@ -1520,6 +1513,7 @@ static void get_fc_triples_from_file()
                 {
                     auto l = pre_receive_from_live(PNEXT);
                     store_output_share(l);
+                    case_default_count++;
                     break;
                 }
             }
@@ -1558,7 +1552,11 @@ static void get_fc_triples_from_file()
         deinit_ConvC();
         deinit_BatchNorm2DC();
         deinit_FullyConnectedC();
+#if ROT_PREPROCESSING_OPT == 1
+        init_beaverC_arithmetic(1);
+#else
         init_beaverC(1);
+#endif
 #if FAKE_TRIPLES == 1
         get_triples_from_file(1, num_arithmetic_triples.data(), num_boolean_triples.data());
         init_beaverAB2C(1);
@@ -1672,8 +1670,13 @@ static void get_fc_triples_from_file()
 
         delete[] lxly_a;
         delete[] lxly_b;
+#if ROT_PREPROCESSING_OPT == 1
+        deinit_beaverC_arithmetic();
+        deinit_beaverAB2C_arithmetic();
+#else
         deinit_beaverC();
         deinit_beaverAB2C();
+#endif
         init_srngs();
     }
 

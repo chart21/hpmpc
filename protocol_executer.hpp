@@ -394,6 +394,7 @@ void preprocess_circuit(std::string ips[])
     rounds = 0;
     sending_rounds = 0;
     receiving_rounds = 0;
+    curr_boolean_triple_index = 0;
 #if INIT == 0 && NO_INI == 0
     init_from_file();
     finalize(ips);

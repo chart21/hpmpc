@@ -113,21 +113,39 @@ struct triple
 template <typename Datatype>
 triple<Datatype> retrieveArithmeticTriple()
 {
-    total_arithmetic_triples_index++;
-    return triple<Datatype>{arithmetic_triple_a[total_arithmetic_triples_index - 1],
-                            arithmetic_triple_b[total_arithmetic_triples_index - 1],
-                            arithmetic_triple_c[total_arithmetic_triples_index - 1]};
+    curr_arithmetic_triple_index++;
+    return triple<Datatype>{arithmetic_triple_a[curr_arithmetic_triple_index - 1],
+                            arithmetic_triple_b[curr_arithmetic_triple_index - 1],
+                            arithmetic_triple_c[curr_arithmetic_triple_index - 1]};
 }
 
 template <typename Datatype>
 triple<Datatype> retrieveBooleanTriple()
 {
-    total_boolean_triples_index++;
-    return triple<Datatype>{boolean_triple_a[total_boolean_triples_index - 1],
-                            boolean_triple_b[total_boolean_triples_index - 1],
-                            boolean_triple_c[total_boolean_triples_index - 1]};
+    curr_boolean_triple_index++;
+    return triple<Datatype>{boolean_triple_a[curr_boolean_triple_index - 1],
+                            boolean_triple_b[curr_boolean_triple_index - 1],
+                            boolean_triple_c[curr_boolean_triple_index - 1]};
     /* return triple<Datatype>{boolean_triple_a[boolean_triple_index], boolean_triple_b[boolean_triple_index],
      * boolean_triple_c[boolean_triple_index++]}; */
+}
+
+template <typename Datatype>
+triple<Datatype> retrieveArithmeticAB2Triple()
+{
+    curr_arithmetic_ab2_triple_index++;
+    return triple<Datatype>{arithmetic_ab2_triple_a[curr_arithmetic_ab2_triple_index - 1],
+                            arithmetic_ab2_triple_b[curr_arithmetic_ab2_triple_index - 1],
+                            arithmetic_ab2_triple_c[curr_arithmetic_ab2_triple_index - 1]};
+}   
+
+template <typename Datatype>
+triple<Datatype> retrieveBooleanAB2Triple()
+{
+    curr_boolean_ab2_triple_index++;
+    return triple<Datatype>{boolean_ab2_triple_a[curr_boolean_ab2_triple_index - 1],
+                            boolean_ab2_triple_b[curr_boolean_ab2_triple_index - 1],
+                            boolean_ab2_triple_c[curr_boolean_ab2_triple_index - 1]};
 }
     
     template <typename Datatype>
