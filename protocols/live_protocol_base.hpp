@@ -211,8 +211,20 @@ DATATYPE pre_receive_from_live(int player_id)
 #if SKIP_PRE == 1
     return SET_ALL_ZERO();
 #else
+#if PROTOCOL == 4
+#if RECV_BUFFER > 0
+    if (share_buffer_pre[player_id] == RECV_BUFFER)
+    {
+        receive_pre();
+    }
+#endif
+    share_buffer_pre[player_id] += 1;
+    return receiving_args_pre[player_id].received_elements[rounds - 1][share_buffer_pre[player_id] - 1];
+#else
     share_buffer_pre[player_id] += 1;
     return receiving_args_pre[player_id].received_elements[0][share_buffer_pre[player_id] - 1];
+
+#endif
 #endif
 }
 
