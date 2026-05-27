@@ -7,4 +7,4 @@
 	branch = aby2-merge
 [submodule "nn/ConvTriple"]
 	path = nn/ConvTriple
-	url = https://github.com/aSlunk/ConvTriple
+	url = https://github.com/chart21/ConvTriple
