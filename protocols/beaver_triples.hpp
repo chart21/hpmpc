@@ -38,7 +38,6 @@ struct Beaver4Tuple {
 
 // std::vector<uint64_t> arithmetic_triple_index;
 // std::vector<uint64_t> boolean_triple_index;
-#if BEAVER_N_TUPLES == 1
 uint64_t num_beaver_3_tuples;
 uint64_t num_beaver_4_tuples;
 uint64_t curr_beaver_3_triple_index = 0;
@@ -47,7 +46,6 @@ uint64_t beaver_3_triple_index = 0;
 uint64_t beaver_4_triple_index = 0;
 Beaver3TuplesD<DATATYPE> beaver_3_tuples;
 Beaver4TuplesD<DATATYPE> beaver_4_tuples;
-#endif
 std::vector<uint64_t> num_arithmetic_triples;
 std::vector<uint64_t> num_ab2_arithmetic_triples;
 std::vector<uint64_t> num_boolean_triples;
