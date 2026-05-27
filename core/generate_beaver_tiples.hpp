@@ -217,14 +217,42 @@ void generateBooleanDummyTriples(type a[],
 }
 
 #if BEAVER_N_TUPLES == 1
-void generateBeaverNTDummyTuples(Beaver3Tuples &beaver_3_tuples, Beaver4Tuples &beaver_4_tuples, uint64_t num_beaver_3_tuples, uint64_t num_beaver_4_tuples, const std::string& ip, int port)
+template <typename Datatype>
+void generateBeaverNDummyTuples(Beaver3TuplesD<Datatype> &beaver_3_tuples, Beaver4TuplesD<Datatype> &beaver_4_tuples, uint64_t num_beaver_3_tuples, uint64_t num_beaver_4_tuples, const std::string& ip, int port)
 {
     std::cout << "BEAVER N TUPLES\n";
 
     if(num_beaver_3_tuples == 0 && num_beaver_4_tuples == 0) return;
     port += CHEETAH_PORT_OFFSET;
-    Iface::generateBool3TupleCheetah(beaver_3_tuples, num_beaver_3_tuples, ip, port, CHEETAH_PARTY);
-    Iface::generateBool4TupleCheetah(beaver_4_tuples, num_beaver_4_tuples, ip, port, CHEETAH_PARTY);
+    Beaver3Tuples l_beaver_3_tuples{
+        (uint8_t*) beaver_3_tuples.a,
+        (uint8_t*) beaver_3_tuples.b,
+        (uint8_t*) beaver_3_tuples.c,
+        (uint8_t*) beaver_3_tuples.ab,
+        (uint8_t*) beaver_3_tuples.ac,
+        (uint8_t*) beaver_3_tuples.bc,
+        (uint8_t*) beaver_3_tuples.abc
+    };
+    Beaver4Tuples l_beaver_4_tuples{
+        (uint8_t*) beaver_4_tuples.a,
+        (uint8_t*) beaver_4_tuples.b,
+        (uint8_t*) beaver_4_tuples.c,
+        (uint8_t*) beaver_4_tuples.d,
+        (uint8_t*) beaver_4_tuples.ab,
+        (uint8_t*) beaver_4_tuples.ac,
+        (uint8_t*) beaver_4_tuples.ad,
+        (uint8_t*) beaver_4_tuples.bc,
+        (uint8_t*) beaver_4_tuples.bd,
+        (uint8_t*) beaver_4_tuples.cd,
+        (uint8_t*) beaver_4_tuples.abc,
+        (uint8_t*) beaver_4_tuples.abd,
+        (uint8_t*) beaver_4_tuples.acd,
+        (uint8_t*) beaver_4_tuples.bcd,
+        (uint8_t*) beaver_4_tuples.abcd
+    };
+
+    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples / 8, ip, port, CHEETAH_PARTY);
+    Iface::generateBool4TupleCheetah(l_beaver_4_tuples, num_beaver_4_tuples / 8, ip, port, CHEETAH_PARTY);
 }
 #endif
 

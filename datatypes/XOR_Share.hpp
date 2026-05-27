@@ -115,14 +115,14 @@ class XOR_Share : public Share_Type
     #if BEAVER_N_TUPLES == 1 && PROTOCOL == 4
 
     XOR_Share prepare_dot3_and_assign(const XOR_Share<Datatype, Share_Type>& b,
-                           const XOR_Share<Datatype, Share_Type>& c, const Datatype assign, const Beaver3Tuple& beaver_triple) const
+                           const XOR_Share<Datatype, Share_Type>& c, const Datatype assign, const Beaver3Tuple<Datatype>& beaver_triple) const
     {
         return XOR_Share(Share_Type::prepare_dot3_and_assign(
             b, c, assign, beaver_triple, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }
     
         XOR_Share prepare_and3_and_assign(const XOR_Share<Datatype, Share_Type>& b,
-                            const XOR_Share<Datatype, Share_Type>& c, const Datatype assign, const Beaver3Tuple& beaver_triple) const
+                            const XOR_Share<Datatype, Share_Type>& c, const Datatype assign, const Beaver3Tuple<Datatype>& beaver_triple) const
         {
             return XOR_Share(Share_Type::prepare_mult3_and_assign(
                 b, c, assign, beaver_triple, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
@@ -130,7 +130,7 @@ class XOR_Share : public Share_Type
 
     XOR_Share prepare_dot4_and_assign(const XOR_Share<Datatype, Share_Type>& b,
                            const XOR_Share<Datatype, Share_Type>& c,
-                           const XOR_Share<Datatype, Share_Type>& d, const Datatype assign, const Beaver4Tuple& beaver_triple) const
+                           const XOR_Share<Datatype, Share_Type>& d, const Datatype assign, const Beaver4Tuple<Datatype>& beaver_triple) const
     {
         return XOR_Share(Share_Type::prepare_dot4_and_assign(
             b, c, d, assign, beaver_triple, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
@@ -138,7 +138,7 @@ class XOR_Share : public Share_Type
 
     XOR_Share prepare_and4_and_assign(const XOR_Share<Datatype, Share_Type>& b,
                            const XOR_Share<Datatype, Share_Type>& c,
-                           const XOR_Share<Datatype, Share_Type>& d, const Datatype assign, const Beaver4Tuple& beaver_triple) const
+                           const XOR_Share<Datatype, Share_Type>& d, const Datatype assign, const Beaver4Tuple<Datatype>& beaver_triple) const
     {
         return XOR_Share(Share_Type::prepare_mult4_and_assign(
             b, c, d, assign, beaver_triple, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
@@ -183,6 +183,12 @@ class XOR_Share : public Share_Type
     {
         return XOR_Share(
             Share_Type::prepare_mult(b, assign, triple_c, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
+    }
+
+    XOR_Share prepare_dot_and_assign(const XOR_Share<Datatype, Share_Type>& b, Datatype assign, Datatype triple_c) const
+    {
+        return XOR_Share(
+            Share_Type::prepare_dot_and_assign(b, assign, triple_c, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
     }
 
 

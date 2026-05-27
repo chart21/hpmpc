@@ -5,26 +5,36 @@
 #include "generic_share.hpp"
 #include "../core/include/pch.h"
 
+template <typename Datatype>
 struct Beaver3Tuple {
-    DATATYPE ab;
-    DATATYPE ac;
-    DATATYPE bc;
-    DATATYPE abc;
+    Datatype a;
+    Datatype b;
+    Datatype c;
+    Datatype ab;
+    Datatype ac;
+    Datatype bc;
+    Datatype abc;
 };
 
+template <typename Datatype>
 struct Beaver4Tuple {
-    DATATYPE ab;
-    DATATYPE ac;
-    DATATYPE ad;
-    DATATYPE bc;
-    DATATYPE bd;
-    DATATYPE cd;
-    DATATYPE abc;
-    DATATYPE abd;
-    DATATYPE acd;
-    DATATYPE bcd;
-    DATATYPE abcd;
+    Datatype a;
+    Datatype b;
+    Datatype c;
+    Datatype d;
+    Datatype ab;
+    Datatype ac;
+    Datatype ad;
+    Datatype bc;
+    Datatype bd;
+    Datatype cd;
+    Datatype abc;
+    Datatype abd;
+    Datatype acd;
+    Datatype bcd;
+    Datatype abcd;
 };
+
 
 // std::vector<uint64_t> arithmetic_triple_index;
 // std::vector<uint64_t> boolean_triple_index;
@@ -35,8 +45,8 @@ uint64_t curr_beaver_3_triple_index = 0;
 uint64_t curr_beaver_4_triple_index = 0;
 uint64_t beaver_3_triple_index = 0;
 uint64_t beaver_4_triple_index = 0;
-Beaver3Tuples beaver_3_tuples;
-Beaver4Tuples beaver_4_tuples;
+Beaver3TuplesD<DATATYPE> beaver_3_tuples;
+Beaver4TuplesD<DATATYPE> beaver_4_tuples;
 #endif
 std::vector<uint64_t> num_arithmetic_triples;
 std::vector<uint64_t> num_ab2_arithmetic_triples;
@@ -162,9 +172,9 @@ triple<Datatype> retrieveBooleanTriple()
 }
 
 template <typename Datatype>
-triple<Datatype> retrieveBeaver3Tuple()
+Beaver3Tuple<Datatype> retrieveBeaver3Tuple()
 {
-    Beaver3Tuple tuple{
+    Beaver3Tuple<Datatype> tuple{
         beaver_3_tuples.a[curr_beaver_3_triple_index],
         beaver_3_tuples.b[curr_beaver_3_triple_index],
         beaver_3_tuples.c[curr_beaver_3_triple_index],
@@ -178,9 +188,9 @@ triple<Datatype> retrieveBeaver3Tuple()
 }
 
 template <typename Datatype>
-Beaver4Tuple retrieveBeaver4Tuple()
+Beaver4Tuple<Datatype> retrieveBeaver4Tuple()
 {
-    Beaver4Tuple tuple{
+    Beaver4Tuple<Datatype> tuple{
         beaver_4_tuples.a[curr_beaver_4_triple_index],
         beaver_4_tuples.b[curr_beaver_4_triple_index],
         beaver_4_tuples.c[curr_beaver_4_triple_index],
@@ -854,7 +864,7 @@ else if (triple_type == "COT") {
 #endif
 #if BEAVER_N_TUPLES == 1
 else if (triple_type == "BEAVER_N_TUPLES") {
-    generateBeaverNTDummyTuples(beaver3_tuples, beaver4_tuples, l_num_beaver_3_tuples, l_num_beaver_4_tuples, ips[0], base_port + process_offset);
+    generateBeaverNDummyTuples(beaver_3_tuples, beaver_4_tuples, l_num_beaver_3_tuples, l_num_beaver_4_tuples, ips[0], base_port + process_offset);
 }
 #endif
 else {

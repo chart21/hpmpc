@@ -293,6 +293,7 @@ void preprocess_circuit(std::string ips[])
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, 0, "BEAVER_N_TUPLES");
 #endif
+#endif
     pthread_t sending_Threads_pre[num_players - 1];
     pthread_t receiving_threads_pre[num_players - 1];
     int ret_pre;
