@@ -282,11 +282,16 @@ void preprocess_circuit(std::string ips[])
 {
 #if ROT_PREPROCESSING_OPT == 1
         init_beaverC_boolean(0);
-        init_beaverAB2C_boolean(0);
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, num_boolean_triples[0], "LXLY");
+        init_beaverAB2C_boolean(0);
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, num_ab2_boolean_triples[0], "LXLY2");
+#if BEAVER_N_TUPLES == 1
+        init_beaver_3_tuples();
+        init_beaver_4_tuples();
+        generate_beaver_triples(
+                ips, base_port, process_offset, 0, 0, "BEAVER_N_TUPLES");
 #endif
     pthread_t sending_Threads_pre[num_players - 1];
     pthread_t receiving_threads_pre[num_players - 1];

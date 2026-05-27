@@ -162,6 +162,46 @@ triple<Datatype> retrieveBooleanTriple()
 }
 
 template <typename Datatype>
+triple<Datatype> retrieveBeaver3Tuple()
+{
+    Beaver3Tuple tuple{
+        beaver_3_tuples.a[curr_beaver_3_triple_index],
+        beaver_3_tuples.b[curr_beaver_3_triple_index],
+        beaver_3_tuples.c[curr_beaver_3_triple_index],
+        beaver_3_tuples.ab[curr_beaver_3_triple_index],
+        beaver_3_tuples.ac[curr_beaver_3_triple_index],
+        beaver_3_tuples.bc[curr_beaver_3_triple_index],
+        beaver_3_tuples.abc[curr_beaver_3_triple_index]
+    };
+    curr_beaver_3_triple_index++;
+    return tuple;
+}
+
+template <typename Datatype>
+Beaver4Tuple retrieveBeaver4Tuple()
+{
+    Beaver4Tuple tuple{
+        beaver_4_tuples.a[curr_beaver_4_triple_index],
+        beaver_4_tuples.b[curr_beaver_4_triple_index],
+        beaver_4_tuples.c[curr_beaver_4_triple_index],
+        beaver_4_tuples.d[curr_beaver_4_triple_index],
+        beaver_4_tuples.ab[curr_beaver_4_triple_index],
+        beaver_4_tuples.ac[curr_beaver_4_triple_index],
+        beaver_4_tuples.ad[curr_beaver_4_triple_index],
+        beaver_4_tuples.bc[curr_beaver_4_triple_index],
+        beaver_4_tuples.bd[curr_beaver_4_triple_index],
+        beaver_4_tuples.cd[curr_beaver_4_triple_index],
+        beaver_4_tuples.abc[curr_beaver_4_triple_index],
+        beaver_4_tuples.abd[curr_beaver_4_triple_index],
+        beaver_4_tuples.acd[curr_beaver_4_triple_index],
+        beaver_4_tuples.bcd[curr_beaver_4_triple_index],
+        beaver_4_tuples.abcd[curr_beaver_4_triple_index]
+    };
+    curr_beaver_4_triple_index++;
+    return tuple;
+}
+
+template <typename Datatype>
 triple<Datatype> retrieveArithmeticAB2Triple()
 {
     curr_arithmetic_ab2_triple_index++;
@@ -709,6 +749,9 @@ void generate_beaver_triples(std::string ips[], int base_port, int process_offse
     uint64_t l_num_multiplexer_triples = num_multiplexer_triples * DATTYPE / BITLENGTH;
     uint64_t l_num_cot_triples = num_cot_triples * DATTYPE / BITLENGTH;
     uint64_t l_num_boolean_addition_triples = num_boolean_addition_triples * DATTYPE;
+    uint64_t l_num_beaver_3_tuples = num_beaver_3_tuples * DATTYPE;
+    uint64_t l_num_beaver_4_tuples = num_beaver_4_tuples * DATTYPE;
+
 #if FAKE_TRIPLES == 1
     print("Fake Triples set to 1, generating fake triples ... \n");
 #else
@@ -807,6 +850,11 @@ else if (triple_type == "COT") {
                        l_num_cot_triples,
                        ips[0],
                        base_port + process_offset);
+}
+#endif
+#if BEAVER_N_TUPLES == 1
+else if (triple_type == "BEAVER_N_TUPLES") {
+    generateBeaverNTDummyTuples(beaver3_tuples, beaver4_tuples, l_num_beaver_3_tuples, l_num_beaver_4_tuples, ips[0], base_port + process_offset);
 }
 #endif
 else {
