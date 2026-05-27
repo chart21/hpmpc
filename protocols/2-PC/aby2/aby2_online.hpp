@@ -414,6 +414,13 @@ class ABY2_ONLINE_Share
     }
     
     template <typename func_add, typename func_sub>
+    void mask_and_send_dot_without_remask(func_add ADD, func_sub SUB)
+    {
+        m = ADD(m, l);
+        send_to_live(PNEXT, m);
+    }
+    
+    template <typename func_add, typename func_sub>
     void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB)
     {
         l = getRandomVal(PSELF);
@@ -715,6 +722,90 @@ class ABY2_ONLINE_Share
         d.m = SUB(d.m, rxyz);  // -rxyz
         return d;
     }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_dot3_and_assign(const ABY2_ONLINE_Share b,
+                                   const ABY2_ONLINE_Share c,
+                                   const Datatype assign,
+                                   const Beaver3Tuple& beaver_triple,
+                                   func_add ADD,
+                                   func_sub SUB,
+                                   func_mul MULT) const
+    {
+        Datatype rxy = beaver_triple.ab;
+        Datatype rxyz = beaver_triple.abc;
+        Datatype rxz = beaver_triple.ac;
+        Datatype ryz = beaver_triple.bc;
+
+        ABY2_ONLINE_Share d;
+#if PARTY == 1
+        d.m = ADD(ADD(MULT(m, SUB(ryz, MULT(b.m, c.l)))  // a [lb lc] - ab [lc]
+                      ,
+                      (MULT(b.m, SUB(rxz, MULT(c.m, l)))))  // + b [la lc] - bc [la]
+                  ,
+                  MULT(c.m, SUB(rxy, MULT(m, b.l))));  // + c [la lb] - ac [lb]
+#else
+        d.m = ADD(                                           // abc +
+            ADD(MULT(m, ADD(MULT(b.m, SUB(c.m, c.l)), ryz))  // a [lb lc] - ab [lc]
+                ,
+                (MULT(b.m, SUB(rxz, MULT(c.m, l)))))  // + b [la lc] - bc [la]
+            ,
+            MULT(c.m, SUB(rxy, MULT(m, b.l))));  // + c [la lb] - ac [lb]
+#endif
+        d.m = SUB(d.m, rxyz);  // -rxyz
+        d.l = assign;
+        return d;
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_dot4_and_assign(const ABY2_ONLINE_Share b,
+                                   const ABY2_ONLINE_Share c,
+                                   const ABY2_ONLINE_Share d,
+                                   const Datatype assign,
+                                   const Beaver4Tuple& beaver_triple,
+                                   func_add ADD,
+                                   func_sub SUB,
+                                   func_mul MULT) const
+    {
+
+        Datatype rxy = beaver_triple.ab;
+        Datatype rzw = beaver_triple.cd;
+
+        Datatype rxyz = beaver_triple.abc;
+        Datatype rxyw = beaver_triple.abd;
+        Datatype rxzw = beaver_triple.acd;
+        Datatype ryzw = beaver_triple.bcd;
+        Datatype rxyzw = beaver_triple.abcd;
+
+        Datatype rxz = beaver_triple.ac;
+        Datatype rxw = beaver_triple.ad;
+        Datatype ryz = beaver_triple.bc;
+        Datatype ryw = beaver_triple.bd;
+
+
+        ABY2_ONLINE_Share e;
+#if PARTY == 1
+        e.m = ADD(ADD(MULT(m, SUB(MULT(d.m, SUB(ryz, MULT(b.m, c.l))), ryzw)),
+                      MULT(b.m, ADD(MULT(m, SUB(rzw, MULT(c.m, d.l))), SUB(MULT(c.m, rxw), rxzw)))),
+                  ADD(
+
+                      MULT(c.m, SUB(MULT(m, SUB(ryw, MULT(d.m, b.l))), rxyw)),
+
+                      MULT(d.m, ADD(MULT(b.m, SUB(rxz, MULT(c.m, l))), SUB(MULT(c.m, rxy), rxyz)))));
+#else
+        e.m = ADD(ADD(MULT(m, SUB(MULT(d.m, ADD(MULT(b.m, SUB(c.m, c.l)), ryz)), ryzw)),
+                      MULT(b.m, ADD(MULT(m, SUB(rzw, MULT(c.m, d.l))), SUB(MULT(c.m, rxw), rxzw)))),
+                  ADD(MULT(c.m, SUB(MULT(m, SUB(ryw, MULT(d.m, b.l))), rxyw)),
+                      MULT(d.m, ADD(MULT(b.m, SUB(rxz, MULT(c.m, l))), SUB(MULT(c.m, rxy), rxyz))))
+
+        );  // a0(d0(b0(c0 - z1) + ryz) - ryzw) + b0(a0(rzw-c0w1) + c0rxy - rxzw) + c0(a0(ryw-d0y1) - rxyw) +
+            // d0(b0(rxz-c0x1) + c0rxy - rxyz) + rxyzw
+
+#endif
+        e.m = ADD(e.m, rxyzw);
+        e.l = assign;
+        return e;
+    }
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_dot4(ABY2_ONLINE_Share b,
@@ -785,6 +876,14 @@ class ABY2_ONLINE_Share
         return d;
     }
 
+    ABY2_ONLINE_Share prepare_mult3_and_assign(ABY2_ONLINE_Share b, ABY2_ONLINE_Share c, const Datatype assign, const Beaver3Tuple& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT)
+        const
+    {
+        ABY2_ONLINE_Share d = prepare_dot3_and_assign(b, c, assign, beaver_triple, ADD, SUB, MULT);
+        d.mask_and_send_dot_without_remask(ADD, SUB);
+        return d;
+    }
+
     template <typename func_add, typename func_sub>
     void complete_mult3(func_add ADD, func_sub SUB)
     {
@@ -803,6 +902,22 @@ class ABY2_ONLINE_Share
         e.mask_and_send_dot(ADD, SUB);
         return e;
     }
+
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_mult4_and_assign(ABY2_ONLINE_Share b,
+                                    ABY2_ONLINE_Share c,
+                                    ABY2_ONLINE_Share d,
+                                    const Datatype assign,
+                                    const Beaver4Tuple& beaver_triple,
+                                    func_add ADD,
+                                    func_sub SUB,
+                                    func_mul MULT) const
+    {
+        ABY2_ONLINE_Share e = prepare_dot4_and_assign(b, c, d, assign, beaver_triple, ADD, SUB, MULT);
+        e.mask_and_send_dot_without_remask(ADD, SUB);
+        return e;
+    }
+    
 
     template <typename func_add, typename func_sub>
     void complete_mult4(func_add ADD, func_sub SUB)

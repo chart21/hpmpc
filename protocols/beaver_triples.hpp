@@ -5,8 +5,39 @@
 #include "generic_share.hpp"
 #include "../core/include/pch.h"
 
+struct Beaver3Tuple {
+    DATATYPE ab;
+    DATATYPE ac;
+    DATATYPE bc;
+    DATATYPE abc;
+};
+
+struct Beaver4Tuple {
+    DATATYPE ab;
+    DATATYPE ac;
+    DATATYPE ad;
+    DATATYPE bc;
+    DATATYPE bd;
+    DATATYPE cd;
+    DATATYPE abc;
+    DATATYPE abd;
+    DATATYPE acd;
+    DATATYPE bcd;
+    DATATYPE abcd;
+};
+
 // std::vector<uint64_t> arithmetic_triple_index;
 // std::vector<uint64_t> boolean_triple_index;
+#if BEAVER_N_TUPLES == 1
+uint64_t num_beaver_3_tuples;
+uint64_t num_beaver_4_tuples;
+uint64_t curr_beaver_3_triple_index = 0;
+uint64_t curr_beaver_4_triple_index = 0;
+uint64_t beaver_3_triple_index = 0;
+uint64_t beaver_4_triple_index = 0;
+Beaver3Tuples beaver_3_tuples;
+Beaver4Tuples beaver_4_tuples;
+#endif
 std::vector<uint64_t> num_arithmetic_triples;
 std::vector<uint64_t> num_ab2_arithmetic_triples;
 std::vector<uint64_t> num_boolean_triples;
@@ -284,6 +315,70 @@ void deinit_multiplexerBeaverC()
 {
     delete[] multiplexer_triple_c;
 }
+
+#if BEAVER_N_TUPLES == 1
+
+void init_beaver_3_tuples()
+{
+    beaver_3_tuples.a = new DATATYPE[num_beaver_3_tuples];
+    beaver_3_tuples.b = new DATATYPE[num_beaver_3_tuples];
+    beaver_3_tuples.c = new DATATYPE[num_beaver_3_tuples];
+    beaver_3_tuples.ab = new DATATYPE[num_beaver_3_tuples];
+    beaver_3_tuples.bc = new DATATYPE[num_beaver_3_tuples];
+    beaver_3_tuples.ac = new DATATYPE[num_beaver_3_tuples];
+    beaver_3_tuples.abc = new DATATYPE[num_beaver_3_tuples];
+}
+
+void init_beaver_4_tuples()
+{
+    beaver_4_tuples.a = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.b = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.c = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.d = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.ab = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.ac = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.ad = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.bc = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.bd = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.cd = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.abc = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.abd = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.acd = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.bcd = new DATATYPE[num_beaver_4_tuples];
+    beaver_4_tuples.abcd = new DATATYPE[num_beaver_4_tuples];
+}
+
+void deinit_beaver_3_tuples()
+{
+    delete[] beaver_3_tuples.a;
+    delete[] beaver_3_tuples.b;
+    delete[] beaver_3_tuples.c;
+    delete[] beaver_3_tuples.ab;
+    delete[] beaver_3_tuples.ac;
+    delete[] beaver_3_tuples.bc;
+    delete[] beaver_3_tuples.abc;
+}
+
+void deinit_beaver_4_tuples()
+{
+    delete[] beaver_4_tuples.a;
+    delete[] beaver_4_tuples.b;
+    delete[] beaver_4_tuples.c;
+    delete[] beaver_4_tuples.d;
+    delete[] beaver_4_tuples.ab;
+    delete[] beaver_4_tuples.ac;
+    delete[] beaver_4_tuples.ad;
+    delete[] beaver_4_tuples.bc;
+    delete[] beaver_4_tuples.bd;
+    delete[] beaver_4_tuples.cd;
+    delete[] beaver_4_tuples.abc;
+    delete[] beaver_4_tuples.abd;
+    delete[] beaver_4_tuples.acd;
+    delete[] beaver_4_tuples.bcd;
+    delete[] beaver_4_tuples.abcd;
+}
+
+#endif
 
 void init_cotBeaverAB()
 {

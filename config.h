@@ -405,6 +405,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define ROT_PREPROCESSING_OPT 1  // Use optimized preprocessing using ROTs
 #endif
 
+#ifndef BEAVER_N_TUPLES
+#define BEAVER_N_TUPLES 1  
+#endif
+
 #define generate_triple generate_lxly_triple
 #define generate_ab2_triple generate_lxly2_triple
 #define generate_conv_triple generate_conv_lxly_triple

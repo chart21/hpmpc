@@ -291,6 +291,12 @@ class ABY2_init
         return ABY2_init();
     }
 
+    ABY2_init prepare_dot3_and_assign(const ABY2_init b, const ABY2_init c, const Datatype assign, const Beaver3Tuple& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        num_beaver_3_tuples++;
+        return ABY2_init();
+    }
+
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot4(const ABY2_init b,
                            const ABY2_init c,
@@ -317,11 +323,32 @@ class ABY2_init
         return ABY2_init();
     }
 
+    ABY2_init prepare_dot4_and_assign(const ABY2_init b,
+                           const ABY2_init c,
+                           const ABY2_init d,
+                           const Datatype assign,
+                           const Beaver4Tuple& beaver_triple,
+                           func_add ADD,
+                           func_sub SUB,
+                           func_mul MULT) const
+    {
+        num_beaver_4_tuples++;
+        return ABY2_init();
+    }
+
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_mult3(ABY2_init b, ABY2_init c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         ABY2_init d = prepare_dot3(b, c, ADD, SUB, MULT);
         d.mask_and_send_dot(ADD, SUB);
+        return d;
+    }
+
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_mult3_and_assign(ABY2_init b, ABY2_init c, const Datatype assign, const Beaver3Tuple& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        ABY2_init d = prepare_dot3_and_assign(b, c, assign, beaver_triple, ADD, SUB, MULT);
+        d.mask_and_send_dot_without_remask(ADD, SUB);
         return d;
     }
 
@@ -339,6 +366,13 @@ class ABY2_init
         return e;
     }
 
+    ABY2_init prepare_mult4_and_assign(ABY2_init b, ABY2_init c, ABY2_init d, const Datatype assign, const Beaver4Tuple& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        ABY2_init e = prepare_dot4_and_assign(b, c, d, assign, beaver_triple, ADD, SUB, MULT);
+        e.mask_and_send_dot_without_remask(ADD, SUB);
+        return e;
+    }
+
     template <typename func_add, typename func_sub>
     void complete_mult4(func_add ADD, func_sub SUB)
     {
@@ -347,6 +381,18 @@ class ABY2_init
 
     template <typename func_add, typename func_sub>
     void mask_and_send_dot(func_add ADD, func_sub SUB)
+    {
+        send_to_(PNEXT);
+    }
+    
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_without_remask(func_add ADD, func_sub SUB)
+    {
+        send_to_(PNEXT);
+    }
+    
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_and_assign(Datatype assign, func_add ADD, func_sub SUB)
     {
         send_to_(PNEXT);
     }

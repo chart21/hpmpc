@@ -216,6 +216,17 @@ void generateBooleanDummyTriples(type a[],
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
 }
 
+#if BEAVER_N_TUPLES == 1
+void generateBeaverNTDummyTuples(Beaver3Tuples &beaver_3_tuples, Beaver4Tuples &beaver_4_tuples, uint64_t num_beaver_3_tuples, uint64_t num_beaver_4_tuples, const std::string& ip, int port)
+{
+    std::cout << "BEAVER N TUPLES\n";
+
+    if(num_beaver_3_tuples == 0 && num_beaver_4_tuples == 0) return;
+    port += CHEETAH_PORT_OFFSET;
+    Iface::generateBool3TupleCheetah(beaver_3_tuples, num_beaver_3_tuples, ip, port, CHEETAH_PARTY);
+    Iface::generateBool4TupleCheetah(beaver_4_tuples, num_beaver_4_tuples, ip, port, CHEETAH_PARTY);
+}
+#endif
 
 
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength

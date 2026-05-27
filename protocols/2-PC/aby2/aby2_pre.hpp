@@ -696,6 +696,12 @@ class ABY2_PRE_Share
         #endif 
         return ABY2_PRE_Share();
     }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_dot3_and_assign(const ABY2_PRE_Share b, const ABY2_PRE_Share c, Datatype assign, const Beaver3Tuple& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return ABY2_PRE_Share(assign);
+    }
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot4(const ABY2_PRE_Share b,
@@ -747,11 +753,24 @@ class ABY2_PRE_Share
         return ABY2_PRE_Share();
     }
 
+    ABY2_PRE_Share prepare_dot4_and_assign(const ABY2_PRE_Share b, const ABY2_PRE_Share c, const ABY2_PRE_Share d, Datatype assign, const Beaver4Tuple& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        return ABY2_PRE_Share(assign);
+    }
+
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_mult3(ABY2_PRE_Share b, ABY2_PRE_Share c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         ABY2_PRE_Share d = prepare_dot3(b, c, ADD, SUB, MULT);
         d.mask_and_send_dot(ADD, SUB);
+        return d;
+    }
+
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_mult3_and_assign(ABY2_PRE_Share b, ABY2_PRE_Share c, Datatype assign, const Beaver3Tuple& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT) const
+    {        
+        ABY2_PRE_Share d = prepare_dot3_and_assign(b, c, beaver_triple, assign, ADD, SUB, MULT);
+        d.mask_and_send_dot_without_remask(ADD, SUB);
         return d;
     }
 
@@ -771,6 +790,14 @@ class ABY2_PRE_Share
     {
         ABY2_PRE_Share e = prepare_dot4(b, c, d, ADD, SUB, MULT);
         e.mask_and_send_dot(ADD, SUB);
+        return e;
+    }
+
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_PRE_Share prepare_mult4_and_assign(ABY2_PRE_Share b, ABY2_PRE_Share c, ABY2_PRE_Share d, Datatype assign, const Beaver4Tuple& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        ABY2_PRE_Share e = prepare_dot4_and_assign(b, c, d, beaver_triple, assign, ADD, SUB, MULT);
+        e.mask_and_send_dot_without_remask(ADD, SUB);
         return e;
     }
 
