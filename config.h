@@ -280,7 +280,7 @@ int base_port = BASE_PORT;  // temporary solution
 
 #ifndef RESHARE_OPT
 #if A_KNOWN_TO_EVALUATORS_OPT == 0
-#define RESHARE_OPT 1  // Reshare mvi share as mvi + a_1 + a_2 where [a] is part of a triple
+#define RESHARE_OPT 0  // Reshare mvi share as mvi + a_1 + a_2 where [a] is part of a triple
 #endif
 #endif
 
