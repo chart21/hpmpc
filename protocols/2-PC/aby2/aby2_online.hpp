@@ -243,14 +243,14 @@ class ABY2_ONLINE_Share
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_ONLINE_Share prepare_and_a_known(ABY2_PRE_Share b, Datatype a_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_ONLINE_Share prepare_and_a_known(ABY2_ONLINE_Share b, Datatype a_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         ABY2_ONLINE_Share c;
         c.l = assign;
         #if PARTY == 0
         c.m = MULT(a_mask, OP_SUB(m, l)); // a mb2 = ab - a lb2, note that a_mask = a
         #else
-        c.m = MULT(a.m, b.l); // a lb2 + la lb2
+        c.m = MULT(m, b.l); // a lb2 + la lb2
         #endif
         c.m = ADD(c.m, ADD(triplc_c, c.l)); // + [la lb2] + [lc]
         send_to_live(PNEXT, c.m);
@@ -258,14 +258,14 @@ class ABY2_ONLINE_Share
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_ONLINE_Share prepare_dot_b_known(ABY2_PRE_Share b, Datatype b_mask, Datatype assign,  Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_ONLINE_Share prepare_dot_b_known(ABY2_ONLINE_Share b, Datatype b_mask, Datatype assign,  Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         ABY2_ONLINE_Share c;
         c.l = assign;
         #if PARTY == 0
         c.m = MULT(b_mask, OP_SUB(m, l)); // b mb2 = bb - b lb2, note that b_mask = b
         #else
-        c.m = MULT(a.m, b.l); // a lb2 + la lb2
+        c.m = MULT(m, b.l); // a lb2 + la lb2
         #endif
         c.m = ADD(c.m, ADD(triplc_c, c.l)); // + [la lb2] + [lc]
         return c;
