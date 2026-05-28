@@ -225,6 +225,21 @@ class ABY2_init
         send_to_(PNEXT);
         return ABY2_init();
     }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_and_a_known(ABY2_init b, Datatype b_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        num_ab2_boolean_triples[0]++;
+        send_to_(PNEXT);
+        return ABY2_init();
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_init prepare_dot_a_known(ABY2_init b, Datatype b_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        num_ab2_boolean_triples[0]++;
+        return ABY2_init();
+    }
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot(ABY2_init b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -233,7 +248,8 @@ class ABY2_init
         return ABY2_init();
     }
 
-    template <typename func_add, typename func_sub, typename func_mul>
+
+ template <typename func_add, typename func_sub, typename func_mul>
     ABY2_init prepare_dot_and_assign(ABY2_init b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         return ABY2_init();
@@ -445,7 +461,11 @@ class ABY2_init
 #endif
     }
 
+    #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
+    static void prepare_A2B_S2(int m, int k, ABY2_init in[], ABY2_init out[])
+    #else
     static void prepare_A2B_S1(int m, int k, ABY2_init in[], ABY2_init out[])
+    #endif
     {
 #if A2B_ONLINE_OPT == 0
 #if PARTY == 0
@@ -457,7 +477,11 @@ class ABY2_init
 #endif
     }
 
+    #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
+    static void prepare_A2B_S1(int m, int k, ABY2_init in[], ABY2_init out[])
+    #else
     static void prepare_A2B_S2(int m, int k, ABY2_init in[], ABY2_init out[])
+    #endif
     {
 #if A2B_ONLINE_OPT == 1
         for (int i = m; i < k; i++)
@@ -466,8 +490,11 @@ class ABY2_init
         }
 #endif
     }
-
+    #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
+    static void complete_A2B_S2(int k, ABY2_init out[])
+    #else
     static void complete_A2B_S1(int k, ABY2_init out[])
+    #endif
     {
 #if A2B_ONLINE_OPT == 0
 #if PARTY == 1
@@ -479,7 +506,11 @@ class ABY2_init
 #endif
     }
 
+    #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0  
+    static void complete_A2B_S1(int k, ABY2_init out[])
+    #else
     static void complete_A2B_S2(int k, ABY2_init out[])
+    #endif
     {
     }
 

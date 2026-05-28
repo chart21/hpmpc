@@ -243,6 +243,35 @@ class ABY2_ONLINE_Share
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_and_a_known(ABY2_PRE_Share b, Datatype a_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        ABY2_ONLINE_Share c;
+        c.l = assign;
+        #if PARTY == 0
+        c.m = MULT(a_mask, OP_SUB(m, l)); // a mb2 = ab - a lb2, note that a_mask = a
+        #else
+        c.m = MULT(a.m, b.l); // a lb2 + la lb2
+        #endif
+        c.m = ADD(c.m, ADD(triplc_c, c.l)); // + [la lb2] + [lc]
+        send_to_live(PNEXT, c.m);
+        return c;
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
+    ABY2_ONLINE_Share prepare_dot_b_known(ABY2_PRE_Share b, Datatype b_mask, Datatype assign,  Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    {
+        ABY2_ONLINE_Share c;
+        c.l = assign;
+        #if PARTY == 0
+        c.m = MULT(b_mask, OP_SUB(m, l)); // b mb2 = bb - b lb2, note that b_mask = b
+        #else
+        c.m = MULT(a.m, b.l); // a lb2 + la lb2
+        #endif
+        c.m = ADD(c.m, ADD(triplc_c, c.l)); // + [la lb2] + [lc]
+        return c;
+    }
+    
+    template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_mult(ABY2_ONLINE_Share b, Datatype assign, Datatype triple_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         Datatype lxly = triple_c;
@@ -542,7 +571,11 @@ class ABY2_ONLINE_Share
         complete_mult(ADD, SUB);
     }
 
+    #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
+    static void prepare_A2B_S2(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Share out[])
+    #else
     static void prepare_A2B_S1(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Share out[])
+    #endif
     {
 #if A2B_ONLINE_OPT == 1
         Datatype temp_p1[BITLENGTH];
@@ -577,7 +610,11 @@ class ABY2_ONLINE_Share
 #endif
     }
 
+    #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
+    static void prepare_A2B_S1(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Share out[])
+    #else
     static void prepare_A2B_S2(int m, int k, ABY2_ONLINE_Share in[], ABY2_ONLINE_Share out[])
+    #endif
     {
 #if A2B_ONLINE_OPT == 1
         for (int i = m; i < k; i++)
@@ -605,7 +642,11 @@ class ABY2_ONLINE_Share
 #endif
     }
 
+    #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
+    static void complete_A2B_S2(int k, ABY2_ONLINE_Share out[])
+    #else
     static void complete_A2B_S1(int k, ABY2_ONLINE_Share out[])
+    #endif
     {
 #if A2B_ONLINE_OPT == 0
 #if PARTY == 1
@@ -618,7 +659,11 @@ class ABY2_ONLINE_Share
 #endif
     }
 
+    #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
+    static void complete_A2B_S1(int k, ABY2_ONLINE_Share out[])
+    #else
     static void complete_A2B_S2(int k, ABY2_ONLINE_Share out[])
+    #endif
     {
 #if A2B_ONLINE_OPT == 0
 #if PARTY == 0
