@@ -215,7 +215,6 @@ class ABY2_init
     ABY2_init prepare_dot_and_assign(ABY2_init b, Datatype assign, Datatype triple_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         num_boolean_triples[0]++;
-        send_to_(PNEXT);
         return ABY2_init();
     }
     

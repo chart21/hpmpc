@@ -251,8 +251,8 @@ void generateBeaverNDummyTuples(Beaver3TuplesD<Datatype> &beaver_3_tuples, Beave
         (uint8_t*) beaver_4_tuples.abcd
     };
 
-    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples / 8, ip, port, CHEETAH_PARTY);
-    Iface::generateBool4TupleCheetah(l_beaver_4_tuples, num_beaver_4_tuples / 8, ip, port, CHEETAH_PARTY);
+    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples / 8, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+    Iface::generateBool4TupleCheetah(l_beaver_4_tuples, num_beaver_4_tuples / 8, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
 }
 #endif
 
