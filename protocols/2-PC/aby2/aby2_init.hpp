@@ -471,7 +471,14 @@ class ABY2_init
 #if PARTY == 0
         for (int i = m; i < k; i++)
         {
-            send_to_(PNEXT);
+            #if RESHARE_OPT == 1 && RCA_MSB == 1
+            if(i == k - 1)
+                continue; // will be reshared in circuit
+            #elif RESHARE_OPT == 1 && RCA_MSB != 1
+            if(i != m)
+                continue; // will be reshared in circuit
+            #endif 
+                send_to_(PNEXT);
         }
 #endif
 #endif
@@ -500,7 +507,14 @@ class ABY2_init
 #if PARTY == 1
         for (int i = 0; i < k; i++)
         {
-            receive_from_(PNEXT);
+            #if RESHARE_OPT == 1 && RCA_MSB == 1
+            if(i == k - 1)
+                continue; // will be reshared in circuit
+            #elif RESHARE_OPT == 1 && RCA_MSB != 1
+            if(i != 0)
+                continue; // will be reshared in circuit 
+            #endif 
+                receive_from_(PNEXT);
         }
 #endif
 #endif

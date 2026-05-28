@@ -602,6 +602,19 @@ class ABY2_ONLINE_Share
 
         for (int i = m; i < k; i++)
         {
+            #if RESHARE_OPT == 1 && RCA_MSB == 1
+            if(i == k-1)
+            {
+                out[i - m].m = temp_p1[i]; // will be reshared in circuit
+                continue;
+            }
+            #elif RESHARE_OPT == 1 && RCA_MSB != 1
+            if(i != m)
+            {
+                out[i - m].m = temp_p1[i]; // will be reshared in circuit
+                continue;
+            }
+            #endif
             out[i - m].l = getRandomVal(PSELF);
             out[i - m].m = OP_XOR(temp_p1[i], out[i - m].l);
             send_to_live(PNEXT, out[i - m].m);
@@ -652,6 +665,13 @@ class ABY2_ONLINE_Share
 #if PARTY == 1
         for (int i = 0; i < k; i++)
         {
+            #if RESHARE_OPT == 1 && RCA_MSB == 1
+            if(i == k-1)
+                continue;
+            #elif RESHARE_OPT == 1 && RCA_MSB != 1
+            if(i != 0)
+                continue;
+            #endif
             out[i].m = receive_from_live(PNEXT);
             out[i].l = SET_ALL_ZERO();
         }

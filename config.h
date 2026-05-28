@@ -272,6 +272,16 @@ int base_port = BASE_PORT;  // temporary solution
 #define A_KNOWN_TO_EVALUATORS_OPT 0  // Use optimized addition circuit, for 2PC requires A2B_ONLINE_OPT == 1
 #endif
 
+#ifndef A_KNOWN_FOR_L0_OPT
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
+#define A_KNOWN_FOR_L0_OPT 1  // Use A_KNOWN for Boolean Circuits
+#endif
+
+#ifndef RESHARE_OPT
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
+#define RESHARE_OPT 1  // Reshare mvi share as mvi + a_1 + a_2 where [a] is part of a triple
+#endif
+
 #ifndef A2B_ROUND_OPT_SIM
 #define A2B_ROUND_OPT_SIM 0  // Simulate round-optimized A2B, by reconstructing both ab + lc and ab xor lc in the Online Phase
 #endif

@@ -488,6 +488,13 @@ class ABY2_PRE_Share
 #if PARTY == 0
         for (int i = m; i < k; i++)
         {
+            #if RESHARE_OPT == 1 && RCA_MSB == 1
+            if(i == k - 1)
+                continue; // will be reshared in circuit
+            #elif RESHARE_OPT == 1 && RCA_MSB != 1
+            if(i != m)
+                continue;
+            #endif
             out[i - m].l = getRandomVal(PSELF);
         }
 #endif
