@@ -907,6 +907,10 @@ void print_num_triples()
               << "Multiplexer Triples Required: " << num_multiplexer_triples * DATTYPE / BITLENGTH << std::endl;
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": " 
               << "COT Triples Required: " << num_cot_triples * DATTYPE / BITLENGTH << std::endl;
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+              << "Beaver 3-Tuples Required: " << num_beaver_3_tuples * DATTYPE << std::endl;
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+              << "Beaver 4-Tuples Required: " << num_beaver_4_tuples * DATTYPE << std::endl;
 #if A_KNOWN == 0
     std::string triple_type_str = "AB";
 #else

@@ -325,7 +325,7 @@ class ABY2_PRE_Share
     }
     
     template <typename func_add, typename func_sub>
-    void mask_and_send_dot_with_mask(func_add ADD, func_sub SUB)
+    void mask_and_send_dot_without_remask(func_add ADD, func_sub SUB)
     {
     }
 
@@ -776,7 +776,7 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_mult3_and_assign(ABY2_PRE_Share b, ABY2_PRE_Share c, Datatype assign, const Beaver3Tuple<Datatype>& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT) const
     {        
-        ABY2_PRE_Share d = prepare_dot3_and_assign(b, c, beaver_triple, assign, ADD, SUB, MULT);
+        ABY2_PRE_Share d = prepare_dot3_and_assign(b, c, assign, beaver_triple, ADD, SUB, MULT);
         d.mask_and_send_dot_without_remask(ADD, SUB);
         return d;
     }
@@ -803,7 +803,7 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_mult4_and_assign(ABY2_PRE_Share b, ABY2_PRE_Share c, ABY2_PRE_Share d, Datatype assign, const Beaver4Tuple<Datatype>& beaver_triple, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-        ABY2_PRE_Share e = prepare_dot4_and_assign(b, c, d, beaver_triple, assign, ADD, SUB, MULT);
+        ABY2_PRE_Share e = prepare_dot4_and_assign(b, c, d, assign, beaver_triple, ADD, SUB, MULT);
         e.mask_and_send_dot_without_remask(ADD, SUB);
         return e;
     }
