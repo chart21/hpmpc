@@ -1343,7 +1343,7 @@ static void get_fc_triples_from_file()
 #endif
         deinit_FullyConnectedAB();
 
-#if A2B_ONLINE_OPT == 1 && ROT_PREPROCESSING_OPT == 0
+#if A2B_ONLINE_OPT == 1 
         init_booleanAdditionBeaverC();
 #if FAKE_TRIPLES == 1
         get_booleanAddition_triples_from_file();
@@ -1382,7 +1382,6 @@ static void get_fc_triples_from_file()
 
 
 #endif
-
 
 
 
