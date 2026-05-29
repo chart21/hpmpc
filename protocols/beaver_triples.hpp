@@ -41,6 +41,27 @@ struct RandomMultiplication {
     Datatype b;
 };
 
+// Compile-time check: is bit index i reshared in a PPA4Way circuit of width k?
+// The reshared positions correspond to AND2 "generate" gates g1 = a[i] & b[i]
+// at each level of the 4-way prefix tree.
+constexpr bool is_ppa4_reshared(int k, int i)
+{
+    if (k == 8)
+    {
+        return i == 1 || i == 2 || i == 5;
+    }
+    else if (k == 16)
+    {
+        return i == 1 || i == 4 || i == 7 || i == 10 || i == 13;
+    }
+    else if (k == 32)
+    {
+        return i == 1 || i == 4 || i == 7 || i == 10 || i == 13
+            || i == 16 || i == 19 || i == 22 || i == 23 || i == 26 || i == 29;
+    }
+    return false;
+}
+
 // std::vector<uint64_t> arithmetic_triple_index;
 // std::vector<uint64_t> boolean_triple_index;
 uint64_t num_beaver_3_tuples;

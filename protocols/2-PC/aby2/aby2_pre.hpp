@@ -491,6 +491,9 @@ class ABY2_PRE_Share
             #if RESHARE_OPT == 1 && RCA_MSB == 1
             if(i == k - 1)
                 continue; // will be reshared in circuit
+            #elif RESHARE_OPT == 1 && PPA4_MSB == 1
+            if(is_ppa4_reshared(k, i))
+                continue; // will be reshared in circuit
             #elif RESHARE_OPT == 1 && RCA_MSB != 1
             if(i != m)
                 continue;

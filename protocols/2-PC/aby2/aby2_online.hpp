@@ -642,6 +642,12 @@ class ABY2_ONLINE_Share
                 out[i - m].m = temp_p1[i]; // will be reshared in circuit
                 continue;
             }
+            #elif RESHARE_OPT == 1 && PPA4_MSB == 1
+            if(is_ppa4_reshared(k, i))
+            {
+                out[i - m].m = temp_p1[i]; // will be reshared in circuit
+                continue;
+            }
             #elif RESHARE_OPT == 1 && RCA_MSB != 1
             if(i != m)
             {
@@ -701,6 +707,9 @@ class ABY2_ONLINE_Share
         {
             #if RESHARE_OPT == 1 && RCA_MSB == 1
             if(i == k-1)
+                continue;
+            #elif RESHARE_OPT == 1 && PPA4_MSB == 1
+            if(is_ppa4_reshared(k, i))
                 continue;
             #elif RESHARE_OPT == 1 && RCA_MSB != 1
             if(i != 0)
