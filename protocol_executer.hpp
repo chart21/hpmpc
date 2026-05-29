@@ -280,6 +280,14 @@ void load_preprocessed_data()
 #if PRE == 1 && SKIP_PRE == 0
 void preprocess_circuit(std::string ips[])
 {
+#if BEAVER == 1
+    curr_beaver_3_triple_index = 0;
+    curr_beaver_4_triple_index = 0;
+    curr_boolean_triple_index = 0;
+    curr_arithmetic_triple_index = 0;
+    curr_arithmetic_ab2_triple_index = 0;
+    curr_boolean_ab2_triple_index = 0;
+#endif
 #if ROT_PREPROCESSING_OPT == 1
         init_beaverC_boolean(0);
         generate_beaver_triples(
@@ -478,6 +486,15 @@ void live_circuit()
     print("All parties connected sucessfully, starting protocol and timer! \n");
     clock_gettime(CLOCK_REALTIME, &l1);
     /* clock_gettime(CLOCK_REALTIME, &i3); */
+
+#if BEAVER == 1
+    curr_beaver_3_triple_index = 0;
+    curr_beaver_4_triple_index = 0;
+    curr_boolean_triple_index = 0;
+    curr_arithmetic_triple_index = 0;
+    curr_arithmetic_ab2_triple_index = 0;
+    curr_boolean_ab2_triple_index = 0;
+#endif
 
     /// Processing Inputs ///
     /* Sharemind protocol = Sharemind(); */

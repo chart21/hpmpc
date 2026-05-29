@@ -6,8 +6,8 @@
 #include "../../protocols/Protocols.h"
 #include "adders/rca.hpp"
 #if ROT_PREPROCESSING_OPT == 1
-#include "adders/ppa_msb_unsafe_and_ab.hpp"
-// #include "adders/ppa_msb_4way_and_ab.hpp"
+// #include "adders/ppa_msb_unsafe_and_ab.hpp"
+#include "adders/ppa_msb_4way_and_ab.hpp"
 // #include "adders/rca_msb_and_ab.hpp"
 #else
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
@@ -59,8 +59,8 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 
 #if ROT_PREPROCESSING_OPT == 1
 // std::vector<RCA_MSB_AB<bk - bm, S>> adders;
-// std::vector<PPA_MSB_4Way_AB<bk - bm, S>> adders;
-std::vector<PPA_MSB_Unsafe_AB<bk - bm, S>> adders;
+std::vector<PPA_MSB_4Way_AB<bk - bm, S>> adders;
+// std::vector<PPA_MSB_Unsafe_AB<bk - bm, S>> adders;
 #else
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     std::vector<BooleanAdder_MSB<bk - bm, S>> adders;
