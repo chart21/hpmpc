@@ -227,17 +227,17 @@ class ABY2_init
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_init prepare_and_a_known(ABY2_init b, Datatype b_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_init prepare_and_reshared(ABY2_init b, Datatype assign, Datatype triple_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-        num_ab2_boolean_triples[0]++;
+        num_random_multiplications++;
         send_to_(PNEXT);
         return ABY2_init();
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_init prepare_dot_a_known(ABY2_init b, Datatype b_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_init prepare_dot_reshared(ABY2_init b, Datatype assign, Datatype triple_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
-        num_ab2_boolean_triples[0]++;
+        num_random_multiplications++;
         return ABY2_init();
     }
 
@@ -451,6 +451,29 @@ class ABY2_init
     void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
         send_to_(PNEXT);
+    }
+    
+    template <typename func_add>
+    void reshare_a(Datatype mask, func_add ADD)
+    {
+        #if PARTY == 0
+        send_to_(PNEXT);
+        #else
+        receive_from_(PNEXT);
+        #endif
+    }
+    template <typename func_add>
+    void reshare_b(Datatype mask, func_add ADD)
+    {
+        #if PARTY == 0
+        #if RESHARE_OPT_SIM == 0
+        store_output_share_();
+        #endif
+        #else
+        #if RESHARE_OPT_SIM == 0
+        pre_send_to_(PNEXT);
+        #endif
+        #endif
     }
     
     template <typename func_add, typename func_sub, typename func_trunc>

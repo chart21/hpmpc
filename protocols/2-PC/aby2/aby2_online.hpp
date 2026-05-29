@@ -243,32 +243,34 @@ class ABY2_ONLINE_Share
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_ONLINE_Share prepare_and_a_known(ABY2_ONLINE_Share b, Datatype a_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_ONLINE_Share prepare_and_reshared(ABY2_ONLINE_Share b, Datatype assign, Datatype triple_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         ABY2_ONLINE_Share c;
+        Datatype lxly = triple_c;
         c.l = assign;
-        #if PARTY == 0
-        c.m = MULT(a_mask, OP_SUB(m, l)); // a mb2 = ab - a lb2, note that a_mask = a
-        #else
-        c.m = MULT(m, b.l); // a lb2 + la lb2
-        #endif
-        c.m = ADD(c.m, ADD(triplc_c, c.l)); // + [la lb2] + [lc]
+#if PARTY == 0
+        c.m = MULT(m, b.m);
+#else
+        c.m = SET_ALL_ZERO();
+#endif
+        c.m = SUB(c.m,
+                  SUB(ADD(MULT(m, b.l), MULT(l, b.m)), ADD(lxly, c.l)));  // mx my - (mx[ly] + my[lx] - [lxly] - [lz])
         send_to_live(PNEXT, c.m);
         return c;
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_ONLINE_Share prepare_dot_b_known(ABY2_ONLINE_Share b, Datatype b_mask, Datatype assign,  Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_ONLINE_Share prepare_dot_reshared(ABY2_ONLINE_Share b, Datatype assign,  Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         ABY2_ONLINE_Share c;
         c.l = assign;
-        #if PARTY == 0
-        c.m = MULT(b_mask, OP_SUB(m, l)); // b mb2 = bb - b lb2, note that b_mask = b
-        #else
-        c.m = MULT(m, b.l); // a lb2 + la lb2
-        #endif
-        c.m = ADD(c.m, ADD(triplc_c, c.l)); // + [la lb2] + [lc]
-        return c;
+        
+#if PARTY == 0
+        c.m = MULT(m, b.m);
+#else
+        c.m = SET_ALL_ZERO();
+#endif
+        c.m = SUB(c.m, SUB(ADD(MULT(m, b.l), MULT(l, b.m)), triplc_c));  // mx my - (mx[ly] + my[lx] - [lxly]) 
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
@@ -569,6 +571,38 @@ class ABY2_ONLINE_Share
     void complete_mult_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
     {
         complete_mult(ADD, SUB);
+    }
+    
+    template <typename func_add>
+    void reshare_a(Datatype mask, func_add ADD)
+    {
+        #if PARTY == 0
+        l = mask;
+        m = ADD(m, l);
+        send_to_live(PNEXT, m); //try without communicate
+        #else
+        m = receive_from_live(PNEXT); // m + a
+        l = SET_ALL_ZERO();
+        #endif
+    }
+    template <typename func_add>
+    void reshare_b(Datatype mask, func_add ADD)
+    {
+        #if PARTY == 0
+        l = SET_ALL_ZERO();
+        #if RESHARE_OPT_SIM == 0
+        m = retrieve_output_share_bool();
+        #else
+        m = SET_ALL_ZERO();
+        #endif
+        #else
+        #if RESHARE_OPT_SIM == 0
+        m = ADD(l, mask);  // l + b
+        l = mask;
+        #else 
+        m = SET_ALL_ZERO();
+        #endif
+        #endif
     }
 
     #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0

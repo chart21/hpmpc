@@ -208,13 +208,13 @@ class ABY2_PRE_Share
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_PRE_Share prepare_and_a_known(ABY2_PRE_Share b, Datatype a_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_PRE_Share prepare_and_reshared(ABY2_PRE_Share b, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         return ABY2_PRE_Share(assign);
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
-    ABY2_PRE_Share prepare_dot_a_known(ABY2_PRE_Share b, Datatype a_mask, Datatype assign, Datatype triplc_c, func_add ADD, func_sub SUB, func_mul MULT) const
+    ABY2_PRE_Share prepare_dot_reshared(ABY2_PRE_Share b, Datatype assign, Datatype triple_c, func_add ADD, func_sub SUB, func_mul MULT) const
     {
         return ABY2_PRE_Share(assign);
     }
@@ -500,6 +500,33 @@ class ABY2_PRE_Share
 #endif
 #endif
     }
+    
+    template <typename func_add>
+    void reshare_a(Datatype mask, func_add ADD)
+    {
+        #if PARTY == 0
+        l = mask;
+        #else
+        l = SET_ALL_ZERO();
+        #endif
+    }
+    template <typename func_add>
+    void reshare_b(Datatype mask, func_add ADD)
+    {
+        #if PARTY == 0
+        l = SET_ALL_ZERO();
+        #if RESHARE_OPT_SIM == 0
+        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        #endif
+        #else
+        #if RESHARE_OPT_SIM == 0
+        Datatype m = ADD(l, mask);  // l + b
+        pre_send_to_live(PNEXT, m); 
+        l = mask;
+        #endif
+        #endif
+    }
+
 
 #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
     static void prepare_A2B_S1(int m, int k, ABY2_PRE_Share in[], ABY2_PRE_Share out[])

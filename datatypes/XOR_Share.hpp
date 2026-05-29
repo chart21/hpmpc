@@ -235,17 +235,29 @@ class XOR_Share : public Share_Type
    {
        return Share_Type::get_mask();
    }
+
+   void reshare_a(Datatype mask)
+   {
+        Share_Type::reshare_a(mask, std::bit_xor<Datatype>());
+   }
+
+   void reshare_b(Datatype mask)
+   {
+    Share_Type::reshare_b(mask, std::bit_xor<Datatype>());
+   }
+   
+   XOR_Share prepare_and_reshared(const XOR_Share b, Datatype assign, Datatype triple_c) const
+    {
+        return XOR_Share(Share_Type::prepare_and_reshared(b, assign, triple_c, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
+    }
+
+    XOR_Share prepare_dot_reshared(const XOR_Share b, Datatype assign, Datatype triple_c) const
+    {
+        return XOR_Share(Share_Type::prepare_dot_reshared(b, assign, triple_c, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
+    }
    #endif
 
-   XOR_Share prepare_and_a_known(const XOR_Share b, Datatype a_mask, Datatype assign, Datatype triple_c) const
-    {
-        return XOR_Share(Share_Type::prepare_and_a_known(b, a_mask, assign, triple_c, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
-    }
 
-    XOR_Share prepare_dot_a_known(const XOR_Share b, Datatype a_mask, Datatype assign, Datatype triple_c) const
-    {
-        return XOR_Share(Share_Type::prepare_dot_a_known(b, a_mask, assign, triple_c, std::bit_xor<Datatype>(), std::bit_xor<Datatype>(), std::bit_and<Datatype>()));
-    }
     
 #if CV_FIX == 1
     void complete_and2()
