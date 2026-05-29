@@ -466,7 +466,7 @@ void generateBooleanAdditionDummyTriples(type a[],
 #endif
                 }
                 #if ROT_PREPROCESSING_OPT == 1
-                generateBooleanCOTMultTriples(ot_a, ot_b, carry_last, bitlength, num_triples * DATTYPE/8, ip, port, false);
+                generateBooleanCOTMultTriples(ot_a, ot_b, carry_last, bitlength, num_triples * DATTYPE, ip, port, false);
                 #else
                 generateBooleanAB2Triples(ot_a, ot_b, carry_last, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type, false);
                 #endif
@@ -490,9 +490,9 @@ void generateBooleanAdditionDummyTriples(type a[],
 #endif
                 }
                 #if ROT_PREPROCESSING_OPT == 1
-                generateBooleanCOTMultTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE/8, ip, port, false);
+                generateBooleanCOTMultTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, false);
                 #else
-                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE/8, ip, port, cheetah_ot_type, false);
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type, false);
                 #endif
 
                 break;
@@ -523,9 +523,9 @@ void generateBooleanAdditionDummyTriples(type a[],
 #endif
                 }
                 #if ROT_PREPROCESSING_OPT == 1
-                generateBooleanCOTMultTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE/8, ip, port, false);
+                generateBooleanCOTMultTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, false);
                 #else
-                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE/8, ip, port, cheetah_ot_type, false);
+                generateBooleanTriples(ot_a, ot_b, carry_this, bitlength, num_triples * DATTYPE, ip, port, cheetah_ot_type, false);
                 #endif
                 break;
             case 0:
