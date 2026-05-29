@@ -287,6 +287,7 @@ void preprocess_circuit(std::string ips[])
     curr_arithmetic_triple_index = 0;
     curr_arithmetic_ab2_triple_index = 0;
     curr_boolean_ab2_triple_index = 0;
+    curr_random_multiplication_index = 0;
 #endif
 #if ROT_PREPROCESSING_OPT == 1
         init_beaverC_boolean(0);
@@ -494,6 +495,7 @@ void live_circuit()
     curr_arithmetic_triple_index = 0;
     curr_arithmetic_ab2_triple_index = 0;
     curr_boolean_ab2_triple_index = 0;
+    curr_random_multiplication_index = 0;
 #endif
 
     /// Processing Inputs ///

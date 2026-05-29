@@ -35,17 +35,27 @@ struct Beaver4Tuple {
     Datatype abcd;
 };
 
+template <typename Datatype>
+struct RandomMultiplication {
+    Datatype a;
+    Datatype b;
+};
 
 // std::vector<uint64_t> arithmetic_triple_index;
 // std::vector<uint64_t> boolean_triple_index;
 uint64_t num_beaver_3_tuples;
 uint64_t num_beaver_4_tuples;
+uint64_t num_random_multiplications = 0;
 uint64_t curr_beaver_3_triple_index = 0;
 uint64_t curr_beaver_4_triple_index = 0;
+uint64_t curr_random_multiplication_index = 0;
 uint64_t beaver_3_triple_index = 0;
 uint64_t beaver_4_triple_index = 0;
+uint64_t random_multiplication_index = 0;
 Beaver3TuplesD<DATATYPE> beaver_3_tuples;
 Beaver4TuplesD<DATATYPE> beaver_4_tuples;
+DATATYPE* random_multiplication_a = nullptr;
+DATATYPE* random_multiplication_b = nullptr;
 std::vector<uint64_t> num_arithmetic_triples;
 std::vector<uint64_t> num_ab2_arithmetic_triples;
 std::vector<uint64_t> num_boolean_triples;
@@ -206,6 +216,17 @@ Beaver4Tuple<Datatype> retrieveBeaver4Tuple()
         beaver_4_tuples.abcd[curr_beaver_4_triple_index]
     };
     curr_beaver_4_triple_index++;
+    return tuple;
+}
+
+template <typename Datatype>
+RandomMultiplication<Datatype> retrieveRandomMultiplication()
+{
+    RandomMultiplication<Datatype> tuple{
+        random_multiplication_a[curr_random_multiplication_index],
+        random_multiplication_b[curr_random_multiplication_index]
+    };
+    curr_random_multiplication_index++;
     return tuple;
 }
 
@@ -427,6 +448,24 @@ void deinit_beaver_4_tuples()
 }
 
 #endif
+
+void init_random_multiplications()
+{
+    random_multiplication_a = new DATATYPE[num_random_multiplications];
+    random_multiplication_b = new DATATYPE[num_random_multiplications];
+}
+
+void deinit_random_multiplications()
+{
+    if (random_multiplication_a != nullptr) {
+        delete[] random_multiplication_a;
+        random_multiplication_a = nullptr;
+    }
+    if (random_multiplication_b != nullptr) {
+        delete[] random_multiplication_b;
+        random_multiplication_b = nullptr;
+    }
+}
 
 void init_cotBeaverAB()
 {
@@ -759,6 +798,7 @@ void generate_beaver_triples(std::string ips[], int base_port, int process_offse
     uint64_t l_num_boolean_addition_triples = num_boolean_addition_triples * DATTYPE;
     uint64_t l_num_beaver_3_tuples = num_beaver_3_tuples * DATTYPE;
     uint64_t l_num_beaver_4_tuples = num_beaver_4_tuples * DATTYPE;
+    uint64_t l_num_random_multiplications = num_random_multiplications * DATTYPE;
 
 #if FAKE_TRIPLES == 1
     print("Fake Triples set to 1, generating fake triples ... \n");
@@ -865,6 +905,9 @@ else if (triple_type == "BEAVER_N_TUPLES") {
     generateBeaverNDummyTuples(beaver_3_tuples, beaver_4_tuples, l_num_beaver_3_tuples, l_num_beaver_4_tuples, ips[0], base_port + process_offset);
 }
 #endif
+else if (triple_type == "RANDOM_MULTIPLICATION") {
+    generateRandomMultiplications(random_multiplication_a, random_multiplication_b, l_num_random_multiplications, ips[0], base_port + process_offset);
+}
 else {
     std::cerr << "Unknown triple type: " << triple_type << std::endl;
     exit(1);

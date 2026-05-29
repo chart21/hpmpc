@@ -118,6 +118,7 @@ struct FullyConnectedParameter
 #define generateMultiplexerTriples generateMultiplexerDummyTriples
 #define generateCOTTriples generateCOTDummyTriples
 #define generateBooleanCOTMultTriples generateBooleanCOTMultiplyDummyTriples
+#define generateRandomMultiplications generateRandomMultiplicationDummyTriples
 
 #include <core/hpmpc_interface.hpp>
 #include <core/keys.hpp>
@@ -867,8 +868,25 @@ void generateLayerDummyTriples(type** a,
     keys.disconnect();
 }
 
+template <typename type>
+void generateRandomMultiplicationDummyTriples(type a[],
+                                              type b[],
+                                              uint64_t num_muls,
+                                              std::string ip,
+                                              int port)
+{
+    std::cout << "RANDOM_MULTIPLICATION\n";
 
+    if (num_muls == 0) return;
 
+    port += CHEETAH_PORT_OFFSET;
+
+    //reinterpret SIMD bitstream as uint8 bitstream
+    uint8_t* uint_a = (uint8_t*) a;
+    uint8_t* uint_b = (uint8_t*) b;
+
+    Iface::generateRandomMultiplicationsCheetah(uint_a, uint_b, num_muls, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+}
 
 #else
 
@@ -882,6 +900,7 @@ void generateLayerDummyTriples(type** a,
 #define generateBooleanAdditionTriples generateFakeBooleanAdditionTriples
 #define generateMultiplexerTriples generateFakeMultiplexerTriples
 #define generateCOTTriples generateCOTDummyTriples
+#define generateRandomMultiplications generateFakeRandomMultiplications
 
 template <typename type>
 void generateFakeArithmeticTriples(type a[],
@@ -971,6 +990,13 @@ void generateFakeLayerTriples(type** a,
 {
 }
 
-
+template <typename type>
+void generateFakeRandomMultiplications(type a[],
+                                       type b[],
+                                       uint64_t num_muls,
+                                       std::string ip,
+                                       int port)
+{
+}
 
 #endif
