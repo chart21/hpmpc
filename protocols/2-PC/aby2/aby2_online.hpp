@@ -271,6 +271,7 @@ class ABY2_ONLINE_Share
         c.m = SET_ALL_ZERO();
 #endif
         c.m = SUB(c.m, SUB(ADD(MULT(m, b.l), MULT(l, b.m)), triplc_c));  // mx my - (mx[ly] + my[lx] - [lxly]) 
+        return c;
     }
     
     template <typename func_add, typename func_sub, typename func_mul>
@@ -591,7 +592,7 @@ class ABY2_ONLINE_Share
         #if PARTY == 0
         l = SET_ALL_ZERO();
         #if RESHARE_OPT_SIM == 0
-        m = retrieve_output_share_bool();
+        m = retrieve_output_share();
         #else
         m = SET_ALL_ZERO();
         #endif
@@ -643,7 +644,7 @@ class ABY2_ONLINE_Share
                 continue;
             }
             #elif RESHARE_OPT == 1 && PPA4_MSB == 1
-            if(is_ppa4_reshared(k, i))
+            if(is_ppa4_reshared(k - m, i - m))
             {
                 out[i - m].m = temp_p1[i]; // will be reshared in circuit
                 continue;

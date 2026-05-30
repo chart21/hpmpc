@@ -280,6 +280,7 @@ void load_preprocessed_data()
 #if PRE == 1 && SKIP_PRE == 0
 void preprocess_circuit(std::string ips[])
 {
+#if PROTOCOL == 4
 #if BEAVER == 1
     curr_beaver_3_triple_index = 0;
     curr_beaver_4_triple_index = 0;
@@ -296,11 +297,17 @@ void preprocess_circuit(std::string ips[])
         init_beaverAB2C_boolean(0);
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, num_ab2_boolean_triples[0], "LXLY2");
+#endif
 #if BEAVER_N_TUPLES == 1
         init_beaver_3_tuples();
         init_beaver_4_tuples();
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, 0, "BEAVER_N_TUPLES");
+#endif
+#if RESHARE_OPT == 1
+init_random_multiplications();
+generate_beaver_triples(
+                ips, base_port, process_offset, 0, 0, "RANDOM_MULTIPLICATION");
 #endif
 #endif
     pthread_t sending_Threads_pre[num_players - 1];

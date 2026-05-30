@@ -975,6 +975,8 @@ void print_num_triples()
               << "Beaver 3-Tuples Required: " << num_beaver_3_tuples * DATTYPE << std::endl;
     std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
               << "Beaver 4-Tuples Required: " << num_beaver_4_tuples * DATTYPE << std::endl;
+    std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+              << "Random Multiplications Required: " << num_random_multiplications * DATTYPE << std::endl;
 #if A_KNOWN == 0
     std::string triple_type_str = "AB";
 #else

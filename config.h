@@ -284,6 +284,12 @@ int base_port = BASE_PORT;  // temporary solution
 #endif
 #endif
 
+#ifndef RESHARE_OPT_SIM
+#if A_KNOWN_TO_EVALUATORS_OPT == 0
+#define RESHARE_OPT_SIM 0  // Simulate additional reshare optimizations
+#endif
+#endif
+
 #ifndef A2B_ROUND_OPT_SIM
 #define A2B_ROUND_OPT_SIM 0  // Simulate round-optimized A2B, by reconstructing both ab + lc and ab xor lc in the Online Phase
 #endif
@@ -628,6 +634,11 @@ int base_port = BASE_PORT;  // temporary solution
     0  // 1 if online optimized (e.g. MULTI_INPUT AND gates), 0 if optimized for total communication (e.g. no
        // MULTI_INPUT AND gates)
 #endif
+
+// #ifndef RCA_MSB
+// #define RCA_MSB 1
+// #endif
+
 #elif FUNCTION_IDENTIFIER < 200  // PPA
 #ifndef BANDWIDTH_OPTIMIZED
 #define BANDWIDTH_OPTIMIZED 0
@@ -636,6 +647,11 @@ int base_port = BASE_PORT;  // temporary solution
 #ifndef ONLINE_OPTIMIZED
 #define ONLINE_OPTIMIZED 0
 #endif
+
+// #ifndef PPA_MSB
+// #define PPA_MSB 1 
+// #endif
+
 #elif FUNCTION_IDENTIFIER < 300
 #ifndef BANDWIDTH_OPTIMIZED
 #define BANDWIDTH_OPTIMIZED 0  // PPA 4-Way
@@ -645,6 +661,11 @@ int base_port = BASE_PORT;  // temporary solution
 #define ONLINE_OPTIMIZED 1
 #endif
 #endif
+
+// #ifndef PPA4_MSB
+// #define PPA4_MSB 1 
+// #endif
+
 
 #elif FUNCTION_IDENTIFIER >= 500 || FUNCTION_IDENTIFIER <= 530  // MP-SPDZ
 #if FUNCTION_IDENTIFIER == 507 || FUNCTION_IDENTIFIER == 513 || FUNCTION_IDENTIFIER == 516 || \
