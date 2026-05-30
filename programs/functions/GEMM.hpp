@@ -15,7 +15,7 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
 #if PUBLIC_WEIGHTS == 0
 #if A_KNOWN == 1 
 #if FC_TRIPLES == 1 
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
             sum += W[i * w_cols + j].prepare_dot_ex_lxly_a_known_pre(A[j]);
 #else
             sum += W[i * w_cols + j].prepare_dot_ex_lxly_a_known(A[j]);
@@ -44,7 +44,7 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
 #endif
 #else
 #if FC_TRIPLES == 1 && PROTOCOL == 4 
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         sum.mask_and_send_dot_a_known_pre_with_triple();  
 #else
         sum.mask_and_send_dot_with_triple();
@@ -120,7 +120,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
                                 {
 #if A_KNOWN == 1 
 #if CONV_TRIPLES == 1 
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
                                     temps[i] += A[iif + kk].prepare_dot_ex_lxly_a_known_pre(B[jjf + kk], i);
 #else
                                     temps[i] += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk], i); 
@@ -144,7 +144,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #else
 #if A_KNOWN == 1 
 #if CONV_TRIPLES == 1 
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
                                 temp += A[iif + kk].prepare_dot_ex_lxly_a_known_pre(B[jjf + kk]);
 #else
                                 temp += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk]);
@@ -163,7 +163,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #elif FUSE_DOT == 2
 #if A_KNOWN == 1 
 #if CONV_TRIPLES == 1 
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
                                 Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot_ex_lxly_a_known_pre(B[jjf + kk], t);
 #else
                                 Q[iip + jj + t * m * p] += A[iif + kk].prepare_dot_ex_lxly_a_known(B[jjf + kk], t);
@@ -219,7 +219,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #if A2B_ROUND_OPT_SIM == 1
                         C[row + jj].mask_and_send_dot(); // Simulate second send for XOR Share
 #endif
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
                         C[row + jj].mask_and_send_dot_a_known_pre_with_triple(row + jj);
 #else
                         C[row + jj].mask_and_send_dot_without_trunc_with_triple(row + jj);
@@ -232,7 +232,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #if CONV_TRIPLES == 1 && PROTOCOL == 4
                         // C[row + jj].mask_and_send_dot_with_triple();
 
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
                         C[row + jj].mask_and_send_dot_a_known_pre_with_triple(row + jj);
 #else
                         C[row + jj].mask_and_send_dot_with_triple(row + jj);
@@ -268,7 +268,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
         }
         C[i].join_dots(temps);
 #if PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         C[i].mask_and_send_dot_a_known_pre_with_triple(i);
 #else
         C[i].mask_and_send_dot_with_triple(i);
@@ -282,7 +282,7 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
 #if INTERLEAVE_COMM == 0
     for (int i = 0; i < m * p; ++i)
 #if PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         C[i].mask_and_send_dot_a_known_pre_with_triple();
 #else
         C[i].mask_and_send_dot_with_triple();
@@ -324,7 +324,7 @@ void complete_GEMM_CPU(T* C, const int m, const int p)
 #if A2B_ROUND_OPT_SIM == 1
                     C[row + jj].complete_mult(); // simulate second receive for XOR Share
 #endif
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
                     C[row + jj].complete_mult_a_known_pre();
 #else
                     C[row + jj].complete_mult();
@@ -356,7 +356,7 @@ void send_GEMM_GPU(T* C, const int m, const int p)
 #endif
 #else
 #if CONV_TRIPLES == 1
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         C[j].mask_and_send_dot_a_known_pre_with_triple();
 #else
         C[j].mask_and_send_dot_with_triple();
@@ -384,7 +384,7 @@ void complete_GEMM(T* C, const int len)
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
         C[i].complete_mult_without_trunc();
 #else
-#if MODELWEIGTHS_KNOWN_DURING_PREPROCESSING == 1
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         C[i].complete_mult_a_known_pre();
 #else
         C[i].complete_mult();

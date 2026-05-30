@@ -379,6 +379,17 @@ class ABY2_PRE_Share
     }
 
     template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+#else
+        l = TRUNC(l);
+#endif
+
+    }
+
+    template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
         l = getRandomVal(PSELF);

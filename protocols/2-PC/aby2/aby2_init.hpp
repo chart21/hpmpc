@@ -483,6 +483,14 @@ class ABY2_init
     }
     
     template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+    {
+#if PARTY == 0
+        send_to_(PNEXT);
+#endif
+    }
+
+    template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
 #if PARTY == 0

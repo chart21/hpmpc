@@ -506,8 +506,23 @@ class ABY2_ONLINE_Share
         send_to_live(PNEXT, m);
     }
     
-    template <typename func_add, typename func_sub>
-    void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, int index)
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+    {
+        Datatype lxly;
+        lxly = retrieve_output_share_arithmetic();
+#if PARTY == 0
+        l = getRandomVal(PSELF); 
+        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);  //ToDO: Check whether SET_ALL_ZERO modification is needed, ab - [lxlw2] 
+        send_to_live(PNEXT, m);
+#else
+        l = TRUNC(lxly);
+        // Party1 sends nothing, defines mask as lxly2 share
+#endif
+    }
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
         Datatype lxly;
         lxly = retrieve_output_share_arithmetic(0, index);
