@@ -306,6 +306,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define OPTIMIZED_BIT_INJECTION_RELU 1  // Use optimized bit injection for ReLU
 #endif
 
+#ifndef BIT_INJECTION_TRUNC_SIM
+#define BIT_INJECTION_TRUNC_SIM 0 // Assume Truncation is handled during bit injection and delayed by linear layers
+#endif
+
 #ifndef OPTIMIZED_COMPUTATION_MULT
 #define OPTIMIZED_COMPUTATION_MULT 0 // Use fewer instructions for multiplications
 #endif

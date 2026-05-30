@@ -89,7 +89,7 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 #if TRUNC_DELAYED == 1
     if (delayed)
     {
-#if TRUNC_APPROACH == 0
+#if TRUNC_APPROACH == 0 && BIT_INJECTION_TRUNC_SIM == 0
         trunc_pr_in_place(val, len);
 #elif TRUNC_APPROACH == 1 || TRUNC_APPROACH == 4
         print_online("Shouldn't be here");
