@@ -135,6 +135,12 @@ class ABY2_init
         }
 
     template <typename func_add, typename func_sub>
+        void prepare_remask(Datatype assign, func_add ADD, func_sub SUB)
+        {
+            send_to_(PNEXT);
+        }
+
+    template <typename func_add, typename func_sub>
         void complete_remask(func_add ADD, func_sub SUB)
         {
             receive_from_(PNEXT);
@@ -539,7 +545,7 @@ class ABY2_init
             #elif RESHARE_OPT == 1 && PPA4_MSB == 1
             if(is_ppa4_reshared(k, i))
                 continue; // will be reshared in circuit
-            #elif RESHARE_OPT == 1 && PPA_MSB == 1
+            #elif RESHARE_OPT == 1 && RCA_MSB != 1
             if(i != 0)
                 continue; // will be reshared in circuit 
             #endif 

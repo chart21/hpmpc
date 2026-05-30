@@ -8,26 +8,41 @@
 #if ROT_PREPROCESSING_OPT == 1
 
 #if PPA4_MSB == 1
-#if RESHARE_OPT == 1 
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
+#include "adders/ppa_msb_4way_and_a_ab.hpp"
+#define ADDER_TYPE PPA_MSB_4Way_A_AB
+#elif RESHARE_OPT == 1 
 #include "adders/ppa_msb_4way_and_ab_reshared.hpp"
+#define ADDER_TYPE PPA_MSB_4Way_AB
 #else
 #include "adders/ppa_msb_4way_and_ab.hpp"
+#define ADDER_TYPE PPA_MSB_4Way_AB
 #endif
 #endif
 
 #if PPA_MSB == 1
-#if RESHARE_OPT == 1
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
+#include "adders/ppa_msb_unsafe_and_a_ab.hpp"
+#define ADDER_TYPE PPA_MSB_Unsafe_A_AB
+#elif RESHARE_OPT == 1
 #include "adders/ppa_msb_unsafe_and_ab_reshared.hpp"
+#define ADDER_TYPE PPA_MSB_Unsafe_AB
 #else
 #include "adders/ppa_msb_unsafe_and_ab.hpp"
+#define ADDER_TYPE PPA_MSB_Unsafe_AB
 #endif
 #endif
 
 #if RCA_MSB == 1
-#if RESHARE_OPT == 1
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
+#include "adders/rca_msb_and_a_ab.hpp"
+#define ADDER_TYPE RCA_MSB_A_AB
+#elif RESHARE_OPT == 1
 #include "adders/rca_msb_and_ab_reshared.hpp"
+#define ADDER_TYPE RCA_MSB_AB
 #else
 #include "adders/rca_msb_and_ab.hpp"
+#define ADDER_TYPE RCA_MSB_AB
 #endif
 #endif
 
@@ -80,13 +95,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
     /* } */
 
 #if ROT_PREPROCESSING_OPT == 1
-#if PPA4_MSB == 1
-std::vector<PPA_MSB_4Way_AB<bk - bm, S>> adders;
-#elif PPA_MSB == 1
-std::vector<PPA_MSB_Unsafe_AB<bk - bm, S>> adders;
-#elif RCA_MSB == 1
-std::vector<RCA_MSB_AB<bk - bm, S>> adders;
-#endif
+std::vector<ADDER_TYPE<bk - bm, S>> adders;
 #else
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
     std::vector<BooleanAdder_MSB<bk - bm, S>> adders;

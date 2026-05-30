@@ -64,6 +64,14 @@ class ABY2_ONLINE_Share
         }
 
     template <typename func_add, typename func_sub>
+        void prepare_remask(Datatype assign, func_add ADD, func_sub SUB)
+        {
+            send_to_live(PNEXT, SUB(assign, l)); // replace old mask with assigned mask
+            m = ADD(SUB(m, l), assign); //mv' = mv - lvi + assign
+            l = assign; // lvi' = assign
+        }
+
+    template <typename func_add, typename func_sub>
         void complete_remask(func_add ADD, func_sub SUB)
         {
             auto old_l = receive_from_live(PNEXT);

@@ -418,6 +418,12 @@ class ABY2_PRE_Share
         }
 
     template <typename func_add, typename func_sub>
+        void prepare_remask(Datatype assign, func_add ADD, func_sub SUB)
+        {
+            l = assign;
+        }
+
+    template <typename func_add, typename func_sub>
         void complete_remask(func_add ADD, func_sub SUB)
         {
         }

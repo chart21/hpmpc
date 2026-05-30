@@ -224,6 +224,11 @@ class XOR_Share : public Share_Type
         Share_Type::prepare_remask(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
     }
 
+    void prepare_remask(Datatype assign)
+    {
+        Share_Type::prepare_remask(assign, std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
+    }
+
     void complete_remask()
     {
         Share_Type::complete_remask(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
