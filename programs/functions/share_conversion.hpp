@@ -55,7 +55,7 @@
 #include "adders/ppa_msb_unsafe.hpp"
 #endif
 #endif
-#if FUSE_RELU_AVG == 1 && TRUNC_APPROACH == 4 && TRUNC_DELAYED == 0
+#if FUSE_RELU_AVG == 1 && (TRUNC_APPROACH == 4 || TRUNC_APPROACH == 0) && TRUNC_DELAYED == 0
 #include "../../datatypes/float_fixed_converter.hpp"
 #endif
 
@@ -236,9 +236,9 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
     for (int i = 0; i < len; i++)
     {
         y[i].prepare_opt_bit_injection(val[i].get_share_pointer(), val[i].get_share_pointer());
-#if FUSE_RELU_AVG == 1 && TRUNC_APPROACH == 4 && TRUNC_DELAYED == 0
+#if FUSE_RELU_AVG == 1 && (TRUNC_APPROACH == 4 || TRUNC_APPROACH == 0) && TRUNC_DELAYED == 0
       auto denominator = FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(curr_denom);
-      y[i].local_mult_and_trunc(PROMOTE(denominator));
+      val[i].local_mult_and_trunc(PROMOTE(denominator));
 #endif
     }
     Share::communicate();

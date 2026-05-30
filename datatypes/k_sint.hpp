@@ -491,4 +491,15 @@ class sint_t
             result[i] = shares[i].prepare_trunc_exact_xmod2t(fractional_bits);
         return result;
     }
+
+#if FUSE_RELU_AVG == 1
+    sint_t local_mult_and_trunc(const UINT_TYPE b, int fractional_bits = FRACTIONAL) const
+    {
+        sint_t result;
+        for (int i = 0; i < BITLENGTH; ++i)
+            result[i] = shares[i].local_mult_and_trunc(b, fractional_bits);
+        return result;
+    }        
+#endif
+
 };
