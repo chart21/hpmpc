@@ -210,7 +210,7 @@ void generateBooleanDummyTriples(type a[],
 
     Iface::generateBoolTriplesCheetah(
             uint_a, uint_b, uint_c,
-            bitlength, num_triples / 8, ip, port, CHEETAH_PARTY,
+            bitlength, num_triples ,ip, port, CHEETAH_PARTY,
             CHEETAH_THREADS,
             ot, PROCESS_NUM);
 
@@ -241,7 +241,7 @@ void generateBooleanCOTMultiplyDummyTriples(type a[],
 
     Iface::generateBoolCOTMultTriplesCheetah(
             uint_a, uint_b, uint_c,
-            bitlength, num_triples / 8, ip, port, CHEETAH_PARTY,
+            bitlength, num_triples ,ip, port, CHEETAH_PARTY,
             CHEETAH_THREADS, PROCESS_NUM);
 
     if (disconnect)
@@ -284,8 +284,8 @@ void generateBeaverNDummyTuples(Beaver3TuplesD<Datatype> &beaver_3_tuples, Beave
         (uint8_t*) beaver_4_tuples.abcd
     };
 
-    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples / 8, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
-    Iface::generateBool4TupleCheetah(l_beaver_4_tuples, num_beaver_4_tuples / 8, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+    Iface::generateBool4TupleCheetah(l_beaver_4_tuples, num_beaver_4_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
 }
 #endif
 
@@ -379,13 +379,13 @@ void generateBooleanAB2DummyTriples(type a[],
 #if PARTY == 0
     uint8_t* uint_a = (uint8_t*) a;
 #else
-    std::vector<uint8_t> zerosa(num_triples/8, 0);
+    std::vector<uint8_t> zerosa(num_triples, 0);
     uint8_t* uint_a = zerosa.data();
 #endif
 #if PARTY == 1
     uint8_t* uint_b = (uint8_t*) b;
 #else
-    std::vector<uint8_t> zeros(num_triples/8, 0);
+    std::vector<uint8_t> zeros(num_triples, 0);
     uint8_t* uint_b = zeros.data();
 #endif // P_0 doesn't need b for AB2
     uint8_t* uint_c = (uint8_t*) c;
@@ -412,7 +412,7 @@ void generateBooleanAB2DummyTriples(type a[],
     };
 
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
-            num_triples / 8, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, ot, PROCESS_NUM);
+            num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, ot, PROCESS_NUM);
 
     if (disconnect)
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();

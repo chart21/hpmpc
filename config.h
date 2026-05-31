@@ -364,7 +364,7 @@ int base_port = BASE_PORT;  // temporary solution
 #define BEAVER 1
 
 #ifndef CHEETAH_PORT_OFFSET
-#define CHEETAH_PORT_OFFSET 100  // Port offset for cheetah
+#define CHEETAH_PORT_OFFSET 200  // Port offset for cheetah
 #endif
 
 #ifndef CHEETAH_CONV_TYPE
