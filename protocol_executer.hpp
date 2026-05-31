@@ -290,7 +290,7 @@ void preprocess_circuit(std::string ips[])
     curr_boolean_ab2_triple_index = 0;
     curr_random_multiplication_index = 0;
 #endif
-#if ROT_PREPROCESSING_OPT == 1
+#if ROT_PREPROCESSING_OPT == 1 
         init_beaverC_boolean(0);
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, num_boolean_triples[0], "LXLY");

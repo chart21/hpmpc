@@ -183,26 +183,40 @@ struct triple
 template <typename Datatype>
 triple<Datatype> retrieveArithmeticTriple()
 {
+#if SKIP_PRE == 1
+    return triple<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()};
+#else
     curr_arithmetic_triple_index++;
     return triple<Datatype>{arithmetic_triple_a[curr_arithmetic_triple_index - 1],
                             arithmetic_triple_b[curr_arithmetic_triple_index - 1],
                             arithmetic_triple_c[curr_arithmetic_triple_index - 1]};
+#endif
 }
 
 template <typename Datatype>
 triple<Datatype> retrieveBooleanTriple()
 {
+#if SKIP_PRE == 1
+    return triple<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()};
+#else
     curr_boolean_triple_index++;
     return triple<Datatype>{boolean_triple_a[curr_boolean_triple_index - 1],
                             boolean_triple_b[curr_boolean_triple_index - 1],
                             boolean_triple_c[curr_boolean_triple_index - 1]};
     /* return triple<Datatype>{boolean_triple_a[boolean_triple_index], boolean_triple_b[boolean_triple_index],
      * boolean_triple_c[boolean_triple_index++]}; */
+#endif
 }
 
 template <typename Datatype>
 Beaver3Tuple<Datatype> retrieveBeaver3Tuple()
 {
+#if SKIP_PRE == 1
+    return Beaver3Tuple<Datatype>{
+        SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(),
+        SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()
+    };
+#else
     Beaver3Tuple<Datatype> tuple{
         beaver_3_tuples.a[curr_beaver_3_triple_index],
         beaver_3_tuples.b[curr_beaver_3_triple_index],
@@ -214,11 +228,20 @@ Beaver3Tuple<Datatype> retrieveBeaver3Tuple()
     };
     curr_beaver_3_triple_index++;
     return tuple;
+#endif
 }
 
 template <typename Datatype>
 Beaver4Tuple<Datatype> retrieveBeaver4Tuple()
 {
+#if SKIP_PRE == 1
+    return Beaver4Tuple<Datatype>{
+        SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(),
+        SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(),
+        SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(),
+        SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()
+    };
+#else
     Beaver4Tuple<Datatype> tuple{
         beaver_4_tuples.a[curr_beaver_4_triple_index],
         beaver_4_tuples.b[curr_beaver_4_triple_index],
@@ -238,35 +261,48 @@ Beaver4Tuple<Datatype> retrieveBeaver4Tuple()
     };
     curr_beaver_4_triple_index++;
     return tuple;
+#endif
 }
 
 template <typename Datatype>
 RandomMultiplication<Datatype> retrieveRandomMultiplication()
 {
+#if SKIP_PRE == 1
+    return RandomMultiplication<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO()};
+#else
     RandomMultiplication<Datatype> tuple{
         random_multiplication_a[curr_random_multiplication_index],
         random_multiplication_b[curr_random_multiplication_index]
     };
     curr_random_multiplication_index++;
     return tuple;
+#endif
 }
 
 template <typename Datatype>
 triple<Datatype> retrieveArithmeticAB2Triple()
 {
+#if SKIP_PRE == 1
+    return triple<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()};
+#else
     curr_arithmetic_ab2_triple_index++;
     return triple<Datatype>{arithmetic_ab2_triple_a[curr_arithmetic_ab2_triple_index - 1],
                             arithmetic_ab2_triple_b[curr_arithmetic_ab2_triple_index - 1],
                             arithmetic_ab2_triple_c[curr_arithmetic_ab2_triple_index - 1]};
-}   
+#endif
+}
 
 template <typename Datatype>
 triple<Datatype> retrieveBooleanAB2Triple()
 {
+#if SKIP_PRE == 1
+    return triple<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()};
+#else
     curr_boolean_ab2_triple_index++;
     return triple<Datatype>{boolean_ab2_triple_a[curr_boolean_ab2_triple_index - 1],
                             boolean_ab2_triple_b[curr_boolean_ab2_triple_index - 1],
                             boolean_ab2_triple_c[curr_boolean_ab2_triple_index - 1]};
+#endif
 }
     
     template <typename Datatype>
@@ -313,16 +349,24 @@ void storeBooleanAB2Triple(const Datatype a, const Datatype b)
 template <typename Datatype>
 Datatype retrieveBooleanLXLY()
 {
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#else
     total_boolean_triples_index++;
     return boolean_triple_c[total_boolean_triples_index - 1];
+#endif
 }
 
 
 template <typename Datatype>
 Datatype retrieveArithmeticLXLY()
 {
+#if SKIP_PRE == 1
+    return SET_ALL_ZERO();
+#else
     total_arithmetic_triples_index++;
     return arithmetic_triple_c[total_arithmetic_triples_index - 1];
+#endif
 }
 
 
