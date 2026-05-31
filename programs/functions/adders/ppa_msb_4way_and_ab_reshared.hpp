@@ -540,6 +540,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 16)>::type>
                 p_13_p_1 = p_13.zero_add(beaver4_tuples[4].a);  // p[13]'_1, mask=a17
                 p_14_p = p_14.zero_add(beaver4_tuples[4].b);  // p[14]', mask=b17
                 p_12_p = p_12.zero_add(beaver4_tuples[7].d);  // p[12]', mask=d20
+                // and_0: random_triples[0].a, random_triples[0].b, output mask=r88
+                B3G_1_3_g1 = a[1].prepare_dot_reshared(b[1], r88, random_triples[0].b);  // and_0
+                // and3_2: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=r89
+                B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(a_2_p, b_2_p, r89, beaver3_tuples[0]);  // and3_2
+                // and4_4: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r90
+                B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, r90, beaver4_tuples[0]);  // and4_4
+                B3G_1_3_s1 = B3G_1_3_g1 ^ B3G_1_3_t1;  // B3G_1_3_s1
+                B3G_1_3_out = B3G_1_3_s1 ^ B3G_1_3_t2;  // B3G_1_3_out
+                B3G_1_3_out.mask_and_send_dot_without_remask();
                 // and3_8: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=a23
                 B3P_1_3_out = p_1_p_2.prepare_and3_and_assign(p_2_p_1, p_3_p, beaver4_tuples[8].a, beaver3_tuples[1]);  // and3_8
                 // and_9: random_triples[1].a, random_triples[1].b, output mask=r81
@@ -590,6 +599,7 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 16)>::type>
                 p1234_3 = p_9_p_1.prepare_and4_and_assign(p_10_p_2, p_11_p_1, p_12_p, beaver4_tuples[9].c, beaver4_tuples[7]);  // and4_44
                 break;
             case 1:
+                B3G_1_3_out.complete_and();
                 B3P_1_3_out.complete_and3();
                 B3G_4_6_out.complete_and();
                 B3P_4_6_out.complete_and3();
@@ -603,12 +613,6 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 16)>::type>
                 B3P_1_3_out_p = B3P_1_3_out.zero_add(triples[0].a);  // B3P_1_3_out', mask=a21
                 B3P_1_3_out_p_1 = B3P_1_3_out.zero_add(beaver3_tuples[8].a);  // B3P_1_3_out'_1, mask=a22
                 B3P_4_6_out_p = B3P_4_6_out.zero_add(beaver3_tuples[8].b);  // B3P_4_6_out', mask=b22
-                // and_0: random_triples[0].a, random_triples[0].b, output mask=r88
-                B3G_1_3_g1 = a[1].prepare_dot_reshared(b[1], r88, random_triples[0].b);  // and_0
-                // and3_2: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=r89
-                B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(a_2_p, b_2_p, r89, beaver3_tuples[0]);  // and3_2
-                // and4_4: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r90
-                B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, r90, beaver4_tuples[0]);  // and4_4
                 // and_45: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r91
                 W5_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r91, triples[0].c);  // and_45
                 // and3_46: a8=beaver3_tuples[8].a, b8=beaver3_tuples[8].b, c8=beaver3_tuples[8].c, output mask=r92
@@ -617,16 +621,14 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 16)>::type>
                 W5_t3 = B3P_1_3_out.prepare_dot4_and_assign(B3P_4_6_out, B3P_7_9_out, B3G_10_12_out, r93, beaver4_tuples[8]);  // and4_47
                 // and4_48: a9=beaver4_tuples[9].a, b9=beaver4_tuples[9].b, c9=beaver4_tuples[9].c, d9=beaver4_tuples[9].d, output mask=r94
                 W5_t4 = p1234_1.prepare_dot4_and_assign(p1234_2, p1234_3, W3L1_13_15_out, r94, beaver4_tuples[9]);  // and4_48
-                B3G_1_3_s1 = B3G_1_3_g1 ^ B3G_1_3_t1;  // B3G_1_3_s1
-                B3G_1_3_out = B3G_1_3_s1 ^ B3G_1_3_t2;  // B3G_1_3_out
                 W5_s1 = W5_t1 ^ W5_t2;  // W5_s1
                 W5_s2 = W5_s1 ^ W5_t3;  // W5_s2
                 W5_s3 = W5_s2 ^ W5_t4;  // W5_s3
-                W5_s4 = W5_s3 ^ B3G_1_3_out;  // W5_s4
-                W5_s4.mask_and_send_dot_without_remask();
+                W5_s3.mask_and_send_dot_without_remask();
                 break;
             case 2:
-                W5_s4.complete_and();
+                W5_s3.complete_and();
+                W5_s4 = W5_s3 ^ B3G_1_3_out;  // W5_s4
                 msb = W5_s4 ^ p0;  // msb
                 break;
         }
@@ -1213,6 +1215,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_22_p = p_22.zero_add(triples[2].a);  // p[22]', mask=a47
                 p_22_p_1 = p_22.zero_add(beaver3_tuples[22].a);  // p[22]'_1, mask=a48
                 p_22_p_2 = p_22.zero_add(beaver4_tuples[12].a);  // p[22]'_2, mask=a49
+                // and_0: random_triples[0].a, random_triples[0].b, output mask=r179
+                B3G_1_3_g1 = a[1].prepare_dot_reshared(b[1], r179, random_triples[0].b);  // and_0
+                // and3_2: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=r180
+                B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(a_2_p, b_2_p, r180, beaver3_tuples[0]);  // and3_2
+                // and4_4: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r181
+                B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, r181, beaver4_tuples[0]);  // and4_4
+                B3G_1_3_s1 = B3G_1_3_g1 ^ B3G_1_3_t1;  // B3G_1_3_s1
+                B3G_1_3_out = B3G_1_3_s1 ^ B3G_1_3_t2;  // B3G_1_3_out
+                B3G_1_3_out.mask_and_send_dot_without_remask();
                 // and3_8: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=a41
                 B3P_1_3_out = p_1_p_2.prepare_and3_and_assign(p_2_p_1, p_3_p, beaver3_tuples[20].a, beaver3_tuples[1]);  // and3_8
                 // and_9: random_triples[1].a, random_triples[1].b, output mask=r156
@@ -1237,6 +1248,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 B3G_7_9_out.mask_and_send_dot_without_remask();
                 // and3_26: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=c41
                 B3P_7_9_out = p_7_p_2.prepare_and3_and_assign(p_8_p_1, p_9_p, beaver3_tuples[20].c, beaver3_tuples[5]);  // and3_26
+                // and_27: random_triples[3].a, random_triples[3].b, output mask=r173
+                B3G_10_12_g1 = a[10].prepare_dot_reshared(b[10], r173, random_triples[3].b);  // and_27
+                // and3_29: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=(r172-r173)
+                B3G_10_12_t1 = p_10_p.prepare_dot3_and_assign(a_11_p, b_11_p, FUNC_XOR(r172, r173), beaver3_tuples[6]);  // and3_29
+                // and4_31: a3=beaver4_tuples[3].a, b3=beaver4_tuples[3].b, c3=beaver4_tuples[3].c, d3=beaver4_tuples[3].d, output mask=((b50-r171)-r172)
+                B3G_10_12_t2 = p_10_p_1.prepare_dot4_and_assign(p_11_p, a_12_p, b_12_p, FUNC_XOR(FUNC_XOR(triples[3].b, r171), r172), beaver4_tuples[3]);  // and4_31
+                B3G_10_12_s1 = B3G_10_12_g1 ^ B3G_10_12_t1;  // B3G_10_12_s1
+                B3G_10_12_out = B3G_10_12_s1 ^ B3G_10_12_t2;  // B3G_10_12_out
+                B3G_10_12_out.mask_and_send_dot_without_remask();
                 // and3_35: a7=beaver3_tuples[7].a, b7=beaver3_tuples[7].b, c7=beaver3_tuples[7].c, output mask=a45
                 B3P_10_12_out = p_10_p_2.prepare_and3_and_assign(p_11_p_1, p_12_p, beaver4_tuples[11].a, beaver3_tuples[7]);  // and3_35
                 // and_36: random_triples[4].a, random_triples[4].b, output mask=r160
@@ -1305,11 +1325,13 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 W3L1_29_31_out.mask_and_send_dot_without_remask();
                 break;
             case 1:
+                B3G_1_3_out.complete_and();
                 B3P_1_3_out.complete_and3();
                 B3G_4_6_out.complete_and();
                 B3P_4_6_out.complete_and3();
                 B3G_7_9_out.complete_and();
                 B3P_7_9_out.complete_and3();
+                B3G_10_12_out.complete_and();
                 B3P_10_12_out.complete_and3();
                 B3G_13_15_out.complete_and();
                 B3P_13_15_out.complete_and3();
@@ -1332,26 +1354,23 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 B3P_13_15_out_p_1 = B3P_13_15_out.zero_add(beaver4_tuples[10].b);  // B3P_13_15_out'_1, mask=b44
                 B3P_16_18_out_p = B3P_16_18_out.zero_add(beaver4_tuples[10].c);  // B3P_16_18_out', mask=c44
                 B3P_23_25_out_p = B3P_23_25_out.zero_add(beaver3_tuples[22].b);  // B3P_23_25_out', mask=b48
-                // and_27: random_triples[3].a, random_triples[3].b, output mask=r173
-                B3G_10_12_g1 = a[10].prepare_dot_reshared(b[10], r173, random_triples[3].b);  // and_27
-                // and3_29: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=(r172-r173)
-                B3G_10_12_t1 = p_10_p.prepare_dot3_and_assign(a_11_p, b_11_p, FUNC_XOR(r172, r173), beaver3_tuples[6]);  // and3_29
-                // and4_31: a3=beaver4_tuples[3].a, b3=beaver4_tuples[3].b, c3=beaver4_tuples[3].c, d3=beaver4_tuples[3].d, output mask=((b50-r171)-r172)
-                B3G_10_12_t2 = p_10_p_1.prepare_dot4_and_assign(p_11_p, a_12_p, b_12_p, FUNC_XOR(FUNC_XOR(triples[3].b, r171), r172), beaver4_tuples[3]);  // and4_31
+                // and_88: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r182
+                L1_B3G_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r182, triples[0].c);  // and_88
+                // and3_89: a19=beaver3_tuples[19].a, b19=beaver3_tuples[19].b, c19=beaver3_tuples[19].c, output mask=r183
+                L1_B3G_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r183, beaver3_tuples[19]);  // and3_89
+                L1_B3G_s1 = L1_B3G_t1 ^ L1_B3G_t2;  // L1_B3G_s1
+                L1_B3G_s1.mask_and_send_dot_without_remask();
+                // and3_92: a20=beaver3_tuples[20].a, b20=beaver3_tuples[20].b, c20=beaver3_tuples[20].c, output mask=a51
+                L1_B3P_out = B3P_1_3_out.prepare_and3_and_assign(B3P_4_6_out, B3P_7_9_out, beaver3_tuples[23].a, beaver3_tuples[20]);  // and3_92
                 // and_93: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r175
                 L1_B4G_t1 = B3P_10_12_out_p.prepare_dot_and_assign(B3G_13_15_out, r175, triples[1].c);  // and_93
                 // and3_94: a21=beaver3_tuples[21].a, b21=beaver3_tuples[21].b, c21=beaver3_tuples[21].c, output mask=(r174-r175)
                 L1_B4G_t2 = B3P_10_12_out_p_1.prepare_dot3_and_assign(B3P_13_15_out_p, B3G_16_18_out, FUNC_XOR(r174, r175), beaver3_tuples[21]);  // and3_94
                 // and4_95: a10=beaver4_tuples[10].a, b10=beaver4_tuples[10].b, c10=beaver4_tuples[10].c, d10=beaver4_tuples[10].d, output mask=(r171-r174)
                 L1_B4G_t3 = B3P_10_12_out_p_2.prepare_dot4_and_assign(B3P_13_15_out_p_1, B3P_16_18_out_p, B3G_19_21_out, FUNC_XOR(r171, r174), beaver4_tuples[10]);  // and4_95
-                B3G_10_12_s1 = B3G_10_12_g1 ^ B3G_10_12_t1;  // B3G_10_12_s1
-                B3G_10_12_out = B3G_10_12_s1 ^ B3G_10_12_t2;  // B3G_10_12_out
                 L1_B4G_s1 = L1_B4G_t1 ^ L1_B4G_t2;  // L1_B4G_s1
                 L1_B4G_s2 = L1_B4G_s1 ^ L1_B4G_t3;  // L1_B4G_s2
-                L1_B4G_out = L1_B4G_s2 ^ B3G_10_12_out;  // L1_B4G_out
-                L1_B4G_out.mask_and_send_dot_without_remask();
-                // and3_92: a20=beaver3_tuples[20].a, b20=beaver3_tuples[20].b, c20=beaver3_tuples[20].c, output mask=a51
-                L1_B3P_out = B3P_1_3_out.prepare_and3_and_assign(B3P_4_6_out, B3P_7_9_out, beaver3_tuples[23].a, beaver3_tuples[20]);  // and3_92
+                L1_B4G_s2.mask_and_send_dot_without_remask();
                 // and4_99: a11=beaver4_tuples[11].a, b11=beaver4_tuples[11].b, c11=beaver4_tuples[11].c, d11=beaver4_tuples[11].d, output mask=b51
                 L1_B4P_out = B3P_10_12_out.prepare_and4_and_assign(B3P_13_15_out, B3P_16_18_out, B3P_19_21_out, beaver3_tuples[23].b, beaver4_tuples[11]);  // and4_99
                 // and_100: random_triples[10].a, random_triples[10].b, output mask=r178
@@ -1368,35 +1387,24 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 L1_W4S_out.mask_and_send_dot_without_remask();
                 break;
             case 2:
-                L1_B4G_out.complete_and();
+                L1_B3G_s1.complete_and();
                 L1_B3P_out.complete_and3();
+                L1_B4G_s2.complete_and();
                 L1_B4P_out.complete_and4();
                 L1_W4S_out.complete_and();
                 L1_B3P_out_p = L1_B3P_out.zero_add(triples[3].a);  // L1_B3P_out', mask=a50
-                // and_0: random_triples[0].a, random_triples[0].b, output mask=r179
-                B3G_1_3_g1 = a[1].prepare_dot_reshared(b[1], r179, random_triples[0].b);  // and_0
-                // and3_2: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=r180
-                B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(a_2_p, b_2_p, r180, beaver3_tuples[0]);  // and3_2
-                // and4_4: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r181
-                B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, r181, beaver4_tuples[0]);  // and4_4
-                // and_88: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r182
-                L1_B3G_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r182, triples[0].c);  // and_88
-                // and3_89: a19=beaver3_tuples[19].a, b19=beaver3_tuples[19].b, c19=beaver3_tuples[19].c, output mask=r183
-                L1_B3G_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r183, beaver3_tuples[19]);  // and3_89
+                L1_B3G_out = L1_B3G_s1 ^ B3G_1_3_out;  // L1_B3G_out
+                L1_B4G_out = L1_B4G_s2 ^ B3G_10_12_out;  // L1_B4G_out
                 // and_108: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r184
                 L2_W3_t1 = L1_B3P_out_p.prepare_dot_and_assign(L1_B4G_out, r184, triples[3].c);  // and_108
                 // and3_109: a23=beaver3_tuples[23].a, b23=beaver3_tuples[23].b, c23=beaver3_tuples[23].c, output mask=r185
                 L2_W3_t2 = L1_B3P_out.prepare_dot3_and_assign(L1_B4P_out, L1_W4S_out, r185, beaver3_tuples[23]);  // and3_109
-                B3G_1_3_s1 = B3G_1_3_g1 ^ B3G_1_3_t1;  // B3G_1_3_s1
-                B3G_1_3_out = B3G_1_3_s1 ^ B3G_1_3_t2;  // B3G_1_3_out
-                L1_B3G_s1 = L1_B3G_t1 ^ L1_B3G_t2;  // L1_B3G_s1
-                L1_B3G_out = L1_B3G_s1 ^ B3G_1_3_out;  // L1_B3G_out
                 L2_W3_s1 = L2_W3_t1 ^ L2_W3_t2;  // L2_W3_s1
-                L2_W3_s2 = L2_W3_s1 ^ L1_B3G_out;  // L2_W3_s2
-                L2_W3_s2.mask_and_send_dot_without_remask();
+                L2_W3_s1.mask_and_send_dot_without_remask();
                 break;
             case 3:
-                L2_W3_s2.complete_and();
+                L2_W3_s1.complete_and();
+                L2_W3_s2 = L2_W3_s1 ^ L1_B3G_out;  // L2_W3_s2
                 msb = L2_W3_s2 ^ p0;  // msb
                 break;
         }

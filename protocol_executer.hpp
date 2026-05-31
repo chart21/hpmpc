@@ -392,6 +392,8 @@ generate_beaver_triples(
 #if BEAVER == 1
     PROTOCOL_PRE<DATATYPE>::complete_preprocessing(
         ips, base_port, process_offset);
+    Iface::printTripleStats(CHEETAH_PARTY, process_offset);
+    Iface::resetTripleStats();
 #else
     communicate_pre();
 #endif
