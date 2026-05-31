@@ -4,54 +4,89 @@
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
 #include "../../protocols/Protocols.h"
+
+#if RCA_MSB == 0 && PPA_MSB == 0 && PPA4_MSB == 0
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+#ifndef RCA_MSB
+#define RCA_MSB 1
+#endif
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
+#ifndef PPA4_MSB
+#define PPA4_MSB 1
+#endif
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+#ifndef PPA_MSB
+#define PPA_MSB 1
+#endif
+#endif
+#endif
+
+#if ROT_PREPROCESSING_OPT == 1
+#if A_KNOWN_TO_EVALUATORS_OPT == 1
+#include "adders/zero_add_adders/rca_and_a_ab.hpp"
+#define FULL_ADDER_TYPE RCA_A_AB
+#elif RESHARE_OPT == 1
+#include "adders/zero_add_adders/rca_and_ab_reshared.hpp"
+#define FULL_ADDER_TYPE RCA_AB
+#else
+#include "adders/zero_add_adders/rca_and_ab.hpp"
+#define FULL_ADDER_TYPE RCA_AB
+#endif
+#else
+#define FULL_ADDER_TYPE BooleanAdder
 #include "adders/rca.hpp"
+#endif
+
 #if ROT_PREPROCESSING_OPT == 1
 
 #if PPA4_MSB == 1
 #if A_KNOWN_TO_EVALUATORS_OPT == 1
-#include "adders/ppa_msb_4way_and_a_ab.hpp"
+#include "adders/zero_add_adders/ppa_msb_4way_and_a_ab.hpp"
 #define ADDER_TYPE PPA_MSB_4Way_A_AB
 #elif RESHARE_OPT == 1 
-#include "adders/ppa_msb_4way_and_ab_reshared.hpp"
+#include "adders/zero_add_adders/ppa_msb_4way_and_ab_reshared.hpp"
 #define ADDER_TYPE PPA_MSB_4Way_AB
 #else
-#include "adders/ppa_msb_4way_and_ab.hpp"
+#include "adders/zero_add_adders/ppa_msb_4way_and_ab.hpp"
 #define ADDER_TYPE PPA_MSB_4Way_AB
 #endif
 #endif
 
 #if PPA_MSB == 1
 #if A_KNOWN_TO_EVALUATORS_OPT == 1
-#include "adders/ppa_msb_unsafe_and_a_ab.hpp"
+#include "adders/zero_add_adders/ppa_msb_unsafe_and_a_ab.hpp"
 #define ADDER_TYPE PPA_MSB_Unsafe_A_AB
 #elif RESHARE_OPT == 1
-#include "adders/ppa_msb_unsafe_and_ab_reshared.hpp"
+#include "adders/zero_add_adders/ppa_msb_unsafe_and_ab_reshared.hpp"
 #define ADDER_TYPE PPA_MSB_Unsafe_AB
 #else
-#include "adders/ppa_msb_unsafe_and_ab.hpp"
+#include "adders/zero_add_adders/ppa_msb_unsafe_and_ab.hpp"
 #define ADDER_TYPE PPA_MSB_Unsafe_AB
 #endif
 #endif
 
 #if RCA_MSB == 1
 #if A_KNOWN_TO_EVALUATORS_OPT == 1
-#include "adders/rca_msb_and_a_ab.hpp"
+#include "adders/zero_add_adders/rca_msb_and_a_ab.hpp"
 #define ADDER_TYPE RCA_MSB_A_AB
 #elif RESHARE_OPT == 1
-#include "adders/rca_msb_and_ab_reshared.hpp"
+#include "adders/zero_add_adders/rca_msb_and_ab_reshared.hpp"
 #define ADDER_TYPE RCA_MSB_AB
 #else
-#include "adders/rca_msb_and_ab.hpp"
+#include "adders/zero_add_adders/rca_msb_and_ab.hpp"
 #define ADDER_TYPE RCA_MSB_AB
 #endif
 #endif
 
 #else
-#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+#if (BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0) || RCA_MSB == 1
+#define ADDER_TYPE BooleanAdder
 #include "adders/rca_msb.hpp"
-#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
+#elif (BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1) || PPA4_MSB == 1
+#define ADDER_TYPE PPA_MSB_4Way
 #include "adders/ppa_msb_4_way.hpp"
-#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+#elif (BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0) || PPA_MSB == 1
+#define ADDER_TYPE PPA_MSB_Unsafe
 #include "adders/ppa_msb_unsafe.hpp"
 #endif
 #endif
@@ -85,27 +120,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 #endif
 
 
-    /* for(int i = 0; i < len; i++) */
-    /* { */
-    /*     for(int j = 0; j < bk-bm; j++) */
-    /*     { */
-    /*         s1[i][j] = SET_ALL_ZERO(); */
-    /*         s2[i][j] = SET_ALL_ZERO(); */
-    /* } */
-    /* } */
-
-#if ROT_PREPROCESSING_OPT == 1
 std::vector<ADDER_TYPE<bk - bm, S>> adders;
-#else
-#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
-    std::vector<BooleanAdder_MSB<bk - bm, S>> adders;
-#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
-    /* std::vector<PPA_MSB<bk-bm,S>> adders; */
-    std::vector<PPA_MSB_Unsafe<bk - bm, S>> adders;
-#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
-    std::vector<PPA_MSB_4Way<bk - bm, S>> adders;
-#endif
-#endif
     adders.reserve(len);
     for (int i = 0; i < len; i++)
     {
@@ -151,7 +166,7 @@ void A2B_range(sint_t<Additive_Share<Datatype, Share>>* val, sbitset_t<bk - bm, 
 
     Share::communicate();
 
-    std::vector<BooleanAdder<bk - bm, S>> adders;
+    std::vector<FULL_ADDER_TYPE<bk - bm, S>> adders;
 
     adders.reserve(len);
     for (int i = 0; i < len; i++)
@@ -191,7 +206,7 @@ void B2A_range(sbitset_t<bk - bm, XOR_Share<Datatype, Share>>* y, sint_t<Additiv
     }
 
     Bitset* z = new Bitset[len];
-    std::vector<BooleanAdder<bk - bm, S>> adders2;
+    std::vector<FULL_ADDER_TYPE<bk - bm, S>> adders2;
 
     adders2.reserve(len);
     for (int i = 0; i < len; i++)

@@ -286,7 +286,7 @@ int base_port = BASE_PORT;  // temporary solution
 
 #ifndef RESHARE_OPT_SIM
 #if A_KNOWN_TO_EVALUATORS_OPT == 0
-#define RESHARE_OPT_SIM 0  // Simulate additional reshare optimizations
+#define RESHARE_OPT_SIM 0  // Simulate additional reshare optimizations, P_0 can choose mask r freely when sharing mv - lv0 + r, no need for z-add
 #endif
 #endif
 
@@ -639,10 +639,6 @@ int base_port = BASE_PORT;  // temporary solution
        // MULTI_INPUT AND gates)
 #endif
 
-// #ifndef RCA_MSB
-// #define RCA_MSB 1
-// #endif
-
 #elif FUNCTION_IDENTIFIER < 200  // PPA
 #ifndef BANDWIDTH_OPTIMIZED
 #define BANDWIDTH_OPTIMIZED 0
@@ -652,9 +648,6 @@ int base_port = BASE_PORT;  // temporary solution
 #define ONLINE_OPTIMIZED 0
 #endif
 
-// #ifndef PPA_MSB
-// #define PPA_MSB 1 
-// #endif
 
 #elif FUNCTION_IDENTIFIER < 300
 #ifndef BANDWIDTH_OPTIMIZED
@@ -665,10 +658,6 @@ int base_port = BASE_PORT;  // temporary solution
 #define ONLINE_OPTIMIZED 1
 #endif
 #endif
-
-// #ifndef PPA4_MSB
-// #define PPA4_MSB 1 
-// #endif
 
 
 #elif FUNCTION_IDENTIFIER >= 500 || FUNCTION_IDENTIFIER <= 530  // MP-SPDZ
