@@ -318,6 +318,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define INTERLEAVE_COMM 1  // Interleave communication
 #endif
 
+#ifndef ADDITIONAL_GEMM_THREADS
+#define ADDITIONAL_GEMM_THREADS 0  // Number of additional threads for parallelizing GEMM prepare_dot/mult_public accumulations. 0 = single-threaded. Only effective when dot products per output element are large enough (f >= 64).
+#endif
+
 // === Legacy Settings ===
 
 // Allow sharing of inputs in offline phase

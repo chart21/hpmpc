@@ -2,6 +2,9 @@
 #include "../../config.h"
 #include "prob_truncation.hpp"
 #include <algorithm>
+#if ADDITIONAL_GEMM_THREADS > 0
+#include <thread>
+#endif
 
 template <typename T, typename U>
 void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_rows, const int w_cols)
@@ -77,6 +80,11 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
     const auto dummy_mu = T(0);
     const auto dummy_beta = T(0);
     auto C_Accum = new DATATYPE[m * p * T::get_conv_bn_size()]();
+#endif
+
+#if ADDITIONAL_GEMM_THREADS > 0 && FUSE_DOT == 1 && FUSE_CONV_BN_SIM == 0 && \
+    (PUBLIC_WEIGHTS == 1 || CONV_TRIPLES == 1)
+#include "GEMM_threaded.hpp"
 #endif
 
 #if FUSE_DOT == 2
