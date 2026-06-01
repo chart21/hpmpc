@@ -46,6 +46,19 @@ def parse_log_file(file_path, debug=False):
         parties_seen = set()
         # -------------------------------------
 
+        # Timings for each triple generation step (collect list of chronos to average)
+        triple_step_times_occurrences = defaultdict(list)
+
+        # NN_STATS (Aggregated)
+        nn_stats_occurrences = defaultdict(list)
+
+        # TRIPLE_STATS (Aggregated)
+        triple_stats_aggregated_occurrences = defaultdict(list)
+        # TRIPLE_STATS (Total)
+        triple_stats_total_occurrences = []
+
+        current_step = None
+
         # Initialize counters and lists for calculations
         triple_gen_total = 0.0
         pre_received = pre_sent = online_received = online_sent = 0
@@ -55,18 +68,83 @@ def parse_log_file(file_path, debug=False):
         tests_passed = tests_total = 0
 
         for line in lines:
-            # --- Triples Parsing Logic ---
-            if 'Triples Required' in line:
-                triple_match = re.search(r'P(\d+).*?:\s*(.*?)\s*Triples Required.*:\s*(\d+)', line)
-                if triple_match:
-                    party_id = triple_match.group(1)
-                    triple_type = triple_match.group(2).strip()
-                    count = int(triple_match.group(3))
+            # 1. Track current triple generation step name
+            step_match = re.search(r'P\d+(?:, PRE)?, PID\d+: Generating ([A-Za-z0-9_]+) (?:[Tt]riples|[Tt]uples)', line)
+            if step_match:
+                current_step = step_match.group(1).strip()
+
+            # 2. Parse beaver triple generation times
+            if 'beaver triple generation chrono:' in line:
+                time_match = re.search(r'(?:([A-Z0-9_]+)\s+)?P\d+, PID\d+: Time measured to perform beaver triple generation chrono:\s*([\d.e+-]+)s', line)
+                if time_match:
+                    prefix = time_match.group(1)
+                    val = float(time_match.group(2))
+                    step_name = prefix
+                    if step_name == "CONVOLUTION":
+                        step_name = "CONV"
+                    elif step_name == "BATCHNORM":
+                        step_name = "BATCHNORM2D"
+                    if not step_name:
+                        step_name = current_step
+                    if step_name:
+                        triple_step_times_occurrences[step_name].append(val)
+
+            # 3. Parse "Required" lines
+            if 'Required' in line:
+                req_match = re.search(r'P(\d+).*?:\s*(.*?)\s*Required.*:\s*(\d+)', line)
+                if req_match:
+                    party_id = req_match.group(1)
+                    req_type = req_match.group(2).strip()
+                    count = int(req_match.group(3))
                     
                     parties_seen.add(party_id)
-                    triples_accumulators[triple_type] += count
-            # ----------------------------------
+                    triples_accumulators[req_type] += count
 
+            # 4. Parse NN_STATS (Aggregated)
+            if 'NN_STATS (Aggregated)' in line:
+                nn_match = re.search(
+                    r'P\d+:\s+--NN_STATS\s+\(Aggregated\)--\s+([A-Z0-9_]+)\s+MB\s+SENT:\s*([\d.]+)\s+MB\s+RECEIVED:\s*([\d.]+)\s+MB\s+SENT\s+PRE:\s*([\d.]+)\s+MB\s+RECEIVED\s+PRE:\s*([\d.]+)\s+ms\s+LIVE:\s*([\d.]+)\s+ms\s+PRE:\s*([\d.]+)',
+                    line
+                )
+                if nn_match:
+                    layer = nn_match.group(1).strip()
+                    nn_stats_occurrences[layer].append({
+                        'MB_SENT': float(nn_match.group(2)),
+                        'MB_RECEIVED': float(nn_match.group(3)),
+                        'MB_SENT_PRE': float(nn_match.group(4)),
+                        'MB_RECEIVED_PRE': float(nn_match.group(5)),
+                        'ms_LIVE': float(nn_match.group(6)),
+                        'ms_PRE': float(nn_match.group(7)),
+                    })
+
+            # 5. Parse TRIPLE_STATS (Aggregated)
+            if 'TRIPLE_STATS (Aggregated)' in line:
+                t_match = re.search(
+                    r'P\d+,\s+PID\d+:\s+--TRIPLE_STATS\s+\(Aggregated\)--\s+([A-Z0-9_]+)\s+MB\s+SENT\s+PRE:\s*([\d.e+-]+)\s+MB\s+RECEIVED\s+PRE:\s*([\d.e+-]+)\s+s\s+PRE:\s*([\d.e+-]+)',
+                    line
+                )
+                if t_match:
+                    category = t_match.group(1).strip()
+                    triple_stats_aggregated_occurrences[category].append({
+                        'MB_SENT_PRE': float(t_match.group(2)),
+                        'MB_RECEIVED_PRE': float(t_match.group(3)),
+                        's_PRE': float(t_match.group(4)),
+                    })
+                    
+            # 6. Parse TRIPLE_STATS (Total)
+            elif 'TRIPLE_STATS (Total)' in line:
+                t_match = re.search(
+                    r'P\d+,\s+PID\d+:\s+--TRIPLE_STATS\s+\(Total\)--\s+MB\s+SENT\s+PRE:\s*([\d.e+-]+)\s+MB\s+RECEIVED\s+PRE:\s*([\d.e+-]+)\s+s\s+PRE:\s*([\d.e+-]+)',
+                    line
+                )
+                if t_match:
+                    triple_stats_total_occurrences.append({
+                        'MB_SENT_PRE': float(t_match.group(1)),
+                        'MB_RECEIVED_PRE': float(t_match.group(2)),
+                        's_PRE': float(t_match.group(3)),
+                    })
+
+            # --- Original parsing logic ---
             if 'data[MiB]:' in line:
                 triple_match = re.search(r'data\[MiB\]:\s*([\d.e+-]+)', line)
                 if triple_match:
@@ -109,11 +187,60 @@ def parse_log_file(file_path, debug=False):
         # --- Calculate Final Triple Stats ---
         num_parties = len(parties_seen) if len(parties_seen) > 0 else 1
         for t_type, t_count in triples_accumulators.items():
-            # Sum of all layers / number of parties / 10^6
-            val_normalized = (t_count / num_parties) / 1_000_000
-            col_name = f"{t_type} Triples (#10^6)"
-            run_data[col_name] = val_normalized
+            val_raw = t_count / num_parties
+            
+            # Formulate backwards-compatible names and absolute counts with unit (#)
+            if t_type.endswith(('Triples', 'Tuples', 'Multiplications')):
+                col_name_raw = f"{t_type} Required (#)"
+            else:
+                col_name_raw = f"{t_type} Triples Required (#)"
+            
+            run_data[col_name_raw] = val_raw
         # -----------------------------------------
+
+        # --- Add Triple Steps Gen Times (Averages) ---
+        for step_name, occurrences in triple_step_times_occurrences.items():
+            if occurrences:
+                run_data[f"{step_name} Gen (s)"] = sum(occurrences) / len(occurrences)
+            
+        # --- Add NN Stats (Aggregated: sum MB numbers, average times) ---
+        for layer, occurrences in nn_stats_occurrences.items():
+            n = len(occurrences)
+            if n > 0:
+                run_data[f"NN_{layer}_SENT(MB)"] = sum(occ['MB_SENT'] for occ in occurrences)
+                run_data[f"NN_{layer}_RECEIVED(MB)"] = sum(occ['MB_RECEIVED'] for occ in occurrences)
+                run_data[f"NN_{layer}_SENT_PRE(MB)"] = sum(occ['MB_SENT_PRE'] for occ in occurrences)
+                run_data[f"NN_{layer}_RECEIVED_PRE(MB)"] = sum(occ['MB_RECEIVED_PRE'] for occ in occurrences)
+                run_data[f"NN_{layer}_LIVE(ms)"] = sum(occ['ms_LIVE'] for occ in occurrences) / n
+                run_data[f"NN_{layer}_PRE(ms)"] = sum(occ['ms_PRE'] for occ in occurrences) / n
+
+        # --- Add Triple Stats (Aggregated: sum MB numbers, average times) ---
+        for category, occurrences in triple_stats_aggregated_occurrences.items():
+            n = len(occurrences)
+            if n > 0:
+                run_data[f"TRIPLE_STATS_{category}_SENT_PRE(MB)"] = sum(occ['MB_SENT_PRE'] for occ in occurrences)
+                run_data[f"TRIPLE_STATS_{category}_RECEIVED_PRE(MB)"] = sum(occ['MB_RECEIVED_PRE'] for occ in occurrences)
+                run_data[f"TRIPLE_STATS_{category}_PRE(s)"] = sum(occ['s_PRE'] for occ in occurrences) / n
+
+        # --- Add Triple Stats (Total: sum MB numbers, average times) ---
+        total_triple_mb_sent_pre = 0.0
+        total_triple_mb_received_pre = 0.0
+        n_total = len(triple_stats_total_occurrences)
+        if n_total > 0:
+            total_triple_mb_sent_pre = sum(occ['MB_SENT_PRE'] for occ in triple_stats_total_occurrences)
+            total_triple_mb_received_pre = sum(occ['MB_RECEIVED_PRE'] for occ in triple_stats_total_occurrences)
+            run_data["TRIPLE_STATS_Total_SENT_PRE(MB)"] = total_triple_mb_sent_pre
+            run_data["TRIPLE_STATS_Total_RECEIVED_PRE(MB)"] = total_triple_mb_received_pre
+            run_data["TRIPLE_STATS_Total_PRE(s)"] = sum(occ['s_PRE'] for occ in triple_stats_total_occurrences) / n_total
+
+        # --- Introduce total pre MB (sum of pre MB and Aggregated triple MB) ---
+        run_data['TOTAL_PRE_RECEIVED(MB)'] = pre_received + total_triple_mb_received_pre
+        run_data['TOTAL_PRE_SENT(MB)'] = pre_sent + total_triple_mb_sent_pre
+
+        # --- Sums of Sent and Received ---
+        run_data['PRE_SENT+RECV(MB)'] = pre_sent + pre_received
+        run_data['TOTAL_PRE_SENT+RECV(MB)'] = run_data['TOTAL_PRE_SENT(MB)'] + run_data['TOTAL_PRE_RECEIVED(MB)']
+        run_data['ONLINE_SENT+RECV(MB)'] = online_sent + online_received
 
         # Calculate statistics
         pre_avg = sum(pre_times) / len(pre_times) if pre_times else 0
@@ -182,18 +309,22 @@ def parse_log_file(file_path, debug=False):
         print(f"Total parsed runs: {len(parsed_data)}")
     return parsed_data
 
+
 def write_csv(parsed_data, output_file):
     if not parsed_data:
         print(f"No data to write to CSV: {output_file}")
         return
     
     # Define the fixed headers
-    fixed_headers = [
+    total_metrics = [
         'ACCURACY(%)', 'TESTS_PASSED',
-        'PRE_RECEIVED(MB)', 'PRE_SENT(MB)', 'ONLINE_RECEIVED(MB)', 'ONLINE_SENT(MB)',
+        'PRE_RECEIVED(MB)', 'PRE_SENT(MB)', 'PRE_SENT+RECV(MB)',
+        'TOTAL_PRE_RECEIVED(MB)', 'TOTAL_PRE_SENT(MB)', 'TOTAL_PRE_SENT+RECV(MB)',
+        'ONLINE_RECEIVED(MB)', 'ONLINE_SENT(MB)', 'ONLINE_SENT+RECV(MB)',
         'PRE_AVG(s)', 'PRE_MAX(s)', 'ONLINE_AVG(s)', 'ONLINE_MAX(s)',
         'TP_PRE_AVG(Mbit/s)', 'TP_PRE_MAX(Mbit/s)', 'TP_ONLINE_AVG(Mbit/s)', 'TP_ONLINE_MAX(Mbit/s)',
-        'TP_PRE_AVG(Ops/s)', 'TP_PRE_MAX(Ops/s)', 'TP_ONLINE_AVG(Ops/s)', 'TP_ONLINE_MAX(Ops/s)'
+        'TP_PRE_AVG(Ops/s)', 'TP_PRE_MAX(Ops/s)', 'TP_ONLINE_AVG(Ops/s)', 'TP_ONLINE_MAX(Ops/s)',
+        'TRPLE_GEN(MB)'
     ]
     
     # Get all unique keys from all runs
@@ -201,33 +332,51 @@ def write_csv(parsed_data, output_file):
     for run in parsed_data:
         all_keys.update(run.keys())
     
-    # --- NEW SORTING LOGIC ---
-    # 1. Identify Triples headers (to go to the far right)
-    triple_headers = sorted([k for k in all_keys if 'Triples' in k])
+    def get_column_category(k):
+        # Category 4: Number of triples (ends with "Required (#)")
+        if k.endswith('Required (#)'):
+            return 4
+        # Category 3: Triple and NN timings and comm
+        if k.startswith(('NN_', 'TRIPLE_STATS_')) or k.endswith('Gen (s)'):
+            return 3
+        # Category 2: Total timings and comm
+        if k in total_metrics:
+            return 2
+        # Category 1: Compile/input options (everything else)
+        return 1
 
-    # 2. Identify "Other" dynamic headers (Input params like BITLENGTH, etc.)
-    #    These are keys that are NOT fixed headers AND NOT triple headers
-    other_headers = sorted([k for k in all_keys if k not in fixed_headers and k not in triple_headers])
+    def sort_key(k):
+        cat = get_column_category(k)
+        if cat == 2:
+            try:
+                sub_order = total_metrics.index(k)
+            except ValueError:
+                sub_order = len(total_metrics)
+            return (cat, sub_order, k)
+        else:
+            return (cat, 0, k)
+
+    # Sort all keys based on their category and sub-order
+    fieldnames = sorted(list(all_keys), key=sort_key)
     
-    # 3. Filter out empty columns (Checking `if v` to exclude 0s and Nones)
-    triple_headers = [h for h in triple_headers if any(run.get(h) for run in parsed_data)]
-    other_headers = [h for h in other_headers if any(run.get(h) for run in parsed_data)]
-    fixed_headers = [h for h in fixed_headers if any(run.get(h) for run in parsed_data)]
-    
-    # 4. Combine in order: [Params/Misc] -> [Fixed Stats] -> [Triple Stats]
-    fieldnames = other_headers + fixed_headers + triple_headers
-    # -------------------------
+    # Filter out empty columns (Checking `is not None and != ""` to preserve 0s)
+    fieldnames = [h for h in fieldnames if any(run.get(h) is not None and run.get(h) != "" for run in parsed_data)]
 
     with open(output_file, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for run in parsed_data:
-            # Convert scientific notation to normal numbers and filter out empty values
-            formatted_run = {
-                k: f"{float(v):.6f}" if isinstance(v, (int, float)) and k != 'TESTS_PASSED' else v 
-                for k, v in run.items() 
-                if v and k in fieldnames
-            }
+            formatted_run = {}
+            for k in fieldnames:
+                v = run.get(k)
+                if v is not None and v != "":
+                    if isinstance(v, (int, float)) and k != 'TESTS_PASSED':
+                        if isinstance(v, int) or k.endswith('Required (#)'):
+                            formatted_run[k] = str(int(round(v)))
+                        else:
+                            formatted_run[k] = f"{float(v):.6f}"
+                    else:
+                        formatted_run[k] = v
             writer.writerow(formatted_run)
     print(f"CSV file has been created: {output_file}")
 
