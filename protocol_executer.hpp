@@ -291,6 +291,9 @@ void preprocess_circuit(std::string ips[])
     curr_random_multiplication_index = 0;
 #endif
 #if ROT_PREPROCESSING_OPT == 1 
+        clock_t time_pre_function_start = clock();
+        clock_gettime(CLOCK_REALTIME, &p1);
+        std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
         init_beaverC_boolean(0);
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, num_boolean_triples[0], "LXLY");
@@ -351,9 +354,12 @@ generate_beaver_triples(
 #if PRINT == 1
     print("Preprocessing phase ...\n");
 #endif
+
+#if ROT_PREPROCESSING_OPT == 0
     clock_t time_pre_function_start = clock();
     clock_gettime(CLOCK_REALTIME, &p1);
     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
+#endif
     
 
 #if PROTOCOL_PRE == -1
