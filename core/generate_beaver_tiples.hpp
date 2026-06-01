@@ -289,6 +289,11 @@ void generateBeaverNDummyTuples(Beaver3TuplesD<Datatype> &beaver_3_tuples, Beave
     };
 
     Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+#if CHEETAH_WAN_OPT == 1
+    if (num_beaver_3_tuples > 0 && num_beaver_4_tuples > 0) {
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).get_ios(CHEETAH_THREADS)[0]->sync();
+    }
+#endif
     Iface::generateBool4TupleCheetah(l_beaver_4_tuples, num_beaver_4_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
     #if CHEETAH_DISCONNECT == 1
     Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
@@ -460,6 +465,9 @@ void generateBooleanAdditionDummyTriples(type a[],
     while(r > 0)
     {
         r--;
+#if CHEETAH_WAN_OPT == 1
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).get_ios(CHEETAH_THREADS)[0]->sync();
+#endif
         switch(r)
         {
             case k - 1:
@@ -768,7 +776,11 @@ void generateLayerDummyTriples(type** a,
             }
             // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
             y_index_counter += p.y_size_per_batch * p.batchSize;
-
+#if CHEETAH_WAN_OPT == 1
+            if (n + 1 < params.size()) {
+                keys.get_ios(CHEETAH_THREADS)[0]->sync();
+            }
+#endif
         }
 #if CHEETAH_CONV_TYPE == 1
         if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {

@@ -232,7 +232,7 @@
 #define SPLIT_ROLES_OFFSET 0
 #endif
 
-int base_port = BASE_PORT;  // temporary solution
+inline int base_port = BASE_PORT;  // temporary solution
 
 // Timeout in seconds when connecting to a socket
 #ifndef CONNECTION_TIMEOUT
@@ -377,6 +377,10 @@ int base_port = BASE_PORT;  // temporary solution
 
 #ifndef CHEETAH_THREADS
 #define CHEETAH_THREADS 32  // Number of threads to use for Cheetah triples generation
+#endif
+
+#ifndef CHEETAH_WAN_OPT
+#define CHEETAH_WAN_OPT 0  // 0: disable, 1: enable WAN optimizations (no-delay TCP, sync barriers between sequential iterations)
 #endif
 
 #ifndef CHEETAH_DISCONNECT

@@ -1,8 +1,14 @@
 #include "config.h"
+#include <cstdlib>
 #include "protocol_executer.hpp"
 
 int main(int argc, char* argv[])
 {
+#if CHEETAH_WAN_OPT == 1
+    setenv("CHEETAH_WAN_OPT", "1", 1);
+#else
+    setenv("CHEETAH_WAN_OPT", "0", 1);
+#endif
 #if PROCESS_NUM > 1
     pid_t child_pid, wpid;
     int status = 0;

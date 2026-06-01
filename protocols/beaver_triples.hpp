@@ -450,6 +450,8 @@ void deinit_multiplexerBeaverC()
     delete[] multiplexer_triple_c;
 }
 
+#endif // BIT_INJECTION_PREPROCESSING_OPT == 1
+
 #if BEAVER_N_TUPLES == 1
 
 void init_beaver_3_tuples()
@@ -512,7 +514,7 @@ void deinit_beaver_4_tuples()
     delete[] beaver_4_tuples.abcd;
 }
 
-#endif
+#endif // BEAVER_N_TUPLES == 1
 
 void init_random_multiplications()
 {
@@ -531,6 +533,8 @@ void deinit_random_multiplications()
         random_multiplication_b = nullptr;
     }
 }
+
+#if BIT_INJECTION_PREPROCESSING_OPT == 1
 
 void init_cotBeaverAB()
 {
@@ -560,7 +564,7 @@ void deinit_cotBeaverC()
     delete[] cot_triple_c;
 }
 
-#endif
+#endif // BIT_INJECTION_PREPROCESSING_OPT == 1
 
 
 void init_beaverC(int rounds)

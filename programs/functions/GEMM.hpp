@@ -82,10 +82,12 @@ void prepare_GEMM_CPU(const U* A, const T* B, T* C, const int m, const int p, co
     auto C_Accum = new DATATYPE[m * p * T::get_conv_bn_size()]();
 #endif
 
+if(current_phase != PHASE_INIT) {
 #if ADDITIONAL_GEMM_THREADS > 0 && FUSE_DOT == 1 && FUSE_CONV_BN_SIM == 0 && \
     (PUBLIC_WEIGHTS == 1 || CONV_TRIPLES == 1)
 #include "GEMM_threaded.hpp"
 #endif
+}
 
 #if FUSE_DOT == 2
     T* Q = new T[m * p * T::getNumDotProducts()];
