@@ -322,6 +322,10 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define ADDITIONAL_GEMM_THREADS 0  // Number of additional threads for parallelizing GEMM prepare_dot/mult_public accumulations. 0 = single-threaded. Only effective when dot products per output element are large enough (f >= 64).
 #endif
 
+#ifndef ADDITIONAL_PPA_THREADS
+#define ADDITIONAL_PPA_THREADS 0  // Number of threads for parallelizing PPA adder compute steps in share conversion. 0 = single-threaded. Only effective when PPA4_MSB == 1.
+#endif
+
 // === Legacy Settings ===
 
 // Allow sharing of inputs in offline phase

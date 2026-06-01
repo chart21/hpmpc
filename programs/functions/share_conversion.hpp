@@ -4,6 +4,9 @@
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
 #include "../../protocols/Protocols.h"
+#if ADDITIONAL_PPA_THREADS > 0
+#include <thread>
+#endif
 
 #if RCA_MSB == 0 && PPA_MSB == 0 && PPA4_MSB == 0
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
@@ -41,10 +44,18 @@
 
 #if PPA4_MSB == 1
 #if A_KNOWN_TO_EVALUATORS_OPT == 1
+#if ADDITIONAL_PPA_THREADS > 0
+#include "adders/zero_add_adders/ppa_msb_4way_and_a_ab_split.hpp"
+#else
 #include "adders/zero_add_adders/ppa_msb_4way_and_a_ab.hpp"
+#endif
 #define ADDER_TYPE PPA_MSB_4Way_A_AB
 #elif RESHARE_OPT == 1 
+#if ADDITIONAL_PPA_THREADS > 0
+#include "adders/zero_add_adders/ppa_msb_4way_and_ab_reshared_split.hpp"
+#else
 #include "adders/zero_add_adders/ppa_msb_4way_and_ab_reshared.hpp"
+#endif
 #define ADDER_TYPE PPA_MSB_4Way_AB
 #else
 #include "adders/zero_add_adders/ppa_msb_4way_and_ab.hpp"
@@ -127,7 +138,52 @@ std::vector<ADDER_TYPE<bk - bm, S>> adders;
         /* adder[i].set_values(s1[i], s2[i], y[i]); */
         adders.emplace_back(s1[i], s2[i], msb[i]);
     }
-    
+   
+#if RESHARE_OPT == 1
+Share::communicate(); // For resharings
+#endif 
+#if PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0
+    while (!adders[0].is_done())
+    {
+        if(current_phase == PHASE_LIVE)
+        // Spawn threads for compute_step (Live Phase has heavy computation)
+       { 
+        {
+            std::vector<std::thread> threads;
+            int chunk_size = (len + ADDITIONAL_PPA_THREADS - 1) / ADDITIONAL_PPA_THREADS;
+            for (int t = 0; t < ADDITIONAL_PPA_THREADS && t * chunk_size < len; t++)
+            {
+                int start = t * chunk_size;
+                int end = std::min(start + chunk_size, len);
+                threads.emplace_back([&adders, start, end]() {
+                    for (int i = start; i < end; i++)
+                    {
+                        adders[i].compute_step();
+                    }
+                });
+            }
+            for (auto& th : threads) th.join();
+        }
+    }
+        else
+        {
+            for (int i = 0; i < len; i++)
+            {
+                adders[i].compute_step();
+            }
+        }
+        // Aggregate step (single thread)
+        for (int i = 0; i < len; i++)
+        {
+            adders[i].aggregate_step();
+        }
+        Share::communicate();
+        for (int i = 0; i < len; i++)
+        {
+            adders[i].collect_step();
+        }
+    }
+#else
     while (!adders[0].is_done())
     {
         for (int i = 0; i < len; i++)
@@ -136,6 +192,7 @@ std::vector<ADDER_TYPE<bk - bm, S>> adders;
         }
         Share::communicate();
     }
+#endif
     delete[] s1;
     delete[] s2;
     adders.clear();

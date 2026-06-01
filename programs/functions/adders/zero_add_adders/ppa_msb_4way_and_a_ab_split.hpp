@@ -334,12 +334,24 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 8)>::type>
                 B3P_2_4_out.mask_and_send_dot_without_remask();
                 B3G_2_4_out.mask_and_send_dot_without_remask();
                 W3L1_5_7_out.mask_and_send_dot_without_remask();
+                break;
+            case 1:
+                s2_L1.mask_and_send_dot_without_remask();
+                break;
+            case 2:
+                break;
+        }
+    }
+
+    void collect_step()
+    {
+        switch(level) {
+            case 0:
                 B3P_2_4_out.complete_and();
                 B3G_2_4_out.complete_and();
                 W3L1_5_7_out.complete_and();
                 break;
             case 1:
-                s2_L1.mask_and_send_dot_without_remask();
                 s2_L1.complete_and();
                 break;
             case 2:
@@ -1093,12 +1105,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 16)>::type>
                 W3L1_13_15_out_s4 = W3L1_13_15_out_s3 ^ W3L1_13_15_t3_2;  // W3L1_13_15_out_s4
                 W3L1_13_15_out_s5 = W3L1_13_15_out_s4 ^ W3L1_13_15_t3_3;  // W3L1_13_15_out_s5
                 W3L1_13_15_out = W3L1_13_15_out_s5 ^ W3L1_13_15_t3_4;  // W3L1_13_15_out
-                // and4_160: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=a26
-                p1234_1 = p_1_p.prepare_and4_and_assign(p_2_p, p_3_p, p_4_p, beaver4_tuples[4].a, beaver4_tuples[0]);  // and4_160
-                // and4_165: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=b26
-                p1234_2 = p_5_p.prepare_and4_and_assign(p_6_p, p_7_p, p_8_p, beaver4_tuples[4].b, beaver4_tuples[1]);  // and4_165
-                // and4_170: a2=beaver4_tuples[2].a, b2=beaver4_tuples[2].b, c2=beaver4_tuples[2].c, d2=beaver4_tuples[2].d, output mask=c26
-                p1234_3 = p_9_p.prepare_and4_and_assign(p_10_p, p_11_p, p_12_p, beaver4_tuples[4].c, beaver4_tuples[2]);  // and4_170
                 break;
             case 1:
                 B3P_1_3_out_p = B3P_1_3_out.zero_add(triples[15].a);  // B3P_1_3_out', mask=a23
@@ -1135,6 +1141,25 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 16)>::type>
                 B3G_7_9_out.mask_and_send_dot_without_remask();
                 B3G_10_12_out.mask_and_send_dot_without_remask();
                 W3L1_13_15_out.mask_and_send_dot_without_remask();
+                // and4_160: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=a26
+                p1234_1 = p_1_p.prepare_and4_and_assign(p_2_p, p_3_p, p_4_p, beaver4_tuples[4].a, beaver4_tuples[0]);  // and4_160
+                // and4_165: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=b26
+                p1234_2 = p_5_p.prepare_and4_and_assign(p_6_p, p_7_p, p_8_p, beaver4_tuples[4].b, beaver4_tuples[1]);  // and4_165
+                // and4_170: a2=beaver4_tuples[2].a, b2=beaver4_tuples[2].b, c2=beaver4_tuples[2].c, d2=beaver4_tuples[2].d, output mask=c26
+                p1234_3 = p_9_p.prepare_and4_and_assign(p_10_p, p_11_p, p_12_p, beaver4_tuples[4].c, beaver4_tuples[2]);  // and4_170
+                break;
+            case 1:
+                W5_s3.mask_and_send_dot_without_remask();
+                break;
+            case 2:
+                break;
+        }
+    }
+
+    void collect_step()
+    {
+        switch(level) {
+            case 0:
                 B3P_1_3_out.complete_and();
                 B3G_1_3_out.complete_and();
                 B3P_4_6_out.complete_and();
@@ -1148,7 +1173,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 16)>::type>
                 p1234_3.complete_and4();
                 break;
             case 1:
-                W5_s3.mask_and_send_dot_without_remask();
                 W5_s3.complete_and();
                 break;
             case 2:
@@ -2683,8 +2707,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 // and3_364: a10=beaver3_tuples[10].a, b10=beaver3_tuples[10].b, c10=beaver3_tuples[10].c, output mask=r257
                 L1_B3G_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r257, beaver3_tuples[10]);  // and3_364
                 L1_B3G_s1 = L1_B3G_t1 ^ L1_B3G_t2;  // L1_B3G_s1
-                // and3_367: a11=beaver3_tuples[11].a, b11=beaver3_tuples[11].b, c11=beaver3_tuples[11].c, output mask=a51
-                L1_B3P_out = B3P_1_3_out.prepare_and3_and_assign(B3P_4_6_out, B3P_7_9_out, beaver3_tuples[14].a, beaver3_tuples[11]);  // and3_367
                 // and_368: a31=triples[31].a, b31=triples[31].b, c31=triples[31].c, output mask=r245
                 L1_B4G_t1 = B3P_10_12_out_p.prepare_dot_and_assign(B3G_13_15_out, r245, triples[31].c);  // and_368
                 // and3_369: a12=beaver3_tuples[12].a, b12=beaver3_tuples[12].b, c12=beaver3_tuples[12].c, output mask=(r244-r245)
@@ -2693,8 +2715,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 L1_B4G_t3 = B3P_10_12_out_p_2.prepare_dot4_and_assign(B3P_13_15_out_p_1, B3P_16_18_out_p, B3G_19_21_out, FUNC_XOR(r237, r244), beaver4_tuples[0]);  // and4_370
                 L1_B4G_s1 = L1_B4G_t1 ^ L1_B4G_t2;  // L1_B4G_s1
                 L1_B4G_s2 = L1_B4G_s1 ^ L1_B4G_t3;  // L1_B4G_s2
-                // and4_374: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=b51
-                L1_B4P_out = B3P_10_12_out.prepare_and4_and_assign(B3P_13_15_out, B3P_16_18_out, B3P_19_21_out, beaver3_tuples[14].b, beaver4_tuples[1]);  // and4_374
                 L1_W4S_g1 = a[22].mult_a_known_to_evaluators(b[22]);  // and_a_375
                 // and_377: a32=triples[32].a, b32=triples[32].b, c32=triples[32].c, output mask=r248
                 L1_W4S_t1 = p_22_p.prepare_dot_and_assign(B3G_23_25_out, r248, triples[32].c);  // and_377
@@ -2746,6 +2766,28 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 B3P_26_28_out.mask_and_send_dot_without_remask();
                 B3G_26_28_out.mask_and_send_dot_without_remask();
                 W3L1_29_31_out.mask_and_send_dot_without_remask();
+                break;
+            case 1:
+                L1_B3G_s1.mask_and_send_dot_without_remask();
+                // and3_367: a11=beaver3_tuples[11].a, b11=beaver3_tuples[11].b, c11=beaver3_tuples[11].c, output mask=a51
+                L1_B3P_out = B3P_1_3_out.prepare_and3_and_assign(B3P_4_6_out, B3P_7_9_out, beaver3_tuples[14].a, beaver3_tuples[11]);  // and3_367
+                L1_B4G_s2.mask_and_send_dot_without_remask();
+                // and4_374: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=b51
+                L1_B4P_out = B3P_10_12_out.prepare_and4_and_assign(B3P_13_15_out, B3P_16_18_out, B3P_19_21_out, beaver3_tuples[14].b, beaver4_tuples[1]);  // and4_374
+                L1_W4S_out.mask_and_send_dot_without_remask();
+                break;
+            case 2:
+                L2_W3_s1.mask_and_send_dot_without_remask();
+                break;
+            case 3:
+                break;
+        }
+    }
+
+    void collect_step()
+    {
+        switch(level) {
+            case 0:
                 B3P_1_3_out.complete_and();
                 B3G_1_3_out.complete_and();
                 B3P_4_6_out.complete_and();
@@ -2767,9 +2809,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 W3L1_29_31_out.complete_and();
                 break;
             case 1:
-                L1_B3G_s1.mask_and_send_dot_without_remask();
-                L1_B4G_s2.mask_and_send_dot_without_remask();
-                L1_W4S_out.mask_and_send_dot_without_remask();
                 L1_B3G_s1.complete_and();
                 L1_B3P_out.complete_and3();
                 L1_B4G_s2.complete_and();
@@ -2777,7 +2816,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 L1_W4S_out.complete_and();
                 break;
             case 2:
-                L2_W3_s1.mask_and_send_dot_without_remask();
                 L2_W3_s1.complete_and();
                 break;
             case 3:
