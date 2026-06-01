@@ -80,7 +80,7 @@
 
 #else
 #if (BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0) || RCA_MSB == 1
-#define ADDER_TYPE BooleanAdder
+#define ADDER_TYPE BooleanAdder_MSB
 #include "adders/rca_msb.hpp"
 #elif (BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1) || PPA4_MSB == 1
 #define ADDER_TYPE PPA_MSB_4Way
