@@ -125,6 +125,17 @@ struct FullyConnectedParameter
 
 #define CHEETAH_PARTY (PARTY+1)
 
+#if CHEETAH_WAN_OPT == 1
+inline void sync_cheetah_wan_barrier(Iface::Keys<IO::NetIO>& keys)
+{
+    auto** ios = keys.get_ios(CHEETAH_THREADS);
+    for (int thread = 0; thread < CHEETAH_THREADS; ++thread)
+    {
+        ios[thread]->sync();
+    }
+}
+#endif
+
 
 // Input: arrays of arithmetic triple shares [a], [b], [c] with size num_triples and ring size of bitlength
 // Input: ip and port of the other party to connect to
@@ -448,6 +459,9 @@ void generateBooleanAdditionDummyTriples(type a[],
     constexpr int num_bits_per_input = REDUCED_BITLENGTH_k - REDUCED_BITLENGTH_m;
     if(num_triples == 0) return;
     if(num_bits_per_input <= 0) return;
+#if CHEETAH_WAN_OPT == 1
+    auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port + CHEETAH_PORT_OFFSET, CHEETAH_THREADS, PROCESS_NUM);
+#endif
     //reinterpret SIMD bitstream as uint8 bitstream
 #if PARTY == 0
     auto av = reinterpret_cast<type (*)[num_bits_per_input]> (a);
@@ -466,7 +480,7 @@ void generateBooleanAdditionDummyTriples(type a[],
     {
         r--;
 #if CHEETAH_WAN_OPT == 1
-        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).get_ios(CHEETAH_THREADS)[0]->sync();
+        sync_cheetah_wan_barrier(keys);
 #endif
         switch(r)
         {
