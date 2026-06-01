@@ -379,6 +379,10 @@ int base_port = BASE_PORT;  // temporary solution
 #define CHEETAH_THREADS 32  // Number of threads to use for Cheetah triples generation
 #endif
 
+#ifndef CHEETAH_DISCONNECT
+#define CHEETAH_DISCONNECT 1  // Disconnect sockets after every Cheetah triples generation
+#endif
+
 #ifndef CHEETAH_BOOL_OT_TYPE
 #define CHEETAH_BOOL_OT_TYPE 0  // 0: _2ROT, 1: _8KKOT, 2: _16KKOT_to_4OT, 3: _2COT
 #endif

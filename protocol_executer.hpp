@@ -300,7 +300,6 @@ void preprocess_circuit(std::string ips[])
         init_beaverAB2C_boolean(0);
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, num_ab2_boolean_triples[0], "LXLY2");
-#endif
 #if BEAVER_N_TUPLES == 1
         init_beaver_3_tuples();
         init_beaver_4_tuples();
@@ -311,6 +310,10 @@ void preprocess_circuit(std::string ips[])
 init_random_multiplications();
 generate_beaver_triples(
                 ips, base_port, process_offset, 0, 0, "RANDOM_MULTIPLICATION");
+#endif
+#endif
+#if CHEETAH_DISCONNECT == 0
+    CheetahDisconnect(ips[0], base_port + process_offset);
 #endif
 #endif
     pthread_t sending_Threads_pre[num_players - 1];

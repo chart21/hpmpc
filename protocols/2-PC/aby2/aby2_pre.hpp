@@ -1429,6 +1429,9 @@ static void get_fc_triples_from_file()
 
 
 #endif
+#if CHEETAH_DISCONNECT == 0
+    CheetahDisconnect(ips[0], base_port + process_offset);
+#endif
 
 
 
@@ -1696,6 +1699,9 @@ static void get_fc_triples_from_file()
                 ips, port, process_offset, num_ab2_arithmetic_triples[1], 0, "LXLY2");
         deinit_beaverAB2_arithmetic();
         #endif
+#if CHEETAH_DISCONNECT == 0
+    CheetahDisconnect(ips[0], base_port + process_offset);
+#endif
 #endif
 
 

@@ -214,8 +214,10 @@ void generateBooleanDummyTriples(type a[],
             CHEETAH_THREADS,
             ot, PROCESS_NUM);
 
+#if CHEETAH_DISCONNECT == 1
     if (disconnect)
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+#endif
 }
 
 template <typename type>
@@ -244,8 +246,10 @@ void generateBooleanCOTMultiplyDummyTriples(type a[],
             bitlength, num_triples ,ip, port, CHEETAH_PARTY,
             CHEETAH_THREADS, PROCESS_NUM);
 
+#if CHEETAH_DISCONNECT == 1
     if (disconnect)
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+#endif
 }
 
 
@@ -286,6 +290,9 @@ void generateBeaverNDummyTuples(Beaver3TuplesD<Datatype> &beaver_3_tuples, Beave
 
     Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
     Iface::generateBool4TupleCheetah(l_beaver_4_tuples, num_beaver_4_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+    #if CHEETAH_DISCONNECT == 1
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    #endif
 }
 #endif
 
@@ -414,8 +421,10 @@ void generateBooleanAB2DummyTriples(type a[],
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
             num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, ot, PROCESS_NUM);
 
+#if CHEETAH_DISCONNECT == 1
     if (disconnect)
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+#endif
 }
 
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
@@ -547,7 +556,9 @@ void generateBooleanAdditionDummyTriples(type a[],
                 delete[] carry_this;
                 delete[] ot_a;
                 delete[] ot_b;
+#if CHEETAH_DISCONNECT == 1
                 Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+#endif
                 return;
 
         }
@@ -865,7 +876,9 @@ void generateLayerDummyTriples(type** a,
             c_index += y_size;
         }
     }
+    #if CHEETAH_DISCONNECT == 1
     keys.disconnect();
+    #endif
 }
 
 template <typename type>
@@ -886,7 +899,16 @@ void generateRandomMultiplicationDummyTriples(type a[],
     uint8_t* uint_b = (uint8_t*) b;
 
     Iface::generateRandomMultiplicationsCheetah(uint_a, uint_b, num_muls, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+    #if CHEETAH_DISCONNECT == 1
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    #endif
 }
+
+void CheetahDisconnect(std::string ip, int port) {
+    port += CHEETAH_PORT_OFFSET;
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+}
+
 
 #else
 
