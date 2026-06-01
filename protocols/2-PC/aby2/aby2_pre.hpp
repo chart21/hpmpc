@@ -1357,38 +1357,6 @@ static void get_fc_triples_from_file()
         init_beaverAB2_arithmetic(1);
 #endif
 
-        init_ConvC();
-#if FAKE_TRIPLES == 1
-        get_conv_ab2_triples_from_file();
-        generate_beaver_triples(
-                ips, port, process_offset, num_conv_c_triples, 0, "CONV");
-#else
-        generate_beaver_triples(
-                ips, port, process_offset, num_conv_c_triples, 0, "CONV");
-#endif
-        deinit_ConvAB();
-
-        init_BatchNorm2DC();
-#if FAKE_TRIPLES == 1
-        get_batchnorm2D_triples_from_file();
-        generate_beaver_triples(
-                ips, port, process_offset, num_bc2D_c_triples, 0, "BATCHNORM2D");
-#else
-        generate_beaver_triples(
-                ips, port, process_offset, num_bc2D_c_triples, 0, "BATCHNORM2D");
-#endif
-        deinit_BatchNorm2DAB();
-
-        init_FullyConnectedC();
-#if FAKE_TRIPLES == 1
-        get_fc_triples_from_file();
-        generate_beaver_triples(
-                ips, port, process_offset, num_fc_c_triples, 0, "FC");
-#else
-        generate_beaver_triples(
-                ips, port, process_offset, num_fc_c_triples, 0, "FC");
-#endif
-        deinit_FullyConnectedAB();
 
 #if A2B_ONLINE_OPT == 1 
         init_booleanAdditionBeaverC();
@@ -1426,6 +1394,40 @@ static void get_fc_triples_from_file()
                 ips, port, process_offset, num_multiplexer_triples, 0, "MULTIPLEXER");
 #endif
         deinit_multiplexerBeaverAB();
+
+
+        init_ConvC();
+#if FAKE_TRIPLES == 1
+        get_conv_ab2_triples_from_file();
+        generate_beaver_triples(
+                ips, port, process_offset, num_conv_c_triples, 0, "CONV");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_conv_c_triples, 0, "CONV");
+#endif
+        deinit_ConvAB();
+
+        init_BatchNorm2DC();
+#if FAKE_TRIPLES == 1
+        get_batchnorm2D_triples_from_file();
+        generate_beaver_triples(
+                ips, port, process_offset, num_bc2D_c_triples, 0, "BATCHNORM2D");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_bc2D_c_triples, 0, "BATCHNORM2D");
+#endif
+        deinit_BatchNorm2DAB();
+
+        init_FullyConnectedC();
+#if FAKE_TRIPLES == 1
+        get_fc_triples_from_file();
+        generate_beaver_triples(
+                ips, port, process_offset, num_fc_c_triples, 0, "FC");
+#else
+        generate_beaver_triples(
+                ips, port, process_offset, num_fc_c_triples, 0, "FC");
+#endif
+        deinit_FullyConnectedAB();
 
 
 #endif

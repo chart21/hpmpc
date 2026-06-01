@@ -634,6 +634,10 @@ void generateCOTDummyTriples(type a[],
     DELETEARR(uint_a);
 #endif
     DELETEARR(uint_c);
+
+    #if CHEETAH_DISCONNECT == 1
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    #endif
 }
 
 // Input: Arithmetic shares stored in a[] and shared bits stored in b[]
@@ -677,6 +681,11 @@ void generateMultiplexerDummyTriples(type a[],
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
     DELETEARR(uint_a);
     DELETEARR(uint_c);
+
+    #if CHEETAH_DISCONNECT == 1
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    #endif
+
 }
 
 
@@ -704,6 +713,7 @@ void generateLayerDummyTriples(type** a,
     }
 
 
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
     auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM);
     const int factor = DATTYPE/BITLENGTH;
 
