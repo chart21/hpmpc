@@ -1199,9 +1199,9 @@ return;
 #if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
 auto templ = W[i].l;
 #else
-auto tempml = OP_SUB(W[i].m, W[i].l);
+auto templ = OP_SUB(W[i].m, W[i].l);
 #endif
-            unorthogonalize_arithmetic(&tempml, temp, 1);
+            unorthogonalize_arithmetic(&templ, temp, 1);
 #else // mw
             unorthogonalize_arithmetic(&W[i].m, temp, 1);
 #endif
@@ -1211,12 +1211,12 @@ auto tempml = OP_SUB(W[i].m, W[i].l);
         {
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
 #if PARTY == 0 // mx - lx1
-#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1     
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
 auto templ = X[i].m;
 #else
-auto tempml = OP_SUB(X[i].m, X[i].l);
+auto templ = OP_SUB(X[i].m, X[i].l);
 #endif
-            unorthogonalize_arithmetic(&tempml, temp, 1);
+            unorthogonalize_arithmetic(&templ, temp, 1);
 #else // lx2
             unorthogonalize_arithmetic(&X[i].m, temp, 1);
 #endif
@@ -1250,8 +1250,8 @@ auto tempml = OP_SUB(X[i].m, X[i].l);
         {
             alignas(sizeof(Datatype)) UINT_TYPE temp[factor];
 #if PARTY == 0
-            auto tempml = OP_SUB(X[i].m, X[i].l);
-            unorthogonalize_arithmetic(&tempml, temp, 1);
+            auto templ = OP_SUB(X[i].m, X[i].l);
+            unorthogonalize_arithmetic(&templ, temp, 1);
 #else
             unorthogonalize_arithmetic(&X[i].m, temp, 1);
 #endif
