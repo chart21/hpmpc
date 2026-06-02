@@ -809,9 +809,11 @@ void generateLayerDummyTriples(type** a,
 #if CHEETAH_CONV_TYPE == 1
         if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
             Iface::generateConvTriplesCheetah2(keys, total_batches, parms,
-                    PARTY == 1 ? uint_x : nullptr, PARTY == 0 ? uint_w : nullptr,
-                    uint_y, Utils::PROTO::AB2, CHEETAH_PARTY,
-                    CHEETAH_THREADS, factor
+                    A_KNOWN == 0 || PARTY == 1 ? uint_x : nullptr,
+                    A_KNOWN == 0 || PARTY == 0 ? uint_w : nullptr,
+                    uint_y,
+                    A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
+                    CHEETAH_PARTY, CHEETAH_THREADS, factor, A_KNOWN == 0
             );
         }
 #endif
