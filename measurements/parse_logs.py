@@ -66,6 +66,9 @@ def parse_log_file(file_path, debug=False):
         online_times = []
         accuracies = []
         tests_passed = tests_total = 0
+        key_exchange_time = 0.0
+        key_exchange_sent_pre = 0.0
+        key_exchange_received_pre = 0.0
 
         for line in lines:
             # 1. Track current triple generation step name
@@ -184,6 +187,16 @@ def parse_log_file(file_path, debug=False):
                 tests_passed += int(tests_match.group(1))
                 tests_total += int(tests_match.group(2))
 
+            # Parse Key Exchange stats
+            if 'Key exchange' in line or 'key exchange' in line:
+                ke_time_match = re.search(r'P\d+,\s+PID\d+:\s+Key\s+exchange\s+s\s+PRE:\s*([\d.e+-]+)', line, re.IGNORECASE)
+                if ke_time_match:
+                    key_exchange_time += float(ke_time_match.group(1))
+                ke_mb_match = re.search(r'P\d+,\s+PID\d+:\s+Key\s+exchange\s+MB\s+SENT\s+PRE:\s*([\d.e+-]+)\s+MB\s+RECEIVED\s+PRE:\s*([\d.e+-]+)', line, re.IGNORECASE)
+                if ke_mb_match:
+                    key_exchange_sent_pre += float(ke_mb_match.group(1))
+                    key_exchange_received_pre += float(ke_mb_match.group(2))
+
         # --- Calculate Final Triple Stats ---
         num_parties = len(parties_seen) if len(parties_seen) > 0 else 1
         for t_type, t_count in triples_accumulators.items():
@@ -233,16 +246,28 @@ def parse_log_file(file_path, debug=False):
             run_data["TRIPLE_STATS_Total_RECEIVED_PRE(MB)"] = total_triple_mb_received_pre
             run_data["TRIPLE_STATS_Total_PRE(s)"] = sum(occ['s_PRE'] for occ in triple_stats_total_occurrences) / n_total
 
-        # --- Introduce total pre MB (sum of pre MB and Aggregated triple MB) ---
-        run_data['TOTAL_PRE_RECEIVED(MB)'] = pre_received + total_triple_mb_received_pre
-        run_data['TOTAL_PRE_SENT(MB)'] = pre_sent + total_triple_mb_sent_pre
+        # Store individual key exchange metrics if they exist
+        if key_exchange_time > 0 or key_exchange_sent_pre > 0 or key_exchange_received_pre > 0:
+            run_data['KEY_EXCHANGE_PRE(s)'] = key_exchange_time
+            run_data['KEY_EXCHANGE_SENT_PRE(MB)'] = key_exchange_sent_pre
+            run_data['KEY_EXCHANGE_RECEIVED_PRE(MB)'] = key_exchange_received_pre
+
+        # --- Introduce total pre MB (sum of pre MB, Aggregated triple MB, and Key Exchange MB) ---
+        run_data['TOTAL_PRE_RECEIVED(MB)'] = pre_received + total_triple_mb_received_pre + key_exchange_received_pre
+        run_data['TOTAL_PRE_SENT(MB)'] = pre_sent + total_triple_mb_sent_pre + key_exchange_sent_pre
 
         # --- Sums of Sent and Received ---
         run_data['PRE_SENT+RECV(MB)'] = pre_sent + pre_received
         run_data['TOTAL_PRE_SENT+RECV(MB)'] = run_data['TOTAL_PRE_SENT(MB)'] + run_data['TOTAL_PRE_RECEIVED(MB)']
         run_data['ONLINE_SENT+RECV(MB)'] = online_sent + online_received
 
-        # Calculate statistics
+        # Calculate statistics (including key exchange time in preprocessing)
+        if key_exchange_time > 0:
+            if pre_times:
+                pre_times = [t + key_exchange_time for t in pre_times]
+            else:
+                pre_times = [key_exchange_time]
+
         pre_avg = sum(pre_times) / len(pre_times) if pre_times else 0
         pre_max = max(pre_times) if pre_times else 0
         online_avg = sum(online_times) / len(online_times) if online_times else 0
@@ -319,8 +344,10 @@ def write_csv(parsed_data, output_file):
     total_metrics = [
         'ACCURACY(%)', 'TESTS_PASSED',
         'PRE_RECEIVED(MB)', 'PRE_SENT(MB)', 'PRE_SENT+RECV(MB)',
+        'KEY_EXCHANGE_RECEIVED_PRE(MB)', 'KEY_EXCHANGE_SENT_PRE(MB)',
         'TOTAL_PRE_RECEIVED(MB)', 'TOTAL_PRE_SENT(MB)', 'TOTAL_PRE_SENT+RECV(MB)',
         'ONLINE_RECEIVED(MB)', 'ONLINE_SENT(MB)', 'ONLINE_SENT+RECV(MB)',
+        'KEY_EXCHANGE_PRE(s)',
         'PRE_AVG(s)', 'PRE_MAX(s)', 'ONLINE_AVG(s)', 'ONLINE_MAX(s)',
         'TP_PRE_AVG(Mbit/s)', 'TP_PRE_MAX(Mbit/s)', 'TP_ONLINE_AVG(Mbit/s)', 'TP_ONLINE_MAX(Mbit/s)',
         'TP_PRE_AVG(Ops/s)', 'TP_PRE_MAX(Ops/s)', 'TP_ONLINE_AVG(Ops/s)', 'TP_ONLINE_MAX(Ops/s)',
