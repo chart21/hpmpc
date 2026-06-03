@@ -103,4 +103,4 @@ if docker container inspect "$CONTAINER_NAME" &>/dev/null; then
   fi
 fi
 
-docker run "${GPU_ARGS[@]}" -it --name "$CONTAINER_NAME" $MOUNT_FLAG "$RESOLVED_IMAGE"
+docker run "${GPU_ARGS[@]}" -it --name "$CONTAINER_NAME" --network host --cap-add=NET_ADMIN $MOUNT_FLAG "$RESOLVED_IMAGE"
