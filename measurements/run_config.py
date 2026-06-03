@@ -69,7 +69,7 @@ def main():
 
     config_files = []
     if os.path.isdir(args.config):
-        config_files = [os.path.join(args.config, f) for f in os.listdir(args.config) if f.endswith('.conf')]
+        config_files = sorted([os.path.join(args.config, f) for f in os.listdir(args.config) if f.endswith('.conf')])
     else:
         config_files = [args.config]
 
