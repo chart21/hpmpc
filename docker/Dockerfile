@@ -22,7 +22,9 @@ RUN apt-get update && \
         jq \
         bc \
         iproute2 \
-        iperf && \
+        iperf \
+        iperf3 \
+        iputils-ping && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 120 --slave /usr/bin/g++ g++ /usr/bin/g++-12 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 130 --slave /usr/bin/g++ g++ /usr/bin/g++-13 && \
     update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 100 && \
