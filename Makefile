@@ -24,7 +24,7 @@ HE_LIBS := -lHE -lgemini -lseal-4.1
 
 ifeq (${CHEETAH_GPU}, 1)
 HE_INCLUDE += -isystem ${CHEETAH}/deps/include/troy
-HE_PATHS += -L/opt/cuda/targets/x86_64-linux/lib
+HE_PATHS += -L/usr/local/cuda/lib64
 HE_LIBS += -lcudart -ltroy
 endif
 
@@ -36,6 +36,10 @@ LINKFLAGS := ${CHEETAH_FLAGS} -lssl -lcrypto -I nn/PIGEON
 
 CXXFLAGS := $(EXECFLAGS) $(LINKFLAGS)
 NVCCFLAGS := -Xptxas -O3
+# nvcc does not accept -Wl, syntax — use -Xlinker for rpath and keep -L/-l flags as-is
+NVCC_LINKFLAGS := -Xlinker -rpath,${CHEETAH}/build/lib:${CHEETAH}/deps/lib \
+	-L${CHEETAH}/build/lib -L${CHEETAH}/deps/lib \
+	$(HE_LIBS) -lssl -lcrypto
 
 # Additional flags for overwriting macros
 MACRO_FLAGS :=
@@ -155,11 +159,11 @@ do_compile_player_%:
 			echo "Linking CUDA executable $(EXEC_NAME)" ; \
 			case "$(USE_CUDA_GEMM)" in \
 			1|3) \
-				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o -o ./$(NEXEC_NAME).o;; \
+				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o -o ./$(NEXEC_NAME).o $(NVCC_LINKFLAGS);; \
 			2) \
-				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o ./core/cuda/bin/conv_cutlass_int_NCHW.o -o ./$(NEXEC_NAME).o;; \
+				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o ./core/cuda/bin/conv_cutlass_int_NCHW.o -o ./$(NEXEC_NAME).o $(NVCC_LINKFLAGS);; \
 			4) \
-				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o ./core/cuda/bin/conv_cutlass_int_CHWN.o -o ./$(NEXEC_NAME).o;; \
+				$(NVCC) ./$(NEXEC_NAME)-cuda.o $(NVCCFLAGS) ./core/cuda/bin/gemm_cutlass_int.o ./core/cuda/bin/conv_cutlass_int_CHWN.o -o ./$(NEXEC_NAME).o $(NVCC_LINKFLAGS);; \
 			esac; \
 			rm -f ./$(NEXEC_NAME)-cuda.o; \
 		else \
