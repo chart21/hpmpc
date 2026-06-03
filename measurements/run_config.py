@@ -34,16 +34,14 @@ def print_progress_bar(iteration, total, prefix='', suffix='', length=50, fill='
         print()
 
 def run_command(command, log):
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
-    if stdout:
-        output = stdout.decode()
-        print(output)
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    for line in iter(process.stdout.readline, b''):
+        output = line.decode()
+        print(output, end='', flush=True)
         log.write(output)
-    if stderr:
-        output = stderr.decode()
-        print(output)
-        log.write(output)
+        log.flush()
+    process.stdout.close()
+    process.wait()
 
 def main():
     parser = argparse.ArgumentParser(description='Run configurations')
