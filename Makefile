@@ -127,7 +127,7 @@ define update_config
 endef
 
 
-compile_executables:
+compile_executables: compile_pch
 	@if [ "$(SPLITROLES)" -eq 1 ]; then \
 		$(MAKE) compile_splitroles_3; \
 	elif [ "$(SPLITROLES)" -eq 2 ]; then \
