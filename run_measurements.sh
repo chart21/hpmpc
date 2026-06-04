@@ -16,11 +16,11 @@ mkdir -p "$LOG_DIR"
 declare -A TEST_DESC
 declare -A TEST_CMD_EXTRA
 
-TEST_DESC[1]="GPU (default config)"
+TEST_DESC[1]="GPU preprocessing"
 TEST_CMD_EXTRA[1]=""
 
 TEST_DESC[2]="CPU (no GPU, 24 GEMM threads)"
-TEST_CMD_EXTRA[2]="--override USE_CUDA_GEMM=0 CHEETAH_GPU=0 ADDITIONAL_GEMM_THREADS=24"
+TEST_CMD_EXTRA[2]="--override CHEETAH_GPU=0 ADDITIONAL_GEMM_THREADS=24"
 
 VALID_TESTS="1 2"
 BASE_CONFIG="measurements/configs/artifacts/triad/2pc/GPU"
@@ -44,6 +44,9 @@ OPTIONS:
   -G <player:device>    Assign a CUDA device to a player. Repeatable.
                         Only relevant for single-machine runs (-p all).
                         Example: -G 0:0,1,2,3,4,5,6 -G 1:7
+  --gemm <N>            Set USE_CUDA_GEMM for all tests (default: 0).
+                        0 = CPU GEMM (faster for single batch)
+                        2 = GPU GEMM via CUTLASS (faster for large batches)
   -h, --help            Show this help message.
 
 TESTS:
@@ -85,7 +88,12 @@ run_test() {
     for g in "${GPU_ASSIGN[@]}"; do
         cmd="$cmd -G $g"
     done
-    [ -n "$extra" ] && cmd="$cmd $extra"
+    # Append USE_CUDA_GEMM from --gemm flag to both tests
+    if [ -n "$extra" ]; then
+        cmd="$cmd $extra --override USE_CUDA_GEMM=${GEMM_VAL}"
+    else
+        cmd="$cmd --override USE_CUDA_GEMM=${GEMM_VAL}"
+    fi
 
     echo "  → cmd: $cmd"
     echo "  → log: $log_file"
@@ -103,15 +111,17 @@ IPB="127.0.0.1"
 TEST=""
 NUM_ITER=""
 GPU_ASSIGN=()
+GEMM_VAL=0    # default USE_CUDA_GEMM=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -p) PID="$2";        shift 2 ;;
-        -a) IPA="$2";        shift 2 ;;
-        -b) IPB="$2";        shift 2 ;;
-        -t|--test) TEST="$2"; shift 2 ;;
+        -p) PID="$2";          shift 2 ;;
+        -a) IPA="$2";          shift 2 ;;
+        -b) IPB="$2";          shift 2 ;;
+        -t|--test) TEST="$2";  shift 2 ;;
         -n|--num)  NUM_ITER="$2"; shift 2 ;;
         -G) GPU_ASSIGN+=("$2"); shift 2 ;;
+        --gemm) GEMM_VAL="$2"; shift 2 ;;
         -h|--help) print_help; exit 0 ;;
         *) echo "❌ Unknown option: $1"; echo ""; print_help; exit 1 ;;
     esac
@@ -135,7 +145,7 @@ fi
 
 mode="distributed"
 [ "$PID" = "all" ] && mode="single-machine"
-echo "Mode: $mode | Party: $PID | IPA: $IPA | IPB: $IPB${NUM_ITER:+ | Iterations: $NUM_ITER}"
+echo "Mode: $mode | Party: $PID | IPA: $IPA | IPB: $IPB${NUM_ITER:+ | Iterations: $NUM_ITER} | USE_CUDA_GEMM: $GEMM_VAL"
 [ ${#GPU_ASSIGN[@]} -gt 0 ] && echo "GPU assignment: ${GPU_ASSIGN[*]}"
 
 # ─────────────────────────────────────────────────────────────────────────────
