@@ -8,7 +8,15 @@ $(shell mkdir -p executables/flags)
 
 CHEETAH := nn/ConvTriple
 
-CHEETAH_GPU ?= 0
+CHEETAH_GPU      ?= 0
+CHEETAH_GPU_ARCH ?= 90
+
+# ── Auto-rebuild ConvTriple when CHEETAH_GPU changes ─────────────────────────
+# Stamp records "gpu=<0|1> arch=<xx>" from the last build.
+# On mismatch: re-runs deps.sh (with or without -gpu) + build.sh.
+CHEETAH_STAMP         := $(CURDIR)/$(CHEETAH)/.build_stamp
+CHEETAH_STAMP_CONTENT := gpu=$(CHEETAH_GPU) arch=$(CHEETAH_GPU_ARCH)
+# ─────────────────────────────────────────────────────────────────────────────
 
 HE_INCLUDE := -I${CHEETAH}/src/include \
 			  -I${CHEETAH}/src \
@@ -79,9 +87,30 @@ CONFIG_OPTIONS := PROTOCOL PRE PARTY BITLENGTH FRACTIONAL FUNCTION_IDENTIFIER NU
 
 
 # Targets
-.PHONY: all clean compile_pch compile_parties link_objects
+.PHONY: all clean compile_pch compile_parties link_objects convtriple_check
 
-all: compile_pch compile_executables link_objects
+all: convtriple_check compile_pch compile_executables link_objects
+
+# ── ConvTriple auto-rebuild ───────────────────────────────────────────────────
+convtriple_check:
+	@CURRENT=$$(cat $(CHEETAH_STAMP) 2>/dev/null); \
+	WANTED="$(CHEETAH_STAMP_CONTENT)"; \
+	if [ "$$CURRENT" != "$$WANTED" ]; then \
+		if [ "$(CHEETAH_GPU)" = "1" ]; then \
+			echo "[ConvTriple] Rebuilding with GPU (arch=sm_$(CHEETAH_GPU_ARCH))..."; \
+			cd $(CHEETAH) && rm -rf deps build && \
+			GPU_ARCHITECTURE=$(CHEETAH_GPU_ARCH) ./deps.sh -gpu && ./build.sh \
+			  && echo "$$WANTED" > $(CHEETAH_STAMP) \
+			  || { echo "[ConvTriple] GPU build FAILED — check output above"; exit 1; }; \
+		else \
+			echo "[ConvTriple] Rebuilding CPU-only..."; \
+			cd $(CHEETAH) && rm -rf deps build && \
+			./deps.sh && ./build.sh \
+			  && echo "$$WANTED" > $(CHEETAH_STAMP) \
+			  || { echo "[ConvTriple] CPU build FAILED — check output above"; exit 1; }; \
+		fi; \
+	fi
+# ─────────────────────────────────────────────────────────────────────────────
 
 compile_pch:
 	@if [ ! -f $(PCH_OBJ) ] || [ $(PCH) -nt $(PCH_OBJ) ]; then \
