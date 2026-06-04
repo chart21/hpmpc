@@ -109,6 +109,8 @@ convtriple_check:
 			  && echo "$$WANTED" > $(CHEETAH_STAMP) \
 			  || { echo "[ConvTriple] CPU build FAILED — check output above"; exit 1; }; \
 		fi; \
+		echo "[ConvTriple] Cleaning executables to force relink with new libraries..."; \
+		rm -f $(CURDIR)/executables/*.o $(CURDIR)/executables/flags/*; \
 	fi
 # ─────────────────────────────────────────────────────────────────────────────
 
