@@ -28,19 +28,23 @@ BASE_CONFIG="measurements/configs/artifacts/triad/2pc/GPU"
 # ─────────────────────────────────────────────────────────────────────────────
 print_help() {
     cat <<EOF
-Usage: $0 -p <PID> -a <IPA> -b <IPB> [OPTIONS]
+Usage: $0 -p <PID> [OPTIONS]
 
-Run HPMPC 2PC measurement configs, saving output logs per test.
+Run HPMPC 2PC measurement configs (GPU vs CPU), saving output logs per test.
 
 REQUIRED:
-  -p <PID>          Party ID (0 or 1)
-  -a <IPA>          IP address of party 0
-  -b <IPB>          IP address of party 1
+  -p <PID>              Party ID. Use 'all' for single-machine runs (both parties locally).
+                        Use 0 or 1 for distributed runs (one party per machine).
 
 OPTIONS:
-  -t, --test <N>    Run only test N (1-2). Default: run all tests.
-  -n, --num <N>     Number of iterations per run (passed as -i <N>).
-  -h, --help        Show this help message.
+  -a <IPA>              IP address of party 0 (default: 127.0.0.1)
+  -b <IPB>              IP address of party 1 (default: 127.0.0.1)
+  -t, --test <N>        Run only test N (1-2). Default: run all tests.
+  -n, --num <N>         Number of iterations per run (passed as -i <N>).
+  -G <player:device>    Assign a CUDA device to a player. Repeatable.
+                        Only relevant for single-machine runs (-p all).
+                        Example: -G 0:0,1,2,3,4,5,6 -G 1:7
+  -h, --help            Show this help message.
 
 TESTS:
   1  GPU — measurements/configs/artifacts/triad/2pc/GPU
@@ -49,10 +53,15 @@ TESTS:
 LOGS:
   Saved to logs/measurement_test<N>_<timestamp>.log
 
-EXAMPLES:
+SINGLE-MACHINE EXAMPLES (compare GPU vs CPU on same machine):
+  $0 -p all -G 0:0,1,2,3,4,5,6 -G 1:7        # all tests, P0→GPUs 0-6, P1→GPU 7
+  $0 -p all -G 0:0,1,2,3,4,5,6 -G 1:7 -t 1   # GPU test only
+  $0 -p all -t 2                               # CPU test only
+  $0 -p all -G 0:0,1,2,3,4,5,6 -G 1:7 -n 3   # 3 iterations each
+
+DISTRIBUTED EXAMPLES (run on each machine separately):
   $0 -p 0 -a 192.168.1.1 -b 192.168.1.2
-  $0 -p 1 -a 192.168.1.1 -b 192.168.1.2 -t 1
-  $0 -p 0 -a 192.168.1.1 -b 192.168.1.2 -n 5
+  $0 -p 1 -a 192.168.1.1 -b 192.168.1.2 -n 5
 EOF
 }
 
@@ -72,7 +81,11 @@ run_test() {
 
     local cmd="python3 measurements/run_config.py $BASE_CONFIG -p $PID -a $IPA -b $IPB"
     [ -n "$NUM_ITER" ] && cmd="$cmd -i $NUM_ITER"
-    [ -n "$extra"    ] && cmd="$cmd $extra"
+    # Pass -G flags (only used when -p all; run_config.py forwards them to scripts/run.sh)
+    for g in "${GPU_ASSIGN[@]}"; do
+        cmd="$cmd -G $g"
+    done
+    [ -n "$extra" ] && cmd="$cmd $extra"
 
     echo "  → cmd: $cmd"
     echo "  → log: $log_file"
@@ -85,30 +98,28 @@ run_test() {
 # ─────────────────────────────────────────────────────────────────────────────
 # Parse arguments
 PID=""
-IPA=""
-IPB=""
+IPA="127.0.0.1"
+IPB="127.0.0.1"
 TEST=""
 NUM_ITER=""
+GPU_ASSIGN=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -p) PID="$2";      shift 2 ;;
-        -a) IPA="$2";      shift 2 ;;
-        -b) IPB="$2";      shift 2 ;;
+        -p) PID="$2";        shift 2 ;;
+        -a) IPA="$2";        shift 2 ;;
+        -b) IPB="$2";        shift 2 ;;
         -t|--test) TEST="$2"; shift 2 ;;
         -n|--num)  NUM_ITER="$2"; shift 2 ;;
+        -G) GPU_ASSIGN+=("$2"); shift 2 ;;
         -h|--help) print_help; exit 0 ;;
         *) echo "❌ Unknown option: $1"; echo ""; print_help; exit 1 ;;
     esac
 done
 
 # Validate required args
-missing=""
-[ -z "$PID" ] && missing="$missing -p"
-[ -z "$IPA" ] && missing="$missing -a"
-[ -z "$IPB" ] && missing="$missing -b"
-if [ -n "$missing" ]; then
-    echo "❌ Missing required arguments:$missing"
+if [ -z "$PID" ]; then
+    echo "❌ Missing required argument: -p"
     echo ""
     print_help
     exit 1
@@ -122,7 +133,10 @@ if [ -n "$TEST" ]; then
     fi
 fi
 
-echo "Party: $PID | IPA: $IPA | IPB: $IPB${NUM_ITER:+ | Iterations: $NUM_ITER}"
+mode="distributed"
+[ "$PID" = "all" ] && mode="single-machine"
+echo "Mode: $mode | Party: $PID | IPA: $IPA | IPB: $IPB${NUM_ITER:+ | Iterations: $NUM_ITER}"
+[ ${#GPU_ASSIGN[@]} -gt 0 ] && echo "GPU assignment: ${GPU_ASSIGN[*]}"
 
 # ─────────────────────────────────────────────────────────────────────────────
 if [ -n "$TEST" ]; then

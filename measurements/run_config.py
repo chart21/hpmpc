@@ -55,6 +55,8 @@ def main():
     parser.add_argument('-f', type=str, default='', help='filename suffix')
     parser.add_argument('--override', nargs='*', help='Override config options (key=value)')
     parser.add_argument('-i', type=int, default=1, help='Number of iterations per run')
+    parser.add_argument('-G', type=str, action='append', default=[], metavar='player:device',
+                        help='Assign CUDA device to a player for local runs (e.g. -G 0:0,1,2,3,4,5,6 -G 1:7). Repeatable.')
 
     args = parser.parse_args()
 
@@ -118,7 +120,8 @@ def main():
                     print("===================")
 
                     make_command = f"make -j PARTY={args.p} " + ' '.join([f"{k}={v}" for k, v in comb.items()])
-                    script_command = f"scripts/run.sh -n {n_value} -p {args.p} -a {args.a} -b {args.b} -c {args.c} -d {args.d} -g {args.g} -s {splitroles}"
+                    gpu_flags = ' '.join(f'-G {g}' for g in args.G) if args.G else ''
+                    script_command = f"scripts/run.sh -n {n_value} -p {args.p} -a {args.a} -b {args.b} -c {args.c} -d {args.d} -g {args.g} -s {splitroles} {gpu_flags}".strip()
                     log.write(f"\n====== Run {run_count}/{total_runs} (Iteration {iteration}/{args.i}) ======\n")
                     log.write(f"Running: PARTY={args.p} " + ' '.join([f"{k}={v}" for k, v in comb.items()]) + "\n")
                     log.write("===================\n")
