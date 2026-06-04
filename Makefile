@@ -99,7 +99,7 @@ convtriple_check:
 		if [ "$(CHEETAH_GPU)" = "1" ]; then \
 			echo "[ConvTriple] Rebuilding with GPU (arch=sm_$(CHEETAH_GPU_ARCH))..."; \
 			cd $(CHEETAH) && rm -rf deps build && \
-			GPU_ARCHITECTURE=$(CHEETAH_GPU_ARCH) ./deps.sh -gpu && ./build.sh \
+			GPU_ARCHITECTURE=$(CHEETAH_GPU_ARCH) ./deps.sh -gpu && ./build.sh -gpu \
 			  && echo "$$WANTED" > $(CHEETAH_STAMP) \
 			  || { echo "[ConvTriple] GPU build FAILED — check output above"; exit 1; }; \
 		else \
