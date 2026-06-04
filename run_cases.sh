@@ -51,6 +51,9 @@ OPTIONS:
   -o, --override <FLAGS> Additional make flags appended to the case's make command.
                         Only applies when --case is also specified.
                         Example: -o "NUM_INPUTS=100 DATTYPE=256"
+  -G <player:device>    Assign a CUDA device to a player for GPU cases (3 and 4).
+                        Can be repeated. Passed directly to scripts/run.sh -G.
+                        Example: -G 0:0 -G 1:1
   -h, --help            Show this help message.
 
 CASES:
@@ -63,10 +66,12 @@ LOGS:
   Saved to logs/case<N>_make.log and logs/case<N>_run.log
 
 EXAMPLES:
-  $0                          # run all 4 cases
-  $0 -c 2                     # run only case 2
-  $0 -c 2 -m                  # make only for case 2
-  $0 -c 2 -o "NUM_INPUTS=100" # run case 2 with extra make flag
+  $0                              # run all 4 cases
+  $0 -c 2                         # run only case 2
+  $0 -c 2 -m                      # make only for case 2
+  $0 -c 2 -o "NUM_INPUTS=100"     # run case 2 with extra make flag
+  $0 -c 3 -G 0:0 -G 1:1           # case 3 with P0→GPU0, P1→GPU1
+  $0 -G 0:0 -G 1:1                # all cases, GPU cases use GPU0/GPU1
 EOF
 }
 
@@ -97,7 +102,12 @@ run_case() {
     fi
 
     echo "  → run log:  $run_log"
-    scripts/run.sh -p all -n 2 > "$run_log" 2>&1 && \
+    # Pass -G flags for GPU cases (3 and 4) if provided
+    RUN_GPU_ARGS=""
+    if [[ "$n" == "3" || "$n" == "4" ]]; then
+        RUN_GPU_ARGS="$GPU_ARGS"
+    fi
+    eval "scripts/run.sh -p all -n 2 $RUN_GPU_ARGS" > "$run_log" 2>&1 && \
         echo "  ✓ run succeeded" || \
         echo "  ✗ run FAILED — see $run_log"
 }
@@ -107,6 +117,7 @@ run_case() {
 CASE=""
 MAKE_ONLY="false"
 OVERRIDE=""
+GPU_ARGS=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -116,6 +127,8 @@ while [[ $# -gt 0 ]]; do
             MAKE_ONLY="true"; shift ;;
         -o|--override)
             OVERRIDE="$2"; shift 2 ;;
+        -G)
+            GPU_ARGS="$GPU_ARGS -G $2"; shift 2 ;;
         -h|--help)
             print_help; exit 0 ;;
         *)
