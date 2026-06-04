@@ -7,4 +7,5 @@
 	branch = aby2-merge
 [submodule "nn/ConvTriple"]
 	path = nn/ConvTriple
-	url = https://github.com/chart21/ConvTriple
+	url = https://github.com/ajithsureshtii/ConvTriple
+	branch = aby2-merge
