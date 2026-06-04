@@ -89,7 +89,7 @@ CONFIG_OPTIONS := PROTOCOL PRE PARTY BITLENGTH FRACTIONAL FUNCTION_IDENTIFIER NU
 # Targets
 .PHONY: all clean compile_pch compile_parties link_objects convtriple_check
 
-all: convtriple_check compile_pch compile_executables link_objects
+all: compile_pch compile_executables link_objects
 
 # ── ConvTriple auto-rebuild ───────────────────────────────────────────────────
 convtriple_check:
@@ -112,7 +112,7 @@ convtriple_check:
 	fi
 # ─────────────────────────────────────────────────────────────────────────────
 
-compile_pch:
+compile_pch: convtriple_check
 	@if [ ! -f $(PCH_OBJ) ] || [ $(PCH) -nt $(PCH_OBJ) ]; then \
 		echo "Compiling precompiled header..."; \
 		$(COMPILER) $(EXECFLAGS) -x c++-header $(PCH) -o $(PCH_OBJ); \
