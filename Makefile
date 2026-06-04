@@ -8,14 +8,15 @@ $(shell mkdir -p executables/flags)
 
 CHEETAH := nn/ConvTriple
 
-CHEETAH_GPU      ?= 0
-CHEETAH_GPU_ARCH ?= 90
+CHEETAH_GPU         ?= 0
+CHEETAH_GPU_ARCH    ?= 90
+CHEETAH_GPU_REVERSE ?= 0   # 1 = encrypt weights instead of inputs (TRIPLE_GPU_REVERSE=ON)
 
-# ── Auto-rebuild ConvTriple when CHEETAH_GPU changes ─────────────────────────
-# Stamp records "gpu=<0|1> arch=<xx>" from the last build.
+# ── Auto-rebuild ConvTriple when CHEETAH_GPU / CHEETAH_GPU_REVERSE changes ───
+# Stamp records "gpu=<0|1> arch=<xx> reverse=<0|1>" from the last build.
 # On mismatch: re-runs deps.sh (with or without -gpu) + build.sh.
 CHEETAH_STAMP         := $(CURDIR)/$(CHEETAH)/.build_stamp
-CHEETAH_STAMP_CONTENT := gpu=$(CHEETAH_GPU) arch=$(CHEETAH_GPU_ARCH)
+CHEETAH_STAMP_CONTENT := gpu=$(CHEETAH_GPU) arch=$(CHEETAH_GPU_ARCH) reverse=$(CHEETAH_GPU_REVERSE)
 # ─────────────────────────────────────────────────────────────────────────────
 
 HE_INCLUDE := -I${CHEETAH}/src/include \
@@ -97,9 +98,10 @@ convtriple_check:
 	WANTED="$(CHEETAH_STAMP_CONTENT)"; \
 	if [ "$$CURRENT" != "$$WANTED" ]; then \
 		if [ "$(CHEETAH_GPU)" = "1" ]; then \
-			echo "[ConvTriple] Rebuilding with GPU (arch=sm_$(CHEETAH_GPU_ARCH))..."; \
+			echo "[ConvTriple] Rebuilding with GPU (arch=sm_$(CHEETAH_GPU_ARCH), reverse=$(CHEETAH_GPU_REVERSE))..."; \
 			cd $(CHEETAH) && rm -rf deps build && \
-			GPU_ARCHITECTURE=$(CHEETAH_GPU_ARCH) ./deps.sh -gpu && ./build.sh -gpu \
+			GPU_ARCHITECTURE=$(CHEETAH_GPU_ARCH) ./deps.sh -gpu && \
+			./build.sh $(if $(filter 1,$(CHEETAH_GPU_REVERSE)),-gpu-reverse,-gpu) \
 			  && echo "$$WANTED" > $(CHEETAH_STAMP) \
 			  || { echo "[ConvTriple] GPU build FAILED — check output above"; exit 1; }; \
 		else \
