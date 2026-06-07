@@ -221,18 +221,44 @@ void beaver(std::string ips[])
 #if STORE_PREPROCESSING == 1
 void store_preprocessed_data() 
 {
+    #if ROT_PREPROCESSING_OPT == 1
     float total_ouputs_MB = (total_num_boolean_output_triples[0] + total_num_arithmetic_output_triples[0] +
                              total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1] +
-                             total_preprocessed_outputs)/1000000 * sizeof(DATATYPE);
+                             total_boolean_triples_num * 3 + num_random_multiplications * 2 +
+                             num_beaver_3_tuples * 7 + num_beaver_4_tuples *15 +
+                             total_preprocessed_outputs)/1000000.0 * sizeof(DATATYPE);
+    #else
+    float total_ouputs_MB = (total_num_boolean_output_triples[0] + total_num_arithmetic_output_triples[0] +
+                             total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1] +
+                             total_preprocessed_outputs)/1000000.0 * sizeof(DATATYPE);
+    #endif
 
     print("Storing %f MB of preprocessing data to file \n", total_ouputs_MB);
     
     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
+    #if ROT_PREPROCESSING_OPT == 1
+    store_preprocessed_data(preprocessed_outputs_bool[0], total_num_boolean_output_triples[0],
+                            preprocessed_outputs_arithmetic[0], total_num_arithmetic_output_triples[0],
+                            preprocessed_outputs_bool[1], total_num_boolean_output_triples[1],
+                            preprocessed_outputs_arithmetic[1], total_num_arithmetic_output_triples[1],
+                            boolean_triple_a, boolean_triple_b, boolean_triple_c, total_boolean_triples_num,
+                            random_multiplication_a, random_multiplication_b, num_random_multiplications,
+                            beaver_3_tuples.a, beaver_3_tuples.b, beaver_3_tuples.c,
+                            beaver_3_tuples.ab, beaver_3_tuples.ac, beaver_3_tuples.bc,
+                            beaver_3_tuples.abc, num_beaver_3_tuples,
+                            beaver_4_tuples.a, beaver_4_tuples.b, beaver_4_tuples.c, beaver_4_tuples.d,
+                            beaver_4_tuples.ab, beaver_4_tuples.ac, beaver_4_tuples.ad,
+                            beaver_4_tuples.bc, beaver_4_tuples.bd, beaver_4_tuples.cd,
+                            beaver_4_tuples.abc, beaver_4_tuples.abd, beaver_4_tuples.acd, beaver_4_tuples.bcd,
+                            beaver_4_tuples.abcd, num_beaver_4_tuples,
+                            preprocessed_outputs, total_preprocessed_outputs);
+    #else
     store_preprocessed_data(preprocessed_outputs_bool[0], total_num_boolean_output_triples[0],
                             preprocessed_outputs_arithmetic[0], total_num_arithmetic_output_triples[0],
                             preprocessed_outputs_bool[1], total_num_boolean_output_triples[1],
                             preprocessed_outputs_arithmetic[1], total_num_arithmetic_output_triples[1],
                             preprocessed_outputs, total_preprocessed_outputs);
+    #endif
     delete[] preprocessed_outputs_bool[0];
     delete[] preprocessed_outputs_bool[1];
     delete[] preprocessed_outputs_arithmetic[0];
@@ -240,6 +266,15 @@ void store_preprocessed_data()
     delete[] preprocessed_outputs;
     delete[] preprocessed_outputs_bool;
     delete[] preprocessed_outputs_arithmetic;
+    #if ROT_PREPROCESSING_OPT == 1
+    delete[] boolean_triple_a;
+    delete[] boolean_triple_b;
+    delete[] boolean_triple_c;
+    delete[] random_multiplication_a;
+    delete[] random_multiplication_b;
+    deinit_beaver_3_tuples();
+    deinit_beaver_4_tuples();
+    #endif
     print("Time measured to store preprocessing data chrono: %fs \n",
           double(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - p)
                      .count()) /
@@ -252,9 +287,17 @@ void store_preprocessed_data()
 #if LOAD_PREPROCESSING == 1
 void load_preprocessed_data()
 {
+    #if ROT_PREPROCESSING_OPT == 1
     float total_ouputs_MB = (total_num_boolean_output_triples[0] + total_num_arithmetic_output_triples[0] +
                              total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1] +
-                             total_preprocessed_outputs)/1000000 * sizeof(DATATYPE);
+                             total_boolean_triples_num * 3 + num_random_multiplications * 2 +
+                             num_beaver_3_tuples * 7 + num_beaver_4_tuples * 15 +
+                             total_preprocessed_outputs)/1000000.0 * sizeof(DATATYPE);
+    #else
+    float total_ouputs_MB = (total_num_boolean_output_triples[0] + total_num_arithmetic_output_triples[0] +
+                             total_num_boolean_output_triples[1] + total_num_arithmetic_output_triples[1] +
+                             total_preprocessed_outputs)/1000000.0 * sizeof(DATATYPE);
+    #endif
     print("Loading %f MB of preprocessing data from file \n", total_ouputs_MB);
     std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
     preprocessed_outputs_bool = new DATATYPE*[2];
@@ -264,11 +307,37 @@ void load_preprocessed_data()
     preprocessed_outputs_arithmetic[0] = new DATATYPE[total_num_arithmetic_output_triples[0]];
     preprocessed_outputs_arithmetic[1] = new DATATYPE[total_num_arithmetic_output_triples[1]];
     preprocessed_outputs = new DATATYPE[total_preprocessed_outputs];
+
+    #if ROT_PREPROCESSING_OPT == 1
+    boolean_triple_a = new DATATYPE[total_boolean_triples_num];
+    boolean_triple_b = new DATATYPE[total_boolean_triples_num];
+    boolean_triple_c = new DATATYPE[total_boolean_triples_num];
+    random_multiplication_a = new DATATYPE[num_random_multiplications];
+    random_multiplication_b = new DATATYPE[num_random_multiplications];
+    init_beaver_3_tuples();
+    init_beaver_4_tuples();
+    load_preprocessed_data(preprocessed_outputs_bool[0], total_num_boolean_output_triples[0],
+                            preprocessed_outputs_arithmetic[0], total_num_arithmetic_output_triples[0],
+                            preprocessed_outputs_bool[1], total_num_boolean_output_triples[1],
+                            preprocessed_outputs_arithmetic[1], total_num_arithmetic_output_triples[1],
+                            boolean_triple_a, boolean_triple_b, boolean_triple_c, total_boolean_triples_num,
+                            random_multiplication_a, random_multiplication_b, num_random_multiplications,
+                            beaver_3_tuples.a, beaver_3_tuples.b, beaver_3_tuples.c,
+                            beaver_3_tuples.ab, beaver_3_tuples.ac, beaver_3_tuples.bc,
+                            beaver_3_tuples.abc, num_beaver_3_tuples,
+                            beaver_4_tuples.a, beaver_4_tuples.b, beaver_4_tuples.c, beaver_4_tuples.d,
+                            beaver_4_tuples.ab, beaver_4_tuples.ac, beaver_4_tuples.ad,
+                            beaver_4_tuples.bc, beaver_4_tuples.bd, beaver_4_tuples.cd,
+                            beaver_4_tuples.abc, beaver_4_tuples.abd, beaver_4_tuples.acd, beaver_4_tuples.bcd,
+                            beaver_4_tuples.abcd, num_beaver_4_tuples,
+                            preprocessed_outputs, total_preprocessed_outputs);
+    #else
     load_preprocessed_data(preprocessed_outputs_bool[0], total_num_boolean_output_triples[0],
                             preprocessed_outputs_arithmetic[0], total_num_arithmetic_output_triples[0],
                             preprocessed_outputs_bool[1], total_num_boolean_output_triples[1],
                             preprocessed_outputs_arithmetic[1], total_num_arithmetic_output_triples[1],
                             preprocessed_outputs, total_preprocessed_outputs);
+    #endif
     print("Time measured to load preprocessing data chrono: %fs \n",
           double(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - p)
                      .count()) /

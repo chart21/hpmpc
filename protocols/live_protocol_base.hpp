@@ -465,6 +465,187 @@ void compare_views()
 
 #include <io/file_io.hpp>
 
+#if ROT_PREPROCESSING_OPT == 1
+#include <fstream>
+#include <vector>
+#include <cstdio>
+#include <unistd.h>
+
+void store_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_triples_round0,
+                            DATATYPE* arithmetic_triples_round0, uint64_t size_arithmetic_triples_round0,
+                            DATATYPE* bool_triples_round1, uint64_t size_bool_triples_round1,
+                            DATATYPE* arithmetic_triples_round1, uint64_t size_arithmetic_triples_round1,
+                            DATATYPE* boolean_triple_a, DATATYPE* boolean_triple_b, DATATYPE* boolean_triple_c, uint64_t size_boolean_triples,
+                            DATATYPE* random_multiplication_a, DATATYPE* random_multiplication_b, uint64_t size_random_multiplications,
+                            DATATYPE* beaver_3_tuples_a, DATATYPE* beaver_3_tuples_b, DATATYPE* beaver_3_tuples_c,
+                            DATATYPE* beaver_3_tuples_ab, DATATYPE* beaver_3_tuples_ac, DATATYPE* beaver_3_tuples_bc,
+                            DATATYPE* beaver_3_tuples_abc, uint64_t size_beaver_3_tuples,
+                            DATATYPE* beaver_4_tuples_a, DATATYPE* beaver_4_tuples_b, DATATYPE* beaver_4_tuples_c, DATATYPE* beaver_4_tuples_d,
+                            DATATYPE* beaver_4_tuples_ab, DATATYPE* beaver_4_tuples_ac, DATATYPE* beaver_4_tuples_ad,
+                            DATATYPE* beaver_4_tuples_bc, DATATYPE* beaver_4_tuples_bd, DATATYPE* beaver_4_tuples_cd,
+                            DATATYPE* beaver_4_tuples_abc, DATATYPE* beaver_4_tuples_abd, DATATYPE* beaver_4_tuples_acd, DATATYPE* beaver_4_tuples_bcd,
+                            DATATYPE* beaver_4_tuples_abcd, uint64_t size_beaver_4_tuples,
+                            DATATYPE* preprocessing_material, uint64_t size_preprocessing_material)
+{
+    auto UID = base_port + player_id * (num_players - 1);
+    auto path = "data/preprocessing_" + std::to_string(UID) + ".triple";
+    std::ofstream file(path, std::ios::binary | std::ios::out);
+    if (!file.is_open()) {
+        std::cout << "P" << player_id << ": [store_preprocessed_data] failed storing data\n";
+        return;
+    }
+
+    auto write_array = [&](const DATATYPE* arr, uint64_t size) {
+        if (size && arr) {
+            file.write((char*)arr, size * sizeof(DATATYPE));
+        }
+    };
+
+    write_array(bool_triples_round0, size_bool_triples_round0);
+    write_array(arithmetic_triples_round0, size_arithmetic_triples_round0);
+    write_array(bool_triples_round1, size_bool_triples_round1);
+    write_array(arithmetic_triples_round1, size_arithmetic_triples_round1);
+    
+    write_array(boolean_triple_a, size_boolean_triples);
+    write_array(boolean_triple_b, size_boolean_triples);
+    write_array(boolean_triple_c, size_boolean_triples);
+
+    write_array(random_multiplication_a, size_random_multiplications);
+    write_array(random_multiplication_b, size_random_multiplications);
+
+    write_array(beaver_3_tuples_a, size_beaver_3_tuples);
+    write_array(beaver_3_tuples_b, size_beaver_3_tuples);
+    write_array(beaver_3_tuples_c, size_beaver_3_tuples);
+    write_array(beaver_3_tuples_ab, size_beaver_3_tuples);
+    write_array(beaver_3_tuples_ac, size_beaver_3_tuples);
+    write_array(beaver_3_tuples_bc, size_beaver_3_tuples);
+    write_array(beaver_3_tuples_abc, size_beaver_3_tuples);
+
+    write_array(beaver_4_tuples_a, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_b, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_c, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_d, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_ab, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_ac, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_ad, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_bc, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_bd, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_cd, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_abc, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_abd, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_acd, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_bcd, size_beaver_4_tuples);
+    write_array(beaver_4_tuples_abcd, size_beaver_4_tuples);
+
+    write_array(preprocessing_material, size_preprocessing_material);
+    file.close();
+}
+
+void load_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_triples_round0,
+                            DATATYPE* arithmetic_triples_round0, uint64_t size_arithmetic_triples_round0,
+                            DATATYPE* bool_triples_round1, uint64_t size_bool_triples_round1,
+                            DATATYPE* arithmetic_triples_round1, uint64_t size_arithmetic_triples_round1,
+                            DATATYPE* boolean_triple_a, DATATYPE* boolean_triple_b, DATATYPE* boolean_triple_c, uint64_t size_boolean_triples,
+                            DATATYPE* random_multiplication_a, DATATYPE* random_multiplication_b, uint64_t size_random_multiplications,
+                            DATATYPE* beaver_3_tuples_a, DATATYPE* beaver_3_tuples_b, DATATYPE* beaver_3_tuples_c,
+                            DATATYPE* beaver_3_tuples_ab, DATATYPE* beaver_3_tuples_ac, DATATYPE* beaver_3_tuples_bc,
+                            DATATYPE* beaver_3_tuples_abc, uint64_t size_beaver_3_tuples,
+                            DATATYPE* beaver_4_tuples_a, DATATYPE* beaver_4_tuples_b, DATATYPE* beaver_4_tuples_c, DATATYPE* beaver_4_tuples_d,
+                            DATATYPE* beaver_4_tuples_ab, DATATYPE* beaver_4_tuples_ac, DATATYPE* beaver_4_tuples_ad,
+                            DATATYPE* beaver_4_tuples_bc, DATATYPE* beaver_4_tuples_bd, DATATYPE* beaver_4_tuples_cd,
+                            DATATYPE* beaver_4_tuples_abc, DATATYPE* beaver_4_tuples_abd, DATATYPE* beaver_4_tuples_acd, DATATYPE* beaver_4_tuples_bcd,
+                            DATATYPE* beaver_4_tuples_abcd, uint64_t size_beaver_4_tuples,
+                            DATATYPE* preprocessing_material, uint64_t size_preprocessing_material)
+{
+    auto UID = base_port + player_id * (num_players - 1);
+    auto path = "data/preprocessing_" + std::to_string(UID) + ".triple";
+    std::ifstream file(path, std::ios::binary | std::ios::in | std::ios::ate);
+    if (!file.is_open()) {
+        std::cout << "P" << player_id << ": [load_preprocessed_data] failed loading data\n";
+        return;
+    }
+    size_t size = file.tellg();
+    auto total = (size_bool_triples_round0 + size_arithmetic_triples_round0 +
+                  size_bool_triples_round1 + size_arithmetic_triples_round1 +
+                  size_boolean_triples * 3 + size_random_multiplications * 2 +
+                  size_beaver_3_tuples * 7 + size_beaver_4_tuples * 15 +
+                  size_preprocessing_material) * sizeof(DATATYPE);
+
+    if (total > size) {
+        file.close();
+        std::cout << "P" << player_id << ": [load_preprocessed_data] file too small\n";
+        return;
+    }
+
+    file.seekg(0, std::ios::beg);
+
+    auto read_array = [&](DATATYPE* arr, uint64_t size) {
+        if (size && arr) {
+            file.read((char*)arr, size * sizeof(DATATYPE));
+        }
+    };
+
+    read_array(bool_triples_round0, size_bool_triples_round0);
+    read_array(arithmetic_triples_round0, size_arithmetic_triples_round0);
+    read_array(bool_triples_round1, size_bool_triples_round1);
+    read_array(arithmetic_triples_round1, size_arithmetic_triples_round1);
+    
+    read_array(boolean_triple_a, size_boolean_triples);
+    read_array(boolean_triple_b, size_boolean_triples);
+    read_array(boolean_triple_c, size_boolean_triples);
+
+    read_array(random_multiplication_a, size_random_multiplications);
+    read_array(random_multiplication_b, size_random_multiplications);
+
+    read_array(beaver_3_tuples_a, size_beaver_3_tuples);
+    read_array(beaver_3_tuples_b, size_beaver_3_tuples);
+    read_array(beaver_3_tuples_c, size_beaver_3_tuples);
+    read_array(beaver_3_tuples_ab, size_beaver_3_tuples);
+    read_array(beaver_3_tuples_ac, size_beaver_3_tuples);
+    read_array(beaver_3_tuples_bc, size_beaver_3_tuples);
+    read_array(beaver_3_tuples_abc, size_beaver_3_tuples);
+
+    read_array(beaver_4_tuples_a, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_b, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_c, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_d, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_ab, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_ac, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_ad, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_bc, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_bd, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_cd, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_abc, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_abd, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_acd, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_bcd, size_beaver_4_tuples);
+    read_array(beaver_4_tuples_abcd, size_beaver_4_tuples);
+
+    read_array(preprocessing_material, size_preprocessing_material);
+
+    file.close();
+
+    if (size == total) {
+        if (remove(path.c_str()) != 0) {
+            std::perror("Truncation failed");
+        }
+    } else {
+        std::fstream file_rw(path, std::ios::in | std::ios::out | std::ios::binary);
+        if (file_rw.is_open()) {
+            std::vector<char> buffer(size - total);
+            file_rw.seekg(total, std::ios::beg);
+            file_rw.read(buffer.data(), buffer.size());
+            file_rw.seekg(0, std::ios::beg);
+            file_rw.write(buffer.data(), buffer.size());
+            file_rw.close();
+        }
+        int res = truncate(path.c_str(), size - total);
+        if (res != 0) {
+            std::perror("Truncation failed");
+        }
+    }
+}
+#else
 void store_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_triples_round0,
                             DATATYPE* arithmetic_triples_round0, uint64_t size_arithmetic_triples_round0,
                             DATATYPE* bool_triples_round1, uint64_t size_bool_triples_round1,
@@ -503,6 +684,7 @@ void load_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_tr
         std::cout << "P" << player_id << ": [load_preprocessed_data] failed loading data\n";
     }
 }
+#endif
 
 
 
