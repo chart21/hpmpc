@@ -464,6 +464,8 @@ void compare_views()
 #if (PRE == 1 && HAS_POST_PROTOCOL == 1) || BEAVER == 1
 
 #include <io/file_io.hpp>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #if ROT_PREPROCESSING_OPT == 1
 #include <fstream>
@@ -487,6 +489,7 @@ void store_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_t
                             DATATYPE* beaver_4_tuples_abcd, uint64_t size_beaver_4_tuples,
                             DATATYPE* preprocessing_material, uint64_t size_preprocessing_material)
 {
+    mkdir("data", 0777);
     auto UID = base_port + player_id * (num_players - 1);
     auto path = "data/preprocessing_" + std::to_string(UID) + ".triple";
     std::ofstream file(path, std::ios::binary | std::ios::out);
@@ -652,6 +655,7 @@ void store_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_t
                             DATATYPE* arithmetic_triples_round1, uint64_t size_arithmetic_triples_round1,
                             DATATYPE* preprocessing_material, uint64_t size_preprocessing_material)
 {
+    mkdir("data", 0777);
     //store all to file
     // (int)base_port + player_id * (num_players - 1)
     auto UID = base_port + player_id * (num_players - 1);
