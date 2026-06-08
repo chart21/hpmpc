@@ -134,5 +134,10 @@ def main():
                     print(f"==== Saved log file {run_count}/{total_runs} to {log_file} ====")
                     print(f"==== Saved config details to {config_log_file} ====")
 
+                    # Cleanup: kill leftover processes and clear terminal so ports
+                    # are free for the next run.
+                    cleanup_command = "clear && pkill -9 -f python; pkill -9 -f run.sh; pkill -9 -f run-P; sleep 1"
+                    subprocess.run(cleanup_command, shell=True)
+
 if __name__ == '__main__':
     main()
