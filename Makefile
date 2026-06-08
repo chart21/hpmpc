@@ -11,13 +11,14 @@ CHEETAH := nn/ConvTriple
 CHEETAH_GPU         ?= 0
 CHEETAH_GPU_ARCH    ?= 90
 CHEETAH_GPU_REVERSE ?= 0   # 1 = encrypt weights instead of inputs (TRIPLE_GPU_REVERSE=ON)
+CHEETAH_FC_GPU      ?= 1   # 1 = GPU FC triples (troy MatmulHelper); 0 = CPU SEAL FC triples
 CHEETAH_NUM_GPUS    ?= 1   # number of GPUs per party; process i uses gpu_id = (process_offset % CHEETAH_NUM_GPUS)
 
-# ── Auto-rebuild ConvTriple when CHEETAH_GPU / CHEETAH_GPU_REVERSE changes ───
-# Stamp records "gpu=<0|1> arch=<xx> reverse=<0|1>" from the last build.
+# ── Auto-rebuild ConvTriple when CHEETAH_GPU / CHEETAH_GPU_REVERSE / CHEETAH_FC_GPU changes ──
+# Stamp records "gpu=<0|1> arch=<xx> reverse=<0|1> fc_gpu=<0|1>" from the last build.
 # On mismatch: re-runs deps.sh (with or without -gpu) + build.sh.
 CHEETAH_STAMP         := $(CURDIR)/$(CHEETAH)/.build_stamp
-CHEETAH_STAMP_CONTENT := gpu=$(CHEETAH_GPU) arch=$(CHEETAH_GPU_ARCH) reverse=$(CHEETAH_GPU_REVERSE)
+CHEETAH_STAMP_CONTENT := gpu=$(CHEETAH_GPU) arch=$(CHEETAH_GPU_ARCH) reverse=$(CHEETAH_GPU_REVERSE) fc_gpu=$(CHEETAH_FC_GPU)
 # ─────────────────────────────────────────────────────────────────────────────
 
 HE_INCLUDE := -I${CHEETAH}/src/include \
@@ -74,7 +75,7 @@ CONFIG_OPTIONS := PROTOCOL PRE PARTY BITLENGTH FRACTIONAL FUNCTION_IDENTIFIER NU
 				  RANDOM_ALGORITHM USE_SSL_AES ARM USE_CUDA_GEMM \
 				  SEND_BUFFER RECV_BUFFER VERIFY_BUFFER \
 				  USE_SSL CV_FIX\
-				  A_KNOWN CONV_TRIPLES FC_TRIPLES BN2D_TRIPLES CHEETAH_THREADS CHEETAH_WAN_OPT CHEETAH_CONV_TYPE CHEETAH_DISCONNECT CHEETAH_BOOL_OT_TYPE ADDITIONAL_GEMM_THREADS ADDITIONAL_PPA_THREADS CHEETAH_NUM_GPUS\
+				  A_KNOWN CONV_TRIPLES FC_TRIPLES BN2D_TRIPLES CHEETAH_THREADS CHEETAH_WAN_OPT CHEETAH_CONV_TYPE CHEETAH_DISCONNECT CHEETAH_BOOL_OT_TYPE ADDITIONAL_GEMM_THREADS ADDITIONAL_PPA_THREADS CHEETAH_NUM_GPUS CHEETAH_FC_GPU\
 				  MODELOWNER DATAOWNER TRUNC_THEN_MULT TRUNC_APPROACH TRUNC_DELAYED COMPUTE_ARGMAX PUBLIC_WEIGHTS COMPRESS REDUCED_BITLENGTH_k REDUCED_BITLENGTH_m \
 				  PRINT PRINT_TIMINGS PRINT_IMPORTANT \
 				  STORE_PREPROCESSING LOAD_PREPROCESSING \
@@ -99,10 +100,10 @@ convtriple_check:
 	WANTED="$(CHEETAH_STAMP_CONTENT)"; \
 	if [ "$$CURRENT" != "$$WANTED" ]; then \
 		if [ "$(CHEETAH_GPU)" = "1" ]; then \
-			echo "[ConvTriple] Rebuilding with GPU (arch=sm_$(CHEETAH_GPU_ARCH), reverse=$(CHEETAH_GPU_REVERSE))..."; \
+			echo "[ConvTriple] Rebuilding with GPU (arch=sm_$(CHEETAH_GPU_ARCH), reverse=$(CHEETAH_GPU_REVERSE), fc_gpu=$(CHEETAH_FC_GPU))..."; \
 			cd $(CHEETAH) && rm -rf deps build && \
 			GPU_ARCHITECTURE=$(CHEETAH_GPU_ARCH) ./deps.sh -gpu && \
-			./build.sh $(if $(filter 1,$(CHEETAH_GPU_REVERSE)),-gpu-reverse,-gpu) \
+			./build.sh $(if $(filter 1,$(CHEETAH_GPU_REVERSE)),-gpu-reverse,-gpu) $(if $(filter 0,$(CHEETAH_FC_GPU)),-no-fc-gpu,) \
 			  && echo "$$WANTED" > $(CHEETAH_STAMP) \
 			  || { echo "[ConvTriple] GPU build FAILED — check output above"; exit 1; }; \
 		else \
