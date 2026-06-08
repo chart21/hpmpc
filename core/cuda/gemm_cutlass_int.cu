@@ -4,10 +4,20 @@
 #include <gemm.cuh>
 #include <cstdint>
 #include <iostream>
+#include <cuda_runtime.h>
+
+// process_offset and CHEETAH_NUM_GPUS are compiled in via config.h / MACRO_FLAGS.
+// Each forked child calls cudaSetDevice once per GEMM to route to its assigned GPU.
+extern int process_offset;
+
+#ifndef CHEETAH_NUM_GPUS
+#define CHEETAH_NUM_GPUS 1
+#endif
 
 template <typename Type>
 void gemm_cutlass(int M, int N, int K, Type* X, Type* W, Type* Y)
 {
+    cudaSetDevice(process_offset % CHEETAH_NUM_GPUS);
     Type *x, *w, *y;
     cudaMalloc((void**)&x, M * K * sizeof(Type));  // Matrix X has M rows and K columns
     cudaMalloc((void**)&w, K * N * sizeof(Type));  // Matrix W has K rows and N columns
