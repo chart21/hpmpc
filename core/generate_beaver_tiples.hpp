@@ -786,7 +786,7 @@ void generateLayerDummyTriples(type** a,
                         p.batchSize, p.in_feat, p.out_feat,
                         CHEETAH_PARTY, CHEETAH_THREADS,
                         A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
-                        factor
+                        factor, cheetah_gpu_id
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
                 Iface::generateBNTriplesCheetah(keys,
@@ -890,7 +890,7 @@ void generateLayerDummyTriples(type** a,
                         p.batchSize, p.in_feat, p.out_feat,
                         CHEETAH_PARTY, CHEETAH_THREADS,
                         A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
-                        factor
+                        factor, cheetah_gpu_id
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
                 Iface::generateBNTriplesCheetah(keys,
