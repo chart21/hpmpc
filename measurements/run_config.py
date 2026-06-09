@@ -135,8 +135,14 @@ def main():
                     print(f"==== Saved config details to {config_log_file} ====")
 
                     # Cleanup: kill leftover processes and clear terminal so ports
-                    # are free for the next run.
-                    cleanup_command = "clear && pkill -9 -f python; pkill -9 -f run.sh; pkill -9 -f run-P; sleep 1"
+                    # are free for the next run.  Exclude this script ($$) from
+                    # the python pkill so we don't kill ourselves.
+                    my_pid = os.getpid()
+                    cleanup_command = (
+                        f"pkill -9 -f run.sh; pkill -9 -f run-P; "
+                        f"pgrep -f python | grep -v {my_pid} | xargs -r kill -9; "
+                        f"sleep 1; clear"
+                    )
                     subprocess.run(cleanup_command, shell=True)
 
 if __name__ == '__main__':
