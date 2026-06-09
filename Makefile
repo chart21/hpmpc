@@ -9,7 +9,7 @@ $(shell mkdir -p executables/flags)
 CHEETAH := nn/ConvTriple
 
 CHEETAH_GPU         ?= 0
-CHEETAH_GPU_ARCH    ?= 90
+CHEETAH_GPU_ARCH    ?= $(shell nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.')
 CHEETAH_GPU_REVERSE ?= 0   # 1 = encrypt weights instead of inputs (TRIPLE_GPU_REVERSE=ON)
 CHEETAH_FC_GPU      ?= 1   # 1 = GPU FC triples (troy MatmulHelper); 0 = CPU SEAL FC triples
 CHEETAH_NUM_GPUS    ?= 1   # number of GPUs per party; process i uses gpu_id = (process_offset % CHEETAH_NUM_GPUS)
