@@ -1,3 +1,18 @@
+# Peregrine Implementation
+
+This repository forks HPMPC to add novel 2PC protocol primitives, Zero-ADD augmented circuits, and triple generation.
+- 2PC protocols can be found in `protocols/2-PC/aby2`
+- Zero-ADD augmented circuits can be found in `programs/functions/adders/zero_add_adders/`
+- Triple Generation is implemented in [https://anonymous.4open.science/status/2PC-triple-gen](https://anonymous.4open.science/status/2PC-triple-gen) and is expected at `nn/ConvTriple`. Building 2PC protocols requires deps and build commands.
+- PIGEON fork with minor edits is implemented in [https://anonymous.4open.science/status/2PC-pigeon](https://anonymous.4open.science/status/2PC-pigeon) and is expected at `nn/PIGEON/`
+- Experiments can be found in `measurements/configs/artifacts/triad/2pc/
+
+After setting everything up the following command should run a small CNN.
+```sh
+make -j PARTY=all PROTOCOL=4 PRE=1 FUNCTION_IDENTIFIER=170 ROT_PREPROCESSING=1 CHEETAH_THREADS=4 CHEETAH_BOOL_OT_TYPE=0 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1 RESHARE_OPT=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 FUSE_RELU_AVG=1 FUSE_CONV_BN=1 BITLENGTH=32 COMPRESS=0 SKIP_PRE=0 CHEETAH_DISCONNECT=0 CHEETAH_WAN_OPT=0 ADDITIONAL_GEMM_THREADS=4
+./secripts/run.sh -p all -n 2
+```
+
 # HPMPC: High-Performance Implementation of Secure Multiparty Computation (MPC) Protocols
 
 
