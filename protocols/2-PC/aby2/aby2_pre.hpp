@@ -717,6 +717,11 @@ class ABY2_PRE_Share
 #endif
     }
 
+    void prepare_opt_bit_injection_with_trunc(ABY2_PRE_Share x[], ABY2_PRE_Share out[], Datatype trunc_factor, int fractional_bits = FRACTIONAL)
+    {
+        prepare_opt_bit_injection(x, out);
+    }
+
     #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
     static void complete_A2B_S2(int k, ABY2_PRE_Share out[])
     #else 

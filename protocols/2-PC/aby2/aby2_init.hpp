@@ -602,6 +602,11 @@ class ABY2_init
         }
     }
 
+    void prepare_opt_bit_injection_with_trunc(ABY2_init x[], ABY2_init out[], Datatype trunc_factor, int fractional_bits = FRACTIONAL)
+    {
+        prepare_opt_bit_injection(x, out);
+    }
+
     void complete_opt_bit_injection() { receive_from_(PNEXT); }
 
     template <typename func_add, typename func_sub>

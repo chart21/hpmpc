@@ -166,6 +166,45 @@ class ABY2_ONLINE_Share
         }
     }
 
+    void prepare_opt_bit_injection_with_trunc(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[], Datatype trunc_factor, int fractional_bits = FRACTIONAL)
+    {
+        Datatype b0[BITLENGTH]{0};
+        b0[BITLENGTH - 1] = m;  // convert b0 to an arithemtic value
+        alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+        unorthogonalize_boolean(b0, temp2);
+        orthogonalize_arithmetic(temp2, b0);
+        Datatype lbi[BITLENGTH]{0};
+        lbi[BITLENGTH - 1] = l;
+        unorthogonalize_boolean(lbi, temp2);
+        orthogonalize_arithmetic(temp2, lbi);
+        for (int i = 0; i < BITLENGTH; i++)
+        {
+#if BIT_INJECTION_PREPROCESSING_OPT == 1
+            Datatype lalb = retrieve_output_share_arithmetic();
+            Datatype lb1lb2 = retrieve_output_share_arithmetic();
+            Datatype lb = OP_SUB(lbi[i], OP_ADD(lb1lb2,lb1lb2)); 
+#else
+            Datatype lb = retrieve_output_share_arithmetic();
+            Datatype lalb = retrieve_output_share_arithmetic(1);
+#endif
+            auto xim = x[i].m;
+            auto xil = x[i].l;
+#if PARTY == 0
+            out[i].m = OP_MULT(b0[i], xim);
+#else
+            out[i].m = SET_ALL_ZERO();
+#endif
+            out[i].m = OP_ADD(OP_SUB(out[i].m,
+                                     OP_MULT(b0[i], xil)),
+                              OP_MULT(OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1)),
+                                      OP_SUB(lalb, OP_MULT(xim, lb))));
+            out[i].l = getRandomVal(PSELF);
+            out[i].m = OP_ADD(out[i].m, out[i].l);
+            out[i].m = OP_TRUNCF(OP_MULT(out[i].m, trunc_factor), fractional_bits);
+            send_to_live(PNEXT, out[i].m);
+        }
+    }
+
     // P_i shares mx - lxi, P_j sets lxj to 0
     template <int id, typename func_add, typename func_sub>
     void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)
