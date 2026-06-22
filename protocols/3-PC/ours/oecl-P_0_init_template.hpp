@@ -309,6 +309,11 @@ class OECL0_init
         }
     }
 
+    void prepare_opt_bit_injection_with_trunc(OECL0_init x[], OECL0_init out[], Datatype trunc_factor, int fractional_bits = FRACTIONAL)
+    {
+        prepare_opt_bit_injection(x, out);
+    }
+
     void complete_opt_bit_injection() {}
 
     void prepare_bit2a(OECL0_init out[])

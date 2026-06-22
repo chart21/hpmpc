@@ -388,8 +388,34 @@ class OECL1_Share
             Datatype m1 = OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1));
             m1 = OP_MULT(m1, OP_SUB(r01_2, OP_MULT(a0, r01)));
             m1 = OP_SUB(m1, OP_MULT(b0[i], a[i].p2));
+            m1 = OP_ADD(m1, OP_MULT(a0, b0[i]));
             send_to_live(P_2, OP_ADD(m1, z1));
-            out[i].p1 = OP_ADD(m1, OP_MULT(a0, b0[i]));
+            out[i].p1 = m1;
+            // out[i].p1 = OP_ADD(m1, OP_MULT(a0, b0[i]));
+            out[i].p2 = z1;
+        }
+    }
+
+    void prepare_opt_bit_injection_with_trunc(OECL1_Share a[], OECL1_Share out[], Datatype trunc_factor, int fractional_bits = FRACTIONAL)
+    {
+        Datatype b0[BITLENGTH]{0};
+        b0[BITLENGTH - 1] = FUNC_XOR(p1, p2);  // convert b to an arithemtic value
+        alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+        unorthogonalize_boolean(b0, temp2);
+        orthogonalize_arithmetic(temp2, b0);
+        for (int i = 0; i < BITLENGTH; i++)
+        {
+            Datatype a0 = OP_ADD(a[i].p1, a[i].p2);
+            Datatype r01 = getRandomVal(P_0);
+            Datatype r01_2 = getRandomVal(P_0);
+            Datatype z1 = getRandomVal(P_0);
+            Datatype m1 = OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1));
+            m1 = OP_MULT(m1, OP_SUB(r01_2, OP_MULT(a0, r01)));
+            m1 = OP_SUB(m1, OP_MULT(b0[i], a[i].p2));
+            m1 = OP_ADD(m1, OP_MULT(a0, b0[i]));
+            m1 = OP_SUB(SET_ALL_ZERO(), OP_TRUNCF(OP_SUB(SET_ALL_ZERO(), OP_MULT(m1, trunc_factor)), fractional_bits));
+            send_to_live(P_2, OP_ADD(m1, z1));
+            out[i].p1 = m1;
             out[i].p2 = z1;
         }
     }
