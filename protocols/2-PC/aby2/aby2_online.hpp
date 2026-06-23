@@ -199,8 +199,16 @@ class ABY2_ONLINE_Share
                               OP_MULT(OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1)),
                                       OP_SUB(lalb, OP_MULT(xim, lb))));
             out[i].l = getRandomVal(PSELF);
-            out[i].m = OP_ADD(out[i].m, out[i].l);
+            // SecureML-style local truncation of (value_share * trunc_factor), THEN add the fresh mask.
+            // (The previous code added the mask first and scaled the masked value, so the mask did not
+            //  cancel on reconstruction -> garbage. Mirrors mask_and_send_dot_with_trunc.)
+#if PARTY == 0
+            out[i].m = OP_SUB(SET_ALL_ZERO(),
+                              OP_TRUNCF(OP_MULT(OP_SUB(SET_ALL_ZERO(), out[i].m), trunc_factor), fractional_bits));
+#else
             out[i].m = OP_TRUNCF(OP_MULT(out[i].m, trunc_factor), fractional_bits);
+#endif
+            out[i].m = OP_ADD(out[i].m, out[i].l);
             send_to_live(PNEXT, out[i].m);
         }
     }
