@@ -588,9 +588,9 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 16)>::type>
                 pg_L1_1_2.complete_and();
                 pg_L2_1_4.complete_and();
                 pg_L3_1_8.complete_and();
+                g_L2_1 = g_1 ^ pg_L1_1_2;  // g_L2[1]
                 g_L3_1 = g_L2_1 ^ pg_L2_1_4;  // g_L3[1]
                 g_L4_1 = g_L3_1 ^ pg_L3_1_8;  // g_L4[1]
-                g_L2_1 = g_1 ^ pg_L1_1_2;  // g_L2[1]
                 msb = p_0 ^ g_L4_1;  // msb
                 break;
         }
@@ -1307,16 +1307,16 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 pg_L0_8_9.complete_and();
                 pg_L1_8_10.complete_and();
                 pg_L2_8_12.complete_and();
-                g_L3_8 = g_L2_8 ^ pg_L2_8_12;  // g_L3[8]
                 g_L1_8 = g_8 ^ pg_L0_8_9;  // g_L1[8]
                 g_L2_8 = g_L1_8 ^ pg_L1_8_10;  // g_L2[8]
+                g_L3_8 = g_L2_8 ^ pg_L2_8_12;  // g_L3[8]
                 g_24.complete_and();
                 pg_L0_24_25.complete_and();
                 pg_L1_24_26.complete_and();
                 pg_L2_24_28.complete_and();
-                g_L3_24 = g_L2_24 ^ pg_L2_24_28;  // g_L3[24]
                 g_L1_24 = g_24 ^ pg_L0_24_25;  // g_L1[24]
                 g_L2_24 = g_L1_24 ^ pg_L1_24_26;  // g_L2[24]
+                g_L3_24 = g_L2_24 ^ pg_L2_24_28;  // g_L3[24]
                 p_L4_1.complete_and();
                 // and_31: random_triples[15].a, random_triples[15].b, output mask=r198
                 g_16 = a[16].prepare_and_reshared(b[16], r198, random_triples[15].b);  // and_31
@@ -1335,10 +1335,10 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 pg_L1_16_18.complete_and();
                 pg_L2_16_20.complete_and();
                 pg_L3_16_24.complete_and();
-                g_L3_16 = g_L2_16 ^ pg_L2_16_20;  // g_L3[16]
-                g_L4_16 = g_L3_16 ^ pg_L3_16_24;  // g_L4[16]
                 g_L1_16 = g_16 ^ pg_L0_16_17;  // g_L1[16]
                 g_L2_16 = g_L1_16 ^ pg_L1_16_18;  // g_L2[16]
+                g_L3_16 = g_L2_16 ^ pg_L2_16_20;  // g_L3[16]
+                g_L4_16 = g_L3_16 ^ pg_L3_16_24;  // g_L4[16]
                 // and_1: random_triples[0].a, random_triples[0].b, output mask=r199
                 g_1 = a[1].prepare_and_reshared(b[1], r199, random_triples[0].b);  // and_1
                 // and_127: a42=triples[42].a, b42=triples[42].b, c42=triples[42].c, output mask=r200
