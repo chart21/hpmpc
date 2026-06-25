@@ -65,6 +65,17 @@ DATATYPE* preprocessed_outputs = nullptr;
 uint64_t preprocessed_outputs_input_index = 0;
 uint64_t preprocessed_outputs_index = 0;
 uint64_t total_preprocessed_outputs = 0;
+#if A2B_ONLINE_OPT == 1
+// Dedicated output-share buffer for the A2B MSB adder. The adder is deferred in PRE past the
+// boolean-addition step (so its S2 operand can use the boolean-addition result c instead of bits(-l_i)),
+// then run in a batch. Its zero_add output-shares live here (NOT the shared default buffer) so the
+// batched fill order matches the online's forward-pass read order. Only used when A2B_ONLINE_OPT==1.
+DATATYPE* preprocessed_outputs_a2b = nullptr;
+uint64_t preprocessed_outputs_a2b_input_index = 0;   // PRE write cursor (batch)
+uint64_t preprocessed_outputs_a2b_index = 0;         // online read cursor
+uint64_t total_preprocessed_outputs_a2b = 0;
+bool g_a2b_adder_active = false;                       // route zero_add output-shares to the dedicated buffer
+#endif
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
 uint64_t num_generated[num_players * player_multiplier] = {0};

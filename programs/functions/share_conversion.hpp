@@ -130,6 +130,50 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
     }
 #endif
 
+#if DEBUG_A2B == 1
+    // Reveal the boolean A2B operands S1 (=bits(m)) and S2 (=bits(-lambda)) and check S1+S2 == v.
+    // Reveal is mirrored in both phases (prepare_reveal stores an output share in PRE) so rounds stay matched.
+    {
+        const int NLANES = DATTYPE / BITLENGTH;  // arithmetic SIMD lanes
+        for (int i = 0; i < len; i++)
+        {
+            s1[i].prepare_reveal_to_all();
+            s2[i].prepare_reveal_to_all();
+            val[i].get_share_pointer()[0].prepare_reveal_to_all();
+        }
+        Share::communicate();
+        if (current_phase == PHASE_LIVE && PARTY == 0)
+            printf("[A2B CALL] len=%d  NLANES(arith)=%d  DATTYPE=%d BITLENGTH=%d\n", len, NLANES, DATTYPE, BITLENGTH);
+        for (int i = 0; i < len; i++)
+        {
+            alignas(sizeof(DATATYPE)) UINT_TYPE r1[DATTYPE];
+            alignas(sizeof(DATATYPE)) UINT_TYPE r2[DATTYPE];
+            alignas(sizeof(DATATYPE)) UINT_TYPE vr[DATTYPE];
+            s1[i].complete_reveal_to_all(r1);
+            s2[i].complete_reveal_to_all(r2);
+            val[i].get_share_pointer()[0].complete_reveal_to_all(vr);
+            if (current_phase == PHASE_LIVE && i == 0)
+            {
+                DATATYPE myl = val[i].get_share_pointer()[0].get_mask();
+                printf("[A2B MASK P%d] elem0 lane0 mask l=%u (0x%08x)\n",
+                       PARTY, (unsigned)(((UINT_TYPE*)&myl)[0]), (unsigned)(((UINT_TYPE*)&myl)[0]));
+            }
+            if (current_phase == PHASE_LIVE && PARTY == 0 && i < 4)
+            {
+                for (int ln = 0; ln < NLANES; ln++)
+                {
+                    UINT_TYPE mm = r1[ln];
+                    UINT_TYPE nl = r2[ln];
+                    UINT_TYPE exp_s2 = (UINT_TYPE)(vr[ln] - mm);
+                    printf("  [i=%d lane=%d] v=%lld m=%lld S2=%lld expS2=%lld S2ok=%d\n",
+                           i, ln, (long long)(INT_TYPE)vr[ln], (long long)(INT_TYPE)mm,
+                           (long long)(INT_TYPE)nl, (long long)(INT_TYPE)exp_s2, (int)(nl == exp_s2));
+                }
+            }
+        }
+    }
+#endif
+
 
 std::vector<ADDER_TYPE<bk - bm, S>> adders;
     adders.reserve(len);
@@ -191,6 +235,31 @@ Share::communicate(); // For resharings
             adders[i].step();
         }
         Share::communicate();
+    }
+#endif
+#if DEBUG_A2B == 1
+    // Reliable check: reveal the ADDER's MSB output and compare to sign(v). msb's PRE share == online share
+    // (the adder is deterministic), so this reveal is trustworthy (unlike the S2 reveal above).
+    {
+        for (int i = 0; i < len; i++) {
+            msb[i].prepare_reveal_to_all();
+            val[i].get_share_pointer()[0].prepare_reveal_to_all();
+        }
+        Share::communicate();
+        int wrong = 0;
+        for (int i = 0; i < len; i++) {
+            DATATYPE mb = msb[i].complete_reveal_to_all();
+            alignas(sizeof(DATATYPE)) UINT_TYPE vr[DATTYPE];
+            val[i].get_share_pointer()[0].complete_reveal_to_all(vr);
+            if (current_phase == PHASE_LIVE && PARTY == 0) {
+                int sign_bit = (int)(((UINT_TYPE*)&mb)[0] & 1);
+                int expected = ((INT_TYPE)vr[0] < 0) ? 1 : 0;
+                if (sign_bit != expected) wrong++;
+                if (i < 6) printf("[MSB i=%d] v=%lld msb=%d expected=%d %s\n",
+                    i, (long long)(INT_TYPE)vr[0], sign_bit, expected, sign_bit == expected ? "OK" : "WRONG");
+            }
+        }
+        if (current_phase == PHASE_LIVE && PARTY == 0) printf("[MSB] wrong=%d/%d\n", wrong, len);
     }
 #endif
     delete[] s1;

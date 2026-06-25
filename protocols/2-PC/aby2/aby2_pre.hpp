@@ -148,6 +148,9 @@ class ABY2_PRE_Share
        return l;
    }
 #endif
+#if DEBUG_A2B == 1
+   Datatype get_m_debug() const { return SET_ALL_ZERO(); }
+#endif
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -1616,6 +1619,12 @@ static void get_fc_triples_from_file()
                 case CaseBooleanAddition:
                 {
                     auto lxly = boolean_addition_triple_c[curr_boolean_addition_triple_index++];
+#if DEBUG_A2B == 1
+                    if (curr_boolean_addition_triple_index <= 5)
+                        printf("[CBA] P%d curr_c=%lu -> lxly_b[0][%lu]  c_share[lane0]=0x%08x\n",
+                               PARTY, (unsigned long)(curr_boolean_addition_triple_index - 1),
+                               (unsigned long)boolean_triple_counter[0], (unsigned)(((UINT_TYPE*)&lxly)[0]));
+#endif
                     lxly_b[0][boolean_triple_counter[0]++] = lxly;
                     break;
                 }
@@ -1649,6 +1658,11 @@ static void get_fc_triples_from_file()
         delete[] triple_type[0];
         delete[] preprocessed_outputs_bool[0];
         preprocessed_outputs_bool[0] = lxly_b[0];
+#if DEBUG_A2B == 1
+        printf("[PRE-INSTALL] P%d preprocessed_outputs_bool[0]=%p  [0][lane0]=0x%08x  total_bool_out=%lu\n",
+               PARTY, (void*)preprocessed_outputs_bool[0], (unsigned)(((UINT_TYPE*)&lxly_b[0][0])[0]),
+               (unsigned long)total_num_boolean_output_triples[0]);
+#endif
         /* preprocessed_outputs_bool_index[0] = 0; */
         // preprocessed_outputs_bool_input_index[0] = 0;
 

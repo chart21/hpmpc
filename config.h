@@ -139,6 +139,23 @@
 #define TRUNC_DELAYED 0  // Delay CONV truncation until next ReLU
 #endif
 
+#ifndef VERIFY_CORRECTNESS
+#define VERIFY_CORRECTNESS 0
+// Debug: reveal each NN layer's output (ufixed->float) and compare against a plaintext float
+// recomputation of the same layer (fed the revealed input of the previous layer + revealed weights),
+// printing the max abs error per layer to localize which layer diverges. Adds reveals in BOTH phases
+// (pre & live) so rounds stay matched; comparison/printing only in the live phase.
+#endif
+
+#ifndef DEBUG_A2B
+#define DEBUG_A2B 0
+// Debug: inside get_msb_range, reveal the boolean S1 (=bits(m)) and S2 (=bits(-lambda)) operands of the
+// A2B adder and print S1+S2 (should equal the cleartext value v) plus the resulting sign. Localizes
+// whether an A2B failure is in the S1/S2 preprocessing (e.g. the A2B_ONLINE_OPT boolean addition of
+// bits(-l0)+bits(-l1)) or in the boolean adder itself. Reveal is mirrored in BOTH phases so rounds stay
+// matched; printing only in the live phase, P0.
+#endif
+
 #ifndef AVG_OPT
 #define AVG_OPT \
     1  // Optimize average pooling truncation failure by reducing fractional bits, Currently only works with

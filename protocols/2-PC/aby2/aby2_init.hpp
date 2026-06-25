@@ -68,7 +68,10 @@ class ABY2_init
    {
        return SET_ALL_ZERO();
    }
-   #endif 
+   #endif
+#if DEBUG_A2B == 1
+   Datatype get_m_debug() const { return SET_ALL_ZERO(); }
+#endif
     template <typename func_add>
     ABY2_init zero_add(Datatype assign, func_add ADD) const
     {

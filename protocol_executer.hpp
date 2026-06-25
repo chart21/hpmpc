@@ -22,6 +22,8 @@
 #include "programs/benchmarks/bench_use_cases.hpp"
 #elif FUNCTION_IDENTIFIER < 48
 #include "programs/benchmarks/bench_nn.hpp"
+#elif FUNCTION_IDENTIFIER == 53
+#include "programs/tests/test_conv_pool.hpp"
 #elif FUNCTION_IDENTIFIER < 54
 #include "programs/benchmarks/bench_conv_alt.hpp"
 #elif FUNCTION_IDENTIFIER == 54
