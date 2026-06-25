@@ -72,6 +72,9 @@ class ABY2_init
 #if DEBUG_A2B == 1
    Datatype get_m_debug() const { return SET_ALL_ZERO(); }
 #endif
+#if A2B_ONLINE_OPT == 1
+   void set_mask(Datatype mask) { }   // init phase: no-op
+#endif
     template <typename func_add>
     ABY2_init zero_add(Datatype assign, func_add ADD) const
     {

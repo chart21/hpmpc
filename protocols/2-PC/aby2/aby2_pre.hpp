@@ -151,6 +151,9 @@ class ABY2_PRE_Share
 #if DEBUG_A2B == 1
    Datatype get_m_debug() const { return SET_ALL_ZERO(); }
 #endif
+#if A2B_ONLINE_OPT == 1
+   void set_mask(Datatype mask) { l = mask; }   // used by the deferred A2B batch to set S2.l = c
+#endif
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const

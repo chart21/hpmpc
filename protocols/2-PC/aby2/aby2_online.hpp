@@ -278,6 +278,9 @@ class ABY2_ONLINE_Share
 #if DEBUG_A2B == 1
    Datatype get_m_debug() const { return m; }
 #endif
+#if A2B_ONLINE_OPT == 1
+   void set_mask(Datatype mask) { l = mask; }
+#endif
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_mult(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -482,7 +485,12 @@ class ABY2_ONLINE_Share
     ABY2_ONLINE_Share zero_add(Datatype assign, func_add ADD) const
     {
         ABY2_ONLINE_Share c;
+#if A2B_ONLINE_OPT == 1
+        // While the deferred A2B adder runs, its zero_add output-shares come from the dedicated buffer.
+        auto retrieved = g_a2b_adder_active ? retrieve_output_share_a2b() : retrieve_output_share();
+#else
         auto retrieved = retrieve_output_share();
+#endif
         c.m = ADD(ADD(assign,l),ADD(m,retrieved));
         c.l = assign;
         return c;

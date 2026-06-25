@@ -75,6 +75,23 @@ uint64_t preprocessed_outputs_a2b_input_index = 0;   // PRE write cursor (batch)
 uint64_t preprocessed_outputs_a2b_index = 0;         // online read cursor
 uint64_t total_preprocessed_outputs_a2b = 0;
 bool g_a2b_adder_active = false;                       // route zero_add output-shares to the dedicated buffer
+#include <functional>
+#include <vector>
+std::vector<std::function<void()>> g_deferred_a2b_circuits;  // boolean circuits deferred past the boolean addition
+uint64_t g_a2b_c_consume_index = 0;   // cursor into boolean_addition_triple_c used to set S2.l=c in the batch
+uint64_t g_a2b_zero_add_count = 0;    // # of adder zero_adds (counted in the batch) -> dedicated buffer size
+
+// dedicated-buffer accessors mirroring retrieve_output_share / store_output_share
+inline DATATYPE retrieve_output_share_a2b()
+{
+    preprocessed_outputs_a2b_index += 1;
+    return preprocessed_outputs_a2b[preprocessed_outputs_a2b_index - 1];
+}
+inline void store_output_share_a2b(DATATYPE val)
+{
+    preprocessed_outputs_a2b[preprocessed_outputs_a2b_input_index] = val;
+    preprocessed_outputs_a2b_input_index += 1;
+}
 #endif
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
