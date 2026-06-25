@@ -235,6 +235,11 @@ class ABY2_PRE_Share
     ABY2_PRE_Share zero_add(Datatype assign, func_add ADD) const
     {
         pre_send_to_live(PNEXT, ADD(l, assign));
+#if A2B_ONLINE_OPT == 1
+        // Deferred A2B adder: its output-shares go to the dedicated buffer, received in a separate loop
+        // (after the round-0 loop consumes the forward-pass sends). Just count here; no CaseDefault push.
+        if (g_a2b_adder_active) { g_a2b_zero_add_count++; return ABY2_PRE_Share(assign); }
+#endif
         triple_type[0][triple_type_index[0]++] = CaseDefault;
         return ABY2_PRE_Share(assign);
     }
@@ -1379,6 +1384,21 @@ static void get_fc_triples_from_file()
         generate_beaver_triples(
                 ips, port, process_offset, num_boolean_addition_triples, 0, "BOOLEANADDITION");
 #endif
+        // === deferred A2B adder batch ===
+        // The boolean-addition result c (boolean_addition_triple_c) now exists. Run every deferred MSB
+        // adder here, BEFORE the round-0 loop, so the adder's boolean_triple_c consumption keeps the same
+        // ordering it had in the non-deferred path. Each closure sets S2.l=c and runs the adder; its
+        // zero_add output-shares are pre_sent here (and counted) and received into the dedicated buffer
+        // after the round-0 loop (below).
+        g_a2b_c_consume_index = 0;
+        g_a2b_zero_add_count = 0;
+        // The deferred adders consume boolean_triple_c via their constructors. In the non-deferred path
+        // this happens in the forward pass, leaving curr at N for the round-0 CaseAND. Here the forward
+        // pass skipped it, so start at 0 (matching the online phase) and let the round-0 loop continue.
+        curr_boolean_triple_index = 0;
+        g_a2b_adder_active = true;
+        for (auto& circuit : g_deferred_a2b_circuits) circuit();
+        g_a2b_adder_active = false;
         deinit_booleanAdditionBeaverAB();
 #endif
 
@@ -1656,6 +1676,18 @@ static void get_fc_triples_from_file()
                 }
             }
         }
+#if A2B_ONLINE_OPT == 1
+        // Receive the deferred adders' zero_add output-shares into the dedicated buffer. The round-0 loop
+        // just consumed the forward-pass sends, so the next FIFO entries are the batch's adder pre_sends
+        // (sent in forward-pass/adder-step order, which is exactly the online read order).
+        g_a2b_buffer.clear();
+        g_a2b_buffer.reserve(g_a2b_zero_add_count);
+        for (uint64_t i = 0; i < g_a2b_zero_add_count; i++)
+            store_output_share_a2b(pre_receive_from_live(PNEXT));
+        preprocessed_outputs_a2b = g_a2b_buffer.data();
+        preprocessed_outputs_a2b_index = 0;
+        g_deferred_a2b_circuits.clear();
+#endif
         arithmetic_triple_index = 0;
         boolean_triple_index = 0;
         delete[] triple_type[0];

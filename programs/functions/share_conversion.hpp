@@ -175,6 +175,38 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 #endif
 
 
+#if A2B_ONLINE_OPT == 1
+    // Deferred-adder restructure: in the PRE phase the boolean-addition result c is not yet available,
+    // so the MSB adder (which re-masks S2 with c) is deferred. Stash a closure that, after the boolean
+    // addition has produced c, sets S2.l = c and runs the adder, with its zero_add output-shares routed
+    // to the dedicated buffer (g_a2b_adder_active). The closure owns s1/s2. Online/INIT run normally.
+    if (current_phase == PHASE_PRE)
+    {
+        // NOTE: the caller's `msb` array (e.g. ReLU's `y`) is freed right after get_msb_range returns in
+        // the forward pass, long before this closure runs. In PRE the adder's msb OUTPUT is irrelevant
+        // (only its preprocessing matters), so write into a throwaway buffer.
+        g_deferred_a2b_circuits.push_back([s1, s2, len]() {
+            for (int i = 0; i < len; i++)
+                for (int b = 0; b < bk - bm; b++)
+                    s2[i][b].set_mask(boolean_addition_triple_c[g_a2b_c_consume_index++]);
+            S* dummy_msb = new S[len];
+            std::vector<ADDER_TYPE<bk - bm, S>> adders;
+            adders.reserve(len);
+            for (int i = 0; i < len; i++) adders.emplace_back(s1[i], s2[i], dummy_msb[i]);
+            while (!adders[0].is_done())
+            {
+                for (int i = 0; i < len; i++) adders[i].step();
+                Share::communicate();
+            }
+            delete[] dummy_msb;
+            delete[] s1;
+            delete[] s2;
+        });
+        return;   // closure owns s1/s2; do not run the adder or free here
+    }
+    if (current_phase == PHASE_LIVE) g_a2b_adder_active = true;
+#endif
+
 std::vector<ADDER_TYPE<bk - bm, S>> adders;
     adders.reserve(len);
     for (int i = 0; i < len; i++)
@@ -182,10 +214,10 @@ std::vector<ADDER_TYPE<bk - bm, S>> adders;
         /* adder[i].set_values(s1[i], s2[i], y[i]); */
         adders.emplace_back(s1[i], s2[i], msb[i]);
     }
-   
+
 #if RESHARE_OPT == 1
 Share::communicate(); // For resharings
-#endif 
+#endif
 #if PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0
     while (!adders[0].is_done())
     {
@@ -236,6 +268,9 @@ Share::communicate(); // For resharings
         }
         Share::communicate();
     }
+#endif
+#if A2B_ONLINE_OPT == 1
+    if (current_phase == PHASE_LIVE) g_a2b_adder_active = false;
 #endif
 #if DEBUG_A2B == 1
     // Reliable check: reveal the ADDER's MSB output and compare to sign(v). msb's PRE share == online share

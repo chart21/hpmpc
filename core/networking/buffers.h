@@ -81,16 +81,14 @@ std::vector<std::function<void()>> g_deferred_a2b_circuits;  // boolean circuits
 uint64_t g_a2b_c_consume_index = 0;   // cursor into boolean_addition_triple_c used to set S2.l=c in the batch
 uint64_t g_a2b_zero_add_count = 0;    // # of adder zero_adds (counted in the batch) -> dedicated buffer size
 
-// dedicated-buffer accessors mirroring retrieve_output_share / store_output_share
+std::vector<DATATYPE> g_a2b_buffer;   // PRE fills this (growable); online reads via preprocessed_outputs_a2b
+// dedicated-buffer accessors. PRE store grows the vector; before the online phase the pointer is set to
+// the vector's data and the read cursor reset.
+inline void store_output_share_a2b(DATATYPE val) { g_a2b_buffer.push_back(val); }
 inline DATATYPE retrieve_output_share_a2b()
 {
     preprocessed_outputs_a2b_index += 1;
     return preprocessed_outputs_a2b[preprocessed_outputs_a2b_index - 1];
-}
-inline void store_output_share_a2b(DATATYPE val)
-{
-    preprocessed_outputs_a2b[preprocessed_outputs_a2b_input_index] = val;
-    preprocessed_outputs_a2b_input_index += 1;
 }
 #endif
 uint64_t send_in_last_round[num_players - 1] = {0};

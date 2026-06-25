@@ -69,12 +69,38 @@ Unit test: `programs/tests/test_conv_pool.hpp` `relu_large_test` (`TEST_RELU_LAR
 
 Debug helpers: `scratch/adder_debug/find_ubd.py` (flags use-before-def of prefix wires in a generated adder — this is what found the RESHARE_OPT bug) and `verify_adder.py` (Beaver-mask telescoping check).
 
-## Remaining work
+## Implementation progress (deferred MSB adder — DONE; cascade — remaining)
 
-1. Defer every boolean circuit in `get_msb_range` (and the bit-injection path) during the PRE forward pass; store `(s1, s2, msb, len)`.
-2. Batched run after the `BOOLEANADDITION` generation in `complete_preprocessing`: set `S2.l = c` (needs a setter into the private share `l`), run the deferred circuits with `g_a2b_adder_active=true`.
-3. Route `zero_add`'s retrieve/store to `preprocessed_outputs_a2b` under the flag (PRE store + online read), with its own send/receive in the batch.
-4. Repeat for the bit-injection / downstream boolean circuits.
+The MSB-adder deferral is implemented and wired, all behind `#if A2B_ONLINE_OPT == 1`:
+- `get_msb_range` (`share_conversion.hpp`): in PRE, pushes a closure (`g_deferred_a2b_circuits`) capturing
+  `s1/s2/len` (NOT `msb` — the caller frees it; the PRE adder's msb output is irrelevant, so it writes to a
+  throwaway). Online/INIT run the adder normally; online sets `g_a2b_adder_active` so its zero_adds read the
+  dedicated buffer.
+- `complete_preprocessing` (`aby2_pre.hpp`): after the BOOLEANADDITION generation, a batch resets
+  `curr_boolean_triple_index=0`, sets `g_a2b_adder_active`, and runs all closures (each sets `S2.l=c` from
+  `boolean_addition_triple_c`, then runs the adder, pre_sending its zero_add shares). After the round-0 loop
+  consumes the forward-pass sends, a dedicated-receive loop reads the batch's zero_add shares into
+  `g_a2b_buffer` (→ `preprocessed_outputs_a2b`).
+- PRE `zero_add` routes to count-only (no `CaseDefault`) under the flag.
+
+**Verified:** the batch runs to completion, c-consume = `num_boolean_addition_triples` exactly (160=160),
+and the earlier use-after-free crash is fixed. Baseline (`A2B_ONLINE_OPT=0`) stays func53 **6/6**.
+
+**The remaining blocker — the cascade.** With only the adder deferred, func53 with `A2B_ONLINE_OPT=1` is
+**2/6** (worse than the pre-deferral 4/6). Reason: deferring the adder leaves the PRE `msb` a placeholder
+(garbage `l`), so the **bit-injection / maxpool-selection** (and any boolean op consuming `msb`) sets up
+its preprocessing against the wrong mask. So the deferral must cover the **entire boolean chain** after each
+A2B — bit-injections and comparisons too — exactly as the design says ("skip all boolean circuits"). That is
+a substantially larger change: the bit-injection must capture its `(value, msb)` inputs in the forward pass
+and run in the same batch after the real `msb` is computed, producing the (arithmetic) ReLU output that
+downstream arithmetic layers can still consume as a placeholder (arithmetic preprocessing is value-
+independent, so only boolean ops cascade).
+
+### Remaining work
+1. Generalize the deferral to the bit-injection path (`Relu.hpp` `RELU_range_in_place_opt` after `get_msb_range`,
+   and the maxpool selection): defer those boolean ops, capture their inputs, run them in the batch after the
+   adder so they see the real `msb`.
+2. Confirm the `boolean_triple_c` / default-buffer / send-receive ordering holds once the full chain is deferred.
 
 ## Appendix — RESHARE_OPT fix (already in HEAD)
 
