@@ -96,11 +96,52 @@ and run in the same batch after the real `msb` is computed, producing the (arith
 downstream arithmetic layers can still consume as a placeholder (arithmetic preprocessing is value-
 independent, so only boolean ops cascade).
 
+### Bit-injection deferral — ATTEMPTED across two blockers; NOT working (reverted to the adder-only checkpoint)
+
+Deferring the ReLU bit-injection was attempted in full (`g_a2b_keep_msb` makes the deferred adder write the
+**real** msb into the caller's `y`; ReLU defers everything after `get_msb` into a closure pushed right after
+the adder closure). Two distinct blockers were found and the second is unresolved, so the whole bit-injection
+deferral was reverted (the adder-only checkpoint `7078ff1` remains; baseline `A2B_ONLINE_OPT=0` still 6/6).
+
+**Blocker 1 — use-after-free of the forward-pass data buffers (SOLVED).** Orchestration in
+`protocol_executer.hpp`: `FUNCTION<PROTOCOL_PRE>(…)` (line ~443) runs the whole PRE forward pass — for func53
+that is `test_conv_pool`, whose layer buffers (`input`, `relu.output`) are **function locals** — then
+**returns**, destroying them; **only afterwards** (line ~473) does `complete_preprocessing(…)` run the batch.
+The adder deferral is safe (its closures touch only heap-owned `s1/s2/y`), but the bit-injection reads/writes
+`val` (the layer shares) → the batched closure scribbled freed memory → `free(): unaligned chunk` crash during
+MULTIPLEXER generation. **Fix that worked:** defer the bit-injection on a closure-owned **copy** of `val`
+(`vcopy = new sint[len]; vcopy[i]=val[i]`). The copy captures `val[i].l` (the only input the PRE
+`prepare_opt_bit_injection` reads — it never reads `val.m`); the discarded `out` writes don't matter (the
+online recomputes them). With the copy, **the crash is gone.**
+
+**Blocker 2 — deterministic wrong values (UNRESOLVED).** With the copy, the isolated ReLU (func53,
+`TEST_*`=0 except `TEST_RELU_LARGE`) runs but every output is large garbage (e.g. expected 0 → 27123762),
+**byte-for-byte identical run to run.** Investigated:
+- *getRandomVal desync — RULED OUT as the cause.* The PPA MSB adder draws `getRandomVal(PSELF)` 53× per
+  element for its AND-gate masks (`ppa_msb_unsafe_and_ab.hpp` lines 102–108). Deferring it moves those draws
+  from the forward pass into the batch, a different position in the shared per-link PRNG stream
+  (`core/utils/randomizer.h`: `num_generated[link]` + `aes_counter[link]`). I added PRNG snapshot/restore
+  (`snapshot_prng`/`restore_prng`) and restored PSELF before the batched adder so it draws the online's exact
+  sequence. **Result: byte-for-byte identical garbage** → the adder's mask draws do **not** affect the
+  revealed output. That fits: the adder's output *mask* is deterministic (`zero_add`: `c.l = assign`, not
+  `getRandomVal`, `aby2_online.hpp:495`) and its output *value* is buffered (the dedicated `a2b` buffer), so
+  the msb is consistent regardless of the 53 draws.
+- *So the garbage is in the bit-injection's arithmetic-output path*, not the adder masks. The online reads
+  `lalb`/`lb1lb2` via `retrieve_output_share_arithmetic()` (`aby2_online.hpp:144-145`); these come from
+  `multiplexer_triple_c`/`cot_triple_c` produced in the round-0 loop (`aby2_pre.hpp:1654-1664` → `lxly_a[0]`).
+  By hand the order looked aligned for the isolated case (only the bit-injection writes the arithmetic
+  buffer), yet the values are wrong and deterministic — i.e. a real misalignment I did **not** pinpoint within
+  budget. The next concrete step is to instrument `lalb`/`lb1lb2` (and the consumed `msb`) at the online read
+  vs the PRE store to locate it, and most likely give the deferred bit-injection a **dedicated arithmetic
+  output buffer** (exactly as the adder's `zero_add` needed `preprocessed_outputs_a2b`), since the round-0
+  loop stores its outputs at the *batch* position while the online reads at the *forward-pass* position.
+
 ### Remaining work
-1. Generalize the deferral to the bit-injection path (`Relu.hpp` `RELU_range_in_place_opt` after `get_msb_range`,
-   and the maxpool selection): defer those boolean ops, capture their inputs, run them in the batch after the
-   adder so they see the real `msb`.
-2. Confirm the `boolean_triple_c` / default-buffer / send-receive ordering holds once the full chain is deferred.
+1. Instrument the deferred bit-injection's `lalb`/`lb1lb2` (PRE store vs online read) to locate the
+   deterministic misalignment; expect to need a dedicated arithmetic-output buffer for deferred ops.
+2. The use-after-free fix (closure-owned `val` copy) and the `g_a2b_keep_msb` real-msb plumbing are validated
+   and should be re-applied once blocker 2 is solved. The PRNG snapshot/restore is **not** needed.
+3. Repeat the deferral for maxpool selection / comparisons.
 
 ## Appendix — RESHARE_OPT fix (already in HEAD)
 
