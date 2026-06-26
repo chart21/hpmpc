@@ -148,12 +148,6 @@ class ABY2_PRE_Share
        return l;
    }
 #endif
-#if DEBUG_A2B == 1
-   Datatype get_m_debug() const { return SET_ALL_ZERO(); }
-#endif
-#if A2B_ONLINE_OPT == 1
-   void set_mask(Datatype mask) { l = mask; }   // used by the deferred A2B batch to set S2.l = c
-#endif
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_mult(ABY2_PRE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -235,11 +229,6 @@ class ABY2_PRE_Share
     ABY2_PRE_Share zero_add(Datatype assign, func_add ADD) const
     {
         pre_send_to_live(PNEXT, ADD(l, assign));
-#if A2B_ONLINE_OPT == 1
-        // Deferred A2B adder: its output-shares go to the dedicated buffer, received in a separate loop
-        // (after the round-0 loop consumes the forward-pass sends). Just count here; no CaseDefault push.
-        if (g_a2b_adder_active) { g_a2b_zero_add_count++; return ABY2_PRE_Share(assign); }
-#endif
         triple_type[0][triple_type_index[0]++] = CaseDefault;
         return ABY2_PRE_Share(assign);
     }
@@ -1384,21 +1373,6 @@ static void get_fc_triples_from_file()
         generate_beaver_triples(
                 ips, port, process_offset, num_boolean_addition_triples, 0, "BOOLEANADDITION");
 #endif
-        // === deferred A2B adder batch ===
-        // The boolean-addition result c (boolean_addition_triple_c) now exists. Run every deferred MSB
-        // adder here, BEFORE the round-0 loop, so the adder's boolean_triple_c consumption keeps the same
-        // ordering it had in the non-deferred path. Each closure sets S2.l=c and runs the adder; its
-        // zero_add output-shares are pre_sent here (and counted) and received into the dedicated buffer
-        // after the round-0 loop (below).
-        g_a2b_c_consume_index = 0;
-        g_a2b_zero_add_count = 0;
-        // The deferred adders consume boolean_triple_c via their constructors. In the non-deferred path
-        // this happens in the forward pass, leaving curr at N for the round-0 CaseAND. Here the forward
-        // pass skipped it, so start at 0 (matching the online phase) and let the round-0 loop continue.
-        curr_boolean_triple_index = 0;
-        g_a2b_adder_active = true;
-        for (auto& circuit : g_deferred_a2b_circuits) circuit();
-        g_a2b_adder_active = false;
         deinit_booleanAdditionBeaverAB();
 #endif
 
@@ -1642,12 +1616,6 @@ static void get_fc_triples_from_file()
                 case CaseBooleanAddition:
                 {
                     auto lxly = boolean_addition_triple_c[curr_boolean_addition_triple_index++];
-#if DEBUG_A2B == 1
-                    if (curr_boolean_addition_triple_index <= 5)
-                        printf("[CBA] P%d curr_c=%lu -> lxly_b[0][%lu]  c_share[lane0]=0x%08x\n",
-                               PARTY, (unsigned long)(curr_boolean_addition_triple_index - 1),
-                               (unsigned long)boolean_triple_counter[0], (unsigned)(((UINT_TYPE*)&lxly)[0]));
-#endif
                     lxly_b[0][boolean_triple_counter[0]++] = lxly;
                     break;
                 }
@@ -1676,28 +1644,11 @@ static void get_fc_triples_from_file()
                 }
             }
         }
-#if A2B_ONLINE_OPT == 1
-        // Receive the deferred adders' zero_add output-shares into the dedicated buffer. The round-0 loop
-        // just consumed the forward-pass sends, so the next FIFO entries are the batch's adder pre_sends
-        // (sent in forward-pass/adder-step order, which is exactly the online read order).
-        g_a2b_buffer.clear();
-        g_a2b_buffer.reserve(g_a2b_zero_add_count);
-        for (uint64_t i = 0; i < g_a2b_zero_add_count; i++)
-            store_output_share_a2b(pre_receive_from_live(PNEXT));
-        preprocessed_outputs_a2b = g_a2b_buffer.data();
-        preprocessed_outputs_a2b_index = 0;
-        g_deferred_a2b_circuits.clear();
-#endif
         arithmetic_triple_index = 0;
         boolean_triple_index = 0;
         delete[] triple_type[0];
         delete[] preprocessed_outputs_bool[0];
         preprocessed_outputs_bool[0] = lxly_b[0];
-#if DEBUG_A2B == 1
-        printf("[PRE-INSTALL] P%d preprocessed_outputs_bool[0]=%p  [0][lane0]=0x%08x  total_bool_out=%lu\n",
-               PARTY, (void*)preprocessed_outputs_bool[0], (unsigned)(((UINT_TYPE*)&lxly_b[0][0])[0]),
-               (unsigned long)total_num_boolean_output_triples[0]);
-#endif
         /* preprocessed_outputs_bool_index[0] = 0; */
         // preprocessed_outputs_bool_input_index[0] = 0;
 

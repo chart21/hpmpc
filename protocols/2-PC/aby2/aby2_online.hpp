@@ -275,12 +275,6 @@ class ABY2_ONLINE_Share
        return l;
    }
     #endif
-#if DEBUG_A2B == 1
-   Datatype get_m_debug() const { return m; }
-#endif
-#if A2B_ONLINE_OPT == 1
-   void set_mask(Datatype mask) { l = mask; }
-#endif
 
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_ONLINE_Share prepare_mult(ABY2_ONLINE_Share b, func_add ADD, func_sub SUB, func_mul MULT) const
@@ -485,12 +479,7 @@ class ABY2_ONLINE_Share
     ABY2_ONLINE_Share zero_add(Datatype assign, func_add ADD) const
     {
         ABY2_ONLINE_Share c;
-#if A2B_ONLINE_OPT == 1
-        // While the deferred A2B adder runs, its zero_add output-shares come from the dedicated buffer.
-        auto retrieved = g_a2b_adder_active ? retrieve_output_share_a2b() : retrieve_output_share();
-#else
         auto retrieved = retrieve_output_share();
-#endif
         c.m = ADD(ADD(assign,l),ADD(m,retrieved));
         c.l = assign;
         return c;
@@ -752,27 +741,11 @@ class ABY2_ONLINE_Share
     #endif
     {
 #if A2B_ONLINE_OPT == 1
-#if DEBUG_A2B == 1
-        { static int once = 0; if (current_phase == PHASE_LIVE && once < 3) { once++;
-            printf("[S2READ] P%d bool_index[0]=%lu m=%d k=%d  buf_ptr=%p  buf[idx][lane0]=0x%08x\n", PARTY,
-                   (unsigned long)preprocessed_outputs_bool_index[0], m, k,
-                   (void*)preprocessed_outputs_bool[0],
-                   (unsigned)(((UINT_TYPE*)&preprocessed_outputs_bool[0][preprocessed_outputs_bool_index[0]])[0])); } }
-#endif
         for (int i = m; i < k; i++)
         {
-            out[i - m].l = retrieve_output_share_bool();
+            out[i - m].l = retrieve_output_share_bool(); 
             out[i - m].m = SET_ALL_ZERO(); // v = lv = 0 xor lv1 xor lv2
         }
-#if DEBUG_A2B == 1
-        { static int once2 = 0; if (current_phase == PHASE_LIVE && once2 < 3) { once2++;
-            DATATYPE planes[BITLENGTH];
-            for (int i = 0; i < BITLENGTH; i++) planes[i] = (i < k - m) ? out[i].l : SET_ALL_ZERO();
-            alignas(sizeof(DATATYPE)) UINT_TYPE recon[DATTYPE];
-            unorthogonalize_boolean(planes, recon);
-            printf("[S2VAL] P%d online_S2.l(=c) recon lane0=0x%08x  (XOR both parties -> bits(-lambda))\n",
-                   PARTY, (unsigned)recon[0]); } }
-#endif
 #else
 #if PARTY == 1
         Datatype temp_p1[BITLENGTH];

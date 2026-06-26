@@ -443,16 +443,6 @@ void generateBooleanAB2DummyTriples(type a[],
 #endif
 }
 
-#if DEBUG_A2B == 1
-// Isolation-test hooks for the A2B preprocessing boolean addition.
-static bool g_bool_add_test = false;          // when true, the addition prints its per-bit carry shares
-static bool g_bool_add_tag = false;           // when true, the REAL addition overwrites its output c with a
-                                              // per-element tag (element e -> value e) so the c->S2
-                                              // consumption mapping can be traced from the online side.
-static int  g_bool_add_carry_share[64];       // this party's carry-into-bit[r] share (lane 0 bit), indexed by r
-void test_bool_addition_isolated(const std::string& ip, int port);  // fwd decl, defined after the addition
-#endif
-
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
 // Input: ip and port of the other party to connect to
 // Output: [c] will be filled with shares of a + b
@@ -469,13 +459,6 @@ void generateBooleanAdditionDummyTriples(type a[],
     constexpr int num_bits_per_input = REDUCED_BITLENGTH_k - REDUCED_BITLENGTH_m;
     if(num_triples == 0) return;
     if(num_bits_per_input <= 0) return;
-#if DEBUG_A2B == 1
-    // Run the isolation test once, before the first real generation, reusing the same ip/port/keys.
-    {
-        static bool ran_test = false;
-        if (!ran_test) { ran_test = true; g_bool_add_test = true; test_bool_addition_isolated(ip, port); g_bool_add_test = false; /* g_bool_add_tag stays false: keep real output */ }
-    }
-#endif
 #if CHEETAH_WAN_OPT == 1
     auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port + CHEETAH_PORT_OFFSET, CHEETAH_THREADS, PROCESS_NUM);
 #endif
@@ -529,9 +512,6 @@ void generateBooleanAdditionDummyTriples(type a[],
 #else
                     cv[i][r] = bv[i][r] ^ carry_last[i];
 #endif
-#if DEBUG_A2B == 1
-                    if (g_bool_add_test && i == 0) g_bool_add_carry_share[r] = (int)(((UINT_TYPE*)&carry_last[i])[0] & 1);
-#endif
                     //prepare
 #if PARTY == 0
                     ot_a[i] = av[i][r] ^ carry_last[i];
@@ -555,9 +535,6 @@ void generateBooleanAdditionDummyTriples(type a[],
                     carry_this[i] = carry_this[i] ^ carry_last[i];
                     carry_last[i] = carry_this[i];
                 }
-#if DEBUG_A2B == 1
-                if (g_bool_add_test) g_bool_add_carry_share[r] = (int)(((UINT_TYPE*)&carry_last[0])[0] & 1);
-#endif
                 // update result
                 for (uint64_t i = 0; i < num_triples ; i++)
 #if PARTY == 0
@@ -590,33 +567,12 @@ void generateBooleanAdditionDummyTriples(type a[],
                     carry_this[i] = carry_this[i] ^ carry_last[i];
                     carry_last[i] = carry_this[i];
                 }
-#if DEBUG_A2B == 1
-                if (g_bool_add_test) g_bool_add_carry_share[r] = (int)(((UINT_TYPE*)&carry_last[0])[0] & 1);
-#endif
                 // update result
                 for (uint64_t i = 0; i < num_triples ; i++)
 #if PARTY == 0
                     cv[i][r] = av[i][r] ^ carry_last[i];
 #else
                     cv[i][r] = bv[i][r] ^ carry_last[i];
-#endif
-#if DEBUG_A2B == 1
-                if (g_bool_add_tag) {
-                    printf("[TAG] P%d overwrite ran: num_triples(elements)=%lu, k=%d\n", PARTY, (unsigned long)num_triples, k);
-                    // overwrite output: element e -> integer value e (P0 holds the tag, P1 holds 0)
-                    for (uint64_t e = 0; e < num_triples; e++) {
-                        alignas(sizeof(DATATYPE)) UINT_TYPE tagvals[DATTYPE];
-                        for (int ln = 0; ln < DATTYPE; ln++) tagvals[ln] = (UINT_TYPE)e;
-                        DATATYPE tagplanes[BITLENGTH];
-                        orthogonalize_boolean(tagvals, tagplanes);
-                        for (int bit = 0; bit < k; bit++)
-#if PARTY == 0
-                            cv[e][bit] = tagplanes[bit];
-#else
-                            cv[e][bit] = SET_ALL_ZERO();
-#endif
-                    }
-                }
 #endif
                 delete[] carry_last;
                 delete[] carry_this;
@@ -630,77 +586,6 @@ void generateBooleanAdditionDummyTriples(type a[],
         }
     }
 }
-
-#if DEBUG_A2B == 1
-// Isolation test for the A2B preprocessing boolean addition with KNOWN inputs.
-// P0's mask = l0, P1's mask = l1; the addition should produce shares of bits(-(l0+l1)).
-// Each party prints its own c-share (lane 0) and its per-bit carry shares; XOR the two parties'
-// outputs offline to reconstruct.  Reuses the exact production addition code.
-void test_bool_addition_isolated(const std::string& ip, int port)
-{
-    constexpr int K = REDUCED_BITLENGTH_k - REDUCED_BITLENGTH_m;
-    if (K <= 0) return;
-
-    // (l0, l1) pairs to test: small, large, and "real-mask-like".  Also test MULTI-ELEMENT (2 values).
-    const UINT_TYPE pairs[][2] = {
-        {5u, 3u},
-        {1234567890u, 987654321u},
-        {0x80000000u, 0x80000000u},   // both MSB set -> carry out of MSB
-        {0xAAAAAAAAu, 0x55555555u},   // alternating, no carries
-        {609238994u, 609238991u},     // sums near a real failing case
-    };
-    const int NP = sizeof(pairs) / sizeof(pairs[0]);
-
-    // ---- single-element tests over the pairs ----
-    for (int p = 0; p < NP; p++)
-    {
-        UINT_TYPE myl = (PARTY == 0) ? pairs[p][0] : pairs[p][1];
-        alignas(sizeof(DATATYPE)) UINT_TYPE in_data[DATTYPE];
-        for (int i = 0; i < DATTYPE; i++) in_data[i] = 0;
-        in_data[0] = (UINT_TYPE)(0 - myl);
-        DATATYPE inp[BITLENGTH];
-        orthogonalize_boolean(in_data, inp);
-        DATATYPE aa[BITLENGTH], bb[BITLENGTH], cc[BITLENGTH];
-        for (int i = 0; i < K; i++) { aa[i] = inp[i]; bb[i] = inp[i]; }
-        generateBooleanAdditionDummyTriples(aa, bb, cc, BITLENGTH, (uint64_t)K * DATTYPE, ip, port);
-        alignas(sizeof(DATATYPE)) UINT_TYPE out_data[DATTYPE];
-        unorthogonalize_boolean(cc, out_data);
-        printf("[BA-TEST P%d single] l0=%u l1=%u  expected=%d  c_share[lane0]=0x%08x\n",
-               PARTY, (unsigned)pairs[p][0], (unsigned)pairs[p][1],
-               (int)(INT_TYPE)(0 - (pairs[p][0] + pairs[p][1])), (unsigned)out_data[0]);
-    }
-
-    // ---- ALL-LANES test: fill every one of the DATTYPE boolean lanes with a distinct value,
-    //      exactly like the real prepare_A2B_S2 bundles up to DATTYPE values per A2B element. ----
-    {
-        UINT_TYPE p0_masks[DATTYPE], p1_masks[DATTYPE];
-        for (int ln = 0; ln < DATTYPE; ln++) {
-            p0_masks[ln] = (UINT_TYPE)(100000u * (ln + 1) + 12345u);     // P0's mask for lane ln
-            p1_masks[ln] = (UINT_TYPE)(700000007u - 50000u * (ln + 1));  // P1's mask for lane ln
-        }
-        alignas(sizeof(DATATYPE)) UINT_TYPE in_data[DATTYPE];
-        for (int ln = 0; ln < DATTYPE; ln++)
-            in_data[ln] = (UINT_TYPE)(0 - ((PARTY == 0) ? p0_masks[ln] : p1_masks[ln]));
-        DATATYPE inp[BITLENGTH];
-        orthogonalize_boolean(in_data, inp);
-        DATATYPE aa[BITLENGTH], bb[BITLENGTH], cc[BITLENGTH];
-        for (int i = 0; i < K; i++) { aa[i] = inp[i]; bb[i] = inp[i]; }
-        generateBooleanAdditionDummyTriples(aa, bb, cc, BITLENGTH, (uint64_t)K * DATTYPE, ip, port);
-        alignas(sizeof(DATATYPE)) UINT_TYPE out_data[DATTYPE];
-        unorthogonalize_boolean(cc, out_data);
-        // each party prints its share per lane; XOR offline. Also print expected per lane (same on both).
-        printf("[BA-TEST P%d alllanes] per-lane c_share (lane0..%d):", PARTY, DATTYPE - 1);
-        for (int ln = 0; ln < DATTYPE; ln++) printf(" %08x", (unsigned)out_data[ln]);
-        printf("\n");
-        if (PARTY == 0) {
-            printf("[BA-TEST EXPECTED alllanes]:");
-            for (int ln = 0; ln < DATTYPE; ln++)
-                printf(" %08x", (unsigned)(UINT_TYPE)(0 - (p0_masks[ln] + p1_masks[ln])));
-            printf("\n");
-        }
-    }
-}
-#endif
 
 // Input: For Party 0: Array of messages m0 stored in a[]
 // Input: For Party 1: Array of selection bits stored in a[]
