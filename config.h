@@ -161,7 +161,7 @@
 #define MSB0_OPT 1  // Exploit that the MSB of many layers is 0 when uing truncation
 #endif
 
-#ifndef AVG1_OPT  // OPtimze avaerage pooling for denominator = 1
+#ifndef AVG1_OPT  // Optimze avaerage pooling for denominator = 1
 #define AVG1_OPT 1
 #endif
 

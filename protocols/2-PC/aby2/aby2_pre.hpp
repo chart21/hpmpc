@@ -369,11 +369,22 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
     {
+        // No-index (non-interleaved GEMM) path: mask_and_send is called in LINEAR output order, so the triple
+        // buffer is consumed linearly -> store the sentinel so the triple gen uses position = k.
 #if PARTY == 0
         l = getRandomVal(PSELF);
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        g_mwk_p1_indices.push_back(G_MWK_LINEAR_SENTINEL);  // P0 needs the order for the triple delta-exchange
+#endif
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        // P1 freely picks its conv-triple share [lxly]_2 = r1 (fresh PSELF random, synced with LIVE), uses it
+        // as the output mask l_P1 = TRUNC(-r1), and stores r1 so the ConvTriple gen forces P1's share to r1.
+        Datatype r1 = getRandomVal(PSELF);
+        g_mwk_p1_masks.push_back(r1);
+        g_mwk_p1_indices.push_back(G_MWK_LINEAR_SENTINEL);
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
 #else
         l = TRUNC(l);
-        // l = TRUNC(lxly); // TODO: Needs to be assigned
 #endif
 
     }
@@ -381,8 +392,19 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
+        // Indexed (interleaved/tiled GEMM) path: record the per-layer output index so the triple gen can SCATTER
+        // r1 into c[index] (the tiled call order != linear c[] order). Push on BOTH parties so the triple
+        // delta-exchange iterates send/recv in the same order.
 #if PARTY == 0
         l = getRandomVal(PSELF);
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        g_mwk_p1_indices.push_back((uint64_t) index);
+#endif
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        Datatype r1 = getRandomVal(PSELF);
+        g_mwk_p1_masks.push_back(r1);
+        g_mwk_p1_indices.push_back((uint64_t) index);
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
 #else
         l = TRUNC(l);
 #endif
@@ -411,6 +433,27 @@ class ABY2_PRE_Share
         auto c = ABY2_PRE_Share(getRandomVal(PSELF));
         pre_send_to_live(
             PNEXT, ADD(c.l, SUB(SET_ALL_ZERO(), TRUNC(MULT(l, b), fractional_bits))));  // Share Trunc -(lv1 * b) + lz
+        return c;
+#endif
+    }
+
+    // PRE counterpart of prepare_mult_public_fixed_a_known (see aby2_online.hpp). The OWNER sends its c.m online
+    // (it depends on the live data), so here it just reserves its mask and expects to RECEIVE (CaseDefault). The
+    // NON-OWNER's online c.m is just its fresh mask, so it pre-sends c.l to the owner.
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+    ABY2_PRE_Share prepare_mult_public_fixed_a_known(const Datatype b,
+                                                     func_mul MULT,
+                                                     func_add ADD,
+                                                     func_sub SUB,
+                                                     func_trunc TRUNC,
+                                                     int fractional_bits = FRACTIONAL) const
+    {
+#if PSELF == DATAOWNER
+        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        return ABY2_PRE_Share(getRandomVal(PSELF));
+#else
+        auto c = ABY2_PRE_Share(getRandomVal(PSELF));
+        pre_send_to_live(PNEXT, c.l);  // non-owner's online c.m == its fresh mask
         return c;
 #endif
     }
@@ -472,6 +515,11 @@ class ABY2_PRE_Share
 
     template <typename func_add, typename func_sub>
     void complete_public_mult_fixed(func_add ADD, func_sub SUB)
+    {
+    }
+
+    template <typename func_add, typename func_sub>
+    void complete_mult_public_fixed_a_known(func_add ADD, func_sub SUB)
     {
     }
 

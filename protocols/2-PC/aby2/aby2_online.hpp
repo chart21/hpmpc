@@ -34,6 +34,12 @@ class ABY2_ONLINE_Share
                                                 int fractional_bits = FRACTIONAL) const
     {
         ABY2_ONLINE_Share c;
+        // SecureML local truncation (P0 = Trunc(share0), P1 = -Trunc(-share1); share0 = m-l, share1 = -l).
+        // NOTE: for the PUBLIC_WEIGHTS conv (TRUNC_DELAYED=0) this wraps systematically -> ~random accuracy. None of
+        // the 4 sign conventions fix it (the two complementary ones give ~11-15%, the non-complementary ones break
+        // the secret/well-masked case). The real cause is the raw conv-output share distribution, which needs
+        // re-masking before truncation; the working path is TRUNC_DELAYED=1 (truncates the re-masked bit-injection
+        // output instead). See memory/public-weights-broken.md.
 #if PARTY == 0
         c.m = TRUNC(MULT(SUB(m, l), b), fractional_bits);  // Share Trunc(mv1 * b)
 #else
@@ -46,7 +52,32 @@ class ABY2_ONLINE_Share
 #endif
         return c;
     }
-    
+
+    // Truncation for a freshly shared DATA-OWNER input (e.g. conv1 with PUBLIC_WEIGHTS). The standard 2PC input
+    // sharing leaves the non-owner with a ZERO mask, so the value a = m - l sits ENTIRELY in the owner's share
+    // (the (0, value) sharing makes the SecureML local truncation in prepare_mult_public_fixed wrap systematically).
+    // Here the owner, who holds a in the clear and knows the public b, truncates a*b locally with an ARITHMETIC
+    // shift (TRUNC must be OP_SHIFT_RIGHTF -> exact, no wrap), re-masks, and sends; the non-owner only contributes
+    // a fresh mask. See memory/public-weights-broken.md.
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+    ABY2_ONLINE_Share prepare_mult_public_fixed_a_known(const Datatype b,
+                                                        func_mul MULT,
+                                                        func_add ADD,
+                                                        func_sub SUB,
+                                                        func_trunc TRUNC,
+                                                        int fractional_bits = FRACTIONAL) const
+    {
+        ABY2_ONLINE_Share c;
+        c.l = getRandomVal(PSELF);
+#if PSELF == DATAOWNER
+        c.m = ADD(TRUNC(MULT(SUB(m, l), b), fractional_bits), c.l);  // Trunc(a*b) + mask, a = m - l (in the clear)
+        send_to_live(PNEXT, c.m);
+#else
+        c.m = c.l;  // non-owner contributes only its fresh mask (its value share is 0)
+#endif
+        return c;
+    }
+
     template <typename func_mul>
     ABY2_ONLINE_Share mult_a_known_to_evaluators(const ABY2_ONLINE_Share b,
                                                 func_mul MULT) const
@@ -125,6 +156,19 @@ class ABY2_ONLINE_Share
         Datatype msg = retrieve_output_share();
 #endif
         m = ADD(m, msg);  // recv Trunc(mv1 * b) - TRunc(lv1 * b)
+    }
+
+    // Owner sent its c.m online; it retrieves the non-owner's fresh mask (pre-sent in PRE). The non-owner receives
+    // the owner's c.m online. Both reconstruct m_c = Trunc(a*b) + (c.l_owner + c.l_nonowner).
+    template <typename func_add, typename func_sub>
+    void complete_mult_public_fixed_a_known(func_add ADD, func_sub SUB)
+    {
+#if PSELF == DATAOWNER
+        Datatype msg = retrieve_output_share();   // non-owner's c.l (precomputed in PRE)
+#else
+        Datatype msg = receive_from_live(PNEXT);  // owner's online c.m = Trunc(a*b) + c.l_owner
+#endif
+        m = ADD(m, msg);
     }
 
     void prepare_opt_bit_injection(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[])
@@ -468,7 +512,7 @@ class ABY2_ONLINE_Share
         ABY2_ONLINE_Share c;
 /* c.l = getRandomVal(PSELF); */
 #if PARTY == 0
-        c.m = MULT(b.m, l); // -wx - [lw1lx]
+        c.m = MULT(SUB(b.m, b.l), l); // l_w0*(m_x - l_x0); with [lxly]=l_w0*l_x1 -> l_w0*lambda_x
 #else
         // lalb2 is the error
 #endif
@@ -560,11 +604,13 @@ class ABY2_ONLINE_Share
         lxly = retrieve_output_share_arithmetic();
 #if PARTY == 0
         l = getRandomVal(PSELF); 
-        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);  //ToDO: Check whether SET_ALL_ZERO modification is needed, ab - [lxlw2] 
+        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l); 
         send_to_live(PNEXT, m);
 #else
-        l = TRUNC(lxly);
-        // Party1 sends nothing, defines mask as lxly2 share
+        /* l = TRUNC(lxly); */
+        Datatype r1 = getRandomVal(PSELF); // == [lxly]_2 chosen in PRE (synced PSELF PRNG) == retrieved lxly
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
+        // Party1 sends nothing; mask l_P1 = TRUNC(-r1), consistent with PRE and the forced conv-triple share
 #endif
     }
 
@@ -574,12 +620,14 @@ class ABY2_ONLINE_Share
         Datatype lxly;
         lxly = retrieve_output_share_arithmetic(0, index);
 #if PARTY == 0
-        l = getRandomVal(PSELF); 
-        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);  //ToDO: Check whether SET_ALL_ZERO modification is needed, ab - [lxlw2] 
+        l = getRandomVal(PSELF);
+        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);
         send_to_live(PNEXT, m);
 #else
-        l = TRUNC(lxly);
-        // Party1 sends nothing, defines mask as lxly2 share
+        /* l = TRUNC(lxly); */
+        Datatype r1 = getRandomVal(PSELF); // == [lxly]_2 chosen in PRE (synced PSELF PRNG) == retrieved lxly
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
+        // Party1 sends nothing; mask l_P1 = TRUNC(-r1), consistent with PRE and the forced conv-triple share
 #endif
     }
 

@@ -212,6 +212,16 @@ class sint_t
         return result;
     }
 
+    sint_t prepare_mult_public_fixed_a_known(const UINT_TYPE other, int fractional_bits = FRACTIONAL) const
+    {
+        sint_t result;
+        for (int i = 0; i < BITLENGTH; ++i)
+        {
+            result[i] = shares[i].prepare_mult_public_fixed_a_known(other, fractional_bits);
+        }
+        return result;
+    }
+
     sint_t prepare_trunc_share(int fractional_bits = FRACTIONAL) const
     {
         sint_t result;
@@ -235,6 +245,14 @@ class sint_t
         for (int i = 0; i < BITLENGTH; ++i)
         {
             shares[i].complete_public_mult_fixed();
+        }
+    }
+
+    void complete_mult_public_fixed_a_known()
+    {
+        for (int i = 0; i < BITLENGTH; ++i)
+        {
+            shares[i].complete_mult_public_fixed_a_known();
         }
     }
 

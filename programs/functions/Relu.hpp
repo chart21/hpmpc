@@ -73,6 +73,22 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 
     Share::communicate();
 
+#if TRUNC_DELAYED == 1 && BIT_INJECTION_TRUNC_SIM == 1 && FUSE_RELU_AVG == 1 && PUBLIC_WEIGHTS == 0 && \
+    (TRUNC_APPROACH == 0 || TRUNC_APPROACH == 4)
+    // When BOTH a linear delayed truncation (from the preceding conv/fc) and an average-pool division (denom > 1)
+    // fall on this ReLU, handle the linear delayed truncation up front here (as conv/avgpool do under if(delayed))
+    // and let the bit injection fold ONLY the avg division. This splits one 2*FRACTIONAL local truncation into two
+    // FRACTIONAL ones, which is more robust (lower SecureML wrap probability).
+    // GATED to PUBLIC_WEIGHTS == 0: for public weights trunc_pr_in_place on the RAW conv output wraps systematically
+    // (same issue as prepare_mult_public_fixed), so public weights instead fold both into the re-masking bit
+    // injection (which works), see bit_injection_opt_range / memory/public-weights-broken.md.
+    if (delayed && curr_denom > 1)
+    {
+        trunc_pr_in_place(val, len);
+        delayed = false;  // consumed: bit_injection_opt_range now sees fold_delayed == false (avg division only)
+    }
+#endif
+
     S* y = new S[len];
     get_msb_range<m, k, Datatype, Share>(val, y, len);
 

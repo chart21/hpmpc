@@ -99,6 +99,23 @@ class ABY2_init
 #endif
         return ABY2_init();
     }
+
+    // a-known truncation: the OWNER is the online sender, the non-owner pre-sends its mask (see aby2_online.hpp).
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+    ABY2_init prepare_mult_public_fixed_a_known(const Datatype b,
+                                                func_mul MULT,
+                                                func_add ADD,
+                                                func_sub SUB,
+                                                func_trunc TRUNC,
+                                                int fractional_bits = FRACTIONAL) const
+    {
+#if PSELF == DATAOWNER
+        send_to_(PNEXT);
+#else
+        pre_send_to_(PNEXT);
+#endif
+        return ABY2_init();
+    }
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
         ABY2_init local_mult_and_trunc(const Datatype b,
                                         func_mul MULT,
@@ -153,6 +170,16 @@ class ABY2_init
         receive_from_(PNEXT);
 #else
         store_output_share_();
+#endif
+    }
+
+    template <typename func_add, typename func_sub>
+    void complete_mult_public_fixed_a_known(func_add ADD, func_sub SUB)
+    {
+#if PSELF == DATAOWNER
+        store_output_share_();
+#else
+        receive_from_(PNEXT);
 #endif
     }
 

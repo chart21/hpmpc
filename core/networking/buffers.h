@@ -17,7 +17,9 @@ uint64_t total_send_pre[num_players - 1] = {0};
 uint64_t total_recv_pre[num_players - 1] = {0};
 #endif
 
-#if FUSE_RELU_AVG == 1
+#if FUSE_RELU_AVG == 1 || (TRUNC_DELAYED == 1 && BIT_INJECTION_TRUNC_SIM == 1)
+// Average-pool denominator folded into the fused ReLU bit injection. Also used (defaulting to 1 = a pure
+// truncation) when a delayed truncation is folded into the bit injection (BIT_INJECTION_TRUNC_SIM == 1).
 int curr_denom = 1;
 #endif
 
@@ -65,11 +67,32 @@ DATATYPE* preprocessed_outputs = nullptr;
 uint64_t preprocessed_outputs_input_index = 0;
 uint64_t preprocessed_outputs_index = 0;
 uint64_t total_preprocessed_outputs = 0;
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+// MODELWEIGHTS_KNOWN: in PRE, P1 freely picks its conv/FC triple share [lxly]_2 = r1 (a fresh PSELF random),
+// uses it to set the output mask l_P1 = TRUNC(-r1), and pushes r1 here so the ConvTriple/FCTriple generation
+// forces P1's share to r1 (P0 gets cross - r1). This makes l_P1 and [lxly]_2 consistent for the reveal.
+#include <vector>
+std::vector<DATATYPE> g_mwk_p1_masks;
+// The GEMM (programs/functions/GEMM.hpp) is TILE_SIZE-tiled, so mask_and_send is called in TILE order, not in
+// linear output-index order. Online reads the triple via retrieve_output_share_arithmetic(0, index) (index =
+// row+jj), so it is order-independent. But the ConvTriple buffer c[] is laid out in LINEAR output order. We must
+// therefore record the output index of each pushed r1 (in the same tile order on BOTH parties so the triple
+// delta-exchange runs in a matching send/recv order) and SCATTER r1 into c[index] during triple generation.
+std::vector<uint64_t> g_mwk_p1_indices;
+#define G_MWK_LINEAR_SENTINEL ((uint64_t) -1)  // non-interleaved GEMM path: consume c[] linearly
+uint64_t g_mwk_p1_masks_consume = 0;
+#endif
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
 uint64_t num_generated[num_players * player_multiplier] = {0};
 
 int use_srng_for_inputs = 1;
+
+// Set by the conv/FC layer to its is_first flag: 1 only for the network's first layer, whose input is the raw
+// data-owner share (non-owner mask = 0). With PUBLIC_WEIGHTS, that layer's truncation routes to the *_a_known
+// variant (owner truncates in the clear) instead of the SecureML local truncation, which wraps on the (0,value)
+// sharing. See protocols/2-PC/aby2/aby2_online.hpp prepare_mult_public_fixed_a_known.
+int g_a_known_input = 0;
 
 int current_phase = 0;   // Keeping track of current pahse
 int process_offset = 0;  // offsets the starting input for each process, base port must be multiple of 1000 to work

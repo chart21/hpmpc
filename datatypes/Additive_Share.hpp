@@ -63,6 +63,14 @@ class Additive_Share : public Share_Type
         return Share_Type::prepare_mult_public_fixed(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, OP_TRUNCF, fractional_bits);
     }
 
+    // a-known (data-owner holds the value) truncation: owner truncates in the clear with an ARITHMETIC shift
+    // (OP_SHIFT_RIGHTF, not the logical OP_TRUNCF) so signed values are handled correctly.
+    Additive_Share prepare_mult_public_fixed_a_known(const UINT_TYPE b, int fractional_bits = FRACTIONAL) const
+    {
+        return Share_Type::prepare_mult_public_fixed_a_known(PROMOTE(b), OP_MULT, OP_ADD, OP_SUB, OP_SHIFT_RIGHTF,
+                                                             fractional_bits);
+    }
+
 #if FUSE_RELU_AVG == 1
     Additive_Share local_mult_and_trunc(const UINT_TYPE b, int fractional_bits = FRACTIONAL) const
     {
@@ -86,6 +94,8 @@ class Additive_Share : public Share_Type
     }
 
     void complete_public_mult_fixed() { Share_Type::complete_public_mult_fixed(OP_ADD, OP_SUB); }
+
+    void complete_mult_public_fixed_a_known() { Share_Type::complete_mult_public_fixed_a_known(OP_ADD, OP_SUB); }
 
     bool operator==(const Additive_Share& b) const
     {

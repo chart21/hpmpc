@@ -257,7 +257,14 @@ if(current_phase != PHASE_INIT) {
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
                         // do nothing
 #else
-                        C[row + jj] = C[row + jj].prepare_mult_public_fixed(1);  // initiate truncation
+#if DATAOWNER != -1
+                        // First layer's input is the raw data-owner share (non-owner mask = 0): the SecureML local
+                        // truncation wraps on it, so the owner truncates a*b in the clear instead.
+                        if (g_a_known_input)
+                            C[row + jj] = C[row + jj].prepare_mult_public_fixed_a_known(1);
+                        else
+#endif
+                            C[row + jj] = C[row + jj].prepare_mult_public_fixed(1);  // initiate truncation
 #endif
 #endif
                     }
@@ -343,7 +350,12 @@ void complete_GEMM_CPU(T* C, const int m, const int p)
 #else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #else
-                    C[row + jj].complete_public_mult_fixed();
+#if DATAOWNER != -1
+                    if (g_a_known_input)
+                        C[row + jj].complete_mult_public_fixed_a_known();
+                    else
+#endif
+                        C[row + jj].complete_public_mult_fixed();
 #endif
 #endif
                 }
