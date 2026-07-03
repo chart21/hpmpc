@@ -369,16 +369,14 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
     {
-        // No-index (non-interleaved GEMM) path: mask_and_send is called in LINEAR output order, so the triple
-        // buffer is consumed linearly -> store the sentinel so the triple gen uses position = k.
+        // No-index (non-interleaved GEMM) path: mask_and_send is called in LINEAR output order, so the
+        // prescribed buffer is filled linearly -> store the sentinel so the triple gen uses position = k.
 #if PARTY == 0
         l = getRandomVal(PSELF);
-#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-        g_mwk_p1_indices.push_back(G_MWK_LINEAR_SENTINEL);  // P0 needs the order for the triple delta-exchange
-#endif
 #elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         // P1 freely picks its conv-triple share [lxly]_2 = r1 (fresh PSELF random, synced with LIVE), uses it
-        // as the output mask l_P1 = TRUNC(-r1), and stores r1 so the ConvTriple gen forces P1's share to r1.
+        // as the output mask l_P1 = TRUNC(-r1), and stores r1: the AB2P ConvTriple generation PRESCRIBES P1's
+        // share to r1 (P0 decrypts cross - r1), so no share-fixing communication is needed.
         Datatype r1 = getRandomVal(PSELF);
         g_mwk_p1_masks.push_back(r1);
         g_mwk_p1_indices.push_back(G_MWK_LINEAR_SENTINEL);
@@ -392,14 +390,11 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
-        // Indexed (interleaved/tiled GEMM) path: record the per-layer output index so the triple gen can SCATTER
-        // r1 into c[index] (the tiled call order != linear c[] order). Push on BOTH parties so the triple
-        // delta-exchange iterates send/recv in the same order.
+        // Indexed (interleaved/tiled GEMM) path: record the per-layer output index so the prescribed buffer
+        // can be SCATTERED to presc[index] (the tiled call order != linear c[] order). P1-only: P0 no longer
+        // participates in any share fixing (its share comes out of the AB2P decryption directly).
 #if PARTY == 0
         l = getRandomVal(PSELF);
-#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-        g_mwk_p1_indices.push_back((uint64_t) index);
-#endif
 #elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         Datatype r1 = getRandomVal(PSELF);
         g_mwk_p1_masks.push_back(r1);

@@ -744,6 +744,46 @@ void generateLayerDummyTriples(type** a,
         for(size_t n = 0; n < params.size(); n++) {
             auto p = params[n];
 
+            // MODELWEIGHTS_KNOWN: P1's triple share [lxly]_2 must equal the r1 it picked in aby2_pre
+            // (l_P1 = TRUNC(-r1), PRNG-synced with the online phase). Assemble those r1 into a PRESCRIBED
+            // buffer in linear c[] order and hand it to the AB2P (flipped-HE) triple generation: P1's share
+            // is r1 by construction and P0 DECRYPTS cross - r1 - no share-fixing communication needed.
+            // SCATTER: CONV runs ONE GEMM per batch element (convolutional_layer.h), so its recorded index
+            // resets per batch (0..N-1); c[] is batch-major, so add the batch offset (k/N)*N. FC runs a
+            // SINGLE GEMM with m=batch, so its recorded index is already global (stride = ysz => offset 0).
+            [[maybe_unused]] const UINT_TYPE* prescribed = nullptr;
+            [[maybe_unused]] std::vector<UINT_TYPE> presc_buf;
+            [[maybe_unused]] constexpr bool mwk_layer =
+                MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 &&
+                (std::is_same_v<LayerParams, ConvolutionParameter> ||
+                 std::is_same_v<LayerParams, FullyConnectedParameter>);
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+            if constexpr (mwk_layer)
+            {
+                const uint64_t N = (uint64_t)p.y_size_per_batch;  // per-batch output size (oc*oh*ow)
+                const uint64_t ysz = N * p.batchSize;
+                constexpr bool is_conv = std::is_same_v<LayerParams, ConvolutionParameter>;
+                const uint64_t bstride = is_conv ? N : ysz;
+#if PARTY == 1
+                presc_buf.resize(ysz);
+                for (uint64_t k = 0; k < ysz; k++) {
+                    uint64_t raw = g_mwk_p1_indices[g_mwk_p1_masks_consume + k];
+                    uint64_t idx = (raw == G_MWK_LINEAR_SENTINEL) ? k : ((k / bstride) * bstride + raw);
+                    // factor == 1 here, but DATATYPE may still be a SIMD type in other builds of this TU:
+                    // use the generic unvectorize (a plain copy for factor == 1) instead of a scalar cast
+                    alignas(sizeof(DATATYPE)) UINT_TYPE temp[DATTYPE / BITLENGTH];
+                    unorthogonalize_arithmetic(&g_mwk_p1_masks[g_mwk_p1_masks_consume + k], temp, 1);
+                    presc_buf[idx] = temp[0];
+                }
+                prescribed = presc_buf.data();
+#endif
+                g_mwk_p1_masks_consume += ysz;
+            }
+#endif
+            [[maybe_unused]] const Utils::PROTO layer_proto =
+                mwk_layer ? Utils::PROTO::AB2P
+                          : (A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2);
+
             if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
                 if (p.dilation != 1) {
                     std::cerr << "DILATION != 1 is not supported\n";
@@ -768,10 +808,15 @@ void generateLayerDummyTriples(type** a,
                         uint_y + y_index_counter,
                         conv,
                         CHEETAH_PARTY, CHEETAH_THREADS,
-                        A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
-                        factor, A_KNOWN == 0
+                        layer_proto,
+                        factor, A_KNOWN == 0,
+                        prescribed
                 );
 #else
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+                static_assert(MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0,
+                              "MODELWEIGHTS_KNOWN_DURING_PREPROCESSING requires CHEETAH_CONV_TYPE == 0");
+#endif
                 parms[n] = conv;
                 total_batches += conv.batchsize;
 #endif
@@ -782,8 +827,9 @@ void generateLayerDummyTriples(type** a,
                         uint_y + y_index_counter,
                         p.batchSize, p.in_feat, p.out_feat,
                         CHEETAH_PARTY, CHEETAH_THREADS,
-                        A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
-                        factor
+                        layer_proto,
+                        factor,
+                        prescribed
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
                 Iface::generateBNTriplesCheetah(keys,
@@ -799,42 +845,6 @@ void generateLayerDummyTriples(type** a,
                 std::cerr << "Unsupported Param type\n";
             }
             // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
-#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-            // Force P1's triple share [lxly]_2 to the r1 it picked in aby2_pre (uint_y == (UINT_TYPE*)c here).
-            if constexpr (std::is_same_v<LayerParams, ConvolutionParameter> ||
-                          std::is_same_v<LayerParams, FullyConnectedParameter>)
-            {
-                const uint64_t N = (uint64_t)p.y_size_per_batch;  // per-batch output size (oc*oh*ow)
-                uint64_t ysz = N * p.batchSize;
-                auto* mwk_io = keys.get_ios(CHEETAH_THREADS)[0];
-                // SCATTER: CONV runs ONE GEMM per batch element (convolutional_layer.h), so its recorded index
-                // resets per batch (0..N-1); c[] is batch-major, so add the batch offset (k/N)*N. FC runs a SINGLE
-                // GEMM with m=batch, so its recorded index is already global (offset stride = ysz => offset 0).
-                // P0 and P1 share an identical g_mwk_p1_indices order, so the delta send/recv stays aligned.
-                constexpr bool is_conv = std::is_same_v<LayerParams, ConvolutionParameter>;
-                const uint64_t bstride = is_conv ? N : ysz;
-#if PARTY == 1
-                for (uint64_t k = 0; k < ysz; k++) {
-                    uint64_t raw = g_mwk_p1_indices[g_mwk_p1_masks_consume + k];
-                    uint64_t idx = (raw == G_MWK_LINEAR_SENTINEL) ? k : ((k / bstride) * bstride + raw);
-                    DATATYPE r1 = g_mwk_p1_masks[g_mwk_p1_masks_consume + k];
-                    DATATYPE delta = OP_SUB(r1, c[y_index_counter + idx]);
-                    mwk_io->send_data(&delta, sizeof(DATATYPE));
-                    c[y_index_counter + idx] = r1;
-                }
-                mwk_io->flush();
-#else
-                for (uint64_t k = 0; k < ysz; k++) {
-                    uint64_t raw = g_mwk_p1_indices[g_mwk_p1_masks_consume + k];
-                    uint64_t idx = (raw == G_MWK_LINEAR_SENTINEL) ? k : ((k / bstride) * bstride + raw);
-                    DATATYPE delta;
-                    mwk_io->recv_data(&delta, sizeof(DATATYPE));
-                    c[y_index_counter + idx] = OP_SUB(c[y_index_counter + idx], delta);
-                }
-#endif
-                g_mwk_p1_masks_consume += ysz;
-            }
-#endif
             y_index_counter += p.y_size_per_batch * p.batchSize;
 #if CHEETAH_WAN_OPT == 1
             if (n + 1 < params.size()) {
@@ -893,6 +903,40 @@ void generateLayerDummyTriples(type** a,
 
             p.batchSize *= factor;
 
+            // MODELWEIGHTS_KNOWN: assemble P1's PRESCRIBED triple shares (the r1 it picked in aby2_pre)
+            // in the UNVECTORIZED y[] layout ([lane j][batch-major output]) and hand them to the AB2P
+            // (flipped-HE) triple generation - no share-fixing communication (see the factor==1 path).
+            [[maybe_unused]] const UINT_TYPE* prescribed = nullptr;
+            [[maybe_unused]] std::vector<UINT_TYPE> presc_buf;
+            [[maybe_unused]] constexpr bool mwk_layer =
+                MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 &&
+                (std::is_same_v<LayerParams, ConvolutionParameter> ||
+                 std::is_same_v<LayerParams, FullyConnectedParameter>);
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+            if constexpr (mwk_layer)
+            {
+                const uint64_t N = (uint64_t)p.y_size_per_batch;  // per-batch output size (oc*oh*ow)
+                constexpr bool is_conv = std::is_same_v<LayerParams, ConvolutionParameter>;
+                const uint64_t bstride = is_conv ? N : y_size;
+#if PARTY == 1
+                presc_buf.resize(factor * y_size);
+                for (uint64_t k = 0; k < y_size; k++) {
+                    uint64_t raw = g_mwk_p1_indices[g_mwk_p1_masks_consume + k];
+                    uint64_t idx = (raw == G_MWK_LINEAR_SENTINEL) ? k : ((k / bstride) * bstride + raw);
+                    alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+                    unorthogonalize_arithmetic(&g_mwk_p1_masks[g_mwk_p1_masks_consume + k], temp, 1);
+                    for (int j = 0; j < factor; j++)
+                        presc_buf[j * y_size + idx] = temp[j];
+                }
+                prescribed = presc_buf.data();
+#endif
+                g_mwk_p1_masks_consume += y_size;
+            }
+#endif
+            [[maybe_unused]] const Utils::PROTO layer_proto =
+                mwk_layer ? Utils::PROTO::AB2P
+                          : (A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB);
+
             if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
                 if (p.dilation != 1) {
                     std::cerr << "DILATION != 1 is not supported\n";
@@ -914,16 +958,18 @@ void generateLayerDummyTriples(type** a,
                         x, w, y,
                         conv,
                         CHEETAH_PARTY, CHEETAH_THREADS,
-                        A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
-                        factor
+                        layer_proto,
+                        factor, false,
+                        prescribed
                 );
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
                 Iface::generateFCTriplesCheetah(keys,
                         x, w, y,
                         p.batchSize, p.in_feat, p.out_feat,
                         CHEETAH_PARTY, CHEETAH_THREADS,
-                        A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
-                        factor
+                        layer_proto,
+                        factor,
+                        prescribed
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
                 Iface::generateBNTriplesCheetah(keys,
@@ -943,41 +989,6 @@ void generateLayerDummyTriples(type** a,
                     temp[j] = y[j * y_size + i];
                 orthogonalize_arithmetic(temp, c + c_index + i, 1);
             }
-
-#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-            // Force P1's triple share [lxly]_2 to the r1 it picked in aby2_pre (so l_P1 = TRUNC(-r1) and the
-            // share are consistent for the reveal). P0 receives delta = r1 - c1 and sets its share to cross-r1.
-            if constexpr (std::is_same_v<LayerParams, ConvolutionParameter> ||
-                          std::is_same_v<LayerParams, FullyConnectedParameter>)
-            {
-                const uint64_t N = (uint64_t)p.y_size_per_batch;  // per-batch output size (oc*oh*ow)
-                auto* mwk_io = keys.get_ios(CHEETAH_THREADS)[0];
-                // SCATTER (see factor==1 path above): CONV resets its index per batch (0..N-1) into batch-major c[]
-                // -> add batch offset (k/N)*N; FC index is already global (stride = y_size => offset 0).
-                constexpr bool is_conv = std::is_same_v<LayerParams, ConvolutionParameter>;
-                const uint64_t bstride = is_conv ? N : y_size;
-#if PARTY == 1
-                for (uint64_t k = 0; k < y_size; k++) {
-                    uint64_t raw = g_mwk_p1_indices[g_mwk_p1_masks_consume + k];
-                    uint64_t idx = (raw == G_MWK_LINEAR_SENTINEL) ? k : ((k / bstride) * bstride + raw);
-                    DATATYPE r1 = g_mwk_p1_masks[g_mwk_p1_masks_consume + k];
-                    DATATYPE delta = OP_SUB(r1, c[c_index + idx]);
-                    mwk_io->send_data(&delta, sizeof(DATATYPE));
-                    c[c_index + idx] = r1;
-                }
-                mwk_io->flush();
-#else
-                for (uint64_t k = 0; k < y_size; k++) {
-                    uint64_t raw = g_mwk_p1_indices[g_mwk_p1_masks_consume + k];
-                    uint64_t idx = (raw == G_MWK_LINEAR_SENTINEL) ? k : ((k / bstride) * bstride + raw);
-                    DATATYPE delta;
-                    mwk_io->recv_data(&delta, sizeof(DATATYPE));
-                    c[c_index + idx] = OP_SUB(c[c_index + idx], delta);
-                }
-#endif
-                g_mwk_p1_masks_consume += y_size;
-            }
-#endif
 
             delete[] x;
             delete[] w;
