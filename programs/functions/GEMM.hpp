@@ -307,9 +307,13 @@ if(current_phase != PHASE_INIT) {
 #endif
 #endif
 #endif
-#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1 && PUBLIC_WEIGHTS == 0
+// The tiled (INTERLEAVE_COMM) sends above retrieve their conv lxly INDEXED (cursor + index, no
+// advance), so the cursor must be bumped past the layer block afterwards. This applies for ANY
+// A_KNOWN (the send sites are not A_KNOWN-gated): with the old `A_KNOWN == 1` guard, A_KNOWN=0 left
+// the cursor stuck at the conv block and every subsequent arithmetic retrieval read shifted values.
+#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && PUBLIC_WEIGHTS == 0
         if(current_phase == PHASE_LIVE)
-            preprocessed_outputs_arithmetic_index[0] += m * p; //TODO: Check if this is correct and neccessary
+            preprocessed_outputs_arithmetic_index[0] += m * p;
 #endif
 #if FUSE_CONV_BN_SIM == 1
     delete[] C_Accum;
@@ -448,6 +452,30 @@ void complete_GEMM(T* C, const int m, const int p)
     complete_GEMM(C, m * p);
 #endif
 }
+
+#if PROTOCOL == 4 && BEAVER == 1
+// Re-randomize shares in place via x*1 (no truncation): gives every value a fresh SPLIT mask.
+// Needed for the network's FIRST layer under A_KNOWN=0: the raw data-owner input has m = 0
+// (SHARE_PREP), which makes the SecureML-truncation share pair the bare layer-triple c-shares -
+// their integer sum systematically wraps on NEGATIVE outputs (every negative off by +2^(K-F);
+// reproduced in the conv unit test by disabling its remask). Re-randomized shares restore the
+// standard rare-wrap SecureML analysis. The proper protocol fix (pre-truncated dealer triples)
+// lives on another branch; this is the correctness fallback for A_KNOWN=0 here.
+template <typename T>
+void remask_range(T* v, const int n)
+{
+    T one = T(1);
+    for (int i = 0; i < n; i++)
+    {
+        v[i] = v[i].prepare_dot(one);
+        v[i].mask_and_send_dot_baked(-1);
+    }
+    T::communicate();
+    for (int i = 0; i < n; i++)
+        v[i].complete_mult_without_trunc();
+    T::communicate();
+}
+#endif
 
 template <typename T, typename U>
 void add_bias(T& C, const U& bias)

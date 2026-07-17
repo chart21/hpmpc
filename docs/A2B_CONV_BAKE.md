@@ -260,3 +260,29 @@ no-bake baseline for BOTH TD modes**.
   case (relu_large's 16 real lanes match, discarded padding lanes differ).
 - Still open: `COMPUTE_ARGMAX=1` (argmax_argmin in MPC) has the same unbaked-comparison structure and
   needs the same remask + cut treatment if used under either baking scheme.
+
+## A_KNOWN=0 support (2026-07)
+
+The bake itself needed NOTHING new for A_KNOWN=0: the conv/FC outputs use the same symmetric
+mask/send as MWK=0 (freely chosen masks at every indexed/`_baked` GEMM site), already baked. The
+matrix's earlier 0/8 was entirely THREE pre-existing A_KNOWN=0 BASELINE bugs on this branch,
+now fixed:
+
+1. **GEMM cursor bump gated on `A_KNOWN == 1`** (`GEMM.hpp`): the tiled conv sends retrieve their
+   lxly INDEXED (cursor + index, no advance) for any A_KNOWN, but the post-layer cursor bump only ran
+   under A_KNOWN=1 — under A_KNOWN=0 every arithmetic retrieval after the first conv read shifted
+   values (the "everything after Convolution is garbage" cascade). Guard corrected.
+2. **First-layer SecureML wrap** (`remask_range` in GEMM.hpp + conv/FC forwards): the raw data-owner
+   input has `m = 0` (SHARE_PREP), making the SecureML-truncation share pair the bare layer-triple
+   c-shares, whose integer sum systematically wraps on NEGATIVE outputs (+2^(K-F) on every negative;
+   reproduced in the conv unit test by disabling its remask). The first layer's input is now
+   re-randomized in place (`is_first`, gated `A_KNOWN == 0`). The proper protocol fix (pre-truncated
+   dealer triples) lives on another branch.
+3. **BatchNorm dot dispatch** (`batch_normalization_2d_layer.h`): under `BN2D_TRIPLES` the BN dot
+   called `prepare_dot_ex_lxly_a_known` unconditionally while the BN triples are AB-flavored under
+   A_KNOWN=0. Now dispatches to `prepare_dot_ex_lxly` like the GEMM.
+
+**Results:** A_KNOWN=0 baseline: func53 8/8 (TD=0), LeNet 90% (= A_KNOWN=1 level). A2B bake +
+A_KNOWN=0: func53 8/8 (TD=0), 6/8 (TD=1, = baseline), LeNet **90% for BOTH TD modes**. Regressions:
+bake MWK=1 8/8, RESHARE+SIM+CUT 8/8 (A_KNOWN=1 paths untouched: the cursor-bump change is identical
+under A_KNOWN=1, the remask and BN changes are A_KNOWN=0-gated).
