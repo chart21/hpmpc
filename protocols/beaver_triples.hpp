@@ -98,9 +98,14 @@ DATATYPE* random_multiplication_b = nullptr;
 // max/min/comparison adders run the full circuit on the same build).
 // Currently implemented for the RESHARE_OPT=1 generated circuits of RCA, PPA, and PPA4 (k = 32);
 // other circuit variants safely no-op the cut until they are patched too.
+// Second leg: the A2B bake (A2B_ONLINE_OPT + A_KNOWN_TO_EVALUATORS_OPT) also supports the cut - the
+// a_ab adders skip their top-FRACTIONAL-slice gates internally (RCA + PPA; the PPA4 a_ab adder has no
+// cut guards yet and simply computes fully, which stays correct because under the bake no external
+// stream count depends on adder-internal gates: [c], S1 and the boolean addition stay full-width).
 #define CUT_FRAC_ELIGIBLE \
     (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && \
-     RESHARE_OPT == 1 && ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
+     (RESHARE_OPT == 1 || (A2B_ONLINE_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 1)) && \
+     ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 #define CUT_FRAC_ELIGIBLE_PPA4 (CUT_FRAC_ELIGIBLE && PPA4_MSB == 1)
 

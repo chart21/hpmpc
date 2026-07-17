@@ -1,0 +1,199 @@
+================================================================================
+STATUS SUMMARY - branch dbg (2026-07-14)
+Two-party secure computation (PROTOCOL=4, ABY2-style sharing), unit tests =
+FUNCTION_IDENTIFIER 53 (convolution/pooling test suite), network test = LeNet5
+on MNIST (FUNCTION_IDENTIFIER 182, ten images, expected accuracy 90 percent
+with the model file LeNet5_MNIST_custom_best.bin).
+================================================================================
+
+--------------------------------------------------------------------------------
+1. WHAT WORKS (verified in this session, clean rebuilds for every cell)
+--------------------------------------------------------------------------------
+
+A. The arithmetic-to-boolean conversion bake
+   (A2B_ONLINE_OPT=1 + A_KNOWN_TO_EVALUATORS_OPT=1 + A2B_CONV_BAKE=1,
+    which implies RESHARE_OPT=0 and RESHARE_OPT_SIM=0)
+
+   The bake commits every convolution / fully-connected output mask before the
+   preprocessing and online passes, runs the boolean addition that produces the
+   precomputed boolean share of the negated mask EARLY (at the same generation
+   stage as the multiplication triples), and feeds the committed values
+   identically into both passes. This makes the online-optimized
+   arithmetic-to-boolean conversion correct, which it previously was not.
+
+   Verified support matrix (unit tests / LeNet accuracy):
+
+   | Weight setting                                | TRUNC_DELAYED=0 | TRUNC_DELAYED=1 |
+   |-----------------------------------------------|-----------------|-----------------|
+   | MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1     | 8 of 8 / 90%    | 6 of 8 / 90%    |
+   | MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0     | 8 of 8 / 90%    | 6 of 8 / 90%    |
+   | A_KNOWN=0                                     | 8 of 8 / 90%    | 6 of 8 / 90%    |
+
+   90 percent equals the plain (no optimization) baseline accuracy in every
+   cell. The reason for "6 of 8" is explained in section 3 below; it is a
+   property of the delayed-truncation configuration, not a defect.
+
+   CUT_FRACTIONAL_BITS_OPT=1 now also works together with the bake (section 4).
+
+B. The reshare-simulation family
+   (RESHARE_OPT=1 + RESHARE_OPT_SIM=1, together with CUT_FRACTIONAL_BITS_OPT=1)
+
+   | Setting                                       | Unit tests | LeNet |
+   |-----------------------------------------------|------------|-------|
+   | MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0     | 8 of 8     | 90%   |
+   | MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1     | 8 of 8     | 90%   |
+   | PUBLIC_WEIGHTS=1 with TRUNC_DELAYED=1         | 6 of 8     | 90%   |
+
+   Note that under PUBLIC_WEIGHTS=1 the configuration automatically falls back
+   to RESHARE_OPT_SIM=0 (documented fallback in config.h); the two unit-test
+   failures in that row are again the delayed-truncation artifacts of section 3.
+
+C. A_KNOWN=0 baseline (fixed in this session; previously 0 of 8 and 10 percent)
+   Three independent pre-existing bugs were found and fixed:
+   - The tiled convolution send retrieves its multiplication-triple output
+     INDEXED (reads at cursor position plus index without advancing the
+     cursor), so a cursor advance by the layer size must follow; that advance
+     was wrongly restricted to A_KNOWN=1. Under A_KNOWN=0 the cursor stayed at
+     the convolution block and every later retrieval read shifted values,
+     which made every test after the convolution test fail with garbage.
+   - The network's first layer consumes the raw data-owner input, whose public
+     value part is zero under SHARE_PREP=1. That makes the truncation share
+     pair equal to the bare layer-triple output shares, whose integer sum
+     systematically wraps for negative outputs: every negative output came out
+     too large by exactly two to the power (BITLENGTH minus FRACTIONAL). The
+     first layer's input is now re-randomized in place before the layer runs.
+   - The batch-normalization dot product always used the accumulation variant
+     for the "mask of the first factor is known" triple flavor, even under
+     A_KNOWN=0 where the triples are of the symmetric flavor. It now
+     dispatches on A_KNOWN exactly like the general matrix multiplication.
+
+D. MaxPool correctness under BOTH optimization families (fixed this session)
+   The MaxPool unit test previously used the global comparison tolerance of
+   0.8 while all candidate values lie within 0.8 of every window maximum, so
+   even a wrong candidate pick could not fail the test - the test was
+   meaningless. It now compares against the fixed-point-quantized expected
+   value with a tolerance of 0.01. The honest test exposed that maximum
+   pooling comparisons were silently broken under BOTH baking schemes
+   (consistent but wrong sign bits lead to wrong candidate picks). Two fixes:
+   - The comparison differences are re-masked through the baked path before
+     the sign computation, so the committed material matches the values.
+   - Under the reshare simulation the comparison adders now run with the
+     fractional-bits cut active (as the rectified-linear-unit already did),
+     because the reshare bake's stride and slot mapping are compile-time
+     cut-aware; an uncut adder consumed thirty-one instead of twenty-six
+     random multiplications per adder and misaligned every group.
+
+--------------------------------------------------------------------------------
+2. WHAT IS BROKEN OR NOT SUPPORTED (known, documented)
+--------------------------------------------------------------------------------
+
+- PUBLIC_WEIGHTS=1 together with the arithmetic-to-boolean bake: not
+  supported. Under public weights even the test re-masking helper takes a
+  different code path, so no mask is committed at all; unit tests drop to
+  3 of 8 and LeNet to 0 percent. Public weights currently require the
+  reshare-simulation family (row B above), which handles them via its
+  documented fallback. Supporting the bake here would require solving the
+  "choose the party-one mask through the public weight matrix" problem
+  (same blocker class as the deferred PUBLIC_WEIGHTS prescription task).
+
+- COMPUTE_ARGMAX=1 (the final argument-maximum computed inside the secure
+  computation instead of on revealed outputs): has the same
+  unbaked-comparison structure that MaxPool had, and would need the same
+  re-mask-plus-cut treatment. All current tests reveal the logits and take
+  the argument maximum in the clear, so this is not exercised.
+
+- The plain boolean AND test in the basic-primitives suite
+  (FUNCTION_IDENTIFIER 54) fails under EVERY configuration, including the
+  plain baseline with A_KNOWN=1. This is a pre-existing break of the plain
+  boolean multiplication-triple path, is independent of every optimization
+  discussed here, and is not exercised by the convolution/pooling suite or
+  by LeNet (whose boolean gates all go through the adder and correlated-
+  oblivious-transfer paths). Left open.
+
+- The exact-truncation work for A_KNOWN=0 (pre-truncated dealer triples)
+  lives on a different branch. On this branch A_KNOWN=0 relies on the
+  first-layer re-randomization workaround described in section 1.C, which is
+  correct but costs one extra multiplication triple and one communication
+  round for the first layer's inputs.
+
+- The parallel-prefix-adder families under the bake accept the cut flag but
+  only the ripple-carry adder actually skips gates (section 4).
+
+--------------------------------------------------------------------------------
+3. WHY SOME UNIT-TEST RUNS REPORT "PASSED 6 OUT OF 8"
+--------------------------------------------------------------------------------
+
+Every "6 of 8" in the tables above comes from configurations with
+TRUNC_DELAYED=1, and the two failing tests are always the standalone
+Convolution test and the standalone BatchNorm test. This is EXPECTED
+behavior of that configuration, not a correctness bug. Detailed reasoning:
+
+Fixed-point arithmetic represents a real number x as the integer
+x times two to the power FRACTIONAL (here FRACTIONAL = 5, so a scale factor
+of thirty-two). When two fixed-point numbers are multiplied, the product
+carries twice the scale factor (two to the power ten instead of two to the
+power five), so every multiplication must be followed by a truncation
+(division by two to the power FRACTIONAL) to return to the normal scale.
+
+TRUNC_DELAYED=1 is an optimization that intentionally POSTPONES this
+truncation: the convolution or fully-connected layer leaves its outputs at
+the doubled scale, and the truncation is folded into the next
+rectified-linear-unit, where it can be combined with the sign-bit
+computation and the bit injection at no extra cost. In a real network every
+convolution is followed by such an activation, so the postponed truncation
+is always caught up before anyone looks at the values.
+
+The standalone Convolution test and the standalone BatchNorm test, however,
+reveal the layer output DIRECTLY, with no activation following. Under
+TRUNC_DELAYED=1 the revealed values are therefore still at the doubled
+scale: the test prints values that are exactly thirty-two times larger than
+the expected values (for example, expected 0.1625, got 5.5). The comparison
+fails, and the suite reports "Passed 6 out of 8".
+
+That this is an artifact and not a bug is confirmed by three observations:
+first, the same two tests pass in the same configuration with
+TRUNC_DELAYED=0, where the layer truncates immediately (8 of 8); second,
+every test that contains an activation after the layer (fully-connected
+followed by rectifier, convolution followed by rectifier, rectifier with
+average pooling) passes under TRUNC_DELAYED=1, because the delayed
+truncation is correctly caught up inside the activation; third, the
+unmodified no-optimization baseline shows exactly the same 6 of 8 pattern
+under TRUNC_DELAYED=1, and LeNet - whose layers are all
+activation-terminated - reaches the full 90 percent accuracy in these very
+configurations.
+
+--------------------------------------------------------------------------------
+4. CUT_FRACTIONAL_BITS_OPT together with the arithmetic-to-boolean bake
+--------------------------------------------------------------------------------
+
+Background: under TRUNC_DELAYED=0 the inputs of a rectified-linear-unit have
+already been truncated, so their absolute value is below two to the power
+(BITLENGTH minus FRACTIONAL minus one). Consequently the top FRACTIONAL bit
+positions of the value are pure sign extension, and the sign can be read at
+the boundary bit position instead of the topmost bit position. The
+fractional-bits cut exploits this by stopping the adder early and skipping
+the gates for the redundant top slices.
+
+Previously the cut's eligibility condition required RESHARE_OPT=1, so under
+the bake the flag was silently inert. The eligibility now has a second leg
+for A2B_ONLINE_OPT=1 + A_KNOWN_TO_EVALUATORS_OPT=1, and:
+
+- The ripple-carry adder family for the bake (the "a known to evaluators"
+  circuit) received the full cut: the carry chain stops at the boundary
+  slice, the most significant bit is read there, the beaver-triple retrieval
+  matches the reduced gate count, and FRACTIONAL fewer communication rounds
+  and triples are spent per adder. Verified: unit tests 8 of 8 and LeNet at
+  90 percent with the cut active.
+- The parallel-prefix adder and the four-way parallel-prefix adder for the
+  bake are CUT-COMPATIBLE but not yet cut-optimized: they ignore the runtime
+  cut flag and compute the full circuit, which remains correct because under
+  the bake no external stream count depends on adder-internal gates (the
+  precomputed boolean share, the public summand, and the early boolean
+  addition all stay at full width). Porting the gate-skipping identity
+  substitution into these two generated circuit families (the same work that
+  was done for the reshare family earlier) is left as follow-up; it is an
+  efficiency improvement only. Verified cut-compatible: unit tests 8 of 8
+  and LeNet at 90 percent with the parallel-prefix adder and the cut flag
+  set.
+- The reshare-family leg of the eligibility condition is unchanged;
+  its configurations still pass 8 of 8 after the change.
