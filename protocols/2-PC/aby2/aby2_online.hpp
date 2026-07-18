@@ -632,13 +632,18 @@ class ABY2_ONLINE_Share
     }
 
     template <typename func_add, typename func_sub, typename func_trunc>
-    void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
+    void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index = -1)
     {
         l = getRandomVal(PSELF);
 #if PARTY == 0
         // m = ADD(TRUNC(m),l);
         m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
 #else
+#if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && \
+    (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1)
+        if (bake_index >= 0)
+            bake_reshare_mask(l, bake_index, SUB);  // bake rt.a into -l so the ReLU A2B reshare needs no P1 preprocessing
+#endif
         m = ADD(TRUNC(m), l);
         /* m = ADD(SUB(TRUNC(m), OP_MULT(OP_SHIFT_LOG_RIGHTF(m, BITLENGTH -1), PROMOTE(UINT_TYPE(1) << (BITLENGTH -
          * 1))))   ,l); // x2^t - (x2 > 1) * 2^l */
@@ -664,7 +669,7 @@ class ABY2_ONLINE_Share
         Datatype lxly;
         lxly = retrieve_output_share_arithmetic(0, index);
         m = ADD(m, lxly);
-        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC);
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC, index);  // pass C-index so RESHARE_OPT_SIM bakes the right element
     }
     
     
@@ -712,13 +717,32 @@ class ABY2_ONLINE_Share
         #if RESHARE_OPT_SIM == 0
         m = retrieve_output_share();
         #else
+#if DATTYPE == BITLENGTH
+        if (current_phase == PHASE_LIVE && (UINT_TYPE)mask != 0)
+            g_rb_a0_nonzero++;  // a0 != 0 => a wrong P1-side bake WOULD corrupt this gate (not a hollow test)
+#endif
         m = SET_ALL_ZERO();
         #endif
         #else
         #if RESHARE_OPT_SIM == 0
         m = ADD(l, mask);  // l + b
         l = mask;
-        #else 
+        #else
+#if DATTYPE == BITLENGTH
+        if (current_phase == PHASE_LIVE)
+        {
+            g_rb_checks++;  // sim correctness condition: this wire's l (A2B slice of -l2) must equal our rt.a share
+            if ((UINT_TYPE)l != (UINT_TYPE)mask)
+            {
+                g_rb_mismatch++;
+                if (g_rb_mismatch <= 4)
+                    fprintf(stderr, "RB-MISMATCH #%llu idx=%llu l=%08x mask=%08x\n",
+                            (unsigned long long)g_rb_mismatch,
+                            (unsigned long long)(curr_random_multiplication_index - 1), (unsigned)(UINT_TYPE)l,
+                            (unsigned)(UINT_TYPE)mask);
+            }
+        }
+#endif
         m = SET_ALL_ZERO();
         #endif
         #endif

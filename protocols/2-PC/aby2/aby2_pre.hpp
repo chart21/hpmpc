@@ -415,6 +415,11 @@ class ABY2_PRE_Share
     void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
         l = getRandomVal(PSELF);
+#if PARTY == 1 && RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && \
+    (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1)
+        if (index >= 0)
+            bake_reshare_mask(l, index, SUB);  // MUST match the ONLINE bake exactly (l PRNG-synced PRE<->LIVE)
+#endif
     }
 
 

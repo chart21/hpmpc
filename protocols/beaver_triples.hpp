@@ -70,6 +70,13 @@ uint64_t num_random_multiplications = 0;
 uint64_t curr_beaver_3_triple_index = 0;
 uint64_t curr_beaver_4_triple_index = 0;
 uint64_t curr_random_multiplication_index = 0;
+// RESHARE_OPT_SIM: per-conv-output index used (online, P1) to bake rt.a into the conv-output mask l, so the A2B
+// b-input bool(-l) already carries the reshare mask (no separate reshare preprocessing). Must advance in the same
+// order the MSB adder consumes random multiplications (rt.a/rt.b are correlated, so any consistent order works).
+// RESHARE_OPT_SIM validation counters: the sim is bit-identical to SIM=0 iff P1's A2B slice l equals its rt.a
+// share at every reshare_b (checked live on P1). This is the SENSITIVE correctness check - end-to-end tests can
+// miss LSB-slice errors (an RCA carry error only shifts the sum by +-2, which almost never flips the MSB).
+uint64_t g_rb_checks = 0, g_rb_mismatch = 0, g_rb_a0_nonzero = 0;
 uint64_t beaver_3_triple_index = 0;
 uint64_t beaver_4_triple_index = 0;
 uint64_t random_multiplication_index = 0;
@@ -77,6 +84,101 @@ Beaver3TuplesD<DATATYPE> beaver_3_tuples;
 Beaver4TuplesD<DATATYPE> beaver_4_tuples;
 DATATYPE* random_multiplication_a = nullptr;
 DATATYPE* random_multiplication_b = nullptr;
+
+// Reshare wiring of the *_and_ab_reshared adders: which bit-slice (adder wire index i, 0 = numeric MSB,
+// k-1 = numeric LSB) is reshared with which random_triples[] offset within one adder. -1 = not reshared.
+// Must mirror the generated circuit constructors (rca_msb / ppa_msb_unsafe / ppa_msb_4way _and_ab_reshared.hpp).
+constexpr int reshare_rt_offset(int k, int i)
+{
+#if RCA_MSB == 1
+    return (i == k - 1) ? 0 : -1;  // RCA reshares only the LSB slice (first carry gate), rt[0]
+#elif PPA_MSB == 1
+    return (i >= 1 && i < k) ? i - 1 : -1;  // PPA reshares slices 1..k-1 with rt[i-1], ascending
+#elif PPA4_MSB == 1
+    // PPA4 reshares the AND2 "generate" wires; retrieval order is circuit-specific (k=32: wire 22 is LAST).
+    if (k == 32)
+    {
+        switch (i)
+        {
+            case 1: return 0; case 4: return 1; case 7: return 2; case 10: return 3; case 13: return 4;
+            case 16: return 5; case 19: return 6; case 23: return 7; case 26: return 8; case 29: return 9;
+            case 22: return 10;
+            default: return -1;
+        }
+    }
+    else if (k == 16)
+    {
+        switch (i)
+        {
+            case 1: return 0; case 4: return 1; case 7: return 2; case 10: return 3; case 13: return 4;
+            default: return -1;
+        }
+    }
+    else if (k == 8)
+    {
+        switch (i)
+        {
+            case 2: return 0; case 5: return 1; case 1: return 2;
+            default: return -1;
+        }
+    }
+    return -1;
+#else
+    return -1;
+#endif
+}
+
+// Random multiplications consumed by one MSB adder of width k.
+constexpr uint64_t reshares_per_adder(int k)
+{
+#if RCA_MSB == 1
+    return 1;
+#elif PPA_MSB == 1
+    return (uint64_t)(k - 1);
+#elif PPA4_MSB == 1
+    return k == 32 ? 11 : (k == 16 ? 5 : 3);
+#else
+    return 0;
+#endif
+}
+
+// RESHARE_OPT_SIM: bake the reshare random multiplication rt.a into P1's (negated) conv-output mask -l, so the ReLU's
+// A2B b-input bool(-l) already equals P1's rt.a share at every reshared bit-slice -> the skipped reshare_b
+// preprocessing send (delta = l ^ rt.a) would be 0, making the SIM=1 execution bit-identical to SIM=0.
+// MUST be called IDENTICALLY in PRE and online (l is PRNG-synced across phases, and the adders consume random
+// multiplications at the same sequence points in both phases). bake_index = the value's LAYER-LOCAL linear output
+// index e (the GEMM masks in tiled order, so we key off this, not call order).
+//
+// Mapping (verified against real_ortho): the A2B transposes BITLENGTH values into slices with BOTH indices mirrored:
+// value j (= e % BITLENGTH), numeric bit b -> slice (BITLENGTH-1-b), lane-bit (BITLENGTH-1-j). The adder for group
+// g (= e / BITLENGTH) consumes random_multiplication_a[base + g*R + t] where base = curr_random_multiplication_index
+// at conv-mask time (nothing else consumes between the conv and its ReLU A2B) and t = reshare_rt_offset(k, slice).
+template <typename Datatype, typename func_sub>
+inline void bake_reshare_mask(Datatype& l, int bake_index, func_sub SUB)
+{
+#if DATTYPE == BITLENGTH && (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1)
+    constexpr int K = BITLENGTH;
+    constexpr uint64_t R = reshares_per_adder(K);
+    const uint64_t e = (uint64_t) bake_index;
+    const uint64_t g = e / K;        // bit-sliced A2B group (one adder per group)
+    const int j = (int) (e % K);     // value's word index in the group -> lane-bit (K-1-j) after the transpose
+    const uint64_t base = curr_random_multiplication_index + g * R;
+    if (base + R > num_random_multiplications)
+        return;  // this layer's outputs never reach an MSB adder (e.g. final layer) - leave the mask random
+    UINT_TYPE negl = (UINT_TYPE) l;
+    for (int i = 1; i < K; i++)  // slice 0 (numeric MSB) is never reshared
+    {
+        const int t = reshare_rt_offset(K, i);
+        if (t < 0)
+            continue;
+        const UINT_TYPE rta = (UINT_TYPE) random_multiplication_a[base + (uint64_t) t];
+        const UINT_TYPE bit = (rta >> (K - 1 - j)) & (UINT_TYPE) 1;
+        const int nb = K - 1 - i;  // numeric bit position of slice i
+        negl = (negl & ~((UINT_TYPE) 1 << nb)) | (bit << nb);
+    }
+    l = SUB(SET_ALL_ZERO(), (Datatype) negl);  // l = -negl => the A2B input -l transposes to rt.a at reshared slices
+#endif
+}
 std::vector<uint64_t> num_arithmetic_triples;
 std::vector<uint64_t> num_ab2_arithmetic_triples;
 std::vector<uint64_t> num_boolean_triples;

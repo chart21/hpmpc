@@ -730,6 +730,30 @@ inline int base_port = BASE_PORT;  // temporary solution
 #endif
 #endif
 
+// Derive the MSB-adder choice (RCA_MSB / PPA_MSB / PPA4_MSB) HERE, before Protocols.h pulls in the A2B code
+// (aby2_online.hpp / aby2_pre.hpp). These were previously only #defined in share_conversion.hpp, which is included
+// AFTER Protocols.h, so in the A2B's scope RCA_MSB was undefined (== 0) and the RESHARE_OPT reshare-skip
+// (#if RCA_MSB == 1 ... #elif RCA_MSB != 1 ...) ALWAYS took the PPA branch (reshare bits 1..k-1). For PPA functions
+// that happened to be correct, but for RCA it left the non-reshared bits unshared -> corrupted output. share_conversion.hpp
+// keeps the same (now redundant, #ifndef-guarded) derivation, so it is a no-op once these are defined here.
+#if defined(BANDWIDTH_OPTIMIZED) && defined(ONLINE_OPTIMIZED)
+#if RCA_MSB == 0 && PPA_MSB == 0 && PPA4_MSB == 0
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+#ifndef RCA_MSB
+#define RCA_MSB 1
+#endif
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
+#ifndef PPA4_MSB
+#define PPA4_MSB 1
+#endif
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+#ifndef PPA_MSB
+#define PPA_MSB 1
+#endif
+#endif
+#endif
+#endif
+
 #ifndef SIMULATE_MPC_FUNCTIONS
 #define SIMULATE_MPC_FUNCTIONS 1
 #endif

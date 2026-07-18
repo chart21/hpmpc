@@ -454,6 +454,86 @@ bool relu_large_test()
 }
 #endif
 
+// Conv -> ReLU: the conv output (masked in mask_and_send_dot) flows through the ReLU MSB adder, so this exercises
+// the RESHARE_OPT_SIM=1 baking (rt.a baked into the conv-output mask l, consumed by the reshared MSB adder).
+template <typename Share>
+bool conv_relu_test()
+{
+    using A = Additive_Share<DATATYPE, Share>;
+    using FFC = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>;
+    const int vf = DATTYPE / BITLENGTH;
+    A::communicate();
+
+#if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH
+    // Reset so the summary printed after this test covers ONLY the baked conv->ReLU reshares: the bake must
+    // make every one of them match (g_rb_mismatch == 0), which is the exact SIM=0-equivalence condition.
+    g_rb_checks = 0; g_rb_mismatch = 0; g_rb_a0_nonzero = 0;
+#endif
+    const int batch = 1, ic = 1, oc = 4, ih = 6, iw = 6, ks = 3, stride = 1, pad = 0;
+    const int oh = (ih - ks) / stride + 1, ow = (iw - ks) / stride + 1;
+    const int osize = batch * oc * oh * ow;
+
+    float* in_f = new float[batch * ih * iw];
+    for (int i = 0; i < batch * ih * iw; i++) in_f[i] = ((i * 5 + 1) % 20 - 10) / 5.0f;  // ~ -2..1.8
+    float ker_f[oc * ic * ks * ks];
+    for (int i = 0; i < oc * ic * ks * ks; i++) ker_f[i] = ((i * 7 + 2) % 10 - 5) / 5.0f;  // ~ -1..0.8
+
+    Conv2d<A> conv(ic, oc, ks, stride, pad, false);
+    conv.set_layer({batch, ic, ih, iw});
+    MatX<A> input(batch * ic, ih * iw);
+    UINT_TYPE ker_v[oc * ic * ks * ks];
+    for (int i = 0; i < oc * ic * ks * ks; i++) ker_v[i] = FFC::float_to_ufixed(ker_f[i]);
+    UINT_TYPE* in_v = new UINT_TYPE[batch * ih * iw];
+    for (int i = 0; i < batch * ih * iw; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
+    share_vals<P_0>(conv.kernel.data(), ker_v, oc * ic * ks * ks);
+    share_vals<P_1>(input.data(), in_v, batch * ih * iw);
+    remask(input.data(), batch * ih * iw);
+    conv.forward(input, false);
+
+    ReLU<A> relu;
+    relu.set_layer({batch, oc, oh, ow});
+    Layer<A>* relu_ptr = &relu;
+    relu_ptr->forward(conv.output, false);
+
+    auto* output = new UINT_TYPE[osize][DATTYPE / BITLENGTH];
+    reveal_and_store(relu.output.data(), output, osize);
+
+    float* expected = new float[osize];
+    for (int b = 0; b < batch; b++)
+        for (int oc_i = 0; oc_i < oc; oc_i++)
+            for (int oi = 0; oi < oh; oi++)
+                for (int oj = 0; oj < ow; oj++)
+                {
+                    float s = 0;
+                    for (int ki = 0; ki < ks; ki++)
+                        for (int kj = 0; kj < ks; kj++)
+                        {
+                            int ii = oi * stride + ki - pad, jj = oj * stride + kj - pad;
+                            if (ii >= 0 && ii < ih && jj >= 0 && jj < iw)
+                                s += in_f[b * ih * iw + ii * iw + jj] * ker_f[oc_i * ks * ks + ki * ks + kj];
+                        }
+                    expected[(b * oc + oc_i) * oh * ow + oi * ow + oj] = s > 0 ? s : 0;  // relu
+                }
+
+    int nfail = 0;
+    for (int q = 0; q < osize; q++)
+        for (int v = 0; v < vf; v++)
+        {
+            float got = FFC::ufixed_to_float(output[q][v]);
+            if (got - expected[q] > epsilon || got - expected[q] < -epsilon)
+            {
+                nfail++;
+                if (nfail <= 6)
+                    print_online("conv_relu FAIL q=" + std::to_string(q) + " exp=" + std::to_string(expected[q]) +
+                                 " got=" + std::to_string(got));
+            }
+        }
+    print_online("conv_relu nfail=" + std::to_string(nfail) + " / " + std::to_string(osize));
+    bool ok = (nfail == 0);
+    delete[] in_f; delete[] in_v; delete[] output; delete[] expected;
+    return ok;
+}
+
 template <typename Share>
 bool test_conv_pool(DATATYPE* res)
 {
@@ -478,7 +558,12 @@ bool test_conv_pool(DATATYPE* res)
 #if TEST_RELU_LARGE == 1
     test_function(num_tests, num_passed, "ReLU(large)", relu_large_test<Share>);
 #endif
+    test_function(num_tests, num_passed, "Conv+ReLU", conv_relu_test<Share>);
 
+#if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH
+    print_online("RESHARE_SIM reshare_b checks=" + std::to_string(g_rb_checks) +
+                 " mismatch=" + std::to_string(g_rb_mismatch) + " a0_nonzero=" + std::to_string(g_rb_a0_nonzero));
+#endif
     print_stats(num_tests, num_passed);
     if (num_tests == num_passed)
         return true;
