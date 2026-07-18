@@ -42,16 +42,43 @@ void share_vals(A* dst, const UINT_TYPE* vals, int n)
     A::communicate();
 }
 
+
+// Model parameters: secretly shared from the model owner, or plainly assigned under PUBLIC_WEIGHTS.
+template <int P, typename W>
+void set_weights(W* dst, const UINT_TYPE* vals, int n)
+{
+#if PUBLIC_WEIGHTS == 1
+    for (int i = 0; i < n; i++) dst[i] = vals[i];
+#else
+    share_vals<P>(dst, vals, n);
+#endif
+}
+
 // Re-mask via x*1 (integer, no truncation) so each value gets a *split* lambda, like a real layer
 // output (post-ReLU). A raw input share leaves lambda 0 on one party, which is not representative.
+// Uses the BAKED mask/send (linear call order) so a directly following MSB-adder batch (ReLU etc.)
+// finds the reshare material baked into the masks under RESHARE_OPT_SIM=1 - like a real layer output.
 template <typename A>
-void remask(A* dst, int n)
+void remask(A* dst, int n, bool bake = false)
 {
+#if PROTOCOL == 4 && BEAVER == 1 && PUBLIC_WEIGHTS == 0
+    A one = A(1);
+    for (int i = 0; i < n; i++)
+    {
+        dst[i] = dst[i].prepare_dot(one);  // retrieves [lxly] itself; the mask/send below adds only the fresh mask
+        dst[i].mask_and_send_dot_baked(bake ? i : -1);
+    }
+    A::communicate();
+    for (int i = 0; i < n; i++) dst[i].complete_mult_without_trunc();
+    A::communicate();
+#else
+    (void)bake;
     A one = A(1);
     for (int i = 0; i < n; i++) dst[i] = dst[i].prepare_mult(one);
     A::communicate();
     for (int i = 0; i < n; i++) dst[i].complete_mult_without_trunc();
     A::communicate();
+#endif
 }
 
 #if TEST_CONV == 1
@@ -85,7 +112,7 @@ bool conv_test()
     UINT_TYPE* in_v = new UINT_TYPE[batch * ih * iw];
     for (int i = 0; i < batch * ih * iw; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
 
-    share_vals<P_0>(conv.kernel.data(), ker_v, oc * ic * ks * ks);  // weights from model owner
+    set_weights<P_0>(conv.kernel.data(), ker_v, oc * ic * ks * ks);  // weights from model owner
     share_vals<P_1>(input.data(), in_v, batch * ih * iw);           // data from data owner
     remask(input.data(), batch * ih * iw);  // activation behaves like a layer output (split lambda)
 
@@ -295,10 +322,10 @@ bool batchnorm_test()
         beta_v[c] = FFC::float_to_ufixed(beta_f[c]);
         gamma_v[c] = FFC::float_to_ufixed(1.0);
     }
-    share_vals<P_0>(bn.move_mu.data(), mu_v, ch);
-    share_vals<P_0>(bn.move_var.data(), scale_v, ch);
-    share_vals<P_0>(bn.beta.data(), beta_v, ch);
-    share_vals<P_0>(bn.gamma.data(), gamma_v, ch);
+    set_weights<P_0>(bn.move_mu.data(), mu_v, ch);
+    set_weights<P_0>(bn.move_var.data(), scale_v, ch);
+    set_weights<P_0>(bn.beta.data(), beta_v, ch);
+    set_weights<P_0>(bn.gamma.data(), gamma_v, ch);
 
     MatX<A> input(batch * ch, hw);
     UINT_TYPE in_v[ch * hw];
@@ -364,7 +391,7 @@ bool relu_avgpool_test()
     UINT_TYPE in_v[ih * iw];
     for (int i = 0; i < ih * iw; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
     share_vals<P_1>(input.data(), in_v, ih * iw);
-    remask(input.data(), ih * iw);
+    remask(input.data(), ih * iw, /*bake=*/true);  // a (fused) ReLU directly follows
 
     // call forward via base pointers: with FUSE_RELU_AVG==1 ReLU::forward is (quirkily) private,
     // but the network dispatches through Layer*, so do the same here.
@@ -433,7 +460,7 @@ bool relu_large_test()
     UINT_TYPE in_v[n];
     for (int i = 0; i < n; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
     share_vals<P_1>(input.data(), in_v, n);
-    remask(input.data(), n);
+    remask(input.data(), n, /*bake=*/true);  // a ReLU (MSB adder batch) directly follows
 
     relu_ptr->forward(input, false);
 
@@ -454,6 +481,76 @@ bool relu_large_test()
 }
 #endif
 
+// FC (Linear, with shared bias) -> ReLU: exercises the RESHARE_OPT_SIM=1 baking on the FC path
+// (linear-order mask_and_send with sequential triple retrieval) incl. the bias mask compensation.
+template <typename Share>
+bool fc_relu_test()
+{
+    using A = Additive_Share<DATATYPE, Share>;
+    using FFC = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>;
+    const int vf = DATTYPE / BITLENGTH;
+    A::communicate();
+
+    const int batch = 2, in_feat = 20, out_feat = 32;  // batch*out_feat = 64 = exact bit-slice groups
+
+    float* in_f = new float[batch * in_feat];
+    for (int i = 0; i < batch * in_feat; i++) in_f[i] = ((i * 7 + 3) % 16 - 8) / 8.0f;  // ~ -1..0.875
+    float* w_f = new float[out_feat * in_feat];
+    for (int i = 0; i < out_feat * in_feat; i++) w_f[i] = ((i * 5 + 1) % 12 - 6) / 12.0f;  // ~ -0.5..0.42
+    float* b_f = new float[out_feat];
+    for (int i = 0; i < out_feat; i++) b_f[i] = ((i * 3 + 2) % 8 - 4) / 4.0f;  // ~ -1..0.75
+
+    Linear<A> fc(in_feat, out_feat);
+    fc.set_layer({batch, in_feat});
+
+    UINT_TYPE* w_v = new UINT_TYPE[out_feat * in_feat];
+    for (int i = 0; i < out_feat * in_feat; i++) w_v[i] = FFC::float_to_ufixed(w_f[i]);
+    UINT_TYPE* b_v = new UINT_TYPE[out_feat];
+    for (int i = 0; i < out_feat; i++) b_v[i] = FFC::float_to_ufixed(b_f[i]);
+    UINT_TYPE* in_v = new UINT_TYPE[batch * in_feat];
+    for (int i = 0; i < batch * in_feat; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
+
+    set_weights<P_0>(fc.W.data(), w_v, out_feat * in_feat);
+    set_weights<P_0>(fc.b.data(), b_v, out_feat);
+    MatX<A> input(batch, in_feat);
+    share_vals<P_1>(input.data(), in_v, batch * in_feat);
+    remask(input.data(), batch * in_feat);
+
+    fc.forward(input, false);
+
+    ReLU<A> relu;
+    relu.set_layer({batch, out_feat});
+    Layer<A>* relu_ptr = &relu;
+    relu_ptr->forward(fc.output, false);
+
+    auto* output = new UINT_TYPE[batch * out_feat][DATTYPE / BITLENGTH];
+    reveal_and_store(relu.output.data(), output, batch * out_feat);
+
+    int nfail = 0;
+    for (int n = 0; n < batch; n++)
+        for (int o = 0; o < out_feat; o++)
+        {
+            float s = b_f[o];
+            for (int i = 0; i < in_feat; i++) s += w_f[o * in_feat + i] * in_f[n * in_feat + i];
+            float expected = s > 0 ? s : 0;
+            for (int v = 0; v < vf; v++)
+            {
+                float got = FFC::ufixed_to_float(output[n * out_feat + o][v]);
+                if (got - expected > epsilon || got - expected < -epsilon)
+                {
+                    nfail++;
+                    if (nfail <= 6)
+                        print_online("fc_relu FAIL n=" + std::to_string(n) + " o=" + std::to_string(o) +
+                                     " exp=" + std::to_string(expected) + " got=" + std::to_string(got));
+                }
+            }
+        }
+    print_online("fc_relu nfail=" + std::to_string(nfail) + " / " + std::to_string(batch * out_feat));
+    bool ok = (nfail == 0);
+    delete[] in_f; delete[] w_f; delete[] b_f; delete[] w_v; delete[] b_v; delete[] in_v; delete[] output;
+    return ok;
+}
+
 // Conv -> ReLU: the conv output (masked in mask_and_send_dot) flows through the ReLU MSB adder, so this exercises
 // the RESHARE_OPT_SIM=1 baking (rt.a baked into the conv-output mask l, consumed by the reshared MSB adder).
 template <typename Share>
@@ -467,7 +564,7 @@ bool conv_relu_test()
 #if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH
     // Reset so the summary printed after this test covers ONLY the baked conv->ReLU reshares: the bake must
     // make every one of them match (g_rb_mismatch == 0), which is the exact SIM=0-equivalence condition.
-    g_rb_checks = 0; g_rb_mismatch = 0; g_rb_a0_nonzero = 0;
+    g_rb_checks = 0; g_rb_mismatch = 0;
 #endif
     const int batch = 1, ic = 1, oc = 4, ih = 6, iw = 6, ks = 3, stride = 1, pad = 0;
     const int oh = (ih - ks) / stride + 1, ow = (iw - ks) / stride + 1;
@@ -485,7 +582,7 @@ bool conv_relu_test()
     for (int i = 0; i < oc * ic * ks * ks; i++) ker_v[i] = FFC::float_to_ufixed(ker_f[i]);
     UINT_TYPE* in_v = new UINT_TYPE[batch * ih * iw];
     for (int i = 0; i < batch * ih * iw; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
-    share_vals<P_0>(conv.kernel.data(), ker_v, oc * ic * ks * ks);
+    set_weights<P_0>(conv.kernel.data(), ker_v, oc * ic * ks * ks);
     share_vals<P_1>(input.data(), in_v, batch * ih * iw);
     remask(input.data(), batch * ih * iw);
     conv.forward(input, false);
@@ -558,11 +655,12 @@ bool test_conv_pool(DATATYPE* res)
 #if TEST_RELU_LARGE == 1
     test_function(num_tests, num_passed, "ReLU(large)", relu_large_test<Share>);
 #endif
+    test_function(num_tests, num_passed, "FC+ReLU", fc_relu_test<Share>);
     test_function(num_tests, num_passed, "Conv+ReLU", conv_relu_test<Share>);
 
 #if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH
     print_online("RESHARE_SIM reshare_b checks=" + std::to_string(g_rb_checks) +
-                 " mismatch=" + std::to_string(g_rb_mismatch) + " a0_nonzero=" + std::to_string(g_rb_a0_nonzero));
+                 " mismatch=" + std::to_string(g_rb_mismatch));
 #endif
     print_stats(num_tests, num_passed);
     if (num_tests == num_passed)

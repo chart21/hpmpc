@@ -39,19 +39,17 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
         }
 
 #if PUBLIC_WEIGHTS == 0
-#if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 && FC_TRIPLES == 1 && PROTOCOL == 4
+        sum.mask_and_send_dot_a_known_pre_with_triple_baked(i);  // dispatches TRUNC_DELAYED internally
+#elif TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if FC_TRIPLES == 1 && PROTOCOL == 4
-        sum.mask_and_send_dot_without_trunc_with_triple();  // send immediately to utilize network better
+        sum.mask_and_send_dot_without_trunc_with_triple_baked(i);  // linear call order; i for the reshare bake
 #else
         sum.mask_and_send_dot_without_trunc();  // send immediately to utilize network better
 #endif
 #else
-#if FC_TRIPLES == 1 && PROTOCOL == 4 
-#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-        sum.mask_and_send_dot_a_known_pre_with_triple();  
-#else
-        sum.mask_and_send_dot_with_triple();
-#endif
+#if FC_TRIPLES == 1 && PROTOCOL == 4
+        sum.mask_and_send_dot_with_triple_baked(i);  // linear call order; i = layer-local output index for the reshare bake
 #else
         sum.mask_and_send_dot();
 #endif
@@ -336,7 +334,11 @@ void complete_GEMM_CPU(T* C, const int m, const int p)
                     /* C[row + jj].complete_mult(); */
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+                    C[row + jj].complete_mult_a_known_pre();  // MWK: only P1 receives
+#else
                     C[row + jj].complete_mult_without_trunc();
+#endif
 #else
 #if A2B_ROUND_OPT_SIM == 1
                     C[row + jj].complete_mult(); // simulate second receive for XOR Share
@@ -404,7 +406,11 @@ void complete_GEMM(T* C, const int len)
     {
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        C[i].complete_mult_a_known_pre();  // MWK: only P1 receives (P0 was the online sender)
+#else
         C[i].complete_mult_without_trunc();
+#endif
 #else
 #if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         C[i].complete_mult_a_known_pre();

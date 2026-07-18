@@ -70,13 +70,12 @@ uint64_t num_random_multiplications = 0;
 uint64_t curr_beaver_3_triple_index = 0;
 uint64_t curr_beaver_4_triple_index = 0;
 uint64_t curr_random_multiplication_index = 0;
-// RESHARE_OPT_SIM: per-conv-output index used (online, P1) to bake rt.a into the conv-output mask l, so the A2B
-// b-input bool(-l) already carries the reshare mask (no separate reshare preprocessing). Must advance in the same
-// order the MSB adder consumes random multiplications (rt.a/rt.b are correlated, so any consistent order works).
 // RESHARE_OPT_SIM validation counters: the sim is bit-identical to SIM=0 iff P1's A2B slice l equals its rt.a
-// share at every reshare_b (checked live on P1). This is the SENSITIVE correctness check - end-to-end tests can
-// miss LSB-slice errors (an RCA carry error only shifts the sum by +-2, which almost never flips the MSB).
-uint64_t g_rb_checks = 0, g_rb_mismatch = 0, g_rb_a0_nonzero = 0;
+// share at every reshare_b (checked live on P1, see reshare_sim_check). This is the SENSITIVE correctness check:
+// end-to-end tests can miss LSB-slice errors (an RCA carry error only shifts the sum by +-2, which almost never
+// flips the MSB). Residual mismatches on padded groups (layer size not a multiple of BITLENGTH) are EXPECTED:
+// the padding lanes belong to no value and cannot be baked; they are harmless (bit-sliced gates are lane-local).
+uint64_t g_rb_checks = 0, g_rb_mismatch = 0;
 uint64_t beaver_3_triple_index = 0;
 uint64_t beaver_4_triple_index = 0;
 uint64_t random_multiplication_index = 0;
@@ -84,6 +83,13 @@ Beaver3TuplesD<DATATYPE> beaver_3_tuples;
 Beaver4TuplesD<DATATYPE> beaver_4_tuples;
 DATATYPE* random_multiplication_a = nullptr;
 DATATYPE* random_multiplication_b = nullptr;
+
+// All reshare-baking machinery below is active only in this configuration; call sites can rely on
+// bake_reshare_mask compiling to a no-op otherwise (construct_mwk_r1_baked call sites must still be
+// gated because they consume an extra PRNG draw).
+#define RESHARE_BAKE_ACTIVE \
+    (RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && \
+     (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 
 // Reshare wiring of the *_and_ab_reshared adders: which bit-slice (adder wire index i, 0 = numeric MSB,
 // k-1 = numeric LSB) is reshared with which random_triples[] offset within one adder. -1 = not reshared.
@@ -142,6 +148,51 @@ constexpr uint64_t reshares_per_adder(int k)
 #endif
 }
 
+// PPA4 SIM=1 input-wire zero_adds: slice i's a-wire is re-masked to beaver3_tuples[t].b and its
+// b-wire to beaver3_tuples[t].c (per-adder tuple index t; -1 = no gated zero_add on this slice).
+// Extracted from ppa_msb_4way_and_ab_reshared.hpp (the RESHARE_OPT_SIM == 1 branches).
+constexpr int ppa4_zero_add_t3(int k, int i)
+{
+    if (k == 32)
+    {
+        switch (i)
+        {
+            case 2: return 0; case 5: return 2; case 8: return 4; case 11: return 6;
+            case 14: return 8; case 17: return 10; case 20: return 12; case 24: return 14;
+            case 27: return 16; case 30: return 18;
+            default: return -1;
+        }
+    }
+    else if (k == 16)
+    {
+        switch (i)
+        {
+            case 2: return 0; case 5: return 2; case 8: return 4; case 11: return 6;
+            case 14: return 7;
+            default: return -1;
+        }
+    }
+    else if (k == 8)
+    {
+        switch (i)
+        {
+            case 3: return 0; case 6: return 2;
+            default: return -1;
+        }
+    }
+    return -1;
+}
+
+// Beaver 3-tuples consumed by one PPA4 MSB adder of width k (Beaver3TupleCount in the circuit).
+constexpr uint64_t b3_tuples_per_adder(int k) { return k == 32 ? 24 : (k == 16 ? 9 : 4); }
+
+// P0-side helper for the PPA4 SIM=1 zero_add skip: counts prepare_A2B_S1 calls since the last
+// beaver-3-tuple retrieval, so slice masks can be peeked at the tuple positions the group's adder
+// WILL consume (all groups are prepared before any adder is constructed). Reset in
+// retrieveBeaver3Tuple (any retrieval means the S1 batch has ended).
+uint64_t g_a2b_s1_pending = 0;
+
+
 // RESHARE_OPT_SIM: bake the reshare random multiplication rt.a into P1's (negated) conv-output mask -l, so the ReLU's
 // A2B b-input bool(-l) already equals P1's rt.a share at every reshared bit-slice -> the skipped reshare_b
 // preprocessing send (delta = l ^ rt.a) would be 0, making the SIM=1 execution bit-identical to SIM=0.
@@ -156,10 +207,10 @@ constexpr uint64_t reshares_per_adder(int k)
 template <typename Datatype, typename func_sub>
 inline void bake_reshare_mask(Datatype& l, int bake_index, func_sub SUB)
 {
-#if DATTYPE == BITLENGTH && (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1)
+#if PARTY == 1 && RESHARE_BAKE_ACTIVE  // P1-ONLY: baking P0's mask online would desync its PRE vs LIVE masks
     constexpr int K = BITLENGTH;
     constexpr uint64_t R = reshares_per_adder(K);
-    const uint64_t e = (uint64_t) bake_index;
+    const uint64_t e = (uint64_t) bake_index + g_bake_batch_offset;  // batch-global output index
     const uint64_t g = e / K;        // bit-sliced A2B group (one adder per group)
     const int j = (int) (e % K);     // value's word index in the group -> lane-bit (K-1-j) after the transpose
     const uint64_t base = curr_random_multiplication_index + g * R;
@@ -176,9 +227,112 @@ inline void bake_reshare_mask(Datatype& l, int bake_index, func_sub SUB)
         const int nb = K - 1 - i;  // numeric bit position of slice i
         negl = (negl & ~((UINT_TYPE) 1 << nb)) | (bit << nb);
     }
-    l = SUB(SET_ALL_ZERO(), (Datatype) negl);  // l = -negl => the A2B input -l transposes to rt.a at reshared slices
+#if PPA4_MSB == 1
+    // PPA4 additionally SIM-skips the input-wire zero_adds: bake our (P1-local, see party_local_bc
+    // in the tuple generation) beaver3 .c fields into the zero_added b-wire slices so the skipped
+    // re-masking would have been a no-op. Same base-offset reasoning as the random multiplications.
+    const uint64_t b3_base = curr_beaver_3_triple_index + g * b3_tuples_per_adder(K);
+    if (b3_base + b3_tuples_per_adder(K) <= num_beaver_3_tuples)
+    {
+        for (int i = 1; i < K; i++)
+        {
+            const int t3 = ppa4_zero_add_t3(K, i);
+            if (t3 < 0)
+                continue;
+            const UINT_TYPE c3 = (UINT_TYPE) beaver_3_tuples.c[b3_base + (uint64_t) t3];
+            const UINT_TYPE bit = (c3 >> (K - 1 - j)) & (UINT_TYPE) 1;
+            const int nb = K - 1 - i;
+            negl = (negl & ~((UINT_TYPE) 1 << nb)) | (bit << nb);
+        }
+    }
+#endif
+    Datatype l_new = SUB(SET_ALL_ZERO(), (Datatype) negl);
+    if (g_bake_bias_l != nullptr && g_bake_bias_len > 0)  // pre-compensate a shared bias added after the GEMM
+        l_new = SUB(l_new, g_bake_bias_l[e % g_bake_bias_len]);
+    l = l_new;  // final ReLU-input mask == -negl => the A2B input -l transposes to rt.a at reshared slices
+#else
+    (void) l; (void) bake_index;
 #endif
 }
+
+// MODELWEIGHTS_KNOWN + RESHARE_OPT_SIM, SecureML (non-delayed) truncation: construct P1's freely
+// prescribed triple share r1 so that its output mask l = TRUNC(-r1) (LOGICAL shift by FRACTIONAL)
+// carries the baked reshare bits: -r1 := (l_baked << FRACTIONAL) + low with low < 2^FRACTIONAL.
+// Only mask bits 0..K-FRACTIONAL-1 are realizable (the trunc image zeroes the top FRACTIONAL bits),
+// so reshared slices at numeric bits >= K-FRACTIONAL stay unbaked: exact for RCA (reshares bit 0
+// only); PPA/PPA4 additionally need TRUNC_DELAYED=1 (see the without_trunc a_known variant).
+template <typename Datatype, typename func_sub>
+inline Datatype construct_mwk_r1_baked(Datatype r1_base, Datatype low_rand, int bake_index, func_sub SUB)
+{
+#if PARTY == 1 && RESHARE_BAKE_ACTIVE
+    Datatype l_t = r1_base;
+    bake_reshare_mask(l_t, bake_index, SUB);
+    const UINT_TYPE low = (UINT_TYPE) low_rand & (((UINT_TYPE) 1 << FRACTIONAL) - (UINT_TYPE) 1);
+    return (Datatype) (UINT_TYPE) (0 - (((UINT_TYPE) l_t << FRACTIONAL) + low));
+#else
+    (void) low_rand; (void) bake_index;
+    return r1_base;
+#endif
+}
+
+// P1's prescribed triple share for the a_known (MODELWEIGHTS_KNOWN) paths. Used by BOTH the PRE and
+// the online phase so the PRNG draw sequences match by construction.
+// SecureML-truncated mask l = TRUNC(-r1): bake image-limited to bits 0..K-FRACTIONAL-1 (RCA-exact).
+template <typename Datatype, typename func_sub>
+inline Datatype mwk_choose_r1_trunc(int bake_index, func_sub SUB)
+{
+    Datatype r1 = getRandomVal(PSELF);
+#if RESHARE_BAKE_ACTIVE  // gated: consumes an extra PRNG draw
+    if (bake_index >= 0)
+        r1 = construct_mwk_r1_baked(r1, getRandomVal(PSELF), bake_index, SUB);
+#endif
+    return r1;
+}
+
+// Untruncated mask l = -r1 (TRUNC_DELAYED): fully bakeable, no image constraint.
+template <typename Datatype, typename func_sub>
+inline Datatype mwk_choose_r1_no_trunc(int bake_index, func_sub SUB)
+{
+    Datatype r1 = getRandomVal(PSELF);
+    if (bake_index >= 0)
+    {
+        Datatype l_t = r1;
+        bake_reshare_mask(l_t, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+        r1 = SUB(SET_ALL_ZERO(), l_t);
+    }
+    return r1;
+}
+// P1-side live check for the SIM=1 reshare condition (see the counter comment above). Registers a
+// one-line summary at exit; the first few mismatches are printed with their rt index for diagnosis.
+template <typename Datatype>
+inline void reshare_sim_check(Datatype l, Datatype mask)
+{
+#if PARTY == 1 && DATTYPE == BITLENGTH
+    if (current_phase != PHASE_LIVE)
+        return;
+    static bool reg = []()
+    {
+        atexit([]() {
+            fprintf(stderr, "RB-FINAL checks=%llu mismatch=%llu\n", (unsigned long long) g_rb_checks,
+                    (unsigned long long) g_rb_mismatch);
+        });
+        return true;
+    }();
+    (void) reg;
+    g_rb_checks++;
+    if ((UINT_TYPE) l != (UINT_TYPE) mask)
+    {
+        g_rb_mismatch++;
+        if (g_rb_mismatch <= 4)
+            fprintf(stderr, "RB-MISMATCH #%llu idx=%llu l=%08x mask=%08x\n", (unsigned long long) g_rb_mismatch,
+                    (unsigned long long) (curr_random_multiplication_index - 1), (unsigned) (UINT_TYPE) l,
+                    (unsigned) (UINT_TYPE) mask);
+    }
+#else
+    (void) l; (void) mask;
+#endif
+}
+
 std::vector<uint64_t> num_arithmetic_triples;
 std::vector<uint64_t> num_ab2_arithmetic_triples;
 std::vector<uint64_t> num_boolean_triples;
@@ -313,6 +467,7 @@ triple<Datatype> retrieveBooleanTriple()
 template <typename Datatype>
 Beaver3Tuple<Datatype> retrieveBeaver3Tuple()
 {
+    g_a2b_s1_pending = 0;  // an adder is consuming -> the prepare_A2B_S1 batch (if any) has ended
 #if SKIP_PRE == 1
     return Beaver3Tuple<Datatype>{
         SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(),

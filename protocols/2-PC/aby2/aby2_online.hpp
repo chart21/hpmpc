@@ -528,6 +528,18 @@ class ABY2_ONLINE_Share
         c.l = assign;
         return c;
     }
+
+    // zero_add with BOTH deltas (l ^ assign of each party) known to be zero (RESHARE_OPT baking):
+    // the re-masking keeps m unchanged. Substituting the deltas by their guaranteed value keeps the
+    // parties consistent even at lanes the bake could not cover (padding lanes of partial groups).
+    template <typename func_add>
+    ABY2_ONLINE_Share zero_add_local(Datatype assign, func_add ADD) const
+    {
+        ABY2_ONLINE_Share c;
+        c.m = m;
+        c.l = assign;
+        return c;
+    }
     
 
     /* template <typename func_add, typename func_sub, typename func_mul, typename func_trunc> */
@@ -555,6 +567,17 @@ class ABY2_ONLINE_Share
     void mask_and_send_dot(func_add ADD, func_sub SUB)
     {
         l = getRandomVal(PSELF);
+        m = ADD(m, l);
+        send_to_live(PNEXT, m);
+    }
+
+    // mask_and_send_dot + reshare-mask bake (linear call order; no triple retrieval)
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        l = getRandomVal(PSELF);
+        if (bake_index >= 0)
+            bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
         m = ADD(m, l);
         send_to_live(PNEXT, m);
     }
@@ -591,9 +614,27 @@ class ABY2_ONLINE_Share
     void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB, int index)
     {
         l = getRandomVal(PSELF);
+        if (index >= 0)
+            bake_reshare_mask(l, index, SUB);  // delayed-trunc conv path: same bake as the trunc variant (P1-only)  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
         Datatype lxly;
         lxly = retrieve_output_share_arithmetic(0, index);
-        m = ADD(ADD(m, l), lxly); 
+        m = ADD(ADD(m, l), lxly);
+        send_to_live(PNEXT, m);
+    }
+
+    // sequential triple retrieval (call order == linear output order) + reshare-mask bake, no truncation
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_triple_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        l = getRandomVal(PSELF);
+        if (bake_index >= 0)
+            bake_reshare_mask(l, bake_index, SUB);  // P1-only (see mask_and_send_dot_baked)  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+        Datatype lxly;
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+            lxly = retrieve_output_share_bool();
+        else
+            lxly = retrieve_output_share_arithmetic();
+        m = ADD(ADD(m, l), lxly);
         send_to_live(PNEXT, m);
     }
     
@@ -614,21 +655,64 @@ class ABY2_ONLINE_Share
 #endif
     }
 
+    // Shared implementations of the four a_known mask/send variants (MODELWEIGHTS_KNOWN):
+    // P0 computes and sends its whole term (optionally SecureML-truncated); P1 sends nothing and
+    // derives its output mask from the freely PRESCRIBED triple share r1 (PRNG-synced with PRE).
+    // Under RESHARE_OPT_SIM, r1 is chosen so the mask carries the baked reshare material:
+    //  - with trunc:    l = TRUNC(-r1) with -r1 = (l_baked << FRACTIONAL) + low (image-limited, see
+    //                   construct_mwk_r1_baked: exact for RCA; PPA/PPA4 need TRUNC_DELAYED=1)
+    //  - without trunc: l = -r1 = l_baked (no constraint; the ReLU truncates later)
     template <typename func_add, typename func_sub, typename func_trunc>
-    void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
+    void a_known_pre_mask_send_with_trunc(Datatype lxly, func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
     {
-        Datatype lxly;
-        lxly = retrieve_output_share_arithmetic(0, index);
 #if PARTY == 0
         l = getRandomVal(PSELF);
         m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);
         send_to_live(PNEXT, m);
 #else
-        /* l = TRUNC(lxly); */
-        Datatype r1 = getRandomVal(PSELF); // == [lxly]_2 chosen in PRE (synced PSELF PRNG) == retrieved lxly
-        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
-        // Party1 sends nothing; mask l_P1 = TRUNC(-r1), consistent with PRE and the forced conv-triple share
+        // r1 == [lxly]_2 chosen in PRE (shared chooser + synced PSELF PRNG) == the retrieved lxly
+        Datatype r1 = mwk_choose_r1_trunc<Datatype>(bake_index, SUB);
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1));  // SecureML l_P1 = TRUNC(-[lxly]_2)
 #endif
+    }
+
+    template <typename func_add, typename func_sub>
+    void a_known_pre_mask_send_without_trunc(Datatype lxly, func_add ADD, func_sub SUB, int bake_index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+        m = ADD(ADD(SUB(SET_ALL_ZERO(), m), lxly), l);
+        send_to_live(PNEXT, m);
+#else
+        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(bake_index, SUB);
+        l = SUB(SET_ALL_ZERO(), r1);
+#endif
+    }
+
+    // conv path: INDEXED triple retrieval (tiled GEMM call order)
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
+    {
+        a_known_pre_mask_send_with_trunc(retrieve_output_share_arithmetic(0, index), ADD, SUB, TRUNC, index);
+    }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc(func_add ADD, func_sub SUB, int index)
+    {
+        a_known_pre_mask_send_without_trunc(retrieve_output_share_arithmetic(0, index), ADD, SUB, index);
+    }
+
+    // FC path: SEQUENTIAL triple retrieval (linear call order); trunc mode dispatched by the wrapper
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+        a_known_pre_mask_send_with_trunc(retrieve_output_share_arithmetic(), ADD, SUB, TRUNC, bake_index);
+    }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        a_known_pre_mask_send_without_trunc(retrieve_output_share_arithmetic(), ADD, SUB, bake_index);
     }
 
     template <typename func_add, typename func_sub, typename func_trunc>
@@ -639,11 +723,8 @@ class ABY2_ONLINE_Share
         // m = ADD(TRUNC(m),l);
         m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
 #else
-#if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && \
-    (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1)
         if (bake_index >= 0)
-            bake_reshare_mask(l, bake_index, SUB);  // bake rt.a into -l so the ReLU A2B reshare needs no P1 preprocessing
-#endif
+            bake_reshare_mask(l, bake_index, SUB);  // bake rt.a into -l (no-op unless RESHARE_BAKE_ACTIVE)
         m = ADD(TRUNC(m), l);
         /* m = ADD(SUB(TRUNC(m), OP_MULT(OP_SHIFT_LOG_RIGHTF(m, BITLENGTH -1), PROMOTE(UINT_TYPE(1) << (BITLENGTH -
          * 1))))   ,l); // x2^t - (x2 > 1) * 2^l */
@@ -670,6 +751,19 @@ class ABY2_ONLINE_Share
         lxly = retrieve_output_share_arithmetic(0, index);
         m = ADD(m, lxly);
         mask_and_send_dot_with_trunc(ADD, SUB, TRUNC, index);  // pass C-index so RESHARE_OPT_SIM bakes the right element
+    }
+
+    // sequential triple retrieval (call order == linear output order) + reshare-mask bake
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_with_trunc_with_triple_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+        Datatype lxly;
+        if constexpr (std::is_same_v<func_add(), OP_XOR>)
+            lxly = retrieve_output_share_bool();
+        else
+            lxly = retrieve_output_share_arithmetic();
+        m = ADD(m, lxly);
+        mask_and_send_dot_with_trunc(ADD, SUB, TRUNC, bake_index);
     }
     
     
@@ -717,33 +811,20 @@ class ABY2_ONLINE_Share
         #if RESHARE_OPT_SIM == 0
         m = retrieve_output_share();
         #else
-#if DATTYPE == BITLENGTH
-        if (current_phase == PHASE_LIVE && (UINT_TYPE)mask != 0)
-            g_rb_a0_nonzero++;  // a0 != 0 => a wrong P1-side bake WOULD corrupt this gate (not a hollow test)
-#endif
-        m = SET_ALL_ZERO();
+        m = SET_ALL_ZERO();  // P1's pre-send delta l ^ rt.a is zero by the conv-mask bake
         #endif
         #else
         #if RESHARE_OPT_SIM == 0
         m = ADD(l, mask);  // l + b
         l = mask;
         #else
-#if DATTYPE == BITLENGTH
-        if (current_phase == PHASE_LIVE)
-        {
-            g_rb_checks++;  // sim correctness condition: this wire's l (A2B slice of -l2) must equal our rt.a share
-            if ((UINT_TYPE)l != (UINT_TYPE)mask)
-            {
-                g_rb_mismatch++;
-                if (g_rb_mismatch <= 4)
-                    fprintf(stderr, "RB-MISMATCH #%llu idx=%llu l=%08x mask=%08x\n",
-                            (unsigned long long)g_rb_mismatch,
-                            (unsigned long long)(curr_random_multiplication_index - 1), (unsigned)(UINT_TYPE)l,
-                            (unsigned)(UINT_TYPE)mask);
-            }
-        }
-#endif
+        reshare_sim_check(l, mask);  // correctness condition: l (A2B slice of -l2) == our rt.a share
+        // The ACTUAL reshare operations with the pre-sent delta SUBSTITUTED by its baked-guaranteed
+        // value (l ^ mask == 0): both parties must use the same m, so set 0 directly instead of
+        // computing l ^ mask locally - at unbaked (e.g. padding) lanes the local value would differ
+        // from P0's assumption and the parties' views would diverge (garbage instead of a confined error).
         m = SET_ALL_ZERO();
+        l = mask;
         #endif
         #endif
     }
@@ -791,6 +872,25 @@ class ABY2_ONLINE_Share
                 out[i - m].m = temp_p1[i]; // will be reshared in circuit
                 continue;
             }
+#if RESHARE_BAKE_ACTIVE
+            {
+                // SIM=1 skips this slice's zero_add in the circuit: choose the mask AS the beaver3 .b
+                // field the adder will use (P0-local under party_local_bc), so the skip is a no-op.
+                const int t3 = ppa4_zero_add_t3(k - m, i - m);
+                if (t3 >= 0)
+                {
+                    const uint64_t b3i = curr_beaver_3_triple_index +
+                                         g_a2b_s1_pending * b3_tuples_per_adder(k - m) + (uint64_t) t3;
+                    if (b3i < num_beaver_3_tuples)
+                    {
+                        out[i - m].l = beaver_3_tuples.b[b3i];
+                        out[i - m].m = OP_XOR(temp_p1[i], out[i - m].l);
+                        send_to_live(PNEXT, out[i - m].m);
+                        continue;
+                    }
+                }
+            }
+#endif
             #elif RESHARE_OPT == 1 && RCA_MSB != 1
             if(i != m)
             {
@@ -802,6 +902,9 @@ class ABY2_ONLINE_Share
             out[i - m].m = OP_XOR(temp_p1[i], out[i - m].l);
             send_to_live(PNEXT, out[i - m].m);
         }
+#if RESHARE_BAKE_ACTIVE && PPA4_MSB == 1
+        g_a2b_s1_pending++;  // this group's adder will consume its tuples after all groups are prepared
+#endif
 #endif
 #endif
     }

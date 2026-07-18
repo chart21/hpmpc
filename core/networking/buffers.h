@@ -81,7 +81,25 @@ std::vector<DATATYPE> g_mwk_p1_masks;
 std::vector<uint64_t> g_mwk_p1_indices;
 #define G_MWK_LINEAR_SENTINEL ((uint64_t) -1)  // non-interleaved GEMM path: consume c[] linearly
 uint64_t g_mwk_p1_masks_consume = 0;
+// FC layers push into their OWN vectors: the triple generation processes ALL conv layers first and
+// ALL FC layers second, so a shared vector breaks whenever conv and FC layers interleave in program
+// order (the consume pointer would hand FC masks to a later conv layer and vice versa).
+std::vector<DATATYPE> g_mwk_p1_fc_masks;
+std::vector<uint64_t> g_mwk_p1_fc_indices;
+uint64_t g_mwk_p1_fc_masks_consume = 0;
 #endif
+// RESHARE_OPT: the conv layer runs ONE GEMM per batch element, so the mask index passed to
+// mask_and_send_dot_with_trunc_with_triple is LAYER-LOCAL PER ELEMENT (0..N-1) while the ReLU's MSB
+// adders consume the layer's random multiplications / beaver-3 tuples GLOBALLY across the batch.
+// The layer sets this to (element * N) around each per-element GEMM so the reshare bake sees the
+// batch-global output index. FC runs a single GEMM with a global index -> stays 0.
+uint64_t g_bake_batch_offset = 0;
+// RESHARE_OPT: a layer that adds a SHARED bias after its GEMM shifts the output wire's mask by the
+// bias mask share, which would destroy the bake. The layer publishes its effective bias mask shares
+// (this party's l of exactly what add_bias will add, indexed by output_index % len) around the GEMM
+// so the bake can pre-compensate: l_gemm := -negl - l_bias => final ReLU-input mask == -negl.
+const DATATYPE* g_bake_bias_l = nullptr;
+uint64_t g_bake_bias_len = 0;
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
 uint64_t num_generated[num_players * player_multiplier] = {0};

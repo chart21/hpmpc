@@ -298,6 +298,14 @@ inline int base_port = BASE_PORT;  // temporary solution
 #endif
 #endif
 
+#if PUBLIC_WEIGHTS == 1 && RESHARE_OPT_SIM == 1
+// With public weights the conv/FC layers multiply LOCALLY (no fresh output mask anywhere), so there
+// is no place to bake the reshare material into and the reshare-skip cannot be made correct: fall
+// back to the real (communicating) reshares.
+#undef RESHARE_OPT_SIM
+#define RESHARE_OPT_SIM 0
+#endif
+
 #ifndef A2B_ROUND_OPT_SIM
 #define A2B_ROUND_OPT_SIM 0  // Simulate round-optimized A2B, by reconstructing both ab + lc and ab xor lc in the Online Phase
 #endif

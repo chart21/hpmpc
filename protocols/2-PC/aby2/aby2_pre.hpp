@@ -233,6 +233,13 @@ class ABY2_PRE_Share
         return ABY2_PRE_Share(assign);
     }
 
+    // zero_add minus the communication (RESHARE_OPT baking: l == assign on both parties)
+    template <typename func_add>
+    ABY2_PRE_Share zero_add_local(Datatype assign, func_add ADD) const
+    {
+        return ABY2_PRE_Share(assign);
+    }
+
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot_and_assign(ABY2_PRE_Share b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
     {
@@ -329,6 +336,14 @@ class ABY2_PRE_Share
     {
         l = getRandomVal(PSELF);
     }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        l = getRandomVal(PSELF);
+        if (bake_index >= 0)
+            bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+    }
     
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_and_assign(Datatype assign, func_add ADD, func_sub SUB)
@@ -351,6 +366,16 @@ class ABY2_PRE_Share
     void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB, int index)
     {
         l = getRandomVal(PSELF);
+        if (index >= 0)
+            bake_reshare_mask(l, index, SUB);  // delayed-trunc conv path (no-op unless RESHARE_BAKE_ACTIVE)
+    }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_triple_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        l = getRandomVal(PSELF);
+        if (bake_index >= 0)
+            bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
     }
 
 
@@ -377,6 +402,8 @@ class ABY2_PRE_Share
         // P1 freely picks its conv-triple share [lxly]_2 = r1 (fresh PSELF random, synced with LIVE), uses it
         // as the output mask l_P1 = TRUNC(-r1), and stores r1: the AB2P ConvTriple generation PRESCRIBES P1's
         // share to r1 (P0 decrypts cross - r1), so no share-fixing communication is needed.
+        // CONV linear paths only (INTERLEAVE_COMM == 0 / GPU); FC uses the _baked variants below,
+        // which record into the separate FC vectors (see g_mwk_p1_fc_masks in buffers.h).
         Datatype r1 = getRandomVal(PSELF);
         g_mwk_p1_masks.push_back(r1);
         g_mwk_p1_indices.push_back(G_MWK_LINEAR_SENTINEL);
@@ -396,7 +423,7 @@ class ABY2_PRE_Share
 #if PARTY == 0
         l = getRandomVal(PSELF);
 #elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-        Datatype r1 = getRandomVal(PSELF);
+        Datatype r1 = mwk_choose_r1_trunc<Datatype>(index, SUB);
         g_mwk_p1_masks.push_back(r1);
         g_mwk_p1_indices.push_back((uint64_t) index);
         l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
@@ -406,15 +433,67 @@ class ABY2_PRE_Share
 
     }
 
+    // MWK + TRUNC_DELAYED (see the online counterpart): untruncated product, l = -r1 fully bakeable
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc(func_add ADD, func_sub SUB, int index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(index, SUB);
+        g_mwk_p1_masks.push_back(r1);
+        g_mwk_p1_indices.push_back((uint64_t) index);
+        l = SUB(SET_ALL_ZERO(), r1);
+#else
+        l = getRandomVal(PSELF);
+#endif
+    }
+
+    // FC path (linear order): sentinel index bookkeeping + bake (trunc mode dispatched by the wrapper)
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        Datatype r1 = mwk_choose_r1_trunc<Datatype>(bake_index, SUB);
+        g_mwk_p1_fc_masks.push_back(r1);  // FC path
+        g_mwk_p1_fc_indices.push_back(G_MWK_LINEAR_SENTINEL);
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1));
+#else
+        l = TRUNC(l);
+#endif
+    }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(bake_index, SUB);
+        g_mwk_p1_fc_masks.push_back(r1);  // FC path
+        g_mwk_p1_fc_indices.push_back(G_MWK_LINEAR_SENTINEL);
+        l = SUB(SET_ALL_ZERO(), r1);
+#else
+        l = getRandomVal(PSELF);
+#endif
+    }
+
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
         l = getRandomVal(PSELF);
-#if PARTY == 1 && RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && \
-    (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1)
         if (index >= 0)
-            bake_reshare_mask(l, index, SUB);  // MUST match the ONLINE bake exactly (l PRNG-synced PRE<->LIVE)
-#endif
+            bake_reshare_mask(l, index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE (l PRNG-synced PRE<->LIVE)
+    }
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_with_trunc_with_triple_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+        l = getRandomVal(PSELF);
+        if (bake_index >= 0)
+            bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE (l PRNG-synced PRE<->LIVE)
     }
 
 
@@ -559,12 +638,32 @@ class ABY2_PRE_Share
             #elif RESHARE_OPT == 1 && PPA4_MSB == 1
             if(is_ppa4_reshared(k - m, i - m))
                 continue; // will be reshared in circuit
+#if RESHARE_BAKE_ACTIVE
+            {
+                // MUST mirror the ONLINE prepare_A2B_S1: SIM=1 zero_add-skipped slices get the
+                // beaver3 .b field as their mask (buffers and counters are identical in both phases)
+                const int t3 = ppa4_zero_add_t3(k - m, i - m);
+                if (t3 >= 0)
+                {
+                    const uint64_t b3i = curr_beaver_3_triple_index +
+                                         g_a2b_s1_pending * b3_tuples_per_adder(k - m) + (uint64_t) t3;
+                    if (b3i < num_beaver_3_tuples)
+                    {
+                        out[i - m].l = beaver_3_tuples.b[b3i];
+                        continue;
+                    }
+                }
+            }
+#endif
             #elif RESHARE_OPT == 1 && RCA_MSB != 1
             if(i != m)
                 continue;
             #endif
             out[i - m].l = getRandomVal(PSELF);
         }
+#if RESHARE_BAKE_ACTIVE && PPA4_MSB == 1
+        g_a2b_s1_pending++;
+#endif
 #endif
 #endif
     }
@@ -589,8 +688,10 @@ class ABY2_PRE_Share
         #else
         #if RESHARE_OPT_SIM == 0
         Datatype m = ADD(l, mask);  // l + b
-        pre_send_to_live(PNEXT, m); 
+        pre_send_to_live(PNEXT, m);
         l = mask;
+        #else
+        l = mask;  // the actual reshare, minus the pre-send (delta == 0 thanks to the conv bake)
         #endif
         #endif
     }

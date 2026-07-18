@@ -299,7 +299,14 @@ void generateBeaverNDummyTuples(Beaver3TuplesD<Datatype> &beaver_3_tuples, Beave
         (uint8_t*) beaver_4_tuples.abcd
     };
 
-    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+#if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && PPA4_MSB == 1
+    // PPA4 SIM=1 skips the input-wire zero_adds, which is exact only if the 3-tuple mask fields are
+    // party-local: .b P0-only (masks the P0-known s1 slices), .c P1-only (masks P1's s2 slices).
+    constexpr bool b3_party_local_bc = true;
+#else
+    constexpr bool b3_party_local_bc = false;
+#endif
+    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM, b3_party_local_bc);
 #if CHEETAH_WAN_OPT == 1
     if (num_beaver_3_tuples > 0 && num_beaver_4_tuples > 0) {
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).get_ios(CHEETAH_THREADS)[0]->sync();
@@ -764,20 +771,25 @@ void generateLayerDummyTriples(type** a,
                 const uint64_t ysz = N * p.batchSize;
                 constexpr bool is_conv = std::is_same_v<LayerParams, ConvolutionParameter>;
                 const uint64_t bstride = is_conv ? N : ysz;
+                // conv and FC prescriptions live in SEPARATE vectors: the generation runs all conv
+                // layers first, then all FC layers, regardless of program order (see buffers.h).
+                auto& mwk_masks = is_conv ? g_mwk_p1_masks : g_mwk_p1_fc_masks;
+                auto& mwk_indices = is_conv ? g_mwk_p1_indices : g_mwk_p1_fc_indices;
+                auto& mwk_consume = is_conv ? g_mwk_p1_masks_consume : g_mwk_p1_fc_masks_consume;
 #if PARTY == 1
                 presc_buf.resize(ysz);
                 for (uint64_t k = 0; k < ysz; k++) {
-                    uint64_t raw = g_mwk_p1_indices[g_mwk_p1_masks_consume + k];
+                    uint64_t raw = mwk_indices[mwk_consume + k];
                     uint64_t idx = (raw == G_MWK_LINEAR_SENTINEL) ? k : ((k / bstride) * bstride + raw);
                     // factor == 1 here, but DATATYPE may still be a SIMD type in other builds of this TU:
                     // use the generic unvectorize (a plain copy for factor == 1) instead of a scalar cast
                     alignas(sizeof(DATATYPE)) UINT_TYPE temp[DATTYPE / BITLENGTH];
-                    unorthogonalize_arithmetic(&g_mwk_p1_masks[g_mwk_p1_masks_consume + k], temp, 1);
+                    unorthogonalize_arithmetic(&mwk_masks[mwk_consume + k], temp, 1);
                     presc_buf[idx] = temp[0];
                 }
                 prescribed = presc_buf.data();
 #endif
-                g_mwk_p1_masks_consume += ysz;
+                mwk_consume += ysz;
             }
 #endif
             [[maybe_unused]] const Utils::PROTO layer_proto =
@@ -918,19 +930,22 @@ void generateLayerDummyTriples(type** a,
                 const uint64_t N = (uint64_t)p.y_size_per_batch;  // per-batch output size (oc*oh*ow)
                 constexpr bool is_conv = std::is_same_v<LayerParams, ConvolutionParameter>;
                 const uint64_t bstride = is_conv ? N : y_size;
+                auto& mwk_masks = is_conv ? g_mwk_p1_masks : g_mwk_p1_fc_masks;      // see buffers.h
+                auto& mwk_indices = is_conv ? g_mwk_p1_indices : g_mwk_p1_fc_indices;
+                auto& mwk_consume = is_conv ? g_mwk_p1_masks_consume : g_mwk_p1_fc_masks_consume;
 #if PARTY == 1
                 presc_buf.resize(factor * y_size);
                 for (uint64_t k = 0; k < y_size; k++) {
-                    uint64_t raw = g_mwk_p1_indices[g_mwk_p1_masks_consume + k];
+                    uint64_t raw = mwk_indices[mwk_consume + k];
                     uint64_t idx = (raw == G_MWK_LINEAR_SENTINEL) ? k : ((k / bstride) * bstride + raw);
                     alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
-                    unorthogonalize_arithmetic(&g_mwk_p1_masks[g_mwk_p1_masks_consume + k], temp, 1);
+                    unorthogonalize_arithmetic(&mwk_masks[mwk_consume + k], temp, 1);
                     for (int j = 0; j < factor; j++)
                         presc_buf[j * y_size + idx] = temp[j];
                 }
                 prescribed = presc_buf.data();
 #endif
-                g_mwk_p1_masks_consume += y_size;
+                mwk_consume += y_size;
             }
 #endif
             [[maybe_unused]] const Utils::PROTO layer_proto =
