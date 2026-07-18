@@ -584,6 +584,13 @@ class ABY2_init
 #if PARTY == 0
         for (int i = m; i < k; i++)
         {
+            if (cut_frac_prep_vacant(m, k, i))
+                continue;  // CUT_FRACTIONAL_BITS_OPT: vacant slice, never shared
+            if (cut_frac_prep_boundary(m, k, i))
+            {
+                send_to_(PNEXT);  // boundary slice: masked + sent
+                continue;
+            }
             #if RESHARE_OPT == 1 && RCA_MSB == 1
             if(i == k - 1)
                 continue; // will be reshared in circuit
@@ -623,6 +630,13 @@ class ABY2_init
 #if PARTY == 1
         for (int i = 0; i < k; i++)
         {
+            if (cut_frac_prep_vacant(0, k, i))
+                continue;  // CUT_FRACTIONAL_BITS_OPT: vacant slice, nothing sent
+            if (cut_frac_prep_boundary(0, k, i))
+            {
+                receive_from_(PNEXT);  // boundary slice: masked + sent by P0
+                continue;
+            }
             #if RESHARE_OPT == 1 && RCA_MSB == 1
             if(i == k - 1)
                 continue; // will be reshared in circuit

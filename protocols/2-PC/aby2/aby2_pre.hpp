@@ -632,6 +632,16 @@ class ABY2_PRE_Share
 #if PARTY == 0
         for (int i = m; i < k; i++)
         {
+            if (cut_frac_prep_vacant(m, k, i))
+            {
+                out[i - m].l = SET_ALL_ZERO();  // public constant (mask 0), no PRNG draw
+                continue;
+            }
+            if (cut_frac_prep_boundary(m, k, i))
+            {
+                out[i - m].l = getRandomVal(PSELF);  // boundary slice: masked path (see online)
+                continue;
+            }
             #if RESHARE_OPT == 1 && RCA_MSB == 1
             if(i == k - 1)
                 continue; // will be reshared in circuit
@@ -735,7 +745,7 @@ class ABY2_PRE_Share
 
         for (int i = m; i < k; i++)
         {
-            out[i - m].l = temp_p1[i];
+            out[i - m].l = cut_frac_prep_vacant(m, k, i) ? SET_ALL_ZERO() : temp_p1[i];
         }
 #endif
 #endif

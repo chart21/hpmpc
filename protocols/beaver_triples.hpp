@@ -91,6 +91,122 @@ DATATYPE* random_multiplication_b = nullptr;
     (RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && \
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 
+// CUT_FRACTIONAL_BITS_OPT (docs/CUT_FRACTIONAL_BITS_OPT.md): compile-time eligibility. Under
+// TRUNC_DELAYED == 0 the ReLU input is freshly truncated, so its value fits BITLENGTH-FRACTIONAL
+// signed bits and the MSB adder's top FRACTIONAL slices are redundant. Whether a given adder
+// instance actually applies the cut is the RUNTIME flag g_cut_frac_active (set by RELU only -
+// max/min/comparison adders run the full circuit on the same build).
+// Currently implemented for the RESHARE_OPT=1 generated circuits of RCA, PPA, and PPA4 (k = 32);
+// other circuit variants safely no-op the cut until they are patched too.
+#define CUT_FRAC_ELIGIBLE \
+    (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && \
+     RESHARE_OPT == 1 && ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
+     (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
+#define CUT_FRAC_ELIGIBLE_PPA4 (CUT_FRAC_ELIGIBLE && PPA4_MSB == 1)
+
+// PPA4 comm-elimination thresholds: a gate/send/zero_add site with threshold T is skipped when
+// FRACTIONAL >= T (its g-factor coverage is then entirely identity-substituted -> public output).
+// The P-gate beaver3 slots (skipped in ALL phases, so allocation and retrieval both drop) shift the
+// consumption RANK of all later slots within each adder - external offset arithmetic (the S1 peek
+// and the bake) must use the cut-aware count and ranks below.
+constexpr int cut_frac_ppa4_b3_pslot_th(int slot)  // -1 = not a P-slot (never skipped)
+{
+    switch (slot)
+    {
+        case 1: return 3; case 3: return 6; case 5: return 9; case 7: return 12; case 9: return 15;
+        case 11: return 18; case 13: return 21; case 15: return 25; case 17: return 28; case 20: return 9;
+        default: return -1;
+    }
+}
+constexpr int cut_frac_ppa4_b3_skipped_below(int slot)
+{
+#if CUT_FRAC_ELIGIBLE_PPA4
+    int n = 0;
+    for (int j = 0; j < slot; j++)
+    {
+        const int th = cut_frac_ppa4_b3_pslot_th(j);
+        if (th >= 0 && FRACTIONAL >= th)
+            n++;
+    }
+    return n;
+#else
+    (void) slot;
+    return 0;
+#endif
+}
+constexpr bool cut_frac_ppa4_skip(int thresholdF)
+{
+#if CUT_FRAC_ELIGIBLE_PPA4
+    return FRACTIONAL >= thresholdF;
+#else
+    (void) thresholdF;
+    return false;
+#endif
+}
+
+// Slice roles when the cut is active (adder width k == BITLENGTH; slice 0 = numeric MSB):
+//  - slices [0, FRACTIONAL):  vacant - never prepared, shared, reshared, or read.
+//  - slice FRACTIONAL:        boundary - its RAW wire pair is kept (masked + sent in the A2B
+//                             prepare, taking over slice 0's original role) because the tree's
+//                             output tap p_0 is substituted by a[FRACTIONAL] ^ b[FRACTIONAL];
+//                             its LEAF values are still identity-substituted (g := 0, p := 1).
+//  - slices (FRACTIONAL, k):  unchanged.
+// The identity substitution (g_i, p_i) := (public 0, public 1) for slices 1..FRACTIONAL makes the
+// UNCHANGED prefix tree compute p_F ^ G(F+1 .. k-1) - the reduced-width MSB - because identity
+// elements drop out of every prefix combine (verified by exhaustive simulation).
+constexpr bool cut_frac_vacant(int k, int i)  // fully-skipped slice?
+{
+#if CUT_FRAC_ELIGIBLE
+    return k == BITLENGTH && i < FRACTIONAL;
+#else
+    (void) k; (void) i;
+    return false;
+#endif
+}
+
+constexpr bool cut_frac_identity(int k, int i)  // leaf (g,p) := (0,1) substituted slice?
+{
+#if CUT_FRAC_ELIGIBLE
+    return k == BITLENGTH && i >= 1 && i <= FRACTIONAL;
+#else
+    (void) k; (void) i;
+    return false;
+#endif
+}
+
+// Runtime slice-role helpers for the A2B prepare/complete loops (the flag distinguishes ReLU
+// adders, which apply the cut, from max/min/comparison adders on the same build, which don't).
+// prepare_A2B_* receives a slice RANGE (m, k); the cut only applies to full-width conversions.
+inline bool cut_frac_prep_vacant(int m, int k, int i)
+{
+#if CUT_FRAC_ELIGIBLE
+    return g_cut_frac_active && m == 0 && k == BITLENGTH && i < FRACTIONAL;
+#else
+    (void) m; (void) k; (void) i;
+    return false;
+#endif
+}
+// Constructor-side reshare skip for identity slices.
+inline bool cut_frac_skip_reshare(int k, int i)
+{
+#if CUT_FRAC_ELIGIBLE
+    return g_cut_frac_active && cut_frac_identity(k, i);
+#else
+    (void) k; (void) i;
+    return false;
+#endif
+}
+
+inline bool cut_frac_prep_boundary(int m, int k, int i)
+{
+#if CUT_FRAC_ELIGIBLE
+    return g_cut_frac_active && m == 0 && k == BITLENGTH && i == FRACTIONAL;
+#else
+    (void) m; (void) k; (void) i;
+    return false;
+#endif
+}
+
 // Reshare wiring of the *_and_ab_reshared adders: which bit-slice (adder wire index i, 0 = numeric MSB,
 // k-1 = numeric LSB) is reshared with which random_triples[] offset within one adder. -1 = not reshared.
 // Must mirror the generated circuit constructors (rca_msb / ppa_msb_unsafe / ppa_msb_4way _and_ab_reshared.hpp).
@@ -99,11 +215,34 @@ constexpr int reshare_rt_offset(int k, int i)
 #if RCA_MSB == 1
     return (i == k - 1) ? 0 : -1;  // RCA reshares only the LSB slice (first carry gate), rt[0]
 #elif PPA_MSB == 1
+#if CUT_FRAC_ELIGIBLE
+    // CUT: slices 1..FRACTIONAL are identity-substituted (not reshared, no rt consumed); kept
+    // slices consume sequentially, so slice i's offset shifts down by FRACTIONAL.
+    return (i >= FRACTIONAL + 1 && i < k) ? i - 1 - FRACTIONAL : -1;
+#else
     return (i >= 1 && i < k) ? i - 1 : -1;  // PPA reshares slices 1..k-1 with rt[i-1], ascending
+#endif
 #elif PPA4_MSB == 1
     // PPA4 reshares the AND2 "generate" wires; retrieval order is circuit-specific (k=32: wire 22 is LAST).
     if (k == 32)
     {
+#if CUT_FRAC_ELIGIBLE_PPA4
+        // CUT: identity-substituted slices (1..FRACTIONAL) are not reshared; kept slices consume
+        // sequentially by RANK among kept slices in the retrieval order 1,4,7,...,29,22.
+        {
+            constexpr int order[11] = {1, 4, 7, 10, 13, 16, 19, 23, 26, 29, 22};
+            int rank = 0;
+            for (int j = 0; j < 11; j++)
+            {
+                if (order[j] <= FRACTIONAL)
+                    continue;  // skipped (identity)
+                if (order[j] == i)
+                    return rank;
+                rank++;
+            }
+            return -1;
+        }
+#else
         switch (i)
         {
             case 1: return 0; case 4: return 1; case 7: return 2; case 10: return 3; case 13: return 4;
@@ -111,6 +250,7 @@ constexpr int reshare_rt_offset(int k, int i)
             case 22: return 10;
             default: return -1;
         }
+#endif
     }
     else if (k == 16)
     {
@@ -140,9 +280,26 @@ constexpr uint64_t reshares_per_adder(int k)
 #if RCA_MSB == 1
     return 1;
 #elif PPA_MSB == 1
+#if CUT_FRAC_ELIGIBLE
+    return (uint64_t)(k - 1 - FRACTIONAL);  // CUT: identity slices consume no rt
+#else
     return (uint64_t)(k - 1);
+#endif
 #elif PPA4_MSB == 1
+#if CUT_FRAC_ELIGIBLE_PPA4
+    if (k == 32)
+    {
+        constexpr int order[11] = {1, 4, 7, 10, 13, 16, 19, 23, 26, 29, 22};
+        uint64_t n = 0;
+        for (int j = 0; j < 11; j++)
+            if (order[j] > FRACTIONAL)
+                n++;
+        return n;
+    }
+    return k == 16 ? 5 : 3;
+#else
     return k == 32 ? 11 : (k == 16 ? 5 : 3);
+#endif
 #else
     return 0;
 #endif
@@ -155,13 +312,16 @@ constexpr int ppa4_zero_add_t3(int k, int i)
 {
     if (k == 32)
     {
+        int slot = -1;
         switch (i)
         {
-            case 2: return 0; case 5: return 2; case 8: return 4; case 11: return 6;
-            case 14: return 8; case 17: return 10; case 20: return 12; case 24: return 14;
-            case 27: return 16; case 30: return 18;
+            case 2: slot = 0; break; case 5: slot = 2; break; case 8: slot = 4; break;
+            case 11: slot = 6; break; case 14: slot = 8; break; case 17: slot = 10; break;
+            case 20: slot = 12; break; case 24: slot = 14; break; case 27: slot = 16; break;
+            case 30: slot = 18; break;
             default: return -1;
         }
+        return slot - cut_frac_ppa4_b3_skipped_below(slot);  // consumption rank under the cut
     }
     else if (k == 16)
     {
@@ -184,7 +344,13 @@ constexpr int ppa4_zero_add_t3(int k, int i)
 }
 
 // Beaver 3-tuples consumed by one PPA4 MSB adder of width k (Beaver3TupleCount in the circuit).
-constexpr uint64_t b3_tuples_per_adder(int k) { return k == 32 ? 24 : (k == 16 ? 9 : 4); }
+// Under the cut, skipped P-gate slots consume nothing (retrieval and INIT allocation both skip).
+constexpr uint64_t b3_tuples_per_adder(int k)
+{
+    if (k == 32)
+        return (uint64_t)(24 - cut_frac_ppa4_b3_skipped_below(24));
+    return k == 16 ? 9 : 4;
+}
 
 // P0-side helper for the PPA4 SIM=1 zero_add skip: counts prepare_A2B_S1 calls since the last
 // beaver-3-tuple retrieval, so slice masks can be peeked at the tuple positions the group's adder
@@ -219,6 +385,8 @@ inline void bake_reshare_mask(Datatype& l, int bake_index, func_sub SUB)
     UINT_TYPE negl = (UINT_TYPE) l;
     for (int i = 1; i < K; i++)  // slice 0 (numeric MSB) is never reshared
     {
+        if (cut_frac_identity(K, i))
+            continue;  // CUT_FRACTIONAL_BITS_OPT: identity-substituted slice, not reshared in the circuit
         const int t = reshare_rt_offset(K, i);
         if (t < 0)
             continue;
@@ -236,6 +404,8 @@ inline void bake_reshare_mask(Datatype& l, int bake_index, func_sub SUB)
     {
         for (int i = 1; i < K; i++)
         {
+            if (cut_frac_identity(K, i))
+                continue;  // CUT_FRACTIONAL_BITS_OPT: identity-substituted slice, zero_add skipped
             const int t3 = ppa4_zero_add_t3(K, i);
             if (t3 < 0)
                 continue;

@@ -306,6 +306,16 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define RESHARE_OPT_SIM 0
 #endif
 
+#ifndef CUT_FRACTIONAL_BITS_OPT
+#define CUT_FRACTIONAL_BITS_OPT 0  // Skip the MSB adder's top FRACTIONAL slices under TRUNC_DELAYED == 0:
+// the wire's reconstructed value is then provably bounded within BITLENGTH-FRACTIONAL signed bits (it
+// went through a real truncation by FRACTIONAL bits), so those slices are redundant and no gates are
+// needed for them (see docs/CUT_FRACTIONAL_BITS_OPT.md). Works for MODELWEIGHTS_KNOWN_DURING_PREPROCESSING
+// either 0 or 1 (the bound comes from the truncation invariant, not from any mask-construction trick) and
+// for any FRACTIONAL in [1, BITLENGTH-3]. Implemented for the RESHARE_OPT=1 generated circuits of all
+// three adders (RCA, PPA, PPA4, k=32); other circuit variants safely no-op (see CUT_FRAC_ELIGIBLE).
+#endif
+
 #ifndef A2B_ROUND_OPT_SIM
 #define A2B_ROUND_OPT_SIM 0  // Simulate round-optimized A2B, by reconstructing both ab + lc and ab xor lc in the Online Phase
 #endif

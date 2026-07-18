@@ -865,7 +865,10 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
             }
             for (int i = 0; i < RandomTripleCount; ++i)
             {
-                random_triples[i] = retrieveRandomMultiplication<DATATYPE>();
+                // CUT: slot i belongs to slice i+1's reshare; skipped slices consume no rt
+                // (matches the INIT-phase count, which follows the same skipped reshare calls)
+                if (!cut_frac_skip_reshare(32, i + 1))
+                    random_triples[i] = retrieveRandomMultiplication<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
             r173 = getRandomVal(PSELF);
@@ -901,68 +904,161 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
             r203 = getRandomVal(PSELF);
 
         }
-        a[1].reshare_a(random_triples[0].a);
-        b[1].reshare_b(random_triples[0].a);
-        a[2].reshare_a(random_triples[1].a);
-        b[2].reshare_b(random_triples[1].a);
-        a[3].reshare_a(random_triples[2].a);
-        b[3].reshare_b(random_triples[2].a);
-        a[4].reshare_a(random_triples[3].a);
-        b[4].reshare_b(random_triples[3].a);
-        a[5].reshare_a(random_triples[4].a);
-        b[5].reshare_b(random_triples[4].a);
-        a[6].reshare_a(random_triples[5].a);
-        b[6].reshare_b(random_triples[5].a);
-        a[7].reshare_a(random_triples[6].a);
-        b[7].reshare_b(random_triples[6].a);
-        a[8].reshare_a(random_triples[7].a);
-        b[8].reshare_b(random_triples[7].a);
-        a[9].reshare_a(random_triples[8].a);
-        b[9].reshare_b(random_triples[8].a);
-        a[10].reshare_a(random_triples[9].a);
-        b[10].reshare_b(random_triples[9].a);
-        a[11].reshare_a(random_triples[10].a);
-        b[11].reshare_b(random_triples[10].a);
-        a[12].reshare_a(random_triples[11].a);
-        b[12].reshare_b(random_triples[11].a);
-        a[13].reshare_a(random_triples[12].a);
-        b[13].reshare_b(random_triples[12].a);
-        a[14].reshare_a(random_triples[13].a);
-        b[14].reshare_b(random_triples[13].a);
-        a[15].reshare_a(random_triples[14].a);
-        b[15].reshare_b(random_triples[14].a);
-        a[16].reshare_a(random_triples[15].a);
-        b[16].reshare_b(random_triples[15].a);
-        a[17].reshare_a(random_triples[16].a);
-        b[17].reshare_b(random_triples[16].a);
-        a[18].reshare_a(random_triples[17].a);
-        b[18].reshare_b(random_triples[17].a);
-        a[19].reshare_a(random_triples[18].a);
-        b[19].reshare_b(random_triples[18].a);
-        a[20].reshare_a(random_triples[19].a);
-        b[20].reshare_b(random_triples[19].a);
-        a[21].reshare_a(random_triples[20].a);
-        b[21].reshare_b(random_triples[20].a);
-        a[22].reshare_a(random_triples[21].a);
-        b[22].reshare_b(random_triples[21].a);
-        a[23].reshare_a(random_triples[22].a);
-        b[23].reshare_b(random_triples[22].a);
-        a[24].reshare_a(random_triples[23].a);
-        b[24].reshare_b(random_triples[23].a);
-        a[25].reshare_a(random_triples[24].a);
-        b[25].reshare_b(random_triples[24].a);
-        a[26].reshare_a(random_triples[25].a);
-        b[26].reshare_b(random_triples[25].a);
-        a[27].reshare_a(random_triples[26].a);
-        b[27].reshare_b(random_triples[26].a);
-        a[28].reshare_a(random_triples[27].a);
-        b[28].reshare_b(random_triples[27].a);
-        a[29].reshare_a(random_triples[28].a);
-        b[29].reshare_b(random_triples[28].a);
-        a[30].reshare_a(random_triples[29].a);
-        b[30].reshare_b(random_triples[29].a);
-        a[31].reshare_a(random_triples[30].a);
-        b[31].reshare_b(random_triples[30].a);
+        if (!cut_frac_skip_reshare(32, 1))
+        {
+            a[1].reshare_a(random_triples[0].a);
+            b[1].reshare_b(random_triples[0].a);
+        }
+        if (!cut_frac_skip_reshare(32, 2))
+        {
+            a[2].reshare_a(random_triples[1].a);
+            b[2].reshare_b(random_triples[1].a);
+        }
+        if (!cut_frac_skip_reshare(32, 3))
+        {
+            a[3].reshare_a(random_triples[2].a);
+            b[3].reshare_b(random_triples[2].a);
+        }
+        if (!cut_frac_skip_reshare(32, 4))
+        {
+            a[4].reshare_a(random_triples[3].a);
+            b[4].reshare_b(random_triples[3].a);
+        }
+        if (!cut_frac_skip_reshare(32, 5))
+        {
+            a[5].reshare_a(random_triples[4].a);
+            b[5].reshare_b(random_triples[4].a);
+        }
+        if (!cut_frac_skip_reshare(32, 6))
+        {
+            a[6].reshare_a(random_triples[5].a);
+            b[6].reshare_b(random_triples[5].a);
+        }
+        if (!cut_frac_skip_reshare(32, 7))
+        {
+            a[7].reshare_a(random_triples[6].a);
+            b[7].reshare_b(random_triples[6].a);
+        }
+        if (!cut_frac_skip_reshare(32, 8))
+        {
+            a[8].reshare_a(random_triples[7].a);
+            b[8].reshare_b(random_triples[7].a);
+        }
+        if (!cut_frac_skip_reshare(32, 9))
+        {
+            a[9].reshare_a(random_triples[8].a);
+            b[9].reshare_b(random_triples[8].a);
+        }
+        if (!cut_frac_skip_reshare(32, 10))
+        {
+            a[10].reshare_a(random_triples[9].a);
+            b[10].reshare_b(random_triples[9].a);
+        }
+        if (!cut_frac_skip_reshare(32, 11))
+        {
+            a[11].reshare_a(random_triples[10].a);
+            b[11].reshare_b(random_triples[10].a);
+        }
+        if (!cut_frac_skip_reshare(32, 12))
+        {
+            a[12].reshare_a(random_triples[11].a);
+            b[12].reshare_b(random_triples[11].a);
+        }
+        if (!cut_frac_skip_reshare(32, 13))
+        {
+            a[13].reshare_a(random_triples[12].a);
+            b[13].reshare_b(random_triples[12].a);
+        }
+        if (!cut_frac_skip_reshare(32, 14))
+        {
+            a[14].reshare_a(random_triples[13].a);
+            b[14].reshare_b(random_triples[13].a);
+        }
+        if (!cut_frac_skip_reshare(32, 15))
+        {
+            a[15].reshare_a(random_triples[14].a);
+            b[15].reshare_b(random_triples[14].a);
+        }
+        if (!cut_frac_skip_reshare(32, 16))
+        {
+            a[16].reshare_a(random_triples[15].a);
+            b[16].reshare_b(random_triples[15].a);
+        }
+        if (!cut_frac_skip_reshare(32, 17))
+        {
+            a[17].reshare_a(random_triples[16].a);
+            b[17].reshare_b(random_triples[16].a);
+        }
+        if (!cut_frac_skip_reshare(32, 18))
+        {
+            a[18].reshare_a(random_triples[17].a);
+            b[18].reshare_b(random_triples[17].a);
+        }
+        if (!cut_frac_skip_reshare(32, 19))
+        {
+            a[19].reshare_a(random_triples[18].a);
+            b[19].reshare_b(random_triples[18].a);
+        }
+        if (!cut_frac_skip_reshare(32, 20))
+        {
+            a[20].reshare_a(random_triples[19].a);
+            b[20].reshare_b(random_triples[19].a);
+        }
+        if (!cut_frac_skip_reshare(32, 21))
+        {
+            a[21].reshare_a(random_triples[20].a);
+            b[21].reshare_b(random_triples[20].a);
+        }
+        if (!cut_frac_skip_reshare(32, 22))
+        {
+            a[22].reshare_a(random_triples[21].a);
+            b[22].reshare_b(random_triples[21].a);
+        }
+        if (!cut_frac_skip_reshare(32, 23))
+        {
+            a[23].reshare_a(random_triples[22].a);
+            b[23].reshare_b(random_triples[22].a);
+        }
+        if (!cut_frac_skip_reshare(32, 24))
+        {
+            a[24].reshare_a(random_triples[23].a);
+            b[24].reshare_b(random_triples[23].a);
+        }
+        if (!cut_frac_skip_reshare(32, 25))
+        {
+            a[25].reshare_a(random_triples[24].a);
+            b[25].reshare_b(random_triples[24].a);
+        }
+        if (!cut_frac_skip_reshare(32, 26))
+        {
+            a[26].reshare_a(random_triples[25].a);
+            b[26].reshare_b(random_triples[25].a);
+        }
+        if (!cut_frac_skip_reshare(32, 27))
+        {
+            a[27].reshare_a(random_triples[26].a);
+            b[27].reshare_b(random_triples[26].a);
+        }
+        if (!cut_frac_skip_reshare(32, 28))
+        {
+            a[28].reshare_a(random_triples[27].a);
+            b[28].reshare_b(random_triples[27].a);
+        }
+        if (!cut_frac_skip_reshare(32, 29))
+        {
+            a[29].reshare_a(random_triples[28].a);
+            b[29].reshare_b(random_triples[28].a);
+        }
+        if (!cut_frac_skip_reshare(32, 30))
+        {
+            a[30].reshare_a(random_triples[29].a);
+            b[30].reshare_b(random_triples[29].a);
+        }
+        if (!cut_frac_skip_reshare(32, 31))
+        {
+            a[31].reshare_a(random_triples[30].a);
+            b[31].reshare_b(random_triples[30].a);
+        }
     }
 
     int get_rounds() const { return level; }
@@ -973,38 +1069,103 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
     {
         switch(level) {
             case 0:
-                p_0 = a[0] ^ b[0];  // p[0]
-                p_1 = a[1] ^ b[1];  // p[1]
-                p_2 = a[2] ^ b[2];  // p[2]
-                p_3 = a[3] ^ b[3];  // p[3]
-                p_4 = a[4] ^ b[4];  // p[4]
-                p_5 = a[5] ^ b[5];  // p[5]
-                p_6 = a[6] ^ b[6];  // p[6]
-                p_7 = a[7] ^ b[7];  // p[7]
-                p_8 = a[8] ^ b[8];  // p[8]
-                p_9 = a[9] ^ b[9];  // p[9]
-                p_10 = a[10] ^ b[10];  // p[10]
-                p_11 = a[11] ^ b[11];  // p[11]
-                p_12 = a[12] ^ b[12];  // p[12]
-                p_13 = a[13] ^ b[13];  // p[13]
-                p_14 = a[14] ^ b[14];  // p[14]
-                p_15 = a[15] ^ b[15];  // p[15]
-                p_16 = a[16] ^ b[16];  // p[16]
-                p_17 = a[17] ^ b[17];  // p[17]
-                p_18 = a[18] ^ b[18];  // p[18]
-                p_19 = a[19] ^ b[19];  // p[19]
-                p_20 = a[20] ^ b[20];  // p[20]
-                p_21 = a[21] ^ b[21];  // p[21]
-                p_22 = a[22] ^ b[22];  // p[22]
-                p_23 = a[23] ^ b[23];  // p[23]
-                p_24 = a[24] ^ b[24];  // p[24]
-                p_25 = a[25] ^ b[25];  // p[25]
-                p_26 = a[26] ^ b[26];  // p[26]
-                p_27 = a[27] ^ b[27];  // p[27]
-                p_28 = a[28] ^ b[28];  // p[28]
-                p_29 = a[29] ^ b[29];  // p[29]
-                p_30 = a[30] ^ b[30];  // p[30]
-                p_31 = a[31] ^ b[31];  // p[31]
+                if (g_cut_frac_active && cut_frac_identity(32, 1))
+                    p_0 = a[FRACTIONAL] ^ b[FRACTIONAL];  // CUT: output tap reads the boundary slice
+                else
+                    p_0 = a[0] ^ b[0];  // p[0]
+                p_1 = (g_cut_frac_active && cut_frac_identity(32, 1))
+                            ? Share(SET_ALL_ONE())
+                            : a[1] ^ b[1];  // p[1] (identity 1 when CUT-substituted)
+                p_2 = (g_cut_frac_active && cut_frac_identity(32, 2))
+                            ? Share(SET_ALL_ONE())
+                            : a[2] ^ b[2];  // p[2] (identity 1 when CUT-substituted)
+                p_3 = (g_cut_frac_active && cut_frac_identity(32, 3))
+                            ? Share(SET_ALL_ONE())
+                            : a[3] ^ b[3];  // p[3] (identity 1 when CUT-substituted)
+                p_4 = (g_cut_frac_active && cut_frac_identity(32, 4))
+                            ? Share(SET_ALL_ONE())
+                            : a[4] ^ b[4];  // p[4] (identity 1 when CUT-substituted)
+                p_5 = (g_cut_frac_active && cut_frac_identity(32, 5))
+                            ? Share(SET_ALL_ONE())
+                            : a[5] ^ b[5];  // p[5] (identity 1 when CUT-substituted)
+                p_6 = (g_cut_frac_active && cut_frac_identity(32, 6))
+                            ? Share(SET_ALL_ONE())
+                            : a[6] ^ b[6];  // p[6] (identity 1 when CUT-substituted)
+                p_7 = (g_cut_frac_active && cut_frac_identity(32, 7))
+                            ? Share(SET_ALL_ONE())
+                            : a[7] ^ b[7];  // p[7] (identity 1 when CUT-substituted)
+                p_8 = (g_cut_frac_active && cut_frac_identity(32, 8))
+                            ? Share(SET_ALL_ONE())
+                            : a[8] ^ b[8];  // p[8] (identity 1 when CUT-substituted)
+                p_9 = (g_cut_frac_active && cut_frac_identity(32, 9))
+                            ? Share(SET_ALL_ONE())
+                            : a[9] ^ b[9];  // p[9] (identity 1 when CUT-substituted)
+                p_10 = (g_cut_frac_active && cut_frac_identity(32, 10))
+                            ? Share(SET_ALL_ONE())
+                            : a[10] ^ b[10];  // p[10] (identity 1 when CUT-substituted)
+                p_11 = (g_cut_frac_active && cut_frac_identity(32, 11))
+                            ? Share(SET_ALL_ONE())
+                            : a[11] ^ b[11];  // p[11] (identity 1 when CUT-substituted)
+                p_12 = (g_cut_frac_active && cut_frac_identity(32, 12))
+                            ? Share(SET_ALL_ONE())
+                            : a[12] ^ b[12];  // p[12] (identity 1 when CUT-substituted)
+                p_13 = (g_cut_frac_active && cut_frac_identity(32, 13))
+                            ? Share(SET_ALL_ONE())
+                            : a[13] ^ b[13];  // p[13] (identity 1 when CUT-substituted)
+                p_14 = (g_cut_frac_active && cut_frac_identity(32, 14))
+                            ? Share(SET_ALL_ONE())
+                            : a[14] ^ b[14];  // p[14] (identity 1 when CUT-substituted)
+                p_15 = (g_cut_frac_active && cut_frac_identity(32, 15))
+                            ? Share(SET_ALL_ONE())
+                            : a[15] ^ b[15];  // p[15] (identity 1 when CUT-substituted)
+                p_16 = (g_cut_frac_active && cut_frac_identity(32, 16))
+                            ? Share(SET_ALL_ONE())
+                            : a[16] ^ b[16];  // p[16] (identity 1 when CUT-substituted)
+                p_17 = (g_cut_frac_active && cut_frac_identity(32, 17))
+                            ? Share(SET_ALL_ONE())
+                            : a[17] ^ b[17];  // p[17] (identity 1 when CUT-substituted)
+                p_18 = (g_cut_frac_active && cut_frac_identity(32, 18))
+                            ? Share(SET_ALL_ONE())
+                            : a[18] ^ b[18];  // p[18] (identity 1 when CUT-substituted)
+                p_19 = (g_cut_frac_active && cut_frac_identity(32, 19))
+                            ? Share(SET_ALL_ONE())
+                            : a[19] ^ b[19];  // p[19] (identity 1 when CUT-substituted)
+                p_20 = (g_cut_frac_active && cut_frac_identity(32, 20))
+                            ? Share(SET_ALL_ONE())
+                            : a[20] ^ b[20];  // p[20] (identity 1 when CUT-substituted)
+                p_21 = (g_cut_frac_active && cut_frac_identity(32, 21))
+                            ? Share(SET_ALL_ONE())
+                            : a[21] ^ b[21];  // p[21] (identity 1 when CUT-substituted)
+                p_22 = (g_cut_frac_active && cut_frac_identity(32, 22))
+                            ? Share(SET_ALL_ONE())
+                            : a[22] ^ b[22];  // p[22] (identity 1 when CUT-substituted)
+                p_23 = (g_cut_frac_active && cut_frac_identity(32, 23))
+                            ? Share(SET_ALL_ONE())
+                            : a[23] ^ b[23];  // p[23] (identity 1 when CUT-substituted)
+                p_24 = (g_cut_frac_active && cut_frac_identity(32, 24))
+                            ? Share(SET_ALL_ONE())
+                            : a[24] ^ b[24];  // p[24] (identity 1 when CUT-substituted)
+                p_25 = (g_cut_frac_active && cut_frac_identity(32, 25))
+                            ? Share(SET_ALL_ONE())
+                            : a[25] ^ b[25];  // p[25] (identity 1 when CUT-substituted)
+                p_26 = (g_cut_frac_active && cut_frac_identity(32, 26))
+                            ? Share(SET_ALL_ONE())
+                            : a[26] ^ b[26];  // p[26] (identity 1 when CUT-substituted)
+                p_27 = (g_cut_frac_active && cut_frac_identity(32, 27))
+                            ? Share(SET_ALL_ONE())
+                            : a[27] ^ b[27];  // p[27] (identity 1 when CUT-substituted)
+                p_28 = (g_cut_frac_active && cut_frac_identity(32, 28))
+                            ? Share(SET_ALL_ONE())
+                            : a[28] ^ b[28];  // p[28] (identity 1 when CUT-substituted)
+                p_29 = (g_cut_frac_active && cut_frac_identity(32, 29))
+                            ? Share(SET_ALL_ONE())
+                            : a[29] ^ b[29];  // p[29] (identity 1 when CUT-substituted)
+                p_30 = (g_cut_frac_active && cut_frac_identity(32, 30))
+                            ? Share(SET_ALL_ONE())
+                            : a[30] ^ b[30];  // p[30] (identity 1 when CUT-substituted)
+                p_31 = (g_cut_frac_active && cut_frac_identity(32, 31))
+                            ? Share(SET_ALL_ONE())
+                            : a[31] ^ b[31];  // p[31] (identity 1 when CUT-substituted)
                 p_1_p = p_1.zero_add(triples[42].a);  // p[1]', mask=a73
                 p_1_p_1 = p_1.zero_add(triples[43].b);  // p[1]'_1, mask=b74
                 p_2_p = p_2.zero_add(triples[27].a);  // p[2]', mask=a58
@@ -1051,35 +1212,80 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_29_p = p_29.zero_add(triples[2].a);  // p[29]', mask=a33
                 p_30_p = p_30.zero_add(triples[0].a);  // p[30]', mask=a31
                 // and_5: random_triples[2].a, random_triples[2].b, output mask=b58
-                g_3 = a[3].prepare_and_reshared(b[3], triples[27].b, random_triples[2].b);  // and_5
+                if (g_cut_frac_active && cut_frac_identity(32, 3))
+                    g_3 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_3 = a[3].prepare_and_reshared(b[3], triples[27].b, random_triples[2].b);  // and_5
                 // and_9: random_triples[4].a, random_triples[4].b, output mask=b56
-                g_5 = a[5].prepare_and_reshared(b[5], triples[25].b, random_triples[4].b);  // and_9
+                if (g_cut_frac_active && cut_frac_identity(32, 5))
+                    g_5 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_5 = a[5].prepare_and_reshared(b[5], triples[25].b, random_triples[4].b);  // and_9
                 // and_13: random_triples[6].a, random_triples[6].b, output mask=b54
-                g_7 = a[7].prepare_and_reshared(b[7], triples[23].b, random_triples[6].b);  // and_13
+                if (g_cut_frac_active && cut_frac_identity(32, 7))
+                    g_7 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_7 = a[7].prepare_and_reshared(b[7], triples[23].b, random_triples[6].b);  // and_13
                 // and_17: random_triples[8].a, random_triples[8].b, output mask=b52
-                g_9 = a[9].prepare_and_reshared(b[9], triples[21].b, random_triples[8].b);  // and_17
+                if (g_cut_frac_active && cut_frac_identity(32, 9))
+                    g_9 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_9 = a[9].prepare_and_reshared(b[9], triples[21].b, random_triples[8].b);  // and_17
                 // and_21: random_triples[10].a, random_triples[10].b, output mask=b50
-                g_11 = a[11].prepare_and_reshared(b[11], triples[19].b, random_triples[10].b);  // and_21
+                if (g_cut_frac_active && cut_frac_identity(32, 11))
+                    g_11 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_11 = a[11].prepare_and_reshared(b[11], triples[19].b, random_triples[10].b);  // and_21
                 // and_25: random_triples[12].a, random_triples[12].b, output mask=b48
-                g_13 = a[13].prepare_and_reshared(b[13], triples[17].b, random_triples[12].b);  // and_25
+                if (g_cut_frac_active && cut_frac_identity(32, 13))
+                    g_13 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_13 = a[13].prepare_and_reshared(b[13], triples[17].b, random_triples[12].b);  // and_25
                 // and_29: random_triples[14].a, random_triples[14].b, output mask=b46
-                g_15 = a[15].prepare_and_reshared(b[15], triples[15].b, random_triples[14].b);  // and_29
+                if (g_cut_frac_active && cut_frac_identity(32, 15))
+                    g_15 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_15 = a[15].prepare_and_reshared(b[15], triples[15].b, random_triples[14].b);  // and_29
                 // and_33: random_triples[16].a, random_triples[16].b, output mask=b44
-                g_17 = a[17].prepare_and_reshared(b[17], triples[13].b, random_triples[16].b);  // and_33
+                if (g_cut_frac_active && cut_frac_identity(32, 17))
+                    g_17 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_17 = a[17].prepare_and_reshared(b[17], triples[13].b, random_triples[16].b);  // and_33
                 // and_37: random_triples[18].a, random_triples[18].b, output mask=b42
-                g_19 = a[19].prepare_and_reshared(b[19], triples[11].b, random_triples[18].b);  // and_37
+                if (g_cut_frac_active && cut_frac_identity(32, 19))
+                    g_19 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_19 = a[19].prepare_and_reshared(b[19], triples[11].b, random_triples[18].b);  // and_37
                 // and_41: random_triples[20].a, random_triples[20].b, output mask=b40
-                g_21 = a[21].prepare_and_reshared(b[21], triples[9].b, random_triples[20].b);  // and_41
+                if (g_cut_frac_active && cut_frac_identity(32, 21))
+                    g_21 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_21 = a[21].prepare_and_reshared(b[21], triples[9].b, random_triples[20].b);  // and_41
                 // and_45: random_triples[22].a, random_triples[22].b, output mask=b38
-                g_23 = a[23].prepare_and_reshared(b[23], triples[7].b, random_triples[22].b);  // and_45
+                if (g_cut_frac_active && cut_frac_identity(32, 23))
+                    g_23 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_23 = a[23].prepare_and_reshared(b[23], triples[7].b, random_triples[22].b);  // and_45
                 // and_49: random_triples[24].a, random_triples[24].b, output mask=b36
-                g_25 = a[25].prepare_and_reshared(b[25], triples[5].b, random_triples[24].b);  // and_49
+                if (g_cut_frac_active && cut_frac_identity(32, 25))
+                    g_25 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_25 = a[25].prepare_and_reshared(b[25], triples[5].b, random_triples[24].b);  // and_49
                 // and_53: random_triples[26].a, random_triples[26].b, output mask=b34
-                g_27 = a[27].prepare_and_reshared(b[27], triples[3].b, random_triples[26].b);  // and_53
+                if (g_cut_frac_active && cut_frac_identity(32, 27))
+                    g_27 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_27 = a[27].prepare_and_reshared(b[27], triples[3].b, random_triples[26].b);  // and_53
                 // and_57: random_triples[28].a, random_triples[28].b, output mask=b32
-                g_29 = a[29].prepare_and_reshared(b[29], triples[1].b, random_triples[28].b);  // and_57
+                if (g_cut_frac_active && cut_frac_identity(32, 29))
+                    g_29 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_29 = a[29].prepare_and_reshared(b[29], triples[1].b, random_triples[28].b);  // and_57
                 // and_61: random_triples[30].a, random_triples[30].b, output mask=b31
-                g_31 = a[31].prepare_and_reshared(b[31], triples[0].b, random_triples[30].b);  // and_61
+                if (g_cut_frac_active && cut_frac_identity(32, 31))
+                    g_31 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_31 = a[31].prepare_and_reshared(b[31], triples[0].b, random_triples[30].b);  // and_61
                 // and_67: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=a60
                 p_L1_28 = p_29_p.prepare_and(p_28_p_1, triples[29].a, triples[2].c);  // and_67
                 // and_70: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=a62
@@ -1110,21 +1316,36 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_L1_2 = p_3_p.prepare_and(p_2_p_1, triples[43].a, triples[28].c);  // and_106
                 break;
             case 1:
-                g_3.complete_and();
-                g_5.complete_and();
-                g_7.complete_and();
-                g_9.complete_and();
-                g_11.complete_and();
-                g_13.complete_and();
-                g_15.complete_and();
-                g_17.complete_and();
-                g_19.complete_and();
-                g_21.complete_and();
-                g_23.complete_and();
-                g_25.complete_and();
-                g_27.complete_and();
-                g_29.complete_and();
-                g_31.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 3)))
+                    g_3.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 5)))
+                    g_5.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 7)))
+                    g_7.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 9)))
+                    g_9.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 11)))
+                    g_11.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 13)))
+                    g_13.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 15)))
+                    g_15.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 17)))
+                    g_17.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 19)))
+                    g_19.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 21)))
+                    g_21.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 23)))
+                    g_23.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 25)))
+                    g_25.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 27)))
+                    g_27.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 29)))
+                    g_29.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 31)))
+                    g_31.complete_and();
                 p_L1_28.complete_and();
                 p_L1_26.complete_and();
                 p_L1_24.complete_and();
@@ -1146,37 +1367,101 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_L1_20_p = p_L1_20.zero_add(triples[32].a);  // p_L1[20]', mask=a63
                 p_L1_24_p = p_L1_24.zero_add(triples[30].a);  // p_L1[24]', mask=a61
                 // and_3: random_triples[1].a, random_triples[1].b, output mask=r180
-                g_2 = a[2].prepare_and_reshared(b[2], r180, random_triples[1].b);  // and_3
+                if (g_cut_frac_active && cut_frac_identity(32, 2))
+                    g_2 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_2 = a[2].prepare_and_reshared(b[2], r180, random_triples[1].b);  // and_3
                 // and_104: a27=triples[27].a, b27=triples[27].b, c27=triples[27].c, output mask=(b73-r180)
-                pg_L0_2_3 = p_2_p.prepare_and(g_3, FUNC_XOR(triples[42].b, r180), triples[27].c);  // and_104
+                // CUT: if slice 2 is vacant, g_2 has mask 0 (not r180) - drop the XOR-compensation
+                // from the assign; if slice 3 is vacant, g_3 has mask 0 - the mask product is 0.
+                pg_L0_2_3 = p_2_p.prepare_and(
+                    g_3,
+                    (g_cut_frac_active && cut_frac_identity(32, 2)) ? (triples[42].b) : (FUNC_XOR(triples[42].b, r180)),
+                    (g_cut_frac_active && cut_frac_identity(32, 3)) ? SET_ALL_ZERO() : triples[27].c);  // and_104
                 // and_11: random_triples[5].a, random_triples[5].b, output mask=r179
-                g_6 = a[6].prepare_and_reshared(b[6], r179, random_triples[5].b);  // and_11
+                if (g_cut_frac_active && cut_frac_identity(32, 6))
+                    g_6 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_6 = a[6].prepare_and_reshared(b[6], r179, random_triples[5].b);  // and_11
                 // and_98: a23=triples[23].a, b23=triples[23].b, c23=triples[23].c, output mask=(b71-r179)
-                pg_L0_6_7 = p_6_p.prepare_and(g_7, FUNC_XOR(triples[40].b, r179), triples[23].c);  // and_98
+                // CUT: if slice 6 is vacant, g_6 has mask 0 (not r179) - drop the XOR-compensation
+                // from the assign; if slice 7 is vacant, g_7 has mask 0 - the mask product is 0.
+                pg_L0_6_7 = p_6_p.prepare_and(
+                    g_7,
+                    (g_cut_frac_active && cut_frac_identity(32, 6)) ? (triples[40].b) : (FUNC_XOR(triples[40].b, r179)),
+                    (g_cut_frac_active && cut_frac_identity(32, 7)) ? SET_ALL_ZERO() : triples[23].c);  // and_98
                 // and_19: random_triples[9].a, random_triples[9].b, output mask=r178
-                g_10 = a[10].prepare_and_reshared(b[10], r178, random_triples[9].b);  // and_19
+                if (g_cut_frac_active && cut_frac_identity(32, 10))
+                    g_10 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_10 = a[10].prepare_and_reshared(b[10], r178, random_triples[9].b);  // and_19
                 // and_92: a19=triples[19].a, b19=triples[19].b, c19=triples[19].c, output mask=(b69-r178)
-                pg_L0_10_11 = p_10_p.prepare_and(g_11, FUNC_XOR(triples[38].b, r178), triples[19].c);  // and_92
+                // CUT: if slice 10 is vacant, g_10 has mask 0 (not r178) - drop the XOR-compensation
+                // from the assign; if slice 11 is vacant, g_11 has mask 0 - the mask product is 0.
+                pg_L0_10_11 = p_10_p.prepare_and(
+                    g_11,
+                    (g_cut_frac_active && cut_frac_identity(32, 10)) ? (triples[38].b) : (FUNC_XOR(triples[38].b, r178)),
+                    (g_cut_frac_active && cut_frac_identity(32, 11)) ? SET_ALL_ZERO() : triples[19].c);  // and_92
                 // and_27: random_triples[13].a, random_triples[13].b, output mask=r177
-                g_14 = a[14].prepare_and_reshared(b[14], r177, random_triples[13].b);  // and_27
+                if (g_cut_frac_active && cut_frac_identity(32, 14))
+                    g_14 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_14 = a[14].prepare_and_reshared(b[14], r177, random_triples[13].b);  // and_27
                 // and_86: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=(b67-r177)
-                pg_L0_14_15 = p_14_p.prepare_and(g_15, FUNC_XOR(triples[36].b, r177), triples[15].c);  // and_86
+                // CUT: if slice 14 is vacant, g_14 has mask 0 (not r177) - drop the XOR-compensation
+                // from the assign; if slice 15 is vacant, g_15 has mask 0 - the mask product is 0.
+                pg_L0_14_15 = p_14_p.prepare_and(
+                    g_15,
+                    (g_cut_frac_active && cut_frac_identity(32, 14)) ? (triples[36].b) : (FUNC_XOR(triples[36].b, r177)),
+                    (g_cut_frac_active && cut_frac_identity(32, 15)) ? SET_ALL_ZERO() : triples[15].c);  // and_86
                 // and_35: random_triples[17].a, random_triples[17].b, output mask=r176
-                g_18 = a[18].prepare_and_reshared(b[18], r176, random_triples[17].b);  // and_35
+                if (g_cut_frac_active && cut_frac_identity(32, 18))
+                    g_18 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_18 = a[18].prepare_and_reshared(b[18], r176, random_triples[17].b);  // and_35
                 // and_80: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=(b65-r176)
-                pg_L0_18_19 = p_18_p.prepare_and(g_19, FUNC_XOR(triples[34].b, r176), triples[11].c);  // and_80
+                // CUT: if slice 18 is vacant, g_18 has mask 0 (not r176) - drop the XOR-compensation
+                // from the assign; if slice 19 is vacant, g_19 has mask 0 - the mask product is 0.
+                pg_L0_18_19 = p_18_p.prepare_and(
+                    g_19,
+                    (g_cut_frac_active && cut_frac_identity(32, 18)) ? (triples[34].b) : (FUNC_XOR(triples[34].b, r176)),
+                    (g_cut_frac_active && cut_frac_identity(32, 19)) ? SET_ALL_ZERO() : triples[11].c);  // and_80
                 // and_43: random_triples[21].a, random_triples[21].b, output mask=r175
-                g_22 = a[22].prepare_and_reshared(b[22], r175, random_triples[21].b);  // and_43
+                if (g_cut_frac_active && cut_frac_identity(32, 22))
+                    g_22 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_22 = a[22].prepare_and_reshared(b[22], r175, random_triples[21].b);  // and_43
                 // and_74: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=(b63-r175)
-                pg_L0_22_23 = p_22_p.prepare_and(g_23, FUNC_XOR(triples[32].b, r175), triples[7].c);  // and_74
+                // CUT: if slice 22 is vacant, g_22 has mask 0 (not r175) - drop the XOR-compensation
+                // from the assign; if slice 23 is vacant, g_23 has mask 0 - the mask product is 0.
+                pg_L0_22_23 = p_22_p.prepare_and(
+                    g_23,
+                    (g_cut_frac_active && cut_frac_identity(32, 22)) ? (triples[32].b) : (FUNC_XOR(triples[32].b, r175)),
+                    (g_cut_frac_active && cut_frac_identity(32, 23)) ? SET_ALL_ZERO() : triples[7].c);  // and_74
                 // and_51: random_triples[25].a, random_triples[25].b, output mask=r174
-                g_26 = a[26].prepare_and_reshared(b[26], r174, random_triples[25].b);  // and_51
+                if (g_cut_frac_active && cut_frac_identity(32, 26))
+                    g_26 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_26 = a[26].prepare_and_reshared(b[26], r174, random_triples[25].b);  // and_51
                 // and_68: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=(b61-r174)
-                pg_L0_26_27 = p_26_p.prepare_and(g_27, FUNC_XOR(triples[30].b, r174), triples[3].c);  // and_68
+                // CUT: if slice 26 is vacant, g_26 has mask 0 (not r174) - drop the XOR-compensation
+                // from the assign; if slice 27 is vacant, g_27 has mask 0 - the mask product is 0.
+                pg_L0_26_27 = p_26_p.prepare_and(
+                    g_27,
+                    (g_cut_frac_active && cut_frac_identity(32, 26)) ? (triples[30].b) : (FUNC_XOR(triples[30].b, r174)),
+                    (g_cut_frac_active && cut_frac_identity(32, 27)) ? SET_ALL_ZERO() : triples[3].c);  // and_68
                 // and_59: random_triples[29].a, random_triples[29].b, output mask=r173
-                g_30 = a[30].prepare_and_reshared(b[30], r173, random_triples[29].b);  // and_59
+                if (g_cut_frac_active && cut_frac_identity(32, 30))
+                    g_30 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_30 = a[30].prepare_and_reshared(b[30], r173, random_triples[29].b);  // and_59
                 // and_63: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=(b60-r173)
-                pg_L0_30_31 = p_30_p.prepare_and(g_31, FUNC_XOR(triples[29].b, r173), triples[0].c);  // and_63
+                // CUT: if slice 30 is vacant, g_30 has mask 0 (not r173) - drop the XOR-compensation
+                // from the assign; if slice 31 is vacant, g_31 has mask 0 - the mask product is 0.
+                pg_L0_30_31 = p_30_p.prepare_and(
+                    g_31,
+                    (g_cut_frac_active && cut_frac_identity(32, 30)) ? (triples[29].b) : (FUNC_XOR(triples[29].b, r173)),
+                    (g_cut_frac_active && cut_frac_identity(32, 31)) ? SET_ALL_ZERO() : triples[0].c);  // and_63
                 // and_111: a31=triples[31].a, b31=triples[31].b, c31=triples[31].c, output mask=a75
                 p_L2_24 = p_L1_26.prepare_and(p_L1_24, triples[44].a, triples[31].c);  // and_111
                 // and_114: a33=triples[33].a, b33=triples[33].b, c33=triples[33].c, output mask=a77
@@ -1193,28 +1478,36 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_L2_1 = p_L1_2.prepare_and(p_1_p_1, triples[50].b, triples[43].c);  // and_129
                 break;
             case 2:
-                g_2.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 2)))
+                    g_2.complete_and();
                 pg_L0_2_3.complete_and();
                 g_L1_2 = g_2 ^ pg_L0_2_3;  // g_L1[2]
-                g_6.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 6)))
+                    g_6.complete_and();
                 pg_L0_6_7.complete_and();
                 g_L1_6 = g_6 ^ pg_L0_6_7;  // g_L1[6]
-                g_10.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 10)))
+                    g_10.complete_and();
                 pg_L0_10_11.complete_and();
                 g_L1_10 = g_10 ^ pg_L0_10_11;  // g_L1[10]
-                g_14.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 14)))
+                    g_14.complete_and();
                 pg_L0_14_15.complete_and();
                 g_L1_14 = g_14 ^ pg_L0_14_15;  // g_L1[14]
-                g_18.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 18)))
+                    g_18.complete_and();
                 pg_L0_18_19.complete_and();
                 g_L1_18 = g_18 ^ pg_L0_18_19;  // g_L1[18]
-                g_22.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 22)))
+                    g_22.complete_and();
                 pg_L0_22_23.complete_and();
                 g_L1_22 = g_22 ^ pg_L0_22_23;  // g_L1[22]
-                g_26.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 26)))
+                    g_26.complete_and();
                 pg_L0_26_27.complete_and();
                 g_L1_26 = g_26 ^ pg_L0_26_27;  // g_L1[26]
-                g_30.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 30)))
+                    g_30.complete_and();
                 pg_L0_30_31.complete_and();
                 g_L1_30 = g_30 ^ pg_L0_30_31;  // g_L1[30]
                 p_L2_24.complete_and();
@@ -1228,27 +1521,59 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_L2_8_p = p_L2_8.zero_add(triples[47].a);  // p_L2[8]', mask=a78
                 p_L2_16_p = p_L2_16.zero_add(triples[45].a);  // p_L2[16]', mask=a76
                 // and_7: random_triples[3].a, random_triples[3].b, output mask=r188
-                g_4 = a[4].prepare_and_reshared(b[4], r188, random_triples[3].b);  // and_7
+                if (g_cut_frac_active && cut_frac_identity(32, 4))
+                    g_4 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_4 = a[4].prepare_and_reshared(b[4], r188, random_triples[3].b);  // and_7
                 // and_101: a25=triples[25].a, b25=triples[25].b, c25=triples[25].c, output mask=(r187-r188)
-                pg_L0_4_5 = p_4_p.prepare_and(g_5, FUNC_XOR(r187, r188), triples[25].c);  // and_101
+                // CUT: if slice 4 is vacant, g_4 has mask 0 (not r188) - drop the XOR-compensation
+                // from the assign; if slice 5 is vacant, g_5 has mask 0 - the mask product is 0.
+                pg_L0_4_5 = p_4_p.prepare_and(
+                    g_5,
+                    (g_cut_frac_active && cut_frac_identity(32, 4)) ? (r187) : (FUNC_XOR(r187, r188)),
+                    (g_cut_frac_active && cut_frac_identity(32, 5)) ? SET_ALL_ZERO() : triples[25].c);  // and_101
                 // and_124: a40=triples[40].a, b40=triples[40].b, c40=triples[40].c, output mask=(b80-r187)
                 pg_L1_4_6 = p_L1_4_p.prepare_and(g_L1_6, FUNC_XOR(triples[49].b, r187), triples[40].c);  // and_124
                 // and_23: random_triples[11].a, random_triples[11].b, output mask=r186
-                g_12 = a[12].prepare_and_reshared(b[12], r186, random_triples[11].b);  // and_23
+                if (g_cut_frac_active && cut_frac_identity(32, 12))
+                    g_12 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_12 = a[12].prepare_and_reshared(b[12], r186, random_triples[11].b);  // and_23
                 // and_89: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=(r185-r186)
-                pg_L0_12_13 = p_12_p.prepare_and(g_13, FUNC_XOR(r185, r186), triples[17].c);  // and_89
+                // CUT: if slice 12 is vacant, g_12 has mask 0 (not r186) - drop the XOR-compensation
+                // from the assign; if slice 13 is vacant, g_13 has mask 0 - the mask product is 0.
+                pg_L0_12_13 = p_12_p.prepare_and(
+                    g_13,
+                    (g_cut_frac_active && cut_frac_identity(32, 12)) ? (r185) : (FUNC_XOR(r185, r186)),
+                    (g_cut_frac_active && cut_frac_identity(32, 13)) ? SET_ALL_ZERO() : triples[17].c);  // and_89
                 // and_118: a36=triples[36].a, b36=triples[36].b, c36=triples[36].c, output mask=(b78-r185)
                 pg_L1_12_14 = p_L1_12_p.prepare_and(g_L1_14, FUNC_XOR(triples[47].b, r185), triples[36].c);  // and_118
                 // and_39: random_triples[19].a, random_triples[19].b, output mask=r184
-                g_20 = a[20].prepare_and_reshared(b[20], r184, random_triples[19].b);  // and_39
+                if (g_cut_frac_active && cut_frac_identity(32, 20))
+                    g_20 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_20 = a[20].prepare_and_reshared(b[20], r184, random_triples[19].b);  // and_39
                 // and_77: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=(r183-r184)
-                pg_L0_20_21 = p_20_p.prepare_and(g_21, FUNC_XOR(r183, r184), triples[9].c);  // and_77
+                // CUT: if slice 20 is vacant, g_20 has mask 0 (not r184) - drop the XOR-compensation
+                // from the assign; if slice 21 is vacant, g_21 has mask 0 - the mask product is 0.
+                pg_L0_20_21 = p_20_p.prepare_and(
+                    g_21,
+                    (g_cut_frac_active && cut_frac_identity(32, 20)) ? (r183) : (FUNC_XOR(r183, r184)),
+                    (g_cut_frac_active && cut_frac_identity(32, 21)) ? SET_ALL_ZERO() : triples[9].c);  // and_77
                 // and_112: a32=triples[32].a, b32=triples[32].b, c32=triples[32].c, output mask=(b76-r183)
                 pg_L1_20_22 = p_L1_20_p.prepare_and(g_L1_22, FUNC_XOR(triples[45].b, r183), triples[32].c);  // and_112
                 // and_55: random_triples[27].a, random_triples[27].b, output mask=r182
-                g_28 = a[28].prepare_and_reshared(b[28], r182, random_triples[27].b);  // and_55
+                if (g_cut_frac_active && cut_frac_identity(32, 28))
+                    g_28 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_28 = a[28].prepare_and_reshared(b[28], r182, random_triples[27].b);  // and_55
                 // and_65: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=(r181-r182)
-                pg_L0_28_29 = p_28_p.prepare_and(g_29, FUNC_XOR(r181, r182), triples[1].c);  // and_65
+                // CUT: if slice 28 is vacant, g_28 has mask 0 (not r182) - drop the XOR-compensation
+                // from the assign; if slice 29 is vacant, g_29 has mask 0 - the mask product is 0.
+                pg_L0_28_29 = p_28_p.prepare_and(
+                    g_29,
+                    (g_cut_frac_active && cut_frac_identity(32, 28)) ? (r181) : (FUNC_XOR(r181, r182)),
+                    (g_cut_frac_active && cut_frac_identity(32, 29)) ? SET_ALL_ZERO() : triples[1].c);  // and_65
                 // and_107: a29=triples[29].a, b29=triples[29].b, c29=triples[29].c, output mask=(b75-r181)
                 pg_L1_28_30 = p_L1_28.prepare_and(g_L1_30, FUNC_XOR(triples[44].b, r181), triples[29].c);  // and_107
                 // and_134: a46=triples[46].a, b46=triples[46].b, c46=triples[46].c, output mask=a82
@@ -1259,22 +1584,26 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_L3_1 = p_L2_4.prepare_and(p_L2_1, triples[53].b, triples[50].c);  // and_140
                 break;
             case 3:
-                g_4.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 4)))
+                    g_4.complete_and();
                 pg_L0_4_5.complete_and();
                 pg_L1_4_6.complete_and();
                 g_L1_4 = g_4 ^ pg_L0_4_5;  // g_L1[4]
                 g_L2_4 = g_L1_4 ^ pg_L1_4_6;  // g_L2[4]
-                g_12.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 12)))
+                    g_12.complete_and();
                 pg_L0_12_13.complete_and();
                 pg_L1_12_14.complete_and();
                 g_L1_12 = g_12 ^ pg_L0_12_13;  // g_L1[12]
                 g_L2_12 = g_L1_12 ^ pg_L1_12_14;  // g_L2[12]
-                g_20.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 20)))
+                    g_20.complete_and();
                 pg_L0_20_21.complete_and();
                 pg_L1_20_22.complete_and();
                 g_L1_20 = g_20 ^ pg_L0_20_21;  // g_L1[20]
                 g_L2_20 = g_L1_20 ^ pg_L1_20_22;  // g_L2[20]
-                g_28.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 28)))
+                    g_28.complete_and();
                 pg_L0_28_29.complete_and();
                 pg_L1_28_30.complete_and();
                 g_L1_28 = g_28 ^ pg_L0_28_29;  // g_L1[28]
@@ -1284,17 +1613,33 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_L3_1.complete_and();
                 p_L3_1_p = p_L3_1.zero_add(triples[52].a);  // p_L3[1]', mask=a83
                 // and_15: random_triples[7].a, random_triples[7].b, output mask=r194
-                g_8 = a[8].prepare_and_reshared(b[8], r194, random_triples[7].b);  // and_15
+                if (g_cut_frac_active && cut_frac_identity(32, 8))
+                    g_8 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_8 = a[8].prepare_and_reshared(b[8], r194, random_triples[7].b);  // and_15
                 // and_95: a21=triples[21].a, b21=triples[21].b, c21=triples[21].c, output mask=(r193-r194)
-                pg_L0_8_9 = p_8_p.prepare_and(g_9, FUNC_XOR(r193, r194), triples[21].c);  // and_95
+                // CUT: if slice 8 is vacant, g_8 has mask 0 (not r194) - drop the XOR-compensation
+                // from the assign; if slice 9 is vacant, g_9 has mask 0 - the mask product is 0.
+                pg_L0_8_9 = p_8_p.prepare_and(
+                    g_9,
+                    (g_cut_frac_active && cut_frac_identity(32, 8)) ? (r193) : (FUNC_XOR(r193, r194)),
+                    (g_cut_frac_active && cut_frac_identity(32, 9)) ? SET_ALL_ZERO() : triples[21].c);  // and_95
                 // and_121: a38=triples[38].a, b38=triples[38].b, c38=triples[38].c, output mask=(r192-r193)
                 pg_L1_8_10 = p_L1_8_p.prepare_and(g_L1_10, FUNC_XOR(r192, r193), triples[38].c);  // and_121
                 // and_135: a47=triples[47].a, b47=triples[47].b, c47=triples[47].c, output mask=(b83-r192)
                 pg_L2_8_12 = p_L2_8_p.prepare_and(g_L2_12, FUNC_XOR(triples[52].b, r192), triples[47].c);  // and_135
                 // and_47: random_triples[23].a, random_triples[23].b, output mask=r191
-                g_24 = a[24].prepare_and_reshared(b[24], r191, random_triples[23].b);  // and_47
+                if (g_cut_frac_active && cut_frac_identity(32, 24))
+                    g_24 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_24 = a[24].prepare_and_reshared(b[24], r191, random_triples[23].b);  // and_47
                 // and_71: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=(r190-r191)
-                pg_L0_24_25 = p_24_p.prepare_and(g_25, FUNC_XOR(r190, r191), triples[5].c);  // and_71
+                // CUT: if slice 24 is vacant, g_24 has mask 0 (not r191) - drop the XOR-compensation
+                // from the assign; if slice 25 is vacant, g_25 has mask 0 - the mask product is 0.
+                pg_L0_24_25 = p_24_p.prepare_and(
+                    g_25,
+                    (g_cut_frac_active && cut_frac_identity(32, 24)) ? (r190) : (FUNC_XOR(r190, r191)),
+                    (g_cut_frac_active && cut_frac_identity(32, 25)) ? SET_ALL_ZERO() : triples[5].c);  // and_71
                 // and_109: a30=triples[30].a, b30=triples[30].b, c30=triples[30].c, output mask=(r189-r190)
                 pg_L1_24_26 = p_L1_24_p.prepare_and(g_L1_26, FUNC_XOR(r189, r190), triples[30].c);  // and_109
                 // and_130: a44=triples[44].a, b44=triples[44].b, c44=triples[44].c, output mask=(b82-r189)
@@ -1303,14 +1648,16 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_L4_1 = p_L3_8.prepare_and(p_L3_1, triples[54].a, triples[53].c);  // and_145
                 break;
             case 4:
-                g_8.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 8)))
+                    g_8.complete_and();
                 pg_L0_8_9.complete_and();
                 pg_L1_8_10.complete_and();
                 pg_L2_8_12.complete_and();
                 g_L1_8 = g_8 ^ pg_L0_8_9;  // g_L1[8]
                 g_L2_8 = g_L1_8 ^ pg_L1_8_10;  // g_L2[8]
                 g_L3_8 = g_L2_8 ^ pg_L2_8_12;  // g_L3[8]
-                g_24.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 24)))
+                    g_24.complete_and();
                 pg_L0_24_25.complete_and();
                 pg_L1_24_26.complete_and();
                 pg_L2_24_28.complete_and();
@@ -1319,9 +1666,17 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_L3_24 = g_L2_24 ^ pg_L2_24_28;  // g_L3[24]
                 p_L4_1.complete_and();
                 // and_31: random_triples[15].a, random_triples[15].b, output mask=r198
-                g_16 = a[16].prepare_and_reshared(b[16], r198, random_triples[15].b);  // and_31
+                if (g_cut_frac_active && cut_frac_identity(32, 16))
+                    g_16 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_16 = a[16].prepare_and_reshared(b[16], r198, random_triples[15].b);  // and_31
                 // and_83: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=(r197-r198)
-                pg_L0_16_17 = p_16_p.prepare_and(g_17, FUNC_XOR(r197, r198), triples[13].c);  // and_83
+                // CUT: if slice 16 is vacant, g_16 has mask 0 (not r198) - drop the XOR-compensation
+                // from the assign; if slice 17 is vacant, g_17 has mask 0 - the mask product is 0.
+                pg_L0_16_17 = p_16_p.prepare_and(
+                    g_17,
+                    (g_cut_frac_active && cut_frac_identity(32, 16)) ? (r197) : (FUNC_XOR(r197, r198)),
+                    (g_cut_frac_active && cut_frac_identity(32, 17)) ? SET_ALL_ZERO() : triples[13].c);  // and_83
                 // and_115: a34=triples[34].a, b34=triples[34].b, c34=triples[34].c, output mask=(r196-r197)
                 pg_L1_16_18 = p_L1_16_p.prepare_and(g_L1_18, FUNC_XOR(r196, r197), triples[34].c);  // and_115
                 // and_132: a45=triples[45].a, b45=triples[45].b, c45=triples[45].c, output mask=(r195-r196)
@@ -1330,7 +1685,8 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 pg_L3_16_24 = p_L3_16.prepare_and(g_L3_24, FUNC_XOR(triples[54].b, r195), triples[51].c);  // and_141
                 break;
             case 5:
-                g_16.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 16)))
+                    g_16.complete_and();
                 pg_L0_16_17.complete_and();
                 pg_L1_16_18.complete_and();
                 pg_L2_16_20.complete_and();
@@ -1340,9 +1696,17 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_L3_16 = g_L2_16 ^ pg_L2_16_20;  // g_L3[16]
                 g_L4_16 = g_L3_16 ^ pg_L3_16_24;  // g_L4[16]
                 // and_1: random_triples[0].a, random_triples[0].b, output mask=r199
-                g_1 = a[1].prepare_and_reshared(b[1], r199, random_triples[0].b);  // and_1
+                if (g_cut_frac_active && cut_frac_identity(32, 1))
+                    g_1 = Share(SET_ALL_ZERO());  // CUT: identity leaf, gate skipped
+                else
+                    g_1 = a[1].prepare_and_reshared(b[1], r199, random_triples[0].b);  // and_1
                 // and_127: a42=triples[42].a, b42=triples[42].b, c42=triples[42].c, output mask=r200
-                pg_L1_1_2 = p_1_p.prepare_and(g_L1_2, r200, triples[42].c);  // and_127
+                // CUT: slice 1 vacant -> g_1 has mask 0 (not r199); fold r199 into this assign so
+                // g_L2_1 = g_1 ^ pg_L1_1_2 keeps its designed mask.
+                pg_L1_1_2 = p_1_p.prepare_and(
+                    g_L1_2,
+                    (g_cut_frac_active && cut_frac_identity(32, 1)) ? FUNC_XOR(r200, r199) : r200,
+                    triples[42].c);  // and_127
                 // and_138: a49=triples[49].a, b49=triples[49].b, c49=triples[49].c, output mask=r201
                 pg_L2_1_4 = p_L2_1_p.prepare_and(g_L2_4, r201, triples[49].c);  // and_138
                 // and_143: a52=triples[52].a, b52=triples[52].b, c52=triples[52].c, output mask=r202
@@ -1351,7 +1715,8 @@ class PPA_MSB_Unsafe_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 pg_L4_1_16 = p_L4_1.prepare_and(g_L4_16, r203, triples[54].c);  // and_146
                 break;
             case 6:
-                g_1.complete_and();
+                if (!(g_cut_frac_active && cut_frac_identity(32, 1)))
+                    g_1.complete_and();
                 pg_L1_1_2.complete_and();
                 pg_L2_1_4.complete_and();
                 pg_L3_1_8.complete_and();
