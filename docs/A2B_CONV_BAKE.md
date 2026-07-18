@@ -92,11 +92,15 @@ has the same structure and would need the same treatment — not yet done, not e
   (`i < 30 - FRACTIONAL`), per-case boundary shortcut (`msb = x[F] ^ y[F] ^ carry_{F+1}`),
   last-executed-gate mask-assign swapped to the spare random `r61`. Saves FRACTIONAL rounds and
   triples per adder.
-- **PPA / PPA4 a_ab: cut-compatible, not yet cut-optimized** — they ignore `g_cut_frac_active` and
-  compute fully, which stays correct because under the bake no external stream depends on
-  adder-internal gate counts ([c], S1 and the early boolean addition stay full-width; INIT counts
-  called gates per phase). The identity-substitution gate-skipping port (as done for the reshared
-  family) is follow-up efficiency work.
+- **PPA a_ab: cut-compatible, not yet cut-optimized** — it ignores `g_cut_frac_active` and computes
+  fully, which stays correct because under the bake no external stream depends on adder-internal gate
+  counts ([c], S1 and the early boolean addition stay full-width; INIT counts called gates per phase).
+  The identity-substitution gate-skipping port (as done for the reshared family) is follow-up
+  efficiency work.
+- **PPA4 a_ab: BROKEN under the bake entirely** (with or without the cut — the adder matrix showed
+  3/8 in both cases; earlier support-matrix runs had only exercised the PPA under the bake). The
+  four-way adder's beaver-3/4 tuple interaction with the bake needs its own investigation. RCA and
+  PPA are the supported bake adders.
 
 ## A_KNOWN=0 baseline fixes (needed before the bake could run there)
 
@@ -112,6 +116,12 @@ has the same structure and would need the same treatment — not yet done, not e
    dispatches to `prepare_dot_ex_lxly` for the AB-flavored triples.
 
 ## Known limitations
+
+- **Residual networks (ResNet)**: every residual block's final ReLU consumes `conv3 + shortcut`,
+  whose summed mask matches neither the committed `[c]` (bake) nor the baked reshare shares
+  (RESHARE_OPT_SIM — measured on ResNet50: 809,600 of 1,409,440 reshare checks violated). Both
+  families are unsupported on residual architectures until the MaxPool-style re-mask treatment is
+  applied to non-conv-fed ReLU inputs. LeNet-style chains are fully supported.
 
 - `PUBLIC_WEIGHTS=1` under the bake is unsupported (no mask is committed on the public-weight paths;
   use the RESHARE_OPT_SIM family, which auto-falls back to SIM=0 there).

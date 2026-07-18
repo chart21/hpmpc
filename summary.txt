@@ -197,3 +197,93 @@ for A2B_ONLINE_OPT=1 + A_KNOWN_TO_EVALUATORS_OPT=1, and:
   set.
 - The reshare-family leg of the eligibility condition is unchanged;
   its configurations still pass 8 of 8 after the change.
+
+================================================================================
+UPDATE (2026-07-18): adder matrix, ResNet50, and the FUSE_CONV_BN investigation
+================================================================================
+
+5. ADDER COVERAGE (ripple-carry / parallel-prefix / four-way parallel-prefix)
+
+   Unit-test matrix, TRUNC_DELAYED=0, MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1:
+
+   | Adder              | plain  | bake + cut | reshare-sim + cut |
+   |--------------------|--------|------------|-------------------|
+   | ripple-carry       | 8 of 8 | 8 of 8     | 8 of 8            |
+   | parallel-prefix    | 8 of 8 | 8 of 8     | 8 of 8            |
+   | four-way prefix    | 8 of 8 | 3 of 8 (*) | 8 of 8            |
+
+   (*) NEWLY DISCOVERED, PRE-EXISTING: the four-way parallel-prefix adder is
+   broken under the arithmetic-to-boolean bake WITH OR WITHOUT the cut (every
+   sign-bit-consuming test fails; the earlier support matrix had only ever
+   exercised the parallel-prefix adder under the bake). The cut change is not
+   the cause; the interaction of the four-way adder's triple streams with the
+   bake needs its own investigation. The other eight cells all pass.
+
+6. RESNET50 ON CIFAR-10 (ten images; plaintext model accuracy 74.48 percent)
+
+   | Configuration                                | Accuracy |
+   |----------------------------------------------|----------|
+   | plain, fused batchnorm,   FRACTIONAL=5       | 40%      |
+   | plain, fused batchnorm,   FRACTIONAL=8       | 40%      |
+   | plain, fused batchnorm,   FRACTIONAL=10      | 10%      |
+   | plain, fused batchnorm,   FRACTIONAL=12      | 20%      |
+   | plain, UNFUSED batchnorm, FRACTIONAL=5       | 70%  <-- best; near plaintext |
+   | plain, UNFUSED batchnorm, FRACTIONAL=8       | 20%      |
+   | bake + cut, fused,        FRACTIONAL=8       | 10%      |
+   | reshare-sim + cut, fused, FRACTIONAL=8       | 40% / 0% (two runs; see below) |
+
+   a) The BEST correct configuration at thirty-two bits is UNFUSED batch
+      normalization with FRACTIONAL=5: seventy percent, close to the
+      plaintext ceiling of 74.48 percent on this sample size.
+
+   b) BOTH optimization families are currently UNSUPPORTED on ResNet50, for
+      the same structural reason: every residual block ends with a rectifier
+      whose input is the SUM of the block output and the shortcut. The mask of
+      a sum is the sum of masks, which matches neither the committed
+      arithmetic-to-boolean material (bake) nor the baked reshare shares
+      (reshare simulation). The reshare-simulation run-time check counted
+      809,600 violated reshares out of 1,409,440 checks (57 percent), and two
+      runs of the same binaries returned 40 percent and 0 percent - the
+      "40 percent" earlier was single-run luck on data-dependent garbage.
+      This is the same failure class that maximum pooling had; the same
+      re-masking treatment (re-randomize the rectifier input through the baked
+      path when it is not a direct convolution output) is the fix, left as
+      follow-up. LeNet-style networks (pure convolution / fully-connected
+      chains into rectifiers) remain fully supported by both families.
+
+7. WHY FUSED CONVOLUTION-BATCHNORM NEEDS HIGHER BITLENGTH AND PRECISION
+
+   Fusing folds the batch-normalization scale gamma divided by the square root
+   of (variance plus epsilon) INTO the convolution weights:
+   fused weight = weight times scale. Measured over all 23.45 million
+   convolution weights and 26,560 batch-normalization channels of the ResNet50
+   model:
+
+   - The scale is below one for 99.3 percent of channels; median 0.033;
+     90 percent of channels are below 0.25.
+   - YES, fusion makes the weights MUCH smaller: the median absolute weight
+     drops from 0.0756 (raw) to 0.0016 (fused) - a factor of about
+     FORTY-EIGHT.
+   - Consequence for fixed-point representation (weights quantizing to zero):
+       FRACTIONAL= 5: raw 30.7%  -> fused 89.3%
+       FRACTIONAL= 8: raw  4.0%  -> fused 54.2%
+       FRACTIONAL=10: raw  1.0%  -> fused 28.7%
+       FRACTIONAL=12: raw  0.3%  -> fused 11.0%
+     So the fused network needs roughly ten to fourteen fractional bits before
+     the weights survive quantization at all.
+   - At the same time each multiplication carries TWICE FRACTIONAL fractional
+     bits before truncation, so at thirty-two bits the integer headroom
+     vanishes as FRACTIONAL grows: empirically accuracy already collapses at
+     FRACTIONAL=10 (overflow and truncation-wrap), BEFORE the fused weights
+     become representable. The two requirements cannot both be met in a
+     thirty-two-bit word: fused batch normalization therefore needs
+     BITLENGTH=64 (which the two-party adder circuits do not provide yet -
+     there are no sixty-four-bit specializations of the sign-bit adders).
+   - The unfused path splits the problem: the raw weights survive five
+     fractional bits, and the tiny scale is applied as a separate per-channel
+     multiplier to LARGE (unnormalized) inputs, so the product is well above
+     the quantization step. Its price is integer range - batch-normalization
+     running means reach 218, and the unnormalized activations consume the
+     headroom that higher FRACTIONAL would need, which is why the unfused
+     accuracy drops again at FRACTIONAL=8. At thirty-two bits the working
+     combination is: UNFUSED batch normalization with FRACTIONAL=5.
