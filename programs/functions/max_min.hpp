@@ -40,7 +40,47 @@ void max_min_msb_range(sint_t<Additive_Share<Datatype, Share>>* val,
             max_val[counter + b * len] = UINT_TYPE(0);  // last uneven element is always pairwise max, override later
     }
 
+#if A2B_CONV_BAKE_ACTIVE || RESHARE_BAKE_ACTIVE
+    // The comparison differences carry UNBAKED masks (linear combinations of earlier masks), but BOTH
+    // mask-baking schemes assume the msb-adder input masks carry their baked material: A2B_CONV_BAKE's
+    // committed [c] = bool(-lz), and RESHARE_OPT_SIM's rt.a reshare bake. Re-mask the differences
+    // through the baked path first (x := x*1 with a freshly baked mask): mask_and_send_dot_baked(e)
+    // emits the committed lz (A2B bake) or bakes rt.a into the fresh mask (SIM), and the following
+    // get_msb_range consumes the matching material - identically in PRE and LIVE. Without this, the
+    // msb shares are consistent-but-WRONG (wrong candidate picks; hidden by the old loose test epsilon).
+    {
+        A bake_one = A(1);
+        int e = 0;
+        for (int i = 0; i < batch_size * len; i++)
+        {
+            auto* sh = max_val[i].get_share_pointer();
+            for (int j = 0; j < BITLENGTH; j++)
+            {
+                sh[j] = sh[j].prepare_dot(bake_one);
+                sh[j].mask_and_send_dot_baked(e++);
+            }
+        }
+        Share::communicate();
+        for (int i = 0; i < batch_size * len; i++)
+        {
+            auto* sh = max_val[i].get_share_pointer();
+            for (int j = 0; j < BITLENGTH; j++)
+                sh[j].complete_mult_without_trunc();
+        }
+        Share::communicate();
+    }
+#endif
+
+#if CUT_FRAC_ELIGIBLE
+    // Run the comparison adders CUT, like the ReLU: the differences of post-trunc bounded values
+    // satisfy the same top-FRACTIONAL vacancy. This is required for correctness under the SIM
+    // reshare bake, whose stride (reshares_per_adder) and slice->rt rank mapping are compile-time
+    // cut-aware: an UNCUT adder here would consume k-1 rts per adder against a bake laid out for
+    // k-1-FRACTIONAL, misaligning every group (found via reshare_sim_check mismatches).
+    g_cut_frac_active = true;
+#endif
     get_msb_range<bm, bk>(max_val, msb, len * batch_size);
+    g_cut_frac_active = false;
 
     delete[] max_val;
 

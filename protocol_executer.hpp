@@ -382,6 +382,21 @@ init_random_multiplications();
 generate_beaver_triples(
                 ips, base_port, process_offset, 0, 0, "RANDOM_MULTIPLICATION");
 #endif
+#if A2B_CONV_BAKE_ACTIVE
+        // Commit ia/lz and load the boolean-addition inputs, then run the boolean addition EARLY (here,
+        // not in complete_preprocessing) so [c] is available to prepare_A2B_S2 in BOTH the PRE and LIVE
+        // passes - the msb adder's beaver triples (built in PRE from s2.l = [c]) must match LIVE.
+        init_a2b_bake<DATATYPE>(num_boolean_addition_triples, std::minus<DATATYPE>());
+        if (num_boolean_addition_triples > 0)
+        {
+            init_booleanAdditionBeaverC();
+            generate_beaver_triples(
+                    ips, base_port, process_offset, num_boolean_addition_triples, 0, "BOOLEANADDITION");
+            a2b_bake_store_c(num_boolean_addition_triples);
+        }
+        g_a2b_layer_base = 0;  // conv-mask layer base starts at 0 for the PRE pass
+        g_a2b_c_cursor = 0;  // A2B-S2 [c] cursor starts at 0 for the PRE pass
+#endif
 #endif
 #if CHEETAH_DISCONNECT == 0
     CheetahDisconnect(ips[0], base_port + process_offset);
@@ -585,6 +600,10 @@ void live_circuit()
     curr_arithmetic_ab2_triple_index = 0;
     curr_boolean_ab2_triple_index = 0;
     curr_random_multiplication_index = 0;
+#endif
+#if A2B_CONV_BAKE_ACTIVE
+    g_a2b_layer_base = 0;  // conv-mask layer base restarts for the LIVE pass (same committed lz)
+    g_a2b_c_cursor = 0;  // A2B-S2 [c] cursor restarts for the LIVE pass (same committed [c] as PRE)
 #endif
 
     /// Processing Inputs ///

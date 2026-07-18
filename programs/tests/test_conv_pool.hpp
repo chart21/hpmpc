@@ -278,13 +278,18 @@ bool maxpool_test()
             expected[oi * ow + oj] = mx;
         }
 
+    // Max selects an EXACT input value (no truncation anywhere in this path), so compare against the
+    // fixed-point-quantized expected with a TIGHT epsilon. The global 0.8 epsilon is vacuous here:
+    // every input lies within 0.8 of every window max, so even a wrong candidate pick would "pass".
+    const float maxpool_epsilon = 0.01f;
     bool ok = true;
     for (int q = 0; q < osize; q++)
         for (int v = 0; v < vectorization_factor; v++)
         {
             float got = FFC::ufixed_to_float(output[q][v]);
-            print_compare(expected[q], got, epsilon);
-            if (got - expected[q] > epsilon || got - expected[q] < -epsilon)
+            float exp_q = FFC::ufixed_to_float(FFC::float_to_ufixed(expected[q]));  // quantized expected
+            print_compare(exp_q, got, maxpool_epsilon);
+            if (got - exp_q > maxpool_epsilon || got - exp_q < -maxpool_epsilon)
                 ok = false;
         }
     return ok;

@@ -340,9 +340,13 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_baked(func_add ADD, func_sub SUB, int bake_index)
     {
+#if A2B_CONV_BAKE_ACTIVE
+        l = (bake_index >= 0) ? a2b_bake_conv_mask<Datatype>((uint64_t) bake_index, SUB) : getRandomVal(PSELF);
+#else
         l = getRandomVal(PSELF);
         if (bake_index >= 0)
             bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+#endif
     }
     
     template <typename func_add, typename func_sub>
@@ -365,17 +369,25 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB, int index)
     {
+#if A2B_CONV_BAKE_ACTIVE
+        l = (index >= 0) ? a2b_bake_conv_mask<Datatype>((uint64_t) index, SUB) : getRandomVal(PSELF);  // MWK=0 conv, TD=1
+#else
         l = getRandomVal(PSELF);
         if (index >= 0)
             bake_reshare_mask(l, index, SUB);  // delayed-trunc conv path (no-op unless RESHARE_BAKE_ACTIVE)
+#endif
     }
 
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_with_triple_baked(func_add ADD, func_sub SUB, int bake_index)
     {
+#if A2B_CONV_BAKE_ACTIVE
+        l = (bake_index >= 0) ? a2b_bake_conv_mask<Datatype>((uint64_t) bake_index, SUB) : getRandomVal(PSELF);  // MWK=0 FC, TD=1
+#else
         l = getRandomVal(PSELF);
         if (bake_index >= 0)
             bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+#endif
     }
 
 
@@ -421,12 +433,16 @@ class ABY2_PRE_Share
         // can be SCATTERED to presc[index] (the tiled call order != linear c[] order). P1-only: P0 no longer
         // participates in any share fixing (its share comes out of the AB2P decryption directly).
 #if PARTY == 0
+#if A2B_CONV_BAKE_ACTIVE
+        l = a2b_bake_conv_mask<Datatype>((uint64_t)(index < 0 ? 0 : index), SUB);  // committed lz0 (full, conv)
+#else
         l = getRandomVal(PSELF);
+#endif
 #elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-        Datatype r1 = mwk_choose_r1_trunc<Datatype>(index, SUB);
+        Datatype r1 = mwk_choose_r1_trunc<Datatype>(index, SUB);  // A2B bake: r1 = -((m1<<F)+low)
         g_mwk_p1_masks.push_back(r1);
         g_mwk_p1_indices.push_back((uint64_t) index);
-        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly) == m1 (committed)
 #else
         l = TRUNC(l);
 #endif
@@ -438,9 +454,13 @@ class ABY2_PRE_Share
     void mask_and_send_dot_a_known_pre_with_triple_without_trunc(func_add ADD, func_sub SUB, int index)
     {
 #if PARTY == 0
+#if A2B_CONV_BAKE_ACTIVE
+        l = a2b_bake_conv_mask<Datatype>((uint64_t)(index < 0 ? 0 : index), SUB);  // committed lz0 (conv)
+#else
         l = getRandomVal(PSELF);
+#endif
 #elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(index, SUB);
+        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(index, SUB);  // A2B bake: r1 = -lz1
         g_mwk_p1_masks.push_back(r1);
         g_mwk_p1_indices.push_back((uint64_t) index);
         l = SUB(SET_ALL_ZERO(), r1);
@@ -454,9 +474,13 @@ class ABY2_PRE_Share
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
     {
 #if PARTY == 0
+#if A2B_CONV_BAKE_ACTIVE
+        l = a2b_bake_conv_mask<Datatype>((uint64_t)(bake_index < 0 ? 0 : bake_index), SUB);  // committed lz0 (FC)
+#else
         l = getRandomVal(PSELF);
+#endif
 #elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-        Datatype r1 = mwk_choose_r1_trunc<Datatype>(bake_index, SUB);
+        Datatype r1 = mwk_choose_r1_trunc<Datatype>(bake_index, SUB);  // A2B bake: r1 = -((m1<<F)+low)
         g_mwk_p1_fc_masks.push_back(r1);  // FC path
         g_mwk_p1_fc_indices.push_back(G_MWK_LINEAR_SENTINEL);
         l = TRUNC(SUB(SET_ALL_ZERO(), r1));
@@ -469,10 +493,14 @@ class ABY2_PRE_Share
     void mask_and_send_dot_a_known_pre_with_triple_without_trunc_baked(func_add ADD, func_sub SUB, int bake_index)
     {
 #if PARTY == 0
+#if A2B_CONV_BAKE_ACTIVE
+        l = a2b_bake_conv_mask<Datatype>((uint64_t)(bake_index < 0 ? 0 : bake_index), SUB);  // committed lz0
+#else
         l = getRandomVal(PSELF);
+#endif
 #elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(bake_index, SUB);
-        g_mwk_p1_fc_masks.push_back(r1);  // FC path
+        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(bake_index, SUB);  // A2B bake: r1 = -lz1
+        g_mwk_p1_fc_masks.push_back(r1);  // FC path: prescribe P1's triple share to r1
         g_mwk_p1_fc_indices.push_back(G_MWK_LINEAR_SENTINEL);
         l = SUB(SET_ALL_ZERO(), r1);
 #else
@@ -483,17 +511,25 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
+#if A2B_CONV_BAKE_ACTIVE
+        l = (index >= 0) ? a2b_bake_conv_mask<Datatype>((uint64_t) index, SUB) : getRandomVal(PSELF);  // MWK=0 conv, TD=0
+#else
         l = getRandomVal(PSELF);
         if (index >= 0)
             bake_reshare_mask(l, index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE (l PRNG-synced PRE<->LIVE)
+#endif
     }
 
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc_with_triple_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
     {
+#if A2B_CONV_BAKE_ACTIVE
+        l = (bake_index >= 0) ? a2b_bake_conv_mask<Datatype>((uint64_t) bake_index, SUB) : getRandomVal(PSELF);  // MWK=0 FC, TD=0
+#else
         l = getRandomVal(PSELF);
         if (bake_index >= 0)
             bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE (l PRNG-synced PRE<->LIVE)
+#endif
     }
 
 
@@ -714,6 +750,13 @@ class ABY2_PRE_Share
 #endif
     {
 #if A2B_ONLINE_OPT == 1
+#if A2B_CONV_BAKE_ACTIVE
+        // The boolean addition already ran early (in the pre-PRE generation), so out.l is the committed
+        // [c] = bool(-lv) - the SAME value LIVE consumes. Using [c] here (not the boolean-adder input ia)
+        // is what makes the msb adder's beaver triples, generated in this PRE pass from out.l, match LIVE.
+        for (int i = m; i < k; i++)
+            out[i - m].l = a2b_bake_get_c();
+#else
         Datatype temp_p1[BITLENGTH];
         for (int i = 0; i < BITLENGTH; i++)
         {
@@ -724,14 +767,16 @@ class ABY2_PRE_Share
         orthogonalize_boolean(temp2, temp_p1);
         for (int i = m; i < k; i++)
         {
-            out[i - m].l = temp_p1[i]; // input shares for boolean additions are -lvi
+            Datatype ia = temp_p1[i];  // input shares for boolean additions are -lvi
+            out[i - m].l = ia;
             triple_type[0][triple_type_index[0]++] = CaseBooleanAddition;
 #if PARTY == 0
-            boolean_addition_triple_a[boolean_addition_triple_index++] = temp_p1[i];
+            boolean_addition_triple_a[boolean_addition_triple_index++] = ia;
 #else
-            boolean_addition_triple_b[boolean_addition_triple_index++] = temp_p1[i];
+            boolean_addition_triple_b[boolean_addition_triple_index++] = ia;
 #endif
         }
+#endif
 #else
 #if PARTY == 1
         Datatype temp_p1[BITLENGTH];
@@ -1522,7 +1567,7 @@ static void get_fc_triples_from_file()
 #endif
 
 
-#if A2B_ONLINE_OPT == 1 
+#if A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE_ACTIVE == 0
         init_booleanAdditionBeaverC();
 #if FAKE_TRIPLES == 1
         get_booleanAddition_triples_from_file();

@@ -324,6 +324,12 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define A2B_ONLINE_OPT 0  // Online-optimized A2B, by calculating [lc]^B in preprocessing to skip communication in the Online Phase
 #endif
 
+#ifndef A2B_CONV_BAKE
+#define A2B_CONV_BAKE 0  // A2B_ONLINE_OPT: derive the conv/remask output mask lz from the pre-committed
+// random boolean A2B mask (lz = -untranspose(ia)) so bool(-lz) == boolean_add(ia0,ia1) == [c] by
+// construction, decoupling [c] from re-reading lz. See docs/A2B_CONV_BAKE (task in progress).
+#endif
+
 #ifndef BIT_INJECTION_PREPROCESSING_OPT
 #define BIT_INJECTION_PREPROCESSING_OPT 1  // Use optimized bit injection preprocessing via COT and multiplexing
 #endif

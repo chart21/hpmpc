@@ -104,6 +104,63 @@ DATATYPE* random_multiplication_b = nullptr;
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 #define CUT_FRAC_ELIGIBLE_PPA4 (CUT_FRAC_ELIGIBLE && PPA4_MSB == 1)
 
+// A2B_ONLINE_OPT conv-mask bake (A2B_CONV_BAKE). Root problem it fixes: A2B_ONLINE_OPT precomputes the
+// A2B S2 boolean share [c] = bool(-lv) via an interactive boolean addition of each party's bool(-lv_i).
+// Two independent things must line up for the online msb adder to be correct:
+//   (1) the conv mask lv committed in the PRE mask/send must equal the one in the LIVE mask/send, else
+//       s1 = bool(mv = v+lv_live) and s2 = [c] = bool(-lv_pre) don't cancel; and
+//   (2) the msb adder's beaver triples are generated in PRE from the s2 wire mask (out.l). If PRE sets
+//       out.l to the boolean-adder INPUT (ia) while LIVE sets it to the OUTPUT [c], the triples are
+//       generated for the wrong mask -> garbage. So PRE and LIVE must BOTH use [c] for out.l.
+// The bake satisfies both by choosing, per party and BEFORE either FUNCTION pass, a random boolean A2B
+// mask ia; deriving the conv mask lz = -untranspose(ia) (so ortho(-lz) == ia); running the boolean
+// addition [c] = ia0 (+) ia1 = bool(-lz) EARLY (same stage as the LXLY triples); and then handing lz to
+// every conv mask/send and [c] to every A2B-S2 slice in BOTH phases. g_a2b_ia -> boolean-adder input;
+// g_a2b_lz -> conv mask; g_a2b_c -> [c] share consumed by prepare_A2B_S2.
+#define A2B_CONV_BAKE_ACTIVE (A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && DATTYPE == BITLENGTH)
+#if A2B_CONV_BAKE_ACTIVE
+#include <vector>
+std::vector<DATATYPE> g_a2b_ia;   // this party's random boolean A2B-mask slices (boolean-adder input)
+std::vector<DATATYPE> g_a2b_lz;   // derived conv mask -untranspose(ia); ortho(-lz) == ia
+std::vector<DATATYPE> g_a2b_c;    // this party's share of [c] = bool(-lz), from the early boolean addition
+uint64_t g_a2b_layer_base = 0;    // g_a2b_lz base for the current layer's A2B group (reset per phase)
+uint64_t g_a2b_c_cursor = 0;      // A2B-S2 [c] cursor (reset per phase)
+// init_a2b_bake / a2b_bake_store_c are defined further down, after the boolean_addition_triple buffers.
+
+// Index-addressed (NOT a linear cursor): the conv mask for the e-th layer-local output goes to
+// g_a2b_lz[layer_base + g_bake_batch_offset + e]. e is the C[] output position within the batch
+// element (mask/send index / bake_index), g_bake_batch_offset the batch-element base (set by the
+// conv/FC forward), g_a2b_layer_base the layer base (snapped to the [c] group boundary after each
+// A2B). This matches the A2B, which packs C[] linearly into sints and consumes [c] slice-per-position,
+// even when the conv mask/send is called in tiled (non-linear) order.
+template <typename Datatype, typename func_sub>
+inline Datatype a2b_bake_conv_mask(uint64_t e, func_sub SUB)
+{
+    const uint64_t idx = g_a2b_layer_base + g_bake_batch_offset + e;
+    // Out of range == this output never feeds an A2B (g_a2b_lz covers exactly the INIT-counted A2B
+    // slices; e.g. the network's final FC before the reveal). Fall back to a fresh synced PRNG draw -
+    // the baseline behavior. Returning a constant here instead would make P1's r1 = -low TINY and
+    // break the SecureML trunc wrap (B >= |v| fails) -> every negative output off by +2^(K-F).
+    if (idx >= g_a2b_lz.size())
+        return getRandomVal(PSELF);
+    Datatype lz = g_a2b_lz[idx];
+    // Bias pre-compensation: add_bias later shifts this output's mask by the party's OWN bias-mask
+    // share (owner: get_mask() of its b share; non-owner: 0 -> no-op, so P1's trunc-image constraint
+    // is untouched). Subtract it here so the TOTAL mask after add_bias equals the committed lz that
+    // [c] was built for. Same buffer/indexing as the reshare bake (g_bake_bias_l, batch-local e).
+    if (g_bake_bias_l != nullptr && g_bake_bias_len > 0)
+        lz = SUB(lz, g_bake_bias_l[(g_bake_batch_offset + e) % g_bake_bias_len]);
+    return lz;
+}
+
+// [c] share for the next A2B-S2 slice - identical in PRE and LIVE, so the msb adder's beaver triples
+// (generated in PRE from this out.l) match what LIVE consumes.
+inline DATATYPE a2b_bake_get_c()
+{
+    return (g_a2b_c_cursor < g_a2b_c.size()) ? g_a2b_c[g_a2b_c_cursor++] : SET_ALL_ZERO();
+}
+#endif
+
 // PPA4 comm-elimination thresholds: a gate/send/zero_add site with threshold T is skipped when
 // FRACTIONAL >= T (its g-factor coverage is then entirely identity-substituted -> public output).
 // The P-gate beaver3 slots (skipped in ALL phases, so allocation and retrieval both drop) shift the
@@ -451,18 +508,35 @@ inline Datatype construct_mwk_r1_baked(Datatype r1_base, Datatype low_rand, int 
 template <typename Datatype, typename func_sub>
 inline Datatype mwk_choose_r1_trunc(int bake_index, func_sub SUB)
 {
+#if A2B_CONV_BAKE_ACTIVE
+    // A2B bake, TD=0: prescribe r1 so P1's SecureML-truncated mask l1 = TRUNC(-r1) == the committed
+    // (sign-extended) mask m1 = a2b_bake_conv_mask. -r1 := (m1 << FRACTIONAL) + low, low < 2^FRACTIONAL
+    // fresh: the low bits are truncated away, and m1's top FRACTIONAL bits are sign-extension so
+    // (m1 << F) >> F == m1. The `low` PRNG draw is identical in PRE and LIVE (synced PSELF), so r1 (the
+    // prescribed triple share) matches. [c] = bool(-(lz0+m1)) was formed from the same m1 in init.
+    const Datatype m1 = a2b_bake_conv_mask<Datatype>((uint64_t)(bake_index < 0 ? 0 : bake_index), SUB);
+    const UINT_TYPE low = (UINT_TYPE) getRandomVal(PSELF) & (((UINT_TYPE) 1 << FRACTIONAL) - (UINT_TYPE) 1);
+    return (Datatype) (UINT_TYPE) (0 - (((UINT_TYPE) m1 << FRACTIONAL) + low));
+#else
     Datatype r1 = getRandomVal(PSELF);
 #if RESHARE_BAKE_ACTIVE  // gated: consumes an extra PRNG draw
     if (bake_index >= 0)
         r1 = construct_mwk_r1_baked(r1, getRandomVal(PSELF), bake_index, SUB);
 #endif
     return r1;
+#endif
 }
 
 // Untruncated mask l = -r1 (TRUNC_DELAYED): fully bakeable, no image constraint.
 template <typename Datatype, typename func_sub>
 inline Datatype mwk_choose_r1_no_trunc(int bake_index, func_sub SUB)
 {
+#if A2B_CONV_BAKE_ACTIVE
+    // A2B bake: prescribe P1's conv/FC triple share r1 = -lz1 (committed), so its output mask
+    // l = -r1 = lz1 and [c] = bool(-(lz0+lz1)) matches. No getRandomVal draw (mask is derived), and
+    // identical in PRE and LIVE. bake_index = layer-local output index (indexed g_a2b_lz access).
+    return SUB(SET_ALL_ZERO(), a2b_bake_conv_mask<Datatype>((uint64_t)(bake_index < 0 ? 0 : bake_index), SUB));
+#else
     Datatype r1 = getRandomVal(PSELF);
     if (bake_index >= 0)
     {
@@ -471,6 +545,7 @@ inline Datatype mwk_choose_r1_no_trunc(int bake_index, func_sub SUB)
         r1 = SUB(SET_ALL_ZERO(), l_t);
     }
     return r1;
+#endif
 }
 // P1-side live check for the SIM=1 reshare condition (see the counter comment above). Registers a
 // one-line summary at exit; the first few mismatches are printed with their rt index for diagnosis.
@@ -560,6 +635,74 @@ uint64_t boolean_addition_triple_index = 0;
 DATATYPE* boolean_addition_triple_a = nullptr;
 DATATYPE* boolean_addition_triple_b= nullptr;
 DATATYPE* boolean_addition_triple_c = nullptr;
+
+#if A2B_CONV_BAKE_ACTIVE
+// Choose ia, derive lz = -untranspose(ia), and load the boolean-addition input buffers - ONCE, before
+// either FUNCTION pass. getRandomVal(PSELF) is saved/restored so the function's own PSELF stream stays
+// PRE<->LIVE synced. The caller then runs the boolean addition (generate_beaver_triples "BOOLEANADDITION")
+// and calls a2b_bake_store_c() to capture this party's [c] = bool(-lz) share.
+template <typename Datatype, typename func_sub>
+inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
+{
+    constexpr int K = BITLENGTH;
+    if (!g_a2b_lz.empty())
+        return;  // generated once; both phases reuse it
+    g_a2b_ia.assign(num_slices, SET_ALL_ZERO());
+    g_a2b_lz.assign(num_slices, SET_ALL_ZERO());
+    g_a2b_c.assign(num_slices, SET_ALL_ZERO());
+#if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
+    AES_TYPE saved_counter = aes_counter[PSELF];
+    uint64_t saved_numgen = num_generated[PSELF];
+#endif
+    for (uint64_t base = 0; base + K <= num_slices; base += K)
+    {
+        Datatype ia[K];
+        for (int i = 0; i < K; i++) { ia[i] = getRandomVal(PSELF); g_a2b_ia[base + i] = ia[i]; }
+        // real_ortho (unorthogonalize_boolean) is self-inverse, so with lz = -untranspose(ia): ortho(-lz)==ia.
+        alignas(sizeof(Datatype)) UINT_TYPE t2[DATTYPE];
+        Datatype tmp[K];
+        for (int i = 0; i < K; i++) tmp[i] = ia[i];
+        unorthogonalize_boolean(tmp, t2);
+#if TRUNC_DELAYED == 0 && PARTY == 1
+        // TD=0: P1's conv/FC output mask is l1 = TRUNC(-r1), and TRUNC (FUNC_TRUNC = OP_TRUNC under
+        // SKIP_PRE=0) is a LOGICAL shift - its image has the top FRACTIONAL bits ZERO. Constrain the
+        // committed m1 the same way (zero the top F bits; NOT sign-extension) and RE-derive
+        // ia = bool(-m1) so the early boolean addition still yields [c] = bool(-(lz0+m1)). The remask
+        // path (no trunc) also uses this m1 - a validly-masked, just constrained, value - stays correct.
+        for (int i = 0; i < K; i++)
+        {
+            UINT_TYPE mi = (UINT_TYPE) SUB(SET_ALL_ZERO(), (Datatype) t2[i]);      // m1 = -t2 (numeric)
+            mi &= (((UINT_TYPE) 1 << (BITLENGTH - FRACTIONAL)) - (UINT_TYPE) 1);   // logical-trunc image
+            g_a2b_lz[base + i] = (Datatype) mi;
+            t2[i] = (UINT_TYPE) (0 - mi);                                          // t2 := -m1 (for ia)
+        }
+        Datatype ia_new[K];
+        orthogonalize_boolean(t2, ia_new);  // ia = bool(-lz) = bool(-m1)
+        for (int i = 0; i < K; i++) g_a2b_ia[base + i] = ia_new[i];
+#else
+        for (int i = 0; i < K; i++) g_a2b_lz[base + i] = SUB(SET_ALL_ZERO(), (Datatype) t2[i]);
+#endif
+    }
+#if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
+    aes_counter[PSELF] = saved_counter;
+    num_generated[PSELF] = saved_numgen;
+#endif
+    // Hand this party's ia to the boolean-addition input buffer (P0 -> a, P1 -> b), in slice order.
+    for (uint64_t e = 0; e < num_slices; e++)
+#if PARTY == 0
+        boolean_addition_triple_a[e] = g_a2b_ia[e];
+#else
+        boolean_addition_triple_b[e] = g_a2b_ia[e];
+#endif
+}
+
+// After the early boolean addition has produced boolean_addition_triple_c, capture this party's [c] share.
+inline void a2b_bake_store_c(uint64_t num_slices)
+{
+    for (uint64_t e = 0; e < num_slices && e < g_a2b_c.size(); e++)
+        g_a2b_c[e] = boolean_addition_triple_c[e];
+}
+#endif
 
 uint64_t curr_multiplexer_triple_index = 0;
 uint64_t arithmetic_multiplexer_triple_index = 0;
