@@ -287,3 +287,43 @@ UPDATE (2026-07-18): adder matrix, ResNet50, and the FUSE_CONV_BN investigation
      headroom that higher FRACTIONAL would need, which is why the unfused
      accuracy drops again at FRACTIONAL=8. At thirty-two bits the working
      combination is: UNFUSED batch normalization with FRACTIONAL=5.
+
+================================================================================
+UPDATE (2026-07-18, later): four-way prefix adder under the bake - diagnosis
+================================================================================
+
+The broken cell "four-way parallel-prefix adder + arithmetic-to-boolean bake"
+(3 of 8, independent of the fractional-bits cut) was investigated down to root
+causes. Two findings, one fixed, one requiring circuit regeneration:
+
+a) FIXED: the generated circuit file ppa_msb_4way_and_a_ab.hpp contained
+   EIGHTY-THREE use-before-assignment orderings in its first round: statements
+   consumed wires (for example the public pairwise products of the four-way
+   propagate nodes) BEFORE the statements that compute them, so they operated
+   on default-constructed shares. Repaired by a dependency-preserving
+   topological reorder within the round (verified zero remaining violations;
+   statement semantics unchanged, only order). This was necessary but not
+   sufficient.
+
+b) OPEN - REQUIRES REGENERATING THE CIRCUIT: the four-way "a known to
+   evaluators" lowering is structurally unsound for the preprocessing model.
+   Its two hundred one public-times-secret products are never re-masked: their
+   online masks are VALUE-DEPENDENT (public input value AND the secret input's
+   mask), which the preprocessing pass cannot know - its version of the
+   public-times-secret multiply returns an empty share. These products are
+   accumulated into dot-product sends whose masks are therefore value-
+   dependent, and every piece of preprocessing material later generated from
+   those recorded masks mismatches the online execution. The WORKING two-input
+   parallel-prefix circuit demonstrates the correct discipline: each of its
+   thirty-one public-times-secret products is immediately re-masked to a
+   preprocessing-known value (thirty-one re-mask operations); the four-way
+   circuit contains ZERO re-mask operations. The fix is to regenerate
+   ppa_msb_4way_and_a_ab.hpp from the circuit generator with the re-mask
+   discipline applied (a generator-level change, out of scope for a local
+   patch). Until then: ripple-carry and two-input parallel-prefix are the
+   supported adders under the bake; the four-way adder works under the plain
+   baseline and the reshare-simulation family.
+
+   A reusable stream-parity diagnostic was added along the way (compile-time
+   gated dumps of the tuple/triple stream counters at the end of each phase,
+   macro A2B_STREAM_DBG in protocol_executer.hpp).

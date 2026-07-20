@@ -97,10 +97,15 @@ has the same structure and would need the same treatment — not yet done, not e
   counts ([c], S1 and the early boolean addition stay full-width; INIT counts called gates per phase).
   The identity-substitution gate-skipping port (as done for the reshared family) is follow-up
   efficiency work.
-- **PPA4 a_ab: BROKEN under the bake entirely** (with or without the cut — the adder matrix showed
-  3/8 in both cases; earlier support-matrix runs had only exercised the PPA under the bake). The
-  four-way adder's beaver-3/4 tuple interaction with the bake needs its own investigation. RCA and
-  PPA are the supported bake adders.
+- **PPA4 a_ab: BROKEN under the bake** (with or without the cut; 3/8 either way). Diagnosed:
+  (1) the generated file had 83 use-before-assignment orderings in round 0 (statements consuming
+  default-constructed shares) — FIXED by a dependency-preserving topological reorder; (2) the
+  remaining blocker is structural: the circuit's 201 `mult_a_known_to_evaluators` products are never
+  re-masked, so their masks are VALUE-dependent (`x_pub & l_y`), which PRE cannot track (its a_known
+  mult returns an empty share) — all downstream material generated from those recorded masks
+  mismatches LIVE. The working PPA a_ab pairs each of its 31 a_known products with an immediate
+  `prepare_remask` to a PRE-known assign; the PPA4 file has ZERO remasks. Fix = regenerate the
+  circuit with the remask discipline (generator-level). RCA and PPA remain the supported bake adders.
 
 ## A_KNOWN=0 baseline fixes (needed before the bake could run there)
 

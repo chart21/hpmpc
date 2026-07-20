@@ -456,6 +456,14 @@ generate_beaver_triples(
 #else
     RESULTTYPE garbage_PRE;
     FUNCTION<PROTOCOL_PRE<DATATYPE>>(&garbage_PRE);
+#ifdef A2B_STREAM_DBG
+    fprintf(stderr, "STREAMS P%d PRE-END: b3=%llu/%llu b4=%llu/%llu bool_idx=%llu triple_type_idx=%llu\n",
+            PARTY,
+            (unsigned long long) curr_beaver_3_triple_index, (unsigned long long) num_beaver_3_tuples,
+            (unsigned long long) curr_beaver_4_triple_index, (unsigned long long) num_beaver_4_tuples,
+            (unsigned long long) boolean_triple_index,
+            (unsigned long long) triple_type_index[0]);
+#endif
     #if CV_FIX == 1 && PROTOCOL == 12
         check_eqs_quad_pre();
     #endif
@@ -614,6 +622,15 @@ void live_circuit()
     /* auto p_live = PROTOCOL_LIVE(); */
     RESULTTYPE result;
     FUNCTION<PROTOCOL_LIVE<DATATYPE>>(&result);
+#ifdef A2B_STREAM_DBG
+    fprintf(stderr, "STREAMS P%d LIVE-END: b3=%llu/%llu b4=%llu/%llu bool=%llu pre_bool_idx=%llu pre_arith_idx=%llu\n",
+            PARTY,
+            (unsigned long long) curr_beaver_3_triple_index, (unsigned long long) num_beaver_3_tuples,
+            (unsigned long long) curr_beaver_4_triple_index, (unsigned long long) num_beaver_4_tuples,
+            (unsigned long long) curr_boolean_triple_index,
+            (unsigned long long) preprocessed_outputs_bool_index[0],
+            (unsigned long long) preprocessed_outputs_arithmetic_index[0]);
+#endif
 #if MAL == 1
 #if CV_FIX == 1 && PROTOCOL == 12
     check_eqs_quad_live();
