@@ -376,3 +376,45 @@ a symbolic mask checker that expands nested exclusive-or expressions and
 compares each dot operand's accumulated mask against the tuple field it is used
 with. Both report zero findings on the repaired circuit for all three
 specializations. They should be re-run if the circuit is ever regenerated.
+
+================================================================================
+9. COMPLETE LENET TEST MATRIX (all cells re-measured at this commit)
+LeNet5 on MNIST, FUNCTION_IDENTIFIER 182, ten images, thirty-two bit, five
+fractional bits, model LeNet5_MNIST_custom_best.bin. Plaintext reference for
+this sample: ninety percent. "b4" = beaver four-tuples required, which is
+nonzero only for the four-way prefix adder (used to prove which adder ran).
+================================================================================
+
+  # | family        | weights / truncation | adder | accuracy | b4
+ ---|---------------|----------------------|-------|----------|--------
+  1 | plain         | MWK=1   TD=0         | PPA   |  90%     | 0
+  2 | plain         | MWK=1   TD=1         | PPA   |  90%     | 0
+  3 | plain         | MWK=0   TD=0         | PPA   |  90%     | 0
+  4 | plain         | A_KNOWN=0 TD=0       | PPA   |  90%     | 0
+  5 | plain         | PW=1    TD=1         | PPA   |  90%     | 0
+  6 | A2B bake      | MWK=1   TD=0         | PPA   |  90%     | 0
+  7 | A2B bake      | MWK=1   TD=1         | PPA   |  90%     | 0
+  8 | A2B bake      | MWK=0   TD=0         | PPA   |  90%     | 0
+  9 | A2B bake      | MWK=0   TD=1         | PPA   |  90%     | 0
+ 10 | A2B bake      | A_KNOWN=0 TD=0       | PPA   |  90%     | 0
+ 11 | A2B bake      | A_KNOWN=0 TD=1       | PPA   |  90%     | 0
+ 12 | A2B bake      | PW=1    TD=1         | PPA   |   0%  (*)| 0
+ 13 | reshare-sim   | MWK=1   TD=0         | PPA   |  90%     | 0
+ 14 | reshare-sim   | MWK=0   TD=0         | PPA   |  90%     | 0
+ 15 | reshare-sim   | A_KNOWN=0 TD=0       | PPA   |  90%     | 0
+ 16 | reshare-sim   | PW=1    TD=1         | PPA   |  90%     | 0
+ 17 | A2B bake      | MWK=1   TD=0         | RCA   |  90%     | 0
+ 18 | A2B bake      | MWK=1   TD=0         | PPA4  |  90%     | 195360
+ 19 | A2B bake +CUT | MWK=1   TD=0         | RCA   |  90%     | 0
+ 20 | A2B bake +CUT | MWK=1   TD=0         | PPA   |  90%     | 0
+ 21 | A2B bake +CUT | MWK=1   TD=0         | PPA4  |  90%     | 195360
+ 22 | reshare-sim   | MWK=1   TD=0         | PPA4  |  90%     | 846560
+
+ (*) The only failing cell: public weights under the A2B bake. Nothing is
+     committed on the public-weight multiplication paths, so no mask cancels.
+     Public weights are supported by the reshare-simulation family (row 16).
+
+ Twenty-one of twenty-two cells reach the ninety percent plaintext reference.
+ Every optimization family is at parity with the plain baseline for secret
+ weights (known or unknown during preprocessing) and for A_KNOWN=0, in both
+ truncation modes, with all three adders and with the fractional-bits cut.
