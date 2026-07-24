@@ -136,3 +136,43 @@ Makefile's forwarded-defines list, so `make CUT_FRACTIONAL_BITS_OPT=1` compiled 
 every "flag-on" run was actually a baseline run. Both are fixed; every result in the table above
 was obtained after both fixes, from clean builds, with the reshare-check counter confirming the
 skips actually fire (52 checks per func53 run instead of 62).
+
+
+## Coverage beyond the reshared family (2026-07)
+
+Originally the cut was gated on `RESHARE_OPT == 1` (later also the A2B bake), so with the plain
+circuits — the ones used when neither the reshare simulation nor the bake is on, i.e. the DEFAULT
+configuration — the flag was silently inert. It is now eligible there too, with two changes:
+
+1. **Output tap moved** in the four circuits that lacked it (`ppa_msb_unsafe_and_ab`,
+   `ppa_msb_unsafe_and_a_ab`, `ppa_msb_4way_and_ab`, `ppa_msb_4way_and_a_ab` + its `_split`):
+   `p0 = a[FRACTIONAL] ^ b[FRACTIONAL]` when the cut is active, mirroring the reshared circuits.
+   This is the correctness-critical piece: the substituted top slices make the sum bits above the
+   boundary meaningless, while the carry INTO the boundary slice is untouched (carries flow from
+   less- to more-significant, i.e. from higher slice index to lower), so the boundary sum bit is the
+   true sign.
+
+2. **Vacancy on the bake path.** In the plain A2B prepare the vacant slices were already replaced by
+   the public constants `a := 1`, `b := 0` (identity for the carry algebra) — which is what makes the
+   substitution work and also skips those slices' sharing communication. The `A2B_ONLINE_OPT` prepare
+   had no such handling, so under the bake the adder still saw real bits; it now applies the same
+   substitution. `[c]` is still *consumed* on vacant slices, because the early boolean addition emits
+   a fixed-stride slice per value and skipping would misalign it.
+
+`CUT_FRAC_ADDER_SUPPORTED` names exactly which circuits implement the cut. The plain ripple-carry
+circuit (`rca_msb_and_ab.hpp`) does NOT, so it is excluded rather than silently reading the sign at a
+substituted slice; the reshared and a_known ripple-carry circuits do implement it and are unaffected.
+
+**What this does and does not save.** Correctness and eligibility are now uniform. The realized
+saving today is the A2B input sharing: FRACTIONAL of 32 slices are neither masked nor sent (about 16
+percent of that step at FRACTIONAL=5). The adders still *evaluate* the substituted slices — their
+gates now compute on constants. Skipping those gates (and their triples) is a further, purely
+performance-oriented step: it is not a textual port between circuits, because each circuit has its
+own triple layout and each skipped gate's consumer must still receive its designed mask (the reshared
+circuits solve this with identity substitution plus per-consumer mask compensation, and their beaver
+retrieval is hoisted into the constructor, so the allocation must be adjusted in step). Expected
+additional saving, extrapolating from the reshared circuits: roughly 10-20 percent of adder triples
+at FRACTIONAL=5, more at larger FRACTIONAL.
+
+Validated at FRACTIONAL=5 (func53 8/8 each, plus LeNet): plain PPA +CUT (LeNet 90%), plain PPA4 +CUT,
+bake PPA +CUT, bake PPA4 +CUT, bake RCA +CUT, and the reshare-sim PPA4 +CUT regression.

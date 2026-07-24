@@ -102,10 +102,17 @@ DATATYPE* random_multiplication_b = nullptr;
 // a_ab adders skip their top-FRACTIONAL-slice gates internally (RCA + PPA; the PPA4 a_ab adder has no
 // cut guards yet and simply computes fully, which stays correct because under the bake no external
 // stream count depends on adder-internal gates: [c], S1 and the boolean addition stay full-width).
+// Which circuits implement the cut: the reshared family (all three adders) and the a_known/bake
+// family (all three) do; of the PLAIN (neither reshared nor a_known) circuits only the two prefix
+// adders carry the moved output tap, so the plain ripple-carry adder is excluded here rather than
+// silently producing a sign read at the substituted slice 0.
+#define CUT_FRAC_ADDER_SUPPORTED \
+    (RESHARE_OPT == 1 || (A2B_ONLINE_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 1) || \
+     PPA_MSB == 1 || PPA4_MSB == 1)
+
 #define CUT_FRAC_ELIGIBLE \
     (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && \
-     (RESHARE_OPT == 1 || (A2B_ONLINE_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 1)) && \
-     ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
+     ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && CUT_FRAC_ADDER_SUPPORTED && \
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 #define CUT_FRAC_ELIGIBLE_PPA4 (CUT_FRAC_ELIGIBLE && PPA4_MSB == 1)
 

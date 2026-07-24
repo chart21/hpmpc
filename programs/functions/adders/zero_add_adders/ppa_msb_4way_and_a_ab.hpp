@@ -2145,7 +2145,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
         switch(level) {
             case 0:
                 p_22 = a[22] ^ b[22];  // p[22]
-                p0 = a[0] ^ b[0];  // p0
+                if (g_cut_frac_active && cut_frac_identity(32, 1))
+                    p0 = a[FRACTIONAL] ^ b[FRACTIONAL];  // CUT: output tap reads the boundary slice
+                else
+                    p0 = a[0] ^ b[0];  // p0
                 b_1_p = b[1].zero_add(triples[0].a);  // b[1]', mask=a0
                 b_1_p_1 = b[1].zero_add(beaver3_tuples[0].a);  // b[1]'_1, mask=a1
                 b_1_p_2 = b[1].zero_add(triples[2].a);  // b[1]'_2, mask=a3

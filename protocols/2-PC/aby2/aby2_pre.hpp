@@ -790,7 +790,10 @@ class ABY2_PRE_Share
         // [c] = bool(-lv) - the SAME value LIVE consumes. Using [c] here (not the boolean-adder input ia)
         // is what makes the msb adder's beaver triples, generated in this PRE pass from out.l, match LIVE.
         for (int i = m; i < k; i++)
-            out[i - m].l = a2b_bake_get_c();
+        {
+            Datatype c_i = a2b_bake_get_c();
+            out[i - m].l = cut_frac_prep_vacant(m, k, i) ? SET_ALL_ZERO() : c_i;  // CUT: b := 0
+        }
 #else
         Datatype temp_p1[BITLENGTH];
         for (int i = 0; i < BITLENGTH; i++)

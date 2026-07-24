@@ -849,7 +849,10 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
     {
         switch(level) {
             case 0:
-                p_0 = a[0] ^ b[0];  // p[0]
+                if (g_cut_frac_active && cut_frac_identity(32, 1))
+                    p_0 = a[FRACTIONAL] ^ b[FRACTIONAL];  // CUT: output tap reads the boundary slice
+                else
+                    p_0 = a[0] ^ b[0];  // p[0]
                 p_1 = a[1] ^ b[1];  // p[1]
                 p_2 = a[2] ^ b[2];  // p[2]
                 p_3 = a[3] ^ b[3];  // p[3]

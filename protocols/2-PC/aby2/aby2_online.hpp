@@ -929,7 +929,10 @@ class ABY2_ONLINE_Share
         for (int i = m; i < k; i++)
         {
             out[i - m].l = SET_ALL_ZERO();
-            out[i - m].m = temp_p1[i];
+            // CUT_FRACTIONAL_BITS_OPT: vacant slice -> public constant a := 1 (identity for the
+            // prefix/carry algebra), mirroring the non-online-optimized path above. The sum bits of
+            // the substituted slices are discarded; the output tap moves to the boundary slice.
+            out[i - m].m = cut_frac_prep_vacant(m, k, i) ? SET_ALL_ONE() : temp_p1[i];
         }
 #else
 #if PARTY == 0
@@ -1021,10 +1024,13 @@ class ABY2_ONLINE_Share
         for (int i = m; i < k; i++)
         {
 #if A2B_CONV_BAKE_ACTIVE
-            out[i - m].l = a2b_bake_get_c();  // committed [c] = bool(-lv), same buffer PRE used
+            Datatype c_i = a2b_bake_get_c();  // committed [c] = bool(-lv), same buffer PRE used
 #else
-            out[i - m].l = retrieve_output_share_bool();
+            Datatype c_i = retrieve_output_share_bool();
 #endif
+            // CUT: vacant slice -> public constant b := 0. [c] is still CONSUMED (the boolean
+            // addition produces a fixed-stride slice per value, so skipping would misalign it).
+            out[i - m].l = cut_frac_prep_vacant(m, k, i) ? SET_ALL_ZERO() : c_i;
             out[i - m].m = SET_ALL_ZERO(); // v = lv = 0 xor lv1 xor lv2
         }
 #else
