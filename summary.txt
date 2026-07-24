@@ -116,8 +116,10 @@ D. MaxPool correctness under BOTH optimization families (fixed this session)
   correct but costs one extra multiplication triple and one communication
   round for the first layer's inputs.
 
-- The parallel-prefix-adder families under the bake accept the cut flag but
-  only the ripple-carry adder actually skips gates (section 4).
+- The parallel-prefix families (plain and a-known flavours) accept the cut and
+  are correct under it, but still evaluate the substituted slices on constants;
+  only the ripple-carry family (all three flavours) and the reshared prefix
+  families actually skip gates. See docs/CUT_FRACTIONAL_BITS_OPT.md.
 
 --------------------------------------------------------------------------------
 3. WHY SOME UNIT-TEST RUNS REPORT "PASSED 6 OUT OF 8"

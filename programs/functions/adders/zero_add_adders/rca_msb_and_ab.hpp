@@ -596,7 +596,12 @@ class RCA_MSB_AB<k, Share, typename std::enable_if<(k == 32)>::type>
         {
             for (int i = 0; i < BeaverTripleCount; ++i)
             {
-                triples[i] = retrieveBooleanTriple<DATATYPE>();
+                // CUT_FRACTIONAL_BITS_OPT: the carry chain stops after case 31-FRACTIONAL, whose own
+                // AND is skipped, so the executed ANDs are cases 0..(30-FRACTIONAL) using triple
+                // slots 0..(30-FRACTIONAL). INIT counts per CALLED gate and allocated accordingly,
+                // so retrieval must match or it overruns the allocation.
+                if (!(CUT_FRAC_SUPPORTED && g_cut_frac_active) || i < 31 - FRACTIONAL)
+                    triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
             r63 = getRandomVal(PSELF);
@@ -605,8 +610,15 @@ class RCA_MSB_AB<k, Share, typename std::enable_if<(k == 32)>::type>
     }
 
     int get_rounds() const { return level; }
-    int get_total_rounds() const { return 32; }
-    bool is_done() const { return level > 31; }
+    // CUT_FRACTIONAL_BITS_OPT: under TRUNC_DELAYED == 0 the top FRACTIONAL slices are substituted
+    // by the identity constants, so the sum bit at the boundary slice already equals the true sign:
+    // stop the carry chain there instead of rippling to slice 0. Covers FRACTIONAL in [1,29], i.e.
+    // every value leaving at least three real bits.
+    static constexpr bool CUT_FRAC_SUPPORTED = (FRACTIONAL >= 1 && FRACTIONAL <= 29);
+    static constexpr int CUT_FRAC_STOP_CASE = 31 - FRACTIONAL;
+
+    int get_total_rounds() const { return (CUT_FRAC_SUPPORTED && g_cut_frac_active) ? CUT_FRAC_STOP_CASE + 1 : 32; }
+    bool is_done() const { return (CUT_FRAC_SUPPORTED && g_cut_frac_active) ? level > CUT_FRAC_STOP_CASE : level > 31; }
 
     void step()
     {
@@ -616,7 +628,7 @@ class RCA_MSB_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 x_31_p = x[31].zero_add(triples[0].a);  // x[31]', mask=a0
                 y_31_p = y[31].zero_add(triples[0].b);  // y[31]', mask=b0
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=(a1-f(x[30]))
-                carry_31 = x_31_p.prepare_and(y_31_p, FUNC_XOR(triples[1].a, x[30].get_mask()), triples[0].c);  // and_0
+                carry_31 = x_31_p.prepare_and(y_31_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 30) ? r63 : (FUNC_XOR(triples[1].a, x[30].get_mask())), triples[0].c);  // and_0
                 break;
             case 1:
                 carry_31.complete_and();
@@ -624,263 +636,437 @@ class RCA_MSB_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 cy_30 = carry_31 ^ y[30];  // cy[30]
                 cy_30_p = cy_30.zero_add(triples[1].b);  // cy[30]', mask=b1
                 // and_3: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=((a2-f(x[29]))-(a1-f(x[30])))
-                carry_t_30 = cx_30.prepare_and(cy_30_p, FUNC_XOR(FUNC_XOR(triples[2].a, x[29].get_mask()), FUNC_XOR(triples[1].a, x[30].get_mask())), triples[1].c);  // and_3
+                carry_t_30 = cx_30.prepare_and(cy_30_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 29) ? r63 : (FUNC_XOR(FUNC_XOR(triples[2].a, x[29].get_mask()), FUNC_XOR(triples[1].a, x[30].get_mask()))), triples[1].c);  // and_3
                 break;
             case 2:
                 carry_t_30.complete_and();
                 carry_30 = carry_t_30 ^ carry_31;  // carry[30]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 29)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[29] ^ y[29] ^ carry_30;
+                    break;
+                }
                 cx_29 = carry_30 ^ x[29];  // cx[29]
                 cy_29 = carry_30 ^ y[29];  // cy[29]
                 cy_29_p = cy_29.zero_add(triples[2].b);  // cy[29]', mask=b2
                 // and_7: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=((a3-f(x[28]))-(a2-f(x[29])))
-                carry_t_29 = cx_29.prepare_and(cy_29_p, FUNC_XOR(FUNC_XOR(triples[3].a, x[28].get_mask()), FUNC_XOR(triples[2].a, x[29].get_mask())), triples[2].c);  // and_7
+                carry_t_29 = cx_29.prepare_and(cy_29_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 28) ? r63 : (FUNC_XOR(FUNC_XOR(triples[3].a, x[28].get_mask()), FUNC_XOR(triples[2].a, x[29].get_mask()))), triples[2].c);  // and_7
                 break;
             case 3:
                 carry_t_29.complete_and();
                 carry_29 = carry_t_29 ^ carry_30;  // carry[29]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 28)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[28] ^ y[28] ^ carry_29;
+                    break;
+                }
                 cx_28 = carry_29 ^ x[28];  // cx[28]
                 cy_28 = carry_29 ^ y[28];  // cy[28]
                 cy_28_p = cy_28.zero_add(triples[3].b);  // cy[28]', mask=b3
                 // and_11: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=((a4-f(x[27]))-(a3-f(x[28])))
-                carry_t_28 = cx_28.prepare_and(cy_28_p, FUNC_XOR(FUNC_XOR(triples[4].a, x[27].get_mask()), FUNC_XOR(triples[3].a, x[28].get_mask())), triples[3].c);  // and_11
+                carry_t_28 = cx_28.prepare_and(cy_28_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 27) ? r63 : (FUNC_XOR(FUNC_XOR(triples[4].a, x[27].get_mask()), FUNC_XOR(triples[3].a, x[28].get_mask()))), triples[3].c);  // and_11
                 break;
             case 4:
                 carry_t_28.complete_and();
                 carry_28 = carry_t_28 ^ carry_29;  // carry[28]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 27)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[27] ^ y[27] ^ carry_28;
+                    break;
+                }
                 cx_27 = carry_28 ^ x[27];  // cx[27]
                 cy_27 = carry_28 ^ y[27];  // cy[27]
                 cy_27_p = cy_27.zero_add(triples[4].b);  // cy[27]', mask=b4
                 // and_15: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=((a5-f(x[26]))-(a4-f(x[27])))
-                carry_t_27 = cx_27.prepare_and(cy_27_p, FUNC_XOR(FUNC_XOR(triples[5].a, x[26].get_mask()), FUNC_XOR(triples[4].a, x[27].get_mask())), triples[4].c);  // and_15
+                carry_t_27 = cx_27.prepare_and(cy_27_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 26) ? r63 : (FUNC_XOR(FUNC_XOR(triples[5].a, x[26].get_mask()), FUNC_XOR(triples[4].a, x[27].get_mask()))), triples[4].c);  // and_15
                 break;
             case 5:
                 carry_t_27.complete_and();
                 carry_27 = carry_t_27 ^ carry_28;  // carry[27]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 26)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[26] ^ y[26] ^ carry_27;
+                    break;
+                }
                 cx_26 = carry_27 ^ x[26];  // cx[26]
                 cy_26 = carry_27 ^ y[26];  // cy[26]
                 cy_26_p = cy_26.zero_add(triples[5].b);  // cy[26]', mask=b5
                 // and_19: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=((a6-f(x[25]))-(a5-f(x[26])))
-                carry_t_26 = cx_26.prepare_and(cy_26_p, FUNC_XOR(FUNC_XOR(triples[6].a, x[25].get_mask()), FUNC_XOR(triples[5].a, x[26].get_mask())), triples[5].c);  // and_19
+                carry_t_26 = cx_26.prepare_and(cy_26_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 25) ? r63 : (FUNC_XOR(FUNC_XOR(triples[6].a, x[25].get_mask()), FUNC_XOR(triples[5].a, x[26].get_mask()))), triples[5].c);  // and_19
                 break;
             case 6:
                 carry_t_26.complete_and();
                 carry_26 = carry_t_26 ^ carry_27;  // carry[26]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 25)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[25] ^ y[25] ^ carry_26;
+                    break;
+                }
                 cx_25 = carry_26 ^ x[25];  // cx[25]
                 cy_25 = carry_26 ^ y[25];  // cy[25]
                 cy_25_p = cy_25.zero_add(triples[6].b);  // cy[25]', mask=b6
                 // and_23: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=((a7-f(x[24]))-(a6-f(x[25])))
-                carry_t_25 = cx_25.prepare_and(cy_25_p, FUNC_XOR(FUNC_XOR(triples[7].a, x[24].get_mask()), FUNC_XOR(triples[6].a, x[25].get_mask())), triples[6].c);  // and_23
+                carry_t_25 = cx_25.prepare_and(cy_25_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 24) ? r63 : (FUNC_XOR(FUNC_XOR(triples[7].a, x[24].get_mask()), FUNC_XOR(triples[6].a, x[25].get_mask()))), triples[6].c);  // and_23
                 break;
             case 7:
                 carry_t_25.complete_and();
                 carry_25 = carry_t_25 ^ carry_26;  // carry[25]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 24)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[24] ^ y[24] ^ carry_25;
+                    break;
+                }
                 cx_24 = carry_25 ^ x[24];  // cx[24]
                 cy_24 = carry_25 ^ y[24];  // cy[24]
                 cy_24_p = cy_24.zero_add(triples[7].b);  // cy[24]', mask=b7
                 // and_27: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=((a8-f(x[23]))-(a7-f(x[24])))
-                carry_t_24 = cx_24.prepare_and(cy_24_p, FUNC_XOR(FUNC_XOR(triples[8].a, x[23].get_mask()), FUNC_XOR(triples[7].a, x[24].get_mask())), triples[7].c);  // and_27
+                carry_t_24 = cx_24.prepare_and(cy_24_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 23) ? r63 : (FUNC_XOR(FUNC_XOR(triples[8].a, x[23].get_mask()), FUNC_XOR(triples[7].a, x[24].get_mask()))), triples[7].c);  // and_27
                 break;
             case 8:
                 carry_t_24.complete_and();
                 carry_24 = carry_t_24 ^ carry_25;  // carry[24]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 23)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[23] ^ y[23] ^ carry_24;
+                    break;
+                }
                 cx_23 = carry_24 ^ x[23];  // cx[23]
                 cy_23 = carry_24 ^ y[23];  // cy[23]
                 cy_23_p = cy_23.zero_add(triples[8].b);  // cy[23]', mask=b8
                 // and_31: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=((a9-f(x[22]))-(a8-f(x[23])))
-                carry_t_23 = cx_23.prepare_and(cy_23_p, FUNC_XOR(FUNC_XOR(triples[9].a, x[22].get_mask()), FUNC_XOR(triples[8].a, x[23].get_mask())), triples[8].c);  // and_31
+                carry_t_23 = cx_23.prepare_and(cy_23_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 22) ? r63 : (FUNC_XOR(FUNC_XOR(triples[9].a, x[22].get_mask()), FUNC_XOR(triples[8].a, x[23].get_mask()))), triples[8].c);  // and_31
                 break;
             case 9:
                 carry_t_23.complete_and();
                 carry_23 = carry_t_23 ^ carry_24;  // carry[23]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 22)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[22] ^ y[22] ^ carry_23;
+                    break;
+                }
                 cx_22 = carry_23 ^ x[22];  // cx[22]
                 cy_22 = carry_23 ^ y[22];  // cy[22]
                 cy_22_p = cy_22.zero_add(triples[9].b);  // cy[22]', mask=b9
                 // and_35: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=((a10-f(x[21]))-(a9-f(x[22])))
-                carry_t_22 = cx_22.prepare_and(cy_22_p, FUNC_XOR(FUNC_XOR(triples[10].a, x[21].get_mask()), FUNC_XOR(triples[9].a, x[22].get_mask())), triples[9].c);  // and_35
+                carry_t_22 = cx_22.prepare_and(cy_22_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 21) ? r63 : (FUNC_XOR(FUNC_XOR(triples[10].a, x[21].get_mask()), FUNC_XOR(triples[9].a, x[22].get_mask()))), triples[9].c);  // and_35
                 break;
             case 10:
                 carry_t_22.complete_and();
                 carry_22 = carry_t_22 ^ carry_23;  // carry[22]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 21)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[21] ^ y[21] ^ carry_22;
+                    break;
+                }
                 cx_21 = carry_22 ^ x[21];  // cx[21]
                 cy_21 = carry_22 ^ y[21];  // cy[21]
                 cy_21_p = cy_21.zero_add(triples[10].b);  // cy[21]', mask=b10
                 // and_39: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=((a11-f(x[20]))-(a10-f(x[21])))
-                carry_t_21 = cx_21.prepare_and(cy_21_p, FUNC_XOR(FUNC_XOR(triples[11].a, x[20].get_mask()), FUNC_XOR(triples[10].a, x[21].get_mask())), triples[10].c);  // and_39
+                carry_t_21 = cx_21.prepare_and(cy_21_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 20) ? r63 : (FUNC_XOR(FUNC_XOR(triples[11].a, x[20].get_mask()), FUNC_XOR(triples[10].a, x[21].get_mask()))), triples[10].c);  // and_39
                 break;
             case 11:
                 carry_t_21.complete_and();
                 carry_21 = carry_t_21 ^ carry_22;  // carry[21]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 20)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[20] ^ y[20] ^ carry_21;
+                    break;
+                }
                 cx_20 = carry_21 ^ x[20];  // cx[20]
                 cy_20 = carry_21 ^ y[20];  // cy[20]
                 cy_20_p = cy_20.zero_add(triples[11].b);  // cy[20]', mask=b11
                 // and_43: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=((a12-f(x[19]))-(a11-f(x[20])))
-                carry_t_20 = cx_20.prepare_and(cy_20_p, FUNC_XOR(FUNC_XOR(triples[12].a, x[19].get_mask()), FUNC_XOR(triples[11].a, x[20].get_mask())), triples[11].c);  // and_43
+                carry_t_20 = cx_20.prepare_and(cy_20_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 19) ? r63 : (FUNC_XOR(FUNC_XOR(triples[12].a, x[19].get_mask()), FUNC_XOR(triples[11].a, x[20].get_mask()))), triples[11].c);  // and_43
                 break;
             case 12:
                 carry_t_20.complete_and();
                 carry_20 = carry_t_20 ^ carry_21;  // carry[20]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 19)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[19] ^ y[19] ^ carry_20;
+                    break;
+                }
                 cx_19 = carry_20 ^ x[19];  // cx[19]
                 cy_19 = carry_20 ^ y[19];  // cy[19]
                 cy_19_p = cy_19.zero_add(triples[12].b);  // cy[19]', mask=b12
                 // and_47: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=((a13-f(x[18]))-(a12-f(x[19])))
-                carry_t_19 = cx_19.prepare_and(cy_19_p, FUNC_XOR(FUNC_XOR(triples[13].a, x[18].get_mask()), FUNC_XOR(triples[12].a, x[19].get_mask())), triples[12].c);  // and_47
+                carry_t_19 = cx_19.prepare_and(cy_19_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 18) ? r63 : (FUNC_XOR(FUNC_XOR(triples[13].a, x[18].get_mask()), FUNC_XOR(triples[12].a, x[19].get_mask()))), triples[12].c);  // and_47
                 break;
             case 13:
                 carry_t_19.complete_and();
                 carry_19 = carry_t_19 ^ carry_20;  // carry[19]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 18)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[18] ^ y[18] ^ carry_19;
+                    break;
+                }
                 cx_18 = carry_19 ^ x[18];  // cx[18]
                 cy_18 = carry_19 ^ y[18];  // cy[18]
                 cy_18_p = cy_18.zero_add(triples[13].b);  // cy[18]', mask=b13
                 // and_51: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=((a14-f(x[17]))-(a13-f(x[18])))
-                carry_t_18 = cx_18.prepare_and(cy_18_p, FUNC_XOR(FUNC_XOR(triples[14].a, x[17].get_mask()), FUNC_XOR(triples[13].a, x[18].get_mask())), triples[13].c);  // and_51
+                carry_t_18 = cx_18.prepare_and(cy_18_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 17) ? r63 : (FUNC_XOR(FUNC_XOR(triples[14].a, x[17].get_mask()), FUNC_XOR(triples[13].a, x[18].get_mask()))), triples[13].c);  // and_51
                 break;
             case 14:
                 carry_t_18.complete_and();
                 carry_18 = carry_t_18 ^ carry_19;  // carry[18]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 17)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[17] ^ y[17] ^ carry_18;
+                    break;
+                }
                 cx_17 = carry_18 ^ x[17];  // cx[17]
                 cy_17 = carry_18 ^ y[17];  // cy[17]
                 cy_17_p = cy_17.zero_add(triples[14].b);  // cy[17]', mask=b14
                 // and_55: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=((a15-f(x[16]))-(a14-f(x[17])))
-                carry_t_17 = cx_17.prepare_and(cy_17_p, FUNC_XOR(FUNC_XOR(triples[15].a, x[16].get_mask()), FUNC_XOR(triples[14].a, x[17].get_mask())), triples[14].c);  // and_55
+                carry_t_17 = cx_17.prepare_and(cy_17_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 16) ? r63 : (FUNC_XOR(FUNC_XOR(triples[15].a, x[16].get_mask()), FUNC_XOR(triples[14].a, x[17].get_mask()))), triples[14].c);  // and_55
                 break;
             case 15:
                 carry_t_17.complete_and();
                 carry_17 = carry_t_17 ^ carry_18;  // carry[17]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 16)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[16] ^ y[16] ^ carry_17;
+                    break;
+                }
                 cx_16 = carry_17 ^ x[16];  // cx[16]
                 cy_16 = carry_17 ^ y[16];  // cy[16]
                 cy_16_p = cy_16.zero_add(triples[15].b);  // cy[16]', mask=b15
                 // and_59: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=((a16-f(x[15]))-(a15-f(x[16])))
-                carry_t_16 = cx_16.prepare_and(cy_16_p, FUNC_XOR(FUNC_XOR(triples[16].a, x[15].get_mask()), FUNC_XOR(triples[15].a, x[16].get_mask())), triples[15].c);  // and_59
+                carry_t_16 = cx_16.prepare_and(cy_16_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 15) ? r63 : (FUNC_XOR(FUNC_XOR(triples[16].a, x[15].get_mask()), FUNC_XOR(triples[15].a, x[16].get_mask()))), triples[15].c);  // and_59
                 break;
             case 16:
                 carry_t_16.complete_and();
                 carry_16 = carry_t_16 ^ carry_17;  // carry[16]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 15)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[15] ^ y[15] ^ carry_16;
+                    break;
+                }
                 cx_15 = carry_16 ^ x[15];  // cx[15]
                 cy_15 = carry_16 ^ y[15];  // cy[15]
                 cy_15_p = cy_15.zero_add(triples[16].b);  // cy[15]', mask=b16
                 // and_63: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=((a17-f(x[14]))-(a16-f(x[15])))
-                carry_t_15 = cx_15.prepare_and(cy_15_p, FUNC_XOR(FUNC_XOR(triples[17].a, x[14].get_mask()), FUNC_XOR(triples[16].a, x[15].get_mask())), triples[16].c);  // and_63
+                carry_t_15 = cx_15.prepare_and(cy_15_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 14) ? r63 : (FUNC_XOR(FUNC_XOR(triples[17].a, x[14].get_mask()), FUNC_XOR(triples[16].a, x[15].get_mask()))), triples[16].c);  // and_63
                 break;
             case 17:
                 carry_t_15.complete_and();
                 carry_15 = carry_t_15 ^ carry_16;  // carry[15]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 14)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[14] ^ y[14] ^ carry_15;
+                    break;
+                }
                 cx_14 = carry_15 ^ x[14];  // cx[14]
                 cy_14 = carry_15 ^ y[14];  // cy[14]
                 cy_14_p = cy_14.zero_add(triples[17].b);  // cy[14]', mask=b17
                 // and_67: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=((a18-f(x[13]))-(a17-f(x[14])))
-                carry_t_14 = cx_14.prepare_and(cy_14_p, FUNC_XOR(FUNC_XOR(triples[18].a, x[13].get_mask()), FUNC_XOR(triples[17].a, x[14].get_mask())), triples[17].c);  // and_67
+                carry_t_14 = cx_14.prepare_and(cy_14_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 13) ? r63 : (FUNC_XOR(FUNC_XOR(triples[18].a, x[13].get_mask()), FUNC_XOR(triples[17].a, x[14].get_mask()))), triples[17].c);  // and_67
                 break;
             case 18:
                 carry_t_14.complete_and();
                 carry_14 = carry_t_14 ^ carry_15;  // carry[14]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 13)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[13] ^ y[13] ^ carry_14;
+                    break;
+                }
                 cx_13 = carry_14 ^ x[13];  // cx[13]
                 cy_13 = carry_14 ^ y[13];  // cy[13]
                 cy_13_p = cy_13.zero_add(triples[18].b);  // cy[13]', mask=b18
                 // and_71: a18=triples[18].a, b18=triples[18].b, c18=triples[18].c, output mask=((a19-f(x[12]))-(a18-f(x[13])))
-                carry_t_13 = cx_13.prepare_and(cy_13_p, FUNC_XOR(FUNC_XOR(triples[19].a, x[12].get_mask()), FUNC_XOR(triples[18].a, x[13].get_mask())), triples[18].c);  // and_71
+                carry_t_13 = cx_13.prepare_and(cy_13_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 12) ? r63 : (FUNC_XOR(FUNC_XOR(triples[19].a, x[12].get_mask()), FUNC_XOR(triples[18].a, x[13].get_mask()))), triples[18].c);  // and_71
                 break;
             case 19:
                 carry_t_13.complete_and();
                 carry_13 = carry_t_13 ^ carry_14;  // carry[13]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 12)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[12] ^ y[12] ^ carry_13;
+                    break;
+                }
                 cx_12 = carry_13 ^ x[12];  // cx[12]
                 cy_12 = carry_13 ^ y[12];  // cy[12]
                 cy_12_p = cy_12.zero_add(triples[19].b);  // cy[12]', mask=b19
                 // and_75: a19=triples[19].a, b19=triples[19].b, c19=triples[19].c, output mask=((a20-f(x[11]))-(a19-f(x[12])))
-                carry_t_12 = cx_12.prepare_and(cy_12_p, FUNC_XOR(FUNC_XOR(triples[20].a, x[11].get_mask()), FUNC_XOR(triples[19].a, x[12].get_mask())), triples[19].c);  // and_75
+                carry_t_12 = cx_12.prepare_and(cy_12_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 11) ? r63 : (FUNC_XOR(FUNC_XOR(triples[20].a, x[11].get_mask()), FUNC_XOR(triples[19].a, x[12].get_mask()))), triples[19].c);  // and_75
                 break;
             case 20:
                 carry_t_12.complete_and();
                 carry_12 = carry_t_12 ^ carry_13;  // carry[12]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 11)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[11] ^ y[11] ^ carry_12;
+                    break;
+                }
                 cx_11 = carry_12 ^ x[11];  // cx[11]
                 cy_11 = carry_12 ^ y[11];  // cy[11]
                 cy_11_p = cy_11.zero_add(triples[20].b);  // cy[11]', mask=b20
                 // and_79: a20=triples[20].a, b20=triples[20].b, c20=triples[20].c, output mask=((a21-f(x[10]))-(a20-f(x[11])))
-                carry_t_11 = cx_11.prepare_and(cy_11_p, FUNC_XOR(FUNC_XOR(triples[21].a, x[10].get_mask()), FUNC_XOR(triples[20].a, x[11].get_mask())), triples[20].c);  // and_79
+                carry_t_11 = cx_11.prepare_and(cy_11_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 10) ? r63 : (FUNC_XOR(FUNC_XOR(triples[21].a, x[10].get_mask()), FUNC_XOR(triples[20].a, x[11].get_mask()))), triples[20].c);  // and_79
                 break;
             case 21:
                 carry_t_11.complete_and();
                 carry_11 = carry_t_11 ^ carry_12;  // carry[11]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 10)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[10] ^ y[10] ^ carry_11;
+                    break;
+                }
                 cx_10 = carry_11 ^ x[10];  // cx[10]
                 cy_10 = carry_11 ^ y[10];  // cy[10]
                 cy_10_p = cy_10.zero_add(triples[21].b);  // cy[10]', mask=b21
                 // and_83: a21=triples[21].a, b21=triples[21].b, c21=triples[21].c, output mask=((a22-f(x[9]))-(a21-f(x[10])))
-                carry_t_10 = cx_10.prepare_and(cy_10_p, FUNC_XOR(FUNC_XOR(triples[22].a, x[9].get_mask()), FUNC_XOR(triples[21].a, x[10].get_mask())), triples[21].c);  // and_83
+                carry_t_10 = cx_10.prepare_and(cy_10_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 9) ? r63 : (FUNC_XOR(FUNC_XOR(triples[22].a, x[9].get_mask()), FUNC_XOR(triples[21].a, x[10].get_mask()))), triples[21].c);  // and_83
                 break;
             case 22:
                 carry_t_10.complete_and();
                 carry_10 = carry_t_10 ^ carry_11;  // carry[10]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 9)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[9] ^ y[9] ^ carry_10;
+                    break;
+                }
                 cx_9 = carry_10 ^ x[9];  // cx[9]
                 cy_9 = carry_10 ^ y[9];  // cy[9]
                 cy_9_p = cy_9.zero_add(triples[22].b);  // cy[9]', mask=b22
                 // and_87: a22=triples[22].a, b22=triples[22].b, c22=triples[22].c, output mask=((a23-f(x[8]))-(a22-f(x[9])))
-                carry_t_9 = cx_9.prepare_and(cy_9_p, FUNC_XOR(FUNC_XOR(triples[23].a, x[8].get_mask()), FUNC_XOR(triples[22].a, x[9].get_mask())), triples[22].c);  // and_87
+                carry_t_9 = cx_9.prepare_and(cy_9_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 8) ? r63 : (FUNC_XOR(FUNC_XOR(triples[23].a, x[8].get_mask()), FUNC_XOR(triples[22].a, x[9].get_mask()))), triples[22].c);  // and_87
                 break;
             case 23:
                 carry_t_9.complete_and();
                 carry_9 = carry_t_9 ^ carry_10;  // carry[9]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 8)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[8] ^ y[8] ^ carry_9;
+                    break;
+                }
                 cx_8 = carry_9 ^ x[8];  // cx[8]
                 cy_8 = carry_9 ^ y[8];  // cy[8]
                 cy_8_p = cy_8.zero_add(triples[23].b);  // cy[8]', mask=b23
                 // and_91: a23=triples[23].a, b23=triples[23].b, c23=triples[23].c, output mask=((a24-f(x[7]))-(a23-f(x[8])))
-                carry_t_8 = cx_8.prepare_and(cy_8_p, FUNC_XOR(FUNC_XOR(triples[24].a, x[7].get_mask()), FUNC_XOR(triples[23].a, x[8].get_mask())), triples[23].c);  // and_91
+                carry_t_8 = cx_8.prepare_and(cy_8_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 7) ? r63 : (FUNC_XOR(FUNC_XOR(triples[24].a, x[7].get_mask()), FUNC_XOR(triples[23].a, x[8].get_mask()))), triples[23].c);  // and_91
                 break;
             case 24:
                 carry_t_8.complete_and();
                 carry_8 = carry_t_8 ^ carry_9;  // carry[8]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 7)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[7] ^ y[7] ^ carry_8;
+                    break;
+                }
                 cx_7 = carry_8 ^ x[7];  // cx[7]
                 cy_7 = carry_8 ^ y[7];  // cy[7]
                 cy_7_p = cy_7.zero_add(triples[24].b);  // cy[7]', mask=b24
                 // and_95: a24=triples[24].a, b24=triples[24].b, c24=triples[24].c, output mask=((a25-f(x[6]))-(a24-f(x[7])))
-                carry_t_7 = cx_7.prepare_and(cy_7_p, FUNC_XOR(FUNC_XOR(triples[25].a, x[6].get_mask()), FUNC_XOR(triples[24].a, x[7].get_mask())), triples[24].c);  // and_95
+                carry_t_7 = cx_7.prepare_and(cy_7_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 6) ? r63 : (FUNC_XOR(FUNC_XOR(triples[25].a, x[6].get_mask()), FUNC_XOR(triples[24].a, x[7].get_mask()))), triples[24].c);  // and_95
                 break;
             case 25:
                 carry_t_7.complete_and();
                 carry_7 = carry_t_7 ^ carry_8;  // carry[7]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 6)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[6] ^ y[6] ^ carry_7;
+                    break;
+                }
                 cx_6 = carry_7 ^ x[6];  // cx[6]
                 cy_6 = carry_7 ^ y[6];  // cy[6]
                 cy_6_p = cy_6.zero_add(triples[25].b);  // cy[6]', mask=b25
                 // and_99: a25=triples[25].a, b25=triples[25].b, c25=triples[25].c, output mask=((a26-f(x[5]))-(a25-f(x[6])))
-                carry_t_6 = cx_6.prepare_and(cy_6_p, FUNC_XOR(FUNC_XOR(triples[26].a, x[5].get_mask()), FUNC_XOR(triples[25].a, x[6].get_mask())), triples[25].c);  // and_99
+                carry_t_6 = cx_6.prepare_and(cy_6_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 5) ? r63 : (FUNC_XOR(FUNC_XOR(triples[26].a, x[5].get_mask()), FUNC_XOR(triples[25].a, x[6].get_mask()))), triples[25].c);  // and_99
                 break;
             case 26:
                 carry_t_6.complete_and();
                 carry_6 = carry_t_6 ^ carry_7;  // carry[6]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 5)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[5] ^ y[5] ^ carry_6;
+                    break;
+                }
                 cx_5 = carry_6 ^ x[5];  // cx[5]
                 cy_5 = carry_6 ^ y[5];  // cy[5]
                 cy_5_p = cy_5.zero_add(triples[26].b);  // cy[5]', mask=b26
                 // and_103: a26=triples[26].a, b26=triples[26].b, c26=triples[26].c, output mask=((a27-f(x[4]))-(a26-f(x[5])))
-                carry_t_5 = cx_5.prepare_and(cy_5_p, FUNC_XOR(FUNC_XOR(triples[27].a, x[4].get_mask()), FUNC_XOR(triples[26].a, x[5].get_mask())), triples[26].c);  // and_103
+                carry_t_5 = cx_5.prepare_and(cy_5_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 4) ? r63 : (FUNC_XOR(FUNC_XOR(triples[27].a, x[4].get_mask()), FUNC_XOR(triples[26].a, x[5].get_mask()))), triples[26].c);  // and_103
                 break;
             case 27:
                 carry_t_5.complete_and();
                 carry_5 = carry_t_5 ^ carry_6;  // carry[5]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 4)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[4] ^ y[4] ^ carry_5;
+                    break;
+                }
                 cx_4 = carry_5 ^ x[4];  // cx[4]
                 cy_4 = carry_5 ^ y[4];  // cy[4]
                 cy_4_p = cy_4.zero_add(triples[27].b);  // cy[4]', mask=b27
                 // and_107: a27=triples[27].a, b27=triples[27].b, c27=triples[27].c, output mask=((a28-f(x[3]))-(a27-f(x[4])))
-                carry_t_4 = cx_4.prepare_and(cy_4_p, FUNC_XOR(FUNC_XOR(triples[28].a, x[3].get_mask()), FUNC_XOR(triples[27].a, x[4].get_mask())), triples[27].c);  // and_107
+                carry_t_4 = cx_4.prepare_and(cy_4_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 3) ? r63 : (FUNC_XOR(FUNC_XOR(triples[28].a, x[3].get_mask()), FUNC_XOR(triples[27].a, x[4].get_mask()))), triples[27].c);  // and_107
                 break;
             case 28:
                 carry_t_4.complete_and();
                 carry_4 = carry_t_4 ^ carry_5;  // carry[4]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 3)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[3] ^ y[3] ^ carry_4;
+                    break;
+                }
                 cx_3 = carry_4 ^ x[3];  // cx[3]
                 cy_3 = carry_4 ^ y[3];  // cy[3]
                 cy_3_p = cy_3.zero_add(triples[28].b);  // cy[3]', mask=b28
                 // and_111: a28=triples[28].a, b28=triples[28].b, c28=triples[28].c, output mask=((a29-f(x[2]))-(a28-f(x[3])))
-                carry_t_3 = cx_3.prepare_and(cy_3_p, FUNC_XOR(FUNC_XOR(triples[29].a, x[2].get_mask()), FUNC_XOR(triples[28].a, x[3].get_mask())), triples[28].c);  // and_111
+                carry_t_3 = cx_3.prepare_and(cy_3_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 2) ? r63 : (FUNC_XOR(FUNC_XOR(triples[29].a, x[2].get_mask()), FUNC_XOR(triples[28].a, x[3].get_mask()))), triples[28].c);  // and_111
                 break;
             case 29:
                 carry_t_3.complete_and();
                 carry_3 = carry_t_3 ^ carry_4;  // carry[3]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 2)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[2] ^ y[2] ^ carry_3;
+                    break;
+                }
                 cx_2 = carry_3 ^ x[2];  // cx[2]
                 cy_2 = carry_3 ^ y[2];  // cy[2]
                 cy_2_p = cy_2.zero_add(triples[29].b);  // cy[2]', mask=b29
                 // and_115: a29=triples[29].a, b29=triples[29].b, c29=triples[29].c, output mask=((a30-f(x[1]))-(a29-f(x[2])))
-                carry_t_2 = cx_2.prepare_and(cy_2_p, FUNC_XOR(FUNC_XOR(triples[30].a, x[1].get_mask()), FUNC_XOR(triples[29].a, x[2].get_mask())), triples[29].c);  // and_115
+                carry_t_2 = cx_2.prepare_and(cy_2_p, (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 1) ? r63 : (FUNC_XOR(FUNC_XOR(triples[30].a, x[1].get_mask()), FUNC_XOR(triples[29].a, x[2].get_mask()))), triples[29].c);  // and_115
                 break;
             case 30:
                 carry_t_2.complete_and();
                 carry_2 = carry_t_2 ^ carry_3;  // carry[2]
+                if (CUT_FRAC_SUPPORTED && g_cut_frac_active && FRACTIONAL == 1)
+                {
+                    // CUT: boundary-slice sum bit is the true MSB; the slices above are substituted
+                    msb = x[1] ^ y[1] ^ carry_2;
+                    break;
+                }
                 cx_1 = carry_2 ^ x[1];  // cx[1]
                 cy_1 = carry_2 ^ y[1];  // cy[1]
                 cy_1_p = cy_1.zero_add(triples[30].b);  // cy[1]', mask=b30

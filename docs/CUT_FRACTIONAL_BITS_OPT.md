@@ -176,3 +176,39 @@ at FRACTIONAL=5, more at larger FRACTIONAL.
 
 Validated at FRACTIONAL=5 (func53 8/8 each, plus LeNet): plain PPA +CUT (LeNet 90%), plain PPA4 +CUT,
 bake PPA +CUT, bake PPA4 +CUT, bake RCA +CUT, and the reshare-sim PPA4 +CUT regression.
+
+
+## All nine circuits (2026-07)
+
+The cut is now implemented in every msb circuit, so `CUT_FRAC_ELIGIBLE` no longer depends on which
+optimization family is active - only on the value-level precondition (`TRUNC_DELAYED == 0`, so the
+adder input is already truncated and its top FRACTIONAL bits are sign extension) and the width.
+
+| circuit | plain | reshared | a_known (bake) |
+|---------|-------|----------|----------------|
+| ripple-carry      | early stop + skipped triples | early stop + skipped triples | early stop + skipped triples |
+| prefix            | tap moved | identity substitution + skipped reshares | tap moved |
+| four-way prefix   | tap moved | identity substitution + skipped reshares | tap moved |
+
+**Ripple-carry (all three flavours): full cut.** The carry chain stops after case
+`31 - FRACTIONAL`, the sign is read at the boundary slice (`x[F] ^ y[F] ^ carry_{F+1}`), the last
+executed gate's mask assign is redirected to the spare random so it does not reference a triple slot
+beyond the reduced allocation, and beaver retrieval is made conditional to match - INIT counts per
+CALLED gate, so retrieval that did not shrink in step would overrun the allocation. Measured for
+k = 32: FRACTIONAL 5 -> 27 of 32 rounds and 26 of 31 triples (16 percent saved); FRACTIONAL 8 -> 24
+rounds, 23 triples (26 percent); FRACTIONAL 12 -> 20 rounds, 19 triples (39 percent).
+
+**Prefix and four-way prefix.** The reshared flavours already carried the full identity substitution
+(skipping gates and reshares). The plain and a_known flavours now have the moved output tap, which is
+the correctness-critical half, and are correct under the cut - but they still EVALUATE the
+substituted slices on constants, so their gate-level saving is still to come. That step is a
+per-circuit re-derivation, not a port: substituting `g_i := 0` loses the mask the gate was designed
+to output, so every consumer needs compensation (this is why the reshared prefix circuit has ~157 cut
+sites and why its boolean-triple retrieval stays unconditional - only reshares are saved there).
+
+Validated at k = 32, func53: all nine circuits 8/8 at FRACTIONAL 5; FRACTIONAL 8 (plain ripple-carry,
+plain prefix) 8/8; FRACTIONAL 12 (bake four-way prefix) 8/8; LeNet 90 percent with the plain prefix
+circuit and the cut on. FRACTIONAL 12 with the plain ripple-carry circuit reports 7/8 (Conv+ReLU) BOTH
+with the cut on and with it off - a pre-existing fixed-point precision limit at that setting (2 x
+FRACTIONAL = 24 fractional bits leaves too little integer headroom for that test's accumulation in 32
+bits), not a cut regression.
