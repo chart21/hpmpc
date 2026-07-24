@@ -580,6 +580,41 @@ class ABY2_PRE_Share
         return ABY2_PRE_Share();
     }
 
+    // Dot-pending public-times-secret products (see the online counterparts): their online mask is
+    // identically ZERO, so PRE knows it exactly - unlike the standard variant above, whose online
+    // mask is the value-dependent a_pub & l_b (which is why that one returns an unset share).
+    template <typename func_mul, typename func_add>
+    ABY2_PRE_Share mult_a_known_to_evaluators_dot(const ABY2_PRE_Share b,
+                                                  func_mul MULT,
+                                                  func_add ADD) const
+    {
+        return ABY2_PRE_Share(SET_ALL_ZERO());
+    }
+
+    template <typename func_mul>
+    ABY2_PRE_Share mult_a_known_to_evaluators_dot_pending(const ABY2_PRE_Share b,
+                                                          func_mul MULT) const
+    {
+        return ABY2_PRE_Share(SET_ALL_ZERO());
+    }
+
+    template <typename func_mul, typename func_add>
+    ABY2_PRE_Share mult_a_known_to_evaluators_dot(const ABY2_PRE_Share b,
+                                                  const Datatype assign,
+                                                  func_mul MULT,
+                                                  func_add ADD) const
+    {
+        return ABY2_PRE_Share(assign);
+    }
+
+    template <typename func_mul>
+    ABY2_PRE_Share mult_a_known_to_evaluators_dot_pending(const ABY2_PRE_Share b,
+                                                          const Datatype assign,
+                                                          func_mul MULT) const
+    {
+        return ABY2_PRE_Share(assign);
+    }
+
     template <typename func_add, typename func_sub>
         void prepare_remask(func_add ADD, func_sub SUB)
         {

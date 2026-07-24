@@ -97,15 +97,7 @@ has the same structure and would need the same treatment — not yet done, not e
   counts ([c], S1 and the early boolean addition stay full-width; INIT counts called gates per phase).
   The identity-substitution gate-skipping port (as done for the reshared family) is follow-up
   efficiency work.
-- **PPA4 a_ab: BROKEN under the bake** (with or without the cut; 3/8 either way). Diagnosed:
-  (1) the generated file had 83 use-before-assignment orderings in round 0 (statements consuming
-  default-constructed shares) — FIXED by a dependency-preserving topological reorder; (2) the
-  remaining blocker is structural: the circuit's 201 `mult_a_known_to_evaluators` products are never
-  re-masked, so their masks are VALUE-dependent (`x_pub & l_y`), which PRE cannot track (its a_known
-  mult returns an empty share) — all downstream material generated from those recorded masks
-  mismatches LIVE. The working PPA a_ab pairs each of its 31 a_known products with an immediate
-  `prepare_remask` to a PRE-known assign; the PPA4 file has ZERO remasks. Fix = regenerate the
-  circuit with the remask discipline (generator-level). RCA and PPA remain the supported bake adders.
+- **PPA4 a_ab: FIXED** (was 3/8, now 8/8 + LeNet 90%). See "PPA4 under the bake" below.
 
 ## A_KNOWN=0 baseline fixes (needed before the bake could run there)
 
@@ -133,3 +125,49 @@ has the same structure and would need the same treatment — not yet done, not e
 - `COMPUTE_ARGMAX=1` — see the MaxPool section.
 - The plain boolean AND path (`CaseAND`, basic-primitives test) fails at baseline under every
   configuration — pre-existing, independent of the bake, unused by the conv/pool suite and LeNet.
+
+
+## PPA4 under the bake — what was wrong and how it was fixed
+
+`ppa_msb_4way_and_a_ab.hpp` is only reachable via `A_KNOWN_TO_EVALUATORS_OPT=1`, which requires
+`A2B_ONLINE_OPT=1` — a combination that never worked before the bake, so this generated circuit had
+never actually been executed. It carried three independent defects, all now repaired (the repairs are
+scripted and re-verifiable; see the checkers described below).
+
+**1. Use-before-assignment ordering (42 + 83 sites).** Statements consumed wires before the
+statements that computed them, so those gates ran on default-constructed shares. Repaired by a
+dependency-preserving topological reorder inside each round (flow/anti/output edges, with the anti
+edges of exactly the pairs being repaired suppressed so the graph stays acyclic; stable order
+otherwise). Originally applied to k=32 only; now applied to k=8/16 as well — which also corrected
+their operand classification for defect 2.
+
+**2. Representation mismatch (212 sites) — the reason the msb was silently wrong.** Two share forms
+coexist in these circuits:
+
+  - *standard*: `m` identical on both parties, `v = m (+) l_0 (+) l_1`;
+  - *dot-pending*: `m` additive between the parties (`v = m_0 (+) m_1`), `l_i` being the mask the
+    finished wire will carry. `prepare_dot*/prepare_and*` produce this form; a chain of them is
+    finalized by one `mask_and_send_dot_without_remask` + `complete_and`.
+
+The generator replaced triple-based ANDs (dot-pending) with `mult_a_known_to_evaluators`, which
+returns a **standard** share — a drop-in that silently changed representation. XORing a standard
+share into a pending chain is wrong twice over: its common `m` cancels between the parties at
+completion (`X (+) X == 0`, so the term vanishes entirely), and its value-dependent mask
+(`a_pub & l_b`) pollutes the chain's output mask, which PRE cannot predict (PRE's a-known mult
+returns an *unset* share). Fixed by emitting those products directly in pending form via new
+primitives `mult_a_known_to_evaluators_dot` (standard operand: P0 carries the public part, each party
+its own mask part — mirroring how `prepare_dot` carries `mx*my` on P0 only) and
+`..._dot_pending` (already-pending operand: scale the pending halves only), both contributing a
+**zero** mask. Products that only serve as public multipliers keep the original call.
+
+**3. Chain output masks (29 sites).** Each operand of a `prepare_dotN_and_assign` must carry exactly
+the corresponding beaver-tuple field; the generator instead left placeholder randoms (or, for chains
+built purely from local products, no mask at all). Since a pending term's mask does not affect the
+value it contributes, the correction is free: assign-carrying overloads of the two new primitives let
+one designated chain member carry `required (+) current`, so the finished wire has the mask its
+consumer requires.
+
+Two independent checkers were used and are worth re-running after any regeneration: a representation
+classifier (counts mixed standard/pending XORs — must be 0) and a symbolic mask checker (expands
+nested `FUNC_XOR` and compares each dot operand's accumulated mask against the tuple field it is used
+with — must be 0). Both were validated against `ppa_msb_4way_and_ab.hpp`, which reports 0 on each.

@@ -85,6 +85,63 @@ class ABY2_ONLINE_Share
         return ABY2_ONLINE_Share(MULT(m, b.m), MULT(m, b.l));
     }
 
+    // ---- public-times-secret products in DOT-PENDING form -------------------------------------
+    // mult_a_known_to_evaluators above returns a STANDARD share (m identical on both parties,
+    // v = m (+) l_0 (+) l_1). A dot chain that is finalized by mask_and_send_dot_without_remask +
+    // complete_and instead needs PENDING shares, whose invariant is m_0 (+) m_1 == v with l_i the
+    // intended OUTPUT mask. XORing a standard share into such a chain is wrong twice over: its
+    // common m cancels between the parties (X (+) X == 0, the term silently vanishes) and its
+    // value-dependent mask (a_pub & l_b) pollutes the output mask, which PRE cannot predict.
+    // The two helpers below emit the product directly in pending form with a ZERO mask
+    // contribution, mirroring how prepare_dot carries its mx*my term on P0 only.
+
+    // b is STANDARD (m common): P0 carries the public part, each party carries its own mask part.
+    template <typename func_mul, typename func_add>
+    ABY2_ONLINE_Share mult_a_known_to_evaluators_dot(const ABY2_ONLINE_Share b,
+                                                     func_mul MULT,
+                                                     func_add ADD) const
+    {
+#if PARTY == 0
+        return ABY2_ONLINE_Share(ADD(MULT(m, b.m), MULT(m, b.l)), SET_ALL_ZERO());
+#else
+        return ABY2_ONLINE_Share(MULT(m, b.l), SET_ALL_ZERO());
+#endif
+    }
+
+    // b is already PENDING (its m halves combine to the value; its l is the chain mask and must NOT
+    // be scaled in): scale the pending halves only.
+    template <typename func_mul>
+    ABY2_ONLINE_Share mult_a_known_to_evaluators_dot_pending(const ABY2_ONLINE_Share b,
+                                                             func_mul MULT) const
+    {
+        return ABY2_ONLINE_Share(MULT(m, b.m), SET_ALL_ZERO());
+    }
+
+    // Same two helpers, but carrying an explicit output-mask share. A pending term's mask does not
+    // affect the value it contributes (the chain reconstructs as m_0 (+) m_1), so any chain member
+    // may carry the mask the finished wire needs - which is how a chain whose members are all local
+    // products still ends up with the beaver-tuple field its consumer requires.
+    template <typename func_mul, typename func_add>
+    ABY2_ONLINE_Share mult_a_known_to_evaluators_dot(const ABY2_ONLINE_Share b,
+                                                     const Datatype assign,
+                                                     func_mul MULT,
+                                                     func_add ADD) const
+    {
+#if PARTY == 0
+        return ABY2_ONLINE_Share(ADD(MULT(m, b.m), MULT(m, b.l)), assign);
+#else
+        return ABY2_ONLINE_Share(MULT(m, b.l), assign);
+#endif
+    }
+
+    template <typename func_mul>
+    ABY2_ONLINE_Share mult_a_known_to_evaluators_dot_pending(const ABY2_ONLINE_Share b,
+                                                             const Datatype assign,
+                                                             func_mul MULT) const
+    {
+        return ABY2_ONLINE_Share(MULT(m, b.m), assign);
+    }
+
     template <typename func_add, typename func_sub>
         void prepare_remask(func_add ADD, func_sub SUB)
         {

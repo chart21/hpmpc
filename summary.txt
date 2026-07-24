@@ -210,14 +210,10 @@ UPDATE (2026-07-18): adder matrix, ResNet50, and the FUSE_CONV_BN investigation
    |--------------------|--------|------------|-------------------|
    | ripple-carry       | 8 of 8 | 8 of 8     | 8 of 8            |
    | parallel-prefix    | 8 of 8 | 8 of 8     | 8 of 8            |
-   | four-way prefix    | 8 of 8 | 3 of 8 (*) | 8 of 8            |
+   | four-way prefix    | 8 of 8 | 8 of 8 (*) | 8 of 8            |
 
-   (*) NEWLY DISCOVERED, PRE-EXISTING: the four-way parallel-prefix adder is
-   broken under the arithmetic-to-boolean bake WITH OR WITHOUT the cut (every
-   sign-bit-consuming test fails; the earlier support matrix had only ever
-   exercised the parallel-prefix adder under the bake). The cut change is not
-   the cause; the interaction of the four-way adder's triple streams with the
-   bake needs its own investigation. The other eight cells all pass.
+   (*) The four-way prefix adder under the bake was broken (3 of 8) and has now
+   been FIXED - see section 8. All nine cells pass.
 
 6. RESNET50 ON CIFAR-10 (ten images; plaintext model accuracy 74.48 percent)
 
@@ -327,3 +323,56 @@ b) OPEN - REQUIRES REGENERATING THE CIRCUIT: the four-way "a known to
    A reusable stream-parity diagnostic was added along the way (compile-time
    gated dumps of the tuple/triple stream counters at the end of each phase,
    macro A2B_STREAM_DBG in protocol_executer.hpp).
+
+================================================================================
+8. FOUR-WAY PREFIX ADDER UNDER THE BAKE - FIXED (2026-07-18)
+================================================================================
+
+The four-way parallel-prefix "a known to evaluators" circuit is reachable ONLY
+through the arithmetic-to-boolean bake, a combination that never worked before
+this work - so that generated circuit had in effect never been executed. It
+contained three independent defects. All are now repaired; the configuration
+passes 8 of 8 unit tests and reaches 90 percent LeNet accuracy (equal to the
+baseline), for weights known and unknown during preprocessing, and for
+A_KNOWN=0.
+
+a) ORDERING (125 sites). Statements used wires before the statements that
+   computed them, so those gates operated on default-constructed shares.
+   Repaired by a dependency-preserving topological reorder within each round.
+   (Eighty-three of these were fixed earlier for the thirty-two-bit
+   specialization; the remaining forty-two, in the eight- and sixteen-bit
+   specializations, are fixed now - which also corrected their operand
+   classification for defect b.)
+
+b) SHARE-REPRESENTATION MISMATCH (212 sites) - the reason the sign bit was
+   silently wrong. These circuits use two share forms: the STANDARD form, where
+   the public part is identical on both parties, and the DOT-PENDING form, where
+   the public parts are additive between the parties and combine only when the
+   chain is finalized. The circuit generator replaced triple-based AND gates
+   (which produce the pending form) with the local public-times-secret
+   multiply, which produces the STANDARD form - a drop-in substitution that
+   silently changed representation. Mixing the two is wrong twice over: the
+   standard share's common part CANCELS between the parties when the chain is
+   finalized, so the term disappears from the result entirely, and its
+   value-dependent mask pollutes the chain's output mask, which the
+   preprocessing phase cannot predict. Fixed with two new primitives that emit
+   the product directly in pending form with a zero mask contribution, mirroring
+   how the ordinary dot product carries its public-times-public term on party
+   zero only. Products that merely serve as public multipliers keep the original
+   call.
+
+c) CHAIN OUTPUT MASKS (29 sites). Every operand of a three- or four-input dot
+   product must carry exactly the corresponding beaver-tuple field as its mask;
+   the generator left placeholder randoms instead (or, for chains built purely
+   from local products, no mask at all). Because a pending term's mask does not
+   affect the value it contributes, the correction costs nothing: assign-carrying
+   variants of the new primitives let one chain member carry the mask the
+   finished wire needs.
+
+Two independent static checkers were written and validated against the
+known-good plain four-way circuit (both report zero findings on it): a
+representation classifier that counts mixed standard/pending combinations, and
+a symbolic mask checker that expands nested exclusive-or expressions and
+compares each dot operand's accumulated mask against the tuple field it is used
+with. Both report zero findings on the repaired circuit for all three
+specializations. They should be re-run if the circuit is ever regenerated.

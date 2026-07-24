@@ -152,6 +152,31 @@ class ABY2_init
         return ABY2_init();
     }
 
+    // Dot-pending variants: local, no communication (see the online counterparts).
+    template <typename func_mul, typename func_add>
+    ABY2_init mult_a_known_to_evaluators_dot(const ABY2_init b, func_mul MULT, func_add ADD) const
+    {
+        return ABY2_init();
+    }
+
+    template <typename func_mul>
+    ABY2_init mult_a_known_to_evaluators_dot_pending(const ABY2_init b, func_mul MULT) const
+    {
+        return ABY2_init();
+    }
+
+    template <typename func_mul, typename func_add>
+    ABY2_init mult_a_known_to_evaluators_dot(const ABY2_init b, const Datatype assign, func_mul MULT, func_add ADD) const
+    {
+        return ABY2_init();
+    }
+
+    template <typename func_mul>
+    ABY2_init mult_a_known_to_evaluators_dot_pending(const ABY2_init b, const Datatype assign, func_mul MULT) const
+    {
+        return ABY2_init();
+    }
+
     template <typename func_add, typename func_sub>
         void prepare_remask(func_add ADD, func_sub SUB)
         {
