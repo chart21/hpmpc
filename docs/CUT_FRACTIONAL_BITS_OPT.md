@@ -212,3 +212,36 @@ circuit and the cut on. FRACTIONAL 12 with the plain ripple-carry circuit report
 with the cut on and with it off - a pre-existing fixed-point precision limit at that setting (2 x
 FRACTIONAL = 24 fractional bits leaves too little integer headroom for that test's accumulation in 32
 bits), not a cut regression.
+
+
+## Measured cost of the substituted slices (does "evaluated on constants" include communication?)
+
+Yes. A beaver AND gate communicates regardless of its inputs: `prepare_and(b, assign, triple_c)`
+lowers to `prepare_mult(...)`, which ends in `send_to_live(PNEXT, c.m)`, and `complete_and()` does
+the matching receive. The parties cannot drop that exchange unless BOTH know to drop it - which is
+exactly what the identity substitution plus consumer compensation encodes. So in the prefix circuits
+that only have the moved tap, the substituted slices still consume their beaver triples AND still
+perform their online send/receive.
+
+Measured at FRACTIONAL = 5, thirty-two bit, TRUNC_DELAYED = 0, plain (non-reshared, non-a-known)
+circuits. Boolean triples from the preprocessing requirement print (func53); online megabytes from
+the aggregated per-layer network statistics (LeNet, one image, party 0).
+
+| circuit | boolean triples off -> on | online MB sent off -> on |
+|---------|---------------------------|--------------------------|
+| ripple-carry    | 8928 -> 7488  (-16.1%) | 0.1099 -> 0.1018  (-7.4%) |
+| prefix          | 24768 -> 24768 (unchanged) | 0.1548 -> 0.1507  (-2.6%) |
+| four-way prefix | 4320 -> 4320  (unchanged) | - |
+
+Reading the table: the ripple-carry cut removes the gates themselves, so both the preprocessing
+material and the online traffic fall (and, more importantly on a high-latency link, five of
+thirty-two communication ROUNDS disappear at FRACTIONAL = 5). The prefix circuits skip no gates yet -
+their triple count is bit-for-bit identical - and the small online drop they do show comes only from
+the A2B input sharing, where the vacant slices are never masked or sent. Closing that gap is the
+gate-skipping work described above.
+
+Note that `MB SENT PRE` barely moves in either case (1.63115 -> 1.63117 for the ripple-carry cut):
+under `ROT_PREPROCESSING_OPT` boolean triples are generated very cheaply - the per-type breakdown
+shows the boolean material at roughly 6e-5 MB against about 1.0 MB for the arithmetic triples - so
+the preprocessing byte total is dominated by other material and is not a useful indicator of this
+optimization. Count triples and rounds instead.
