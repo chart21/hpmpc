@@ -299,7 +299,61 @@ saving 15 correlated values for 7. That is not implemented - the gate's tuple is
 original arity, so a reduced gate needs a spare lower-arity tuple, which means widening the beaver3
 pool and retrieving the extras conditionally. Today a mixed gate simply runs at full arity.
 
-`ppa_msb_unsafe_and_a_ab.hpp` is still NOT covered. It takes its leaves
+### Update: the four-way a_ab circuit skips its b-product gates
+
+`ppa_msb_4way_and_a_ab.hpp` is covered, and it is the best case of the three. In the a_ab
+decomposition a wire is `a ^ b` with `a` known to the evaluators, so products expand into a-only
+terms, mixed `a*b` terms - both local - and b-only products, and ONLY the b-products consume a beaver
+tuple. The cut prepares a vacant slice as `a := all-ones, b := 0`, so every b-product touching a
+vacant slice is identically zero and its gate disappears entirely.
+
+Zero-ness is a threshold `z`, the wire being provably zero exactly when `FRACTIONAL >= z`: `b[i]` gives
+`i+1`; `a[i]` and a-only products never die; a product takes the `min` (it dies if either factor dies);
+an XOR takes the `max` (it dies only once both terms die). That is precisely `cut_frac_ppa4_skip(z)`.
+
+| | baseline | with cut | |
+|---|---|---|---|
+| F=5  boolean triples | 9792 | 8352 (-14.7%) | 8/8 |
+| F=5  beaver3         | 4320 | 3744 (-13.3%) | |
+| F=8  boolean triples | 9792 | 7200 (-26.5%) | 8/8 |
+| F=8  beaver3         | 4320 | 3456 (-20.0%) | |
+| F=8  online MB       | 0.005296 | 0.004328 (-18.3%) | |
+
+LeNet over ten images at FRACTIONAL = 5 keeps its 90% baseline with boolean triples
+2214080 -> 1888480, beaver3 976800 -> 846560, and online **0.910 -> 0.7798 MB (-14.3%)** - a far
+bigger online win than the non-a_ab circuits, because here the cut removes whole `mask_and_send`
+chains rather than just tuple consumption.
+
+Two rules make this family safe, and both were learned by breaking it:
+
+1. **Leave the local `mult_a_known` gates running.** Handed a share that is literally `(0, 0)` they
+   return `(0, 0)` in whichever representation they produce, so nothing mixes standard with
+   dot-pending shares.
+2. **Compensate a cut gate's output mask along XOR-only paths.** It is NOT "every chain the gate can
+   reach": a dot gate consumed through a `mult_a_known` gate has its mask replaced by that gate's own
+   output mask, so it never reaches that chain, and compensating there corrupts it. Sharing is heavy
+   (36 of 50 dot outputs have more than one consumer), so a gate genuinely can need compensating in
+   two chains at once; the local `mult_a_known` carriers, which can never be cut, are the safe place
+   to park the mask.
+
+### Still open
+
+**The arity reduction is not implemented.** A four-input dot with one constant operand could fold that
+operand locally with `mult_public` and run as a three-input gate, trading 15 correlated values for 7.
+The reservation side is not the obstacle - `FRACTIONAL` is compile-time and INIT counts per CALLED
+gate, so calling `prepare_dot3` where the circuit used to call `prepare_dot4` already shifts the
+counts by itself; the pools just need sizing from a constexpr and the extra slots retrieving
+conditionally. What is missing is the emission: a reduced gate needs its operands re-`zero_add`ed to
+the substituted tuple's fields, since the existing carriers target the original tuple. Today a mixed
+gate simply runs at full arity.
+
+**`ppa_msb_unsafe_and_a_ab.hpp` is still NOT covered.** Its tree gates are p-products, which are never
+zero (a vacant p is all-ones), so the zero-threshold analysis that works for the four-way a_ab circuit
+finds nothing to cut there - it needs the identity treatment instead, i.e. tracking which operands are
+constant ONE and retargeting the surviving operand. Two attempts failed at 3/8 while correctly
+lowering the triple count (15840 -> 13536), so the savings are reachable; what breaks is the mask
+algebra around its `mult_a_known` + `prepare_remask` leaves, whose wires are dot-pending until
+remasked. It takes its leaves
 from `mult_a_known_to_evaluators` followed by `prepare_remask`/`complete_remask`, so those wires are
 dot-pending rather than standard until remasked; substituting standard-form constants there mixes the
 two share representations and the circuit produces wrong results (3/8, though the triple count does
