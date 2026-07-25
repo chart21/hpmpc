@@ -240,6 +240,37 @@ their triple count is bit-for-bit identical - and the small online drop they do 
 the A2B input sharing, where the vacant slices are never masked or sent. Closing that gap is the
 gate-skipping work described above.
 
+### Update: the plain prefix circuit now skips its gates too
+
+The "unchanged" row for the prefix circuit above is out of date. `ppa_msb_unsafe_and_ab.hpp` now
+rewrites every AND whose operands are constant into a local form, so those gates consume no beaver
+triple and do no online communication:
+
+| FRACTIONAL | boolean triples off -> on | func53 |
+|-----------|----------------------------|--------|
+| 5  | 24768 -> 21312 (-14%) | 8/8 |
+| 8  | 24768 -> 18720 (-24%) | 8/8 |
+| 12 | 24768 -> 15264 (-38%) | 7/8, and 7/8 with the cut OFF as well (precision limit, not the cut) |
+
+LeNet over ten images at FRACTIONAL = 5 keeps its 90% baseline with 5600320 -> 4818880 triples and
+online 1.016 -> 0.9751 MB.
+
+The rewrite works because `zero_add` is local in the online phase: an AND against the all-ones
+constant becomes the other operand retargeted to the gate's designed output mask, costing one
+preprocessing delta instead of a triple and a round. Retargeting is not optional - a bare public
+constant carries mask 0 and would break every consumer expecting the designed mask. Alongside each
+skipped gate, `complete_and()` and the operand `zero_add`s are dropped and beaver retrieval is made
+conditional, because INIT counts per called gate and so allocates one triple fewer; an assign naming
+a skipped slot's mask reads a spare random, as that mask is no longer generated.
+
+The two remaining prefix circuits are NOT yet covered. `ppa_msb_unsafe_and_a_ab.hpp` takes its leaves
+from `mult_a_known_to_evaluators` followed by `prepare_remask`/`complete_remask`, so those wires are
+dot-pending rather than standard until remasked; substituting standard-form constants there mixes the
+two share representations and the circuit produces wrong results (3/8, though the triple count does
+fall 15840 -> 13536). The four-way circuits use `prepare_dot3`/`prepare_dot4`/`prepare_and3`/
+`prepare_and4`, which the rewrite does not handle at all - and a three-input dot with one constant
+operand collapses to a two-input AND needing a boolean triple that was never allocated for it.
+
 Note that `MB SENT PRE` barely moves in either case (1.63115 -> 1.63117 for the ripple-carry cut):
 under `ROT_PREPROCESSING_OPT` boolean triples are generated very cheaply - the per-type breakdown
 shows the boolean material at roughly 6e-5 MB against about 1.0 MB for the arithmetic triples - so
