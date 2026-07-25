@@ -896,10 +896,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
             }
             for (int i = 0; i < Beaver3TupleCount; ++i)
             {
+            static constexpr int b3_skip_th[24] = {99, 4, 99, 7, 99, 10, 99, 13, 99, 16, 99, 19, 99, 22, 99, 26, 99, 29, 99, 99, 10, 99, 99, 99};
+            // CUT: P-gate tuples (skipped in ALL phases incl. INIT counting) are not retrieved
+            if (!(g_cut_frac_active && cut_frac_ppa4_skip(b3_skip_th[i])))
                 beaver3_tuples[i] = retrieveBeaver3Tuple<DATATYPE>();
             }
             for (int i = 0; i < Beaver4TupleCount; ++i)
             {
+            static constexpr int b4_skip_th[13] = {99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 22, 99};
+            if (!(g_cut_frac_active && cut_frac_ppa4_skip(b4_skip_th[i])))
                 beaver4_tuples[i] = retrieveBeaver4Tuple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
@@ -1042,169 +1047,359 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 b_29_p = b[29].zero_add(triples[9].b);  // b[29]', mask=b36
                 b_30_p = b[30].zero_add(beaver3_tuples[18].c);  // b[30]', mask=c37
                 b_31_p = b[31].zero_add(beaver4_tuples[9].d);  // b[31]', mask=d38
-                p_1_p = p_1.zero_add(beaver3_tuples[0].a);  // p[1]', mask=a1
-                p_1_p_1 = p_1.zero_add(beaver4_tuples[0].a);  // p[1]'_1, mask=a2
-                p_1_p_2 = p_1.zero_add(beaver3_tuples[1].a);  // p[1]'_2, mask=a3
-                p_2_p = p_2.zero_add(beaver4_tuples[0].b);  // p[2]', mask=b2
-                p_2_p_1 = p_2.zero_add(beaver3_tuples[1].b);  // p[2]'_1, mask=b3
-                p_3_p = p_3.zero_add(beaver3_tuples[1].c);  // p[3]', mask=c3
-                p_4_p = p_4.zero_add(beaver3_tuples[2].a);  // p[4]', mask=a5
-                p_4_p_1 = p_4.zero_add(beaver4_tuples[1].a);  // p[4]'_1, mask=a6
-                p_4_p_2 = p_4.zero_add(beaver3_tuples[3].a);  // p[4]'_2, mask=a7
-                p_5_p = p_5.zero_add(beaver4_tuples[1].b);  // p[5]', mask=b6
-                p_5_p_1 = p_5.zero_add(beaver3_tuples[3].b);  // p[5]'_1, mask=b7
-                p_6_p = p_6.zero_add(beaver3_tuples[3].c);  // p[6]', mask=c7
-                p_7_p = p_7.zero_add(beaver3_tuples[4].a);  // p[7]', mask=a9
-                p_7_p_1 = p_7.zero_add(beaver4_tuples[2].a);  // p[7]'_1, mask=a10
-                p_7_p_2 = p_7.zero_add(beaver3_tuples[5].a);  // p[7]'_2, mask=a11
-                p_8_p = p_8.zero_add(beaver4_tuples[2].b);  // p[8]', mask=b10
-                p_8_p_1 = p_8.zero_add(beaver3_tuples[5].b);  // p[8]'_1, mask=b11
-                p_9_p = p_9.zero_add(beaver3_tuples[5].c);  // p[9]', mask=c11
-                p_10_p = p_10.zero_add(beaver3_tuples[6].a);  // p[10]', mask=a13
-                p_10_p_1 = p_10.zero_add(beaver4_tuples[3].a);  // p[10]'_1, mask=a14
-                p_10_p_2 = p_10.zero_add(beaver3_tuples[7].a);  // p[10]'_2, mask=a15
-                p_11_p = p_11.zero_add(beaver4_tuples[3].b);  // p[11]', mask=b14
-                p_11_p_1 = p_11.zero_add(beaver3_tuples[7].b);  // p[11]'_1, mask=b15
-                p_12_p = p_12.zero_add(beaver3_tuples[7].c);  // p[12]', mask=c15
-                p_13_p = p_13.zero_add(beaver3_tuples[8].a);  // p[13]', mask=a17
-                p_13_p_1 = p_13.zero_add(beaver4_tuples[4].a);  // p[13]'_1, mask=a18
-                p_13_p_2 = p_13.zero_add(beaver3_tuples[9].a);  // p[13]'_2, mask=a19
-                p_14_p = p_14.zero_add(beaver4_tuples[4].b);  // p[14]', mask=b18
-                p_14_p_1 = p_14.zero_add(beaver3_tuples[9].b);  // p[14]'_1, mask=b19
-                p_15_p = p_15.zero_add(beaver3_tuples[9].c);  // p[15]', mask=c19
-                p_16_p = p_16.zero_add(beaver3_tuples[10].a);  // p[16]', mask=a21
-                p_16_p_1 = p_16.zero_add(beaver4_tuples[5].a);  // p[16]'_1, mask=a22
-                p_16_p_2 = p_16.zero_add(beaver3_tuples[11].a);  // p[16]'_2, mask=a23
-                p_17_p = p_17.zero_add(beaver4_tuples[5].b);  // p[17]', mask=b22
-                p_17_p_1 = p_17.zero_add(beaver3_tuples[11].b);  // p[17]'_1, mask=b23
-                p_18_p = p_18.zero_add(beaver3_tuples[11].c);  // p[18]', mask=c23
-                p_19_p = p_19.zero_add(beaver3_tuples[12].a);  // p[19]', mask=a25
-                p_19_p_1 = p_19.zero_add(beaver4_tuples[6].a);  // p[19]'_1, mask=a26
-                p_19_p_2 = p_19.zero_add(beaver3_tuples[13].a);  // p[19]'_2, mask=a27
-                p_20_p = p_20.zero_add(beaver4_tuples[6].b);  // p[20]', mask=b26
-                p_20_p_1 = p_20.zero_add(beaver3_tuples[13].b);  // p[20]'_1, mask=b27
-                p_21_p = p_21.zero_add(beaver3_tuples[13].c);  // p[21]', mask=c27
-                p_23_p = p_23.zero_add(beaver3_tuples[14].a);  // p[23]', mask=a29
-                p_23_p_1 = p_23.zero_add(beaver4_tuples[7].a);  // p[23]'_1, mask=a30
-                p_23_p_2 = p_23.zero_add(beaver3_tuples[15].a);  // p[23]'_2, mask=a31
-                p_24_p = p_24.zero_add(beaver4_tuples[7].b);  // p[24]', mask=b30
-                p_24_p_1 = p_24.zero_add(beaver3_tuples[15].b);  // p[24]'_1, mask=b31
-                p_25_p = p_25.zero_add(beaver3_tuples[15].c);  // p[25]', mask=c31
-                p_26_p = p_26.zero_add(beaver3_tuples[16].a);  // p[26]', mask=a33
-                p_26_p_1 = p_26.zero_add(beaver4_tuples[8].a);  // p[26]'_1, mask=a34
-                p_26_p_2 = p_26.zero_add(beaver3_tuples[17].a);  // p[26]'_2, mask=a35
-                p_27_p = p_27.zero_add(beaver4_tuples[8].b);  // p[27]', mask=b34
-                p_27_p_1 = p_27.zero_add(beaver3_tuples[17].b);  // p[27]'_1, mask=b35
-                p_28_p = p_28.zero_add(beaver3_tuples[17].c);  // p[28]', mask=c35
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_1_p = p_1.zero_add(beaver3_tuples[0].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_1_p_1 = p_1.zero_add(beaver4_tuples[0].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_1_p_2 = p_1.zero_add(beaver3_tuples[1].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_2_p = p_2.zero_add(beaver4_tuples[0].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_2_p_1 = p_2.zero_add(beaver3_tuples[1].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_3_p = p_3.zero_add(beaver3_tuples[1].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_4_p = p_4.zero_add(beaver3_tuples[2].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_4_p_1 = p_4.zero_add(beaver4_tuples[1].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_4_p_2 = p_4.zero_add(beaver3_tuples[3].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_5_p = p_5.zero_add(beaver4_tuples[1].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_5_p_1 = p_5.zero_add(beaver3_tuples[3].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_6_p = p_6.zero_add(beaver3_tuples[3].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_7_p = p_7.zero_add(beaver3_tuples[4].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_7_p_1 = p_7.zero_add(beaver4_tuples[2].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_7_p_2 = p_7.zero_add(beaver3_tuples[5].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_8_p = p_8.zero_add(beaver4_tuples[2].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_8_p_1 = p_8.zero_add(beaver3_tuples[5].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_9_p = p_9.zero_add(beaver3_tuples[5].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_10_p = p_10.zero_add(beaver3_tuples[6].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_10_p_1 = p_10.zero_add(beaver4_tuples[3].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_10_p_2 = p_10.zero_add(beaver3_tuples[7].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_11_p = p_11.zero_add(beaver4_tuples[3].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_11_p_1 = p_11.zero_add(beaver3_tuples[7].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_12_p = p_12.zero_add(beaver3_tuples[7].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_13_p = p_13.zero_add(beaver3_tuples[8].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_13_p_1 = p_13.zero_add(beaver4_tuples[4].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_13_p_2 = p_13.zero_add(beaver3_tuples[9].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_14_p = p_14.zero_add(beaver4_tuples[4].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_14_p_1 = p_14.zero_add(beaver3_tuples[9].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_15_p = p_15.zero_add(beaver3_tuples[9].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_16_p = p_16.zero_add(beaver3_tuples[10].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_16_p_1 = p_16.zero_add(beaver4_tuples[5].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_16_p_2 = p_16.zero_add(beaver3_tuples[11].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_17_p = p_17.zero_add(beaver4_tuples[5].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_17_p_1 = p_17.zero_add(beaver3_tuples[11].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_18_p = p_18.zero_add(beaver3_tuples[11].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_19_p = p_19.zero_add(beaver3_tuples[12].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_19_p_1 = p_19.zero_add(beaver4_tuples[6].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_19_p_2 = p_19.zero_add(beaver3_tuples[13].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_20_p = p_20.zero_add(beaver4_tuples[6].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_20_p_1 = p_20.zero_add(beaver3_tuples[13].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_21_p = p_21.zero_add(beaver3_tuples[13].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_23_p = p_23.zero_add(beaver3_tuples[14].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_23_p_1 = p_23.zero_add(beaver4_tuples[7].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_23_p_2 = p_23.zero_add(beaver3_tuples[15].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_24_p = p_24.zero_add(beaver4_tuples[7].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_24_p_1 = p_24.zero_add(beaver3_tuples[15].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_25_p = p_25.zero_add(beaver3_tuples[15].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_26_p = p_26.zero_add(beaver3_tuples[16].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_26_p_1 = p_26.zero_add(beaver4_tuples[8].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_26_p_2 = p_26.zero_add(beaver3_tuples[17].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_27_p = p_27.zero_add(beaver4_tuples[8].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_27_p_1 = p_27.zero_add(beaver3_tuples[17].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_28_p = p_28.zero_add(beaver3_tuples[17].c);
                 p_29_p = p_29.zero_add(beaver3_tuples[18].a);  // p[29]', mask=a37
                 p_29_p_1 = p_29.zero_add(beaver4_tuples[9].a);  // p[29]'_1, mask=a38
                 p_30_p = p_30.zero_add(beaver4_tuples[9].b);  // p[30]', mask=b38
-                p_22_p = p_22.zero_add(triples[13].a);  // p[22]', mask=a47
-                p_22_p_1 = p_22.zero_add(beaver3_tuples[22].a);  // p[22]'_1, mask=a48
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_22_p = p_22.zero_add(triples[13].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_22_p_1 = p_22.zero_add(beaver3_tuples[22].a);
                 p_22_p_2 = p_22.zero_add(beaver4_tuples[12].a);  // p[22]'_2, mask=a49
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r179
-                B3G_1_3_g1 = a_1_p.prepare_dot_and_assign(b_1_p, r179, triples[0].c);  // and_0
+                if (g_cut_frac_active && cut_frac_identity(32, 1) && current_phase != PHASE_INIT)
+                    B3G_1_3_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_1_3_g1 = a_1_p.prepare_dot_and_assign(b_1_p, r179, triples[0].c);
                 // and3_2: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=r180
-                B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(a_2_p, b_2_p, r180, beaver3_tuples[0]);  // and3_2
+                if (g_cut_frac_active && cut_frac_ppa4_skip(3) && current_phase != PHASE_INIT)
+                    B3G_1_3_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(a_2_p, b_2_p, (g_cut_frac_active && cut_frac_identity(32, 1) && current_phase != PHASE_INIT) ? FUNC_XOR(r180, r179) : (r180), beaver3_tuples[0]);
                 // and4_4: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r181
-                B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, r181, beaver4_tuples[0]);  // and4_4
+                if (g_cut_frac_active && cut_frac_ppa4_skip(4) && current_phase != PHASE_INIT)
+                    B3G_1_3_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, (g_cut_frac_active && cut_frac_ppa4_skip(3) && current_phase != PHASE_INIT) ? FUNC_XOR(r181, FUNC_XOR(r180, r179)) : (r181), beaver4_tuples[0]);
                 B3G_1_3_s1 = B3G_1_3_g1 ^ B3G_1_3_t1;  // B3G_1_3_s1
                 B3G_1_3_out = B3G_1_3_s1 ^ B3G_1_3_t2;  // B3G_1_3_out
-                B3G_1_3_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))
+                    B3G_1_3_out.mask_and_send_dot_without_remask();
                 // and3_8: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=a41
-                B3P_1_3_out = p_1_p_2.prepare_and3_and_assign(p_2_p_1, p_3_p, beaver3_tuples[20].a, beaver3_tuples[1]);  // and3_8
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(4)))
+                    B3P_1_3_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_1_3_out = p_1_p_2.prepare_and3_and_assign(p_2_p_1, p_3_p, beaver3_tuples[20].a, beaver3_tuples[1]);
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(4)) && !cut_frac_ppa4_skip(10))
+                    B3P_1_3_out = B3P_1_3_out.zero_add(beaver3_tuples[20].a);  // restore designed mask for surviving consumers
                 // and_9: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r156
-                B3G_4_6_g1 = a_4_p.prepare_dot_and_assign(b_4_p, r156, triples[1].c);  // and_9
+                if (g_cut_frac_active && cut_frac_identity(32, 4) && current_phase != PHASE_INIT)
+                    B3G_4_6_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_4_6_g1 = a_4_p.prepare_dot_and_assign(b_4_p, r156, triples[1].c);
                 // and3_11: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r155-r156)
-                B3G_4_6_t1 = p_4_p.prepare_dot3_and_assign(a_5_p, b_5_p, FUNC_XOR(r155, r156), beaver3_tuples[2]);  // and3_11
+                if (g_cut_frac_active && cut_frac_ppa4_skip(6) && current_phase != PHASE_INIT)
+                    B3G_4_6_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_4_6_t1 = p_4_p.prepare_dot3_and_assign(a_5_p, b_5_p, (g_cut_frac_active && cut_frac_identity(32, 4) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r155, r156), r156) : (FUNC_XOR(r155, r156)), beaver3_tuples[2]);
                 // and4_13: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=(b39-r155)
-                B3G_4_6_t2 = p_4_p_1.prepare_dot4_and_assign(p_5_p, a_6_p, b_6_p, FUNC_XOR(triples[10].b, r155), beaver4_tuples[1]);  // and4_13
+                if (g_cut_frac_active && cut_frac_ppa4_skip(7) && current_phase != PHASE_INIT)
+                    B3G_4_6_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_4_6_t2 = p_4_p_1.prepare_dot4_and_assign(p_5_p, a_6_p, b_6_p, (g_cut_frac_active && cut_frac_ppa4_skip(6) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[10].b, r155), FUNC_XOR(FUNC_XOR(r155, r156), r156)) : (FUNC_XOR(triples[10].b, r155)), beaver4_tuples[1]);
                 B3G_4_6_s1 = B3G_4_6_g1 ^ B3G_4_6_t1;  // B3G_4_6_s1
                 B3G_4_6_out = B3G_4_6_s1 ^ B3G_4_6_t2;  // B3G_4_6_out
-                B3G_4_6_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))
+                    B3G_4_6_out.mask_and_send_dot_without_remask();
                 // and3_17: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=b41
-                B3P_4_6_out = p_4_p_2.prepare_and3_and_assign(p_5_p_1, p_6_p, beaver3_tuples[20].b, beaver3_tuples[3]);  // and3_17
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(7)))
+                    B3P_4_6_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_4_6_out = p_4_p_2.prepare_and3_and_assign(p_5_p_1, p_6_p, beaver3_tuples[20].b, beaver3_tuples[3]);
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(7)) && !cut_frac_ppa4_skip(10))
+                    B3P_4_6_out = B3P_4_6_out.zero_add(beaver3_tuples[20].b);  // restore designed mask for surviving consumers
                 // and_18: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r158
-                B3G_7_9_g1 = a_7_p.prepare_dot_and_assign(b_7_p, r158, triples[2].c);  // and_18
+                if (g_cut_frac_active && cut_frac_identity(32, 7) && current_phase != PHASE_INIT)
+                    B3G_7_9_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_7_9_g1 = a_7_p.prepare_dot_and_assign(b_7_p, r158, triples[2].c);
                 // and3_20: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r157-r158)
-                B3G_7_9_t1 = p_7_p.prepare_dot3_and_assign(a_8_p, b_8_p, FUNC_XOR(r157, r158), beaver3_tuples[4]);  // and3_20
+                if (g_cut_frac_active && cut_frac_ppa4_skip(9) && current_phase != PHASE_INIT)
+                    B3G_7_9_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_7_9_t1 = p_7_p.prepare_dot3_and_assign(a_8_p, b_8_p, (g_cut_frac_active && cut_frac_identity(32, 7) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r157, r158), r158) : (FUNC_XOR(r157, r158)), beaver3_tuples[4]);
                 // and4_22: a2=beaver4_tuples[2].a, b2=beaver4_tuples[2].b, c2=beaver4_tuples[2].c, d2=beaver4_tuples[2].d, output mask=(c40-r157)
-                B3G_7_9_t2 = p_7_p_1.prepare_dot4_and_assign(p_8_p, a_9_p, b_9_p, FUNC_XOR(beaver3_tuples[19].c, r157), beaver4_tuples[2]);  // and4_22
+                if (g_cut_frac_active && cut_frac_ppa4_skip(10) && current_phase != PHASE_INIT)
+                    B3G_7_9_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_7_9_t2 = p_7_p_1.prepare_dot4_and_assign(p_8_p, a_9_p, b_9_p, (g_cut_frac_active && cut_frac_ppa4_skip(9) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[19].c, r157), FUNC_XOR(FUNC_XOR(r157, r158), r158)) : (FUNC_XOR(beaver3_tuples[19].c, r157)), beaver4_tuples[2]);
                 B3G_7_9_s1 = B3G_7_9_g1 ^ B3G_7_9_t1;  // B3G_7_9_s1
                 B3G_7_9_out = B3G_7_9_s1 ^ B3G_7_9_t2;  // B3G_7_9_out
-                B3G_7_9_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))
+                    B3G_7_9_out.mask_and_send_dot_without_remask();
                 // and3_26: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=c41
-                B3P_7_9_out = p_7_p_2.prepare_and3_and_assign(p_8_p_1, p_9_p, beaver3_tuples[20].c, beaver3_tuples[5]);  // and3_26
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(10)))
+                    B3P_7_9_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_7_9_out = p_7_p_2.prepare_and3_and_assign(p_8_p_1, p_9_p, beaver3_tuples[20].c, beaver3_tuples[5]);
                 // and_27: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r173
-                B3G_10_12_g1 = a_10_p.prepare_dot_and_assign(b_10_p, r173, triples[3].c);  // and_27
+                if (g_cut_frac_active && cut_frac_identity(32, 10) && current_phase != PHASE_INIT)
+                    B3G_10_12_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_10_12_g1 = a_10_p.prepare_dot_and_assign(b_10_p, r173, triples[3].c);
                 // and3_29: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=(r172-r173)
-                B3G_10_12_t1 = p_10_p.prepare_dot3_and_assign(a_11_p, b_11_p, FUNC_XOR(r172, r173), beaver3_tuples[6]);  // and3_29
+                if (g_cut_frac_active && cut_frac_ppa4_skip(12) && current_phase != PHASE_INIT)
+                    B3G_10_12_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_10_12_t1 = p_10_p.prepare_dot3_and_assign(a_11_p, b_11_p, (g_cut_frac_active && cut_frac_identity(32, 10) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r172, r173), r173) : (FUNC_XOR(r172, r173)), beaver3_tuples[6]);
                 // and4_31: a3=beaver4_tuples[3].a, b3=beaver4_tuples[3].b, c3=beaver4_tuples[3].c, d3=beaver4_tuples[3].d, output mask=((b50-r171)-r172)
-                B3G_10_12_t2 = p_10_p_1.prepare_dot4_and_assign(p_11_p, a_12_p, b_12_p, FUNC_XOR(FUNC_XOR(triples[14].b, r171), r172), beaver4_tuples[3]);  // and4_31
+                if (g_cut_frac_active && cut_frac_ppa4_skip(13) && current_phase != PHASE_INIT)
+                    B3G_10_12_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_10_12_t2 = p_10_p_1.prepare_dot4_and_assign(p_11_p, a_12_p, b_12_p, (g_cut_frac_active && cut_frac_ppa4_skip(12) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(FUNC_XOR(triples[14].b, r171), r172), FUNC_XOR(FUNC_XOR(r172, r173), r173)) : (FUNC_XOR(FUNC_XOR(triples[14].b, r171), r172)), beaver4_tuples[3]);
                 B3G_10_12_s1 = B3G_10_12_g1 ^ B3G_10_12_t1;  // B3G_10_12_s1
                 B3G_10_12_out = B3G_10_12_s1 ^ B3G_10_12_t2;  // B3G_10_12_out
-                B3G_10_12_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))
+                    B3G_10_12_out.mask_and_send_dot_without_remask();
                 // and3_35: a7=beaver3_tuples[7].a, b7=beaver3_tuples[7].b, c7=beaver3_tuples[7].c, output mask=a45
-                B3P_10_12_out = p_10_p_2.prepare_and3_and_assign(p_11_p_1, p_12_p, beaver4_tuples[11].a, beaver3_tuples[7]);  // and3_35
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(13)))
+                    B3P_10_12_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_10_12_out = p_10_p_2.prepare_and3_and_assign(p_11_p_1, p_12_p, beaver4_tuples[11].a, beaver3_tuples[7]);
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(13)) && !cut_frac_ppa4_skip(22))
+                    B3P_10_12_out = B3P_10_12_out.zero_add(beaver4_tuples[11].a);  // restore designed mask for surviving consumers
                 // and_36: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r160
-                B3G_13_15_g1 = a_13_p.prepare_dot_and_assign(b_13_p, r160, triples[4].c);  // and_36
+                if (g_cut_frac_active && cut_frac_identity(32, 13) && current_phase != PHASE_INIT)
+                    B3G_13_15_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_13_15_g1 = a_13_p.prepare_dot_and_assign(b_13_p, r160, triples[4].c);
                 // and3_38: a8=beaver3_tuples[8].a, b8=beaver3_tuples[8].b, c8=beaver3_tuples[8].c, output mask=(r159-r160)
-                B3G_13_15_t1 = p_13_p.prepare_dot3_and_assign(a_14_p, b_14_p, FUNC_XOR(r159, r160), beaver3_tuples[8]);  // and3_38
+                if (g_cut_frac_active && cut_frac_ppa4_skip(15) && current_phase != PHASE_INIT)
+                    B3G_13_15_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_13_15_t1 = p_13_p.prepare_dot3_and_assign(a_14_p, b_14_p, (g_cut_frac_active && cut_frac_identity(32, 13) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r159, r160), r160) : (FUNC_XOR(r159, r160)), beaver3_tuples[8]);
                 // and4_40: a4=beaver4_tuples[4].a, b4=beaver4_tuples[4].b, c4=beaver4_tuples[4].c, d4=beaver4_tuples[4].d, output mask=(b42-r159)
-                B3G_13_15_t2 = p_13_p_1.prepare_dot4_and_assign(p_14_p, a_15_p, b_15_p, FUNC_XOR(triples[11].b, r159), beaver4_tuples[4]);  // and4_40
+                if (g_cut_frac_active && cut_frac_ppa4_skip(16) && current_phase != PHASE_INIT)
+                    B3G_13_15_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_13_15_t2 = p_13_p_1.prepare_dot4_and_assign(p_14_p, a_15_p, b_15_p, (g_cut_frac_active && cut_frac_ppa4_skip(15) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[11].b, r159), FUNC_XOR(FUNC_XOR(r159, r160), r160)) : (FUNC_XOR(triples[11].b, r159)), beaver4_tuples[4]);
                 B3G_13_15_s1 = B3G_13_15_g1 ^ B3G_13_15_t1;  // B3G_13_15_s1
                 B3G_13_15_out = B3G_13_15_s1 ^ B3G_13_15_t2;  // B3G_13_15_out
-                B3G_13_15_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))
+                    B3G_13_15_out.mask_and_send_dot_without_remask();
                 // and3_44: a9=beaver3_tuples[9].a, b9=beaver3_tuples[9].b, c9=beaver3_tuples[9].c, output mask=b45
-                B3P_13_15_out = p_13_p_2.prepare_and3_and_assign(p_14_p_1, p_15_p, beaver4_tuples[11].b, beaver3_tuples[9]);  // and3_44
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(16)))
+                    B3P_13_15_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_13_15_out = p_13_p_2.prepare_and3_and_assign(p_14_p_1, p_15_p, beaver4_tuples[11].b, beaver3_tuples[9]);
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(16)) && !cut_frac_ppa4_skip(22))
+                    B3P_13_15_out = B3P_13_15_out.zero_add(beaver4_tuples[11].b);  // restore designed mask for surviving consumers
                 // and_45: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r162
-                B3G_16_18_g1 = a_16_p.prepare_dot_and_assign(b_16_p, r162, triples[5].c);  // and_45
+                if (g_cut_frac_active && cut_frac_identity(32, 16) && current_phase != PHASE_INIT)
+                    B3G_16_18_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_16_18_g1 = a_16_p.prepare_dot_and_assign(b_16_p, r162, triples[5].c);
                 // and3_47: a10=beaver3_tuples[10].a, b10=beaver3_tuples[10].b, c10=beaver3_tuples[10].c, output mask=(r161-r162)
-                B3G_16_18_t1 = p_16_p.prepare_dot3_and_assign(a_17_p, b_17_p, FUNC_XOR(r161, r162), beaver3_tuples[10]);  // and3_47
+                if (g_cut_frac_active && cut_frac_ppa4_skip(18) && current_phase != PHASE_INIT)
+                    B3G_16_18_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_16_18_t1 = p_16_p.prepare_dot3_and_assign(a_17_p, b_17_p, (g_cut_frac_active && cut_frac_identity(32, 16) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r161, r162), r162) : (FUNC_XOR(r161, r162)), beaver3_tuples[10]);
                 // and4_49: a5=beaver4_tuples[5].a, b5=beaver4_tuples[5].b, c5=beaver4_tuples[5].c, d5=beaver4_tuples[5].d, output mask=(c43-r161)
-                B3G_16_18_t2 = p_16_p_1.prepare_dot4_and_assign(p_17_p, a_18_p, b_18_p, FUNC_XOR(beaver3_tuples[21].c, r161), beaver4_tuples[5]);  // and4_49
+                if (g_cut_frac_active && cut_frac_ppa4_skip(19) && current_phase != PHASE_INIT)
+                    B3G_16_18_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_16_18_t2 = p_16_p_1.prepare_dot4_and_assign(p_17_p, a_18_p, b_18_p, (g_cut_frac_active && cut_frac_ppa4_skip(18) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[21].c, r161), FUNC_XOR(FUNC_XOR(r161, r162), r162)) : (FUNC_XOR(beaver3_tuples[21].c, r161)), beaver4_tuples[5]);
                 B3G_16_18_s1 = B3G_16_18_g1 ^ B3G_16_18_t1;  // B3G_16_18_s1
                 B3G_16_18_out = B3G_16_18_s1 ^ B3G_16_18_t2;  // B3G_16_18_out
-                B3G_16_18_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))
+                    B3G_16_18_out.mask_and_send_dot_without_remask();
                 // and3_53: a11=beaver3_tuples[11].a, b11=beaver3_tuples[11].b, c11=beaver3_tuples[11].c, output mask=c45
-                B3P_16_18_out = p_16_p_2.prepare_and3_and_assign(p_17_p_1, p_18_p, beaver4_tuples[11].c, beaver3_tuples[11]);  // and3_53
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(19)))
+                    B3P_16_18_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_16_18_out = p_16_p_2.prepare_and3_and_assign(p_17_p_1, p_18_p, beaver4_tuples[11].c, beaver3_tuples[11]);
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(19)) && !cut_frac_ppa4_skip(22))
+                    B3P_16_18_out = B3P_16_18_out.zero_add(beaver4_tuples[11].c);  // restore designed mask for surviving consumers
                 // and_54: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r164
-                B3G_19_21_g1 = a_19_p.prepare_dot_and_assign(b_19_p, r164, triples[6].c);  // and_54
+                if (g_cut_frac_active && cut_frac_identity(32, 19) && current_phase != PHASE_INIT)
+                    B3G_19_21_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_19_21_g1 = a_19_p.prepare_dot_and_assign(b_19_p, r164, triples[6].c);
                 // and3_56: a12=beaver3_tuples[12].a, b12=beaver3_tuples[12].b, c12=beaver3_tuples[12].c, output mask=(r163-r164)
-                B3G_19_21_t1 = p_19_p.prepare_dot3_and_assign(a_20_p, b_20_p, FUNC_XOR(r163, r164), beaver3_tuples[12]);  // and3_56
+                if (g_cut_frac_active && cut_frac_ppa4_skip(21) && current_phase != PHASE_INIT)
+                    B3G_19_21_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_19_21_t1 = p_19_p.prepare_dot3_and_assign(a_20_p, b_20_p, (g_cut_frac_active && cut_frac_identity(32, 19) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r163, r164), r164) : (FUNC_XOR(r163, r164)), beaver3_tuples[12]);
                 // and4_58: a6=beaver4_tuples[6].a, b6=beaver4_tuples[6].b, c6=beaver4_tuples[6].c, d6=beaver4_tuples[6].d, output mask=(d44-r163)
-                B3G_19_21_t2 = p_19_p_1.prepare_dot4_and_assign(p_20_p, a_21_p, b_21_p, FUNC_XOR(beaver4_tuples[10].d, r163), beaver4_tuples[6]);  // and4_58
+                if (g_cut_frac_active && cut_frac_ppa4_skip(22) && current_phase != PHASE_INIT)
+                    B3G_19_21_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_19_21_t2 = p_19_p_1.prepare_dot4_and_assign(p_20_p, a_21_p, b_21_p, (g_cut_frac_active && cut_frac_ppa4_skip(21) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver4_tuples[10].d, r163), FUNC_XOR(FUNC_XOR(r163, r164), r164)) : (FUNC_XOR(beaver4_tuples[10].d, r163)), beaver4_tuples[6]);
                 B3G_19_21_s1 = B3G_19_21_g1 ^ B3G_19_21_t1;  // B3G_19_21_s1
                 B3G_19_21_out = B3G_19_21_s1 ^ B3G_19_21_t2;  // B3G_19_21_out
-                B3G_19_21_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))
+                    B3G_19_21_out.mask_and_send_dot_without_remask();
                 // and3_62: a13=beaver3_tuples[13].a, b13=beaver3_tuples[13].b, c13=beaver3_tuples[13].c, output mask=d45
-                B3P_19_21_out = p_19_p_2.prepare_and3_and_assign(p_20_p_1, p_21_p, beaver4_tuples[11].d, beaver3_tuples[13]);  // and3_62
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(22)))
+                    B3P_19_21_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_19_21_out = p_19_p_2.prepare_and3_and_assign(p_20_p_1, p_21_p, beaver4_tuples[11].d, beaver3_tuples[13]);
                 // and_63: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r166
-                B3G_23_25_g1 = a_23_p.prepare_dot_and_assign(b_23_p, r166, triples[7].c);  // and_63
+                if (g_cut_frac_active && cut_frac_identity(32, 23) && current_phase != PHASE_INIT)
+                    B3G_23_25_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_23_25_g1 = a_23_p.prepare_dot_and_assign(b_23_p, r166, triples[7].c);
                 // and3_65: a14=beaver3_tuples[14].a, b14=beaver3_tuples[14].b, c14=beaver3_tuples[14].c, output mask=(r165-r166)
-                B3G_23_25_t1 = p_23_p.prepare_dot3_and_assign(a_24_p, b_24_p, FUNC_XOR(r165, r166), beaver3_tuples[14]);  // and3_65
+                if (g_cut_frac_active && cut_frac_ppa4_skip(25) && current_phase != PHASE_INIT)
+                    B3G_23_25_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_23_25_t1 = p_23_p.prepare_dot3_and_assign(a_24_p, b_24_p, (g_cut_frac_active && cut_frac_identity(32, 23) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r165, r166), r166) : (FUNC_XOR(r165, r166)), beaver3_tuples[14]);
                 // and4_67: a7=beaver4_tuples[7].a, b7=beaver4_tuples[7].b, c7=beaver4_tuples[7].c, d7=beaver4_tuples[7].d, output mask=(b47-r165)
-                B3G_23_25_t2 = p_23_p_1.prepare_dot4_and_assign(p_24_p, a_25_p, b_25_p, FUNC_XOR(triples[13].b, r165), beaver4_tuples[7]);  // and4_67
+                if (g_cut_frac_active && cut_frac_ppa4_skip(26) && current_phase != PHASE_INIT)
+                    B3G_23_25_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_23_25_t2 = p_23_p_1.prepare_dot4_and_assign(p_24_p, a_25_p, b_25_p, (g_cut_frac_active && cut_frac_ppa4_skip(25) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[13].b, r165), FUNC_XOR(FUNC_XOR(r165, r166), r166)) : (FUNC_XOR(triples[13].b, r165)), beaver4_tuples[7]);
                 B3G_23_25_s1 = B3G_23_25_g1 ^ B3G_23_25_t1;  // B3G_23_25_s1
                 B3G_23_25_out = B3G_23_25_s1 ^ B3G_23_25_t2;  // B3G_23_25_out
-                B3G_23_25_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))
+                    B3G_23_25_out.mask_and_send_dot_without_remask();
                 // and3_71: a15=beaver3_tuples[15].a, b15=beaver3_tuples[15].b, c15=beaver3_tuples[15].c, output mask=b49
-                B3P_23_25_out = p_23_p_2.prepare_and3_and_assign(p_24_p_1, p_25_p, beaver4_tuples[12].b, beaver3_tuples[15]);  // and3_71
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(26)))
+                    B3P_23_25_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_23_25_out = p_23_p_2.prepare_and3_and_assign(p_24_p_1, p_25_p, beaver4_tuples[12].b, beaver3_tuples[15]);
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(26)))
+                    B3P_23_25_out = B3P_23_25_out.zero_add(beaver4_tuples[12].b);  // restore designed mask for surviving consumers
                 // and_72: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r168
-                B3G_26_28_g1 = a_26_p.prepare_dot_and_assign(b_26_p, r168, triples[8].c);  // and_72
+                if (g_cut_frac_active && cut_frac_identity(32, 26) && current_phase != PHASE_INIT)
+                    B3G_26_28_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_26_28_g1 = a_26_p.prepare_dot_and_assign(b_26_p, r168, triples[8].c);
                 // and3_74: a16=beaver3_tuples[16].a, b16=beaver3_tuples[16].b, c16=beaver3_tuples[16].c, output mask=(r167-r168)
-                B3G_26_28_t1 = p_26_p.prepare_dot3_and_assign(a_27_p, b_27_p, FUNC_XOR(r167, r168), beaver3_tuples[16]);  // and3_74
+                if (g_cut_frac_active && cut_frac_ppa4_skip(28) && current_phase != PHASE_INIT)
+                    B3G_26_28_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_26_28_t1 = p_26_p.prepare_dot3_and_assign(a_27_p, b_27_p, (g_cut_frac_active && cut_frac_identity(32, 26) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r167, r168), r168) : (FUNC_XOR(r167, r168)), beaver3_tuples[16]);
                 // and4_76: a8=beaver4_tuples[8].a, b8=beaver4_tuples[8].b, c8=beaver4_tuples[8].c, d8=beaver4_tuples[8].d, output mask=(c48-r167)
-                B3G_26_28_t2 = p_26_p_1.prepare_dot4_and_assign(p_27_p, a_28_p, b_28_p, FUNC_XOR(beaver3_tuples[22].c, r167), beaver4_tuples[8]);  // and4_76
+                if (g_cut_frac_active && cut_frac_ppa4_skip(29) && current_phase != PHASE_INIT)
+                    B3G_26_28_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    B3G_26_28_t2 = p_26_p_1.prepare_dot4_and_assign(p_27_p, a_28_p, b_28_p, (g_cut_frac_active && cut_frac_ppa4_skip(28) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[22].c, r167), FUNC_XOR(FUNC_XOR(r167, r168), r168)) : (FUNC_XOR(beaver3_tuples[22].c, r167)), beaver4_tuples[8]);
                 B3G_26_28_s1 = B3G_26_28_g1 ^ B3G_26_28_t1;  // B3G_26_28_s1
                 B3G_26_28_out = B3G_26_28_s1 ^ B3G_26_28_t2;  // B3G_26_28_out
-                B3G_26_28_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))
+                    B3G_26_28_out.mask_and_send_dot_without_remask();
                 // and3_80: a17=beaver3_tuples[17].a, b17=beaver3_tuples[17].b, c17=beaver3_tuples[17].c, output mask=c49
-                B3P_26_28_out = p_26_p_2.prepare_and3_and_assign(p_27_p_1, p_28_p, beaver4_tuples[12].c, beaver3_tuples[17]);  // and3_80
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(29)))
+                    B3P_26_28_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_26_28_out = p_26_p_2.prepare_and3_and_assign(p_27_p_1, p_28_p, beaver4_tuples[12].c, beaver3_tuples[17]);
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(29)))
+                    B3P_26_28_out = B3P_26_28_out.zero_add(beaver4_tuples[12].c);  // restore designed mask for surviving consumers
                 // and_81: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r170
-                W3L1_29_31_g1 = a_29_p.prepare_dot_and_assign(b_29_p, r170, triples[9].c);  // and_81
+                if (g_cut_frac_active && cut_frac_identity(32, 29) && current_phase != PHASE_INIT)
+                    W3L1_29_31_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    W3L1_29_31_g1 = a_29_p.prepare_dot_and_assign(b_29_p, r170, triples[9].c);
                 // and3_83: a18=beaver3_tuples[18].a, b18=beaver3_tuples[18].b, c18=beaver3_tuples[18].c, output mask=(r169-r170)
-                W3L1_29_31_t1 = p_29_p.prepare_dot3_and_assign(a_30_p, b_30_p, FUNC_XOR(r169, r170), beaver3_tuples[18]);  // and3_83
+                W3L1_29_31_t1 = p_29_p.prepare_dot3_and_assign(a_30_p, b_30_p, (g_cut_frac_active && cut_frac_identity(32, 29) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r169, r170), r170) : (FUNC_XOR(r169, r170)), beaver3_tuples[18]);
                 // and4_85: a9=beaver4_tuples[9].a, b9=beaver4_tuples[9].b, c9=beaver4_tuples[9].c, d9=beaver4_tuples[9].d, output mask=(d49-r169)
                 W3L1_29_31_t2 = p_29_p_1.prepare_dot4_and_assign(p_30_p, a_31_p, b_31_p, FUNC_XOR(beaver4_tuples[12].d, r169), beaver4_tuples[9]);  // and4_85
                 W3L1_29_31_s1 = W3L1_29_31_g1 ^ W3L1_29_31_t1;  // W3L1_29_31_s1
@@ -1212,80 +1407,152 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 W3L1_29_31_out.mask_and_send_dot_without_remask();
                 break;
             case 1:
-                B3G_1_3_out.complete_and();
-                B3P_1_3_out.complete_and3();
-                B3G_4_6_out.complete_and();
-                B3P_4_6_out.complete_and3();
-                B3G_7_9_out.complete_and();
-                B3P_7_9_out.complete_and3();
-                B3G_10_12_out.complete_and();
-                B3P_10_12_out.complete_and3();
-                B3G_13_15_out.complete_and();
-                B3P_13_15_out.complete_and3();
-                B3G_16_18_out.complete_and();
-                B3P_16_18_out.complete_and3();
-                B3G_19_21_out.complete_and();
-                B3P_19_21_out.complete_and3();
-                B3G_23_25_out.complete_and();
-                B3P_23_25_out.complete_and3();
-                B3G_26_28_out.complete_and();
-                B3P_26_28_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))
+                    B3G_1_3_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))
+                    B3P_1_3_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))
+                    B3G_4_6_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))
+                    B3P_4_6_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))
+                    B3G_7_9_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))
+                    B3P_7_9_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))
+                    B3G_10_12_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))
+                    B3P_10_12_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))
+                    B3G_13_15_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))
+                    B3P_13_15_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))
+                    B3G_16_18_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))
+                    B3P_16_18_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))
+                    B3G_19_21_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))
+                    B3P_19_21_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))
+                    B3G_23_25_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))
+                    B3P_23_25_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))
+                    B3G_26_28_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))
+                    B3P_26_28_out.complete_and3();
                 W3L1_29_31_out.complete_and();
-                B3P_1_3_out_p = B3P_1_3_out.zero_add(triples[10].a);  // B3P_1_3_out', mask=a39
-                B3P_1_3_out_p_1 = B3P_1_3_out.zero_add(beaver3_tuples[19].a);  // B3P_1_3_out'_1, mask=a40
-                B3P_4_6_out_p = B3P_4_6_out.zero_add(beaver3_tuples[19].b);  // B3P_4_6_out', mask=b40
-                B3P_10_12_out_p = B3P_10_12_out.zero_add(triples[11].a);  // B3P_10_12_out', mask=a42
-                B3P_10_12_out_p_1 = B3P_10_12_out.zero_add(beaver3_tuples[21].a);  // B3P_10_12_out'_1, mask=a43
-                B3P_10_12_out_p_2 = B3P_10_12_out.zero_add(beaver4_tuples[10].a);  // B3P_10_12_out'_2, mask=a44
-                B3P_13_15_out_p = B3P_13_15_out.zero_add(beaver3_tuples[21].b);  // B3P_13_15_out', mask=b43
-                B3P_13_15_out_p_1 = B3P_13_15_out.zero_add(beaver4_tuples[10].b);  // B3P_13_15_out'_1, mask=b44
-                B3P_16_18_out_p = B3P_16_18_out.zero_add(beaver4_tuples[10].c);  // B3P_16_18_out', mask=c44
-                B3P_23_25_out_p = B3P_23_25_out.zero_add(beaver3_tuples[22].b);  // B3P_23_25_out', mask=b48
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_1_3_out_p = B3P_1_3_out.zero_add(triples[10].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_1_3_out_p_1 = B3P_1_3_out.zero_add(beaver3_tuples[19].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_4_6_out_p = B3P_4_6_out.zero_add(beaver3_tuples[19].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_10_12_out_p = B3P_10_12_out.zero_add(triples[11].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_10_12_out_p_1 = B3P_10_12_out.zero_add(beaver3_tuples[21].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_10_12_out_p_2 = B3P_10_12_out.zero_add(beaver4_tuples[10].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_13_15_out_p = B3P_13_15_out.zero_add(beaver3_tuples[21].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_13_15_out_p_1 = B3P_13_15_out.zero_add(beaver4_tuples[10].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_16_18_out_p = B3P_16_18_out.zero_add(beaver4_tuples[10].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_23_25_out_p = B3P_23_25_out.zero_add(beaver3_tuples[22].b);
                 // and_88: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r182
-                L1_B3G_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r182, triples[10].c);  // and_88
+                if (g_cut_frac_active && cut_frac_ppa4_skip(7) && current_phase != PHASE_INIT)
+                    L1_B3G_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    L1_B3G_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r182, triples[10].c);
                 // and3_89: a19=beaver3_tuples[19].a, b19=beaver3_tuples[19].b, c19=beaver3_tuples[19].c, output mask=r183
-                L1_B3G_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r183, beaver3_tuples[19]);  // and3_89
+                if (g_cut_frac_active && cut_frac_ppa4_skip(10) && current_phase != PHASE_INIT)
+                    L1_B3G_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    L1_B3G_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, (g_cut_frac_active && cut_frac_ppa4_skip(7) && current_phase != PHASE_INIT) ? FUNC_XOR(r183, r182) : (r183), beaver3_tuples[19]);
                 L1_B3G_s1 = L1_B3G_t1 ^ L1_B3G_t2;  // L1_B3G_s1
-                L1_B3G_s1.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))
+                    L1_B3G_s1.mask_and_send_dot_without_remask();
                 // and3_92: a20=beaver3_tuples[20].a, b20=beaver3_tuples[20].b, c20=beaver3_tuples[20].c, output mask=a51
-                L1_B3P_out = B3P_1_3_out.prepare_and3_and_assign(B3P_4_6_out, B3P_7_9_out, beaver3_tuples[23].a, beaver3_tuples[20]);  // and3_92
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(10)))
+                    L1_B3P_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    L1_B3P_out = B3P_1_3_out.prepare_and3_and_assign(B3P_4_6_out, B3P_7_9_out, beaver3_tuples[23].a, beaver3_tuples[20]);
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(10)))
+                    L1_B3P_out = L1_B3P_out.zero_add(beaver3_tuples[23].a);  // restore designed mask for surviving consumers
                 // and_93: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r175
-                L1_B4G_t1 = B3P_10_12_out_p.prepare_dot_and_assign(B3G_13_15_out, r175, triples[11].c);  // and_93
+                if (g_cut_frac_active && cut_frac_ppa4_skip(16) && current_phase != PHASE_INIT)
+                    L1_B4G_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    L1_B4G_t1 = B3P_10_12_out_p.prepare_dot_and_assign(B3G_13_15_out, r175, triples[11].c);
                 // and3_94: a21=beaver3_tuples[21].a, b21=beaver3_tuples[21].b, c21=beaver3_tuples[21].c, output mask=(r174-r175)
-                L1_B4G_t2 = B3P_10_12_out_p_1.prepare_dot3_and_assign(B3P_13_15_out_p, B3G_16_18_out, FUNC_XOR(r174, r175), beaver3_tuples[21]);  // and3_94
+                if (g_cut_frac_active && cut_frac_ppa4_skip(19) && current_phase != PHASE_INIT)
+                    L1_B4G_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    L1_B4G_t2 = B3P_10_12_out_p_1.prepare_dot3_and_assign(B3P_13_15_out_p, B3G_16_18_out, (g_cut_frac_active && cut_frac_ppa4_skip(16) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r174, r175), r175) : (FUNC_XOR(r174, r175)), beaver3_tuples[21]);
                 // and4_95: a10=beaver4_tuples[10].a, b10=beaver4_tuples[10].b, c10=beaver4_tuples[10].c, d10=beaver4_tuples[10].d, output mask=(r171-r174)
-                L1_B4G_t3 = B3P_10_12_out_p_2.prepare_dot4_and_assign(B3P_13_15_out_p_1, B3P_16_18_out_p, B3G_19_21_out, FUNC_XOR(r171, r174), beaver4_tuples[10]);  // and4_95
+                if (g_cut_frac_active && cut_frac_ppa4_skip(22) && current_phase != PHASE_INIT)
+                    L1_B4G_t3 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    L1_B4G_t3 = B3P_10_12_out_p_2.prepare_dot4_and_assign(B3P_13_15_out_p_1, B3P_16_18_out_p, B3G_19_21_out, (g_cut_frac_active && cut_frac_ppa4_skip(19) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r171, r174), FUNC_XOR(FUNC_XOR(r174, r175), r175)) : (FUNC_XOR(r171, r174)), beaver4_tuples[10]);
                 L1_B4G_s1 = L1_B4G_t1 ^ L1_B4G_t2;  // L1_B4G_s1
                 L1_B4G_s2 = L1_B4G_s1 ^ L1_B4G_t3;  // L1_B4G_s2
-                L1_B4G_s2.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))
+                    L1_B4G_s2.mask_and_send_dot_without_remask();
                 // and4_99: a11=beaver4_tuples[11].a, b11=beaver4_tuples[11].b, c11=beaver4_tuples[11].c, d11=beaver4_tuples[11].d, output mask=b51
-                L1_B4P_out = B3P_10_12_out.prepare_and4_and_assign(B3P_13_15_out, B3P_16_18_out, B3P_19_21_out, beaver3_tuples[23].b, beaver4_tuples[11]);  // and4_99
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(22)))
+                    L1_B4P_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    L1_B4P_out = B3P_10_12_out.prepare_and4_and_assign(B3P_13_15_out, B3P_16_18_out, B3P_19_21_out, beaver3_tuples[23].b, beaver4_tuples[11]);
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(22)))
+                    L1_B4P_out = L1_B4P_out.zero_add(beaver3_tuples[23].b);  // restore designed mask for surviving consumers
                 // and_100: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r178
-                L1_W4S_g1 = a_22_p.prepare_dot_and_assign(b_22_p, r178, triples[12].c);  // and_100
+                if (g_cut_frac_active && cut_frac_identity(32, 22) && current_phase != PHASE_INIT)
+                    L1_W4S_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    L1_W4S_g1 = a_22_p.prepare_dot_and_assign(b_22_p, r178, triples[12].c);
                 // and_102: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=(r177-r178)
-                L1_W4S_t1 = p_22_p.prepare_dot_and_assign(B3G_23_25_out, FUNC_XOR(r177, r178), triples[13].c);  // and_102
+                if (g_cut_frac_active && cut_frac_ppa4_skip(26) && current_phase != PHASE_INIT)
+                    L1_W4S_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    L1_W4S_t1 = p_22_p.prepare_dot_and_assign(B3G_23_25_out, (g_cut_frac_active && cut_frac_identity(32, 22) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r177, r178), r178) : (FUNC_XOR(r177, r178)), triples[13].c);
                 // and3_103: a22=beaver3_tuples[22].a, b22=beaver3_tuples[22].b, c22=beaver3_tuples[22].c, output mask=(r176-r177)
-                L1_W4S_t2 = p_22_p_1.prepare_dot3_and_assign(B3P_23_25_out_p, B3G_26_28_out, FUNC_XOR(r176, r177), beaver3_tuples[22]);  // and3_103
+                if (g_cut_frac_active && cut_frac_ppa4_skip(29) && current_phase != PHASE_INIT)
+                    L1_W4S_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    L1_W4S_t2 = p_22_p_1.prepare_dot3_and_assign(B3P_23_25_out_p, B3G_26_28_out, (g_cut_frac_active && cut_frac_ppa4_skip(26) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r176, r177), FUNC_XOR(FUNC_XOR(r177, r178), r178)) : (FUNC_XOR(r176, r177)), beaver3_tuples[22]);
                 // and4_104: a12=beaver4_tuples[12].a, b12=beaver4_tuples[12].b, c12=beaver4_tuples[12].c, d12=beaver4_tuples[12].d, output mask=(c51-r176)
-                L1_W4S_t3 = p_22_p_2.prepare_dot4_and_assign(B3P_23_25_out, B3P_26_28_out, W3L1_29_31_out, FUNC_XOR(beaver3_tuples[23].c, r176), beaver4_tuples[12]);  // and4_104
+                L1_W4S_t3 = p_22_p_2.prepare_dot4_and_assign(B3P_23_25_out, B3P_26_28_out, W3L1_29_31_out, (g_cut_frac_active && cut_frac_ppa4_skip(29) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[23].c, r176), FUNC_XOR(FUNC_XOR(r176, r177), FUNC_XOR(FUNC_XOR(r177, r178), r178))) : (FUNC_XOR(beaver3_tuples[23].c, r176)), beaver4_tuples[12]);
                 L1_W4S_s1 = L1_W4S_g1 ^ L1_W4S_t1;  // L1_W4S_s1
                 L1_W4S_s2 = L1_W4S_s1 ^ L1_W4S_t2;  // L1_W4S_s2
                 L1_W4S_out = L1_W4S_s2 ^ L1_W4S_t3;  // L1_W4S_out
                 L1_W4S_out.mask_and_send_dot_without_remask();
                 break;
             case 2:
-                L1_B3G_s1.complete_and();
-                L1_B3P_out.complete_and3();
-                L1_B4G_s2.complete_and();
-                L1_B4P_out.complete_and4();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))
+                    L1_B3G_s1.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))
+                    L1_B3P_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))
+                    L1_B4G_s2.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))
+                    L1_B4P_out.complete_and4();
                 L1_W4S_out.complete_and();
-                L1_B3P_out_p = L1_B3P_out.zero_add(triples[14].a);  // L1_B3P_out', mask=a50
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    L1_B3P_out_p = L1_B3P_out.zero_add(triples[14].a);
                 L1_B3G_out = L1_B3G_s1 ^ B3G_1_3_out;  // L1_B3G_out
                 L1_B4G_out = L1_B4G_s2 ^ B3G_10_12_out;  // L1_B4G_out
                 // and_108: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r184
-                L2_W3_t1 = L1_B3P_out_p.prepare_dot_and_assign(L1_B4G_out, r184, triples[14].c);  // and_108
+                if (g_cut_frac_active && cut_frac_ppa4_skip(22) && current_phase != PHASE_INIT)
+                    L2_W3_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
+                else
+                    L2_W3_t1 = L1_B3P_out_p.prepare_dot_and_assign(L1_B4G_out, r184, triples[14].c);
                 // and3_109: a23=beaver3_tuples[23].a, b23=beaver3_tuples[23].b, c23=beaver3_tuples[23].c, output mask=r185
-                L2_W3_t2 = L1_B3P_out.prepare_dot3_and_assign(L1_B4P_out, L1_W4S_out, r185, beaver3_tuples[23]);  // and3_109
+                L2_W3_t2 = L1_B3P_out.prepare_dot3_and_assign(L1_B4P_out, L1_W4S_out, (g_cut_frac_active && cut_frac_ppa4_skip(22) && current_phase != PHASE_INIT) ? FUNC_XOR(r185, r184) : (r185), beaver3_tuples[23]);
                 L2_W3_s1 = L2_W3_t1 ^ L2_W3_t2;  // L2_W3_s1
                 L2_W3_s1.mask_and_send_dot_without_remask();
                 break;
