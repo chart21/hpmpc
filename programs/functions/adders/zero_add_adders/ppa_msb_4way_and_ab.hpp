@@ -600,9 +600,9 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
     Share& msb;
     int level;
     static constexpr int BeaverTripleCount = 15;
-    triple<DATATYPE> triples[BeaverTripleCount];
+    triple<DATATYPE> triples[BeaverTripleCount + 18];
     static constexpr int Beaver3TupleCount = 24;
-    Beaver3Tuple<DATATYPE> beaver3_tuples[Beaver3TupleCount];
+    Beaver3Tuple<DATATYPE> beaver3_tuples[Beaver3TupleCount + 10];
     static constexpr int Beaver4TupleCount = 13;
     Beaver4Tuple<DATATYPE> beaver4_tuples[Beaver4TupleCount];
 
@@ -894,17 +894,34 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
             {
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
+            static constexpr int cut_extra_t_th[18] = {2, 2, 5, 5, 8, 8, 11, 11, 14, 14, 17, 17, 20, 20, 24, 24, 27, 27};
+            static constexpr int cut_extra_t_thz[18] = {3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 19, 21, 22, 25, 26, 28, 29};
+            for (int kx = 0; kx < 18; ++kx)
+                if (g_cut_frac_active && cut_frac_ppa4_skip(cut_extra_t_th[kx]) && !cut_frac_ppa4_skip(cut_extra_t_thz[kx]))
+                    triples[BeaverTripleCount + kx] = retrieveBooleanTriple<DATATYPE>();
             for (int i = 0; i < Beaver3TupleCount; ++i)
             {
             static constexpr int b3_skip_th[24] = {99, 4, 99, 7, 99, 10, 99, 13, 99, 16, 99, 19, 99, 22, 99, 26, 99, 29, 99, 99, 10, 99, 99, 99};
+            // CUT: slot's gate runs one arity lower on a reserved tuple in this window
+            static constexpr int b3_skip_th_ar[24] = {2, 2, 5, 5, 8, 8, 11, 11, 14, 14, 17, 17, 20, 20, 24, 24, 27, 27, 99, 99, 99, 99, 99, 99};
+            static constexpr int b3_skip_th_arz[24] = {3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 19, 21, 22, 25, 26, 28, 29, 0, 0, 0, 0, 0, 0};
             // CUT: P-gate tuples (skipped in ALL phases incl. INIT counting) are not retrieved
-            if (!(g_cut_frac_active && cut_frac_ppa4_skip(b3_skip_th[i])))
+            if (!(g_cut_frac_active && cut_frac_ppa4_skip(b3_skip_th[i]) || (cut_frac_ppa4_skip(b3_skip_th_ar[i]) && !cut_frac_ppa4_skip(b3_skip_th_arz[i]))))
                 beaver3_tuples[i] = retrieveBeaver3Tuple<DATATYPE>();
             }
+            static constexpr int cut_extra_b3_th[10] = {2, 5, 8, 11, 14, 17, 20, 24, 27, 30};
+            static constexpr int cut_extra_b3_thz[10] = {4, 7, 10, 13, 16, 19, 22, 26, 29, 99};
+            // CUT: tuples reserved for the arity-reduced gates (INIT counts the reduced call)
+            for (int kx = 0; kx < 10; ++kx)
+                if (g_cut_frac_active && cut_frac_ppa4_skip(cut_extra_b3_th[kx]) && !cut_frac_ppa4_skip(cut_extra_b3_thz[kx]))
+                    beaver3_tuples[Beaver3TupleCount + kx] = retrieveBeaver3Tuple<DATATYPE>();
             for (int i = 0; i < Beaver4TupleCount; ++i)
             {
             static constexpr int b4_skip_th[13] = {99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 22, 99};
-            if (!(g_cut_frac_active && cut_frac_ppa4_skip(b4_skip_th[i])))
+            // CUT: slot's gate runs one arity lower on a reserved tuple in this window
+            static constexpr int b4_skip_th_ar[13] = {2, 5, 8, 11, 14, 17, 20, 24, 27, 30, 99, 99, 99};
+            static constexpr int b4_skip_th_arz[13] = {4, 7, 10, 13, 16, 19, 22, 26, 29, 99, 0, 0, 0};
+            if (!(g_cut_frac_active && cut_frac_ppa4_skip(b4_skip_th[i]) || (cut_frac_ppa4_skip(b4_skip_th_ar[i]) && !cut_frac_ppa4_skip(b4_skip_th_arz[i]))))
                 beaver4_tuples[i] = retrieveBeaver4Tuple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
@@ -986,178 +1003,272 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 else
                     p0 = a[0] ^ b[0];  // p0
                 a_1_p = a[1].zero_add(triples[0].a);  // a[1]', mask=a0
-                a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
-                a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(3)))
+                    a_2_p = a[2].zero_add(beaver3_tuples[0].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(4)))
+                    a_3_p = a[3].zero_add(beaver4_tuples[0].c);
                 a_4_p = a[4].zero_add(triples[1].a);  // a[4]', mask=a4
-                a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
-                a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(6)))
+                    a_5_p = a[5].zero_add(beaver3_tuples[2].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(7)))
+                    a_6_p = a[6].zero_add(beaver4_tuples[1].c);
                 a_7_p = a[7].zero_add(triples[2].a);  // a[7]', mask=a8
-                a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
-                a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(9)))
+                    a_8_p = a[8].zero_add(beaver3_tuples[4].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(10)))
+                    a_9_p = a[9].zero_add(beaver4_tuples[2].c);
                 a_10_p = a[10].zero_add(triples[3].a);  // a[10]', mask=a12
-                a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
-                a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(12)))
+                    a_11_p = a[11].zero_add(beaver3_tuples[6].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(13)))
+                    a_12_p = a[12].zero_add(beaver4_tuples[3].c);
                 a_13_p = a[13].zero_add(triples[4].a);  // a[13]', mask=a16
-                a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
-                a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(15)))
+                    a_14_p = a[14].zero_add(beaver3_tuples[8].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(16)))
+                    a_15_p = a[15].zero_add(beaver4_tuples[4].c);
                 a_16_p = a[16].zero_add(triples[5].a);  // a[16]', mask=a20
-                a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
-                a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(18)))
+                    a_17_p = a[17].zero_add(beaver3_tuples[10].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(19)))
+                    a_18_p = a[18].zero_add(beaver4_tuples[5].c);
                 a_19_p = a[19].zero_add(triples[6].a);  // a[19]', mask=a24
-                a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
-                a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(21)))
+                    a_20_p = a[20].zero_add(beaver3_tuples[12].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(22)))
+                    a_21_p = a[21].zero_add(beaver4_tuples[6].c);
                 a_22_p = a[22].zero_add(triples[12].a);  // a[22]', mask=a46
                 a_23_p = a[23].zero_add(triples[7].a);  // a[23]', mask=a28
-                a_24_p = a[24].zero_add(beaver3_tuples[14].b);  // a[24]', mask=b29
-                a_25_p = a[25].zero_add(beaver4_tuples[7].c);  // a[25]', mask=c30
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(25)))
+                    a_24_p = a[24].zero_add(beaver3_tuples[14].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(26)))
+                    a_25_p = a[25].zero_add(beaver4_tuples[7].c);
                 a_26_p = a[26].zero_add(triples[8].a);  // a[26]', mask=a32
-                a_27_p = a[27].zero_add(beaver3_tuples[16].b);  // a[27]', mask=b33
-                a_28_p = a[28].zero_add(beaver4_tuples[8].c);  // a[28]', mask=c34
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(28)))
+                    a_27_p = a[27].zero_add(beaver3_tuples[16].b);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(29)))
+                    a_28_p = a[28].zero_add(beaver4_tuples[8].c);
                 a_29_p = a[29].zero_add(triples[9].a);  // a[29]', mask=a36
                 a_30_p = a[30].zero_add(beaver3_tuples[18].b);  // a[30]', mask=b37
-                a_31_p = a[31].zero_add(beaver4_tuples[9].c);  // a[31]', mask=c38
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(30) && !cut_frac_ppa4_skip(99)))
+                    a_31_p = a[31].zero_add(beaver4_tuples[9].c);
                 b_1_p = b[1].zero_add(triples[0].b);  // b[1]', mask=b0
-                b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
-                b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(3)))
+                    b_2_p = b[2].zero_add(beaver3_tuples[0].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(4)))
+                    b_3_p = b[3].zero_add(beaver4_tuples[0].d);
                 b_4_p = b[4].zero_add(triples[1].b);  // b[4]', mask=b4
-                b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
-                b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(6)))
+                    b_5_p = b[5].zero_add(beaver3_tuples[2].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(7)))
+                    b_6_p = b[6].zero_add(beaver4_tuples[1].d);
                 b_7_p = b[7].zero_add(triples[2].b);  // b[7]', mask=b8
-                b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
-                b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(9)))
+                    b_8_p = b[8].zero_add(beaver3_tuples[4].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(10)))
+                    b_9_p = b[9].zero_add(beaver4_tuples[2].d);
                 b_10_p = b[10].zero_add(triples[3].b);  // b[10]', mask=b12
-                b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
-                b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(12)))
+                    b_11_p = b[11].zero_add(beaver3_tuples[6].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(13)))
+                    b_12_p = b[12].zero_add(beaver4_tuples[3].d);
                 b_13_p = b[13].zero_add(triples[4].b);  // b[13]', mask=b16
-                b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
-                b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(15)))
+                    b_14_p = b[14].zero_add(beaver3_tuples[8].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(16)))
+                    b_15_p = b[15].zero_add(beaver4_tuples[4].d);
                 b_16_p = b[16].zero_add(triples[5].b);  // b[16]', mask=b20
-                b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
-                b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(18)))
+                    b_17_p = b[17].zero_add(beaver3_tuples[10].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(19)))
+                    b_18_p = b[18].zero_add(beaver4_tuples[5].d);
                 b_19_p = b[19].zero_add(triples[6].b);  // b[19]', mask=b24
-                b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
-                b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(21)))
+                    b_20_p = b[20].zero_add(beaver3_tuples[12].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(22)))
+                    b_21_p = b[21].zero_add(beaver4_tuples[6].d);
                 b_22_p = b[22].zero_add(triples[12].b);  // b[22]', mask=b46
                 b_23_p = b[23].zero_add(triples[7].b);  // b[23]', mask=b28
-                b_24_p = b[24].zero_add(beaver3_tuples[14].c);  // b[24]', mask=c29
-                b_25_p = b[25].zero_add(beaver4_tuples[7].d);  // b[25]', mask=d30
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(25)))
+                    b_24_p = b[24].zero_add(beaver3_tuples[14].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(26)))
+                    b_25_p = b[25].zero_add(beaver4_tuples[7].d);
                 b_26_p = b[26].zero_add(triples[8].b);  // b[26]', mask=b32
-                b_27_p = b[27].zero_add(beaver3_tuples[16].c);  // b[27]', mask=c33
-                b_28_p = b[28].zero_add(beaver4_tuples[8].d);  // b[28]', mask=d34
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(28)))
+                    b_27_p = b[27].zero_add(beaver3_tuples[16].c);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(29)))
+                    b_28_p = b[28].zero_add(beaver4_tuples[8].d);
                 b_29_p = b[29].zero_add(triples[9].b);  // b[29]', mask=b36
                 b_30_p = b[30].zero_add(beaver3_tuples[18].c);  // b[30]', mask=c37
-                b_31_p = b[31].zero_add(beaver4_tuples[9].d);  // b[31]', mask=d38
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(30) && !cut_frac_ppa4_skip(99)))
+                    b_31_p = b[31].zero_add(beaver4_tuples[9].d);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_1_p = p_1.zero_add(beaver3_tuples[0].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(3)))
+                        p_1_p = p_1.zero_add(beaver3_tuples[0].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_1_p_1 = p_1.zero_add(beaver4_tuples[0].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(4)))
+                        p_1_p_1 = p_1.zero_add(beaver4_tuples[0].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_1_p_2 = p_1.zero_add(beaver3_tuples[1].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(4)))
+                        p_1_p_2 = p_1.zero_add(beaver3_tuples[1].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_2_p = p_2.zero_add(beaver4_tuples[0].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(4)))
+                        p_2_p = p_2.zero_add(beaver4_tuples[0].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_2_p_1 = p_2.zero_add(beaver3_tuples[1].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(4)))
+                        p_2_p_1 = p_2.zero_add(beaver3_tuples[1].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_3_p = p_3.zero_add(beaver3_tuples[1].c);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(4)))
+                        p_3_p = p_3.zero_add(beaver3_tuples[1].c);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_4_p = p_4.zero_add(beaver3_tuples[2].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(6)))
+                        p_4_p = p_4.zero_add(beaver3_tuples[2].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_4_p_1 = p_4.zero_add(beaver4_tuples[1].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(7)))
+                        p_4_p_1 = p_4.zero_add(beaver4_tuples[1].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_4_p_2 = p_4.zero_add(beaver3_tuples[3].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(7)))
+                        p_4_p_2 = p_4.zero_add(beaver3_tuples[3].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_5_p = p_5.zero_add(beaver4_tuples[1].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(7)))
+                        p_5_p = p_5.zero_add(beaver4_tuples[1].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_5_p_1 = p_5.zero_add(beaver3_tuples[3].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(7)))
+                        p_5_p_1 = p_5.zero_add(beaver3_tuples[3].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_6_p = p_6.zero_add(beaver3_tuples[3].c);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(7)))
+                        p_6_p = p_6.zero_add(beaver3_tuples[3].c);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_7_p = p_7.zero_add(beaver3_tuples[4].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(9)))
+                        p_7_p = p_7.zero_add(beaver3_tuples[4].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_7_p_1 = p_7.zero_add(beaver4_tuples[2].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(10)))
+                        p_7_p_1 = p_7.zero_add(beaver4_tuples[2].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_7_p_2 = p_7.zero_add(beaver3_tuples[5].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(10)))
+                        p_7_p_2 = p_7.zero_add(beaver3_tuples[5].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_8_p = p_8.zero_add(beaver4_tuples[2].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(10)))
+                        p_8_p = p_8.zero_add(beaver4_tuples[2].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_8_p_1 = p_8.zero_add(beaver3_tuples[5].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(10)))
+                        p_8_p_1 = p_8.zero_add(beaver3_tuples[5].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_9_p = p_9.zero_add(beaver3_tuples[5].c);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(10)))
+                        p_9_p = p_9.zero_add(beaver3_tuples[5].c);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_10_p = p_10.zero_add(beaver3_tuples[6].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(12)))
+                        p_10_p = p_10.zero_add(beaver3_tuples[6].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_10_p_1 = p_10.zero_add(beaver4_tuples[3].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(13)))
+                        p_10_p_1 = p_10.zero_add(beaver4_tuples[3].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_10_p_2 = p_10.zero_add(beaver3_tuples[7].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(13)))
+                        p_10_p_2 = p_10.zero_add(beaver3_tuples[7].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_11_p = p_11.zero_add(beaver4_tuples[3].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(13)))
+                        p_11_p = p_11.zero_add(beaver4_tuples[3].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_11_p_1 = p_11.zero_add(beaver3_tuples[7].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(13)))
+                        p_11_p_1 = p_11.zero_add(beaver3_tuples[7].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_12_p = p_12.zero_add(beaver3_tuples[7].c);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(13)))
+                        p_12_p = p_12.zero_add(beaver3_tuples[7].c);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_13_p = p_13.zero_add(beaver3_tuples[8].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(15)))
+                        p_13_p = p_13.zero_add(beaver3_tuples[8].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_13_p_1 = p_13.zero_add(beaver4_tuples[4].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(16)))
+                        p_13_p_1 = p_13.zero_add(beaver4_tuples[4].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_13_p_2 = p_13.zero_add(beaver3_tuples[9].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(16)))
+                        p_13_p_2 = p_13.zero_add(beaver3_tuples[9].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_14_p = p_14.zero_add(beaver4_tuples[4].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(16)))
+                        p_14_p = p_14.zero_add(beaver4_tuples[4].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_14_p_1 = p_14.zero_add(beaver3_tuples[9].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(16)))
+                        p_14_p_1 = p_14.zero_add(beaver3_tuples[9].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_15_p = p_15.zero_add(beaver3_tuples[9].c);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(16)))
+                        p_15_p = p_15.zero_add(beaver3_tuples[9].c);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_16_p = p_16.zero_add(beaver3_tuples[10].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(18)))
+                        p_16_p = p_16.zero_add(beaver3_tuples[10].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_16_p_1 = p_16.zero_add(beaver4_tuples[5].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(19)))
+                        p_16_p_1 = p_16.zero_add(beaver4_tuples[5].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_16_p_2 = p_16.zero_add(beaver3_tuples[11].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(19)))
+                        p_16_p_2 = p_16.zero_add(beaver3_tuples[11].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_17_p = p_17.zero_add(beaver4_tuples[5].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(19)))
+                        p_17_p = p_17.zero_add(beaver4_tuples[5].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_17_p_1 = p_17.zero_add(beaver3_tuples[11].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(19)))
+                        p_17_p_1 = p_17.zero_add(beaver3_tuples[11].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_18_p = p_18.zero_add(beaver3_tuples[11].c);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(19)))
+                        p_18_p = p_18.zero_add(beaver3_tuples[11].c);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_19_p = p_19.zero_add(beaver3_tuples[12].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(21)))
+                        p_19_p = p_19.zero_add(beaver3_tuples[12].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_19_p_1 = p_19.zero_add(beaver4_tuples[6].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(22)))
+                        p_19_p_1 = p_19.zero_add(beaver4_tuples[6].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_19_p_2 = p_19.zero_add(beaver3_tuples[13].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(22)))
+                        p_19_p_2 = p_19.zero_add(beaver3_tuples[13].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_20_p = p_20.zero_add(beaver4_tuples[6].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(22)))
+                        p_20_p = p_20.zero_add(beaver4_tuples[6].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_20_p_1 = p_20.zero_add(beaver3_tuples[13].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(22)))
+                        p_20_p_1 = p_20.zero_add(beaver3_tuples[13].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_21_p = p_21.zero_add(beaver3_tuples[13].c);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(22)))
+                        p_21_p = p_21.zero_add(beaver3_tuples[13].c);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_23_p = p_23.zero_add(beaver3_tuples[14].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(25)))
+                        p_23_p = p_23.zero_add(beaver3_tuples[14].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_23_p_1 = p_23.zero_add(beaver4_tuples[7].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(26)))
+                        p_23_p_1 = p_23.zero_add(beaver4_tuples[7].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_23_p_2 = p_23.zero_add(beaver3_tuples[15].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(26)))
+                        p_23_p_2 = p_23.zero_add(beaver3_tuples[15].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_24_p = p_24.zero_add(beaver4_tuples[7].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(26)))
+                        p_24_p = p_24.zero_add(beaver4_tuples[7].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_24_p_1 = p_24.zero_add(beaver3_tuples[15].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(26)))
+                        p_24_p_1 = p_24.zero_add(beaver3_tuples[15].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_25_p = p_25.zero_add(beaver3_tuples[15].c);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(26)))
+                        p_25_p = p_25.zero_add(beaver3_tuples[15].c);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_26_p = p_26.zero_add(beaver3_tuples[16].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(28)))
+                        p_26_p = p_26.zero_add(beaver3_tuples[16].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_26_p_1 = p_26.zero_add(beaver4_tuples[8].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(29)))
+                        p_26_p_1 = p_26.zero_add(beaver4_tuples[8].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_26_p_2 = p_26.zero_add(beaver3_tuples[17].a);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(29)))
+                        p_26_p_2 = p_26.zero_add(beaver3_tuples[17].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_27_p = p_27.zero_add(beaver4_tuples[8].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(29)))
+                        p_27_p = p_27.zero_add(beaver4_tuples[8].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_27_p_1 = p_27.zero_add(beaver3_tuples[17].b);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(29)))
+                        p_27_p_1 = p_27.zero_add(beaver3_tuples[17].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
-                    p_28_p = p_28.zero_add(beaver3_tuples[17].c);
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(29)))
+                        p_28_p = p_28.zero_add(beaver3_tuples[17].c);
                 p_29_p = p_29.zero_add(beaver3_tuples[18].a);  // p[29]', mask=a37
-                p_29_p_1 = p_29.zero_add(beaver4_tuples[9].a);  // p[29]'_1, mask=a38
-                p_30_p = p_30.zero_add(beaver4_tuples[9].b);  // p[30]', mask=b38
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(30) && !cut_frac_ppa4_skip(99)))
+                    p_29_p_1 = p_29.zero_add(beaver4_tuples[9].a);
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(30) && !cut_frac_ppa4_skip(99)))
+                    p_30_p = p_30.zero_add(beaver4_tuples[9].b);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))  // CUT: consumer gate skipped -> mask carrier not needed
                     p_22_p = p_22.zero_add(triples[13].a);
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))  // CUT: consumer gate skipped -> mask carrier not needed
@@ -1172,12 +1283,29 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if (g_cut_frac_active && cut_frac_ppa4_skip(3) && current_phase != PHASE_INIT)
                     B3G_1_3_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(a_2_p, b_2_p, (g_cut_frac_active && cut_frac_identity(32, 1) && current_phase != PHASE_INIT) ? FUNC_XOR(r180, r179) : (r180), beaver3_tuples[0]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(3))
+                    {
+                        // CUT: p_1_p is public all-ones here - fold it and run one arity lower
+                        auto a_2_p_cr = a[2].zero_add(triples[BeaverTripleCount + 0].a);
+                        auto b_2_p_cr = b[2].zero_add(triples[BeaverTripleCount + 0].b);
+                        B3G_1_3_t1 = a_2_p_cr.prepare_dot_and_assign(b_2_p_cr, (g_cut_frac_active && cut_frac_identity(32, 1) && current_phase != PHASE_INIT) ? FUNC_XOR(r180, r179) : (r180), triples[BeaverTripleCount + 0].c);
+                    }
+                    else
+                        B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(a_2_p, b_2_p, (g_cut_frac_active && cut_frac_identity(32, 1) && current_phase != PHASE_INIT) ? FUNC_XOR(r180, r179) : (r180), beaver3_tuples[0]);
                 // and4_4: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r181
                 if (g_cut_frac_active && cut_frac_ppa4_skip(4) && current_phase != PHASE_INIT)
                     B3G_1_3_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, (g_cut_frac_active && cut_frac_ppa4_skip(3) && current_phase != PHASE_INIT) ? FUNC_XOR(r181, FUNC_XOR(r180, r179)) : (r181), beaver4_tuples[0]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(4))
+                    {
+                        // CUT: p_1_p_1 is public all-ones here - fold it and run one arity lower
+                        auto p_2_p_cr = p_2.zero_add(beaver3_tuples[Beaver3TupleCount + 0].a);
+                        auto a_3_p_cr = a[3].zero_add(beaver3_tuples[Beaver3TupleCount + 0].b);
+                        auto b_3_p_cr = b[3].zero_add(beaver3_tuples[Beaver3TupleCount + 0].c);
+                        B3G_1_3_t2 = p_2_p_cr.prepare_dot3_and_assign(a_3_p_cr, b_3_p_cr, (g_cut_frac_active && cut_frac_ppa4_skip(3) && current_phase != PHASE_INIT) ? FUNC_XOR(r181, FUNC_XOR(r180, r179)) : (r181), beaver3_tuples[Beaver3TupleCount + 0]);
+                    }
+                    else
+                        B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, (g_cut_frac_active && cut_frac_ppa4_skip(3) && current_phase != PHASE_INIT) ? FUNC_XOR(r181, FUNC_XOR(r180, r179)) : (r181), beaver4_tuples[0]);
                 B3G_1_3_s1 = B3G_1_3_g1 ^ B3G_1_3_t1;  // B3G_1_3_s1
                 B3G_1_3_out = B3G_1_3_s1 ^ B3G_1_3_t2;  // B3G_1_3_out
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(4)))
@@ -1186,7 +1314,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(4)))
                     B3P_1_3_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
                 else
-                    B3P_1_3_out = p_1_p_2.prepare_and3_and_assign(p_2_p_1, p_3_p, beaver3_tuples[20].a, beaver3_tuples[1]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(2) && !cut_frac_ppa4_skip(4))
+                    {
+                        // CUT: p_1_p_2 is public all-ones here - fold it and run one arity lower
+                        auto p_2_p_1_cr = p_2.zero_add(triples[BeaverTripleCount + 1].a);
+                        auto p_3_p_cr = p_3.zero_add(triples[BeaverTripleCount + 1].b);
+                        B3P_1_3_out = p_2_p_1_cr.prepare_and(p_3_p_cr, beaver3_tuples[20].a, triples[BeaverTripleCount + 1].c);
+                    }
+                    else
+                        B3P_1_3_out = p_1_p_2.prepare_and3_and_assign(p_2_p_1, p_3_p, beaver3_tuples[20].a, beaver3_tuples[1]);
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(4)) && !cut_frac_ppa4_skip(10))
                     B3P_1_3_out = B3P_1_3_out.zero_add(beaver3_tuples[20].a);  // restore designed mask for surviving consumers
                 // and_9: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r156
@@ -1198,12 +1334,29 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if (g_cut_frac_active && cut_frac_ppa4_skip(6) && current_phase != PHASE_INIT)
                     B3G_4_6_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_4_6_t1 = p_4_p.prepare_dot3_and_assign(a_5_p, b_5_p, (g_cut_frac_active && cut_frac_identity(32, 4) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r155, r156), r156) : (FUNC_XOR(r155, r156)), beaver3_tuples[2]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(6))
+                    {
+                        // CUT: p_4_p is public all-ones here - fold it and run one arity lower
+                        auto a_5_p_cr = a[5].zero_add(triples[BeaverTripleCount + 2].a);
+                        auto b_5_p_cr = b[5].zero_add(triples[BeaverTripleCount + 2].b);
+                        B3G_4_6_t1 = a_5_p_cr.prepare_dot_and_assign(b_5_p_cr, (g_cut_frac_active && cut_frac_identity(32, 4) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r155, r156), r156) : (FUNC_XOR(r155, r156)), triples[BeaverTripleCount + 2].c);
+                    }
+                    else
+                        B3G_4_6_t1 = p_4_p.prepare_dot3_and_assign(a_5_p, b_5_p, (g_cut_frac_active && cut_frac_identity(32, 4) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r155, r156), r156) : (FUNC_XOR(r155, r156)), beaver3_tuples[2]);
                 // and4_13: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=(b39-r155)
                 if (g_cut_frac_active && cut_frac_ppa4_skip(7) && current_phase != PHASE_INIT)
                     B3G_4_6_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_4_6_t2 = p_4_p_1.prepare_dot4_and_assign(p_5_p, a_6_p, b_6_p, (g_cut_frac_active && cut_frac_ppa4_skip(6) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[10].b, r155), FUNC_XOR(FUNC_XOR(r155, r156), r156)) : (FUNC_XOR(triples[10].b, r155)), beaver4_tuples[1]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(7))
+                    {
+                        // CUT: p_4_p_1 is public all-ones here - fold it and run one arity lower
+                        auto p_5_p_cr = p_5.zero_add(beaver3_tuples[Beaver3TupleCount + 1].a);
+                        auto a_6_p_cr = a[6].zero_add(beaver3_tuples[Beaver3TupleCount + 1].b);
+                        auto b_6_p_cr = b[6].zero_add(beaver3_tuples[Beaver3TupleCount + 1].c);
+                        B3G_4_6_t2 = p_5_p_cr.prepare_dot3_and_assign(a_6_p_cr, b_6_p_cr, (g_cut_frac_active && cut_frac_ppa4_skip(6) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[10].b, r155), FUNC_XOR(FUNC_XOR(r155, r156), r156)) : (FUNC_XOR(triples[10].b, r155)), beaver3_tuples[Beaver3TupleCount + 1]);
+                    }
+                    else
+                        B3G_4_6_t2 = p_4_p_1.prepare_dot4_and_assign(p_5_p, a_6_p, b_6_p, (g_cut_frac_active && cut_frac_ppa4_skip(6) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[10].b, r155), FUNC_XOR(FUNC_XOR(r155, r156), r156)) : (FUNC_XOR(triples[10].b, r155)), beaver4_tuples[1]);
                 B3G_4_6_s1 = B3G_4_6_g1 ^ B3G_4_6_t1;  // B3G_4_6_s1
                 B3G_4_6_out = B3G_4_6_s1 ^ B3G_4_6_t2;  // B3G_4_6_out
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(7)))
@@ -1212,7 +1365,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(7)))
                     B3P_4_6_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
                 else
-                    B3P_4_6_out = p_4_p_2.prepare_and3_and_assign(p_5_p_1, p_6_p, beaver3_tuples[20].b, beaver3_tuples[3]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(5) && !cut_frac_ppa4_skip(7))
+                    {
+                        // CUT: p_4_p_2 is public all-ones here - fold it and run one arity lower
+                        auto p_5_p_1_cr = p_5.zero_add(triples[BeaverTripleCount + 3].a);
+                        auto p_6_p_cr = p_6.zero_add(triples[BeaverTripleCount + 3].b);
+                        B3P_4_6_out = p_5_p_1_cr.prepare_and(p_6_p_cr, beaver3_tuples[20].b, triples[BeaverTripleCount + 3].c);
+                    }
+                    else
+                        B3P_4_6_out = p_4_p_2.prepare_and3_and_assign(p_5_p_1, p_6_p, beaver3_tuples[20].b, beaver3_tuples[3]);
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(7)) && !cut_frac_ppa4_skip(10))
                     B3P_4_6_out = B3P_4_6_out.zero_add(beaver3_tuples[20].b);  // restore designed mask for surviving consumers
                 // and_18: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r158
@@ -1224,12 +1385,29 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if (g_cut_frac_active && cut_frac_ppa4_skip(9) && current_phase != PHASE_INIT)
                     B3G_7_9_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_7_9_t1 = p_7_p.prepare_dot3_and_assign(a_8_p, b_8_p, (g_cut_frac_active && cut_frac_identity(32, 7) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r157, r158), r158) : (FUNC_XOR(r157, r158)), beaver3_tuples[4]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(9))
+                    {
+                        // CUT: p_7_p is public all-ones here - fold it and run one arity lower
+                        auto a_8_p_cr = a[8].zero_add(triples[BeaverTripleCount + 4].a);
+                        auto b_8_p_cr = b[8].zero_add(triples[BeaverTripleCount + 4].b);
+                        B3G_7_9_t1 = a_8_p_cr.prepare_dot_and_assign(b_8_p_cr, (g_cut_frac_active && cut_frac_identity(32, 7) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r157, r158), r158) : (FUNC_XOR(r157, r158)), triples[BeaverTripleCount + 4].c);
+                    }
+                    else
+                        B3G_7_9_t1 = p_7_p.prepare_dot3_and_assign(a_8_p, b_8_p, (g_cut_frac_active && cut_frac_identity(32, 7) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r157, r158), r158) : (FUNC_XOR(r157, r158)), beaver3_tuples[4]);
                 // and4_22: a2=beaver4_tuples[2].a, b2=beaver4_tuples[2].b, c2=beaver4_tuples[2].c, d2=beaver4_tuples[2].d, output mask=(c40-r157)
                 if (g_cut_frac_active && cut_frac_ppa4_skip(10) && current_phase != PHASE_INIT)
                     B3G_7_9_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_7_9_t2 = p_7_p_1.prepare_dot4_and_assign(p_8_p, a_9_p, b_9_p, (g_cut_frac_active && cut_frac_ppa4_skip(9) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[19].c, r157), FUNC_XOR(FUNC_XOR(r157, r158), r158)) : (FUNC_XOR(beaver3_tuples[19].c, r157)), beaver4_tuples[2]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(10))
+                    {
+                        // CUT: p_7_p_1 is public all-ones here - fold it and run one arity lower
+                        auto p_8_p_cr = p_8.zero_add(beaver3_tuples[Beaver3TupleCount + 2].a);
+                        auto a_9_p_cr = a[9].zero_add(beaver3_tuples[Beaver3TupleCount + 2].b);
+                        auto b_9_p_cr = b[9].zero_add(beaver3_tuples[Beaver3TupleCount + 2].c);
+                        B3G_7_9_t2 = p_8_p_cr.prepare_dot3_and_assign(a_9_p_cr, b_9_p_cr, (g_cut_frac_active && cut_frac_ppa4_skip(9) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[19].c, r157), FUNC_XOR(FUNC_XOR(r157, r158), r158)) : (FUNC_XOR(beaver3_tuples[19].c, r157)), beaver3_tuples[Beaver3TupleCount + 2]);
+                    }
+                    else
+                        B3G_7_9_t2 = p_7_p_1.prepare_dot4_and_assign(p_8_p, a_9_p, b_9_p, (g_cut_frac_active && cut_frac_ppa4_skip(9) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[19].c, r157), FUNC_XOR(FUNC_XOR(r157, r158), r158)) : (FUNC_XOR(beaver3_tuples[19].c, r157)), beaver4_tuples[2]);
                 B3G_7_9_s1 = B3G_7_9_g1 ^ B3G_7_9_t1;  // B3G_7_9_s1
                 B3G_7_9_out = B3G_7_9_s1 ^ B3G_7_9_t2;  // B3G_7_9_out
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(10)))
@@ -1238,7 +1416,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(10)))
                     B3P_7_9_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
                 else
-                    B3P_7_9_out = p_7_p_2.prepare_and3_and_assign(p_8_p_1, p_9_p, beaver3_tuples[20].c, beaver3_tuples[5]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(8) && !cut_frac_ppa4_skip(10))
+                    {
+                        // CUT: p_7_p_2 is public all-ones here - fold it and run one arity lower
+                        auto p_8_p_1_cr = p_8.zero_add(triples[BeaverTripleCount + 5].a);
+                        auto p_9_p_cr = p_9.zero_add(triples[BeaverTripleCount + 5].b);
+                        B3P_7_9_out = p_8_p_1_cr.prepare_and(p_9_p_cr, beaver3_tuples[20].c, triples[BeaverTripleCount + 5].c);
+                    }
+                    else
+                        B3P_7_9_out = p_7_p_2.prepare_and3_and_assign(p_8_p_1, p_9_p, beaver3_tuples[20].c, beaver3_tuples[5]);
                 // and_27: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r173
                 if (g_cut_frac_active && cut_frac_identity(32, 10) && current_phase != PHASE_INIT)
                     B3G_10_12_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
@@ -1248,12 +1434,29 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if (g_cut_frac_active && cut_frac_ppa4_skip(12) && current_phase != PHASE_INIT)
                     B3G_10_12_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_10_12_t1 = p_10_p.prepare_dot3_and_assign(a_11_p, b_11_p, (g_cut_frac_active && cut_frac_identity(32, 10) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r172, r173), r173) : (FUNC_XOR(r172, r173)), beaver3_tuples[6]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(12))
+                    {
+                        // CUT: p_10_p is public all-ones here - fold it and run one arity lower
+                        auto a_11_p_cr = a[11].zero_add(triples[BeaverTripleCount + 6].a);
+                        auto b_11_p_cr = b[11].zero_add(triples[BeaverTripleCount + 6].b);
+                        B3G_10_12_t1 = a_11_p_cr.prepare_dot_and_assign(b_11_p_cr, (g_cut_frac_active && cut_frac_identity(32, 10) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r172, r173), r173) : (FUNC_XOR(r172, r173)), triples[BeaverTripleCount + 6].c);
+                    }
+                    else
+                        B3G_10_12_t1 = p_10_p.prepare_dot3_and_assign(a_11_p, b_11_p, (g_cut_frac_active && cut_frac_identity(32, 10) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r172, r173), r173) : (FUNC_XOR(r172, r173)), beaver3_tuples[6]);
                 // and4_31: a3=beaver4_tuples[3].a, b3=beaver4_tuples[3].b, c3=beaver4_tuples[3].c, d3=beaver4_tuples[3].d, output mask=((b50-r171)-r172)
                 if (g_cut_frac_active && cut_frac_ppa4_skip(13) && current_phase != PHASE_INIT)
                     B3G_10_12_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_10_12_t2 = p_10_p_1.prepare_dot4_and_assign(p_11_p, a_12_p, b_12_p, (g_cut_frac_active && cut_frac_ppa4_skip(12) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(FUNC_XOR(triples[14].b, r171), r172), FUNC_XOR(FUNC_XOR(r172, r173), r173)) : (FUNC_XOR(FUNC_XOR(triples[14].b, r171), r172)), beaver4_tuples[3]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(13))
+                    {
+                        // CUT: p_10_p_1 is public all-ones here - fold it and run one arity lower
+                        auto p_11_p_cr = p_11.zero_add(beaver3_tuples[Beaver3TupleCount + 3].a);
+                        auto a_12_p_cr = a[12].zero_add(beaver3_tuples[Beaver3TupleCount + 3].b);
+                        auto b_12_p_cr = b[12].zero_add(beaver3_tuples[Beaver3TupleCount + 3].c);
+                        B3G_10_12_t2 = p_11_p_cr.prepare_dot3_and_assign(a_12_p_cr, b_12_p_cr, (g_cut_frac_active && cut_frac_ppa4_skip(12) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(FUNC_XOR(triples[14].b, r171), r172), FUNC_XOR(FUNC_XOR(r172, r173), r173)) : (FUNC_XOR(FUNC_XOR(triples[14].b, r171), r172)), beaver3_tuples[Beaver3TupleCount + 3]);
+                    }
+                    else
+                        B3G_10_12_t2 = p_10_p_1.prepare_dot4_and_assign(p_11_p, a_12_p, b_12_p, (g_cut_frac_active && cut_frac_ppa4_skip(12) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(FUNC_XOR(triples[14].b, r171), r172), FUNC_XOR(FUNC_XOR(r172, r173), r173)) : (FUNC_XOR(FUNC_XOR(triples[14].b, r171), r172)), beaver4_tuples[3]);
                 B3G_10_12_s1 = B3G_10_12_g1 ^ B3G_10_12_t1;  // B3G_10_12_s1
                 B3G_10_12_out = B3G_10_12_s1 ^ B3G_10_12_t2;  // B3G_10_12_out
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(13)))
@@ -1262,7 +1465,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(13)))
                     B3P_10_12_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
                 else
-                    B3P_10_12_out = p_10_p_2.prepare_and3_and_assign(p_11_p_1, p_12_p, beaver4_tuples[11].a, beaver3_tuples[7]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(11) && !cut_frac_ppa4_skip(13))
+                    {
+                        // CUT: p_10_p_2 is public all-ones here - fold it and run one arity lower
+                        auto p_11_p_1_cr = p_11.zero_add(triples[BeaverTripleCount + 7].a);
+                        auto p_12_p_cr = p_12.zero_add(triples[BeaverTripleCount + 7].b);
+                        B3P_10_12_out = p_11_p_1_cr.prepare_and(p_12_p_cr, beaver4_tuples[11].a, triples[BeaverTripleCount + 7].c);
+                    }
+                    else
+                        B3P_10_12_out = p_10_p_2.prepare_and3_and_assign(p_11_p_1, p_12_p, beaver4_tuples[11].a, beaver3_tuples[7]);
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(13)) && !cut_frac_ppa4_skip(22))
                     B3P_10_12_out = B3P_10_12_out.zero_add(beaver4_tuples[11].a);  // restore designed mask for surviving consumers
                 // and_36: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r160
@@ -1274,12 +1485,29 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if (g_cut_frac_active && cut_frac_ppa4_skip(15) && current_phase != PHASE_INIT)
                     B3G_13_15_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_13_15_t1 = p_13_p.prepare_dot3_and_assign(a_14_p, b_14_p, (g_cut_frac_active && cut_frac_identity(32, 13) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r159, r160), r160) : (FUNC_XOR(r159, r160)), beaver3_tuples[8]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(15))
+                    {
+                        // CUT: p_13_p is public all-ones here - fold it and run one arity lower
+                        auto a_14_p_cr = a[14].zero_add(triples[BeaverTripleCount + 8].a);
+                        auto b_14_p_cr = b[14].zero_add(triples[BeaverTripleCount + 8].b);
+                        B3G_13_15_t1 = a_14_p_cr.prepare_dot_and_assign(b_14_p_cr, (g_cut_frac_active && cut_frac_identity(32, 13) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r159, r160), r160) : (FUNC_XOR(r159, r160)), triples[BeaverTripleCount + 8].c);
+                    }
+                    else
+                        B3G_13_15_t1 = p_13_p.prepare_dot3_and_assign(a_14_p, b_14_p, (g_cut_frac_active && cut_frac_identity(32, 13) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r159, r160), r160) : (FUNC_XOR(r159, r160)), beaver3_tuples[8]);
                 // and4_40: a4=beaver4_tuples[4].a, b4=beaver4_tuples[4].b, c4=beaver4_tuples[4].c, d4=beaver4_tuples[4].d, output mask=(b42-r159)
                 if (g_cut_frac_active && cut_frac_ppa4_skip(16) && current_phase != PHASE_INIT)
                     B3G_13_15_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_13_15_t2 = p_13_p_1.prepare_dot4_and_assign(p_14_p, a_15_p, b_15_p, (g_cut_frac_active && cut_frac_ppa4_skip(15) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[11].b, r159), FUNC_XOR(FUNC_XOR(r159, r160), r160)) : (FUNC_XOR(triples[11].b, r159)), beaver4_tuples[4]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(16))
+                    {
+                        // CUT: p_13_p_1 is public all-ones here - fold it and run one arity lower
+                        auto p_14_p_cr = p_14.zero_add(beaver3_tuples[Beaver3TupleCount + 4].a);
+                        auto a_15_p_cr = a[15].zero_add(beaver3_tuples[Beaver3TupleCount + 4].b);
+                        auto b_15_p_cr = b[15].zero_add(beaver3_tuples[Beaver3TupleCount + 4].c);
+                        B3G_13_15_t2 = p_14_p_cr.prepare_dot3_and_assign(a_15_p_cr, b_15_p_cr, (g_cut_frac_active && cut_frac_ppa4_skip(15) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[11].b, r159), FUNC_XOR(FUNC_XOR(r159, r160), r160)) : (FUNC_XOR(triples[11].b, r159)), beaver3_tuples[Beaver3TupleCount + 4]);
+                    }
+                    else
+                        B3G_13_15_t2 = p_13_p_1.prepare_dot4_and_assign(p_14_p, a_15_p, b_15_p, (g_cut_frac_active && cut_frac_ppa4_skip(15) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[11].b, r159), FUNC_XOR(FUNC_XOR(r159, r160), r160)) : (FUNC_XOR(triples[11].b, r159)), beaver4_tuples[4]);
                 B3G_13_15_s1 = B3G_13_15_g1 ^ B3G_13_15_t1;  // B3G_13_15_s1
                 B3G_13_15_out = B3G_13_15_s1 ^ B3G_13_15_t2;  // B3G_13_15_out
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(16)))
@@ -1288,7 +1516,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(16)))
                     B3P_13_15_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
                 else
-                    B3P_13_15_out = p_13_p_2.prepare_and3_and_assign(p_14_p_1, p_15_p, beaver4_tuples[11].b, beaver3_tuples[9]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(14) && !cut_frac_ppa4_skip(16))
+                    {
+                        // CUT: p_13_p_2 is public all-ones here - fold it and run one arity lower
+                        auto p_14_p_1_cr = p_14.zero_add(triples[BeaverTripleCount + 9].a);
+                        auto p_15_p_cr = p_15.zero_add(triples[BeaverTripleCount + 9].b);
+                        B3P_13_15_out = p_14_p_1_cr.prepare_and(p_15_p_cr, beaver4_tuples[11].b, triples[BeaverTripleCount + 9].c);
+                    }
+                    else
+                        B3P_13_15_out = p_13_p_2.prepare_and3_and_assign(p_14_p_1, p_15_p, beaver4_tuples[11].b, beaver3_tuples[9]);
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(16)) && !cut_frac_ppa4_skip(22))
                     B3P_13_15_out = B3P_13_15_out.zero_add(beaver4_tuples[11].b);  // restore designed mask for surviving consumers
                 // and_45: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r162
@@ -1300,12 +1536,29 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if (g_cut_frac_active && cut_frac_ppa4_skip(18) && current_phase != PHASE_INIT)
                     B3G_16_18_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_16_18_t1 = p_16_p.prepare_dot3_and_assign(a_17_p, b_17_p, (g_cut_frac_active && cut_frac_identity(32, 16) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r161, r162), r162) : (FUNC_XOR(r161, r162)), beaver3_tuples[10]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(18))
+                    {
+                        // CUT: p_16_p is public all-ones here - fold it and run one arity lower
+                        auto a_17_p_cr = a[17].zero_add(triples[BeaverTripleCount + 10].a);
+                        auto b_17_p_cr = b[17].zero_add(triples[BeaverTripleCount + 10].b);
+                        B3G_16_18_t1 = a_17_p_cr.prepare_dot_and_assign(b_17_p_cr, (g_cut_frac_active && cut_frac_identity(32, 16) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r161, r162), r162) : (FUNC_XOR(r161, r162)), triples[BeaverTripleCount + 10].c);
+                    }
+                    else
+                        B3G_16_18_t1 = p_16_p.prepare_dot3_and_assign(a_17_p, b_17_p, (g_cut_frac_active && cut_frac_identity(32, 16) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r161, r162), r162) : (FUNC_XOR(r161, r162)), beaver3_tuples[10]);
                 // and4_49: a5=beaver4_tuples[5].a, b5=beaver4_tuples[5].b, c5=beaver4_tuples[5].c, d5=beaver4_tuples[5].d, output mask=(c43-r161)
                 if (g_cut_frac_active && cut_frac_ppa4_skip(19) && current_phase != PHASE_INIT)
                     B3G_16_18_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_16_18_t2 = p_16_p_1.prepare_dot4_and_assign(p_17_p, a_18_p, b_18_p, (g_cut_frac_active && cut_frac_ppa4_skip(18) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[21].c, r161), FUNC_XOR(FUNC_XOR(r161, r162), r162)) : (FUNC_XOR(beaver3_tuples[21].c, r161)), beaver4_tuples[5]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(19))
+                    {
+                        // CUT: p_16_p_1 is public all-ones here - fold it and run one arity lower
+                        auto p_17_p_cr = p_17.zero_add(beaver3_tuples[Beaver3TupleCount + 5].a);
+                        auto a_18_p_cr = a[18].zero_add(beaver3_tuples[Beaver3TupleCount + 5].b);
+                        auto b_18_p_cr = b[18].zero_add(beaver3_tuples[Beaver3TupleCount + 5].c);
+                        B3G_16_18_t2 = p_17_p_cr.prepare_dot3_and_assign(a_18_p_cr, b_18_p_cr, (g_cut_frac_active && cut_frac_ppa4_skip(18) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[21].c, r161), FUNC_XOR(FUNC_XOR(r161, r162), r162)) : (FUNC_XOR(beaver3_tuples[21].c, r161)), beaver3_tuples[Beaver3TupleCount + 5]);
+                    }
+                    else
+                        B3G_16_18_t2 = p_16_p_1.prepare_dot4_and_assign(p_17_p, a_18_p, b_18_p, (g_cut_frac_active && cut_frac_ppa4_skip(18) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[21].c, r161), FUNC_XOR(FUNC_XOR(r161, r162), r162)) : (FUNC_XOR(beaver3_tuples[21].c, r161)), beaver4_tuples[5]);
                 B3G_16_18_s1 = B3G_16_18_g1 ^ B3G_16_18_t1;  // B3G_16_18_s1
                 B3G_16_18_out = B3G_16_18_s1 ^ B3G_16_18_t2;  // B3G_16_18_out
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(19)))
@@ -1314,7 +1567,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(19)))
                     B3P_16_18_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
                 else
-                    B3P_16_18_out = p_16_p_2.prepare_and3_and_assign(p_17_p_1, p_18_p, beaver4_tuples[11].c, beaver3_tuples[11]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(17) && !cut_frac_ppa4_skip(19))
+                    {
+                        // CUT: p_16_p_2 is public all-ones here - fold it and run one arity lower
+                        auto p_17_p_1_cr = p_17.zero_add(triples[BeaverTripleCount + 11].a);
+                        auto p_18_p_cr = p_18.zero_add(triples[BeaverTripleCount + 11].b);
+                        B3P_16_18_out = p_17_p_1_cr.prepare_and(p_18_p_cr, beaver4_tuples[11].c, triples[BeaverTripleCount + 11].c);
+                    }
+                    else
+                        B3P_16_18_out = p_16_p_2.prepare_and3_and_assign(p_17_p_1, p_18_p, beaver4_tuples[11].c, beaver3_tuples[11]);
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(19)) && !cut_frac_ppa4_skip(22))
                     B3P_16_18_out = B3P_16_18_out.zero_add(beaver4_tuples[11].c);  // restore designed mask for surviving consumers
                 // and_54: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r164
@@ -1326,12 +1587,29 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if (g_cut_frac_active && cut_frac_ppa4_skip(21) && current_phase != PHASE_INIT)
                     B3G_19_21_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_19_21_t1 = p_19_p.prepare_dot3_and_assign(a_20_p, b_20_p, (g_cut_frac_active && cut_frac_identity(32, 19) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r163, r164), r164) : (FUNC_XOR(r163, r164)), beaver3_tuples[12]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(21))
+                    {
+                        // CUT: p_19_p is public all-ones here - fold it and run one arity lower
+                        auto a_20_p_cr = a[20].zero_add(triples[BeaverTripleCount + 12].a);
+                        auto b_20_p_cr = b[20].zero_add(triples[BeaverTripleCount + 12].b);
+                        B3G_19_21_t1 = a_20_p_cr.prepare_dot_and_assign(b_20_p_cr, (g_cut_frac_active && cut_frac_identity(32, 19) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r163, r164), r164) : (FUNC_XOR(r163, r164)), triples[BeaverTripleCount + 12].c);
+                    }
+                    else
+                        B3G_19_21_t1 = p_19_p.prepare_dot3_and_assign(a_20_p, b_20_p, (g_cut_frac_active && cut_frac_identity(32, 19) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r163, r164), r164) : (FUNC_XOR(r163, r164)), beaver3_tuples[12]);
                 // and4_58: a6=beaver4_tuples[6].a, b6=beaver4_tuples[6].b, c6=beaver4_tuples[6].c, d6=beaver4_tuples[6].d, output mask=(d44-r163)
                 if (g_cut_frac_active && cut_frac_ppa4_skip(22) && current_phase != PHASE_INIT)
                     B3G_19_21_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_19_21_t2 = p_19_p_1.prepare_dot4_and_assign(p_20_p, a_21_p, b_21_p, (g_cut_frac_active && cut_frac_ppa4_skip(21) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver4_tuples[10].d, r163), FUNC_XOR(FUNC_XOR(r163, r164), r164)) : (FUNC_XOR(beaver4_tuples[10].d, r163)), beaver4_tuples[6]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(22))
+                    {
+                        // CUT: p_19_p_1 is public all-ones here - fold it and run one arity lower
+                        auto p_20_p_cr = p_20.zero_add(beaver3_tuples[Beaver3TupleCount + 6].a);
+                        auto a_21_p_cr = a[21].zero_add(beaver3_tuples[Beaver3TupleCount + 6].b);
+                        auto b_21_p_cr = b[21].zero_add(beaver3_tuples[Beaver3TupleCount + 6].c);
+                        B3G_19_21_t2 = p_20_p_cr.prepare_dot3_and_assign(a_21_p_cr, b_21_p_cr, (g_cut_frac_active && cut_frac_ppa4_skip(21) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver4_tuples[10].d, r163), FUNC_XOR(FUNC_XOR(r163, r164), r164)) : (FUNC_XOR(beaver4_tuples[10].d, r163)), beaver3_tuples[Beaver3TupleCount + 6]);
+                    }
+                    else
+                        B3G_19_21_t2 = p_19_p_1.prepare_dot4_and_assign(p_20_p, a_21_p, b_21_p, (g_cut_frac_active && cut_frac_ppa4_skip(21) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver4_tuples[10].d, r163), FUNC_XOR(FUNC_XOR(r163, r164), r164)) : (FUNC_XOR(beaver4_tuples[10].d, r163)), beaver4_tuples[6]);
                 B3G_19_21_s1 = B3G_19_21_g1 ^ B3G_19_21_t1;  // B3G_19_21_s1
                 B3G_19_21_out = B3G_19_21_s1 ^ B3G_19_21_t2;  // B3G_19_21_out
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(22)))
@@ -1340,7 +1618,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(22)))
                     B3P_19_21_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
                 else
-                    B3P_19_21_out = p_19_p_2.prepare_and3_and_assign(p_20_p_1, p_21_p, beaver4_tuples[11].d, beaver3_tuples[13]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(20) && !cut_frac_ppa4_skip(22))
+                    {
+                        // CUT: p_19_p_2 is public all-ones here - fold it and run one arity lower
+                        auto p_20_p_1_cr = p_20.zero_add(triples[BeaverTripleCount + 13].a);
+                        auto p_21_p_cr = p_21.zero_add(triples[BeaverTripleCount + 13].b);
+                        B3P_19_21_out = p_20_p_1_cr.prepare_and(p_21_p_cr, beaver4_tuples[11].d, triples[BeaverTripleCount + 13].c);
+                    }
+                    else
+                        B3P_19_21_out = p_19_p_2.prepare_and3_and_assign(p_20_p_1, p_21_p, beaver4_tuples[11].d, beaver3_tuples[13]);
                 // and_63: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r166
                 if (g_cut_frac_active && cut_frac_identity(32, 23) && current_phase != PHASE_INIT)
                     B3G_23_25_g1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
@@ -1350,12 +1636,29 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if (g_cut_frac_active && cut_frac_ppa4_skip(25) && current_phase != PHASE_INIT)
                     B3G_23_25_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_23_25_t1 = p_23_p.prepare_dot3_and_assign(a_24_p, b_24_p, (g_cut_frac_active && cut_frac_identity(32, 23) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r165, r166), r166) : (FUNC_XOR(r165, r166)), beaver3_tuples[14]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(25))
+                    {
+                        // CUT: p_23_p is public all-ones here - fold it and run one arity lower
+                        auto a_24_p_cr = a[24].zero_add(triples[BeaverTripleCount + 14].a);
+                        auto b_24_p_cr = b[24].zero_add(triples[BeaverTripleCount + 14].b);
+                        B3G_23_25_t1 = a_24_p_cr.prepare_dot_and_assign(b_24_p_cr, (g_cut_frac_active && cut_frac_identity(32, 23) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r165, r166), r166) : (FUNC_XOR(r165, r166)), triples[BeaverTripleCount + 14].c);
+                    }
+                    else
+                        B3G_23_25_t1 = p_23_p.prepare_dot3_and_assign(a_24_p, b_24_p, (g_cut_frac_active && cut_frac_identity(32, 23) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r165, r166), r166) : (FUNC_XOR(r165, r166)), beaver3_tuples[14]);
                 // and4_67: a7=beaver4_tuples[7].a, b7=beaver4_tuples[7].b, c7=beaver4_tuples[7].c, d7=beaver4_tuples[7].d, output mask=(b47-r165)
                 if (g_cut_frac_active && cut_frac_ppa4_skip(26) && current_phase != PHASE_INIT)
                     B3G_23_25_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_23_25_t2 = p_23_p_1.prepare_dot4_and_assign(p_24_p, a_25_p, b_25_p, (g_cut_frac_active && cut_frac_ppa4_skip(25) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[13].b, r165), FUNC_XOR(FUNC_XOR(r165, r166), r166)) : (FUNC_XOR(triples[13].b, r165)), beaver4_tuples[7]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(26))
+                    {
+                        // CUT: p_23_p_1 is public all-ones here - fold it and run one arity lower
+                        auto p_24_p_cr = p_24.zero_add(beaver3_tuples[Beaver3TupleCount + 7].a);
+                        auto a_25_p_cr = a[25].zero_add(beaver3_tuples[Beaver3TupleCount + 7].b);
+                        auto b_25_p_cr = b[25].zero_add(beaver3_tuples[Beaver3TupleCount + 7].c);
+                        B3G_23_25_t2 = p_24_p_cr.prepare_dot3_and_assign(a_25_p_cr, b_25_p_cr, (g_cut_frac_active && cut_frac_ppa4_skip(25) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[13].b, r165), FUNC_XOR(FUNC_XOR(r165, r166), r166)) : (FUNC_XOR(triples[13].b, r165)), beaver3_tuples[Beaver3TupleCount + 7]);
+                    }
+                    else
+                        B3G_23_25_t2 = p_23_p_1.prepare_dot4_and_assign(p_24_p, a_25_p, b_25_p, (g_cut_frac_active && cut_frac_ppa4_skip(25) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(triples[13].b, r165), FUNC_XOR(FUNC_XOR(r165, r166), r166)) : (FUNC_XOR(triples[13].b, r165)), beaver4_tuples[7]);
                 B3G_23_25_s1 = B3G_23_25_g1 ^ B3G_23_25_t1;  // B3G_23_25_s1
                 B3G_23_25_out = B3G_23_25_s1 ^ B3G_23_25_t2;  // B3G_23_25_out
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(26)))
@@ -1364,7 +1667,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(26)))
                     B3P_23_25_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
                 else
-                    B3P_23_25_out = p_23_p_2.prepare_and3_and_assign(p_24_p_1, p_25_p, beaver4_tuples[12].b, beaver3_tuples[15]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(24) && !cut_frac_ppa4_skip(26))
+                    {
+                        // CUT: p_23_p_2 is public all-ones here - fold it and run one arity lower
+                        auto p_24_p_1_cr = p_24.zero_add(triples[BeaverTripleCount + 15].a);
+                        auto p_25_p_cr = p_25.zero_add(triples[BeaverTripleCount + 15].b);
+                        B3P_23_25_out = p_24_p_1_cr.prepare_and(p_25_p_cr, beaver4_tuples[12].b, triples[BeaverTripleCount + 15].c);
+                    }
+                    else
+                        B3P_23_25_out = p_23_p_2.prepare_and3_and_assign(p_24_p_1, p_25_p, beaver4_tuples[12].b, beaver3_tuples[15]);
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(26)))
                     B3P_23_25_out = B3P_23_25_out.zero_add(beaver4_tuples[12].b);  // restore designed mask for surviving consumers
                 // and_72: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r168
@@ -1376,12 +1687,29 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if (g_cut_frac_active && cut_frac_ppa4_skip(28) && current_phase != PHASE_INIT)
                     B3G_26_28_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_26_28_t1 = p_26_p.prepare_dot3_and_assign(a_27_p, b_27_p, (g_cut_frac_active && cut_frac_identity(32, 26) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r167, r168), r168) : (FUNC_XOR(r167, r168)), beaver3_tuples[16]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(28))
+                    {
+                        // CUT: p_26_p is public all-ones here - fold it and run one arity lower
+                        auto a_27_p_cr = a[27].zero_add(triples[BeaverTripleCount + 16].a);
+                        auto b_27_p_cr = b[27].zero_add(triples[BeaverTripleCount + 16].b);
+                        B3G_26_28_t1 = a_27_p_cr.prepare_dot_and_assign(b_27_p_cr, (g_cut_frac_active && cut_frac_identity(32, 26) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r167, r168), r168) : (FUNC_XOR(r167, r168)), triples[BeaverTripleCount + 16].c);
+                    }
+                    else
+                        B3G_26_28_t1 = p_26_p.prepare_dot3_and_assign(a_27_p, b_27_p, (g_cut_frac_active && cut_frac_identity(32, 26) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r167, r168), r168) : (FUNC_XOR(r167, r168)), beaver3_tuples[16]);
                 // and4_76: a8=beaver4_tuples[8].a, b8=beaver4_tuples[8].b, c8=beaver4_tuples[8].c, d8=beaver4_tuples[8].d, output mask=(c48-r167)
                 if (g_cut_frac_active && cut_frac_ppa4_skip(29) && current_phase != PHASE_INIT)
                     B3G_26_28_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0
                 else
-                    B3G_26_28_t2 = p_26_p_1.prepare_dot4_and_assign(p_27_p, a_28_p, b_28_p, (g_cut_frac_active && cut_frac_ppa4_skip(28) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[22].c, r167), FUNC_XOR(FUNC_XOR(r167, r168), r168)) : (FUNC_XOR(beaver3_tuples[22].c, r167)), beaver4_tuples[8]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(29))
+                    {
+                        // CUT: p_26_p_1 is public all-ones here - fold it and run one arity lower
+                        auto p_27_p_cr = p_27.zero_add(beaver3_tuples[Beaver3TupleCount + 8].a);
+                        auto a_28_p_cr = a[28].zero_add(beaver3_tuples[Beaver3TupleCount + 8].b);
+                        auto b_28_p_cr = b[28].zero_add(beaver3_tuples[Beaver3TupleCount + 8].c);
+                        B3G_26_28_t2 = p_27_p_cr.prepare_dot3_and_assign(a_28_p_cr, b_28_p_cr, (g_cut_frac_active && cut_frac_ppa4_skip(28) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[22].c, r167), FUNC_XOR(FUNC_XOR(r167, r168), r168)) : (FUNC_XOR(beaver3_tuples[22].c, r167)), beaver3_tuples[Beaver3TupleCount + 8]);
+                    }
+                    else
+                        B3G_26_28_t2 = p_26_p_1.prepare_dot4_and_assign(p_27_p, a_28_p, b_28_p, (g_cut_frac_active && cut_frac_ppa4_skip(28) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(beaver3_tuples[22].c, r167), FUNC_XOR(FUNC_XOR(r167, r168), r168)) : (FUNC_XOR(beaver3_tuples[22].c, r167)), beaver4_tuples[8]);
                 B3G_26_28_s1 = B3G_26_28_g1 ^ B3G_26_28_t1;  // B3G_26_28_s1
                 B3G_26_28_out = B3G_26_28_s1 ^ B3G_26_28_t2;  // B3G_26_28_out
                 if (!(g_cut_frac_active && cut_frac_ppa4_skip(29)))
@@ -1390,7 +1718,15 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(29)))
                     B3P_26_28_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
                 else
-                    B3P_26_28_out = p_26_p_2.prepare_and3_and_assign(p_27_p_1, p_28_p, beaver4_tuples[12].c, beaver3_tuples[17]);
+                    if (g_cut_frac_active && cut_frac_ppa4_skip(27) && !cut_frac_ppa4_skip(29))
+                    {
+                        // CUT: p_26_p_2 is public all-ones here - fold it and run one arity lower
+                        auto p_27_p_1_cr = p_27.zero_add(triples[BeaverTripleCount + 17].a);
+                        auto p_28_p_cr = p_28.zero_add(triples[BeaverTripleCount + 17].b);
+                        B3P_26_28_out = p_27_p_1_cr.prepare_and(p_28_p_cr, beaver4_tuples[12].c, triples[BeaverTripleCount + 17].c);
+                    }
+                    else
+                        B3P_26_28_out = p_26_p_2.prepare_and3_and_assign(p_27_p_1, p_28_p, beaver4_tuples[12].c, beaver3_tuples[17]);
                 if ((g_cut_frac_active && cut_frac_ppa4_skip(29)))
                     B3P_26_28_out = B3P_26_28_out.zero_add(beaver4_tuples[12].c);  // restore designed mask for surviving consumers
                 // and_81: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r170
@@ -1401,7 +1737,16 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 // and3_83: a18=beaver3_tuples[18].a, b18=beaver3_tuples[18].b, c18=beaver3_tuples[18].c, output mask=(r169-r170)
                 W3L1_29_31_t1 = p_29_p.prepare_dot3_and_assign(a_30_p, b_30_p, (g_cut_frac_active && cut_frac_identity(32, 29) && current_phase != PHASE_INIT) ? FUNC_XOR(FUNC_XOR(r169, r170), r170) : (FUNC_XOR(r169, r170)), beaver3_tuples[18]);
                 // and4_85: a9=beaver4_tuples[9].a, b9=beaver4_tuples[9].b, c9=beaver4_tuples[9].c, d9=beaver4_tuples[9].d, output mask=(d49-r169)
-                W3L1_29_31_t2 = p_29_p_1.prepare_dot4_and_assign(p_30_p, a_31_p, b_31_p, FUNC_XOR(beaver4_tuples[12].d, r169), beaver4_tuples[9]);  // and4_85
+                if (g_cut_frac_active && cut_frac_ppa4_skip(30) && !cut_frac_ppa4_skip(99))
+                {
+                    // CUT: p_29_p_1 is public all-ones here - fold it and run one arity lower
+                    auto p_30_p_cr = p_30.zero_add(beaver3_tuples[Beaver3TupleCount + 9].a);
+                    auto a_31_p_cr = a[31].zero_add(beaver3_tuples[Beaver3TupleCount + 9].b);
+                    auto b_31_p_cr = b[31].zero_add(beaver3_tuples[Beaver3TupleCount + 9].c);
+                    W3L1_29_31_t2 = p_30_p_cr.prepare_dot3_and_assign(a_31_p_cr, b_31_p_cr, FUNC_XOR(beaver4_tuples[12].d, r169), beaver3_tuples[Beaver3TupleCount + 9]);
+                }
+                else
+                    W3L1_29_31_t2 = p_29_p_1.prepare_dot4_and_assign(p_30_p, a_31_p, b_31_p, FUNC_XOR(beaver4_tuples[12].d, r169), beaver4_tuples[9]);
                 W3L1_29_31_s1 = W3L1_29_31_g1 ^ W3L1_29_31_t1;  // W3L1_29_31_s1
                 W3L1_29_31_out = W3L1_29_31_s1 ^ W3L1_29_31_t2;  // W3L1_29_31_out
                 W3L1_29_31_out.mask_and_send_dot_without_remask();
