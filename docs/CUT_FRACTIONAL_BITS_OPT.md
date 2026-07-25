@@ -231,7 +231,7 @@ the aggregated per-layer network statistics (LeNet, one image, party 0).
 |---------|---------------------------|--------------------------|
 | ripple-carry    | 8928 -> 7488  (-16.1%) | 0.1099 -> 0.1018  (-7.4%) |
 | prefix          | 24768 -> 24768 (unchanged) | 0.1548 -> 0.1507  (-2.6%) |
-| four-way prefix | 4320 -> 4320  (unchanged) | - |
+| four-way prefix | 4320 -> 4320  (unchanged) | - |  <!-- superseded: see the four-way update below (beaver3 6912 -> 6624 at F=5) -->
 
 Reading the table: the ripple-carry cut removes the gates themselves, so both the preprocessing
 material and the online traffic fall (and, more importantly on a high-latency link, five of
@@ -263,7 +263,43 @@ skipped gate, `complete_and()` and the operand `zero_add`s are dropped and beave
 conditional, because INIT counts per called gate and so allocates one triple fewer; an assign naming
 a skipped slot's mask reads a spare random, as that mask is no longer generated.
 
-The two remaining prefix circuits are NOT yet covered. `ppa_msb_unsafe_and_a_ab.hpp` takes its leaves
+### Update: the plain four-way circuit now skips its gates too
+
+`ppa_msb_4way_and_ab.hpp` carries the same treatment as its reshared sibling, ported gate for gate
+(the two are generated from the same circuit, so the guard conditions transplant while the mask
+expressions are rebuilt from the plain file's own masks). Beaver-3 tuples, against 6912 with the cut
+off:
+
+| FRACTIONAL | beaver3 tuples | func53 |
+|-----------|----------------|--------|
+| 5  | 6624 (-4.2%)  | 8/8 |
+| 8  | 6336 (-8.3%)  | 8/8 |
+| 10 | 5760 (-16.7%) | 8/8 |
+| 11 | 5760          | 8/8 |
+| 12 | 5760          | 7/8 - see below |
+
+LeNet over ten images at FRACTIONAL = 5 holds its 90% baseline with beaver3 1562880 -> 1497760 and
+online 1.146 -> 1.105 MB. Beaver-4 tuples are unchanged below FRACTIONAL = 22, where the only
+skippable four-way slot starts.
+
+The FRACTIONAL = 12 failure (ReLU on large magnitudes) is NOT the gate skipping: the unported file
+fails the same test at FRACTIONAL = 12 with the cut on, so it comes from the pre-existing identity
+substitution. Worth chasing separately - everything below 12 is clean.
+
+Two differences from the reshared circuit are worth remembering, because each cost a debugging run.
+The reshared circuit identity-substitutes the BOUNDARY leaf as well, so a block ending exactly on
+slice FRACTIONAL is still all-identity there; this circuit keeps that leaf raw, since a[F] and b[F]
+are the real wires feeding the output tap, so every threshold is one stricter. And `mask_and_send` is
+skipped in every phase INCLUDING INIT even where the term itself stays counted - INIT accounts for the
+send, so keeping it for INIT alone deadlocks the adder.
+
+What is still on the table here is the arity reduction for MIXED gates: a four-input dot with one
+constant operand could fold that operand locally with `mult_public` and run as a three-input gate,
+saving 15 correlated values for 7. That is not implemented - the gate's tuple is allocated at its
+original arity, so a reduced gate needs a spare lower-arity tuple, which means widening the beaver3
+pool and retrieving the extras conditionally. Today a mixed gate simply runs at full arity.
+
+`ppa_msb_unsafe_and_a_ab.hpp` is still NOT covered. It takes its leaves
 from `mult_a_known_to_evaluators` followed by `prepare_remask`/`complete_remask`, so those wires are
 dot-pending rather than standard until remasked; substituting standard-form constants there mixes the
 two share representations and the circuit produces wrong results (3/8, though the triple count does
