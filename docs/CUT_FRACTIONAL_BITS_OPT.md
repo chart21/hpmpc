@@ -385,8 +385,31 @@ triples, so `15 + 7 - 2*3 = 16` correlated values saved per adder, 8/8. LeNet at
 90% with beaver3 1497760 -> 1432640, beaver4 846560 -> 781440, boolean 976800 -> 1107040, online
 1.105 -> 1.081 MB.
 
-Only single-level reduction is done: if several operands are all-ones the gate drops one arity rather
-than several. That is correct, just not maximal, and it is the obvious next increment.
+**Multi-level.** A gate can hold several all-ones operands at once, so it emits one branch per
+reduction LEVEL: with the thresholds sorted `t1 <= t2 <= ...`, level `j` covers `[t_j, t_j+1)` and
+folds away the first `j` operands, the last window closed by the term's own zero threshold. The
+windows tile that range and are disjoint, so at most one level is live for a given FRACTIONAL and only
+the live one's reserved slot is retrieved.
+
+Two limits are deliberate. A dot term never degenerates below a real dot gate: its result must stay in
+dot-pending form for the chain accumulation, and a single surviving wire is standard. An `and` gate's
+output IS standard, so its last level is a pure retarget of the single survivor - no tuple, no
+communication - and since that level prepares nothing, its `complete_and` guard takes the extra window
+too.
+
+Gains appear wherever a 3-slice block has two or more vacant p-operands, i.e. FRACTIONAL one short of
+a block boundary, against single-level reduction:
+
+| FRACTIONAL | beaver3 | |
+|---|---|---|
+| 6 | 6624 -> 6336, online 0.006020 -> 0.005948 MB | 8/8 |
+| 9 | 6336 -> 6048 | 8/8 |
+| 5 | unchanged - no gate has two vacant p-operands there | 8/8 |
+
+At FRACTIONAL=6 the levels net out exactly as designed: the `and3` degenerates to a bare wire, giving
+back a boolean triple, while the `dot4` drops to a two-input dot and spends one - so the boolean count
+is flat and a beaver3 disappears. LeNet at FRACTIONAL=5 is identical to single-level (90%, beaver3
+1432640, beaver4 781440, online 1.081 MB), as expected at that FRACTIONAL.
 
 ### Remaining
 
