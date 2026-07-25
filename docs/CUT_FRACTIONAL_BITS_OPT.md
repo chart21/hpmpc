@@ -336,24 +336,61 @@ Two rules make this family safe, and both were learned by breaking it:
    two chains at once; the local `mult_a_known` carriers, which can never be cut, are the safe place
    to park the mask.
 
-### Still open
+### Update: the a_ab prefix circuit
 
-**The arity reduction is not implemented.** A four-input dot with one constant operand could fold that
-operand locally with `mult_public` and run as a three-input gate, trading 15 correlated values for 7.
-The reservation side is not the obstacle - `FRACTIONAL` is compile-time and INIT counts per CALLED
-gate, so calling `prepare_dot3` where the circuit used to call `prepare_dot4` already shifts the
-counts by itself; the pools just need sizing from a constexpr and the extra slots retrieving
-conditionally. What is missing is the emission: a reduced gate needs its operands re-`zero_add`ed to
-the substituted tuple's fields, since the existing carriers target the original tuple. Today a mixed
-gate simply runs at full arity.
+`ppa_msb_unsafe_and_a_ab.hpp` is covered too. Its tree gates are p-products, and a vacant p is
+all-ones rather than zero, so the zero-threshold analysis finds nothing here - it needs the identity
+treatment: an AND against all-ones is the other operand, retargeted to the designed output mask.
 
-**`ppa_msb_unsafe_and_a_ab.hpp` is still NOT covered.** Its tree gates are p-products, which are never
-zero (a vacant p is all-ones), so the zero-threshold analysis that works for the four-way a_ab circuit
-finds nothing to cut there - it needs the identity treatment instead, i.e. tracking which operands are
-constant ONE and retargeting the surviving operand. Two attempts failed at 3/8 while correctly
-lowering the triple count (15840 -> 13536), so the savings are reachable; what breaks is the mask
-algebra around its `mult_a_known` + `prepare_remask` leaves, whose wires are dot-pending until
-remasked. It takes its leaves
+Boolean triples, against 15840 with the cut off: **13536 at FRACTIONAL=5 (-14.5%)**, **11808 at
+FRACTIONAL=8 (-25.5%)**, both 8/8. LeNet over ten images at FRACTIONAL=5 keeps its 90% baseline with
+3581600 -> 3060640 triples and online unchanged at 0.5111 MB. For reference the unmodified file at
+CUT=1 was byte-identical to CUT=0 - the cut was previously a complete no-op for this circuit.
+
+Two failures at 3/8 preceded this, both the same shape - a mask read from a slot whose gate no longer
+exists. Every `prepare_remask` takes its mask from a triple field and all 15 of its slots are also
+AND-gate slots, so freeing an AND's triple left its remask reading an unallocated field: the
+freed-slot fallback now sweeps EVERY statement, not just gate assigns and zero_adds. And retargeting
+must read the OPERAND, never the wire it was retargeted from, since sources here can still be
+dot-pending ahead of their remask.
+
+Keeping every mask carrier alive to make that safe cost more than it saved - each cut gate then traded
+one AND for a net extra preprocessing delta and LeNet's online traffic rose to 0.5763 MB. Carriers are
+now dropped per OPERAND: with the branch order both-const, A-const, B-const, else, operand A is only
+read in the B-const branch, which is taken only when A is not constant, so A's carrier can go exactly
+when `FRACTIONAL > (A's highest slice)`.
+
+### Update: arity reduction
+
+Implemented for the four-way circuit. A gate holding an all-ones operand folds it away and runs one
+arity lower on a reserved tuple: `dot4 -> dot3` trades 15 correlated values for 7, `dot3 -> dot` and
+`and3 -> and` trade 7 for 3.
+
+Reservation is straightforward - `FRACTIONAL` is compile-time and INIT counts per CALLED gate, so a
+circuit calling `prepare_dot3` where it called `prepare_dot4` shifts the pool counts by itself; the
+arrays get a compile-time overhang and the reserved slots are retrieved under the same predicate that
+selects the reduced branch. The reduced gate re-`zero_add`s its operands from their sources onto the
+new tuple's fields; the original carriers and slot are skipped on the same predicate.
+
+The catch is that a reduction is only real inside a **window**. Below the first threshold nothing is
+constant; at or above the term's own zero threshold the cut removes the gate outright, and because the
+dot-term cuts deliberately keep INIT counting, INIT still runs the ORIGINAL gate there. Reserving
+across that whole range retrieves tuples nobody consumes - which appeared as the documented "only the
+last test fails" signature. Every reduction predicate is therefore `>= TH_RED && < TH_ZERO`, on the
+gate, the freed slot, the carriers and the reserved-slot retrieval alike.
+
+Measured at FRACTIONAL=5 against the cut without reduction (bool 4320, beaver3 6624, beaver4 3744):
+bool 4896, beaver3 6336, beaver4 3456 - per adder one beaver4 and one beaver3 against two boolean
+triples, so `15 + 7 - 2*3 = 16` correlated values saved per adder, 8/8. LeNet at FRACTIONAL=5 holds
+90% with beaver3 1497760 -> 1432640, beaver4 846560 -> 781440, boolean 976800 -> 1107040, online
+1.105 -> 1.081 MB.
+
+Only single-level reduction is done: if several operands are all-ones the gate drops one arity rather
+than several. That is correct, just not maximal, and it is the obvious next increment.
+
+### Remaining
+
+The `ppa_msb_unsafe_and_a_ab.hpp` notes below predate the coverage above. It takes its leaves
 from `mult_a_known_to_evaluators` followed by `prepare_remask`/`complete_remask`, so those wires are
 dot-pending rather than standard until remasked; substituting standard-form constants there mixes the
 two share representations and the circuit produces wrong results (3/8, though the triple count does
