@@ -320,15 +320,23 @@ an XOR takes the `max` (it dies only once both terms die). That is precisely `cu
 | F=8  online MB       | 0.005296 | 0.004328 (-18.3%) | |
 
 LeNet over ten images at FRACTIONAL = 5 keeps its 90% baseline with boolean triples
-2214080 -> 1888480, beaver3 976800 -> 846560, and online **0.910 -> 0.7798 MB (-14.3%)** - a far
-bigger online win than the non-a_ab circuits, because here the cut removes whole `mask_and_send`
-chains rather than just tuple consumption.
+2214080 -> 1888480, beaver3 976800 -> 846560, and online **0.910 -> 0.8205 MB (-9.8%)**.
+
+**Bounded to FRACTIONAL <= 9** (verified 8/8 at 5, 8 and 9), falling back above that to plain identity
+substitution, which is 8/8 at 12. At 10 a third complete block dies, taking a whole level-1 group with
+it, and the reduced circuit is wrong; that case is still open. Note the bound has to cover the
+retrieval guards as well as the gates - bounding the gates alone shrinks the pools while every gate
+still runs.
 
 Two rules make this family safe, and both were learned by breaking it:
 
 1. **Leave the local `mult_a_known` gates running.** Handed a share that is literally `(0, 0)` they
    return `(0, 0)` in whichever representation they produce, so nothing mixes standard with
-   dot-pending shares.
+   dot-pending shares. For the same reason `mask_and_send`/`complete` must ALWAYS run, even on a chain
+   that has gone entirely zero: those local contributions are still dot-pending and still carry their
+   own mask assigns, and the finalisation is what converts the accumulator to standard form and
+   applies the accumulated mask. Skipping it looks like a free online saving and silently corrupts the
+   wire.
 2. **Compensate a cut gate's output mask along XOR-only paths.** It is NOT "every chain the gate can
    reach": a dot gate consumed through a `mult_a_known` gate has its mask replaced by that gate's own
    output mask, so it never reaches that chain, and compensating there corrupts it. Sharing is heavy
