@@ -322,11 +322,22 @@ an XOR takes the `max` (it dies only once both terms die). That is precisely `cu
 LeNet over ten images at FRACTIONAL = 5 keeps its 90% baseline with boolean triples
 2214080 -> 1888480, beaver3 976800 -> 846560, and online **0.910 -> 0.8205 MB (-9.8%)**.
 
-**Bounded to FRACTIONAL <= 9** (verified 8/8 at 5, 8 and 9), falling back above that to plain identity
-substitution, which is 8/8 at 12. At 10 a third complete block dies, taking a whole level-1 group with
-it, and the reduced circuit is wrong; that case is still open. Note the bound has to cover the
-retrieval guards as well as the gates - bounding the gates alone shrinks the pools while every gate
-still runs.
+**Generic - no bound.** A wire can be provably zero for two different reasons, and only one is safe to
+act on: directly, because a factor is a vacant INPUT slice, or indirectly, because a derived CHAIN
+OUTPUT is zero (at FRACTIONAL >= 10 a whole block dies, so B3G_7_9_out really is zero and the level-1
+gate consuming it looks cuttable). The second is true but not locally rewritable - a chain output is a
+finalised wire carrying an accumulated mask from local carriers, and cutting its consumer corrupted
+the heap rather than merely computing a wrong value. Gates are cut only when their zero-ness traces
+back to the inputs without passing through a chain output; that drops 5 of 45 candidates and makes the
+rule hold everywhere, so savings now GROW with FRACTIONAL:
+
+| FRACTIONAL | boolean | beaver3 |
+|---|---|---|
+| 5  | 8352 (-14.7%) | 3744 (-13.3%) |
+| 10 | 7200 (-26.5%) | 3456 (-20.0%) |
+| 12 | 6336 (-35.3%) | 3168 (-26.7%) |
+
+all 8/8, against a cut-off baseline of bool 9792 / beaver3 4320.
 
 Two rules make this family safe, and both were learned by breaking it:
 
@@ -418,6 +429,23 @@ At FRACTIONAL=6 the levels net out exactly as designed: the `and3` degenerates t
 back a boolean triple, while the `dot4` drops to a two-input dot and spends one - so the boolean count
 is flat and a beaver3 disappears. LeNet at FRACTIONAL=5 is identical to single-level (90%, beaver3
 1432640, beaver4 781440, online 1.081 MB), as expected at that FRACTIONAL.
+
+### Reshared circuits
+
+`ppa_msb_4way_and_ab_reshared.hpp` now carries the arity reduction too. One convention differs and
+matters: it identity-substitutes the BOUNDARY leaf as well, so `p_i` is all-ones once `i <= FRACTIONAL`
+where the plain circuit needs `i < FRACTIONAL` - all-ones thresholds are one lower here, the same
+one-off the cut thresholds carry. Operands passed raw (no zero_add carrier) are their own source, which
+this circuit relies on more than the plain one. At FRACTIONAL=5, RESHARE_OPT=1: beaver3 6912 -> 6624
+(cut) -> 6336 (cut + arity), online 0.005516 -> 0.005012 MB, 8/8.
+
+`ppa_msb_unsafe_and_ab_reshared.hpp` (the reshared PPA) already saves random multiplications
+(8928 -> 7488, -16.1%) but its boolean triples are untouched at 15840 - its 39 AND gates are not
+classified by either analysis pass, so it needs its own leaf analysis. Not done.
+
+The `_split` variants (`ADDITIONAL_PPA_THREADS > 0`) are NOT covered: they carry an extra
+`compute_step()` method per specialization, and the retrieval-loop insertion lands wrong there, so the
+transform breaks their build. Reverted rather than shipped.
 
 ### Remaining
 
