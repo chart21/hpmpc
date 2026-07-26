@@ -454,6 +454,35 @@ CUT_FRACTIONAL_BITS_OPT=**0**, and the reshared split scores 7/8 with the cut on
 scores with the transform applied. Extending the cut there is pointless until the threaded adder path
 itself is fixed, and it cannot be validated in the meantime, so the transforms were not committed.
 
+### ResNet50 validation (10 images, CIFAR-10, FUNCTION_IDENTIFIER=171)
+
+The cut runs correctly at ResNet50 scale - no crashes, no deadlocks - and the savings hold at network
+scale, matching the func53 percentages:
+
+| | boolean triples | beaver3 | online |
+|---|---|---|---|
+| FRACTIONAL=5,  cut off -> on | 66672640 -> 56867840 (-14.7%) | 29414400 -> 25492480 (-13.3%) | 25.66 -> 23.29 MB (-9.2%) |
+| FRACTIONAL=12, cut off -> on | 66672640 -> 43141120 (-35.3%) | 29414400 -> 21570560 (-26.7%) | 25.49 -> 20.75 MB (-18.6%) |
+
+Accuracy is NOT a useful signal here and the cut is not the reason: this configuration scores at or
+below chance either way - FRACTIONAL=5 gives 10.00% both with and without the cut, and FRACTIONAL=12
+gives 0.00% WITHOUT the cut against 10.00% with it. ResNet50 does not classify in this configuration
+at all, independently of this optimization; that is a separate pre-existing problem.
+
+### BITLENGTH != 32 is blocked below the cut
+
+Neither BITLENGTH=16 nor BITLENGTH=64 builds in this repo state, and the cut is not involved. Both
+fail identically in `core/generate_beaver_tiples.hpp` with `cannot convert uint16_t* / uint64_t* to
+const Iface::uintNN_t*`: the Cheetah preprocessing interface types its buffers as
+`std::conditional_t<BIT_LEN == 32, uint32_t, uint64_t>` where `BIT_LEN` comes from `TRIPLE_BITLEN`,
+and `nn/ConvTriple` is linked as a PREBUILT shared library (`-L nn/ConvTriple/build/lib`) compiled for
+32 bits. The top-level Makefile never passes `TRIPLE_BITLEN`.
+
+So the k=8/16 circuit specializations could be given the same treatment, but no non-32 configuration
+can be built or run until ConvTriple is rebuilt for the target width - the result would be
+unvalidatable, which is why it has not been written. The prerequisite is rebuilding that library with
+`-DTRIPLE_BITLEN=<width>` and plumbing the flag through the top-level Makefile.
+
 ### Remaining
 
 The `ppa_msb_unsafe_and_a_ab.hpp` notes below predate the coverage above. It takes its leaves
