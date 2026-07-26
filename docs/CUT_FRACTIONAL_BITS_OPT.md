@@ -454,20 +454,27 @@ CUT_FRACTIONAL_BITS_OPT=**0**, and the reshared split scores 7/8 with the cut on
 scores with the transform applied. Extending the cut there is pointless until the threaded adder path
 itself is fixed, and it cannot be validated in the meantime, so the transforms were not committed.
 
-### ResNet50 validation (10 images, CIFAR-10, FUNCTION_IDENTIFIER=171)
+### ResNet50 validation (10 images, CIFAR-10, FUNCTION_IDENTIFIER=171, FRACTIONAL=5)
 
-The cut runs correctly at ResNet50 scale - no crashes, no deadlocks - and the savings hold at network
-scale, matching the func53 percentages:
+Use the MATCHED model/dataset pair - `ResNet50_avg_CIFAR-10_standard_best.bin` with
+`CIFAR-10_standard_test_images.bin`, i.e. `resnet50_env.sh` unmodified. Pairing the `custom` weights
+with the `standard` images (or vice versa) silently yields chance accuracy.
 
-| | boolean triples | beaver3 | online |
+| config | accuracy | boolean triples | online |
 |---|---|---|---|
-| FRACTIONAL=5,  cut off -> on | 66672640 -> 56867840 (-14.7%) | 29414400 -> 25492480 (-13.3%) | 25.66 -> 23.29 MB (-9.2%) |
-| FRACTIONAL=12, cut off -> on | 66672640 -> 43141120 (-35.3%) | 29414400 -> 21570560 (-26.7%) | 25.49 -> 20.75 MB (-18.6%) |
+| RCA, no optimizations, cut OFF | 70.00% | 60789760 | 8.008 MB |
+| RCA, no optimizations, cut ON  | **80.00%** | 50984960 (-16.1%) | 6.782 MB (-15.3%) |
+| PPA4, no optimizations, cut OFF | 80.00% | 29414400 | 32.77 MB |
 
-Accuracy is NOT a useful signal here and the cut is not the reason: this configuration scores at or
-below chance either way - FRACTIONAL=5 gives 10.00% both with and without the cut, and FRACTIONAL=12
-gives 0.00% WITHOUT the cut against 10.00% with it. ResNet50 does not classify in this configuration
-at all, independently of this optimization; that is a separate pre-existing problem.
+The cut is correct at ResNet50 scale and delivers its usual savings; the 70 -> 80% difference is one
+image out of ten, i.e. noise at this sample size, not an improvement.
+
+**A2B_CONV_BAKE breaks ResNet50, and it is not the cut.** With
+`A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1` the network scores 10.00% with the cut
+OFF and 10.00% with it ON (0.00% at FRACTIONAL=12 with the cut off). Bisected: plain RCA is fine with
+and without the cut, PPA4 alone is fine, so the failure is in the bake path - the same
+still-open item as the A2B_ONLINE_OPT conv-mask bake. LeNet does not expose it (it has no BatchNorm and
+is far shallower), which is why the 22-cell LeNet matrix stayed green.
 
 ### BITLENGTH != 32 is blocked below the cut
 
