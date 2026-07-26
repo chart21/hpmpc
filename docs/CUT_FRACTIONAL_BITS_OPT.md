@@ -469,12 +469,26 @@ with the `standard` images (or vice versa) silently yields chance accuracy.
 The cut is correct at ResNet50 scale and delivers its usual savings; the 70 -> 80% difference is one
 image out of ten, i.e. noise at this sample size, not an improvement.
 
-**A2B_CONV_BAKE breaks ResNet50, and it is not the cut.** With
-`A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1` the network scores 10.00% with the cut
-OFF and 10.00% with it ON (0.00% at FRACTIONAL=12 with the cut off). Bisected: plain RCA is fine with
-and without the cut, PPA4 alone is fine, so the failure is in the bake path - the same
-still-open item as the A2B_ONLINE_OPT conv-mask bake. LeNet does not expose it (it has no BatchNorm and
-is far shallower), which is why the 22-cell LeNet matrix stayed green.
+**The A_KNOWN_TO_EVALUATORS_OPT (a_ab) adder path breaks ResNet50, and it is not the cut and not the
+bake.** Full bisect at FRACTIONAL=5 with matched weights:
+
+| config | accuracy |
+|---|---|
+| RCA, no optimizations, cut off / on | 70% / 80% |
+| PPA4, no optimizations, cut off | 80% |
+| a_ab adder ONLY - `A_KNOWN_TO_EVALUATORS_OPT=1`, online-opt OFF, bake OFF, **cut OFF** | **10%** |
+| a_ab + `A2B_ONLINE_OPT=1`, bake off, cut on | 0% |
+| a_ab + `A2B_ONLINE_OPT=1` + `A2B_CONV_BAKE=1`, cut off / on | 10% / 10% |
+
+The third row is the root cause: with every optimization in this document disabled and the bake
+disabled, simply selecting the a_ab adder drops ResNet50 to chance. Disabling the bake alone does NOT
+recover it, so the conv-mask bake is a red herring here.
+
+func53 passes 8/8 and LeNet holds 90% on the same a_ab path, so whatever fails needs ResNet50's
+structure - BatchNorm, depth, or the residual adds - to appear. Worth noting for whoever picks this
+up: the bake compensates for exactly ONE post-GEMM operation, `add_bias` via `g_bake_bias_l`. Nothing
+invalidates a committed mask when BatchNorm or a skip-add changes it between the conv and the ReLU,
+which is a real gap in that design even though it is not what this bisect is pointing at.
 
 ### BITLENGTH != 32 is blocked below the cut
 
