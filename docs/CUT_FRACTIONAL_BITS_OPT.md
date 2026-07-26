@@ -439,13 +439,20 @@ one-off the cut thresholds carry. Operands passed raw (no zero_add carrier) are 
 this circuit relies on more than the plain one. At FRACTIONAL=5, RESHARE_OPT=1: beaver3 6912 -> 6624
 (cut) -> 6336 (cut + arity), online 0.005516 -> 0.005012 MB, 8/8.
 
-`ppa_msb_unsafe_and_ab_reshared.hpp` (the reshared PPA) already saves random multiplications
-(8928 -> 7488, -16.1%) but its boolean triples are untouched at 15840 - its 39 AND gates are not
-classified by either analysis pass, so it needs its own leaf analysis. Not done.
+`ppa_msb_unsafe_and_ab_reshared.hpp` (the reshared PPA) now cuts its boolean-triple gates as well:
+15840 -> 14688 at FRACTIONAL=5 (-7.3%) and -> 12672 at FRACTIONAL=12 (-20%), 8/8, on top of the random
+multiplications it already saved (8928 -> 7488). Two parser gaps had hidden the whole circuit from the
+analysis: it writes its identity substitution as a MULTI-LINE ternary (statements are now assembled
+logically, accumulating until the parens balance and the text ends in ';'), and the freed-slot
+fallback regex matched the TAIL of `random_triples[2].b` and rewrote it to `random_(...)` - it now
+requires a name boundary, which also protects `beaver3_tuples[N]` in the other pass. 25 of 39
+candidate gates are classified; the rest keep unresolved leaves and are left alone.
 
-The `_split` variants (`ADDITIONAL_PPA_THREADS > 0`) are NOT covered: they carry an extra
-`compute_step()` method per specialization, and the retrieval-loop insertion lands wrong there, so the
-transform breaks their build. Reverted rather than shipped.
+The `_split` variants (`ADDITIONAL_PPA_THREADS > 0`) are NOT covered, and the blocker is not the cut:
+that path fails on its own. Pristine `ppa_msb_4way_and_a_ab_split.hpp` scores 3/8 at FRACTIONAL=5 with
+CUT_FRACTIONAL_BITS_OPT=**0**, and the reshared split scores 7/8 with the cut on - identical to the
+scores with the transform applied. Extending the cut there is pointless until the threaded adder path
+itself is fixed, and it cannot be validated in the meantime, so the transforms were not committed.
 
 ### Remaining
 
