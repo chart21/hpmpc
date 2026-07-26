@@ -941,7 +941,9 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 static constexpr int b3_skip_th_arz[24] = {0, 3, 0, 6, 0, 9, 0, 12, 0, 15, 0, 18, 0, 21, 0, 25, 0, 28, 0, 0, 0, 0, 0, 0};
                 for (int i = 0; i < Beaver3TupleCount; ++i)
                 {
-                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(b3_skip_th[i]) || (cut_frac_ppa4_skip(b3_skip_th_ar[i]) && !cut_frac_ppa4_skip(b3_skip_th_arz[i]))))
+                    if (!((g_cut_frac_active && cut_frac_ppa4_skip(b3_skip_th[i]))
+                          || (g_cut_frac_active && cut_frac_ppa4_skip(b3_skip_th_ar[i])
+                              && !cut_frac_ppa4_skip(b3_skip_th_arz[i]))))
                         beaver3_tuples[i] = retrieveBeaver3Tuple<DATATYPE>();
                 }
                     static constexpr int cut_extra_b3_th[1] = {29};
@@ -958,7 +960,9 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 static constexpr int b4_skip_th_arz[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 99, 0, 0, 0};
                 for (int i = 0; i < Beaver4TupleCount; ++i)
                 {
-                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(b4_skip_th[i]) || (cut_frac_ppa4_skip(b4_skip_th_ar[i]) && !cut_frac_ppa4_skip(b4_skip_th_arz[i]))))
+                    if (!((g_cut_frac_active && cut_frac_ppa4_skip(b4_skip_th[i]))
+                          || (g_cut_frac_active && cut_frac_ppa4_skip(b4_skip_th_ar[i])
+                              && !cut_frac_ppa4_skip(b4_skip_th_arz[i]))))
                         beaver4_tuples[i] = retrieveBeaver4Tuple<DATATYPE>();
                 }
             }
