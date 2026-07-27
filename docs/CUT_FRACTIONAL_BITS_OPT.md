@@ -490,6 +490,41 @@ up: the bake compensates for exactly ONE post-GEMM operation, `add_bias` via `g_
 invalidates a committed mask when BatchNorm or a skip-add changes it between the conv and the ReLU,
 which is a real gap in that design even though it is not what this bisect is pointing at.
 
+### Full adder x optimization matrix (FRACTIONAL=5)
+
+Every combination of the three adders with the three optimization modes, each run with the cut ON and
+OFF. `plain` = no A2B/reshare optimizations; `a2b` = `A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1
+A2B_CONV_BAKE=1` (the first two must be enabled together); `reshared` = `RESHARE_OPT=1`.
+
+func53 unit tests: **8/8 in all 18 runs**. LeNet, 10 images, matched standard/standard pair:
+**100.00% in all 18 runs**. So the cut is correct, and accuracy-neutral, in all nine configurations.
+
+LeNet preprocessing / online, cut off -> on:
+
+| adder | mode | boolean triples | online MB |
+|---|---|---|---|
+| RCA  | plain    | 2018720 -> 1693120 (-16.1%) | 0.3239 -> 0.2832 (-12.6%) |
+| RCA  | a2b      | 1953600 -> 1628000 (-16.7%) | 0.3076 -> 0.2669 (-13.2%) |
+| RCA  | reshared | 1953600 -> 1628000 (-16.7%) | 0.3158 -> 0.2751 (-12.9%) |
+| PPA  | plain    | 5600320 -> 4818880 (-14.0%) | 1.016 -> 0.9751 (-4.0%) |
+| PPA  | a2b      | 3581600 -> 3060640 (-14.5%) | 0.5111 unchanged |
+| PPA  | reshared | 3581600 -> 3321120 (-7.3%)  | 0.7635 -> 0.7228 (-5.3%) |
+| PPA4 | plain    | 976800 -> 1107040 (see note) | 1.146 -> 1.081 (-5.7%) |
+| PPA4 | a2b      | 2214080 -> 1888480 (-14.7%) | 0.910 -> 0.8367 (-8.1%) |
+| PPA4 | reshared | 260480 unchanged             | 1.057 -> 0.9263 (-12.4%) |
+
+Two rows need reading carefully. **PPA4 plain is the only cell where boolean triples go UP** - that is
+the arity reduction trading one beaver4 (15 correlated values) and one beaver3 (7) for two boolean
+triples (3 each) per adder, a net -16 values; judging it on the boolean count alone reads as a
+regression. **The reshared circuits spend random multiplications** where the others spend triples, so
+their win shows up there instead (func53: PPA 8928 -> 7488, PPA4 3168 -> 2592).
+
+**Model/dataset pairing.** MNIST and CIFAR-10 each ship `standard` and `custom` preprocessed variants
+for BOTH the weights and the test set, and they must match. Pairing `LeNet5_MNIST_custom_best.bin`
+with `MNIST_standard_test_images.bin` costs one image in ten on some configurations (90% instead of
+100%) - verified by running the same build both ways. On ResNet50 the same mismatch is catastrophic
+rather than marginal (chance accuracy). Use the env scripts unmodified.
+
 ### BITLENGTH != 32 is blocked below the cut
 
 Neither BITLENGTH=16 nor BITLENGTH=64 builds in this repo state, and the cut is not involved. Both
