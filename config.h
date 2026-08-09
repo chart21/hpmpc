@@ -889,3 +889,20 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef PHASE_PRE
 #define PHASE_PRE 2
 #endif
+
+#ifndef ROT_PREPROCESSING_OPT
+#define ROT_PREPROCESSING_OPT 0
+#endif
+#ifndef RCA_MSB
+#define RCA_MSB 0
+#endif
+
+// Generic (protocol-independent) eligibility for CUT_FRACTIONAL_BITS_OPT. The precondition is
+// value-level - the wire went through a real truncation by FRACTIONAL bits, so its top FRACTIONAL
+// slices are sign extension - and holds for ANY protocol. CUT_FRAC_ELIGIBLE (protocols/beaver_triples.hpp)
+// covers the ROT/beaver circuits of the 2PC path; this covers the generic BooleanAdder_MSB that the
+// 3PC and 4PC protocols use, where none of that machinery exists (beaver_triples.hpp is not even
+// included, so CUT_FRAC_ELIGIBLE is undefined and evaluates to 0 there).
+#define CUT_FRAC_ELIGIBLE_GENERIC                                                                  \
+    (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && ROT_PREPROCESSING_OPT == 0 &&           \
+     RCA_MSB == 1 && BITLENGTH == 32 && FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3)

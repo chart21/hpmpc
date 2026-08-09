@@ -531,6 +531,41 @@ with `MNIST_standard_test_images.bin` costs one image in ten on some configurati
 100%) - verified by running the same build both ways. On ResNet50 the same mismatch is catastrophic
 rather than marginal (chance accuracy). Use the env scripts unmodified.
 
+### 3PC and 4PC
+
+The cut is implemented for the generic `BooleanAdder_MSB` (`adders/rca_msb.hpp`) that the 3PC and 4PC
+protocols use. It needs nothing protocol-specific: the ripple runs from the LSB upwards, so the cut is
+just "stop at slice FRACTIONAL and read the sum bit there" - the vacant slices are never read, and the
+last FRACTIONAL rounds with their AND gates and communication never happen. Eligibility comes from
+`CUT_FRAC_ELIGIBLE_GENERIC` (config.h) rather than `CUT_FRAC_ELIGIBLE`, which lives in
+beaver_triples.hpp and is not even included on these protocols.
+
+Verified on func53, FRACTIONAL=5, `RCA_MSB=1`, deterministic across repeats:
+
+| protocol | | cut off | cut on |
+|---|---|---|---|
+| trio (5) | 3PC | 8/8 | 8/8, P1->P2 0.00582 -> 0.00570 MB, P2->P0 0.00494 -> 0.00482 MB |
+| Quad (10) | 4PC | 8/8 | 8/8, P0 0.01148 -> 0.01136 MB, P1 0.005948 -> 0.005828 MB |
+
+Every channel carrying adder traffic drops; the others are unchanged.
+
+**LeNet cannot verify this on 3PC/4PC.** The LeNet harness is nondeterministic on both: the same
+binary run repeatedly gives all-parties-0% on some runs and a party-dependent mix of 0% and 100% on
+others. It is not the cut - the pattern is identical with the cut on and off, and it reproduces at
+this PR's BASE commit (worktree build), so it predates the branch. func53 is deterministic on both
+protocols and is what the table above rests on.
+
+Two pre-existing build breaks had to be fixed before any 3PC/4PC configuration compiled at all:
+`g_bake_batch_offset` and the bias-bake pointers were declared inside a `PRE`/`HAS_POST_PROTOCOL`
+guard while the conv/FC layers assign them unconditionally, and `protocol_executer.hpp` reset
+`curr_boolean_triple_index` outside the `BEAVER` guard that includes its declaration. The base commit
+compiled 4PC fine, so this branch introduced the first one.
+
+Protocol coverage is narrower than the labels suggest, and this is not related to the cut: rep3,
+sharemind, astra and Tetrad do not build for this LeNet path at all - `Replicated_Share` and friends
+are missing `mask_and_send_dot_with_trunc` / `complete_mult_with_trunc`. Only trio (3PC) and Quad
+(4PC) were testable.
+
 ### BITLENGTH != 32 is blocked below the cut
 
 Neither BITLENGTH=16 nor BITLENGTH=64 builds in this repo state, and the cut is not involved. Both

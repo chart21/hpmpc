@@ -93,13 +93,6 @@ uint64_t g_mwk_p1_fc_masks_consume = 0;
 // adders consume the layer's random multiplications / beaver-3 tuples GLOBALLY across the batch.
 // The layer sets this to (element * N) around each per-element GEMM so the reshare bake sees the
 // batch-global output index. FC runs a single GEMM with a global index -> stays 0.
-uint64_t g_bake_batch_offset = 0;
-// RESHARE_OPT: a layer that adds a SHARED bias after its GEMM shifts the output wire's mask by the
-// bias mask share, which would destroy the bake. The layer publishes its effective bias mask shares
-// (this party's l of exactly what add_bias will add, indexed by output_index % len) around the GEMM
-// so the bake can pre-compensate: l_gemm := -negl - l_bias => final ReLU-input mask == -negl.
-const DATATYPE* g_bake_bias_l = nullptr;
-uint64_t g_bake_bias_len = 0;
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
 // CUT_FRACTIONAL_BITS_OPT (see docs): under TRUNC_DELAYED == 0, this wire's true (reconstructed)
@@ -108,6 +101,12 @@ uint64_t send_in_last_round[num_players - 1] = {0};
 // of MODELWEIGHTS_KNOWN_DURING_PREPROCESSING - the bound comes from the truncation invariant, not
 // from any mask-construction trick.
 bool g_cut_frac_active = false;
+// Declared unconditionally: the conv/FC layers set these around every GEMM regardless of protocol,
+// while the buffers they sit next to only exist for the preprocessing protocols. Keeping them inside
+// that guard broke every 3PC/4PC build.
+uint64_t g_bake_batch_offset = 0;
+const DATATYPE* g_bake_bias_l = nullptr;
+uint64_t g_bake_bias_len = 0;
 uint64_t num_generated[num_players * player_multiplier] = {0};
 
 int use_srng_for_inputs = 1;
