@@ -121,12 +121,18 @@ previously required TRUNC_DELAYED=1 for PPA and PPA4.
 
 ## Remaining work
 
-* The `RESHARE_OPT=0` twins (`*_and_ab.hpp`) and `A_KNOWN_TO_EVALUATORS_OPT` variants are
-  unpatched and guarded off (the cut no-ops there).
-* `BITLENGTH != 32` circuits (k=8/16 specializations) untouched (guarded).
-* The PPA4 tuple gates still run on the constant inputs (correct but not free); restructuring
-  them to actually drop tuple/communication consumption for fully-vacant blocks is a further
-  optimization with the same stream-count discipline.
+(This list is historical - the first and third items were completed later in the branch; see the
+updates further down for the measurements.)
+
+* ~~The `RESHARE_OPT=0` twins (`*_and_ab.hpp`) and `A_KNOWN_TO_EVALUATORS_OPT` variants are
+  unpatched and guarded off~~ - DONE: all nine circuits implement the cut, verified 8/8 on func53
+  and 100% on LeNet across the full adder x optimization matrix.
+* `BITLENGTH != 32` circuits (k=8/16 specializations) untouched (guarded). STILL OPEN, and the
+  blocker is below the cut: no non-32-bit configuration builds at all, because ConvTriple is linked
+  as a prebuilt 32-bit library.
+* ~~The PPA4 tuple gates still run on the constant inputs (correct but not free); restructuring
+  them to actually drop tuple/communication consumption~~ - DONE: fully-vacant gates are skipped and
+  consume no tuple, and gates with an all-ones operand run at reduced arity on a reserved tuple.
 
 ## Historical note: two invalid validation eras
 

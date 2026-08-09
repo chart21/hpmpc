@@ -87,20 +87,24 @@ D. MaxPool correctness under BOTH optimization families (fixed this session)
 2. WHAT IS BROKEN OR NOT SUPPORTED (known, documented)
 --------------------------------------------------------------------------------
 
-- PUBLIC_WEIGHTS=1 together with the arithmetic-to-boolean bake: not
-  supported. Under public weights even the test re-masking helper takes a
-  different code path, so no mask is committed at all; unit tests drop to
-  3 of 8 and LeNet to 0 percent. Public weights currently require the
-  reshare-simulation family (row B above), which handles them via its
-  documented fallback. Supporting the bake here would require solving the
-  "choose the party-one mask through the public weight matrix" problem
-  (same blocker class as the deferred PUBLIC_WEIGHTS prescription task).
+- PUBLIC_WEIGHTS=1 together with the arithmetic-to-boolean bake: still not
+  supported, but the numbers previously recorded here (3 of 8 and 0 percent)
+  were stale, and the configuration did not even COMPILE with
+  TRUNC_DELAYED=0. The bias pre-compensation in the convolution and
+  fully-connected layers tested TRUNC_DELAYED before PUBLIC_WEIGHTS, so with a
+  public bias it called get_share() on a plain integer; the "public bias
+  carries no mask" branch was unreachable whenever TRUNC_DELAYED was zero. The
+  guard order is now fixed, and with it the configuration builds and reaches
+  5 of 8 unit tests with LeNet at 20 percent. Still wrong, so still
+  unsupported - the remaining blocker is the documented one: under public
+  weights the layers multiply locally, so there is no fresh output mask to
+  commit the bake into.
 
-- COMPUTE_ARGMAX=1 (the final argument-maximum computed inside the secure
-  computation instead of on revealed outputs): has the same
-  unbaked-comparison structure that MaxPool had, and would need the same
-  re-mask-plus-cut treatment. All current tests reveal the logits and take
-  the argument maximum in the clear, so this is not exercised.
+- COMPUTE_ARGMAX=1 was previously listed here as unsupported. It is NOT: it
+  passes 8 of 8 unit tests and gives LeNet 100 percent, verified with the cut
+  enabled in both the plain and the arithmetic-to-boolean-bake configurations.
+  The concern recorded here (that it shares MaxPool's unbaked-comparison
+  structure and would need the same treatment) does not hold in practice.
 
 - The plain boolean AND test in the basic-primitives suite
   (FUNCTION_IDENTIFIER 54) fails under EVERY configuration, including the
@@ -116,10 +120,14 @@ D. MaxPool correctness under BOTH optimization families (fixed this session)
   correct but costs one extra multiplication triple and one communication
   round for the first layer's inputs.
 
-- The parallel-prefix families (plain and a-known flavours) accept the cut and
-  are correct under it, but still evaluate the substituted slices on constants;
-  only the ripple-carry family (all three flavours) and the reshared prefix
-  families actually skip gates. See docs/CUT_FRACTIONAL_BITS_OPT.md.
+- (RESOLVED, was: "the parallel-prefix families only evaluate the substituted
+  slices on constants".) Every one of the nine msb circuits now SKIPS the vacant
+  gates instead of evaluating them: the gates consume no beaver material and do
+  no online communication, and gates left holding an all-ones operand run at
+  reduced arity on a reserved tuple. Verified over the full adder x optimization
+  matrix at FRACTIONAL=5 - func53 8 of 8 and LeNet 100 percent in all nine
+  configurations, with the cut both on and off. Per-cell savings are tabulated in
+  docs/CUT_FRACTIONAL_BITS_OPT.md.
 
 --------------------------------------------------------------------------------
 3. WHY SOME UNIT-TEST RUNS REPORT "PASSED 6 OUT OF 8"

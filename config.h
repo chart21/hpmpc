@@ -312,8 +312,12 @@ inline int base_port = BASE_PORT;  // temporary solution
 // went through a real truncation by FRACTIONAL bits), so those slices are redundant and no gates are
 // needed for them (see docs/CUT_FRACTIONAL_BITS_OPT.md). Works for MODELWEIGHTS_KNOWN_DURING_PREPROCESSING
 // either 0 or 1 (the bound comes from the truncation invariant, not from any mask-construction trick) and
-// for any FRACTIONAL in [1, BITLENGTH-3]. Implemented for the RESHARE_OPT=1 generated circuits of all
-// three adders (RCA, PPA, PPA4, k=32); other circuit variants safely no-op (see CUT_FRAC_ELIGIBLE).
+// for any FRACTIONAL in [1, BITLENGTH-3]. Implemented for ALL NINE msb circuits: each of the three
+// adders (RCA, PPA, PPA4, k=32) in its plain, reshared and a-known-to-evaluators flavour, and every
+// one of them SKIPS the vacant gates rather than evaluating them on constants. Verified across the
+// full 3x3 matrix at FRACTIONAL=5: func53 8/8 and LeNet 100% in all nine, cut on and off.
+// BITLENGTH != 32 stays out of scope - see docs/CUT_FRACTIONAL_BITS_OPT.md, the blocker is the
+// 32-bit-only ConvTriple preprocessing library, not the circuits.
 #endif
 
 #ifndef A2B_ROUND_OPT_SIM
