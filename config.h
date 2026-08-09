@@ -896,6 +896,12 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef RCA_MSB
 #define RCA_MSB 0
 #endif
+#ifndef PPA_MSB
+#define PPA_MSB 0
+#endif
+#ifndef PPA4_MSB
+#define PPA4_MSB 0
+#endif
 
 // Generic (protocol-independent) eligibility for CUT_FRACTIONAL_BITS_OPT. The precondition is
 // value-level - the wire went through a real truncation by FRACTIONAL bits, so its top FRACTIONAL
@@ -905,4 +911,5 @@ inline int base_port = BASE_PORT;  // temporary solution
 // included, so CUT_FRAC_ELIGIBLE is undefined and evaluates to 0 there).
 #define CUT_FRAC_ELIGIBLE_GENERIC                                                                  \
     (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && ROT_PREPROCESSING_OPT == 0 &&           \
-     RCA_MSB == 1 && BITLENGTH == 32 && FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3)
+     (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1) && BITLENGTH == 32 && FRACTIONAL >= 1 &&        \
+     FRACTIONAL <= BITLENGTH - 3)

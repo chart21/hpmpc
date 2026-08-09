@@ -342,7 +342,7 @@ class PPA_MSB_4Way
                 break;
             case 2:
                 complete_W4_3(msb);
-                msb = msb ^ (a[0] ^ b[0]);
+                msb = msb ^ (cut_on() ? (a[FRACTIONAL] ^ b[FRACTIONAL]) : (a[0] ^ b[0]));
                 break;
             default:
                 break;
@@ -445,7 +445,7 @@ class PPA_MSB_4Way
                 break;
             case 2:
                 complete_W5(msb);
-                msb = (a[0] ^ b[0]) ^ msb;
+                msb = (cut_on() ? (a[FRACTIONAL] ^ b[FRACTIONAL]) : (a[0] ^ b[0])) ^ msb;
                 break;
             default:
                 break;
@@ -530,7 +530,7 @@ class PPA_MSB_4Way
                 break;
             case 3:
                 complete_W3(msb);
-                msb = msb ^ a[0] ^ b[0];
+                msb = msb ^ (cut_on() ? (a[FRACTIONAL] ^ b[FRACTIONAL]) : (a[0] ^ b[0]));
                 break;
 
             default:
@@ -887,9 +887,23 @@ class PPA_MSB_4Way
         }
     }
 
+    // CUT_FRACTIONAL_BITS_OPT for the generic (3PC/4PC) four-way tree. Same device as the 2PC path:
+    // write PUBLIC constants into the vacant slices so that g = a & b = 0 and p = a ^ b = 1 arise on
+    // their own, and every block function then computes the reduced product through the completely
+    // normal machinery. Slice 0 is vacant too - it is the numeric MSB - so the output tap moves to the
+    // boundary slice, whose raw pair is left untouched.
+    static constexpr bool cut_supported = (CUT_FRAC_ELIGIBLE_GENERIC && k == BITLENGTH);
+    static bool cut_on() { return cut_supported && g_cut_frac_active; }
+
     PPA_MSB_4Way(Bitset& x0, Bitset& x1, Share& y0) : a(x0), b(x1), msb(y0)
     {
         level = 0;
+        if (cut_on())
+            for (int i = 0; i < FRACTIONAL; ++i)
+            {
+                a[i] = Share(SET_ALL_ONE());   // p := 1
+                b[i] = Share(SET_ALL_ZERO());  // g := 0
+            }
         if constexpr (k == 8)
             v.reserve(3);  // 4 * online phase
         else if constexpr (k == 16)

@@ -540,14 +540,42 @@ last FRACTIONAL rounds with their AND gates and communication never happen. Elig
 `CUT_FRAC_ELIGIBLE_GENERIC` (config.h) rather than `CUT_FRAC_ELIGIBLE`, which lives in
 beaver_triples.hpp and is not even included on these protocols.
 
-Verified on func53, FRACTIONAL=5, `RCA_MSB=1`, deterministic across repeats:
+All three adders are covered, by the same three devices as the 2PC path:
 
-| protocol | | cut off | cut on |
+* **RCA** (`rca_msb.hpp`): stop the ripple at slice FRACTIONAL and read the sum bit there. The last
+  FRACTIONAL rounds, with their AND gates and communication, never happen.
+* **PPA** (`ppa_msb_unsafe.hpp`): identity substitution with EXACT constant tracking. `cst[i]` marks a
+  prefix wire still holding the operator identity `(g,p) = (0,1)`; a wire stays identity only while
+  every slice it aggregates does, so gates are skipped at every tree depth, not just the leaves. A
+  combine whose low wire is identity is dropped outright; one whose current wire is identity
+  degenerates to a local copy. Completion consults a separate `skipped[]` record, because `cst[]` is
+  mutated during prepare and cannot be re-derived afterwards.
+* **PPA4** (`ppa_msb_4_way.hpp`): public constants written into the vacant slices (slice 0 included -
+  it feeds a dot4 - exactly as the 2PC A2B does), so the block functions compute the reduced product
+  through the normal machinery, and the output tap moves to the boundary slice.
+
+Verified on func53, FRACTIONAL=5, deterministic across repeats. **All twelve runs pass 8/8** -
+protocols 5 and 12, each adder, cut on and off:
+
+| protocol | adder | correctness | online traffic, cut off -> on |
 |---|---|---|---|
-| trio (5) | 3PC | 8/8 | 8/8, P1->P2 0.00582 -> 0.00570 MB, P2->P0 0.00494 -> 0.00482 MB |
-| Quad (10) | 4PC | 8/8 | 8/8, P0 0.01148 -> 0.01136 MB, P1 0.005948 -> 0.005828 MB |
+| trio (5), 3PC | RCA  | 8/8 | 0.00582 -> 0.00570, 0.00494 -> 0.00482 MB |
+| trio (5), 3PC | PPA  | 8/8 | 0.00780 -> 0.007512, 0.00692 -> 0.006632 MB |
+| trio (5), 3PC | PPA4 | 8/8 | unchanged - see below |
+| Quad_OffOn (12), 4PC | RCA  | 8/8 | 0.005948 -> 0.005828, 0.00622 -> 0.00610, 0.00726 -> 0.00714 MB |
+| Quad_OffOn (12), 4PC | PPA  | 8/8 | 0.00924 -> 0.008952, 0.008936 -> 0.008648, 0.00820 -> 0.007912 MB |
+| Quad_OffOn (12), 4PC | PPA4 | 8/8 | unchanged - see below |
 
-Every channel carrying adder traffic drops; the others are unchanged.
+**The generic PPA4 is correct under the cut but does not yet save anything.** Its blocks still evaluate
+on the substituted constants - the same "correct but not free" stage the 2PC four-way circuit started
+at, before gate skipping and arity reduction were added there. Making it free needs the per-block
+analysis that the 2PC version got; the identity substitution is a prerequisite for that, not a
+substitute.
+
+Eligibility for all three comes from `CUT_FRAC_ELIGIBLE_GENERIC`. Note it must name every adder it
+covers: while it still said `RCA_MSB == 1`, the PPA cut compiled in and never engaged, showing
+byte-identical traffic with the flag on and off - the same silent no-op as when the macro was
+undefined altogether.
 
 **LeNet cannot verify this on 3PC/4PC.** The LeNet harness is nondeterministic on both: the same
 binary run repeatedly gives all-parties-0% on some runs and a party-dependent mix of 0% and 100% on
