@@ -239,6 +239,35 @@ void print_layer_stats()
 }
 #endif
 
+#if LOG_COMMUNICATION_ROUNDS == 1
+// elements_to_rec[i] is the number of elements this party receives from that peer in round i, filled
+// in during INIT and executed verbatim by the LIVE phase - so counting its non-zero entries counts
+// exactly the rounds in which data actually crosses the wire.
+inline uint64_t count_communication_rounds(const std::vector<int64_t>& schedule)
+{
+    uint64_t rounds = 0;
+    for (int64_t elements : schedule)
+        if (elements > 0)
+            rounds++;
+    return rounds;
+}
+
+void print_communication_rounds()
+{
+    for (int t = 0; t < num_players - 1; t++)
+    {
+#if PRE == 1
+        std::cout << "P" << PARTY << ", PRE, PID" << process_offset << ": "
+                  << "Communication rounds with peer " << t << ": "
+                  << count_communication_rounds(receiving_args_pre[t].elements_to_rec) << std::endl;
+#endif
+        std::cout << "P" << PARTY << ", ONLINE, PID" << process_offset << ": "
+                  << "Communication rounds with peer " << t << ": "
+                  << count_communication_rounds(receiving_args[t].elements_to_rec) << std::endl;
+    }
+}
+#endif
+
 void print_communication()
 {
 #if PRINT_IMPORTANT == 1
@@ -296,5 +325,8 @@ void print_communication()
               << total_recv[PNEXT] * (float(DATTYPE) / (8000 * 1000)) << "MB " << std::endl;
 #endif
 
+#endif
+#if LOG_COMMUNICATION_ROUNDS == 1
+    print_communication_rounds();
 #endif
 }

@@ -85,6 +85,19 @@
 #define RECV_BUFFER 10000
 #endif
 
+// Count communication ROUNDS (not bytes) per party. A round is counted for a peer when that peer's
+// RECEIVE schedule holds a non-zero message at that index - a round scheduled with nothing to receive
+// is not a communication round. PRE and ONLINE keep separate schedules and are counted separately.
+//
+// Requires SEND_BUFFER == 0 and RECV_BUFFER == 0. With buffering, one logical round is split into
+// several messages of at most the buffer size, so counting messages would no longer count rounds.
+#ifndef LOG_COMMUNICATION_ROUNDS
+#define LOG_COMMUNICATION_ROUNDS 0
+#endif
+#if LOG_COMMUNICATION_ROUNDS == 1 && (SEND_BUFFER != 0 || RECV_BUFFER != 0)
+#error "LOG_COMMUNICATION_ROUNDS requires SEND_BUFFER=0 and RECV_BUFFER=0 (otherwise a round is split into several buffered messages and the count is not a round count)"
+#endif
+
 // How many messages should be buffered until a combined hash is performed? 0 means all hashes are calculated at the
 // very end of the protocol.
 #ifndef VERIFY_BUFFER
