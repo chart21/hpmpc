@@ -2,7 +2,7 @@
 
 This repository forks HPMPC to add novel 2PC protocol primitives, Zero-ADD augmented circuits, and triple generation.
 - 2PC protocols can be found in `protocols/2-PC/aby2`
-- Zero-ADD augmented circuits can be found in `programs/functions/adders/zero_add_adders/`
+- Zero-ADD augmented circuits can be found in `programs/functions/adders/zero_add_adders/`.
 - Triple Generation is implemented in [https://anonymous.4open.science/r/2PC-triple-gen](https://anonymous.4open.science/r/2PC-triple-gen) and is expected at `nn/ConvTriple`. Building 2PC protocols requires deps and build commands.
 - PIGEON fork with minor edits is implemented in [https://anonymous.4open.science/r/2PC-pigeon](https://anonymous.4open.science/r/2PC-pigeon) and is expected at `nn/PIGEON/`
 - Experiments can be found in `measurements/configs/artifacts/triad/2pc/
