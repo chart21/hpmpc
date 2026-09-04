@@ -89,6 +89,6 @@ needs **either**:
 The `f/2`-per-factor shortcut cannot work with full-range masks and should not be pursued further.
 
 ---
-*Status: `ABY3_PROB_TRUNC` flag + conv/FC/BN wiring exist (gated, default off) but are **not correct**
-for full-range masks; the conv unit test fails with it on. Default builds (`ABY3_PROB_TRUNC=0`) are
-unaffected.*
+*Status: the `ABY3_PROB_TRUNC` experiment is **not part of this branch**. It lives on a separate branch,
+where it is not correct for full-range masks (the conv unit test fails with it on). This branch uses the
+SecureML truncation throughout, plus the a-known variant for the first layer under `PUBLIC_WEIGHTS`.*

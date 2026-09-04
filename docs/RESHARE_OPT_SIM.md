@@ -78,8 +78,8 @@ TRUNC_APPROACH > 0 is out of scope.
 
 ### MODELWEIGHTS_KNOWN_DURING_PREPROCESSING (MWK)
 
-Under MWK, P1's output mask is tied to its freely *prescribed* AB2P triple share `r1`
-(`l = TRUNC(-r1)`, SecureML). The bake is realized by constructing
+Under MWK, P1's output mask is tied to the triple share `r1` that it chooses freely and the triple
+generation then forces onto its share (`l = TRUNC(-r1)`, SecureML). The bake is realized by constructing
 `r1 = -((l_baked << FRACTIONAL) + low)` (`construct_mwk_r1_baked`; PRE and online use the same
 chooser, so the PRNG draws match by construction). Since `TRUNC` is a logical shift, its image
 zeroes the top FRACTIONAL mask bits — reshared slices at numeric bits ≥ K-FRACTIONAL **cannot**

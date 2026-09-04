@@ -8,8 +8,8 @@ Its purpose is to make the **online-optimized A2B** (`A2B_ONLINE_OPT=1`) correct
 together with the "a known to evaluators" msb adders (`A_KNOWN_TO_EVALUATORS_OPT=1`, which requires
 `A2B_ONLINE_OPT=1`). This combination implies `RESHARE_OPT=0` and `RESHARE_OPT_SIM=0`.
 
-See `summary.txt` (repository root) for the current status matrix and the explanation of the
-TRUNC_DELAYED=1 "6 of 8" unit-test artifact.
+See `docs/RESHARE_OPT_SIM.md` for the explanation of the TRUNC_DELAYED=1 "6 of 8" unit-test artifact
+and `docs/CUT_FRACTIONAL_BITS_OPT.md` for the adder x optimization validation matrix.
 
 ## Background: how A2B_ONLINE_OPT is supposed to work
 
@@ -61,8 +61,8 @@ negative logit into `+2^(K-F)`.
 - **MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1** (a_known_pre paths): P0's mask is a free draw →
   committed directly; P1's mask is derived from its conv/FC triple share `r1`, so `r1` is
   **prescribed** (`r1 = -lz1` under TRUNC_DELAYED=1; `r1 = -((m1<<F)+low)` under TRUNC_DELAYED=0 so
-  `l1 = TRUNC(-r1) == m1`) and the AB2P triple generation commits it — reusing the MWK prescription
-  machinery.
+  `l1 = TRUNC(-r1) == m1`) and the triple generation forces P1's share to it (the delta fix, or the
+  AB2P prescription under `MWK_PRESCRIBED_HE`) — reusing the MWK machinery.
 - **MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0** and **A_KNOWN=0** (symmetric
   `mask_and_send_dot_with[out]_trunc_with_triple` paths): BOTH parties' masks are free draws
   (truncation applies to the masked share, the mask enters linearly) → both emit the committed `lz`
@@ -81,8 +81,9 @@ committed `[c]`, so `max_min_msb_range` re-masks the differences through the bak
 requirement (its breakage had been hidden by a vacuous test epsilon; the MaxPool unit test now
 compares against the quantized expected with epsilon 0.01). Under RESHARE_OPT_SIM the comparison
 adders additionally run with the cut active (`g_cut_frac_active`, like the ReLU), because the SIM
-bake's stride and slot mapping are compile-time cut-aware. `COMPUTE_ARGMAX=1` (argmax inside MPC)
-has the same structure and would need the same treatment — not yet done, not exercised by the tests.
+bake's stride and slot mapping are compile-time cut-aware. `COMPUTE_ARGMAX=1` (argmax inside MPC) has the
+same structure, but a real run shows it does not need the treatment: 8/8 and LeNet 100%, with the cut
+enabled, in both the plain and the bake configurations.
 
 ## CUT_FRACTIONAL_BITS_OPT under the bake
 
@@ -92,11 +93,8 @@ has the same structure and would need the same treatment — not yet done, not e
   (`i < 30 - FRACTIONAL`), per-case boundary shortcut (`msb = x[F] ^ y[F] ^ carry_{F+1}`),
   last-executed-gate mask-assign swapped to the spare random `r61`. Saves FRACTIONAL rounds and
   triples per adder.
-- **PPA a_ab: cut-compatible, not yet cut-optimized** — it ignores `g_cut_frac_active` and computes
-  fully, which stays correct because under the bake no external stream depends on adder-internal gate
-  counts ([c], S1 and the early boolean addition stay full-width; INIT counts called gates per phase).
-  The identity-substitution gate-skipping port (as done for the reshared family) is follow-up
-  efficiency work.
+- **PPA a_ab: full cut** — the identity treatment skips the vacant gates and their triples
+  (15840 -> 13536 boolean triples at FRACTIONAL=5; see `docs/CUT_FRACTIONAL_BITS_OPT.md`).
 - **PPA4 a_ab: FIXED** (was 3/8, now 8/8 + LeNet 90%). See "PPA4 under the bake" below.
 
 ## A_KNOWN=0 baseline fixes (needed before the bake could run there)

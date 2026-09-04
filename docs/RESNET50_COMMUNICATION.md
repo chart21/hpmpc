@@ -1,54 +1,91 @@
 # ResNet50-Cheetah (32-bit, single inference): communication and rounds
 
-ImageNet ResNet50 (`Cheetah_ResNet`, 230x230, 1000 classes), 2PC (PROTOCOL=4), one image.
-`FUSE_CONV_BN=1` and `FUSE_RELU_AVG=1` throughout; CUT disabled throughout.
+ImageNet ResNet50 (`Cheetah_ResNet`, 230x230, 1000 classes), 2PC (`PROTOCOL=4`), one image,
+`FRACTIONAL=5`. `FUSE_CONV_BN=1` and `FUSE_RELU_AVG=1` throughout; the fractional-bit cut is
+disabled throughout so the three adders are compared on equal terms.
 
-Rounds are counted by `LOG_COMMUNICATION_ROUNDS` (non-zero entries in the receive schedule);
-it requires `SEND_BUFFER=0` and `RECV_BUFFER=0`, otherwise one round is split into several
-buffered messages and the count stops being a round count.
+Two optimization paths are measured for each adder:
 
-MB are **sent** by that party. **PRE includes the Cheetah/ConvTriple traffic**, not just HPMPC's
-own preprocessing channel - the library traffic dominates and quoting the channel alone makes
-PUBLIC_WEIGHTS=1 look more expensive than it is. ONLINE needs no such correction (the external
-library is preprocessing-only).
+* **reshare** - `RESHARE_OPT=1 RESHARE_OPT_SIM=1` (the reshare simulation);
+* **a2b** - `A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1` (the A2B mask bake).
 
-`FUSE_RELU_AVG` cannot engage when `TRUNC_DELAYED=1` (share_conversion.hpp:105), so the
-PUBLIC_WEIGHTS rows have Conv+BN fused but NOT ReLU+AvgPool.
+and three weight settings: `A_KNOWN=0` with secret weights, `A_KNOWN=1` with the weights known to
+P0 during preprocessing (`MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1`), and public weights
+(`PUBLIC_WEIGHTS=1`, which requires `TRUNC_DELAYED=1` here).
+
+**Rounds** are counted by `LOG_COMMUNICATION_ROUNDS`: non-zero entries in the party's receive
+schedule, which is built during INIT and executed verbatim by the LIVE phase, so a round scheduled
+with nothing to receive is not counted. It requires `SEND_BUFFER=0` and `RECV_BUFFER=0`, otherwise
+one logical round is split into several buffered messages and the count stops being a round count.
+Preprocessing is one round in every configuration (the HPMPC preprocessing channel; the Cheetah
+library runs its own protocol outside this schedule).
+
+**MB are sent** by that party. **PRE includes the Cheetah/ConvTriple traffic** (the
+`--TRIPLE_STATS (Aggregated)--` lines), not just HPMPC's own preprocessing channel: the library
+traffic dominates, and quoting the channel alone makes `PUBLIC_WEIGHTS=1` look far more expensive
+than it is. ONLINE needs no such correction - the external library is preprocessing-only.
+
+The `A_KNOWN=1, MWK=1` rows use the default `MWK_PRESCRIBED_HE=0` (P1's triple share is fixed by a
+delta exchange after generation). `MWK_PRESCRIBED_HE=1` prescribes it inside the HE protocol
+instead, which encrypts the whole model: about 40 GB of preprocessing per inference on this
+network, worth it only when one weight set serves hundreds of images.
 
 ## Results
 
-| # | adder | path | config | rounds PRE P0/P1 | rounds ONLINE P0/P1 | PRE MB P0 | PRE MB P1 | ONLINE MB P0 | ONLINE MB P1 | ONLINE total |
+| # | adder | path | weights | rounds PRE P0/P1 | rounds ONLINE P0/P1 | PRE MB P0 | PRE MB P1 | ONLINE MB P0 | ONLINE MB P1 | ONLINE total |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | RCA | reshare | A_KNOWN=0, MWK=0 | 1/1 | 1623/1673 | 1131.0 | 1097.2 | 152.1 | 116.0 | **268.1** |
-| 2 | RCA | reshare | A_KNOWN=1, MWK=1 | 1/1 | 1568/1672 | 40714.7 | 918.4 | 151.4 | 70.9 | **222.3** |
+| 2 | RCA | reshare | A_KNOWN=1, MWK=1 | 1/1 | 1568/1672 | 952.2 | 294.5 | 151.4 | 70.9 | **222.3** |
 | 3 | RCA | reshare | PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1 | 1/1 | 1568/1671 | 117.3 | 129.5 | 151.8 | 70.9 | **222.7** |
 | 4 | RCA | a2b | A_KNOWN=0, MWK=0 | 1/1 | 1623/1624 | 1212.3 | 1178.5 | 116.0 | 116.0 | **232.0** |
-| 5 | RCA | a2b | A_KNOWN=1, MWK=1 | 1/1 | 1568/1623 | 40796.1 | 999.7 | 115.4 | 70.9 | **186.3** |
+| 5 | RCA | a2b | A_KNOWN=1, MWK=1 | 1/1 | 1568/1623 | 1033.5 | 375.8 | 115.4 | 70.9 | **186.3** |
 | 6 | RCA | a2b | PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1 | 1/1 | 1568/1622 | 198.6 | 209.7 | 115.8 | 70.9 | **186.7** |
 | 7 | PPA | reshare | A_KNOWN=0, MWK=0 | 1/1 | 398/448 | 1179.2 | 1145.4 | 214.0 | 177.9 | **391.9** |
-| 8 | PPA | reshare | A_KNOWN=1, MWK=1 | 1/1 | 343/447 | 40762.9 | 966.6 | 213.3 | 132.8 | **346.1** |
+| 8 | PPA | reshare | A_KNOWN=1, MWK=1 | 1/1 | 343/447 | 1000.4 | 342.6 | 213.3 | 132.8 | **346.1** |
 | 9 | PPA | reshare | PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1 | 1/1 | 343/446 | 165.5 | 211.4 | 213.7 | 132.8 | **346.5** |
 | 10 | PPA | a2b | A_KNOWN=0, MWK=0 | 1/1 | 398/399 | 1253.1 | 1219.3 | 178.0 | 177.9 | **355.9** |
-| 11 | PPA | a2b | A_KNOWN=1, MWK=1 | 1/1 | 343/398 | 40836.9 | 1040.5 | 177.3 | 132.8 | **310.1** |
+| 11 | PPA | a2b | A_KNOWN=1, MWK=1 | 1/1 | 343/398 | 1074.3 | 416.6 | 177.3 | 132.8 | **310.1** |
 | 12 | PPA | a2b | PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1 | 1/1 | 343/397 | 239.4 | 250.5 | 177.7 | 132.8 | **310.5** |
 | 13 | PPA4 | reshare | A_KNOWN=0, MWK=0 | 1/1 | 251/301 | 1761.5 | 1727.2 | 145.3 | 109.3 | **254.6** |
-| 14 | PPA4 | reshare | A_KNOWN=1, MWK=1 | 1/1 | 196/300 | 41345.3 | 1548.4 | 144.7 | 64.2 | **208.9** |
+| 14 | PPA4 | reshare | A_KNOWN=1, MWK=1 | 1/1 | 196/300 | 1582.8 | 924.5 | 144.7 | 64.2 | **208.9** |
 | 15 | PPA4 | reshare | PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1 | 1/1 | 196/299 | 718.8 | 741.7 | 145.1 | 64.2 | **209.3** |
 | 16 | PPA4 | a2b | A_KNOWN=0, MWK=0 | 1/1 | 251/252 | 1496.7 | 1462.9 | 109.3 | 109.3 | **218.6** |
-| 17 | PPA4 | a2b | A_KNOWN=1, MWK=1 | 1/1 | 196/251 | 41080.4 | 1284.1 | 108.6 | 64.2 | **172.8** |
+| 17 | PPA4 | a2b | A_KNOWN=1, MWK=1 | 1/1 | 196/251 | 1317.9 | 660.2 | 108.6 | 64.2 | **172.8** |
 | 18 | PPA4 | a2b | PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1 | 1/1 | 196/250 | 483.0 | 494.1 | 109.0 | 64.2 | **173.2** |
 
-## Build commands (distributed)
+Reading the table:
 
-Each row below is the complete `make` line. Build it on **each** node with that node's
-`PARTY` id, then start the run with `scripts/run.sh`:
+* **The adder sets the round count**: RCA about 1600 online rounds, PPA about 400, PPA4 about 200 -
+  the classic depth-for-bandwidth trade, and PPA4 is also the cheapest in online bytes here.
+* **The a2b path removes P1's A2B rounds** (e.g. RCA `A_KNOWN=0`: 1673 -> 1624 for P1) and exactly
+  36 MB of P0's online traffic in all six pairs. It costs about 75 MB more preprocessing for RCA and
+  PPA; for PPA4 it is the cheaper path in preprocessing as well.
+* **Preprocessing is dominated by the conv triples** - 834 MB sent by P0 and 210 MB by P1 in the
+  `MWK=1` rows. Public weights need none of them, which is why those rows are 2.5x to 10x cheaper in
+  preprocessing than their `A_KNOWN=0` counterparts.
+* **`MWK=1` cuts P1's preprocessing by a factor of 2 to 4** against `A_KNOWN=0`, and its online
+  traffic by about 40% (116 -> 71 MB for RCA), because only P0 sends in the conv/FC reveal.
+* **Public weights do not lower the online total** even though their conv layers send almost
+  nothing (CONV2D 44.5 -> 6.4 MB for RCA/a2b). The activation layers send more instead
+  (ACTIVATION 70.9 -> 106.2 MB) and average pooling stops being free (0 -> 3.2 MB), which cancels
+  the saving. Those two increases were not traced further; they are a property of the
+  `TRUNC_DELAYED=1` configuration public weights require, not of the weight setting itself.
+
+## Reproducing
+
+Distributed: build on both machines with the same line, `PARTY=0` on one and `PARTY=1` on the
+other, then run
 
 ```bash
-# on party 0's machine: make ... PARTY=0 ; on party 1's machine: make ... PARTY=1
-export MODEL_DIR=nn/Pygeon/models/pretrained/... DATA_DIR=nn/Pygeon/data/datasets
-export MODEL_FILE=... SAMPLES_FILE=... LABELS_FILE=...   # must match: standard with standard
 scripts/run.sh -p <party_id> -a <ip_of_party_0> -b <ip_of_party_1>
 ```
+
+Locally, replace both with `make -j PARTY=all ...` and `./scripts/run_locally.sh -n 2`.
+
+The numbers above come from dummy weights (no model file exported), which is what the communication
+depends on; to run the real network export the ImageNet ResNet50 model and dataset first.
+
+### With instrumentation (what the table was measured with)
 
 **1. RCA / reshare / A_KNOWN=0, MWK=0**
 
@@ -212,3 +249,172 @@ make -j PARTY=<party_id> FUNCTION_IDENTIFIER=287 \
   PUBLIC_WEIGHTS=1 TRUNC_DELAYED=1
 ```
 
+### Without instrumentation
+
+The same eighteen configurations with the measurement flags dropped: `SEND_BUFFER` and
+`RECV_BUFFER` return to their default 10000 (the normal performance setting) and
+`LOG_COMMUNICATION_ROUNDS` is off. Round counting is not available in these builds - it needs the
+buffers at 0. `CUT_FRACTIONAL_BITS_OPT=0` is kept: it is the default, but naming it keeps these
+lines comparable with the instrumented ones above.
+
+**1. RCA / reshare / A_KNOWN=0, MWK=0**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=87 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=1 RESHARE_OPT_SIM=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 A2B_CONV_BAKE=0 \
+  A_KNOWN=0 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**2. RCA / reshare / A_KNOWN=1, MWK=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=87 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=1 RESHARE_OPT_SIM=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 A2B_CONV_BAKE=0 \
+  A_KNOWN=1 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**3. RCA / reshare / PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=87 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=1 RESHARE_OPT_SIM=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 A2B_CONV_BAKE=0 \
+  PUBLIC_WEIGHTS=1 TRUNC_DELAYED=1
+```
+
+**4. RCA / a2b / A_KNOWN=0, MWK=0**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=87 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=0 RESHARE_OPT_SIM=0 A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1 \
+  A_KNOWN=0 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**5. RCA / a2b / A_KNOWN=1, MWK=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=87 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=0 RESHARE_OPT_SIM=0 A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1 \
+  A_KNOWN=1 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**6. RCA / a2b / PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=87 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=0 RESHARE_OPT_SIM=0 A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1 \
+  PUBLIC_WEIGHTS=1 TRUNC_DELAYED=1
+```
+
+**7. PPA / reshare / A_KNOWN=0, MWK=0**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=187 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=1 RESHARE_OPT_SIM=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 A2B_CONV_BAKE=0 \
+  A_KNOWN=0 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**8. PPA / reshare / A_KNOWN=1, MWK=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=187 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=1 RESHARE_OPT_SIM=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 A2B_CONV_BAKE=0 \
+  A_KNOWN=1 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**9. PPA / reshare / PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=187 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=1 RESHARE_OPT_SIM=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 A2B_CONV_BAKE=0 \
+  PUBLIC_WEIGHTS=1 TRUNC_DELAYED=1
+```
+
+**10. PPA / a2b / A_KNOWN=0, MWK=0**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=187 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=0 RESHARE_OPT_SIM=0 A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1 \
+  A_KNOWN=0 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**11. PPA / a2b / A_KNOWN=1, MWK=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=187 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=0 RESHARE_OPT_SIM=0 A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1 \
+  A_KNOWN=1 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**12. PPA / a2b / PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=187 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=0 RESHARE_OPT_SIM=0 A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1 \
+  PUBLIC_WEIGHTS=1 TRUNC_DELAYED=1
+```
+
+**13. PPA4 / reshare / A_KNOWN=0, MWK=0**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=287 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=1 RESHARE_OPT_SIM=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 A2B_CONV_BAKE=0 \
+  A_KNOWN=0 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**14. PPA4 / reshare / A_KNOWN=1, MWK=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=287 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=1 RESHARE_OPT_SIM=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 A2B_CONV_BAKE=0 \
+  A_KNOWN=1 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**15. PPA4 / reshare / PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=287 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=1 RESHARE_OPT_SIM=1 A2B_ONLINE_OPT=0 A_KNOWN_TO_EVALUATORS_OPT=0 A2B_CONV_BAKE=0 \
+  PUBLIC_WEIGHTS=1 TRUNC_DELAYED=1
+```
+
+**16. PPA4 / a2b / A_KNOWN=0, MWK=0**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=287 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=0 RESHARE_OPT_SIM=0 A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1 \
+  A_KNOWN=0 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**17. PPA4 / a2b / A_KNOWN=1, MWK=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=287 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=0 RESHARE_OPT_SIM=0 A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1 \
+  A_KNOWN=1 MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1 TRUNC_DELAYED=0 PUBLIC_WEIGHTS=0
+```
+
+**18. PPA4 / a2b / PUBLIC_WEIGHTS=1, TRUNC_DELAYED=1**
+
+```bash
+make -j PARTY=<party_id> FUNCTION_IDENTIFIER=287 \
+  PROTOCOL=4 BITLENGTH=32 DATTYPE=32 NUM_INPUTS=1 FRACTIONAL=5 PRE=1 CHEETAH_THREADS=4 USE_CUDA_GEMM=0 CHEETAH_CONV_TYPE=0 MODELOWNER=P_0 DATAOWNER=P_1 CUT_FRACTIONAL_BITS_OPT=0 FUSE_CONV_BN=1 FUSE_RELU_AVG=1 \
+  RESHARE_OPT=0 RESHARE_OPT_SIM=0 A2B_ONLINE_OPT=1 A_KNOWN_TO_EVALUATORS_OPT=1 A2B_CONV_BAKE=1 \
+  PUBLIC_WEIGHTS=1 TRUNC_DELAYED=1
+```
