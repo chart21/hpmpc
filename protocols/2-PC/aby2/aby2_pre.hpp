@@ -412,8 +412,8 @@ class ABY2_PRE_Share
         l = getRandomVal(PSELF);
 #elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         // P1 freely picks its conv-triple share [lxly]_2 = r1 (fresh PSELF random, synced with LIVE), uses it
-        // as the output mask l_P1 = TRUNC(-r1), and stores r1: the AB2P ConvTriple generation PRESCRIBES P1's
-        // share to r1 (P0 decrypts cross - r1), so no share-fixing communication is needed.
+        // as the output mask l_P1 = TRUNC(-r1), and stores r1 so the triple generation forces P1's share to r1
+        // (core/generate_beaver_tiples.hpp: delta fix, or AB2P prescription under MWK_PRESCRIBED_HE).
         // CONV linear paths only (INTERLEAVE_COMM == 0 / GPU); FC uses the _baked variants below,
         // which record into the separate FC vectors (see g_mwk_p1_fc_masks in buffers.h).
         Datatype r1 = getRandomVal(PSELF);
@@ -429,9 +429,9 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
-        // Indexed (interleaved/tiled GEMM) path: record the per-layer output index so the prescribed buffer
-        // can be SCATTERED to presc[index] (the tiled call order != linear c[] order). P1-only: P0 no longer
-        // participates in any share fixing (its share comes out of the AB2P decryption directly).
+        // Indexed (interleaved/tiled GEMM) path: record the per-layer output index so r1 can be SCATTERED to
+        // c[index] in the triple generation (the tiled call order != linear c[] order). P1-only: P0 needs no
+        // index bookkeeping, it receives the share fix in c[] order.
 #if PARTY == 0
 #if A2B_CONV_BAKE_ACTIVE
         l = a2b_bake_conv_mask<Datatype>((uint64_t)(index < 0 ? 0 : index), SUB);  // committed lz0 (full, conv)

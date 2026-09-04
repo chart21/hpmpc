@@ -184,7 +184,7 @@
 #define MSB0_OPT 1  // Exploit that the MSB of many layers is 0 when uing truncation
 #endif
 
-#ifndef AVG1_OPT  // Optimze avaerage pooling for denominator = 1
+#ifndef AVG1_OPT  // Optimize average pooling for denominator = 1
 #define AVG1_OPT 1
 #endif
 
@@ -330,17 +330,10 @@ inline int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef CUT_FRACTIONAL_BITS_OPT
-#define CUT_FRACTIONAL_BITS_OPT 0  // Skip the MSB adder's top FRACTIONAL slices under TRUNC_DELAYED == 0:
-// the wire's reconstructed value is then provably bounded within BITLENGTH-FRACTIONAL signed bits (it
-// went through a real truncation by FRACTIONAL bits), so those slices are redundant and no gates are
-// needed for them (see docs/CUT_FRACTIONAL_BITS_OPT.md). Works for MODELWEIGHTS_KNOWN_DURING_PREPROCESSING
-// either 0 or 1 (the bound comes from the truncation invariant, not from any mask-construction trick) and
-// for any FRACTIONAL in [1, BITLENGTH-3]. Implemented for ALL NINE msb circuits: each of the three
-// adders (RCA, PPA, PPA4, k=32) in its plain, reshared and a-known-to-evaluators flavour, and every
-// one of them SKIPS the vacant gates rather than evaluating them on constants. Verified across the
-// full 3x3 matrix at FRACTIONAL=5: func53 8/8 and LeNet 100% in all nine, cut on and off.
-// BITLENGTH != 32 stays out of scope - see docs/CUT_FRACTIONAL_BITS_OPT.md, the blocker is the
-// 32-bit-only ConvTriple preprocessing library, not the circuits.
+#define CUT_FRACTIONAL_BITS_OPT 0  // Under TRUNC_DELAYED == 0 the ReLU input is already truncated by
+// FRACTIONAL bits, so the MSB adder's top FRACTIONAL slices are sign extension: skip their A2B sharing,
+// reshares and gates. Implemented for all nine 2PC msb circuits (RCA/PPA/PPA4 x plain/reshared/a_known)
+// and the generic 3PC/4PC adders; BITLENGTH == 32 only. See docs/CUT_FRACTIONAL_BITS_OPT.md.
 #endif
 
 #ifndef A2B_ROUND_OPT_SIM
@@ -352,9 +345,9 @@ inline int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef A2B_CONV_BAKE
-#define A2B_CONV_BAKE 0  // A2B_ONLINE_OPT: derive the conv/remask output mask lz from the pre-committed
-// random boolean A2B mask (lz = -untranspose(ia)) so bool(-lz) == boolean_add(ia0,ia1) == [c] by
-// construction, decoupling [c] from re-reading lz. See docs/A2B_CONV_BAKE (task in progress).
+#define A2B_CONV_BAKE 0  // A2B_ONLINE_OPT: commit the conv/FC output mask lz before both passes and derive
+// it from the random boolean A2B mask ia (lz = -untranspose(ia)), so the precomputed [c] = bool(-lz) matches
+// the mask actually used online. See docs/A2B_CONV_BAKE.md.
 #endif
 
 #ifndef BIT_INJECTION_PREPROCESSING_OPT
@@ -781,12 +774,10 @@ inline int base_port = BASE_PORT;  // temporary solution
 #endif
 #endif
 
-// Derive the MSB-adder choice (RCA_MSB / PPA_MSB / PPA4_MSB) HERE, before Protocols.h pulls in the A2B code
-// (aby2_online.hpp / aby2_pre.hpp). These were previously only #defined in share_conversion.hpp, which is included
-// AFTER Protocols.h, so in the A2B's scope RCA_MSB was undefined (== 0) and the RESHARE_OPT reshare-skip
-// (#if RCA_MSB == 1 ... #elif RCA_MSB != 1 ...) ALWAYS took the PPA branch (reshare bits 1..k-1). For PPA functions
-// that happened to be correct, but for RCA it left the non-reshared bits unshared -> corrupted output. share_conversion.hpp
-// keeps the same (now redundant, #ifndef-guarded) derivation, so it is a no-op once these are defined here.
+// Derive the MSB-adder choice (RCA_MSB / PPA_MSB / PPA4_MSB) here, before Protocols.h pulls in the A2B code.
+// share_conversion.hpp used to be the only place deriving them, but it is included after Protocols.h, so inside
+// the A2B code RCA_MSB was still undefined and the RESHARE_OPT reshare-skip always took the PPA branch (wrong for
+// RCA). share_conversion.hpp keeps the same #ifndef-guarded derivation, which is now a no-op.
 #if defined(BANDWIDTH_OPTIMIZED) && defined(ONLINE_OPTIMIZED)
 #if RCA_MSB == 0 && PPA_MSB == 0 && PPA4_MSB == 0
 #if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0

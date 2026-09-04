@@ -35,11 +35,8 @@ class ABY2_ONLINE_Share
     {
         ABY2_ONLINE_Share c;
         // SecureML local truncation (P0 = Trunc(share0), P1 = -Trunc(-share1); share0 = m-l, share1 = -l).
-        // NOTE: for the PUBLIC_WEIGHTS conv (TRUNC_DELAYED=0) this wraps systematically -> ~random accuracy. None of
-        // the 4 sign conventions fix it (the two complementary ones give ~11-15%, the non-complementary ones break
-        // the secret/well-masked case). The real cause is the raw conv-output share distribution, which needs
-        // re-masking before truncation; the working path is TRUNC_DELAYED=1 (truncates the re-masked bit-injection
-        // output instead). See memory/public-weights-broken.md.
+        // NOTE: on a raw data-owner input (non-owner mask 0) this wraps systematically, so the first layer with
+        // PUBLIC_WEIGHTS routes to prepare_mult_public_fixed_a_known below instead.
 #if PARTY == 0
         c.m = TRUNC(MULT(SUB(m, l), b), fractional_bits);  // Share Trunc(mv1 * b)
 #else
@@ -58,7 +55,7 @@ class ABY2_ONLINE_Share
     // (the (0, value) sharing makes the SecureML local truncation in prepare_mult_public_fixed wrap systematically).
     // Here the owner, who holds a in the clear and knows the public b, truncates a*b locally with an ARITHMETIC
     // shift (TRUNC must be OP_SHIFT_RIGHTF -> exact, no wrap), re-masks, and sends; the non-owner only contributes
-    // a fresh mask. See memory/public-weights-broken.md.
+    // a fresh mask.
     template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
     ABY2_ONLINE_Share prepare_mult_public_fixed_a_known(const Datatype b,
                                                         func_mul MULT,
@@ -679,7 +676,7 @@ class ABY2_ONLINE_Share
 #else
         l = getRandomVal(PSELF);
         if (index >= 0)
-            bake_reshare_mask(l, index, SUB);  // delayed-trunc conv path: same bake as the trunc variant (P1-only)  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+            bake_reshare_mask(l, index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
 #endif
         Datatype lxly;
         lxly = retrieve_output_share_arithmetic(0, index);
@@ -696,7 +693,7 @@ class ABY2_ONLINE_Share
 #else
         l = getRandomVal(PSELF);
         if (bake_index >= 0)
-            bake_reshare_mask(l, bake_index, SUB);  // P1-only (see mask_and_send_dot_baked)  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+            bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
 #endif
         Datatype lxly;
         if constexpr (std::is_same_v<func_add(), OP_XOR>)

@@ -93,19 +93,11 @@ DATATYPE* random_multiplication_b = nullptr;
 
 // CUT_FRACTIONAL_BITS_OPT (docs/CUT_FRACTIONAL_BITS_OPT.md): compile-time eligibility. Under
 // TRUNC_DELAYED == 0 the ReLU input is freshly truncated, so its value fits BITLENGTH-FRACTIONAL
-// signed bits and the MSB adder's top FRACTIONAL slices are redundant. Whether a given adder
-// instance actually applies the cut is the RUNTIME flag g_cut_frac_active (set by RELU only -
-// max/min/comparison adders run the full circuit on the same build).
-// Currently implemented for the RESHARE_OPT=1 generated circuits of RCA, PPA, and PPA4 (k = 32);
-// other circuit variants safely no-op the cut until they are patched too.
-// Second leg: the A2B bake (A2B_ONLINE_OPT + A_KNOWN_TO_EVALUATORS_OPT) also supports the cut - the
-// a_ab adders skip their top-FRACTIONAL-slice gates internally (RCA + PPA; the PPA4 a_ab adder has no
-// cut guards yet and simply computes fully, which stays correct because under the bake no external
-// stream count depends on adder-internal gates: [c], S1 and the boolean addition stay full-width).
-// All nine msb circuits (ripple-carry / prefix / four-way prefix, each in the plain, reshared and
-// a_known-to-evaluators flavour) implement the cut, so eligibility no longer depends on which
-// optimization family is active - only on the value-level precondition (post-truncation inputs,
-// TRUNC_DELAYED == 0) and the width.
+// signed bits and the MSB adder's top FRACTIONAL slices are redundant. All nine 2PC msb circuits
+// (ripple-carry / prefix / four-way prefix, each plain, reshared and a_known-to-evaluators) implement
+// the cut, so eligibility depends only on that value-level precondition and the width. Whether a given
+// adder instance applies it is the RUNTIME flag g_cut_frac_active: set by RELU, and by the comparison
+// adders only under the SIM bake (max_min.hpp); other max/min adders run the full circuit.
 #define CUT_FRAC_ELIGIBLE \
     (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && \
      ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
@@ -127,7 +119,6 @@ DATATYPE* random_multiplication_b = nullptr;
 // g_a2b_lz -> conv mask; g_a2b_c -> [c] share consumed by prepare_A2B_S2.
 #define A2B_CONV_BAKE_ACTIVE (A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && DATTYPE == BITLENGTH)
 #if A2B_CONV_BAKE_ACTIVE
-#include <vector>
 std::vector<DATATYPE> g_a2b_ia;   // this party's random boolean A2B-mask slices (boolean-adder input)
 std::vector<DATATYPE> g_a2b_lz;   // derived conv mask -untranspose(ia); ortho(-lz) == ia
 std::vector<DATATYPE> g_a2b_c;    // this party's share of [c] = bool(-lz), from the early boolean addition

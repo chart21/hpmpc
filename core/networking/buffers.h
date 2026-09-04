@@ -1,6 +1,7 @@
 #pragma once
 #include "../include/pch.h"
 #include "sockethelper.h"
+#include <vector>
 int player_id;
 sender_args sending_args[num_players];
 receiver_args receiving_args[num_players];
@@ -69,15 +70,14 @@ uint64_t preprocessed_outputs_index = 0;
 uint64_t total_preprocessed_outputs = 0;
 #if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
 // MODELWEIGHTS_KNOWN: in PRE, P1 freely picks its conv/FC triple share [lxly]_2 = r1 (a fresh PSELF random),
-// uses it to set the output mask l_P1 = TRUNC(-r1), and pushes r1 here so the ConvTriple/FCTriple generation
-// forces P1's share to r1 (P0 gets cross - r1). This makes l_P1 and [lxly]_2 consistent for the reveal.
-#include <vector>
+// derives its output mask l_P1 = TRUNC(-r1) from it, and pushes r1 here so the triple generation forces P1's
+// share to r1 (mwk_fix_p1_share / MWK_PRESCRIBED_HE in core/generate_beaver_tiples.hpp). This keeps l_P1 and
+// [lxly]_2 consistent for the reveal.
 std::vector<DATATYPE> g_mwk_p1_masks;
 // The GEMM (programs/functions/GEMM.hpp) is TILE_SIZE-tiled, so mask_and_send is called in TILE order, not in
-// linear output-index order. Online reads the triple via retrieve_output_share_arithmetic(0, index) (index =
-// row+jj), so it is order-independent. But the ConvTriple buffer c[] is laid out in LINEAR output order. We must
-// therefore record the output index of each pushed r1 (in the same tile order on BOTH parties so the triple
-// delta-exchange runs in a matching send/recv order) and SCATTER r1 into c[index] during triple generation.
+// linear output-index order. Online reads the triple via retrieve_output_share_arithmetic(0, index), which is
+// order-independent, but the ConvTriple buffer c[] is laid out in LINEAR output order. P1 therefore records the
+// output index of each pushed r1 so the triple generation can SCATTER r1 into c[index].
 std::vector<uint64_t> g_mwk_p1_indices;
 #define G_MWK_LINEAR_SENTINEL ((uint64_t) -1)  // non-interleaved GEMM path: consume c[] linearly
 uint64_t g_mwk_p1_masks_consume = 0;
@@ -88,11 +88,6 @@ std::vector<DATATYPE> g_mwk_p1_fc_masks;
 std::vector<uint64_t> g_mwk_p1_fc_indices;
 uint64_t g_mwk_p1_fc_masks_consume = 0;
 #endif
-// RESHARE_OPT: the conv layer runs ONE GEMM per batch element, so the mask index passed to
-// mask_and_send_dot_with_trunc_with_triple is LAYER-LOCAL PER ELEMENT (0..N-1) while the ReLU's MSB
-// adders consume the layer's random multiplications / beaver-3 tuples GLOBALLY across the batch.
-// The layer sets this to (element * N) around each per-element GEMM so the reshare bake sees the
-// batch-global output index. FC runs a single GEMM with a global index -> stays 0.
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
 // CUT_FRACTIONAL_BITS_OPT (see docs): under TRUNC_DELAYED == 0, this wire's true (reconstructed)
@@ -101,10 +96,16 @@ uint64_t send_in_last_round[num_players - 1] = {0};
 // of MODELWEIGHTS_KNOWN_DURING_PREPROCESSING - the bound comes from the truncation invariant, not
 // from any mask-construction trick.
 bool g_cut_frac_active = false;
-// Declared unconditionally: the conv/FC layers set these around every GEMM regardless of protocol,
-// while the buffers they sit next to only exist for the preprocessing protocols. Keeping them inside
-// that guard broke every 3PC/4PC build.
+// Set by the conv/FC layers around every GEMM regardless of protocol, hence declared outside the
+// preprocessing guard above.
+// RESHARE_OPT / A2B_CONV_BAKE: the conv layer runs ONE GEMM per batch element, so the mask index passed to
+// the indexed mask_and_send variants is layer-local per element (0..N-1), while the ReLU's MSB adders
+// consume the layer's reshare/bake material globally across the batch. The layer sets this to
+// (element * N) around each per-element GEMM so the bake sees the batch-global output index; FC runs a
+// single GEMM with a global index, so it stays 0.
 uint64_t g_bake_batch_offset = 0;
+// Effective bias-mask shares published by the conv/FC layer; the bakes pre-compensate them
+// (protocols/beaver_triples.hpp).
 const DATATYPE* g_bake_bias_l = nullptr;
 uint64_t g_bake_bias_len = 0;
 uint64_t num_generated[num_players * player_multiplier] = {0};

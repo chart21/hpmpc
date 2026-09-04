@@ -81,7 +81,7 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
     // FRACTIONAL ones, which is more robust (lower SecureML wrap probability).
     // GATED to PUBLIC_WEIGHTS == 0: for public weights trunc_pr_in_place on the RAW conv output wraps systematically
     // (same issue as prepare_mult_public_fixed), so public weights instead fold both into the re-masking bit
-    // injection (which works), see bit_injection_opt_range / memory/public-weights-broken.md.
+    // injection (which works), see bit_injection_opt_range.
     if (delayed && curr_denom > 1)
     {
         trunc_pr_in_place(val, len);
