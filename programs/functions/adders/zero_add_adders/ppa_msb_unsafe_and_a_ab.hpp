@@ -802,11 +802,18 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
     {
         if (current_phase != PHASE_INIT)
         {
+            // CUT: slot i is skipped (its gate has a constant operand, so INIT allocated no triple for it)
+            // once FRACTIONAL exceeds cut_skip_threshold[i]; 32 marks slots that are never skipped.
+            static constexpr int cut_skip_threshold[BeaverTripleCount] = {
+                30, 28, 28, 26, 26, 24, 24, 22, 22, 20, 20, 18, 18, 16, 16, 14,
+                14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, 2, 2, 29, 25, 25,
+                21, 21, 17, 17, 13, 13, 9, 9, 5, 5, 1, 1, 27, 19, 19, 11,
+                11, 3, 3, 23, 7, 7, 15,
+            };
             for (int i = 0; i < BeaverTripleCount; ++i)
             {
-                // CUT: this slot's gate has a constant operand, so the gate is skipped in
-                // every phase - INIT allocated one triple fewer, so retrieval must skip it.
-                if (!(g_cut_frac_active && ((i == 0 && (FRACTIONAL > 30 || FRACTIONAL > 31)) || (i == 1 && (FRACTIONAL > 28 || FRACTIONAL > 29)) || (i == 2 && (FRACTIONAL > 29 || FRACTIONAL > 28)) || (i == 3 && (FRACTIONAL > 26 || FRACTIONAL > 27)) || (i == 4 && (FRACTIONAL > 27 || FRACTIONAL > 26)) || (i == 5 && (FRACTIONAL > 24 || FRACTIONAL > 25)) || (i == 6 && (FRACTIONAL > 25 || FRACTIONAL > 24)) || (i == 7 && (FRACTIONAL > 22 || FRACTIONAL > 23)) || (i == 8 && (FRACTIONAL > 23 || FRACTIONAL > 22)) || (i == 9 && (FRACTIONAL > 20 || FRACTIONAL > 21)) || (i == 10 && (FRACTIONAL > 21 || FRACTIONAL > 20)) || (i == 11 && (FRACTIONAL > 18 || FRACTIONAL > 19)) || (i == 12 && (FRACTIONAL > 19 || FRACTIONAL > 18)) || (i == 13 && (FRACTIONAL > 16 || FRACTIONAL > 17)) || (i == 14 && (FRACTIONAL > 17 || FRACTIONAL > 16)) || (i == 15 && (FRACTIONAL > 14 || FRACTIONAL > 15)) || (i == 16 && (FRACTIONAL > 15 || FRACTIONAL > 14)) || (i == 17 && (FRACTIONAL > 12 || FRACTIONAL > 13)) || (i == 18 && (FRACTIONAL > 13 || FRACTIONAL > 12)) || (i == 19 && (FRACTIONAL > 10 || FRACTIONAL > 11)) || (i == 20 && (FRACTIONAL > 11 || FRACTIONAL > 10)) || (i == 21 && (FRACTIONAL > 8 || FRACTIONAL > 9)) || (i == 22 && (FRACTIONAL > 9 || FRACTIONAL > 8)) || (i == 23 && (FRACTIONAL > 6 || FRACTIONAL > 7)) || (i == 24 && (FRACTIONAL > 7 || FRACTIONAL > 6)) || (i == 25 && (FRACTIONAL > 4 || FRACTIONAL > 5)) || (i == 26 && (FRACTIONAL > 5 || FRACTIONAL > 4)) || (i == 27 && (FRACTIONAL > 2 || FRACTIONAL > 3)) || (i == 28 && (FRACTIONAL > 3 || FRACTIONAL > 2)) || (i == 29 && (FRACTIONAL > 29 || FRACTIONAL > 31)) || (i == 30 && (FRACTIONAL > 25 || FRACTIONAL > 27)) || (i == 31 && (FRACTIONAL > 27 || FRACTIONAL > 25)) || (i == 32 && (FRACTIONAL > 21 || FRACTIONAL > 23)) || (i == 33 && (FRACTIONAL > 23 || FRACTIONAL > 21)) || (i == 34 && (FRACTIONAL > 17 || FRACTIONAL > 19)) || (i == 35 && (FRACTIONAL > 19 || FRACTIONAL > 17)) || (i == 36 && (FRACTIONAL > 13 || FRACTIONAL > 15)) || (i == 37 && (FRACTIONAL > 15 || FRACTIONAL > 13)) || (i == 38 && (FRACTIONAL > 9 || FRACTIONAL > 11)) || (i == 39 && (FRACTIONAL > 11 || FRACTIONAL > 9)) || (i == 40 && (FRACTIONAL > 5 || FRACTIONAL > 7)) || (i == 41 && (FRACTIONAL > 7 || FRACTIONAL > 5)) || (i == 42 && (FRACTIONAL > 1 || FRACTIONAL > 3)) || (i == 43 && (FRACTIONAL > 3 || FRACTIONAL > 1)) || (i == 44 && (FRACTIONAL > 27 || FRACTIONAL > 31)) || (i == 45 && (FRACTIONAL > 19 || FRACTIONAL > 23)) || (i == 46 && (FRACTIONAL > 23 || FRACTIONAL > 19)) || (i == 47 && (FRACTIONAL > 11 || FRACTIONAL > 15)) || (i == 48 && (FRACTIONAL > 15 || FRACTIONAL > 11)) || (i == 49 && (FRACTIONAL > 3 || FRACTIONAL > 7)) || (i == 50 && (FRACTIONAL > 7 || FRACTIONAL > 3)) || (i == 51 && (FRACTIONAL > 23 || FRACTIONAL > 31)) || (i == 52 && (FRACTIONAL > 7 || FRACTIONAL > 15)) || (i == 53 && (FRACTIONAL > 15 || FRACTIONAL > 7)) || (i == 54 && (FRACTIONAL > 15 || FRACTIONAL > 31)))))
+                // CUT: a skipped gate consumes no triple (INIT allocated one fewer).
+                if (!(g_cut_frac_active && FRACTIONAL > cut_skip_threshold[i]))
                     triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
@@ -890,251 +897,251 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 p_30 = a[30] ^ b[30];  // p[30]
                 p_31 = a[31] ^ b[31];  // p[31]
                 if (!(g_cut_frac_active && FRACTIONAL > 1))  // CUT: operand is constant here - carrier not read
-                    p_1_p = p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 1 || FRACTIONAL > 3)) ? r_cut_spare : triples[42].a));
+                    p_1_p = p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[42].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 1))  // CUT: operand is constant here - carrier not read
-                    p_1_p_1 = p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 1)) ? r_cut_spare : triples[43].b));
+                    p_1_p_1 = p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[43].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 2))  // CUT: operand is constant here - carrier not read
-                    p_2_p = p_2.zero_add(((g_cut_frac_active && (FRACTIONAL > 2 || FRACTIONAL > 3)) ? r_cut_spare : triples[27].a));
+                    p_2_p = p_2.zero_add(((g_cut_frac_active && FRACTIONAL > 2) ? r_cut_spare : triples[27].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 2))  // CUT: operand is constant here - carrier not read
-                    p_2_p_1 = p_2.zero_add(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 2)) ? r_cut_spare : triples[28].b));
+                    p_2_p_1 = p_2.zero_add(((g_cut_frac_active && FRACTIONAL > 2) ? r_cut_spare : triples[28].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 3))  // CUT: operand is constant here - carrier not read
-                    p_3_p = p_3.zero_add(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 2)) ? r_cut_spare : triples[28].a));
+                    p_3_p = p_3.zero_add(((g_cut_frac_active && FRACTIONAL > 2) ? r_cut_spare : triples[28].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 4))  // CUT: operand is constant here - carrier not read
-                    p_4_p = p_4.zero_add(((g_cut_frac_active && (FRACTIONAL > 4 || FRACTIONAL > 5)) ? r_cut_spare : triples[25].a));
+                    p_4_p = p_4.zero_add(((g_cut_frac_active && FRACTIONAL > 4) ? r_cut_spare : triples[25].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 4))  // CUT: operand is constant here - carrier not read
-                    p_4_p_1 = p_4.zero_add(((g_cut_frac_active && (FRACTIONAL > 5 || FRACTIONAL > 4)) ? r_cut_spare : triples[26].b));
+                    p_4_p_1 = p_4.zero_add(((g_cut_frac_active && FRACTIONAL > 4) ? r_cut_spare : triples[26].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 5))  // CUT: operand is constant here - carrier not read
-                    p_5_p = p_5.zero_add(((g_cut_frac_active && (FRACTIONAL > 5 || FRACTIONAL > 4)) ? r_cut_spare : triples[26].a));
+                    p_5_p = p_5.zero_add(((g_cut_frac_active && FRACTIONAL > 4) ? r_cut_spare : triples[26].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 6))  // CUT: operand is constant here - carrier not read
-                    p_6_p = p_6.zero_add(((g_cut_frac_active && (FRACTIONAL > 6 || FRACTIONAL > 7)) ? r_cut_spare : triples[23].a));
+                    p_6_p = p_6.zero_add(((g_cut_frac_active && FRACTIONAL > 6) ? r_cut_spare : triples[23].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 6))  // CUT: operand is constant here - carrier not read
-                    p_6_p_1 = p_6.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 6)) ? r_cut_spare : triples[24].b));
+                    p_6_p_1 = p_6.zero_add(((g_cut_frac_active && FRACTIONAL > 6) ? r_cut_spare : triples[24].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 7))  // CUT: operand is constant here - carrier not read
-                    p_7_p = p_7.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 6)) ? r_cut_spare : triples[24].a));
+                    p_7_p = p_7.zero_add(((g_cut_frac_active && FRACTIONAL > 6) ? r_cut_spare : triples[24].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 8))  // CUT: operand is constant here - carrier not read
-                    p_8_p = p_8.zero_add(((g_cut_frac_active && (FRACTIONAL > 8 || FRACTIONAL > 9)) ? r_cut_spare : triples[21].a));
+                    p_8_p = p_8.zero_add(((g_cut_frac_active && FRACTIONAL > 8) ? r_cut_spare : triples[21].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 8))  // CUT: operand is constant here - carrier not read
-                    p_8_p_1 = p_8.zero_add(((g_cut_frac_active && (FRACTIONAL > 9 || FRACTIONAL > 8)) ? r_cut_spare : triples[22].b));
+                    p_8_p_1 = p_8.zero_add(((g_cut_frac_active && FRACTIONAL > 8) ? r_cut_spare : triples[22].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 9))  // CUT: operand is constant here - carrier not read
-                    p_9_p = p_9.zero_add(((g_cut_frac_active && (FRACTIONAL > 9 || FRACTIONAL > 8)) ? r_cut_spare : triples[22].a));
+                    p_9_p = p_9.zero_add(((g_cut_frac_active && FRACTIONAL > 8) ? r_cut_spare : triples[22].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 10))  // CUT: operand is constant here - carrier not read
-                    p_10_p = p_10.zero_add(((g_cut_frac_active && (FRACTIONAL > 10 || FRACTIONAL > 11)) ? r_cut_spare : triples[19].a));
+                    p_10_p = p_10.zero_add(((g_cut_frac_active && FRACTIONAL > 10) ? r_cut_spare : triples[19].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 10))  // CUT: operand is constant here - carrier not read
-                    p_10_p_1 = p_10.zero_add(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 10)) ? r_cut_spare : triples[20].b));
+                    p_10_p_1 = p_10.zero_add(((g_cut_frac_active && FRACTIONAL > 10) ? r_cut_spare : triples[20].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 11))  // CUT: operand is constant here - carrier not read
-                    p_11_p = p_11.zero_add(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 10)) ? r_cut_spare : triples[20].a));
+                    p_11_p = p_11.zero_add(((g_cut_frac_active && FRACTIONAL > 10) ? r_cut_spare : triples[20].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 12))  // CUT: operand is constant here - carrier not read
-                    p_12_p = p_12.zero_add(((g_cut_frac_active && (FRACTIONAL > 12 || FRACTIONAL > 13)) ? r_cut_spare : triples[17].a));
+                    p_12_p = p_12.zero_add(((g_cut_frac_active && FRACTIONAL > 12) ? r_cut_spare : triples[17].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 12))  // CUT: operand is constant here - carrier not read
-                    p_12_p_1 = p_12.zero_add(((g_cut_frac_active && (FRACTIONAL > 13 || FRACTIONAL > 12)) ? r_cut_spare : triples[18].b));
+                    p_12_p_1 = p_12.zero_add(((g_cut_frac_active && FRACTIONAL > 12) ? r_cut_spare : triples[18].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 13))  // CUT: operand is constant here - carrier not read
-                    p_13_p = p_13.zero_add(((g_cut_frac_active && (FRACTIONAL > 13 || FRACTIONAL > 12)) ? r_cut_spare : triples[18].a));
+                    p_13_p = p_13.zero_add(((g_cut_frac_active && FRACTIONAL > 12) ? r_cut_spare : triples[18].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 14))  // CUT: operand is constant here - carrier not read
-                    p_14_p = p_14.zero_add(((g_cut_frac_active && (FRACTIONAL > 14 || FRACTIONAL > 15)) ? r_cut_spare : triples[15].a));
+                    p_14_p = p_14.zero_add(((g_cut_frac_active && FRACTIONAL > 14) ? r_cut_spare : triples[15].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 14))  // CUT: operand is constant here - carrier not read
-                    p_14_p_1 = p_14.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 14)) ? r_cut_spare : triples[16].b));
+                    p_14_p_1 = p_14.zero_add(((g_cut_frac_active && FRACTIONAL > 14) ? r_cut_spare : triples[16].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 15))  // CUT: operand is constant here - carrier not read
-                    p_15_p = p_15.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 14)) ? r_cut_spare : triples[16].a));
+                    p_15_p = p_15.zero_add(((g_cut_frac_active && FRACTIONAL > 14) ? r_cut_spare : triples[16].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 16))  // CUT: operand is constant here - carrier not read
-                    p_16_p = p_16.zero_add(((g_cut_frac_active && (FRACTIONAL > 16 || FRACTIONAL > 17)) ? r_cut_spare : triples[13].a));
+                    p_16_p = p_16.zero_add(((g_cut_frac_active && FRACTIONAL > 16) ? r_cut_spare : triples[13].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 16))  // CUT: operand is constant here - carrier not read
-                    p_16_p_1 = p_16.zero_add(((g_cut_frac_active && (FRACTIONAL > 17 || FRACTIONAL > 16)) ? r_cut_spare : triples[14].b));
+                    p_16_p_1 = p_16.zero_add(((g_cut_frac_active && FRACTIONAL > 16) ? r_cut_spare : triples[14].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 17))  // CUT: operand is constant here - carrier not read
-                    p_17_p = p_17.zero_add(((g_cut_frac_active && (FRACTIONAL > 17 || FRACTIONAL > 16)) ? r_cut_spare : triples[14].a));
+                    p_17_p = p_17.zero_add(((g_cut_frac_active && FRACTIONAL > 16) ? r_cut_spare : triples[14].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 18))  // CUT: operand is constant here - carrier not read
-                    p_18_p = p_18.zero_add(((g_cut_frac_active && (FRACTIONAL > 18 || FRACTIONAL > 19)) ? r_cut_spare : triples[11].a));
+                    p_18_p = p_18.zero_add(((g_cut_frac_active && FRACTIONAL > 18) ? r_cut_spare : triples[11].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 18))  // CUT: operand is constant here - carrier not read
-                    p_18_p_1 = p_18.zero_add(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 18)) ? r_cut_spare : triples[12].b));
+                    p_18_p_1 = p_18.zero_add(((g_cut_frac_active && FRACTIONAL > 18) ? r_cut_spare : triples[12].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 19))  // CUT: operand is constant here - carrier not read
-                    p_19_p = p_19.zero_add(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 18)) ? r_cut_spare : triples[12].a));
+                    p_19_p = p_19.zero_add(((g_cut_frac_active && FRACTIONAL > 18) ? r_cut_spare : triples[12].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 20))  // CUT: operand is constant here - carrier not read
-                    p_20_p = p_20.zero_add(((g_cut_frac_active && (FRACTIONAL > 20 || FRACTIONAL > 21)) ? r_cut_spare : triples[9].a));
+                    p_20_p = p_20.zero_add(((g_cut_frac_active && FRACTIONAL > 20) ? r_cut_spare : triples[9].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 20))  // CUT: operand is constant here - carrier not read
-                    p_20_p_1 = p_20.zero_add(((g_cut_frac_active && (FRACTIONAL > 21 || FRACTIONAL > 20)) ? r_cut_spare : triples[10].b));
+                    p_20_p_1 = p_20.zero_add(((g_cut_frac_active && FRACTIONAL > 20) ? r_cut_spare : triples[10].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 21))  // CUT: operand is constant here - carrier not read
-                    p_21_p = p_21.zero_add(((g_cut_frac_active && (FRACTIONAL > 21 || FRACTIONAL > 20)) ? r_cut_spare : triples[10].a));
+                    p_21_p = p_21.zero_add(((g_cut_frac_active && FRACTIONAL > 20) ? r_cut_spare : triples[10].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 22))  // CUT: operand is constant here - carrier not read
-                    p_22_p = p_22.zero_add(((g_cut_frac_active && (FRACTIONAL > 22 || FRACTIONAL > 23)) ? r_cut_spare : triples[7].a));
+                    p_22_p = p_22.zero_add(((g_cut_frac_active && FRACTIONAL > 22) ? r_cut_spare : triples[7].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 22))  // CUT: operand is constant here - carrier not read
-                    p_22_p_1 = p_22.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 22)) ? r_cut_spare : triples[8].b));
+                    p_22_p_1 = p_22.zero_add(((g_cut_frac_active && FRACTIONAL > 22) ? r_cut_spare : triples[8].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 23))  // CUT: operand is constant here - carrier not read
-                    p_23_p = p_23.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 22)) ? r_cut_spare : triples[8].a));
+                    p_23_p = p_23.zero_add(((g_cut_frac_active && FRACTIONAL > 22) ? r_cut_spare : triples[8].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 24))  // CUT: operand is constant here - carrier not read
-                    p_24_p = p_24.zero_add(((g_cut_frac_active && (FRACTIONAL > 24 || FRACTIONAL > 25)) ? r_cut_spare : triples[5].a));
+                    p_24_p = p_24.zero_add(((g_cut_frac_active && FRACTIONAL > 24) ? r_cut_spare : triples[5].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 24))  // CUT: operand is constant here - carrier not read
-                    p_24_p_1 = p_24.zero_add(((g_cut_frac_active && (FRACTIONAL > 25 || FRACTIONAL > 24)) ? r_cut_spare : triples[6].b));
+                    p_24_p_1 = p_24.zero_add(((g_cut_frac_active && FRACTIONAL > 24) ? r_cut_spare : triples[6].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 25))  // CUT: operand is constant here - carrier not read
-                    p_25_p = p_25.zero_add(((g_cut_frac_active && (FRACTIONAL > 25 || FRACTIONAL > 24)) ? r_cut_spare : triples[6].a));
+                    p_25_p = p_25.zero_add(((g_cut_frac_active && FRACTIONAL > 24) ? r_cut_spare : triples[6].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 26))  // CUT: operand is constant here - carrier not read
-                    p_26_p = p_26.zero_add(((g_cut_frac_active && (FRACTIONAL > 26 || FRACTIONAL > 27)) ? r_cut_spare : triples[3].a));
+                    p_26_p = p_26.zero_add(((g_cut_frac_active && FRACTIONAL > 26) ? r_cut_spare : triples[3].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 26))  // CUT: operand is constant here - carrier not read
-                    p_26_p_1 = p_26.zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 26)) ? r_cut_spare : triples[4].b));
+                    p_26_p_1 = p_26.zero_add(((g_cut_frac_active && FRACTIONAL > 26) ? r_cut_spare : triples[4].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 27))  // CUT: operand is constant here - carrier not read
-                    p_27_p = p_27.zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 26)) ? r_cut_spare : triples[4].a));
+                    p_27_p = p_27.zero_add(((g_cut_frac_active && FRACTIONAL > 26) ? r_cut_spare : triples[4].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 28))  // CUT: operand is constant here - carrier not read
-                    p_28_p = p_28.zero_add(((g_cut_frac_active && (FRACTIONAL > 28 || FRACTIONAL > 29)) ? r_cut_spare : triples[1].a));
+                    p_28_p = p_28.zero_add(((g_cut_frac_active && FRACTIONAL > 28) ? r_cut_spare : triples[1].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 28))  // CUT: operand is constant here - carrier not read
-                    p_28_p_1 = p_28.zero_add(((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 28)) ? r_cut_spare : triples[2].b));
+                    p_28_p_1 = p_28.zero_add(((g_cut_frac_active && FRACTIONAL > 28) ? r_cut_spare : triples[2].b));
                 if (!(g_cut_frac_active && FRACTIONAL > 29))  // CUT: operand is constant here - carrier not read
-                    p_29_p = p_29.zero_add(((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 28)) ? r_cut_spare : triples[2].a));
+                    p_29_p = p_29.zero_add(((g_cut_frac_active && FRACTIONAL > 28) ? r_cut_spare : triples[2].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 30))  // CUT: operand is constant here - carrier not read
-                    p_30_p = p_30.zero_add(((g_cut_frac_active && (FRACTIONAL > 30 || FRACTIONAL > 31)) ? r_cut_spare : triples[0].a));
+                    p_30_p = p_30.zero_add(((g_cut_frac_active && FRACTIONAL > 30) ? r_cut_spare : triples[0].a));
                 g_3 = a[3].mult_a_known_to_evaluators(b[3]);  // and_a_5
-                g_3.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 2 || FRACTIONAL > 3)) ? r_cut_spare : triples[27].b));
+                g_3.prepare_remask(((g_cut_frac_active && FRACTIONAL > 2) ? r_cut_spare : triples[27].b));
                 g_5 = a[5].mult_a_known_to_evaluators(b[5]);  // and_a_9
-                g_5.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 4 || FRACTIONAL > 5)) ? r_cut_spare : triples[25].b));
+                g_5.prepare_remask(((g_cut_frac_active && FRACTIONAL > 4) ? r_cut_spare : triples[25].b));
                 g_7 = a[7].mult_a_known_to_evaluators(b[7]);  // and_a_13
-                g_7.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 6 || FRACTIONAL > 7)) ? r_cut_spare : triples[23].b));
+                g_7.prepare_remask(((g_cut_frac_active && FRACTIONAL > 6) ? r_cut_spare : triples[23].b));
                 g_9 = a[9].mult_a_known_to_evaluators(b[9]);  // and_a_17
-                g_9.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 8 || FRACTIONAL > 9)) ? r_cut_spare : triples[21].b));
+                g_9.prepare_remask(((g_cut_frac_active && FRACTIONAL > 8) ? r_cut_spare : triples[21].b));
                 g_11 = a[11].mult_a_known_to_evaluators(b[11]);  // and_a_21
-                g_11.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 10 || FRACTIONAL > 11)) ? r_cut_spare : triples[19].b));
+                g_11.prepare_remask(((g_cut_frac_active && FRACTIONAL > 10) ? r_cut_spare : triples[19].b));
                 g_13 = a[13].mult_a_known_to_evaluators(b[13]);  // and_a_25
-                g_13.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 12 || FRACTIONAL > 13)) ? r_cut_spare : triples[17].b));
+                g_13.prepare_remask(((g_cut_frac_active && FRACTIONAL > 12) ? r_cut_spare : triples[17].b));
                 g_15 = a[15].mult_a_known_to_evaluators(b[15]);  // and_a_29
-                g_15.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 14 || FRACTIONAL > 15)) ? r_cut_spare : triples[15].b));
+                g_15.prepare_remask(((g_cut_frac_active && FRACTIONAL > 14) ? r_cut_spare : triples[15].b));
                 g_17 = a[17].mult_a_known_to_evaluators(b[17]);  // and_a_33
-                g_17.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 16 || FRACTIONAL > 17)) ? r_cut_spare : triples[13].b));
+                g_17.prepare_remask(((g_cut_frac_active && FRACTIONAL > 16) ? r_cut_spare : triples[13].b));
                 g_19 = a[19].mult_a_known_to_evaluators(b[19]);  // and_a_37
-                g_19.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 18 || FRACTIONAL > 19)) ? r_cut_spare : triples[11].b));
+                g_19.prepare_remask(((g_cut_frac_active && FRACTIONAL > 18) ? r_cut_spare : triples[11].b));
                 g_21 = a[21].mult_a_known_to_evaluators(b[21]);  // and_a_41
-                g_21.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 20 || FRACTIONAL > 21)) ? r_cut_spare : triples[9].b));
+                g_21.prepare_remask(((g_cut_frac_active && FRACTIONAL > 20) ? r_cut_spare : triples[9].b));
                 g_23 = a[23].mult_a_known_to_evaluators(b[23]);  // and_a_45
-                g_23.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 22 || FRACTIONAL > 23)) ? r_cut_spare : triples[7].b));
+                g_23.prepare_remask(((g_cut_frac_active && FRACTIONAL > 22) ? r_cut_spare : triples[7].b));
                 g_25 = a[25].mult_a_known_to_evaluators(b[25]);  // and_a_49
-                g_25.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 24 || FRACTIONAL > 25)) ? r_cut_spare : triples[5].b));
+                g_25.prepare_remask(((g_cut_frac_active && FRACTIONAL > 24) ? r_cut_spare : triples[5].b));
                 g_27 = a[27].mult_a_known_to_evaluators(b[27]);  // and_a_53
-                g_27.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 26 || FRACTIONAL > 27)) ? r_cut_spare : triples[3].b));
+                g_27.prepare_remask(((g_cut_frac_active && FRACTIONAL > 26) ? r_cut_spare : triples[3].b));
                 g_29 = a[29].mult_a_known_to_evaluators(b[29]);  // and_a_57
-                g_29.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 28 || FRACTIONAL > 29)) ? r_cut_spare : triples[1].b));
+                g_29.prepare_remask(((g_cut_frac_active && FRACTIONAL > 28) ? r_cut_spare : triples[1].b));
                 g_31 = a[31].mult_a_known_to_evaluators(b[31]);  // and_a_61
-                g_31.prepare_remask(((g_cut_frac_active && (FRACTIONAL > 30 || FRACTIONAL > 31)) ? r_cut_spare : triples[0].b));
+                g_31.prepare_remask(((g_cut_frac_active && FRACTIONAL > 30) ? r_cut_spare : triples[0].b));
                 // and_67: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=a29
                 if (g_cut_frac_active && FRACTIONAL > 29)
-                    p_L1_28 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 31)) ? r_cut_spare : triples[29].a));  // CUT: both operands constant - local, no triple
+                    p_L1_28 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 29) ? r_cut_spare : triples[29].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 29)
-                    p_L1_28 = p_28_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 31)) ? r_cut_spare : triples[29].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_28 = p_28_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 29) ? r_cut_spare : triples[29].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 28)
-                    p_L1_28 = p_29_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 31)) ? r_cut_spare : triples[29].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_28 = p_29_p.zero_add(((g_cut_frac_active && FRACTIONAL > 29) ? r_cut_spare : triples[29].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_28 = p_29_p.prepare_and(p_28_p_1, ((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 31)) ? r_cut_spare : triples[29].a), triples[2].c);
+                    p_L1_28 = p_29_p.prepare_and(p_28_p_1, ((g_cut_frac_active && FRACTIONAL > 29) ? r_cut_spare : triples[29].a), triples[2].c);
                 // and_70: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=a31
                 if (g_cut_frac_active && FRACTIONAL > 27)
-                    p_L1_26 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 25)) ? r_cut_spare : triples[31].a));  // CUT: both operands constant - local, no triple
+                    p_L1_26 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[31].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 27)
-                    p_L1_26 = p_26_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 25)) ? r_cut_spare : triples[31].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_26 = p_26_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[31].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 26)
-                    p_L1_26 = p_27_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 25)) ? r_cut_spare : triples[31].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_26 = p_27_p.zero_add(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[31].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_26 = p_27_p.prepare_and(p_26_p_1, ((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 25)) ? r_cut_spare : triples[31].a), triples[4].c);
+                    p_L1_26 = p_27_p.prepare_and(p_26_p_1, ((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[31].a), triples[4].c);
                 // and_73: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=b31
                 if (g_cut_frac_active && FRACTIONAL > 25)
-                    p_L1_24 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 25)) ? r_cut_spare : triples[31].b));  // CUT: both operands constant - local, no triple
+                    p_L1_24 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[31].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 25)
-                    p_L1_24 = p_24_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 25)) ? r_cut_spare : triples[31].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_24 = p_24_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[31].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 24)
-                    p_L1_24 = p_25_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 25)) ? r_cut_spare : triples[31].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_24 = p_25_p.zero_add(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[31].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_24 = p_25_p.prepare_and(p_24_p_1, ((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 25)) ? r_cut_spare : triples[31].b), triples[6].c);
+                    p_L1_24 = p_25_p.prepare_and(p_24_p_1, ((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[31].b), triples[6].c);
                 // and_76: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=a33
                 if (g_cut_frac_active && FRACTIONAL > 23)
-                    p_L1_22 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 21)) ? r_cut_spare : triples[33].a));  // CUT: both operands constant - local, no triple
+                    p_L1_22 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[33].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 23)
-                    p_L1_22 = p_22_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 21)) ? r_cut_spare : triples[33].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_22 = p_22_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[33].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 22)
-                    p_L1_22 = p_23_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 21)) ? r_cut_spare : triples[33].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_22 = p_23_p.zero_add(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[33].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_22 = p_23_p.prepare_and(p_22_p_1, ((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 21)) ? r_cut_spare : triples[33].a), triples[8].c);
+                    p_L1_22 = p_23_p.prepare_and(p_22_p_1, ((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[33].a), triples[8].c);
                 // and_79: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=b33
                 if (g_cut_frac_active && FRACTIONAL > 21)
-                    p_L1_20 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 21)) ? r_cut_spare : triples[33].b));  // CUT: both operands constant - local, no triple
+                    p_L1_20 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[33].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 21)
-                    p_L1_20 = p_20_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 21)) ? r_cut_spare : triples[33].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_20 = p_20_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[33].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 20)
-                    p_L1_20 = p_21_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 21)) ? r_cut_spare : triples[33].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_20 = p_21_p.zero_add(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[33].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_20 = p_21_p.prepare_and(p_20_p_1, ((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 21)) ? r_cut_spare : triples[33].b), triples[10].c);
+                    p_L1_20 = p_21_p.prepare_and(p_20_p_1, ((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[33].b), triples[10].c);
                 // and_82: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=a35
                 if (g_cut_frac_active && FRACTIONAL > 19)
-                    p_L1_18 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 17)) ? r_cut_spare : triples[35].a));  // CUT: both operands constant - local, no triple
+                    p_L1_18 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[35].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 19)
-                    p_L1_18 = p_18_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 17)) ? r_cut_spare : triples[35].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_18 = p_18_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[35].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 18)
-                    p_L1_18 = p_19_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 17)) ? r_cut_spare : triples[35].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_18 = p_19_p.zero_add(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[35].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_18 = p_19_p.prepare_and(p_18_p_1, ((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 17)) ? r_cut_spare : triples[35].a), triples[12].c);
+                    p_L1_18 = p_19_p.prepare_and(p_18_p_1, ((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[35].a), triples[12].c);
                 // and_85: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=b35
                 if (g_cut_frac_active && FRACTIONAL > 17)
-                    p_L1_16 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 17)) ? r_cut_spare : triples[35].b));  // CUT: both operands constant - local, no triple
+                    p_L1_16 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[35].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 17)
-                    p_L1_16 = p_16_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 17)) ? r_cut_spare : triples[35].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_16 = p_16_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[35].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 16)
-                    p_L1_16 = p_17_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 17)) ? r_cut_spare : triples[35].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_16 = p_17_p.zero_add(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[35].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_16 = p_17_p.prepare_and(p_16_p_1, ((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 17)) ? r_cut_spare : triples[35].b), triples[14].c);
+                    p_L1_16 = p_17_p.prepare_and(p_16_p_1, ((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[35].b), triples[14].c);
                 // and_88: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=a37
                 if (g_cut_frac_active && FRACTIONAL > 15)
-                    p_L1_14 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 13)) ? r_cut_spare : triples[37].a));  // CUT: both operands constant - local, no triple
+                    p_L1_14 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[37].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 15)
-                    p_L1_14 = p_14_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 13)) ? r_cut_spare : triples[37].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_14 = p_14_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[37].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 14)
-                    p_L1_14 = p_15_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 13)) ? r_cut_spare : triples[37].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_14 = p_15_p.zero_add(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[37].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_14 = p_15_p.prepare_and(p_14_p_1, ((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 13)) ? r_cut_spare : triples[37].a), triples[16].c);
+                    p_L1_14 = p_15_p.prepare_and(p_14_p_1, ((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[37].a), triples[16].c);
                 // and_91: a18=triples[18].a, b18=triples[18].b, c18=triples[18].c, output mask=b37
                 if (g_cut_frac_active && FRACTIONAL > 13)
-                    p_L1_12 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 13)) ? r_cut_spare : triples[37].b));  // CUT: both operands constant - local, no triple
+                    p_L1_12 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[37].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 13)
-                    p_L1_12 = p_12_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 13)) ? r_cut_spare : triples[37].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_12 = p_12_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[37].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 12)
-                    p_L1_12 = p_13_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 13)) ? r_cut_spare : triples[37].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_12 = p_13_p.zero_add(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[37].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_12 = p_13_p.prepare_and(p_12_p_1, ((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 13)) ? r_cut_spare : triples[37].b), triples[18].c);
+                    p_L1_12 = p_13_p.prepare_and(p_12_p_1, ((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[37].b), triples[18].c);
                 // and_94: a20=triples[20].a, b20=triples[20].b, c20=triples[20].c, output mask=a39
                 if (g_cut_frac_active && FRACTIONAL > 11)
-                    p_L1_10 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 9)) ? r_cut_spare : triples[39].a));  // CUT: both operands constant - local, no triple
+                    p_L1_10 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[39].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 11)
-                    p_L1_10 = p_10_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 9)) ? r_cut_spare : triples[39].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_10 = p_10_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[39].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 10)
-                    p_L1_10 = p_11_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 9)) ? r_cut_spare : triples[39].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_10 = p_11_p.zero_add(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[39].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_10 = p_11_p.prepare_and(p_10_p_1, ((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 9)) ? r_cut_spare : triples[39].a), triples[20].c);
+                    p_L1_10 = p_11_p.prepare_and(p_10_p_1, ((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[39].a), triples[20].c);
                 // and_97: a22=triples[22].a, b22=triples[22].b, c22=triples[22].c, output mask=b39
                 if (g_cut_frac_active && FRACTIONAL > 9)
-                    p_L1_8 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 9)) ? r_cut_spare : triples[39].b));  // CUT: both operands constant - local, no triple
+                    p_L1_8 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[39].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 9)
-                    p_L1_8 = p_8_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 9)) ? r_cut_spare : triples[39].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_8 = p_8_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[39].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 8)
-                    p_L1_8 = p_9_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 9)) ? r_cut_spare : triples[39].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_8 = p_9_p.zero_add(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[39].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_8 = p_9_p.prepare_and(p_8_p_1, ((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 9)) ? r_cut_spare : triples[39].b), triples[22].c);
+                    p_L1_8 = p_9_p.prepare_and(p_8_p_1, ((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[39].b), triples[22].c);
                 // and_100: a24=triples[24].a, b24=triples[24].b, c24=triples[24].c, output mask=a41
                 if (g_cut_frac_active && FRACTIONAL > 7)
-                    p_L1_6 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 5)) ? r_cut_spare : triples[41].a));  // CUT: both operands constant - local, no triple
+                    p_L1_6 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[41].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 7)
-                    p_L1_6 = p_6_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 5)) ? r_cut_spare : triples[41].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_6 = p_6_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[41].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 6)
-                    p_L1_6 = p_7_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 5)) ? r_cut_spare : triples[41].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_6 = p_7_p.zero_add(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[41].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_6 = p_7_p.prepare_and(p_6_p_1, ((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 5)) ? r_cut_spare : triples[41].a), triples[24].c);
+                    p_L1_6 = p_7_p.prepare_and(p_6_p_1, ((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[41].a), triples[24].c);
                 // and_103: a26=triples[26].a, b26=triples[26].b, c26=triples[26].c, output mask=b41
                 if (g_cut_frac_active && FRACTIONAL > 5)
-                    p_L1_4 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 5)) ? r_cut_spare : triples[41].b));  // CUT: both operands constant - local, no triple
+                    p_L1_4 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[41].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 5)
-                    p_L1_4 = p_4_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 5)) ? r_cut_spare : triples[41].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_4 = p_4_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[41].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 4)
-                    p_L1_4 = p_5_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 5)) ? r_cut_spare : triples[41].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_4 = p_5_p.zero_add(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[41].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_4 = p_5_p.prepare_and(p_4_p_1, ((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 5)) ? r_cut_spare : triples[41].b), triples[26].c);
+                    p_L1_4 = p_5_p.prepare_and(p_4_p_1, ((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[41].b), triples[26].c);
                 // and_106: a28=triples[28].a, b28=triples[28].b, c28=triples[28].c, output mask=a43
                 if (g_cut_frac_active && FRACTIONAL > 3)
-                    p_L1_2 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 1)) ? r_cut_spare : triples[43].a));  // CUT: both operands constant - local, no triple
+                    p_L1_2 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[43].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 3)
-                    p_L1_2 = p_2_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 1)) ? r_cut_spare : triples[43].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_2 = p_2_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[43].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 2)
-                    p_L1_2 = p_3_p.zero_add(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 1)) ? r_cut_spare : triples[43].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L1_2 = p_3_p.zero_add(((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[43].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L1_2 = p_3_p.prepare_and(p_2_p_1, ((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 1)) ? r_cut_spare : triples[43].a), triples[28].c);
+                    p_L1_2 = p_3_p.prepare_and(p_2_p_1, ((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[43].a), triples[28].c);
                 break;
             case 1:
                 g_3.complete_remask();
@@ -1152,57 +1159,57 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_27.complete_remask();
                 g_29.complete_remask();
                 g_31.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 28)))
+                if (!(g_cut_frac_active && FRACTIONAL > 28))
                     p_L1_28.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 26)))
+                if (!(g_cut_frac_active && FRACTIONAL > 26))
                     p_L1_26.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 25 || FRACTIONAL > 24)))
+                if (!(g_cut_frac_active && FRACTIONAL > 24))
                     p_L1_24.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 22)))
+                if (!(g_cut_frac_active && FRACTIONAL > 22))
                     p_L1_22.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 21 || FRACTIONAL > 20)))
+                if (!(g_cut_frac_active && FRACTIONAL > 20))
                     p_L1_20.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 18)))
+                if (!(g_cut_frac_active && FRACTIONAL > 18))
                     p_L1_18.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 17 || FRACTIONAL > 16)))
+                if (!(g_cut_frac_active && FRACTIONAL > 16))
                     p_L1_16.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 14)))
+                if (!(g_cut_frac_active && FRACTIONAL > 14))
                     p_L1_14.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 13 || FRACTIONAL > 12)))
+                if (!(g_cut_frac_active && FRACTIONAL > 12))
                     p_L1_12.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 10)))
+                if (!(g_cut_frac_active && FRACTIONAL > 10))
                     p_L1_10.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 9 || FRACTIONAL > 8)))
+                if (!(g_cut_frac_active && FRACTIONAL > 8))
                     p_L1_8.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 6)))
+                if (!(g_cut_frac_active && FRACTIONAL > 6))
                     p_L1_6.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 5 || FRACTIONAL > 4)))
+                if (!(g_cut_frac_active && FRACTIONAL > 4))
                     p_L1_4.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 2)))
+                if (!(g_cut_frac_active && FRACTIONAL > 2))
                     p_L1_2.complete_and();
                 if (!(g_cut_frac_active && FRACTIONAL > 5))  // CUT: operand is constant here - carrier not read
-                    p_L1_4_p = p_L1_4.zero_add(((g_cut_frac_active && (FRACTIONAL > 5 || FRACTIONAL > 7)) ? r_cut_spare : triples[40].a));
+                    p_L1_4_p = p_L1_4.zero_add(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[40].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 9))  // CUT: operand is constant here - carrier not read
-                    p_L1_8_p = p_L1_8.zero_add(((g_cut_frac_active && (FRACTIONAL > 9 || FRACTIONAL > 11)) ? r_cut_spare : triples[38].a));
+                    p_L1_8_p = p_L1_8.zero_add(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[38].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 13))  // CUT: operand is constant here - carrier not read
-                    p_L1_12_p = p_L1_12.zero_add(((g_cut_frac_active && (FRACTIONAL > 13 || FRACTIONAL > 15)) ? r_cut_spare : triples[36].a));
+                    p_L1_12_p = p_L1_12.zero_add(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[36].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 17))  // CUT: operand is constant here - carrier not read
-                    p_L1_16_p = p_L1_16.zero_add(((g_cut_frac_active && (FRACTIONAL > 17 || FRACTIONAL > 19)) ? r_cut_spare : triples[34].a));
+                    p_L1_16_p = p_L1_16.zero_add(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[34].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 21))  // CUT: operand is constant here - carrier not read
-                    p_L1_20_p = p_L1_20.zero_add(((g_cut_frac_active && (FRACTIONAL > 21 || FRACTIONAL > 23)) ? r_cut_spare : triples[32].a));
+                    p_L1_20_p = p_L1_20.zero_add(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[32].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 25))  // CUT: operand is constant here - carrier not read
-                    p_L1_24_p = p_L1_24.zero_add(((g_cut_frac_active && (FRACTIONAL > 25 || FRACTIONAL > 27)) ? r_cut_spare : triples[30].a));
+                    p_L1_24_p = p_L1_24.zero_add(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[30].a));
                 g_2 = a[2].mult_a_known_to_evaluators(b[2]);  // and_a_3
                 g_2.prepare_remask(r118);
                 // and_104: a27=triples[27].a, b27=triples[27].b, c27=triples[27].c, output mask=(b42-r118)
                 if (g_cut_frac_active && FRACTIONAL > 3)
-                    pg_L0_2_3 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 1 || FRACTIONAL > 3)) ? r_cut_spare : triples[42].b), r118));  // CUT: both operands constant - local, no triple
+                    pg_L0_2_3 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[42].b), r118));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 2)
-                    pg_L0_2_3 = g_3.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 1 || FRACTIONAL > 3)) ? r_cut_spare : triples[42].b), r118));  // CUT: AND with constant 1 - local, no triple
+                    pg_L0_2_3 = g_3.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[42].b), r118));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 3)
-                    pg_L0_2_3 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 1 || FRACTIONAL > 3)) ? r_cut_spare : triples[42].b), r118));  // CUT: AND with constant 0 - local, no triple
+                    pg_L0_2_3 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[42].b), r118));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L0_2_3 = p_2_p.prepare_and(g_3, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 1 || FRACTIONAL > 3)) ? r_cut_spare : triples[42].b), r118), triples[27].c);
+                    pg_L0_2_3 = p_2_p.prepare_and(g_3, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 1) ? r_cut_spare : triples[42].b), r118), triples[27].c);
                 g_4 = a[4].mult_a_known_to_evaluators(b[4]);  // and_a_7
                 g_4.prepare_remask(r126);
                 // and_101: a25=triples[25].a, b25=triples[25].b, c25=triples[25].c, output mask=(r125-r126)
@@ -1218,13 +1225,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_6.prepare_remask(r117);
                 // and_98: a23=triples[23].a, b23=triples[23].b, c23=triples[23].c, output mask=(b40-r117)
                 if (g_cut_frac_active && FRACTIONAL > 7)
-                    pg_L0_6_7 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 5 || FRACTIONAL > 7)) ? r_cut_spare : triples[40].b), r117));  // CUT: both operands constant - local, no triple
+                    pg_L0_6_7 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[40].b), r117));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 6)
-                    pg_L0_6_7 = g_7.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 5 || FRACTIONAL > 7)) ? r_cut_spare : triples[40].b), r117));  // CUT: AND with constant 1 - local, no triple
+                    pg_L0_6_7 = g_7.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[40].b), r117));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 7)
-                    pg_L0_6_7 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 5 || FRACTIONAL > 7)) ? r_cut_spare : triples[40].b), r117));  // CUT: AND with constant 0 - local, no triple
+                    pg_L0_6_7 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[40].b), r117));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L0_6_7 = p_6_p.prepare_and(g_7, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 5 || FRACTIONAL > 7)) ? r_cut_spare : triples[40].b), r117), triples[23].c);
+                    pg_L0_6_7 = p_6_p.prepare_and(g_7, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 5) ? r_cut_spare : triples[40].b), r117), triples[23].c);
                 g_8 = a[8].mult_a_known_to_evaluators(b[8]);  // and_a_15
                 g_8.prepare_remask(r132);
                 // and_95: a21=triples[21].a, b21=triples[21].b, c21=triples[21].c, output mask=(r131-r132)
@@ -1240,13 +1247,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_10.prepare_remask(r116);
                 // and_92: a19=triples[19].a, b19=triples[19].b, c19=triples[19].c, output mask=(b38-r116)
                 if (g_cut_frac_active && FRACTIONAL > 11)
-                    pg_L0_10_11 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 9 || FRACTIONAL > 11)) ? r_cut_spare : triples[38].b), r116));  // CUT: both operands constant - local, no triple
+                    pg_L0_10_11 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[38].b), r116));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 10)
-                    pg_L0_10_11 = g_11.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 9 || FRACTIONAL > 11)) ? r_cut_spare : triples[38].b), r116));  // CUT: AND with constant 1 - local, no triple
+                    pg_L0_10_11 = g_11.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[38].b), r116));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 11)
-                    pg_L0_10_11 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 9 || FRACTIONAL > 11)) ? r_cut_spare : triples[38].b), r116));  // CUT: AND with constant 0 - local, no triple
+                    pg_L0_10_11 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[38].b), r116));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L0_10_11 = p_10_p.prepare_and(g_11, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 9 || FRACTIONAL > 11)) ? r_cut_spare : triples[38].b), r116), triples[19].c);
+                    pg_L0_10_11 = p_10_p.prepare_and(g_11, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 9) ? r_cut_spare : triples[38].b), r116), triples[19].c);
                 g_12 = a[12].mult_a_known_to_evaluators(b[12]);  // and_a_23
                 g_12.prepare_remask(r124);
                 // and_89: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=(r123-r124)
@@ -1262,13 +1269,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_14.prepare_remask(r115);
                 // and_86: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=(b36-r115)
                 if (g_cut_frac_active && FRACTIONAL > 15)
-                    pg_L0_14_15 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 13 || FRACTIONAL > 15)) ? r_cut_spare : triples[36].b), r115));  // CUT: both operands constant - local, no triple
+                    pg_L0_14_15 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[36].b), r115));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 14)
-                    pg_L0_14_15 = g_15.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 13 || FRACTIONAL > 15)) ? r_cut_spare : triples[36].b), r115));  // CUT: AND with constant 1 - local, no triple
+                    pg_L0_14_15 = g_15.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[36].b), r115));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 15)
-                    pg_L0_14_15 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 13 || FRACTIONAL > 15)) ? r_cut_spare : triples[36].b), r115));  // CUT: AND with constant 0 - local, no triple
+                    pg_L0_14_15 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[36].b), r115));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L0_14_15 = p_14_p.prepare_and(g_15, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 13 || FRACTIONAL > 15)) ? r_cut_spare : triples[36].b), r115), triples[15].c);
+                    pg_L0_14_15 = p_14_p.prepare_and(g_15, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 13) ? r_cut_spare : triples[36].b), r115), triples[15].c);
                 g_16 = a[16].mult_a_known_to_evaluators(b[16]);  // and_a_31
                 g_16.prepare_remask(r136);
                 // and_83: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=(r135-r136)
@@ -1284,13 +1291,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_18.prepare_remask(r114);
                 // and_80: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=(b34-r114)
                 if (g_cut_frac_active && FRACTIONAL > 19)
-                    pg_L0_18_19 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 17 || FRACTIONAL > 19)) ? r_cut_spare : triples[34].b), r114));  // CUT: both operands constant - local, no triple
+                    pg_L0_18_19 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[34].b), r114));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 18)
-                    pg_L0_18_19 = g_19.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 17 || FRACTIONAL > 19)) ? r_cut_spare : triples[34].b), r114));  // CUT: AND with constant 1 - local, no triple
+                    pg_L0_18_19 = g_19.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[34].b), r114));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 19)
-                    pg_L0_18_19 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 17 || FRACTIONAL > 19)) ? r_cut_spare : triples[34].b), r114));  // CUT: AND with constant 0 - local, no triple
+                    pg_L0_18_19 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[34].b), r114));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L0_18_19 = p_18_p.prepare_and(g_19, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 17 || FRACTIONAL > 19)) ? r_cut_spare : triples[34].b), r114), triples[11].c);
+                    pg_L0_18_19 = p_18_p.prepare_and(g_19, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 17) ? r_cut_spare : triples[34].b), r114), triples[11].c);
                 g_20 = a[20].mult_a_known_to_evaluators(b[20]);  // and_a_39
                 g_20.prepare_remask(r122);
                 // and_77: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=(r121-r122)
@@ -1306,13 +1313,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_22.prepare_remask(r113);
                 // and_74: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=(b32-r113)
                 if (g_cut_frac_active && FRACTIONAL > 23)
-                    pg_L0_22_23 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 21 || FRACTIONAL > 23)) ? r_cut_spare : triples[32].b), r113));  // CUT: both operands constant - local, no triple
+                    pg_L0_22_23 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[32].b), r113));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 22)
-                    pg_L0_22_23 = g_23.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 21 || FRACTIONAL > 23)) ? r_cut_spare : triples[32].b), r113));  // CUT: AND with constant 1 - local, no triple
+                    pg_L0_22_23 = g_23.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[32].b), r113));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 23)
-                    pg_L0_22_23 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 21 || FRACTIONAL > 23)) ? r_cut_spare : triples[32].b), r113));  // CUT: AND with constant 0 - local, no triple
+                    pg_L0_22_23 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[32].b), r113));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L0_22_23 = p_22_p.prepare_and(g_23, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 21 || FRACTIONAL > 23)) ? r_cut_spare : triples[32].b), r113), triples[7].c);
+                    pg_L0_22_23 = p_22_p.prepare_and(g_23, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 21) ? r_cut_spare : triples[32].b), r113), triples[7].c);
                 g_24 = a[24].mult_a_known_to_evaluators(b[24]);  // and_a_47
                 g_24.prepare_remask(r129);
                 // and_71: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=(r128-r129)
@@ -1328,13 +1335,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_26.prepare_remask(r112);
                 // and_68: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=(b30-r112)
                 if (g_cut_frac_active && FRACTIONAL > 27)
-                    pg_L0_26_27 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 25 || FRACTIONAL > 27)) ? r_cut_spare : triples[30].b), r112));  // CUT: both operands constant - local, no triple
+                    pg_L0_26_27 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[30].b), r112));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 26)
-                    pg_L0_26_27 = g_27.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 25 || FRACTIONAL > 27)) ? r_cut_spare : triples[30].b), r112));  // CUT: AND with constant 1 - local, no triple
+                    pg_L0_26_27 = g_27.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[30].b), r112));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 27)
-                    pg_L0_26_27 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 25 || FRACTIONAL > 27)) ? r_cut_spare : triples[30].b), r112));  // CUT: AND with constant 0 - local, no triple
+                    pg_L0_26_27 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[30].b), r112));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L0_26_27 = p_26_p.prepare_and(g_27, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 25 || FRACTIONAL > 27)) ? r_cut_spare : triples[30].b), r112), triples[3].c);
+                    pg_L0_26_27 = p_26_p.prepare_and(g_27, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 25) ? r_cut_spare : triples[30].b), r112), triples[3].c);
                 g_28 = a[28].mult_a_known_to_evaluators(b[28]);  // and_a_55
                 g_28.prepare_remask(r120);
                 // and_65: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=(r119-r120)
@@ -1350,158 +1357,158 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_30.prepare_remask(r111);
                 // and_63: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=(b29-r111)
                 if (g_cut_frac_active && FRACTIONAL > 31)
-                    pg_L0_30_31 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 31)) ? r_cut_spare : triples[29].b), r111));  // CUT: both operands constant - local, no triple
+                    pg_L0_30_31 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 29) ? r_cut_spare : triples[29].b), r111));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 30)
-                    pg_L0_30_31 = g_31.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 31)) ? r_cut_spare : triples[29].b), r111));  // CUT: AND with constant 1 - local, no triple
+                    pg_L0_30_31 = g_31.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 29) ? r_cut_spare : triples[29].b), r111));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 31)
-                    pg_L0_30_31 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 31)) ? r_cut_spare : triples[29].b), r111));  // CUT: AND with constant 0 - local, no triple
+                    pg_L0_30_31 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 29) ? r_cut_spare : triples[29].b), r111));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L0_30_31 = p_30_p.prepare_and(g_31, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 31)) ? r_cut_spare : triples[29].b), r111), triples[0].c);
+                    pg_L0_30_31 = p_30_p.prepare_and(g_31, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 29) ? r_cut_spare : triples[29].b), r111), triples[0].c);
                 // and_111: a31=triples[31].a, b31=triples[31].b, c31=triples[31].c, output mask=a44
                 if (g_cut_frac_active && FRACTIONAL > 27)
-                    p_L2_24 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 31)) ? r_cut_spare : triples[44].a));  // CUT: both operands constant - local, no triple
+                    p_L2_24 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 27) ? r_cut_spare : triples[44].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 27)
-                    p_L2_24 = p_L1_24.zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 31)) ? r_cut_spare : triples[44].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_24 = p_L1_24.zero_add(((g_cut_frac_active && FRACTIONAL > 27) ? r_cut_spare : triples[44].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 25)
-                    p_L2_24 = p_L1_26.zero_add(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 31)) ? r_cut_spare : triples[44].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_24 = p_L1_26.zero_add(((g_cut_frac_active && FRACTIONAL > 27) ? r_cut_spare : triples[44].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L2_24 = p_L1_26.prepare_and(p_L1_24, ((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 31)) ? r_cut_spare : triples[44].a), triples[31].c);
+                    p_L2_24 = p_L1_26.prepare_and(p_L1_24, ((g_cut_frac_active && FRACTIONAL > 27) ? r_cut_spare : triples[44].a), triples[31].c);
                 // and_114: a33=triples[33].a, b33=triples[33].b, c33=triples[33].c, output mask=a46
                 if (g_cut_frac_active && FRACTIONAL > 23)
-                    p_L2_20 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 19)) ? r_cut_spare : triples[46].a));  // CUT: both operands constant - local, no triple
+                    p_L2_20 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[46].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 23)
-                    p_L2_20 = p_L1_20.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 19)) ? r_cut_spare : triples[46].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_20 = p_L1_20.zero_add(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[46].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 21)
-                    p_L2_20 = p_L1_22.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 19)) ? r_cut_spare : triples[46].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_20 = p_L1_22.zero_add(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[46].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L2_20 = p_L1_22.prepare_and(p_L1_20, ((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 19)) ? r_cut_spare : triples[46].a), triples[33].c);
+                    p_L2_20 = p_L1_22.prepare_and(p_L1_20, ((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[46].a), triples[33].c);
                 // and_117: a35=triples[35].a, b35=triples[35].b, c35=triples[35].c, output mask=b46
                 if (g_cut_frac_active && FRACTIONAL > 19)
-                    p_L2_16 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 19)) ? r_cut_spare : triples[46].b));  // CUT: both operands constant - local, no triple
+                    p_L2_16 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[46].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 19)
-                    p_L2_16 = p_L1_16.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 19)) ? r_cut_spare : triples[46].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_16 = p_L1_16.zero_add(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[46].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 17)
-                    p_L2_16 = p_L1_18.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 19)) ? r_cut_spare : triples[46].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_16 = p_L1_18.zero_add(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[46].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L2_16 = p_L1_18.prepare_and(p_L1_16, ((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 19)) ? r_cut_spare : triples[46].b), triples[35].c);
+                    p_L2_16 = p_L1_18.prepare_and(p_L1_16, ((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[46].b), triples[35].c);
                 // and_120: a37=triples[37].a, b37=triples[37].b, c37=triples[37].c, output mask=a48
                 if (g_cut_frac_active && FRACTIONAL > 15)
-                    p_L2_12 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 11)) ? r_cut_spare : triples[48].a));  // CUT: both operands constant - local, no triple
+                    p_L2_12 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[48].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 15)
-                    p_L2_12 = p_L1_12.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 11)) ? r_cut_spare : triples[48].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_12 = p_L1_12.zero_add(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[48].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 13)
-                    p_L2_12 = p_L1_14.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 11)) ? r_cut_spare : triples[48].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_12 = p_L1_14.zero_add(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[48].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L2_12 = p_L1_14.prepare_and(p_L1_12, ((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 11)) ? r_cut_spare : triples[48].a), triples[37].c);
+                    p_L2_12 = p_L1_14.prepare_and(p_L1_12, ((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[48].a), triples[37].c);
                 // and_123: a39=triples[39].a, b39=triples[39].b, c39=triples[39].c, output mask=b48
                 if (g_cut_frac_active && FRACTIONAL > 11)
-                    p_L2_8 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 11)) ? r_cut_spare : triples[48].b));  // CUT: both operands constant - local, no triple
+                    p_L2_8 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[48].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 11)
-                    p_L2_8 = p_L1_8.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 11)) ? r_cut_spare : triples[48].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_8 = p_L1_8.zero_add(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[48].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 9)
-                    p_L2_8 = p_L1_10.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 11)) ? r_cut_spare : triples[48].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_8 = p_L1_10.zero_add(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[48].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L2_8 = p_L1_10.prepare_and(p_L1_8, ((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 11)) ? r_cut_spare : triples[48].b), triples[39].c);
+                    p_L2_8 = p_L1_10.prepare_and(p_L1_8, ((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[48].b), triples[39].c);
                 // and_126: a41=triples[41].a, b41=triples[41].b, c41=triples[41].c, output mask=a50
                 if (g_cut_frac_active && FRACTIONAL > 7)
-                    p_L2_4 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 3)) ? r_cut_spare : triples[50].a));  // CUT: both operands constant - local, no triple
+                    p_L2_4 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[50].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 7)
-                    p_L2_4 = p_L1_4.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 3)) ? r_cut_spare : triples[50].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_4 = p_L1_4.zero_add(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[50].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 5)
-                    p_L2_4 = p_L1_6.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 3)) ? r_cut_spare : triples[50].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_4 = p_L1_6.zero_add(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[50].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L2_4 = p_L1_6.prepare_and(p_L1_4, ((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 3)) ? r_cut_spare : triples[50].a), triples[41].c);
+                    p_L2_4 = p_L1_6.prepare_and(p_L1_4, ((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[50].a), triples[41].c);
                 // and_129: a43=triples[43].a, b43=triples[43].b, c43=triples[43].c, output mask=b50
                 if (g_cut_frac_active && FRACTIONAL > 3)
-                    p_L2_1 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 3)) ? r_cut_spare : triples[50].b));  // CUT: both operands constant - local, no triple
+                    p_L2_1 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[50].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 3)
-                    p_L2_1 = p_1_p_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 3)) ? r_cut_spare : triples[50].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_1 = p_1_p_1.zero_add(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[50].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 1)
-                    p_L2_1 = p_L1_2.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 3)) ? r_cut_spare : triples[50].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L2_1 = p_L1_2.zero_add(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[50].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L2_1 = p_L1_2.prepare_and(p_1_p_1, ((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 3)) ? r_cut_spare : triples[50].b), triples[43].c);
+                    p_L2_1 = p_L1_2.prepare_and(p_1_p_1, ((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[50].b), triples[43].c);
                 break;
             case 2:
                 g_2.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 2 || FRACTIONAL > 3)))
+                if (!(g_cut_frac_active && FRACTIONAL > 2))
                     pg_L0_2_3.complete_and();
                 g_L1_2 = g_2 ^ pg_L0_2_3;  // g_L1[2]
                 g_4.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 4 || FRACTIONAL > 5)))
+                if (!(g_cut_frac_active && FRACTIONAL > 4))
                     pg_L0_4_5.complete_and();
                 g_L1_4 = g_4 ^ pg_L0_4_5;  // g_L1[4]
                 g_6.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 6 || FRACTIONAL > 7)))
+                if (!(g_cut_frac_active && FRACTIONAL > 6))
                     pg_L0_6_7.complete_and();
                 g_L1_6 = g_6 ^ pg_L0_6_7;  // g_L1[6]
                 g_8.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 8 || FRACTIONAL > 9)))
+                if (!(g_cut_frac_active && FRACTIONAL > 8))
                     pg_L0_8_9.complete_and();
                 g_L1_8 = g_8 ^ pg_L0_8_9;  // g_L1[8]
                 g_10.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 10 || FRACTIONAL > 11)))
+                if (!(g_cut_frac_active && FRACTIONAL > 10))
                     pg_L0_10_11.complete_and();
                 g_L1_10 = g_10 ^ pg_L0_10_11;  // g_L1[10]
                 g_12.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 12 || FRACTIONAL > 13)))
+                if (!(g_cut_frac_active && FRACTIONAL > 12))
                     pg_L0_12_13.complete_and();
                 g_L1_12 = g_12 ^ pg_L0_12_13;  // g_L1[12]
                 g_14.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 14 || FRACTIONAL > 15)))
+                if (!(g_cut_frac_active && FRACTIONAL > 14))
                     pg_L0_14_15.complete_and();
                 g_L1_14 = g_14 ^ pg_L0_14_15;  // g_L1[14]
                 g_16.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 16 || FRACTIONAL > 17)))
+                if (!(g_cut_frac_active && FRACTIONAL > 16))
                     pg_L0_16_17.complete_and();
                 g_L1_16 = g_16 ^ pg_L0_16_17;  // g_L1[16]
                 g_18.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 18 || FRACTIONAL > 19)))
+                if (!(g_cut_frac_active && FRACTIONAL > 18))
                     pg_L0_18_19.complete_and();
                 g_L1_18 = g_18 ^ pg_L0_18_19;  // g_L1[18]
                 g_20.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 20 || FRACTIONAL > 21)))
+                if (!(g_cut_frac_active && FRACTIONAL > 20))
                     pg_L0_20_21.complete_and();
                 g_L1_20 = g_20 ^ pg_L0_20_21;  // g_L1[20]
                 g_22.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 22 || FRACTIONAL > 23)))
+                if (!(g_cut_frac_active && FRACTIONAL > 22))
                     pg_L0_22_23.complete_and();
                 g_L1_22 = g_22 ^ pg_L0_22_23;  // g_L1[22]
                 g_24.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 24 || FRACTIONAL > 25)))
+                if (!(g_cut_frac_active && FRACTIONAL > 24))
                     pg_L0_24_25.complete_and();
                 g_L1_24 = g_24 ^ pg_L0_24_25;  // g_L1[24]
                 g_26.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 26 || FRACTIONAL > 27)))
+                if (!(g_cut_frac_active && FRACTIONAL > 26))
                     pg_L0_26_27.complete_and();
                 g_L1_26 = g_26 ^ pg_L0_26_27;  // g_L1[26]
                 g_28.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 28 || FRACTIONAL > 29)))
+                if (!(g_cut_frac_active && FRACTIONAL > 28))
                     pg_L0_28_29.complete_and();
                 g_L1_28 = g_28 ^ pg_L0_28_29;  // g_L1[28]
                 g_30.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 30 || FRACTIONAL > 31)))
+                if (!(g_cut_frac_active && FRACTIONAL > 30))
                     pg_L0_30_31.complete_and();
                 g_L1_30 = g_30 ^ pg_L0_30_31;  // g_L1[30]
-                if (!(g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 25)))
+                if (!(g_cut_frac_active && FRACTIONAL > 25))
                     p_L2_24.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 21)))
+                if (!(g_cut_frac_active && FRACTIONAL > 21))
                     p_L2_20.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 17)))
+                if (!(g_cut_frac_active && FRACTIONAL > 17))
                     p_L2_16.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 13)))
+                if (!(g_cut_frac_active && FRACTIONAL > 13))
                     p_L2_12.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 9)))
+                if (!(g_cut_frac_active && FRACTIONAL > 9))
                     p_L2_8.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 5)))
+                if (!(g_cut_frac_active && FRACTIONAL > 5))
                     p_L2_4.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 1)))
+                if (!(g_cut_frac_active && FRACTIONAL > 1))
                     p_L2_1.complete_and();
                 if (!(g_cut_frac_active && FRACTIONAL > 3))  // CUT: operand is constant here - carrier not read
-                    p_L2_1_p = p_L2_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 7)) ? r_cut_spare : triples[49].a));
+                    p_L2_1_p = p_L2_1.zero_add(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[49].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 11))  // CUT: operand is constant here - carrier not read
-                    p_L2_8_p = p_L2_8.zero_add(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 15)) ? r_cut_spare : triples[47].a));
+                    p_L2_8_p = p_L2_8.zero_add(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[47].a));
                 if (!(g_cut_frac_active && FRACTIONAL > 19))  // CUT: operand is constant here - carrier not read
-                    p_L2_16_p = p_L2_16.zero_add(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 23)) ? r_cut_spare : triples[45].a));
+                    p_L2_16_p = p_L2_16.zero_add(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[45].a));
                 g_1 = a[1].mult_a_known_to_evaluators(b[1]);  // and_a_1
                 g_1.prepare_remask(r137);
                 // and_127: a42=triples[42].a, b42=triples[42].b, c42=triples[42].c, output mask=r138
@@ -1515,13 +1522,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                     pg_L1_1_2 = p_1_p.prepare_and(g_L1_2, r138, triples[42].c);
                 // and_107: a29=triples[29].a, b29=triples[29].b, c29=triples[29].c, output mask=(b44-r119)
                 if (g_cut_frac_active && FRACTIONAL > 31)
-                    pg_L1_28_30 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 31)) ? r_cut_spare : triples[44].b), r119));  // CUT: both operands constant - local, no triple
+                    pg_L1_28_30 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 27) ? r_cut_spare : triples[44].b), r119));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 29)
-                    pg_L1_28_30 = g_L1_30.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 31)) ? r_cut_spare : triples[44].b), r119));  // CUT: AND with constant 1 - local, no triple
+                    pg_L1_28_30 = g_L1_30.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 27) ? r_cut_spare : triples[44].b), r119));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 31)
-                    pg_L1_28_30 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 31)) ? r_cut_spare : triples[44].b), r119));  // CUT: AND with constant 0 - local, no triple
+                    pg_L1_28_30 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 27) ? r_cut_spare : triples[44].b), r119));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L1_28_30 = p_L1_28.prepare_and(g_L1_30, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 31)) ? r_cut_spare : triples[44].b), r119), triples[29].c);
+                    pg_L1_28_30 = p_L1_28.prepare_and(g_L1_30, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 27) ? r_cut_spare : triples[44].b), r119), triples[29].c);
                 // and_109: a30=triples[30].a, b30=triples[30].b, c30=triples[30].c, output mask=(r127-r128)
                 if (g_cut_frac_active && FRACTIONAL > 27)
                     pg_L1_24_26 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(r127, r128));  // CUT: both operands constant - local, no triple
@@ -1533,13 +1540,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                     pg_L1_24_26 = p_L1_24_p.prepare_and(g_L1_26, FUNC_XOR(r127, r128), triples[30].c);
                 // and_112: a32=triples[32].a, b32=triples[32].b, c32=triples[32].c, output mask=(b45-r121)
                 if (g_cut_frac_active && FRACTIONAL > 23)
-                    pg_L1_20_22 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 23)) ? r_cut_spare : triples[45].b), r121));  // CUT: both operands constant - local, no triple
+                    pg_L1_20_22 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[45].b), r121));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 21)
-                    pg_L1_20_22 = g_L1_22.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 23)) ? r_cut_spare : triples[45].b), r121));  // CUT: AND with constant 1 - local, no triple
+                    pg_L1_20_22 = g_L1_22.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[45].b), r121));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 23)
-                    pg_L1_20_22 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 23)) ? r_cut_spare : triples[45].b), r121));  // CUT: AND with constant 0 - local, no triple
+                    pg_L1_20_22 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[45].b), r121));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L1_20_22 = p_L1_20_p.prepare_and(g_L1_22, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 23)) ? r_cut_spare : triples[45].b), r121), triples[32].c);
+                    pg_L1_20_22 = p_L1_20_p.prepare_and(g_L1_22, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 19) ? r_cut_spare : triples[45].b), r121), triples[32].c);
                 // and_115: a34=triples[34].a, b34=triples[34].b, c34=triples[34].c, output mask=(r134-r135)
                 if (g_cut_frac_active && FRACTIONAL > 19)
                     pg_L1_16_18 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(r134, r135));  // CUT: both operands constant - local, no triple
@@ -1551,13 +1558,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                     pg_L1_16_18 = p_L1_16_p.prepare_and(g_L1_18, FUNC_XOR(r134, r135), triples[34].c);
                 // and_118: a36=triples[36].a, b36=triples[36].b, c36=triples[36].c, output mask=(b47-r123)
                 if (g_cut_frac_active && FRACTIONAL > 15)
-                    pg_L1_12_14 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 15)) ? r_cut_spare : triples[47].b), r123));  // CUT: both operands constant - local, no triple
+                    pg_L1_12_14 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[47].b), r123));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 13)
-                    pg_L1_12_14 = g_L1_14.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 15)) ? r_cut_spare : triples[47].b), r123));  // CUT: AND with constant 1 - local, no triple
+                    pg_L1_12_14 = g_L1_14.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[47].b), r123));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 15)
-                    pg_L1_12_14 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 15)) ? r_cut_spare : triples[47].b), r123));  // CUT: AND with constant 0 - local, no triple
+                    pg_L1_12_14 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[47].b), r123));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L1_12_14 = p_L1_12_p.prepare_and(g_L1_14, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 15)) ? r_cut_spare : triples[47].b), r123), triples[36].c);
+                    pg_L1_12_14 = p_L1_12_p.prepare_and(g_L1_14, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 11) ? r_cut_spare : triples[47].b), r123), triples[36].c);
                 // and_121: a38=triples[38].a, b38=triples[38].b, c38=triples[38].c, output mask=(r130-r131)
                 if (g_cut_frac_active && FRACTIONAL > 11)
                     pg_L1_8_10 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(r130, r131));  // CUT: both operands constant - local, no triple
@@ -1569,69 +1576,69 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                     pg_L1_8_10 = p_L1_8_p.prepare_and(g_L1_10, FUNC_XOR(r130, r131), triples[38].c);
                 // and_124: a40=triples[40].a, b40=triples[40].b, c40=triples[40].c, output mask=(b49-r125)
                 if (g_cut_frac_active && FRACTIONAL > 7)
-                    pg_L1_4_6 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 7)) ? r_cut_spare : triples[49].b), r125));  // CUT: both operands constant - local, no triple
+                    pg_L1_4_6 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[49].b), r125));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 5)
-                    pg_L1_4_6 = g_L1_6.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 7)) ? r_cut_spare : triples[49].b), r125));  // CUT: AND with constant 1 - local, no triple
+                    pg_L1_4_6 = g_L1_6.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[49].b), r125));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 7)
-                    pg_L1_4_6 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 7)) ? r_cut_spare : triples[49].b), r125));  // CUT: AND with constant 0 - local, no triple
+                    pg_L1_4_6 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[49].b), r125));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L1_4_6 = p_L1_4_p.prepare_and(g_L1_6, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 7)) ? r_cut_spare : triples[49].b), r125), triples[40].c);
+                    pg_L1_4_6 = p_L1_4_p.prepare_and(g_L1_6, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 3) ? r_cut_spare : triples[49].b), r125), triples[40].c);
                 // and_134: a46=triples[46].a, b46=triples[46].b, c46=triples[46].c, output mask=a51
                 if (g_cut_frac_active && FRACTIONAL > 23)
-                    p_L3_16 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 31)) ? r_cut_spare : triples[51].a));  // CUT: both operands constant - local, no triple
+                    p_L3_16 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 23) ? r_cut_spare : triples[51].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 23)
-                    p_L3_16 = p_L2_16.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 31)) ? r_cut_spare : triples[51].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L3_16 = p_L2_16.zero_add(((g_cut_frac_active && FRACTIONAL > 23) ? r_cut_spare : triples[51].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 19)
-                    p_L3_16 = p_L2_20.zero_add(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 31)) ? r_cut_spare : triples[51].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L3_16 = p_L2_20.zero_add(((g_cut_frac_active && FRACTIONAL > 23) ? r_cut_spare : triples[51].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L3_16 = p_L2_20.prepare_and(p_L2_16, ((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 31)) ? r_cut_spare : triples[51].a), triples[46].c);
+                    p_L3_16 = p_L2_20.prepare_and(p_L2_16, ((g_cut_frac_active && FRACTIONAL > 23) ? r_cut_spare : triples[51].a), triples[46].c);
                 // and_137: a48=triples[48].a, b48=triples[48].b, c48=triples[48].c, output mask=a53
                 if (g_cut_frac_active && FRACTIONAL > 15)
-                    p_L3_8 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 7)) ? r_cut_spare : triples[53].a));  // CUT: both operands constant - local, no triple
+                    p_L3_8 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[53].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 15)
-                    p_L3_8 = p_L2_8.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 7)) ? r_cut_spare : triples[53].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L3_8 = p_L2_8.zero_add(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[53].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 11)
-                    p_L3_8 = p_L2_12.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 7)) ? r_cut_spare : triples[53].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L3_8 = p_L2_12.zero_add(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[53].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L3_8 = p_L2_12.prepare_and(p_L2_8, ((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 7)) ? r_cut_spare : triples[53].a), triples[48].c);
+                    p_L3_8 = p_L2_12.prepare_and(p_L2_8, ((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[53].a), triples[48].c);
                 // and_140: a50=triples[50].a, b50=triples[50].b, c50=triples[50].c, output mask=b53
                 if (g_cut_frac_active && FRACTIONAL > 7)
-                    p_L3_1 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 7)) ? r_cut_spare : triples[53].b));  // CUT: both operands constant - local, no triple
+                    p_L3_1 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[53].b));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 7)
-                    p_L3_1 = p_L2_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 7)) ? r_cut_spare : triples[53].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L3_1 = p_L2_1.zero_add(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[53].b));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 3)
-                    p_L3_1 = p_L2_4.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 7)) ? r_cut_spare : triples[53].b));  // CUT: AND with constant 1 - local, no triple
+                    p_L3_1 = p_L2_4.zero_add(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[53].b));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L3_1 = p_L2_4.prepare_and(p_L2_1, ((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 7)) ? r_cut_spare : triples[53].b), triples[50].c);
+                    p_L3_1 = p_L2_4.prepare_and(p_L2_1, ((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[53].b), triples[50].c);
                 break;
             case 3:
                 g_1.complete_remask();
-                if (!(g_cut_frac_active && (FRACTIONAL > 1 || FRACTIONAL > 3)))
+                if (!(g_cut_frac_active && FRACTIONAL > 1))
                     pg_L1_1_2.complete_and();
                 g_L2_1 = g_1 ^ pg_L1_1_2;  // g_L2[1]
-                if (!(g_cut_frac_active && (FRACTIONAL > 29 || FRACTIONAL > 31)))
+                if (!(g_cut_frac_active && FRACTIONAL > 29))
                     pg_L1_28_30.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 25 || FRACTIONAL > 27)))
+                if (!(g_cut_frac_active && FRACTIONAL > 25))
                     pg_L1_24_26.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 21 || FRACTIONAL > 23)))
+                if (!(g_cut_frac_active && FRACTIONAL > 21))
                     pg_L1_20_22.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 17 || FRACTIONAL > 19)))
+                if (!(g_cut_frac_active && FRACTIONAL > 17))
                     pg_L1_16_18.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 13 || FRACTIONAL > 15)))
+                if (!(g_cut_frac_active && FRACTIONAL > 13))
                     pg_L1_12_14.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 9 || FRACTIONAL > 11)))
+                if (!(g_cut_frac_active && FRACTIONAL > 9))
                     pg_L1_8_10.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 5 || FRACTIONAL > 7)))
+                if (!(g_cut_frac_active && FRACTIONAL > 5))
                     pg_L1_4_6.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 19)))
+                if (!(g_cut_frac_active && FRACTIONAL > 19))
                     p_L3_16.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 11)))
+                if (!(g_cut_frac_active && FRACTIONAL > 11))
                     p_L3_8.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 3)))
+                if (!(g_cut_frac_active && FRACTIONAL > 3))
                     p_L3_1.complete_and();
                 g_L2_4 = g_L1_4 ^ pg_L1_4_6;  // g_L2[4]
                 if (!(g_cut_frac_active && FRACTIONAL > 7))  // CUT: operand is constant here - carrier not read
-                    p_L3_1_p = p_L3_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 15)) ? r_cut_spare : triples[52].a));
+                    p_L3_1_p = p_L3_1.zero_add(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[52].a));
                 g_L2_8 = g_L1_8 ^ pg_L1_8_10;  // g_L2[8]
                 g_L2_12 = g_L1_12 ^ pg_L1_12_14;  // g_L2[12]
                 g_L2_16 = g_L1_16 ^ pg_L1_16_18;  // g_L2[16]
@@ -1640,13 +1647,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_L2_28 = g_L1_28 ^ pg_L1_28_30;  // g_L2[28]
                 // and_130: a44=triples[44].a, b44=triples[44].b, c44=triples[44].c, output mask=(b51-r127)
                 if (g_cut_frac_active && FRACTIONAL > 31)
-                    pg_L2_24_28 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 31)) ? r_cut_spare : triples[51].b), r127));  // CUT: both operands constant - local, no triple
+                    pg_L2_24_28 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 23) ? r_cut_spare : triples[51].b), r127));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 27)
-                    pg_L2_24_28 = g_L2_28.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 31)) ? r_cut_spare : triples[51].b), r127));  // CUT: AND with constant 1 - local, no triple
+                    pg_L2_24_28 = g_L2_28.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 23) ? r_cut_spare : triples[51].b), r127));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 31)
-                    pg_L2_24_28 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 31)) ? r_cut_spare : triples[51].b), r127));  // CUT: AND with constant 0 - local, no triple
+                    pg_L2_24_28 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 23) ? r_cut_spare : triples[51].b), r127));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L2_24_28 = p_L2_24.prepare_and(g_L2_28, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 31)) ? r_cut_spare : triples[51].b), r127), triples[44].c);
+                    pg_L2_24_28 = p_L2_24.prepare_and(g_L2_28, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 23) ? r_cut_spare : triples[51].b), r127), triples[44].c);
                 // and_132: a45=triples[45].a, b45=triples[45].b, c45=triples[45].c, output mask=(r133-r134)
                 if (g_cut_frac_active && FRACTIONAL > 23)
                     pg_L2_16_20 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(r133, r134));  // CUT: both operands constant - local, no triple
@@ -1658,13 +1665,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                     pg_L2_16_20 = p_L2_16_p.prepare_and(g_L2_20, FUNC_XOR(r133, r134), triples[45].c);
                 // and_135: a47=triples[47].a, b47=triples[47].b, c47=triples[47].c, output mask=(b52-r130)
                 if (g_cut_frac_active && FRACTIONAL > 15)
-                    pg_L2_8_12 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 15)) ? r_cut_spare : triples[52].b), r130));  // CUT: both operands constant - local, no triple
+                    pg_L2_8_12 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[52].b), r130));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 11)
-                    pg_L2_8_12 = g_L2_12.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 15)) ? r_cut_spare : triples[52].b), r130));  // CUT: AND with constant 1 - local, no triple
+                    pg_L2_8_12 = g_L2_12.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[52].b), r130));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 15)
-                    pg_L2_8_12 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 15)) ? r_cut_spare : triples[52].b), r130));  // CUT: AND with constant 0 - local, no triple
+                    pg_L2_8_12 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[52].b), r130));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L2_8_12 = p_L2_8_p.prepare_and(g_L2_12, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 15)) ? r_cut_spare : triples[52].b), r130), triples[47].c);
+                    pg_L2_8_12 = p_L2_8_p.prepare_and(g_L2_12, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 7) ? r_cut_spare : triples[52].b), r130), triples[47].c);
                 // and_138: a49=triples[49].a, b49=triples[49].b, c49=triples[49].c, output mask=r139
                 if (g_cut_frac_active && FRACTIONAL > 7)
                     pg_L2_1_4 = Share(SET_ALL_ZERO()).zero_add(r139);  // CUT: both operands constant - local, no triple
@@ -1676,24 +1683,24 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                     pg_L2_1_4 = p_L2_1_p.prepare_and(g_L2_4, r139, triples[49].c);
                 // and_145: a53=triples[53].a, b53=triples[53].b, c53=triples[53].c, output mask=a54
                 if (g_cut_frac_active && FRACTIONAL > 15)
-                    p_L4_1 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 31)) ? r_cut_spare : triples[54].a));  // CUT: both operands constant - local, no triple
+                    p_L4_1 = Share(SET_ALL_ONE()).zero_add(((g_cut_frac_active && FRACTIONAL > 15) ? r_cut_spare : triples[54].a));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 15)
-                    p_L4_1 = p_L3_1.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 31)) ? r_cut_spare : triples[54].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L4_1 = p_L3_1.zero_add(((g_cut_frac_active && FRACTIONAL > 15) ? r_cut_spare : triples[54].a));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 7)
-                    p_L4_1 = p_L3_8.zero_add(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 31)) ? r_cut_spare : triples[54].a));  // CUT: AND with constant 1 - local, no triple
+                    p_L4_1 = p_L3_8.zero_add(((g_cut_frac_active && FRACTIONAL > 15) ? r_cut_spare : triples[54].a));  // CUT: AND with constant 1 - local, no triple
                 else
-                    p_L4_1 = p_L3_8.prepare_and(p_L3_1, ((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 31)) ? r_cut_spare : triples[54].a), triples[53].c);
+                    p_L4_1 = p_L3_8.prepare_and(p_L3_1, ((g_cut_frac_active && FRACTIONAL > 15) ? r_cut_spare : triples[54].a), triples[53].c);
                 break;
             case 4:
-                if (!(g_cut_frac_active && (FRACTIONAL > 27 || FRACTIONAL > 31)))
+                if (!(g_cut_frac_active && FRACTIONAL > 27))
                     pg_L2_24_28.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 19 || FRACTIONAL > 23)))
+                if (!(g_cut_frac_active && FRACTIONAL > 19))
                     pg_L2_16_20.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 11 || FRACTIONAL > 15)))
+                if (!(g_cut_frac_active && FRACTIONAL > 11))
                     pg_L2_8_12.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 3 || FRACTIONAL > 7)))
+                if (!(g_cut_frac_active && FRACTIONAL > 3))
                     pg_L2_1_4.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 7)))
+                if (!(g_cut_frac_active && FRACTIONAL > 7))
                     p_L4_1.complete_and();
                 g_L3_1 = g_L2_1 ^ pg_L2_1_4;  // g_L3[1]
                 g_L3_8 = g_L2_8 ^ pg_L2_8_12;  // g_L3[8]
@@ -1701,13 +1708,13 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 g_L3_24 = g_L2_24 ^ pg_L2_24_28;  // g_L3[24]
                 // and_141: a51=triples[51].a, b51=triples[51].b, c51=triples[51].c, output mask=(b54-r133)
                 if (g_cut_frac_active && FRACTIONAL > 31)
-                    pg_L3_16_24 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 31)) ? r_cut_spare : triples[54].b), r133));  // CUT: both operands constant - local, no triple
+                    pg_L3_16_24 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 15) ? r_cut_spare : triples[54].b), r133));  // CUT: both operands constant - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 23)
-                    pg_L3_16_24 = g_L3_24.zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 31)) ? r_cut_spare : triples[54].b), r133));  // CUT: AND with constant 1 - local, no triple
+                    pg_L3_16_24 = g_L3_24.zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 15) ? r_cut_spare : triples[54].b), r133));  // CUT: AND with constant 1 - local, no triple
                 else if (g_cut_frac_active && FRACTIONAL > 31)
-                    pg_L3_16_24 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 31)) ? r_cut_spare : triples[54].b), r133));  // CUT: AND with constant 0 - local, no triple
+                    pg_L3_16_24 = Share(SET_ALL_ZERO()).zero_add(FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 15) ? r_cut_spare : triples[54].b), r133));  // CUT: AND with constant 0 - local, no triple
                 else
-                    pg_L3_16_24 = p_L3_16.prepare_and(g_L3_24, FUNC_XOR(((g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 31)) ? r_cut_spare : triples[54].b), r133), triples[51].c);
+                    pg_L3_16_24 = p_L3_16.prepare_and(g_L3_24, FUNC_XOR(((g_cut_frac_active && FRACTIONAL > 15) ? r_cut_spare : triples[54].b), r133), triples[51].c);
                 // and_143: a52=triples[52].a, b52=triples[52].b, c52=triples[52].c, output mask=r140
                 if (g_cut_frac_active && FRACTIONAL > 15)
                     pg_L3_1_8 = Share(SET_ALL_ZERO()).zero_add(r140);  // CUT: both operands constant - local, no triple
@@ -1719,9 +1726,9 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                     pg_L3_1_8 = p_L3_1_p.prepare_and(g_L3_8, r140, triples[52].c);
                 break;
             case 5:
-                if (!(g_cut_frac_active && (FRACTIONAL > 23 || FRACTIONAL > 31)))
+                if (!(g_cut_frac_active && FRACTIONAL > 23))
                     pg_L3_16_24.complete_and();
-                if (!(g_cut_frac_active && (FRACTIONAL > 7 || FRACTIONAL > 15)))
+                if (!(g_cut_frac_active && FRACTIONAL > 7))
                     pg_L3_1_8.complete_and();
                 g_L4_1 = g_L3_1 ^ pg_L3_1_8;  // g_L4[1]
                 g_L4_16 = g_L3_16 ^ pg_L3_16_24;  // g_L4[16]
@@ -1736,7 +1743,7 @@ class PPA_MSB_Unsafe_A_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                     pg_L4_1_16 = p_L4_1.prepare_and(g_L4_16, r141, triples[54].c);
                 break;
             case 6:
-                if (!(g_cut_frac_active && (FRACTIONAL > 15 || FRACTIONAL > 31)))
+                if (!(g_cut_frac_active && FRACTIONAL > 15))
                     pg_L4_1_16.complete_and();
                 g_L5_1 = g_L4_1 ^ pg_L4_1_16;  // g_L5[1]
                 msb = p_0 ^ g_L5_1;  // msb
