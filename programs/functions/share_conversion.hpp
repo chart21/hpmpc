@@ -102,10 +102,6 @@
 #include "adders/ppa_msb_unsafe.hpp"
 #endif
 #endif
-#if FUSE_RELU_AVG == 1 && (TRUNC_APPROACH == 4 || TRUNC_APPROACH == 0) && TRUNC_DELAYED == 0
-#include "../../datatypes/float_fixed_converter.hpp"
-#endif
-
 // compute msbs of a range of arithemtic shares
 template <int bm, int bk, typename Datatype, typename Share>
 void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int len)
@@ -346,7 +342,7 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
     {
         // Pure delayed truncation (no avg pool, denom == 1): just shift right by FRACTIONAL. Use multiplier 1
         // rather than the fixed-point "1.0" (== 2^FRACTIONAL) so we don't scale up by 2^FRACTIONAL first (which
-        // would risk overflow on larger activations) — mathematically identical, but safer.
+        // would risk overflow on larger activations) - mathematically identical, but safer.
         for (int i = 0; i < len; i++)
             y[i].prepare_opt_bit_injection_with_trunc(val[i].get_share_pointer(), val[i].get_share_pointer(),
                                                       PROMOTE(UINT_TYPE(1)), FRACTIONAL);
@@ -356,6 +352,10 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
         for (int i = 0; i < len; i++)
             y[i].prepare_opt_bit_injection(val[i].get_share_pointer(), val[i].get_share_pointer());
     }
+#if TRUNC_DELAYED == 1 && BIT_INJECTION_TRUNC_SIM == 1
+    if (fold_delayed)
+        delayed = false;  // consumed here, so the caller's trailing `if (delayed)` must not truncate again
+#endif
 #else
     for (int i = 0; i < len; i++)
         y[i].prepare_opt_bit_injection(val[i].get_share_pointer(), val[i].get_share_pointer());
