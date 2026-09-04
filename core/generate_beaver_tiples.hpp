@@ -715,6 +715,37 @@ void generateMultiplexerDummyTriples(type a[],
 
 //Input: arrays of layer triple shares [a], [b] with sizes predefined by convolution/Fc/Batchnorm params
 //Output: Contigious array of clayer triple shares [c] storing the output
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 && MWK_PRESCRIBED_HE == 0
+// MODELWEIGHTS_KNOWN: force P1's freshly generated triple share c1 to the r1 it committed in aby2_pre
+// (its online mask is l_P1 = TRUNC(-r1), so share and mask must agree) and move the difference onto P0:
+//     P1:  delta = r1 - c1,  c1 := r1        P0:  c0 := c0 - delta
+// Reconstruction is unchanged (c0 - delta + r1 == c0 + c1). delta is uniform from P0's view, because r1
+// is P1's private randomness that P0 never sees. r1 arrives already scattered into c's linear layout, so
+// the whole layer goes in ONE message and P0 needs no index bookkeeping.
+template <typename Keys>
+static void mwk_fix_p1_share(Keys& keys, UINT_TYPE* c, [[maybe_unused]] const UINT_TYPE* r1, uint64_t n)
+{
+    auto* io = keys.get_ios(CHEETAH_THREADS)[0];
+    std::vector<UINT_TYPE> delta(n);
+    constexpr uint64_t CHUNK = (uint64_t) 1 << 28;  // send_data takes an int length
+#if PARTY == 1
+    for (uint64_t k = 0; k < n; k++)
+    {
+        delta[k] = r1[k] - c[k];
+        c[k] = r1[k];
+    }
+    for (uint64_t off = 0; off < n; off += CHUNK)
+        io->send_data(delta.data() + off, (int) (std::min(CHUNK, n - off) * sizeof(UINT_TYPE)));
+    io->flush();
+#else
+    for (uint64_t off = 0; off < n; off += CHUNK)
+        io->recv_data(delta.data() + off, (int) (std::min(CHUNK, n - off) * sizeof(UINT_TYPE)));
+    for (uint64_t k = 0; k < n; k++)
+        c[k] -= delta[k];
+#endif
+}
+#endif
+
 template <typename type, typename LayerParams>
 void generateLayerDummyTriples(type** a,
                               type** b,
@@ -752,9 +783,10 @@ void generateLayerDummyTriples(type** a,
             auto p = params[n];
 
             // MODELWEIGHTS_KNOWN: P1's triple share [lxly]_2 must equal the r1 it picked in aby2_pre
-            // (l_P1 = TRUNC(-r1), PRNG-synced with the online phase). Assemble those r1 into a PRESCRIBED
-            // buffer in linear c[] order and hand it to the AB2P (flipped-HE) triple generation: P1's share
-            // is r1 by construction and P0 DECRYPTS cross - r1 - no share-fixing communication needed.
+            // (l_P1 = TRUNC(-r1), PRNG-synced with the online phase). Assemble those r1 in linear c[] order.
+            // MWK_PRESCRIBED_HE=1 hands them to the AB2P (flipped-HE) generation, which prescribes P1's share
+            // at the cost of encrypting the filters; otherwise the share is fixed after a normal generation
+            // by mwk_fix_p1_share (one element per output).
             // SCATTER: CONV runs ONE GEMM per batch element (convolutional_layer.h), so its recorded index
             // resets per batch (0..N-1); c[] is batch-major, so add the batch offset (k/N)*N. FC runs a
             // SINGLE GEMM with m=batch, so its recorded index is already global (stride = ysz => offset 0).
@@ -787,14 +819,15 @@ void generateLayerDummyTriples(type** a,
                     unorthogonalize_arithmetic(&mwk_masks[mwk_consume + k], temp, 1);
                     presc_buf[idx] = temp[0];
                 }
-                prescribed = presc_buf.data();
+                if (MWK_PRESCRIBED_HE)
+                    prescribed = presc_buf.data();
 #endif
                 mwk_consume += ysz;
             }
 #endif
             [[maybe_unused]] const Utils::PROTO layer_proto =
-                mwk_layer ? Utils::PROTO::AB2P
-                          : (A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2);
+                (mwk_layer && MWK_PRESCRIBED_HE) ? Utils::PROTO::AB2P
+                                                 : (A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2);
 
             if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
                 if (p.dilation != 1) {
@@ -856,7 +889,11 @@ void generateLayerDummyTriples(type** a,
             } else {
                 std::cerr << "Unsupported Param type\n";
             }
-            // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 && MWK_PRESCRIBED_HE == 0
+            if constexpr (mwk_layer)
+                mwk_fix_p1_share(keys, uint_y + y_index_counter, presc_buf.data(),
+                                 (uint64_t) p.y_size_per_batch * p.batchSize);
+#endif
             y_index_counter += p.y_size_per_batch * p.batchSize;
 #if CHEETAH_WAN_OPT == 1
             if (n + 1 < params.size()) {
@@ -915,9 +952,9 @@ void generateLayerDummyTriples(type** a,
 
             p.batchSize *= factor;
 
-            // MODELWEIGHTS_KNOWN: assemble P1's PRESCRIBED triple shares (the r1 it picked in aby2_pre)
-            // in the UNVECTORIZED y[] layout ([lane j][batch-major output]) and hand them to the AB2P
-            // (flipped-HE) triple generation - no share-fixing communication (see the factor==1 path).
+            // MODELWEIGHTS_KNOWN: assemble P1's committed r1 in the UNVECTORIZED y[] layout
+            // ([lane j][batch-major output]); prescribed (MWK_PRESCRIBED_HE) or fixed afterwards, as in
+            // the factor==1 path.
             [[maybe_unused]] const UINT_TYPE* prescribed = nullptr;
             [[maybe_unused]] std::vector<UINT_TYPE> presc_buf;
             [[maybe_unused]] constexpr bool mwk_layer =
@@ -943,14 +980,15 @@ void generateLayerDummyTriples(type** a,
                     for (int j = 0; j < factor; j++)
                         presc_buf[j * y_size + idx] = temp[j];
                 }
-                prescribed = presc_buf.data();
+                if (MWK_PRESCRIBED_HE)
+                    prescribed = presc_buf.data();
 #endif
                 mwk_consume += y_size;
             }
 #endif
             [[maybe_unused]] const Utils::PROTO layer_proto =
-                mwk_layer ? Utils::PROTO::AB2P
-                          : (A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB);
+                (mwk_layer && MWK_PRESCRIBED_HE) ? Utils::PROTO::AB2P
+                                                 : (A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB);
 
             if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
                 if (p.dilation != 1) {
@@ -997,7 +1035,10 @@ void generateLayerDummyTriples(type** a,
             } else {
                 std::cerr << "Unsupported Param type\n";
             }
-            // Conv2D(w,x,y, p) // calculate layer operation
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 && MWK_PRESCRIBED_HE == 0
+            if constexpr (mwk_layer)
+                mwk_fix_p1_share(keys, y, presc_buf.data(), (uint64_t) factor * y_size);
+#endif
             for (uint64_t i = 0; i < y_size; i++) {
                 alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
                 for (int j = 0; j < factor; j++)

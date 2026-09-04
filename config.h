@@ -139,6 +139,16 @@
 #define MODELWEIGHTS_KNOWN_DURING_PREPROCESSING 0 //Assumes Model Weights are known by P_0 during preprocessing
 #endif
 
+// How MODELWEIGHTS_KNOWN_DURING_PREPROCESSING forces P1's conv/FC triple share to the r1 it committed:
+//   0: generate the triple as usual (the IMAGE is what gets encrypted) and fix the share afterwards with
+//      one element per output sent P1 -> P0. Tens of MB on ResNet50.
+//   1: prescribe the share inside the HE protocol (PROTO::AB2P). This flips the HE roles so that P1
+//      evaluates under the ENCRYPTED FILTERS, i.e. the entire model is encrypted and sent: about 40 GB
+//      per inference on ResNet50. It only pays off when one weight set serves hundreds of images.
+#ifndef MWK_PRESCRIBED_HE
+#define MWK_PRESCRIBED_HE 0
+#endif
+
 #ifndef TRUNC_THEN_MULT
 #define TRUNC_THEN_MULT 0  // 0: Truncate after multiplication, 1: Truncate before multiplication
 #endif
