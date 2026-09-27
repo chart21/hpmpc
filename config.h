@@ -322,8 +322,8 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef CUT_FRACTIONAL_BITS_OPT
 #define CUT_FRACTIONAL_BITS_OPT 0  // Under TRUNC_DELAYED == 0 the ReLU input is already truncated by
 // FRACTIONAL bits, so the MSB adder's top FRACTIONAL slices are sign extension: skip their A2B sharing,
-// reshares and gates. Implemented for all nine 2PC msb circuits (RCA/PPA/PPA4 x plain/reshared/a_known);
-// BITLENGTH == 32 only. See docs/CUT_FRACTIONAL_BITS_OPT.md.
+// reshares and gates. Implemented for all nine 2PC msb circuits (RCA/PPA/PPA4 x plain/reshared/a_known)
+// and the generic 3PC/4PC adders; BITLENGTH == 32 only. See docs/CUT_FRACTIONAL_BITS_OPT.md.
 #endif
 
 #ifndef A2B_ROUND_OPT_SIM
@@ -896,6 +896,9 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define PHASE_PRE 2
 #endif
 
+#ifndef ROT_PREPROCESSING_OPT
+#define ROT_PREPROCESSING_OPT 0
+#endif
 #ifndef RCA_MSB
 #define RCA_MSB 0
 #endif
@@ -905,3 +908,14 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef PPA4_MSB
 #define PPA4_MSB 0
 #endif
+
+// Generic (protocol-independent) eligibility for CUT_FRACTIONAL_BITS_OPT. The precondition is
+// value-level - the wire went through a real truncation by FRACTIONAL bits, so its top FRACTIONAL
+// slices are sign extension - and holds for ANY protocol. CUT_FRAC_ELIGIBLE (protocols/beaver_triples.hpp)
+// covers the ROT/beaver circuits of the 2PC path; this covers the generic BooleanAdder_MSB that the
+// 3PC and 4PC protocols use, where none of that machinery exists (beaver_triples.hpp is not even
+// included, so CUT_FRAC_ELIGIBLE is undefined and evaluates to 0 there).
+#define CUT_FRAC_ELIGIBLE_GENERIC                                                                  \
+    (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && ROT_PREPROCESSING_OPT == 0 &&           \
+     (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1) && BITLENGTH == 32 && FRACTIONAL >= 1 &&        \
+     FRACTIONAL <= BITLENGTH - 3)

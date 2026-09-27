@@ -29,15 +29,34 @@ class BooleanAdder_MSB
         z = y0;
     }
 
+    // CUT_FRACTIONAL_BITS_OPT, protocol-independent form. Under TRUNC_DELAYED == 0 the value feeding
+    // this adder has been truncated by FRACTIONAL bits, so its top FRACTIONAL slices (0 .. F-1, slice 0
+    // being the numeric MSB) are sign extension and carry no information. The ripple runs from the LSB
+    // (slice k-1) upwards, so the cut is simply "stop at slice F and read the sum bit there" - the last
+    // F rounds, and their AND gates and communication, never happen. Nothing protocol-specific is
+    // involved: the vacant slices are just never read.
+    //
+    // g_cut_frac_active is set by RELU only; max/min comparisons share this class and run full width,
+    // so the bound has to be a runtime query rather than a compile-time constant.
+    static constexpr bool cut_supported = (CUT_FRAC_ELIGIBLE_GENERIC && k == BITLENGTH);
+    static int cut_lo() { return (cut_supported && g_cut_frac_active) ? FRACTIONAL : 0; }
+
     int get_rounds() { return r; }
 
-    int get_total_rounds() { return k; }
+    int get_total_rounds() { return k - cut_lo(); }
 
-    bool is_done() { return r == 0; }
+    bool is_done() { return r == cut_lo(); }
 
     void step()
     {
         r -= 1;
+        const int lo = cut_lo();
+        if (lo != 0 && r == lo)  // cut: finish early on the boundary slice
+        {
+            complete_carry();
+            z = x[lo] ^ y[lo] ^ carry_last;
+            return;
+        }
         switch (r)
         {
             case k - 1:  // special case for lsbs
