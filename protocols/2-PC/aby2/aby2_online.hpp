@@ -484,6 +484,17 @@ class ABY2_ONLINE_Share
         c.l = assign;
         return c;
     }
+
+    // see aby2_pre.hpp: m += (assign - l) of both parties, the peer's delta arrived in preprocessing
+    template <typename func_add, typename func_sub>
+    ABY2_ONLINE_Share rebase(Datatype assign, func_add ADD, func_sub SUB) const
+    {
+        ABY2_ONLINE_Share c;
+        c.m = ADD(ADD(m, SUB(assign, l)), retrieve_output_share());
+        c.l = assign;
+        return c;
+    }
+
     
 
     /* template <typename func_add, typename func_sub, typename func_mul, typename func_trunc> */

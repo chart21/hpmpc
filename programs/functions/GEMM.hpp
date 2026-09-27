@@ -302,9 +302,13 @@ if(current_phase != PHASE_INIT) {
 #endif
 #endif
 #endif
-#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1 && PUBLIC_WEIGHTS == 0
+// The tiled (INTERLEAVE_COMM) sends above retrieve their conv lxly INDEXED (cursor + index, no
+// advance), so the cursor must be bumped past the layer block afterwards. This applies for ANY
+// A_KNOWN (the send sites are not A_KNOWN-gated): with the old `A_KNOWN == 1` guard, A_KNOWN=0 left
+// the cursor stuck at the conv block and every subsequent arithmetic retrieval read shifted values.
+#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && PUBLIC_WEIGHTS == 0
         if(current_phase == PHASE_LIVE)
-            preprocessed_outputs_arithmetic_index[0] += m * p; //TODO: Check if this is correct and neccessary
+            preprocessed_outputs_arithmetic_index[0] += m * p;
 #endif
 #if FUSE_CONV_BN_SIM == 1
     delete[] C_Accum;
@@ -430,6 +434,20 @@ void complete_GEMM(T* C, const int m, const int p)
     complete_GEMM(C, m * p);
 #endif
 }
+
+#if PROTOCOL == 4 && BEAVER == 1
+// Give every value a fresh split mask. Needed for the network's FIRST layer under A_KNOWN=0: the raw
+// data-owner input is shared as (m, l) = (0, -value) with the other party's mask 0, which makes the
+// SecureML truncation's share pair the bare layer-triple shares - their integer sum systematically wraps
+// on negative outputs (+2^(K-F) each). Split masks restore the usual rare-wrap analysis. The rebase costs
+// one preprocessing message per value and nothing online.
+template <typename T>
+void remask_range(T* v, const int n)
+{
+    for (int i = 0; i < n; i++)
+        v[i] = v[i].rebase(current_phase == PHASE_INIT ? SET_ALL_ZERO() : getRandomVal(PSELF));  // INIT must not draw
+}
+#endif
 
 template <typename T, typename U>
 void add_bias(T& C, const U& bias)

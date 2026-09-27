@@ -233,6 +233,16 @@ class ABY2_PRE_Share
         return ABY2_PRE_Share(assign);
     }
 
+    // Arithmetic counterpart of zero_add: move the value onto mask share `assign`. v = m - l, so m grows by
+    // both parties' deltas assign - l, which are known here and exchanged in preprocessing.
+    template <typename func_add, typename func_sub>
+    ABY2_PRE_Share rebase(Datatype assign, func_add ADD, func_sub SUB) const
+    {
+        pre_send_to_live(PNEXT, SUB(assign, l));
+        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        return ABY2_PRE_Share(assign);
+    }
+
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot_and_assign(ABY2_PRE_Share b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
     {

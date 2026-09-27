@@ -238,6 +238,9 @@ class Additive_Share : public Share_Type
         Share_Type::mask_and_send_dot_with_trunc_with_triple(OP_ADD, OP_SUB, FUNC_TRUNC, index);
     }
 
+    // Move the value onto mask share `assign`; the only communication is one preprocessing message.
+    Additive_Share rebase(Datatype assign) const { return Additive_Share(Share_Type::rebase(assign, OP_ADD, OP_SUB)); }
+
     
     Additive_Share prepare_dot_ex_lxly_a_known(const Additive_Share<Datatype, Share_Type>& b) const
     {

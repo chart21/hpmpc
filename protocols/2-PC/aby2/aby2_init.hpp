@@ -77,6 +77,14 @@ class ABY2_init
         return ABY2_init();
     }
 
+    template <typename func_add, typename func_sub>
+    ABY2_init rebase(Datatype assign, func_add ADD, func_sub SUB) const
+    {
+        pre_send_to_(PNEXT);
+        store_output_share_();
+        return ABY2_init();
+    }
+
 
     template <typename func_mul>
     ABY2_init mult_public(const Datatype b, func_mul MULT) const
