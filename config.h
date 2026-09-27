@@ -328,7 +328,9 @@ inline int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef BIT_INJECTION_TRUNC_SIM
-#define BIT_INJECTION_TRUNC_SIM 0 // Assume Truncation is handled during bit injection and delayed by linear layers
+#define BIT_INJECTION_TRUNC_SIM 0  // TRUNC_DELAYED=1: fold the pending truncation into the ReLU's bit injection
+// instead of truncating in a separate round afterwards (one message per value and one round fewer per ReLU).
+// Needs a protocol that implements prepare_opt_bit_injection_with_trunc (ABY2, trio).
 #endif
 
 #ifndef OPTIMIZED_COMPUTATION_MULT

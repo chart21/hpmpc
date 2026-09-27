@@ -17,7 +17,9 @@ uint64_t total_send_pre[num_players - 1] = {0};
 uint64_t total_recv_pre[num_players - 1] = {0};
 #endif
 
-#if FUSE_RELU_AVG == 1
+#if FUSE_RELU_AVG == 1 || (TRUNC_DELAYED == 1 && BIT_INJECTION_TRUNC_SIM == 1)
+// Average-pool denominator folded into the fused ReLU bit injection. Also used (defaulting to 1 = a pure
+// truncation) when a delayed truncation is folded into the bit injection (BIT_INJECTION_TRUNC_SIM == 1).
 int curr_denom = 1;
 #endif
 
