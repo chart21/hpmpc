@@ -69,6 +69,25 @@ Reading the table:
   `CUT_FRACTIONAL_BITS_OPT=1` those slices are not reshared and the simulation applies again.
   Online traffic and rounds are unaffected.
 
+## Conv triples by backend
+
+The PRE columns above use Cheetah's `HomConv2DSS` on the CPU for the convolutions. The conv triples
+alone, all 53 convolutions (`cheetah_conv_triple_test <party> <port> <ab> imagenet [--packed]` in
+`nn/ConvTriple`, MiB, P0 holds the weights):
+
+| backend | hpmpc flag | AB2 P0->P1 / P1->P0 | AB2 total | AB total | AB2 time |
+|---|---|---|---|---|---|
+| Cheetah, CPU | - | 834.2 / 167.8 | 1001.9 | 2003.4 | 28.6 s (4 threads) |
+| troy, GPU | `CHEETAH_GPU=1` | 281.7 / 373.2 | 654.8 | 1309.7 | 9.7 s |
+| packed, CPU | `CHEETAH_CONV_PACKED=1` | 232.7 / 355.1 | 587.7 | 1175.5 | 23.6 s (4 threads) |
+
+`HomConv2DSS` returns one ciphertext per output channel and spatial tile, and sends its whole second
+polynomial however few outputs it carries: on 7x7 feature maps 49 of 4096 coefficients, so the three
+512->2048 1x1 convolutions cost 170.9 MiB. troy's layout packs several output channels (and images) into
+one ciphertext and pays with more input ciphertexts; `CHEETAH_CONV_PACKED` uses that layout on the CPU
+with Cheetah's output flooding and truncation. With all preprocessing randomness fixed, CIFAR-10
+ResNet50 gives bitwise identical triples and layer outputs with each of the three backends.
+
 ## Reproducing
 
 Distributed: build on both machines with the same line, `PARTY=0` on one and `PARTY=1` on the other, then run

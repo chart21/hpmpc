@@ -814,7 +814,17 @@ void generateLayerDummyTriples(type** a,
                     .padding = p.padding,
                 };
 
-#if CHEETAH_CONV_TYPE == 0
+#if CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1
+                Iface::generateConvTriplesPacked(keys,
+                        A_KNOWN == 0 || PARTY == 1 ? uint_x[n] : nullptr,
+                        A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
+                        uint_y + y_index_counter,
+                        conv,
+                        CHEETAH_PARTY, CHEETAH_THREADS,
+                        A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
+                        factor
+                );
+#elif CHEETAH_CONV_TYPE == 0
                 Iface::generateConvTriplesCheetahWrapper(keys,
                         A_KNOWN == 0 || PARTY == 1 ? uint_x[n] : nullptr,
                         A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
@@ -936,7 +946,11 @@ void generateLayerDummyTriples(type** a,
                     .padding = p.padding,
                 };
 
+#if CHEETAH_CONV_PACKED == 1
+                Iface::generateConvTriplesPacked(keys,
+#else
                 Iface::generateConvTriplesCheetahWrapper(keys,
+#endif
                         x, w, y,
                         conv,
                         CHEETAH_PARTY, CHEETAH_THREADS,

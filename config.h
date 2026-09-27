@@ -423,6 +423,10 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define CHEETAH_CONV_TYPE 0  // 0: standard, 1: experimental
 #endif
 
+#ifndef CHEETAH_CONV_PACKED
+#define CHEETAH_CONV_PACKED 0  // 1: conv triples on the CPU with the GPU path's packing (several images and output channels per ciphertext), less communication for small feature maps; needs CHEETAH_CONV_TYPE 0
+#endif
+
 #ifndef CHEETAH_THREADS
 #define CHEETAH_THREADS 32  // Number of threads to use for Cheetah triples generation
 #endif
