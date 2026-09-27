@@ -404,11 +404,22 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
     {
+        // No-index (non-interleaved GEMM) path: mask_and_send is called in LINEAR output order, so the
+        // share fix (mwk_fix_p1_share) reads it linearly -> store the sentinel so it uses position = k.
 #if PARTY == 0
         l = getRandomVal(PSELF);
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        // P1 freely picks its conv-triple share [lxly]_2 = r1 (fresh PSELF random, synced with LIVE), uses it
+        // as the output mask l_P1 = TRUNC(-r1), and stores r1 so the triple generation forces P1's share to r1
+        // (mwk_fix_p1_share in core/generate_beaver_tiples.hpp).
+        // CONV linear paths only (INTERLEAVE_COMM == 0 / GPU); FC uses the _baked variants below,
+        // which record into the separate FC vectors (see g_mwk_p1_fc_masks in buffers.h).
+        Datatype r1 = getRandomVal(PSELF);
+        g_mwk_p1_masks.push_back(r1);
+        g_mwk_p1_indices.push_back(G_MWK_LINEAR_SENTINEL);
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
 #else
         l = TRUNC(l);
-        // l = TRUNC(lxly); // TODO: Needs to be assigned
 #endif
 
     }
@@ -416,12 +427,67 @@ class ABY2_PRE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
+        // Indexed (interleaved/tiled GEMM) path: record the per-layer output index so r1 can be SCATTERED to
+        // c[index] in the triple generation (the tiled call order != linear c[] order). P1-only: P0 needs no
+        // index bookkeeping, it receives the share fix in c[] order.
 #if PARTY == 0
         l = getRandomVal(PSELF);
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        Datatype r1 = mwk_choose_r1_trunc<Datatype>(index, SUB);
+        g_mwk_p1_masks.push_back(r1);
+        g_mwk_p1_indices.push_back((uint64_t) index);
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
 #else
         l = TRUNC(l);
 #endif
 
+    }
+
+    // MWK + TRUNC_DELAYED (see the online counterpart): untruncated product, l = -r1 fully bakeable
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc(func_add ADD, func_sub SUB, int index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(index, SUB);
+        g_mwk_p1_masks.push_back(r1);
+        g_mwk_p1_indices.push_back((uint64_t) index);
+        l = SUB(SET_ALL_ZERO(), r1);
+#else
+        l = getRandomVal(PSELF);
+#endif
+    }
+
+    // FC path (linear order): sentinel index bookkeeping + bake (trunc mode dispatched by the wrapper)
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        Datatype r1 = mwk_choose_r1_trunc<Datatype>(bake_index, SUB);
+        g_mwk_p1_fc_masks.push_back(r1);  // FC path
+        g_mwk_p1_fc_indices.push_back(G_MWK_LINEAR_SENTINEL);
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1));
+#else
+        l = TRUNC(l);
+#endif
+    }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+#elif MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(bake_index, SUB);
+        g_mwk_p1_fc_masks.push_back(r1);  // FC path: prescribe P1's triple share to r1
+        g_mwk_p1_fc_indices.push_back(G_MWK_LINEAR_SENTINEL);
+        l = SUB(SET_ALL_ZERO(), r1);
+#else
+        l = getRandomVal(PSELF);
+#endif
     }
 
     template <typename func_add, typename func_sub, typename func_trunc>

@@ -1,6 +1,7 @@
 #pragma once
 #include "../include/pch.h"
 #include "sockethelper.h"
+#include <vector>
 int player_id;
 sender_args sending_args[num_players];
 receiver_args receiving_args[num_players];
@@ -67,6 +68,26 @@ DATATYPE* preprocessed_outputs = nullptr;
 uint64_t preprocessed_outputs_input_index = 0;
 uint64_t preprocessed_outputs_index = 0;
 uint64_t total_preprocessed_outputs = 0;
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+// MODELWEIGHTS_KNOWN: in PRE, P1 freely picks its conv/FC triple share [lxly]_2 = r1 (a fresh PSELF random),
+// derives its output mask l_P1 = TRUNC(-r1) from it, and pushes r1 here so the triple generation forces P1's
+// share to r1 (mwk_fix_p1_share in core/generate_beaver_tiples.hpp). This keeps l_P1 and
+// [lxly]_2 consistent for the reveal.
+std::vector<DATATYPE> g_mwk_p1_masks;
+// The GEMM (programs/functions/GEMM.hpp) is TILE_SIZE-tiled, so mask_and_send is called in TILE order, not in
+// linear output-index order. Online reads the triple via retrieve_output_share_arithmetic(0, index), which is
+// order-independent, but the ConvTriple buffer c[] is laid out in LINEAR output order. P1 therefore records the
+// output index of each pushed r1 so the triple generation can SCATTER r1 into c[index].
+std::vector<uint64_t> g_mwk_p1_indices;
+#define G_MWK_LINEAR_SENTINEL ((uint64_t) -1)  // non-interleaved GEMM path: consume c[] linearly
+uint64_t g_mwk_p1_masks_consume = 0;
+// FC layers push into their OWN vectors: the triple generation processes ALL conv layers first and
+// ALL FC layers second, so a shared vector breaks whenever conv and FC layers interleave in program
+// order (the consume pointer would hand FC masks to a later conv layer and vice versa).
+std::vector<DATATYPE> g_mwk_p1_fc_masks;
+std::vector<uint64_t> g_mwk_p1_fc_indices;
+uint64_t g_mwk_p1_fc_masks_consume = 0;
+#endif
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
 // Whether the values entering the current MSB extraction carry the mask bake (RESHARE_OPT_SIM's rt.a bits

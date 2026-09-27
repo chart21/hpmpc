@@ -713,6 +713,52 @@ void generateMultiplexerDummyTriples(type a[],
 
 
 
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+// MODELWEIGHTS_KNOWN: P1's conv/FC triple share must equal the r1 it committed in aby2_pre (its online mask is
+// l_P1 = TRUNC(-r1)). After the normal generation P1 sets its share to r1 and sends delta = r1 - c1, and P0
+// subtracts it: reconstruction is unchanged, and delta is uniform to P0 because r1 is P1's private randomness.
+// One message per layer. c holds `factor` lanes of `cnt` outputs ([lane][batch-major output]). The r1 were
+// recorded in GEMM call order: a conv records its output index per batch element (one GEMM per element), an FC
+// records the linear-order sentinel.
+template <typename LayerParams, typename Keys>
+static void mwk_fix_p1_share(Keys& keys, UINT_TYPE* c, uint64_t cnt, [[maybe_unused]] uint64_t per_batch)
+{
+    constexpr int factor = DATTYPE / BITLENGTH;
+    constexpr bool is_conv = std::is_same_v<LayerParams, ConvolutionParameter>;
+    auto& consume = is_conv ? g_mwk_p1_masks_consume : g_mwk_p1_fc_masks_consume;  // separate vectors, see buffers.h
+    const uint64_t n = cnt * factor;
+    std::vector<UINT_TYPE> delta(n);
+    auto* io = keys.get_ios(CHEETAH_THREADS)[0];
+    constexpr uint64_t CHUNK = (uint64_t) 1 << 28;  // send_data takes an int length
+#if PARTY == 1
+    const auto& masks = is_conv ? g_mwk_p1_masks : g_mwk_p1_fc_masks;
+    const auto& indices = is_conv ? g_mwk_p1_indices : g_mwk_p1_fc_indices;
+    const uint64_t stride = is_conv ? per_batch : cnt;
+    for (uint64_t k = 0; k < cnt; k++)
+    {
+        const uint64_t raw = indices[consume + k];
+        const uint64_t idx = raw == G_MWK_LINEAR_SENTINEL ? k : (k / stride) * stride + raw;
+        alignas(sizeof(DATATYPE)) UINT_TYPE r1[factor];
+        unorthogonalize_arithmetic(&masks[consume + k], r1, 1);
+        for (int j = 0; j < factor; j++)
+        {
+            delta[j * cnt + idx] = r1[j] - c[j * cnt + idx];
+            c[j * cnt + idx] = r1[j];
+        }
+    }
+    for (uint64_t off = 0; off < n; off += CHUNK)
+        io->send_data(delta.data() + off, (int) (std::min(CHUNK, n - off) * sizeof(UINT_TYPE)));
+    io->flush();
+#else
+    for (uint64_t off = 0; off < n; off += CHUNK)
+        io->recv_data(delta.data() + off, (int) (std::min(CHUNK, n - off) * sizeof(UINT_TYPE)));
+    for (uint64_t k = 0; k < n; k++)
+        c[k] -= delta[k];
+#endif
+    consume += cnt;
+}
+#endif
+
 //Input: arrays of layer triple shares [a], [b] with sizes predefined by convolution/Fc/Batchnorm params
 //Output: Contigious array of clayer triple shares [c] storing the output
 template <typename type, typename LayerParams>
@@ -779,6 +825,10 @@ void generateLayerDummyTriples(type** a,
                         factor, A_KNOWN == 0
                 );
 #else
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+                static_assert(MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0,
+                              "MODELWEIGHTS_KNOWN_DURING_PREPROCESSING requires CHEETAH_CONV_TYPE == 0");
+#endif
                 parms[n] = conv;
                 total_batches += conv.batchsize;
 #endif
@@ -805,7 +855,12 @@ void generateLayerDummyTriples(type** a,
             } else {
                 std::cerr << "Unsupported Param type\n";
             }
-            // Layer(uint_w[i],uint_x[i],uint_y + y_index_counter, p); // calculate layer operation
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+            if constexpr (std::is_same_v<LayerParams, ConvolutionParameter> ||
+                          std::is_same_v<LayerParams, FullyConnectedParameter>)
+                mwk_fix_p1_share<LayerParams>(keys, uint_y + y_index_counter,
+                                              (uint64_t) p.y_size_per_batch * p.batchSize, p.y_size_per_batch);
+#endif
             y_index_counter += p.y_size_per_batch * p.batchSize;
 #if CHEETAH_WAN_OPT == 1
             if (n + 1 < params.size()) {
@@ -907,7 +962,11 @@ void generateLayerDummyTriples(type** a,
             } else {
                 std::cerr << "Unsupported Param type\n";
             }
-            // Conv2D(w,x,y, p) // calculate layer operation
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+            if constexpr (std::is_same_v<LayerParams, ConvolutionParameter> ||
+                          std::is_same_v<LayerParams, FullyConnectedParameter>)
+                mwk_fix_p1_share<LayerParams>(keys, y, y_size, p.y_size_per_batch);
+#endif
             for (uint64_t i = 0; i < y_size; i++) {
                 alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
                 for (int j = 0; j < factor; j++)

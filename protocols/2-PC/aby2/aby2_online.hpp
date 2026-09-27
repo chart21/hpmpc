@@ -509,7 +509,7 @@ class ABY2_ONLINE_Share
         ABY2_ONLINE_Share c;
 /* c.l = getRandomVal(PSELF); */
 #if PARTY == 0
-        c.m = MULT(b.m, l); // -wx - [lw1lx]
+        c.m = MULT(SUB(b.m, b.l), l); // l_w0*(m_x - l_x0); with [lxly]=l_w0*l_x1 -> l_w0*lambda_x
 #else
         // lalb2 is the error
 #endif
@@ -654,27 +654,74 @@ class ABY2_ONLINE_Share
         lxly = retrieve_output_share_arithmetic();
 #if PARTY == 0
         l = getRandomVal(PSELF); 
-        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);  //ToDO: Check whether SET_ALL_ZERO modification is needed, ab - [lxlw2] 
+        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l); 
         send_to_live(PNEXT, m);
 #else
-        l = TRUNC(lxly);
-        // Party1 sends nothing, defines mask as lxly2 share
+        /* l = TRUNC(lxly); */
+        Datatype r1 = getRandomVal(PSELF); // == [lxly]_2 chosen in PRE (synced PSELF PRNG) == retrieved lxly
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1)); // SecureML l_P1 = TRUNC(-lxly)
+        // Party1 sends nothing; mask l_P1 = TRUNC(-r1), consistent with PRE and the forced conv-triple share
 #endif
     }
 
+    // Shared implementations of the four a_known mask/send variants (MODELWEIGHTS_KNOWN):
+    // P0 computes and sends its whole term (optionally SecureML-truncated); P1 sends nothing and
+    // derives its output mask from the freely PRESCRIBED triple share r1 (PRNG-synced with PRE).
+    // Under RESHARE_OPT_SIM, r1 is chosen so the mask carries the baked reshare material:
+    //  - with trunc:    l = TRUNC(-r1) with -r1 = (l_baked << FRACTIONAL) + low (image-limited, see
+    //                   construct_mwk_r1_baked: exact for RCA; PPA/PPA4 need TRUNC_DELAYED=1)
+    //  - without trunc: l = -r1 = l_baked (no constraint; the ReLU truncates later)
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void a_known_pre_mask_send_with_trunc(Datatype lxly, func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);
+        send_to_live(PNEXT, m);
+#else
+        // r1 == [lxly]_2 chosen in PRE (shared chooser + synced PSELF PRNG) == the retrieved lxly
+        Datatype r1 = mwk_choose_r1_trunc<Datatype>(bake_index, SUB);
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1));  // SecureML l_P1 = TRUNC(-[lxly]_2)
+#endif
+    }
+
+    template <typename func_add, typename func_sub>
+    void a_known_pre_mask_send_without_trunc(Datatype lxly, func_add ADD, func_sub SUB, int bake_index)
+    {
+#if PARTY == 0
+        l = getRandomVal(PSELF);
+        m = ADD(ADD(SUB(SET_ALL_ZERO(), m), lxly), l);
+        send_to_live(PNEXT, m);
+#else
+        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(bake_index, SUB);
+        l = SUB(SET_ALL_ZERO(), r1);
+#endif
+    }
+
+    // conv path: INDEXED triple retrieval (tiled GEMM call order)
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_a_known_pre_with_triple_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
-        Datatype lxly;
-        lxly = retrieve_output_share_arithmetic(0, index);
-#if PARTY == 0
-        l = getRandomVal(PSELF); 
-        m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);  //ToDO: Check whether SET_ALL_ZERO modification is needed, ab - [lxlw2] 
-        send_to_live(PNEXT, m);
-#else
-        l = TRUNC(lxly);
-        // Party1 sends nothing, defines mask as lxly2 share
-#endif
+        a_known_pre_mask_send_with_trunc(retrieve_output_share_arithmetic(0, index), ADD, SUB, TRUNC, index);
+    }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc(func_add ADD, func_sub SUB, int index)
+    {
+        a_known_pre_mask_send_without_trunc(retrieve_output_share_arithmetic(0, index), ADD, SUB, index);
+    }
+
+    // FC path: SEQUENTIAL triple retrieval (linear call order); trunc mode dispatched by the wrapper
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+        a_known_pre_mask_send_with_trunc(retrieve_output_share_arithmetic(), ADD, SUB, TRUNC, bake_index);
+    }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        a_known_pre_mask_send_without_trunc(retrieve_output_share_arithmetic(), ADD, SUB, bake_index);
     }
 
     template <typename func_add, typename func_sub, typename func_trunc>

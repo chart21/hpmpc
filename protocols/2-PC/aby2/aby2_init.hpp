@@ -556,6 +556,30 @@ class ABY2_init
 #endif
     }
 
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc(func_add ADD, func_sub SUB, int index)
+    {
+#if PARTY == 0
+        send_to_(PNEXT);
+#endif
+    }
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_a_known_pre_with_triple_with_trunc_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+#if PARTY == 0
+        send_to_(PNEXT);
+#endif
+    }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_a_known_pre_with_triple_without_trunc_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+#if PARTY == 0
+        send_to_(PNEXT);
+#endif
+    }
+
     #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
     static void prepare_A2B_S2(int m, int k, ABY2_init in[], ABY2_init out[])
     #else

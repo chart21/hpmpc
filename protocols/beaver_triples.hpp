@@ -85,7 +85,8 @@ DATATYPE* random_multiplication_a = nullptr;
 DATATYPE* random_multiplication_b = nullptr;
 
 // All reshare-baking machinery below is active only in this configuration; call sites can rely on
-// bake_reshare_mask compiling to a no-op otherwise.
+// bake_reshare_mask compiling to a no-op otherwise (construct_mwk_r1_baked call sites must still be
+// gated because they consume an extra PRNG draw).
 #define RESHARE_BAKE_ACTIVE \
     (RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && \
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
@@ -93,11 +94,14 @@ DATATYPE* random_multiplication_b = nullptr;
 // Public-weight layers multiply locally and never bake a mask.
 inline bool msb_input_baked() { return g_msb_input_baked && PUBLIC_WEIGHTS == 0; }
 
-// RESHARE_OPT_SIM skips the reshare pre-send only where the bake guarantees it would be zero: for inputs
-// that were not baked the adder takes the real reshare.
+// RESHARE_OPT_SIM skips the reshare pre-send only where the bake guarantees it would be zero. Elsewhere the
+// adder takes the real reshare: for inputs that were not baked, and for PPA/PPA4 under MWK with SecureML
+// truncation, whose high reshared slices lie outside the truncated mask's image.
+#define RESHARE_BAKE_COMPLETE                                                                         \
+    (!(MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 && TRUNC_DELAYED == 0 && (PPA_MSB == 1 || PPA4_MSB == 1)))
 inline bool reshare_sim_on()
 {
-#if RESHARE_BAKE_ACTIVE  // #if: RESHARE_OPT may be undefined (A_KNOWN_TO_EVALUATORS_OPT)
+#if RESHARE_BAKE_ACTIVE && RESHARE_BAKE_COMPLETE  // #if: RESHARE_OPT may be undefined (A_KNOWN_TO_EVALUATORS_OPT)
     return msb_input_baked();
 #else
     return false;
@@ -274,6 +278,53 @@ inline void bake_reshare_mask(Datatype& l, int bake_index, func_sub SUB)
 #endif
 }
 
+// MODELWEIGHTS_KNOWN + RESHARE_OPT_SIM, SecureML (non-delayed) truncation: construct P1's freely
+// prescribed triple share r1 so that its output mask l = TRUNC(-r1) (LOGICAL shift by FRACTIONAL)
+// carries the baked reshare bits: -r1 := (l_baked << FRACTIONAL) + low with low < 2^FRACTIONAL.
+// Only mask bits 0..K-FRACTIONAL-1 are realizable (the trunc image zeroes the top FRACTIONAL bits),
+// so reshared slices at numeric bits >= K-FRACTIONAL stay unbaked: exact for RCA (reshares bit 0
+// only); PPA/PPA4 additionally need TRUNC_DELAYED=1 (see the without_trunc a_known variant).
+template <typename Datatype, typename func_sub>
+inline Datatype construct_mwk_r1_baked(Datatype r1_base, Datatype low_rand, int bake_index, func_sub SUB)
+{
+#if PARTY == 1 && RESHARE_BAKE_ACTIVE
+    Datatype l_t = r1_base;
+    bake_reshare_mask(l_t, bake_index, SUB);
+    const UINT_TYPE low = (UINT_TYPE) low_rand & (((UINT_TYPE) 1 << FRACTIONAL) - (UINT_TYPE) 1);
+    return (Datatype) (UINT_TYPE) (0 - (((UINT_TYPE) l_t << FRACTIONAL) + low));
+#else
+    (void) low_rand; (void) bake_index;
+    return r1_base;
+#endif
+}
+
+// P1's prescribed triple share for the a_known (MODELWEIGHTS_KNOWN) paths. Used by BOTH the PRE and
+// the online phase so the PRNG draw sequences match by construction.
+// SecureML-truncated mask l = TRUNC(-r1): bake image-limited to bits 0..K-FRACTIONAL-1 (RCA-exact).
+template <typename Datatype, typename func_sub>
+inline Datatype mwk_choose_r1_trunc(int bake_index, func_sub SUB)
+{
+    Datatype r1 = getRandomVal(PSELF);
+#if RESHARE_BAKE_ACTIVE  // gated: consumes an extra PRNG draw
+    if (bake_index >= 0)
+        r1 = construct_mwk_r1_baked(r1, getRandomVal(PSELF), bake_index, SUB);
+#endif
+    return r1;
+}
+
+// Untruncated mask l = -r1 (TRUNC_DELAYED): fully bakeable, no image constraint.
+template <typename Datatype, typename func_sub>
+inline Datatype mwk_choose_r1_no_trunc(int bake_index, func_sub SUB)
+{
+    Datatype r1 = getRandomVal(PSELF);
+    if (bake_index >= 0)
+    {
+        Datatype l_t = r1;
+        bake_reshare_mask(l_t, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+        r1 = SUB(SET_ALL_ZERO(), l_t);
+    }
+    return r1;
+}
 // P1-side live count of the SIM=1 reshare condition (see the counter comment above); the unit test prints it.
 template <typename Datatype>
 inline void reshare_sim_check(Datatype l, Datatype mask)

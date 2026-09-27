@@ -281,14 +281,32 @@ class Additive_Share : public Share_Type
     {        return Additive_Share(Share_Type::prepare_dot_ex_lxly_a_known_pre(b, OP_ADD, OP_SUB, OP_MULT));
     }   
 
+    // CONV linear paths (INTERLEAVE_COMM == 0 / GPU); always SecureML-truncated - MWK+TRUNC_DELAYED
+    // is only supported on the indexed (tiled) conv path and the FC _baked path.
     void mask_and_send_dot_a_known_pre_with_triple()
     {
         Share_Type::mask_and_send_dot_a_known_pre_with_triple_with_trunc(OP_ADD, OP_SUB, FUNC_TRUNC);
     }
 
+    // MWK: under TRUNC_DELAYED the product must stay untruncated (the ReLU truncates later); this
+    // also lifts the trunc-image constraint on P1's mask so the reshare bake covers ALL slices.
     void mask_and_send_dot_a_known_pre_with_triple(int index)
     {
+#if TRUNC_DELAYED == 1
+        Share_Type::mask_and_send_dot_a_known_pre_with_triple_without_trunc(OP_ADD, OP_SUB, index);
+#else
         Share_Type::mask_and_send_dot_a_known_pre_with_triple_with_trunc(OP_ADD, OP_SUB, FUNC_TRUNC, index);
+#endif
+    }
+
+    // FC path: sequential triple retrieval + reshare bake (see mask_and_send_dot_with_triple_baked)
+    void mask_and_send_dot_a_known_pre_with_triple_baked(int bake_index)
+    {
+#if TRUNC_DELAYED == 1
+        Share_Type::mask_and_send_dot_a_known_pre_with_triple_without_trunc_baked(OP_ADD, OP_SUB, bake_index);
+#else
+        Share_Type::mask_and_send_dot_a_known_pre_with_triple_with_trunc_baked(OP_ADD, OP_SUB, FUNC_TRUNC, bake_index);
+#endif
     }
 
     void complete_mult_a_known_pre()
