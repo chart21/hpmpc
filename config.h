@@ -730,6 +730,28 @@ inline int base_port = BASE_PORT;  // temporary solution
 #endif
 #endif
 
+// Derive the MSB-adder choice (RCA_MSB / PPA_MSB / PPA4_MSB) here, before Protocols.h pulls in the A2B code.
+// share_conversion.hpp used to be the only place deriving them, but it is included after Protocols.h, so inside
+// the A2B code RCA_MSB was still undefined and the RESHARE_OPT reshare-skip always took the PPA branch (wrong for
+// RCA). share_conversion.hpp keeps the same #ifndef-guarded derivation, which is now a no-op.
+#if defined(BANDWIDTH_OPTIMIZED) && defined(ONLINE_OPTIMIZED)
+#if RCA_MSB == 0 && PPA_MSB == 0 && PPA4_MSB == 0
+#if BANDWIDTH_OPTIMIZED == 1 && ONLINE_OPTIMIZED == 0
+#ifndef RCA_MSB
+#define RCA_MSB 1
+#endif
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 1
+#ifndef PPA4_MSB
+#define PPA4_MSB 1
+#endif
+#elif BANDWIDTH_OPTIMIZED == 0 && ONLINE_OPTIMIZED == 0
+#ifndef PPA_MSB
+#define PPA_MSB 1
+#endif
+#endif
+#endif
+#endif
+
 #ifndef SIMULATE_MPC_FUNCTIONS
 #define SIMULATE_MPC_FUNCTIONS 1
 #endif
