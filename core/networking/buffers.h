@@ -71,6 +71,12 @@ uint64_t num_generated[num_players * player_multiplier] = {0};
 
 int use_srng_for_inputs = 1;
 
+// Set by the conv/FC layer to its is_first flag: 1 only for the network's first layer, whose input is the raw
+// data-owner share (non-owner mask = 0). With PUBLIC_WEIGHTS, that layer's truncation routes to the *_a_known
+// variant (owner truncates in the clear) instead of the SecureML local truncation, which wraps on the (0,value)
+// sharing. See protocols/2-PC/aby2/aby2_online.hpp prepare_mult_public_fixed_a_known.
+int g_a_known_input = 0;
+
 int current_phase = 0;   // Keeping track of current pahse
 int process_offset = 0;  // offsets the starting input for each process, base port must be multiple of 1000 to work
 

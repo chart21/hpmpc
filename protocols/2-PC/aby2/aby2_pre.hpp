@@ -425,6 +425,27 @@ class ABY2_PRE_Share
 #endif
     }
 
+    // PRE counterpart of prepare_mult_public_fixed_a_known (see aby2_online.hpp). The OWNER sends its c.m online
+    // (it depends on the live data), so here it just reserves its mask and expects to RECEIVE (CaseDefault). The
+    // NON-OWNER's online c.m is just its fresh mask, so it pre-sends c.l to the owner.
+    template <typename func_mul, typename func_add, typename func_sub, typename func_trunc>
+    ABY2_PRE_Share prepare_mult_public_fixed_a_known(const Datatype b,
+                                                     func_mul MULT,
+                                                     func_add ADD,
+                                                     func_sub SUB,
+                                                     func_trunc TRUNC,
+                                                     int fractional_bits = FRACTIONAL) const
+    {
+#if PSELF == DATAOWNER
+        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        return ABY2_PRE_Share(getRandomVal(PSELF));
+#else
+        auto c = ABY2_PRE_Share(getRandomVal(PSELF));
+        pre_send_to_live(PNEXT, c.l);  // non-owner's online c.m == its fresh mask
+        return c;
+#endif
+    }
+
     template <typename func_mul>
     ABY2_PRE_Share mult_a_known_to_evaluators(const ABY2_PRE_Share b,
                                                 func_mul MULT) const
@@ -482,6 +503,11 @@ class ABY2_PRE_Share
 
     template <typename func_add, typename func_sub>
     void complete_public_mult_fixed(func_add ADD, func_sub SUB)
+    {
+    }
+
+    template <typename func_add, typename func_sub>
+    void complete_mult_public_fixed_a_known(func_add ADD, func_sub SUB)
     {
     }
 

@@ -42,6 +42,18 @@ void share_vals(A* dst, const UINT_TYPE* vals, int n)
     A::communicate();
 }
 
+
+// Model parameters: secretly shared from the model owner, or plainly assigned under PUBLIC_WEIGHTS.
+template <int P, typename W>
+void set_weights(W* dst, const UINT_TYPE* vals, int n)
+{
+#if PUBLIC_WEIGHTS == 1
+    for (int i = 0; i < n; i++) dst[i] = vals[i];
+#else
+    share_vals<P>(dst, vals, n);
+#endif
+}
+
 // Re-mask via x*1 (integer, no truncation) so each value gets a *split* lambda, like a real layer
 // output (post-ReLU). A raw input share leaves lambda 0 on one party, which is not representative.
 template <typename A>
@@ -85,7 +97,7 @@ bool conv_test()
     UINT_TYPE* in_v = new UINT_TYPE[batch * ih * iw];
     for (int i = 0; i < batch * ih * iw; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
 
-    share_vals<P_0>(conv.kernel.data(), ker_v, oc * ic * ks * ks);  // weights from model owner
+    set_weights<P_0>(conv.kernel.data(), ker_v, oc * ic * ks * ks);  // weights from model owner
     share_vals<P_1>(input.data(), in_v, batch * ih * iw);           // data from data owner
     remask(input.data(), batch * ih * iw);  // activation behaves like a layer output (split lambda)
 
@@ -300,10 +312,10 @@ bool batchnorm_test()
         beta_v[c] = FFC::float_to_ufixed(beta_f[c]);
         gamma_v[c] = FFC::float_to_ufixed(1.0);
     }
-    share_vals<P_0>(bn.move_mu.data(), mu_v, ch);
-    share_vals<P_0>(bn.move_var.data(), scale_v, ch);
-    share_vals<P_0>(bn.beta.data(), beta_v, ch);
-    share_vals<P_0>(bn.gamma.data(), gamma_v, ch);
+    set_weights<P_0>(bn.move_mu.data(), mu_v, ch);
+    set_weights<P_0>(bn.move_var.data(), scale_v, ch);
+    set_weights<P_0>(bn.beta.data(), beta_v, ch);
+    set_weights<P_0>(bn.gamma.data(), gamma_v, ch);
 
     MatX<A> input(batch * ch, hw);
     UINT_TYPE in_v[ch * hw];
