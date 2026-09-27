@@ -64,15 +64,17 @@ bool conv_test()
 
     A::communicate();
 
-    const int batch = 1, ic = 1, oc = 1, ih = 4, iw = 4, ks = 3, stride = 1, pad = 0;
-    const int oh = (ih - ks) / stride + 1;  // 2
-    const int ow = (iw - ks) / stride + 1;  // 2
+    // Small but representative: multi-batch + multi-output-channel + padding (ic>1 covered by LeNet conv2).
+    const int batch = 2, ic = 1, oc = 3, ih = 6, iw = 6, ks = 3, stride = 1, pad = 1;
+    const int oh = (ih + 2 * pad - ks) / stride + 1;
+    const int ow = (iw + 2 * pad - ks) / stride + 1;
     const int osize = batch * oc * oh * ow;
 
-    // small image-like inputs in [0,1]; small (mixed-sign) weights -> small +/- outputs
-    float in_f[ih * iw];
-    for (int i = 0; i < ih * iw; i++) in_f[i] = (i + 1) / 20.0f;  // 0.05 .. 0.80
-    float ker_f[ks * ks] = {0.1, -0.1, 0.1, -0.1, 0.2, -0.1, 0.1, -0.1, 0.1};
+    // varied inputs/weights spanning a range of dot magnitudes
+    float* in_f = new float[batch * ih * iw];
+    for (int i = 0; i < batch * ih * iw; i++) in_f[i] = ((i * 7 + 3) % 40 - 20) / 20.0f;
+    float ker_f[oc * ic * ks * ks];
+    for (int i = 0; i < oc * ic * ks * ks; i++) ker_f[i] = ((i * 13 + 5) % 14 - 7) / 20.0f;
 
     Conv2d<A> conv(ic, oc, ks, stride, pad, /*use_bias=*/false);
     conv.set_layer({batch, ic, ih, iw});
@@ -80,43 +82,55 @@ bool conv_test()
 
     UINT_TYPE ker_v[oc * ic * ks * ks];
     for (int i = 0; i < oc * ic * ks * ks; i++) ker_v[i] = FFC::float_to_ufixed(ker_f[i]);
-    UINT_TYPE in_v[ih * iw];
-    for (int i = 0; i < ih * iw; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
+    UINT_TYPE* in_v = new UINT_TYPE[batch * ih * iw];
+    for (int i = 0; i < batch * ih * iw; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
 
     share_vals<P_0>(conv.kernel.data(), ker_v, oc * ic * ks * ks);  // weights from model owner
-    share_vals<P_1>(input.data(), in_v, ih * iw);                   // data from data owner
-    remask(input.data(), ih * iw);  // activation behaves like a layer output (split lambda)
+    share_vals<P_1>(input.data(), in_v, batch * ih * iw);           // data from data owner
+    remask(input.data(), batch * ih * iw);  // activation behaves like a layer output (split lambda)
 
     conv.forward(input, false);
 
-    alignas(sizeof(DATATYPE)) UINT_TYPE output[osize][vectorization_factor];
+    auto* output = new UINT_TYPE[osize][DATTYPE / BITLENGTH];
     reveal_and_store(conv.output.data(), output, osize);
 
-    float expected[osize];
-    for (int oi = 0; oi < oh; oi++)
-        for (int oj = 0; oj < ow; oj++)
-        {
-            float s = 0;
-            for (int ki = 0; ki < ks; ki++)
-                for (int kj = 0; kj < ks; kj++)
+    float* expected = new float[osize];
+    for (int b = 0; b < batch; b++)
+        for (int oc_i = 0; oc_i < oc; oc_i++)
+            for (int oi = 0; oi < oh; oi++)
+                for (int oj = 0; oj < ow; oj++)
                 {
-                    int ii = oi * stride + ki - pad;
-                    int jj = oj * stride + kj - pad;
-                    if (ii >= 0 && ii < ih && jj >= 0 && jj < iw)
-                        s += in_f[ii * iw + jj] * ker_f[ki * ks + kj];
+                    float s = 0;
+                    for (int ki = 0; ki < ks; ki++)
+                        for (int kj = 0; kj < ks; kj++)
+                        {
+                            int ii = oi * stride + ki - pad;
+                            int jj = oj * stride + kj - pad;
+                            if (ii >= 0 && ii < ih && jj >= 0 && jj < iw)
+                                s += in_f[b * ih * iw + ii * iw + jj] * ker_f[oc_i * ks * ks + ki * ks + kj];
+                        }
+                    expected[(b * oc + oc_i) * oh * ow + oi * ow + oj] = s;
                 }
-            expected[oi * ow + oj] = s;
-        }
 
-    bool ok = true;
+    int nfail = 0;
     for (int q = 0; q < osize; q++)
         for (int v = 0; v < vectorization_factor; v++)
         {
             float got = FFC::ufixed_to_float(output[q][v]);
-            print_compare(expected[q], got, epsilon);
             if (got - expected[q] > epsilon || got - expected[q] < -epsilon)
-                ok = false;
+            {
+                nfail++;
+                if (nfail <= 8)
+                    print_online("conv FAIL q=" + std::to_string(q) + " exp=" + std::to_string(expected[q]) +
+                                 " got=" + std::to_string(got));
+            }
         }
+    print_online("conv nfail=" + std::to_string(nfail) + " / " + std::to_string(osize));
+    bool ok = (nfail == 0);
+    delete[] in_f;
+    delete[] in_v;
+    delete[] output;
+    delete[] expected;
     return ok;
 }
 #endif
