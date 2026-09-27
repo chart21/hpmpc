@@ -468,6 +468,85 @@ bool relu_large_test()
 }
 #endif
 
+// Conv -> AvgPool: a pool that is not fused into a ReLU divides itself, and under TRUNC_DELAYED it also
+// absorbs the conv's pending truncation (ResNet50-Cheetah's stem has exactly this shape).
+template <typename Share>
+bool conv_avgpool_test()
+{
+    using A = Additive_Share<DATATYPE, Share>;
+    using FFC = FloatFixedConverter<float, INT_TYPE, UINT_TYPE, FRACTIONAL>;
+    const int vf = DATTYPE / BITLENGTH;
+    A::communicate();
+#if TRUNC_DELAYED == 1
+    delayed = false;  // earlier tests reveal delayed outputs without consuming them
+#endif
+    const int batch = 1, ic = 1, oc = 2, ih = 6, iw = 6, ks = 3, stride = 1, pad = 1, pk = 2;
+    const int oh = ih, ow = iw, ph = oh / pk, pw = ow / pk;
+    const int psize = batch * oc * ph * pw;
+
+    float in_f[ih * iw];
+    for (int i = 0; i < ih * iw; i++) in_f[i] = ((i * 5 + 1) % 20 - 10) / 5.0f;
+    float ker_f[oc * ic * ks * ks];
+    for (int i = 0; i < oc * ic * ks * ks; i++) ker_f[i] = ((i * 7 + 2) % 10 - 5) / 5.0f;
+
+    Conv2d<A> conv(ic, oc, ks, stride, pad, false);
+    conv.set_layer({batch, ic, ih, iw});
+    MatX<A> input(batch * ic, ih * iw);
+    UINT_TYPE ker_v[oc * ic * ks * ks];
+    for (int i = 0; i < oc * ic * ks * ks; i++) ker_v[i] = FFC::float_to_ufixed(ker_f[i]);
+    UINT_TYPE in_v[ih * iw];
+    for (int i = 0; i < ih * iw; i++) in_v[i] = FFC::float_to_ufixed(in_f[i]);
+    set_weights<P_0>(conv.kernel.data(), ker_v, oc * ic * ks * ks);
+    share_vals<P_1>(input.data(), in_v, ih * iw);
+    remask(input.data(), ih * iw);
+    conv.forward(input, false);
+
+    AvgPool2d<A> pool(pk, pk, 0);
+    pool.set_layer({batch, oc, oh, ow});
+    pool.forward(conv.output, false);
+
+    auto* output = new UINT_TYPE[psize][DATTYPE / BITLENGTH];
+    reveal_and_store(pool.output.data(), output, psize);
+
+    int nfail = 0;
+    for (int c = 0; c < oc; c++)
+        for (int pi = 0; pi < ph; pi++)
+            for (int pj = 0; pj < pw; pj++)
+            {
+                float avg = 0;
+                for (int y = 0; y < pk; y++)
+                    for (int x = 0; x < pk; x++)
+                    {
+                        const int oi = pi * pk + y, oj = pj * pk + x;
+                        float s = 0;
+                        for (int ki = 0; ki < ks; ki++)
+                            for (int kj = 0; kj < ks; kj++)
+                            {
+                                const int ii = oi + ki - pad, jj = oj + kj - pad;
+                                if (ii >= 0 && ii < ih && jj >= 0 && jj < iw)
+                                    s += in_f[ii * iw + jj] * ker_f[c * ks * ks + ki * ks + kj];
+                            }
+                        avg += s;
+                    }
+                avg /= pk * pk;
+                const int q = (c * ph + pi) * pw + pj;
+                for (int v = 0; v < vf; v++)
+                {
+                    const float got = FFC::ufixed_to_float(output[q][v]);
+                    if (got - avg > epsilon || got - avg < -epsilon)
+                    {
+                        nfail++;
+                        if (nfail <= 6)
+                            print_online("conv_avgpool FAIL q=" + std::to_string(q) + " exp=" + std::to_string(avg) +
+                                         " got=" + std::to_string(got));
+                    }
+                }
+            }
+    print_online("conv_avgpool nfail=" + std::to_string(nfail) + " / " + std::to_string(psize));
+    delete[] output;
+    return nfail == 0;
+}
+
 template <typename Share>
 bool test_conv_pool(DATATYPE* res)
 {
@@ -492,6 +571,7 @@ bool test_conv_pool(DATATYPE* res)
 #if TEST_RELU_LARGE == 1
     test_function(num_tests, num_passed, "ReLU(large)", relu_large_test<Share>);
 #endif
+    test_function(num_tests, num_passed, "Conv+AvgPool", conv_avgpool_test<Share>);
 
     print_stats(num_tests, num_passed);
     if (num_tests == num_passed)

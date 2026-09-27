@@ -2,15 +2,16 @@
 #include "../../config.h"
 #include "../../datatypes/float_fixed_converter.hpp"
 
+// extra_trunc: further bits to truncate in the same step, e.g. a delayed truncation of the input.
 template <typename T>
-void prepare_prob_div(T& out, const int denominator, const int frac_bits = FRACTIONAL)
+void prepare_prob_div(T& out, const int denominator, const int frac_bits = FRACTIONAL, const int extra_trunc = 0)
 {
 #if TRUNC_APPROACH == 0 || TRUNC_APPROACH == 4
 #if TRUNC_APPROACH == 0
     out =
         out.prepare_mult_public_fixed(FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(
                                           1 / FLOATTYPE(denominator), frac_bits),
-                                      frac_bits);
+                                      frac_bits + extra_trunc);
 #elif TRUNC_APPROACH == 4
     /* if(frac_bits <= FRACTIONAL / 2) */
     out =
