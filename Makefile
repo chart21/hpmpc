@@ -9,6 +9,8 @@ $(shell mkdir -p executables/flags)
 CHEETAH := nn/ConvTriple
 
 CHEETAH_GPU ?= 0
+# CUDA toolkit for CHEETAH_GPU=1 builds
+CUDA_PATH ?= /opt/cuda
 
 HE_INCLUDE := -I${CHEETAH}/src/include \
 			  -I${CHEETAH}/src \
@@ -24,7 +26,7 @@ HE_LIBS := -lHE -lgemini -lseal-4.1
 
 ifeq (${CHEETAH_GPU}, 1)
 HE_INCLUDE += -isystem ${CHEETAH}/deps/include/troy
-HE_PATHS += -L/opt/cuda/targets/x86_64-linux/lib
+HE_PATHS += -L$(CUDA_PATH)/targets/x86_64-linux/lib -L$(CUDA_PATH)/lib64 -Wl,-rpath,$(CUDA_PATH)/lib64
 HE_LIBS += -lcudart -ltroy
 endif
 
