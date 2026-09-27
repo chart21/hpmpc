@@ -40,7 +40,9 @@ void max_min_msb_range(sint_t<Additive_Share<Datatype, Share>>* val,
             max_val[counter + b * len] = UINT_TYPE(0);  // last uneven element is always pairwise max, override later
     }
 
+    g_msb_input_baked = false;  // comparison differences carry no baked mask
     get_msb_range<bm, bk>(max_val, msb, len * batch_size);
+    g_msb_input_baked = true;
 
     delete[] max_val;
 

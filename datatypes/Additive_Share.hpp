@@ -251,6 +251,25 @@ class Additive_Share : public Share_Type
     // Move the value onto mask share `assign`; the only communication is one preprocessing message.
     Additive_Share rebase(Datatype assign) const { return Additive_Share(Share_Type::rebase(assign, OP_ADD, OP_SUB)); }
 
+    // Sequential (call-order) triple retrieval like the no-index variant, but with a bake index so
+    // RESHARE_OPT can bake the reshare masks into l (linear-order GEMMs, e.g. the FC layer).
+    void mask_and_send_dot_with_triple_baked(int bake_index)
+    {
+        Share_Type::mask_and_send_dot_with_trunc_with_triple_baked(OP_ADD, OP_SUB, FUNC_TRUNC, bake_index);
+    }
+
+    // as above, without truncation (delayed-trunc GEMMs)
+    void mask_and_send_dot_without_trunc_with_triple_baked(int bake_index)
+    {
+        Share_Type::mask_and_send_dot_with_triple_baked(OP_ADD, OP_SUB, bake_index);
+    }
+
+    // mask_and_send_dot + reshare bake, no triple retrieval (pairs with prepare_dot)
+    void mask_and_send_dot_baked(int bake_index)
+    {
+        Share_Type::mask_and_send_dot_baked(OP_ADD, OP_SUB, bake_index);
+    }
+
     
     Additive_Share prepare_dot_ex_lxly_a_known(const Additive_Share<Datatype, Share_Type>& b) const
     {

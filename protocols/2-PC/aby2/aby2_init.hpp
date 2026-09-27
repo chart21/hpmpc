@@ -85,6 +85,13 @@ class ABY2_init
         return ABY2_init();
     }
 
+    // zero_add minus the communication (RESHARE_OPT baking) - nothing to count
+    template <typename func_add>
+    ABY2_init zero_add_local(Datatype assign, func_add ADD) const
+    {
+        return reshare_sim_on() ? ABY2_init() : zero_add(assign, ADD);
+    }
+
 
     template <typename func_mul>
     ABY2_init mult_public(const Datatype b, func_mul MULT) const
@@ -451,6 +458,12 @@ class ABY2_init
     {
         send_to_(PNEXT);
     }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        send_to_(PNEXT);
+    }
     
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_without_remask(func_add ADD, func_sub SUB)
@@ -476,6 +489,12 @@ class ABY2_init
         send_to_(PNEXT);
     }
 
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_triple_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        send_to_(PNEXT);
+    }
+
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC)
     {
@@ -493,7 +512,13 @@ class ABY2_init
     {
         send_to_(PNEXT);
     }
-    
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_with_trunc_with_triple_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+        send_to_(PNEXT);
+    }
+
     template <typename func_add>
     void reshare_a(Datatype mask, func_add ADD)
     {
@@ -506,15 +531,13 @@ class ABY2_init
     template <typename func_add>
     void reshare_b(Datatype mask, func_add ADD)
     {
-        #if PARTY == 0
-        #if RESHARE_OPT_SIM == 0
+        if (reshare_sim_on())
+            return;  // the pre-send is zero by the bake and skipped
+#if PARTY == 0
         store_output_share_();
-        #endif
-        #else
-        #if RESHARE_OPT_SIM == 0
+#else
         pre_send_to_(PNEXT);
-        #endif
-        #endif
+#endif
     }
     
     template <typename func_add, typename func_sub, typename func_trunc>

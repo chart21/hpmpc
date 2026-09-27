@@ -243,6 +243,13 @@ class ABY2_PRE_Share
         return ABY2_PRE_Share(assign);
     }
 
+    // zero_add minus the communication (RESHARE_OPT baking: l == assign on both parties)
+    template <typename func_add>
+    ABY2_PRE_Share zero_add_local(Datatype assign, func_add ADD) const
+    {
+        return reshare_sim_on() ? ABY2_PRE_Share(assign) : zero_add(assign, ADD);
+    }
+
     template <typename func_add, typename func_sub, typename func_mul>
     ABY2_PRE_Share prepare_dot_and_assign(ABY2_PRE_Share b, Datatype assign, func_add ADD, func_sub SUB, func_mul MULT) const
     {
@@ -339,6 +346,14 @@ class ABY2_PRE_Share
     {
         l = getRandomVal(PSELF);
     }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        l = getRandomVal(PSELF);
+        if (bake_index >= 0)
+            bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+    }
     
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_and_assign(Datatype assign, func_add ADD, func_sub SUB)
@@ -361,6 +376,16 @@ class ABY2_PRE_Share
     void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB, int index)
     {
         l = getRandomVal(PSELF);
+        if (index >= 0)
+            bake_reshare_mask(l, index, SUB);  // delayed-trunc conv path (no-op unless RESHARE_BAKE_ACTIVE)
+    }
+
+    template <typename func_add, typename func_sub>
+    void mask_and_send_dot_with_triple_baked(func_add ADD, func_sub SUB, int bake_index)
+    {
+        l = getRandomVal(PSELF);
+        if (bake_index >= 0)
+            bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
     }
 
 
@@ -403,6 +428,16 @@ class ABY2_PRE_Share
     void mask_and_send_dot_with_trunc_with_triple(func_add ADD, func_sub SUB, func_trunc TRUNC, int index)
     {
         l = getRandomVal(PSELF);
+        if (index >= 0)
+            bake_reshare_mask(l, index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE (l PRNG-synced PRE<->LIVE)
+    }
+
+    template <typename func_add, typename func_sub, typename func_trunc>
+    void mask_and_send_dot_with_trunc_with_triple_baked(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
+    {
+        l = getRandomVal(PSELF);
+        if (bake_index >= 0)
+            bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE (l PRNG-synced PRE<->LIVE)
     }
 
 
@@ -547,12 +582,32 @@ class ABY2_PRE_Share
             #elif RESHARE_OPT == 1 && PPA4_MSB == 1
             if(is_ppa4_reshared(k - m, i - m))
                 continue; // will be reshared in circuit
+#if RESHARE_BAKE_ACTIVE
+            {
+                // MUST mirror the ONLINE prepare_A2B_S1: SIM=1 zero_add-skipped slices get the
+                // beaver3 .b field as their mask (buffers and counters are identical in both phases)
+                const int t3 = ppa4_zero_add_t3(k - m, i - m);
+                if (t3 >= 0 && reshare_sim_on())
+                {
+                    const uint64_t b3i = curr_beaver_3_triple_index +
+                                         g_a2b_s1_pending * b3_tuples_per_adder(k - m) + (uint64_t) t3;
+                    if (b3i < num_beaver_3_tuples)
+                    {
+                        out[i - m].l = beaver_3_tuples.b[b3i];
+                        continue;
+                    }
+                }
+            }
+#endif
             #elif RESHARE_OPT == 1 && RCA_MSB != 1
             if(i != m)
                 continue;
             #endif
             out[i - m].l = getRandomVal(PSELF);
         }
+#if RESHARE_BAKE_ACTIVE && PPA4_MSB == 1
+        g_a2b_s1_pending++;
+#endif
 #endif
 #endif
     }
@@ -569,18 +624,15 @@ class ABY2_PRE_Share
     template <typename func_add>
     void reshare_b(Datatype mask, func_add ADD)
     {
-        #if PARTY == 0
+#if PARTY == 0
         l = SET_ALL_ZERO();
-        #if RESHARE_OPT_SIM == 0
-        triple_type[0][triple_type_index[0]++] = CaseDefault;
-        #endif
-        #else
-        #if RESHARE_OPT_SIM == 0
-        Datatype m = ADD(l, mask);  // l + b
-        pre_send_to_live(PNEXT, m); 
+        if (!reshare_sim_on())
+            triple_type[0][triple_type_index[0]++] = CaseDefault;
+#else
+        if (!reshare_sim_on())  // with the bake the delta l + b is zero and not sent
+            pre_send_to_live(PNEXT, ADD(l, mask));
         l = mask;
-        #endif
-        #endif
+#endif
     }
 
 

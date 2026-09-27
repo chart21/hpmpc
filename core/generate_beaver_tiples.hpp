@@ -299,7 +299,14 @@ void generateBeaverNDummyTuples(Beaver3TuplesD<Datatype> &beaver_3_tuples, Beave
         (uint8_t*) beaver_4_tuples.abcd
     };
 
-    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+#if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && PPA4_MSB == 1
+    // PPA4 SIM=1 skips the input-wire zero_adds, which is exact only if the 3-tuple mask fields are
+    // party-local: .b P0-only (masks the P0-known s1 slices), .c P1-only (masks P1's s2 slices).
+    constexpr bool b3_party_local_bc = true;
+#else
+    constexpr bool b3_party_local_bc = false;
+#endif
+    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM, b3_party_local_bc);
 #if CHEETAH_WAN_OPT == 1
     if (num_beaver_3_tuples > 0 && num_beaver_4_tuples > 0) {
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).get_ios(CHEETAH_THREADS)[0]->sync();

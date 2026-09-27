@@ -69,6 +69,22 @@ uint64_t preprocessed_outputs_index = 0;
 uint64_t total_preprocessed_outputs = 0;
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
+// Whether the values entering the current MSB extraction carry the mask bake (RESHARE_OPT_SIM's rt.a bits
+// in P1's mask). Only a conv/FC mask/send bakes, so the network clears this for ReLUs fed by anything else
+// (BatchNorm, residual sums), and max/min clears it for comparisons.
+bool g_msb_input_baked = true;
+// Set by the conv/FC layers around every GEMM regardless of protocol, hence declared outside the
+// preprocessing guard above.
+// RESHARE_OPT: the conv layer runs ONE GEMM per batch element, so the mask index passed to
+// the indexed mask_and_send variants is layer-local per element (0..N-1), while the ReLU's MSB adders
+// consume the layer's reshare/bake material globally across the batch. The layer sets this to
+// (element * N) around each per-element GEMM so the bake sees the batch-global output index; FC runs a
+// single GEMM with a global index, so it stays 0.
+uint64_t g_bake_batch_offset = 0;
+// Effective bias-mask shares published by the conv/FC layer; the bakes pre-compensate them
+// (protocols/beaver_triples.hpp).
+const DATATYPE* g_bake_bias_l = nullptr;
+uint64_t g_bake_bias_len = 0;
 uint64_t num_generated[num_players * player_multiplier] = {0};
 
 int use_srng_for_inputs = 1;

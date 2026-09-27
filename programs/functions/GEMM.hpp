@@ -41,7 +41,7 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if FC_TRIPLES == 1 && PROTOCOL == 4
-        sum.mask_and_send_dot_without_trunc_with_triple();  // send immediately to utilize network better
+        sum.mask_and_send_dot_without_trunc_with_triple_baked(i);  // linear call order; i for the reshare bake
 #else
         sum.mask_and_send_dot_without_trunc();  // send immediately to utilize network better
 #endif
@@ -50,7 +50,7 @@ void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_row
 #if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
         sum.mask_and_send_dot_a_known_pre_with_triple();  
 #else
-        sum.mask_and_send_dot_with_triple();
+        sum.mask_and_send_dot_with_triple_baked(i);  // linear call order; i = layer-local output index for the reshare bake
 #endif
 #else
         sum.mask_and_send_dot();

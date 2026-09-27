@@ -179,6 +179,13 @@ class XOR_Share : public Share_Type
         return XOR_Share(Share_Type::zero_add(assign, std::bit_xor<Datatype>()));
     }
 
+    // zero_add minus the communication: valid only when both parties' mask shares already equal
+    // their `assign` shares (RESHARE_OPT baking), so the exchanged deltas l ^ assign would be zero.
+    XOR_Share zero_add_local(Datatype assign)
+    {
+        return XOR_Share(Share_Type::zero_add_local(assign, std::bit_xor<Datatype>()));
+    }
+
     XOR_Share prepare_and(const XOR_Share<Datatype, Share_Type>& b, Datatype assign, Datatype triple_c) const
     {
         return XOR_Share(
