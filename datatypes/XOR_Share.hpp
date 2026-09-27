@@ -226,6 +226,30 @@ class XOR_Share : public Share_Type
         return XOR_Share(Share_Type::mult_a_known_to_evaluators(b, std::bit_and<Datatype>()));    
     }
 
+    // Dot-pending forms of the public-times-secret product (see aby2_online.hpp): use these when the
+    // product is XORed into a dot chain finalized by mask_and_send_dot_without_remask.
+    XOR_Share mult_a_known_to_evaluators_dot(const XOR_Share b) const
+    {
+        return XOR_Share(Share_Type::mult_a_known_to_evaluators_dot(b, std::bit_and<Datatype>(),
+                                                                    std::bit_xor<Datatype>()));
+    }
+
+    XOR_Share mult_a_known_to_evaluators_dot_pending(const XOR_Share b) const
+    {
+        return XOR_Share(Share_Type::mult_a_known_to_evaluators_dot_pending(b, std::bit_and<Datatype>()));
+    }
+
+    XOR_Share mult_a_known_to_evaluators_dot(const XOR_Share b, const Datatype assign) const
+    {
+        return XOR_Share(Share_Type::mult_a_known_to_evaluators_dot(b, assign, std::bit_and<Datatype>(),
+                                                                    std::bit_xor<Datatype>()));
+    }
+
+    XOR_Share mult_a_known_to_evaluators_dot_pending(const XOR_Share b, const Datatype assign) const
+    {
+        return XOR_Share(Share_Type::mult_a_known_to_evaluators_dot_pending(b, assign, std::bit_and<Datatype>()));
+    }
+
     void prepare_remask()
     {
         Share_Type::prepare_remask(std::bit_xor<Datatype>(), std::bit_xor<Datatype>());
