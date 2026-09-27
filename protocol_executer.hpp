@@ -498,7 +498,9 @@ generate_beaver_triples(
     rounds = 0;
     sending_rounds = 0;
     receiving_rounds = 0;
-    curr_boolean_triple_index = 0;
+#if BEAVER == 1
+    curr_boolean_triple_index = 0;  // declared in beaver_triples.hpp, which is only included under BEAVER
+#endif
 #if INIT == 0 && NO_INI == 0
     init_from_file();
     finalize(ips);
