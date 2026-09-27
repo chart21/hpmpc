@@ -926,17 +926,35 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
             {
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
-            for (int i = 0; i < Beaver3TupleCount; ++i)
             {
-                beaver3_tuples[i] = retrieveBeaver3Tuple<DATATYPE>();
+                // CUT: P-gate tuples (skipped in ALL phases incl. INIT counting) are not retrieved
+                // when their owning gate is skipped; G-gate tuples stay unconditional (INIT keeps
+                // counting them, see the phase-guarded gate skips). 99 = never skipped.
+                static constexpr int b3_skip_th[24] = {99, 3, 99, 6, 99, 9, 99, 12, 99, 15, 99, 18, 99, 21, 99, 25, 99, 28, 99, 99, 9, 99, 99, 99};
+                for (int i = 0; i < Beaver3TupleCount; ++i)
+                {
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(b3_skip_th[i])))
+                        beaver3_tuples[i] = retrieveBeaver3Tuple<DATATYPE>();
+                }
             }
-            for (int i = 0; i < Beaver4TupleCount; ++i)
             {
-                beaver4_tuples[i] = retrieveBeaver4Tuple<DATATYPE>();
+                static constexpr int b4_skip_th[13] = {99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 21, 99};
+                for (int i = 0; i < Beaver4TupleCount; ++i)
+                {
+                    if (!(g_cut_frac_active && cut_frac_ppa4_skip(b4_skip_th[i])))
+                        beaver4_tuples[i] = retrieveBeaver4Tuple<DATATYPE>();
+                }
             }
-            for (int i = 0; i < RandomTripleCount; ++i)
             {
-                random_triples[i] = retrieveRandomMultiplication<DATATYPE>();
+                // CUT: slot i belongs to reshared slice rt_slice[i]; identity-substituted slices
+                // consume no rt (matches the INIT count from the skipped reshare stubs and the
+                // rank-renumbered bake map in reshare_rt_offset).
+                static constexpr int rt_slice[11] = {1, 4, 7, 10, 13, 16, 19, 23, 26, 29, 22};
+                for (int i = 0; i < RandomTripleCount; ++i)
+                {
+                    if (!cut_frac_skip_reshare(32, rt_slice[i]))
+                        random_triples[i] = retrieveRandomMultiplication<DATATYPE>();
+                }
             }
             // Random mask values (shared across mask expressions)
             r133 = getRandomVal(PSELF);
@@ -972,28 +990,61 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
             r163 = getRandomVal(PSELF);
 
         }
-        a[1].reshare_a(random_triples[0].a);
-        b[1].reshare_b(random_triples[0].a);
-        a[4].reshare_a(random_triples[1].a);
-        b[4].reshare_b(random_triples[1].a);
-        a[7].reshare_a(random_triples[2].a);
-        b[7].reshare_b(random_triples[2].a);
-        a[10].reshare_a(random_triples[3].a);
-        b[10].reshare_b(random_triples[3].a);
-        a[13].reshare_a(random_triples[4].a);
-        b[13].reshare_b(random_triples[4].a);
-        a[16].reshare_a(random_triples[5].a);
-        b[16].reshare_b(random_triples[5].a);
-        a[19].reshare_a(random_triples[6].a);
-        b[19].reshare_b(random_triples[6].a);
-        a[23].reshare_a(random_triples[7].a);
-        b[23].reshare_b(random_triples[7].a);
-        a[26].reshare_a(random_triples[8].a);
-        b[26].reshare_b(random_triples[8].a);
-        a[29].reshare_a(random_triples[9].a);
-        b[29].reshare_b(random_triples[9].a);
-        a[22].reshare_a(random_triples[10].a);
-        b[22].reshare_b(random_triples[10].a);
+        if (!cut_frac_skip_reshare(32, 1))
+        {
+            a[1].reshare_a(random_triples[0].a);
+            b[1].reshare_b(random_triples[0].a);
+        }
+        if (!cut_frac_skip_reshare(32, 4))
+        {
+            a[4].reshare_a(random_triples[1].a);
+            b[4].reshare_b(random_triples[1].a);
+        }
+        if (!cut_frac_skip_reshare(32, 7))
+        {
+            a[7].reshare_a(random_triples[2].a);
+            b[7].reshare_b(random_triples[2].a);
+        }
+        if (!cut_frac_skip_reshare(32, 10))
+        {
+            a[10].reshare_a(random_triples[3].a);
+            b[10].reshare_b(random_triples[3].a);
+        }
+        if (!cut_frac_skip_reshare(32, 13))
+        {
+            a[13].reshare_a(random_triples[4].a);
+            b[13].reshare_b(random_triples[4].a);
+        }
+        if (!cut_frac_skip_reshare(32, 16))
+        {
+            a[16].reshare_a(random_triples[5].a);
+            b[16].reshare_b(random_triples[5].a);
+        }
+        if (!cut_frac_skip_reshare(32, 19))
+        {
+            a[19].reshare_a(random_triples[6].a);
+            b[19].reshare_b(random_triples[6].a);
+        }
+        if (!cut_frac_skip_reshare(32, 23))
+        {
+            a[23].reshare_a(random_triples[7].a);
+            b[23].reshare_b(random_triples[7].a);
+        }
+        if (!cut_frac_skip_reshare(32, 26))
+        {
+            a[26].reshare_a(random_triples[8].a);
+            b[26].reshare_b(random_triples[8].a);
+        }
+        if (!cut_frac_skip_reshare(32, 29))
+        {
+            a[29].reshare_a(random_triples[9].a);
+            b[29].reshare_b(random_triples[9].a);
+        }
+        if (!cut_frac_skip_reshare(32, 22))
+        {
+            a[22].reshare_a(random_triples[10].a);
+            b[22].reshare_b(random_triples[10].a);
+        }
     }
 
     int get_rounds() const { return level; }
@@ -1004,320 +1055,721 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
     {
         switch(level) {
             case 0:
-                p_1 = a[1] ^ b[1];  // p[1]
-                p_2 = a[2] ^ b[2];  // p[2]
-                p_3 = a[3] ^ b[3];  // p[3]
-                p_4 = a[4] ^ b[4];  // p[4]
-                p_5 = a[5] ^ b[5];  // p[5]
-                p_6 = a[6] ^ b[6];  // p[6]
-                p_7 = a[7] ^ b[7];  // p[7]
-                p_8 = a[8] ^ b[8];  // p[8]
-                p_9 = a[9] ^ b[9];  // p[9]
-                p_10 = a[10] ^ b[10];  // p[10]
-                p_11 = a[11] ^ b[11];  // p[11]
-                p_12 = a[12] ^ b[12];  // p[12]
-                p_13 = a[13] ^ b[13];  // p[13]
-                p_14 = a[14] ^ b[14];  // p[14]
-                p_15 = a[15] ^ b[15];  // p[15]
-                p_16 = a[16] ^ b[16];  // p[16]
-                p_17 = a[17] ^ b[17];  // p[17]
-                p_18 = a[18] ^ b[18];  // p[18]
-                p_19 = a[19] ^ b[19];  // p[19]
-                p_20 = a[20] ^ b[20];  // p[20]
-                p_21 = a[21] ^ b[21];  // p[21]
-                p_23 = a[23] ^ b[23];  // p[23]
-                p_24 = a[24] ^ b[24];  // p[24]
-                p_25 = a[25] ^ b[25];  // p[25]
-                p_26 = a[26] ^ b[26];  // p[26]
-                p_27 = a[27] ^ b[27];  // p[27]
-                p_28 = a[28] ^ b[28];  // p[28]
-                p_29 = a[29] ^ b[29];  // p[29]
-                p_30 = a[30] ^ b[30];  // p[30]
-                p_22 = a[22] ^ b[22];  // p[22]
-                p0 = a[0] ^ b[0];  // p0
+                p_1 = (g_cut_frac_active && FRACTIONAL == 1 && cut_frac_identity(32, 1))
+                           ? Share(SET_ALL_ONE())
+                           : a[1] ^ b[1];  // p[1] (identity 1 if boundary slice)
+                p_2 = (g_cut_frac_active && FRACTIONAL == 2 && cut_frac_identity(32, 2))
+                           ? Share(SET_ALL_ONE())
+                           : a[2] ^ b[2];  // p[2] (identity 1 if boundary slice)
+                p_3 = (g_cut_frac_active && FRACTIONAL == 3 && cut_frac_identity(32, 3))
+                           ? Share(SET_ALL_ONE())
+                           : a[3] ^ b[3];  // p[3] (identity 1 if boundary slice)
+                p_4 = (g_cut_frac_active && FRACTIONAL == 4 && cut_frac_identity(32, 4))
+                           ? Share(SET_ALL_ONE())
+                           : a[4] ^ b[4];  // p[4] (identity 1 if boundary slice)
+                p_5 = (g_cut_frac_active && FRACTIONAL == 5 && cut_frac_identity(32, 5))
+                           ? Share(SET_ALL_ONE())
+                           : a[5] ^ b[5];  // p[5] (identity 1 if boundary slice)
+                p_6 = (g_cut_frac_active && FRACTIONAL == 6 && cut_frac_identity(32, 6))
+                           ? Share(SET_ALL_ONE())
+                           : a[6] ^ b[6];  // p[6] (identity 1 if boundary slice)
+                p_7 = (g_cut_frac_active && FRACTIONAL == 7 && cut_frac_identity(32, 7))
+                           ? Share(SET_ALL_ONE())
+                           : a[7] ^ b[7];  // p[7] (identity 1 if boundary slice)
+                p_8 = (g_cut_frac_active && FRACTIONAL == 8 && cut_frac_identity(32, 8))
+                           ? Share(SET_ALL_ONE())
+                           : a[8] ^ b[8];  // p[8] (identity 1 if boundary slice)
+                p_9 = (g_cut_frac_active && FRACTIONAL == 9 && cut_frac_identity(32, 9))
+                           ? Share(SET_ALL_ONE())
+                           : a[9] ^ b[9];  // p[9] (identity 1 if boundary slice)
+                p_10 = (g_cut_frac_active && FRACTIONAL == 10 && cut_frac_identity(32, 10))
+                           ? Share(SET_ALL_ONE())
+                           : a[10] ^ b[10];  // p[10] (identity 1 if boundary slice)
+                p_11 = (g_cut_frac_active && FRACTIONAL == 11 && cut_frac_identity(32, 11))
+                           ? Share(SET_ALL_ONE())
+                           : a[11] ^ b[11];  // p[11] (identity 1 if boundary slice)
+                p_12 = (g_cut_frac_active && FRACTIONAL == 12 && cut_frac_identity(32, 12))
+                           ? Share(SET_ALL_ONE())
+                           : a[12] ^ b[12];  // p[12] (identity 1 if boundary slice)
+                p_13 = (g_cut_frac_active && FRACTIONAL == 13 && cut_frac_identity(32, 13))
+                           ? Share(SET_ALL_ONE())
+                           : a[13] ^ b[13];  // p[13] (identity 1 if boundary slice)
+                p_14 = (g_cut_frac_active && FRACTIONAL == 14 && cut_frac_identity(32, 14))
+                           ? Share(SET_ALL_ONE())
+                           : a[14] ^ b[14];  // p[14] (identity 1 if boundary slice)
+                p_15 = (g_cut_frac_active && FRACTIONAL == 15 && cut_frac_identity(32, 15))
+                           ? Share(SET_ALL_ONE())
+                           : a[15] ^ b[15];  // p[15] (identity 1 if boundary slice)
+                p_16 = (g_cut_frac_active && FRACTIONAL == 16 && cut_frac_identity(32, 16))
+                           ? Share(SET_ALL_ONE())
+                           : a[16] ^ b[16];  // p[16] (identity 1 if boundary slice)
+                p_17 = (g_cut_frac_active && FRACTIONAL == 17 && cut_frac_identity(32, 17))
+                           ? Share(SET_ALL_ONE())
+                           : a[17] ^ b[17];  // p[17] (identity 1 if boundary slice)
+                p_18 = (g_cut_frac_active && FRACTIONAL == 18 && cut_frac_identity(32, 18))
+                           ? Share(SET_ALL_ONE())
+                           : a[18] ^ b[18];  // p[18] (identity 1 if boundary slice)
+                p_19 = (g_cut_frac_active && FRACTIONAL == 19 && cut_frac_identity(32, 19))
+                           ? Share(SET_ALL_ONE())
+                           : a[19] ^ b[19];  // p[19] (identity 1 if boundary slice)
+                p_20 = (g_cut_frac_active && FRACTIONAL == 20 && cut_frac_identity(32, 20))
+                           ? Share(SET_ALL_ONE())
+                           : a[20] ^ b[20];  // p[20] (identity 1 if boundary slice)
+                p_21 = (g_cut_frac_active && FRACTIONAL == 21 && cut_frac_identity(32, 21))
+                           ? Share(SET_ALL_ONE())
+                           : a[21] ^ b[21];  // p[21] (identity 1 if boundary slice)
+                p_23 = (g_cut_frac_active && FRACTIONAL == 23 && cut_frac_identity(32, 23))
+                           ? Share(SET_ALL_ONE())
+                           : a[23] ^ b[23];  // p[23] (identity 1 if boundary slice)
+                p_24 = (g_cut_frac_active && FRACTIONAL == 24 && cut_frac_identity(32, 24))
+                           ? Share(SET_ALL_ONE())
+                           : a[24] ^ b[24];  // p[24] (identity 1 if boundary slice)
+                p_25 = (g_cut_frac_active && FRACTIONAL == 25 && cut_frac_identity(32, 25))
+                           ? Share(SET_ALL_ONE())
+                           : a[25] ^ b[25];  // p[25] (identity 1 if boundary slice)
+                p_26 = (g_cut_frac_active && FRACTIONAL == 26 && cut_frac_identity(32, 26))
+                           ? Share(SET_ALL_ONE())
+                           : a[26] ^ b[26];  // p[26] (identity 1 if boundary slice)
+                p_27 = (g_cut_frac_active && FRACTIONAL == 27 && cut_frac_identity(32, 27))
+                           ? Share(SET_ALL_ONE())
+                           : a[27] ^ b[27];  // p[27] (identity 1 if boundary slice)
+                p_28 = (g_cut_frac_active && FRACTIONAL == 28 && cut_frac_identity(32, 28))
+                           ? Share(SET_ALL_ONE())
+                           : a[28] ^ b[28];  // p[28] (identity 1 if boundary slice)
+                p_29 = (g_cut_frac_active && FRACTIONAL == 29 && cut_frac_identity(32, 29))
+                           ? Share(SET_ALL_ONE())
+                           : a[29] ^ b[29];  // p[29] (identity 1 if boundary slice)
+                p_30 = (g_cut_frac_active && FRACTIONAL == 30 && cut_frac_identity(32, 30))
+                           ? Share(SET_ALL_ONE())
+                           : a[30] ^ b[30];  // p[30] (identity 1 if boundary slice)
+                p_22 = (g_cut_frac_active && FRACTIONAL == 22 && cut_frac_identity(32, 22))
+                           ? Share(SET_ALL_ONE())
+                           : a[22] ^ b[22];  // p[22] (identity 1 if boundary slice)
+                if (g_cut_frac_active && cut_frac_identity(32, 1))
+                    p0 = a[FRACTIONAL] ^ b[FRACTIONAL];  // CUT: output tap reads the boundary slice
+                else
+                    p0 = a[0] ^ b[0];  // p0
+                // CUT: this wire's only consumer gate skips at F >= 2 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                a_2_p = a[2].zero_add_local(beaver3_tuples[0].b);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(2)))
+                    a_2_p = a[2].zero_add_local(beaver3_tuples[0].b);  // mask pre-baked; no communication
 #else
-                a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(2)))
+                    a_2_p = a[2].zero_add(beaver3_tuples[0].b);
 #endif
-                a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    a_3_p = ((g_cut_frac_active && FRACTIONAL == 3) ? Share(SET_ALL_ONE()) : a[3]).zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
+                // CUT: this wire's only consumer gate skips at F >= 5 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                a_5_p = a[5].zero_add_local(beaver3_tuples[2].b);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(5)))
+                    a_5_p = a[5].zero_add_local(beaver3_tuples[2].b);  // mask pre-baked; no communication
 #else
-                a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(5)))
+                    a_5_p = a[5].zero_add(beaver3_tuples[2].b);
 #endif
-                a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    a_6_p = ((g_cut_frac_active && FRACTIONAL == 6) ? Share(SET_ALL_ONE()) : a[6]).zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
+                // CUT: this wire's only consumer gate skips at F >= 8 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                a_8_p = a[8].zero_add_local(beaver3_tuples[4].b);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(8)))
+                    a_8_p = a[8].zero_add_local(beaver3_tuples[4].b);  // mask pre-baked; no communication
 #else
-                a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(8)))
+                    a_8_p = a[8].zero_add(beaver3_tuples[4].b);
 #endif
-                a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    a_9_p = ((g_cut_frac_active && FRACTIONAL == 9) ? Share(SET_ALL_ONE()) : a[9]).zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
+                // CUT: this wire's only consumer gate skips at F >= 11 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                a_11_p = a[11].zero_add_local(beaver3_tuples[6].b);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(11)))
+                    a_11_p = a[11].zero_add_local(beaver3_tuples[6].b);  // mask pre-baked; no communication
 #else
-                a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(11)))
+                    a_11_p = a[11].zero_add(beaver3_tuples[6].b);
 #endif
-                a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    a_12_p = ((g_cut_frac_active && FRACTIONAL == 12) ? Share(SET_ALL_ONE()) : a[12]).zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
+                // CUT: this wire's only consumer gate skips at F >= 14 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                a_14_p = a[14].zero_add_local(beaver3_tuples[8].b);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(14)))
+                    a_14_p = a[14].zero_add_local(beaver3_tuples[8].b);  // mask pre-baked; no communication
 #else
-                a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(14)))
+                    a_14_p = a[14].zero_add(beaver3_tuples[8].b);
 #endif
-                a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    a_15_p = ((g_cut_frac_active && FRACTIONAL == 15) ? Share(SET_ALL_ONE()) : a[15]).zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
+                // CUT: this wire's only consumer gate skips at F >= 17 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                a_17_p = a[17].zero_add_local(beaver3_tuples[10].b);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(17)))
+                    a_17_p = a[17].zero_add_local(beaver3_tuples[10].b);  // mask pre-baked; no communication
 #else
-                a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(17)))
+                    a_17_p = a[17].zero_add(beaver3_tuples[10].b);
 #endif
-                a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    a_18_p = ((g_cut_frac_active && FRACTIONAL == 18) ? Share(SET_ALL_ONE()) : a[18]).zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
+                // CUT: this wire's only consumer gate skips at F >= 20 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                a_20_p = a[20].zero_add_local(beaver3_tuples[12].b);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(20)))
+                    a_20_p = a[20].zero_add_local(beaver3_tuples[12].b);  // mask pre-baked; no communication
 #else
-                a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(20)))
+                    a_20_p = a[20].zero_add(beaver3_tuples[12].b);
 #endif
-                a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    a_21_p = ((g_cut_frac_active && FRACTIONAL == 21) ? Share(SET_ALL_ONE()) : a[21]).zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
+                // CUT: this wire's only consumer gate skips at F >= 24 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                a_24_p = a[24].zero_add_local(beaver3_tuples[14].b);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(24)))
+                    a_24_p = a[24].zero_add_local(beaver3_tuples[14].b);  // mask pre-baked; no communication
 #else
-                a_24_p = a[24].zero_add(beaver3_tuples[14].b);  // a[24]', mask=b29
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(24)))
+                    a_24_p = a[24].zero_add(beaver3_tuples[14].b);
 #endif
-                a_25_p = a[25].zero_add(beaver4_tuples[7].c);  // a[25]', mask=c30
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    a_25_p = ((g_cut_frac_active && FRACTIONAL == 25) ? Share(SET_ALL_ONE()) : a[25]).zero_add(beaver4_tuples[7].c);  // a[25]', mask=c30
+                // CUT: this wire's only consumer gate skips at F >= 27 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                a_27_p = a[27].zero_add_local(beaver3_tuples[16].b);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(27)))
+                    a_27_p = a[27].zero_add_local(beaver3_tuples[16].b);  // mask pre-baked; no communication
 #else
-                a_27_p = a[27].zero_add(beaver3_tuples[16].b);  // a[27]', mask=b33
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(27)))
+                    a_27_p = a[27].zero_add(beaver3_tuples[16].b);
 #endif
-                a_28_p = a[28].zero_add(beaver4_tuples[8].c);  // a[28]', mask=c34
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    a_28_p = ((g_cut_frac_active && FRACTIONAL == 28) ? Share(SET_ALL_ONE()) : a[28]).zero_add(beaver4_tuples[8].c);  // a[28]', mask=c34
 #if RESHARE_OPT_SIM == 1
-                a_30_p = a[30].zero_add_local(beaver3_tuples[18].b);  // mask pre-baked; no communication
+                if (g_cut_frac_active && cut_frac_identity(32, 30))
+                    // CUT: identity slice - public wire, unbaked -> COMMUNICATING zero_add
+                    a_30_p = ((g_cut_frac_active && FRACTIONAL == 30) ? Share(SET_ALL_ONE()) : a[30]).zero_add(beaver3_tuples[18].b);
+                else
+                    a_30_p = a[30].zero_add_local(beaver3_tuples[18].b);  // mask pre-baked; no communication
 #else
-                a_30_p = a[30].zero_add(beaver3_tuples[18].b);  // a[30]', mask=b37
+                a_30_p = ((g_cut_frac_active && FRACTIONAL == 30) ? Share(SET_ALL_ONE()) : a[30]).zero_add(beaver3_tuples[18].b);  // a[30]', mask=b37
 #endif
-                a_31_p = a[31].zero_add(beaver4_tuples[9].c);  // a[31]', mask=c38
+                a_31_p = ((g_cut_frac_active && FRACTIONAL == 31) ? Share(SET_ALL_ONE()) : a[31]).zero_add(beaver4_tuples[9].c);  // a[31]', mask=c38
+                // CUT: this wire's only consumer gate skips at F >= 2 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                b_2_p = b[2].zero_add_local(beaver3_tuples[0].c);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(2)))
+                    b_2_p = b[2].zero_add_local(beaver3_tuples[0].c);  // mask pre-baked; no communication
 #else
-                b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(2)))
+                    b_2_p = b[2].zero_add(beaver3_tuples[0].c);
 #endif
-                b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    b_3_p = ((g_cut_frac_active && FRACTIONAL == 3) ? Share(SET_ALL_ZERO()) : b[3]).zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
+                // CUT: this wire's only consumer gate skips at F >= 5 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                b_5_p = b[5].zero_add_local(beaver3_tuples[2].c);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(5)))
+                    b_5_p = b[5].zero_add_local(beaver3_tuples[2].c);  // mask pre-baked; no communication
 #else
-                b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(5)))
+                    b_5_p = b[5].zero_add(beaver3_tuples[2].c);
 #endif
-                b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    b_6_p = ((g_cut_frac_active && FRACTIONAL == 6) ? Share(SET_ALL_ZERO()) : b[6]).zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
+                // CUT: this wire's only consumer gate skips at F >= 8 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                b_8_p = b[8].zero_add_local(beaver3_tuples[4].c);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(8)))
+                    b_8_p = b[8].zero_add_local(beaver3_tuples[4].c);  // mask pre-baked; no communication
 #else
-                b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(8)))
+                    b_8_p = b[8].zero_add(beaver3_tuples[4].c);
 #endif
-                b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    b_9_p = ((g_cut_frac_active && FRACTIONAL == 9) ? Share(SET_ALL_ZERO()) : b[9]).zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
+                // CUT: this wire's only consumer gate skips at F >= 11 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                b_11_p = b[11].zero_add_local(beaver3_tuples[6].c);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(11)))
+                    b_11_p = b[11].zero_add_local(beaver3_tuples[6].c);  // mask pre-baked; no communication
 #else
-                b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(11)))
+                    b_11_p = b[11].zero_add(beaver3_tuples[6].c);
 #endif
-                b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    b_12_p = ((g_cut_frac_active && FRACTIONAL == 12) ? Share(SET_ALL_ZERO()) : b[12]).zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
+                // CUT: this wire's only consumer gate skips at F >= 14 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                b_14_p = b[14].zero_add_local(beaver3_tuples[8].c);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(14)))
+                    b_14_p = b[14].zero_add_local(beaver3_tuples[8].c);  // mask pre-baked; no communication
 #else
-                b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(14)))
+                    b_14_p = b[14].zero_add(beaver3_tuples[8].c);
 #endif
-                b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    b_15_p = ((g_cut_frac_active && FRACTIONAL == 15) ? Share(SET_ALL_ZERO()) : b[15]).zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
+                // CUT: this wire's only consumer gate skips at F >= 17 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                b_17_p = b[17].zero_add_local(beaver3_tuples[10].c);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(17)))
+                    b_17_p = b[17].zero_add_local(beaver3_tuples[10].c);  // mask pre-baked; no communication
 #else
-                b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(17)))
+                    b_17_p = b[17].zero_add(beaver3_tuples[10].c);
 #endif
-                b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    b_18_p = ((g_cut_frac_active && FRACTIONAL == 18) ? Share(SET_ALL_ZERO()) : b[18]).zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
+                // CUT: this wire's only consumer gate skips at F >= 20 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                b_20_p = b[20].zero_add_local(beaver3_tuples[12].c);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(20)))
+                    b_20_p = b[20].zero_add_local(beaver3_tuples[12].c);  // mask pre-baked; no communication
 #else
-                b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(20)))
+                    b_20_p = b[20].zero_add(beaver3_tuples[12].c);
 #endif
-                b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    b_21_p = ((g_cut_frac_active && FRACTIONAL == 21) ? Share(SET_ALL_ZERO()) : b[21]).zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
+                // CUT: this wire's only consumer gate skips at F >= 24 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                b_24_p = b[24].zero_add_local(beaver3_tuples[14].c);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(24)))
+                    b_24_p = b[24].zero_add_local(beaver3_tuples[14].c);  // mask pre-baked; no communication
 #else
-                b_24_p = b[24].zero_add(beaver3_tuples[14].c);  // b[24]', mask=c29
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(24)))
+                    b_24_p = b[24].zero_add(beaver3_tuples[14].c);
 #endif
-                b_25_p = b[25].zero_add(beaver4_tuples[7].d);  // b[25]', mask=d30
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    b_25_p = ((g_cut_frac_active && FRACTIONAL == 25) ? Share(SET_ALL_ZERO()) : b[25]).zero_add(beaver4_tuples[7].d);  // b[25]', mask=d30
+                // CUT: this wire's only consumer gate skips at F >= 27 == its identity
+                // threshold, so a surviving zero_add always sees a non-identity (real) wire.
 #if RESHARE_OPT_SIM == 1
-                b_27_p = b[27].zero_add_local(beaver3_tuples[16].c);  // mask pre-baked; no communication
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(27)))
+                    b_27_p = b[27].zero_add_local(beaver3_tuples[16].c);  // mask pre-baked; no communication
 #else
-                b_27_p = b[27].zero_add(beaver3_tuples[16].c);  // b[27]', mask=c33
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(27)))
+                    b_27_p = b[27].zero_add(beaver3_tuples[16].c);
 #endif
-                b_28_p = b[28].zero_add(beaver4_tuples[8].d);  // b[28]', mask=d34
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    b_28_p = ((g_cut_frac_active && FRACTIONAL == 28) ? Share(SET_ALL_ZERO()) : b[28]).zero_add(beaver4_tuples[8].d);  // b[28]', mask=d34
 #if RESHARE_OPT_SIM == 1
-                b_30_p = b[30].zero_add_local(beaver3_tuples[18].c);  // mask pre-baked; no communication
+                if (g_cut_frac_active && cut_frac_identity(32, 30))
+                    // CUT: identity slice - public wire, unbaked -> COMMUNICATING zero_add
+                    b_30_p = ((g_cut_frac_active && FRACTIONAL == 30) ? Share(SET_ALL_ZERO()) : b[30]).zero_add(beaver3_tuples[18].c);
+                else
+                    b_30_p = b[30].zero_add_local(beaver3_tuples[18].c);  // mask pre-baked; no communication
 #else
-                b_30_p = b[30].zero_add(beaver3_tuples[18].c);  // b[30]', mask=c37
+                b_30_p = ((g_cut_frac_active && FRACTIONAL == 30) ? Share(SET_ALL_ZERO()) : b[30]).zero_add(beaver3_tuples[18].c);  // b[30]', mask=c37
 #endif
-                b_31_p = b[31].zero_add(beaver4_tuples[9].d);  // b[31]', mask=d38
-                p_1_p = p_1.zero_add(beaver3_tuples[0].a);  // p[1]', mask=a1
-                p_1_p_1 = p_1.zero_add(beaver4_tuples[0].a);  // p[1]'_1, mask=a2
-                p_1_p_2 = p_1.zero_add(beaver3_tuples[1].a);  // p[1]'_2, mask=a3
-                p_2_p = p_2.zero_add(beaver4_tuples[0].b);  // p[2]', mask=b2
-                p_2_p_1 = p_2.zero_add(beaver3_tuples[1].b);  // p[2]'_1, mask=b3
-                p_3_p = p_3.zero_add(beaver3_tuples[1].c);  // p[3]', mask=c3
-                p_4_p = p_4.zero_add(beaver3_tuples[2].a);  // p[4]', mask=a5
-                p_4_p_1 = p_4.zero_add(beaver4_tuples[1].a);  // p[4]'_1, mask=a6
-                p_4_p_2 = p_4.zero_add(beaver3_tuples[3].a);  // p[4]'_2, mask=a7
-                p_5_p = p_5.zero_add(beaver4_tuples[1].b);  // p[5]', mask=b6
-                p_5_p_1 = p_5.zero_add(beaver3_tuples[3].b);  // p[5]'_1, mask=b7
-                p_6_p = p_6.zero_add(beaver3_tuples[3].c);  // p[6]', mask=c7
-                p_7_p = p_7.zero_add(beaver3_tuples[4].a);  // p[7]', mask=a9
-                p_7_p_1 = p_7.zero_add(beaver4_tuples[2].a);  // p[7]'_1, mask=a10
-                p_7_p_2 = p_7.zero_add(beaver3_tuples[5].a);  // p[7]'_2, mask=a11
-                p_8_p = p_8.zero_add(beaver4_tuples[2].b);  // p[8]', mask=b10
-                p_8_p_1 = p_8.zero_add(beaver3_tuples[5].b);  // p[8]'_1, mask=b11
-                p_9_p = p_9.zero_add(beaver3_tuples[5].c);  // p[9]', mask=c11
-                p_10_p = p_10.zero_add(beaver3_tuples[6].a);  // p[10]', mask=a13
-                p_10_p_1 = p_10.zero_add(beaver4_tuples[3].a);  // p[10]'_1, mask=a14
-                p_10_p_2 = p_10.zero_add(beaver3_tuples[7].a);  // p[10]'_2, mask=a15
-                p_11_p = p_11.zero_add(beaver4_tuples[3].b);  // p[11]', mask=b14
-                p_11_p_1 = p_11.zero_add(beaver3_tuples[7].b);  // p[11]'_1, mask=b15
-                p_12_p = p_12.zero_add(beaver3_tuples[7].c);  // p[12]', mask=c15
-                p_13_p = p_13.zero_add(beaver3_tuples[8].a);  // p[13]', mask=a17
-                p_13_p_1 = p_13.zero_add(beaver4_tuples[4].a);  // p[13]'_1, mask=a18
-                p_13_p_2 = p_13.zero_add(beaver3_tuples[9].a);  // p[13]'_2, mask=a19
-                p_14_p = p_14.zero_add(beaver4_tuples[4].b);  // p[14]', mask=b18
-                p_14_p_1 = p_14.zero_add(beaver3_tuples[9].b);  // p[14]'_1, mask=b19
-                p_15_p = p_15.zero_add(beaver3_tuples[9].c);  // p[15]', mask=c19
-                p_16_p = p_16.zero_add(beaver3_tuples[10].a);  // p[16]', mask=a21
-                p_16_p_1 = p_16.zero_add(beaver4_tuples[5].a);  // p[16]'_1, mask=a22
-                p_16_p_2 = p_16.zero_add(beaver3_tuples[11].a);  // p[16]'_2, mask=a23
-                p_17_p = p_17.zero_add(beaver4_tuples[5].b);  // p[17]', mask=b22
-                p_17_p_1 = p_17.zero_add(beaver3_tuples[11].b);  // p[17]'_1, mask=b23
-                p_18_p = p_18.zero_add(beaver3_tuples[11].c);  // p[18]', mask=c23
-                p_19_p = p_19.zero_add(beaver3_tuples[12].a);  // p[19]', mask=a25
-                p_19_p_1 = p_19.zero_add(beaver4_tuples[6].a);  // p[19]'_1, mask=a26
-                p_19_p_2 = p_19.zero_add(beaver3_tuples[13].a);  // p[19]'_2, mask=a27
-                p_20_p = p_20.zero_add(beaver4_tuples[6].b);  // p[20]', mask=b26
-                p_20_p_1 = p_20.zero_add(beaver3_tuples[13].b);  // p[20]'_1, mask=b27
-                p_21_p = p_21.zero_add(beaver3_tuples[13].c);  // p[21]', mask=c27
-                p_23_p = p_23.zero_add(beaver3_tuples[14].a);  // p[23]', mask=a29
-                p_23_p_1 = p_23.zero_add(beaver4_tuples[7].a);  // p[23]'_1, mask=a30
-                p_23_p_2 = p_23.zero_add(beaver3_tuples[15].a);  // p[23]'_2, mask=a31
-                p_24_p = p_24.zero_add(beaver4_tuples[7].b);  // p[24]', mask=b30
-                p_24_p_1 = p_24.zero_add(beaver3_tuples[15].b);  // p[24]'_1, mask=b31
-                p_25_p = p_25.zero_add(beaver3_tuples[15].c);  // p[25]', mask=c31
-                p_26_p = p_26.zero_add(beaver3_tuples[16].a);  // p[26]', mask=a33
-                p_26_p_1 = p_26.zero_add(beaver4_tuples[8].a);  // p[26]'_1, mask=a34
-                p_26_p_2 = p_26.zero_add(beaver3_tuples[17].a);  // p[26]'_2, mask=a35
-                p_27_p = p_27.zero_add(beaver4_tuples[8].b);  // p[27]', mask=b34
-                p_27_p_1 = p_27.zero_add(beaver3_tuples[17].b);  // p[27]'_1, mask=b35
-                p_28_p = p_28.zero_add(beaver3_tuples[17].c);  // p[28]', mask=c35
+                b_31_p = ((g_cut_frac_active && FRACTIONAL == 31) ? Share(SET_ALL_ZERO()) : b[31]).zero_add(beaver4_tuples[9].d);  // b[31]', mask=d38
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(2)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_1_p = p_1.zero_add(beaver3_tuples[0].a);  // p[1]', mask=a1
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_1_p_1 = p_1.zero_add(beaver4_tuples[0].a);  // p[1]'_1, mask=a2
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_1_p_2 = p_1.zero_add(beaver3_tuples[1].a);  // p[1]'_2, mask=a3
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_2_p = p_2.zero_add(beaver4_tuples[0].b);  // p[2]', mask=b2
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_2_p_1 = p_2.zero_add(beaver3_tuples[1].b);  // p[2]'_1, mask=b3
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_3_p = p_3.zero_add(beaver3_tuples[1].c);  // p[3]', mask=c3
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(5)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_4_p = p_4.zero_add(beaver3_tuples[2].a);  // p[4]', mask=a5
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_4_p_1 = p_4.zero_add(beaver4_tuples[1].a);  // p[4]'_1, mask=a6
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_4_p_2 = p_4.zero_add(beaver3_tuples[3].a);  // p[4]'_2, mask=a7
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_5_p = p_5.zero_add(beaver4_tuples[1].b);  // p[5]', mask=b6
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_5_p_1 = p_5.zero_add(beaver3_tuples[3].b);  // p[5]'_1, mask=b7
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_6_p = p_6.zero_add(beaver3_tuples[3].c);  // p[6]', mask=c7
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(8)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_7_p = p_7.zero_add(beaver3_tuples[4].a);  // p[7]', mask=a9
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_7_p_1 = p_7.zero_add(beaver4_tuples[2].a);  // p[7]'_1, mask=a10
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_7_p_2 = p_7.zero_add(beaver3_tuples[5].a);  // p[7]'_2, mask=a11
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_8_p = p_8.zero_add(beaver4_tuples[2].b);  // p[8]', mask=b10
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_8_p_1 = p_8.zero_add(beaver3_tuples[5].b);  // p[8]'_1, mask=b11
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_9_p = p_9.zero_add(beaver3_tuples[5].c);  // p[9]', mask=c11
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(11)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_10_p = p_10.zero_add(beaver3_tuples[6].a);  // p[10]', mask=a13
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_10_p_1 = p_10.zero_add(beaver4_tuples[3].a);  // p[10]'_1, mask=a14
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_10_p_2 = p_10.zero_add(beaver3_tuples[7].a);  // p[10]'_2, mask=a15
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_11_p = p_11.zero_add(beaver4_tuples[3].b);  // p[11]', mask=b14
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_11_p_1 = p_11.zero_add(beaver3_tuples[7].b);  // p[11]'_1, mask=b15
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_12_p = p_12.zero_add(beaver3_tuples[7].c);  // p[12]', mask=c15
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(14)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_13_p = p_13.zero_add(beaver3_tuples[8].a);  // p[13]', mask=a17
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_13_p_1 = p_13.zero_add(beaver4_tuples[4].a);  // p[13]'_1, mask=a18
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_13_p_2 = p_13.zero_add(beaver3_tuples[9].a);  // p[13]'_2, mask=a19
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_14_p = p_14.zero_add(beaver4_tuples[4].b);  // p[14]', mask=b18
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_14_p_1 = p_14.zero_add(beaver3_tuples[9].b);  // p[14]'_1, mask=b19
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_15_p = p_15.zero_add(beaver3_tuples[9].c);  // p[15]', mask=c19
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(17)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_16_p = p_16.zero_add(beaver3_tuples[10].a);  // p[16]', mask=a21
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_16_p_1 = p_16.zero_add(beaver4_tuples[5].a);  // p[16]'_1, mask=a22
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_16_p_2 = p_16.zero_add(beaver3_tuples[11].a);  // p[16]'_2, mask=a23
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_17_p = p_17.zero_add(beaver4_tuples[5].b);  // p[17]', mask=b22
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_17_p_1 = p_17.zero_add(beaver3_tuples[11].b);  // p[17]'_1, mask=b23
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_18_p = p_18.zero_add(beaver3_tuples[11].c);  // p[18]', mask=c23
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(20)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_19_p = p_19.zero_add(beaver3_tuples[12].a);  // p[19]', mask=a25
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_19_p_1 = p_19.zero_add(beaver4_tuples[6].a);  // p[19]'_1, mask=a26
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_19_p_2 = p_19.zero_add(beaver3_tuples[13].a);  // p[19]'_2, mask=a27
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_20_p = p_20.zero_add(beaver4_tuples[6].b);  // p[20]', mask=b26
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_20_p_1 = p_20.zero_add(beaver3_tuples[13].b);  // p[20]'_1, mask=b27
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_21_p = p_21.zero_add(beaver3_tuples[13].c);  // p[21]', mask=c27
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(24)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_23_p = p_23.zero_add(beaver3_tuples[14].a);  // p[23]', mask=a29
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_23_p_1 = p_23.zero_add(beaver4_tuples[7].a);  // p[23]'_1, mask=a30
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_23_p_2 = p_23.zero_add(beaver3_tuples[15].a);  // p[23]'_2, mask=a31
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_24_p = p_24.zero_add(beaver4_tuples[7].b);  // p[24]', mask=b30
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_24_p_1 = p_24.zero_add(beaver3_tuples[15].b);  // p[24]'_1, mask=b31
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_25_p = p_25.zero_add(beaver3_tuples[15].c);  // p[25]', mask=c31
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(27)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_26_p = p_26.zero_add(beaver3_tuples[16].a);  // p[26]', mask=a33
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_26_p_1 = p_26.zero_add(beaver4_tuples[8].a);  // p[26]'_1, mask=a34
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_26_p_2 = p_26.zero_add(beaver3_tuples[17].a);  // p[26]'_2, mask=a35
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_27_p = p_27.zero_add(beaver4_tuples[8].b);  // p[27]', mask=b34
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_27_p_1 = p_27.zero_add(beaver3_tuples[17].b);  // p[27]'_1, mask=b35
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_28_p = p_28.zero_add(beaver3_tuples[17].c);  // p[28]', mask=c35
                 p_29_p = p_29.zero_add(beaver3_tuples[18].a);  // p[29]', mask=a37
                 p_29_p_1 = p_29.zero_add(beaver4_tuples[9].a);  // p[29]'_1, mask=a38
                 p_30_p = p_30.zero_add(beaver4_tuples[9].b);  // p[30]', mask=b38
-                p_22_p = p_22.zero_add(triples[2].a);  // p[22]', mask=a47
-                p_22_p_1 = p_22.zero_add(beaver3_tuples[22].a);  // p[22]'_1, mask=a48
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_22_p = p_22.zero_add(triples[2].a);  // p[22]', mask=a47
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    p_22_p_1 = p_22.zero_add(beaver3_tuples[22].a);  // p[22]'_1, mask=a48
                 p_22_p_2 = p_22.zero_add(beaver4_tuples[12].a);  // p[22]'_2, mask=a49
                 // and_0: random_triples[0].a, random_triples[0].b, output mask=r157
-                B3G_1_3_g1 = a[1].prepare_dot_reshared(b[1], r157, random_triples[0].b);  // and_0
+                if (g_cut_frac_active && cut_frac_identity(32, 1))
+                    B3G_1_3_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    B3G_1_3_g1 = a[1].prepare_dot_reshared(b[1], r157, random_triples[0].b);  // and_0
                 // and3_2: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=r158
-                B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(a_2_p, b_2_p, r158, beaver3_tuples[0]);  // and3_2
+                if (g_cut_frac_active && cut_frac_ppa4_skip(2) && current_phase != PHASE_INIT)
+                    B3G_1_3_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_1_3_t1 = p_1_p.prepare_dot3_and_assign(
+                    a_2_p, b_2_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 1)) ? FUNC_XOR(r158, r157) : (r158),
+                    beaver3_tuples[0]);  // and3_2
                 // and4_4: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r159
-                B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, r159, beaver4_tuples[0]);  // and4_4
+                if (g_cut_frac_active && cut_frac_ppa4_skip(3) && current_phase != PHASE_INIT)
+                    B3G_1_3_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_1_3_t2 = p_1_p_1.prepare_dot4_and_assign(p_2_p, a_3_p, b_3_p, (g_cut_frac_active && cut_frac_ppa4_skip(2))
+                        ? FUNC_XOR(r159, FUNC_XOR(r158, r157))  // CUT: absorb skipped predecessors
+                        : (r159), beaver4_tuples[0]);  // and4_4
                 B3G_1_3_s1 = B3G_1_3_g1 ^ B3G_1_3_t1;  // B3G_1_3_s1
                 B3G_1_3_out = B3G_1_3_s1 ^ B3G_1_3_t2;  // B3G_1_3_out
-                B3G_1_3_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))
+                    B3G_1_3_out.mask_and_send_dot_without_remask();
                 // and3_8: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=a41
-                B3P_1_3_out = p_1_p_2.prepare_and3_and_assign(p_2_p_1, p_3_p, beaver3_tuples[20].a, beaver3_tuples[1]);  // and3_8
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(3)))
+                    B3P_1_3_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_1_3_out = p_1_p_2.prepare_and3_and_assign(p_2_p_1, p_3_p, beaver3_tuples[20].a, beaver3_tuples[1]);  // and3_8
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(3)) && !cut_frac_ppa4_skip(9))
+                    B3P_1_3_out = B3P_1_3_out.zero_add(beaver3_tuples[20].a);  // restore designed mask for surviving consumers
                 // and_9: random_triples[1].a, random_triples[1].b, output mask=r134
-                B3G_4_6_g1 = a[4].prepare_dot_reshared(b[4], r134, random_triples[1].b);  // and_9
+                if (g_cut_frac_active && cut_frac_identity(32, 4))
+                    B3G_4_6_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    B3G_4_6_g1 = a[4].prepare_dot_reshared(b[4], r134, random_triples[1].b);  // and_9
                 // and3_11: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r133-r134)
-                B3G_4_6_t1 = p_4_p.prepare_dot3_and_assign(a_5_p, b_5_p, FUNC_XOR(r133, r134), beaver3_tuples[2]);  // and3_11
+                if (g_cut_frac_active && cut_frac_ppa4_skip(5) && current_phase != PHASE_INIT)
+                    B3G_4_6_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_4_6_t1 = p_4_p.prepare_dot3_and_assign(
+                    a_5_p, b_5_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 4)) ? FUNC_XOR(FUNC_XOR(r133, r134), r134) : (FUNC_XOR(r133, r134)),
+                    beaver3_tuples[2]);  // and3_11
                 // and4_13: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=(b39-r133)
-                B3G_4_6_t2 = p_4_p_1.prepare_dot4_and_assign(p_5_p, a_6_p, b_6_p, FUNC_XOR(triples[0].b, r133), beaver4_tuples[1]);  // and4_13
+                if (g_cut_frac_active && cut_frac_ppa4_skip(6) && current_phase != PHASE_INIT)
+                    B3G_4_6_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_4_6_t2 = p_4_p_1.prepare_dot4_and_assign(p_5_p, a_6_p, b_6_p, (g_cut_frac_active && cut_frac_ppa4_skip(5))
+                        ? FUNC_XOR(FUNC_XOR(triples[0].b, r133), FUNC_XOR(FUNC_XOR(r133, r134), r134))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(triples[0].b, r133)), beaver4_tuples[1]);  // and4_13
                 B3G_4_6_s1 = B3G_4_6_g1 ^ B3G_4_6_t1;  // B3G_4_6_s1
                 B3G_4_6_out = B3G_4_6_s1 ^ B3G_4_6_t2;  // B3G_4_6_out
-                B3G_4_6_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))
+                    B3G_4_6_out.mask_and_send_dot_without_remask();
                 // and3_17: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=b41
-                B3P_4_6_out = p_4_p_2.prepare_and3_and_assign(p_5_p_1, p_6_p, beaver3_tuples[20].b, beaver3_tuples[3]);  // and3_17
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(6)))
+                    B3P_4_6_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_4_6_out = p_4_p_2.prepare_and3_and_assign(p_5_p_1, p_6_p, beaver3_tuples[20].b, beaver3_tuples[3]);  // and3_17
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(6)) && !cut_frac_ppa4_skip(9))
+                    B3P_4_6_out = B3P_4_6_out.zero_add(beaver3_tuples[20].b);  // restore designed mask for surviving consumers
                 // and_18: random_triples[2].a, random_triples[2].b, output mask=r136
-                B3G_7_9_g1 = a[7].prepare_dot_reshared(b[7], r136, random_triples[2].b);  // and_18
+                if (g_cut_frac_active && cut_frac_identity(32, 7))
+                    B3G_7_9_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    B3G_7_9_g1 = a[7].prepare_dot_reshared(b[7], r136, random_triples[2].b);  // and_18
                 // and3_20: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r135-r136)
-                B3G_7_9_t1 = p_7_p.prepare_dot3_and_assign(a_8_p, b_8_p, FUNC_XOR(r135, r136), beaver3_tuples[4]);  // and3_20
+                if (g_cut_frac_active && cut_frac_ppa4_skip(8) && current_phase != PHASE_INIT)
+                    B3G_7_9_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_7_9_t1 = p_7_p.prepare_dot3_and_assign(
+                    a_8_p, b_8_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 7)) ? FUNC_XOR(FUNC_XOR(r135, r136), r136) : (FUNC_XOR(r135, r136)),
+                    beaver3_tuples[4]);  // and3_20
                 // and4_22: a2=beaver4_tuples[2].a, b2=beaver4_tuples[2].b, c2=beaver4_tuples[2].c, d2=beaver4_tuples[2].d, output mask=(c40-r135)
-                B3G_7_9_t2 = p_7_p_1.prepare_dot4_and_assign(p_8_p, a_9_p, b_9_p, FUNC_XOR(beaver3_tuples[19].c, r135), beaver4_tuples[2]);  // and4_22
+                if (g_cut_frac_active && cut_frac_ppa4_skip(9) && current_phase != PHASE_INIT)
+                    B3G_7_9_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_7_9_t2 = p_7_p_1.prepare_dot4_and_assign(p_8_p, a_9_p, b_9_p, (g_cut_frac_active && cut_frac_ppa4_skip(8))
+                        ? FUNC_XOR(FUNC_XOR(beaver3_tuples[19].c, r135), FUNC_XOR(FUNC_XOR(r135, r136), r136))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(beaver3_tuples[19].c, r135)), beaver4_tuples[2]);  // and4_22
                 B3G_7_9_s1 = B3G_7_9_g1 ^ B3G_7_9_t1;  // B3G_7_9_s1
                 B3G_7_9_out = B3G_7_9_s1 ^ B3G_7_9_t2;  // B3G_7_9_out
-                B3G_7_9_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))
+                    B3G_7_9_out.mask_and_send_dot_without_remask();
                 // and3_26: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=c41
-                B3P_7_9_out = p_7_p_2.prepare_and3_and_assign(p_8_p_1, p_9_p, beaver3_tuples[20].c, beaver3_tuples[5]);  // and3_26
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(9)))
+                    B3P_7_9_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_7_9_out = p_7_p_2.prepare_and3_and_assign(p_8_p_1, p_9_p, beaver3_tuples[20].c, beaver3_tuples[5]);  // and3_26
                 // and_27: random_triples[3].a, random_triples[3].b, output mask=r151
-                B3G_10_12_g1 = a[10].prepare_dot_reshared(b[10], r151, random_triples[3].b);  // and_27
+                if (g_cut_frac_active && cut_frac_identity(32, 10))
+                    B3G_10_12_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    B3G_10_12_g1 = a[10].prepare_dot_reshared(b[10], r151, random_triples[3].b);  // and_27
                 // and3_29: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=(r150-r151)
-                B3G_10_12_t1 = p_10_p.prepare_dot3_and_assign(a_11_p, b_11_p, FUNC_XOR(r150, r151), beaver3_tuples[6]);  // and3_29
+                if (g_cut_frac_active && cut_frac_ppa4_skip(11) && current_phase != PHASE_INIT)
+                    B3G_10_12_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_10_12_t1 = p_10_p.prepare_dot3_and_assign(
+                    a_11_p, b_11_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 10)) ? FUNC_XOR(FUNC_XOR(r150, r151), r151) : (FUNC_XOR(r150, r151)),
+                    beaver3_tuples[6]);  // and3_29
                 // and4_31: a3=beaver4_tuples[3].a, b3=beaver4_tuples[3].b, c3=beaver4_tuples[3].c, d3=beaver4_tuples[3].d, output mask=((b50-r149)-r150)
-                B3G_10_12_t2 = p_10_p_1.prepare_dot4_and_assign(p_11_p, a_12_p, b_12_p, FUNC_XOR(FUNC_XOR(triples[3].b, r149), r150), beaver4_tuples[3]);  // and4_31
+                if (g_cut_frac_active && cut_frac_ppa4_skip(12) && current_phase != PHASE_INIT)
+                    B3G_10_12_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_10_12_t2 = p_10_p_1.prepare_dot4_and_assign(p_11_p, a_12_p, b_12_p, (g_cut_frac_active && cut_frac_ppa4_skip(11))
+                        ? FUNC_XOR(FUNC_XOR(FUNC_XOR(triples[3].b, r149), r150), FUNC_XOR(FUNC_XOR(r150, r151), r151))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(FUNC_XOR(triples[3].b, r149), r150)), beaver4_tuples[3]);  // and4_31
                 B3G_10_12_s1 = B3G_10_12_g1 ^ B3G_10_12_t1;  // B3G_10_12_s1
                 B3G_10_12_out = B3G_10_12_s1 ^ B3G_10_12_t2;  // B3G_10_12_out
-                B3G_10_12_out.mask_and_send_dot_without_remask();
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(12)) && !cut_frac_ppa4_skip(21))
+                    B3G_10_12_out = B3G_10_12_out.zero_add(FUNC_XOR(triples[3].b, r149));  // designed mask for L2_W3_t1
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))
+                    B3G_10_12_out.mask_and_send_dot_without_remask();
                 // and3_35: a7=beaver3_tuples[7].a, b7=beaver3_tuples[7].b, c7=beaver3_tuples[7].c, output mask=a45
-                B3P_10_12_out = p_10_p_2.prepare_and3_and_assign(p_11_p_1, p_12_p, beaver4_tuples[11].a, beaver3_tuples[7]);  // and3_35
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(12)))
+                    B3P_10_12_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_10_12_out = p_10_p_2.prepare_and3_and_assign(p_11_p_1, p_12_p, beaver4_tuples[11].a, beaver3_tuples[7]);  // and3_35
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(12)) && !cut_frac_ppa4_skip(21))
+                    B3P_10_12_out = B3P_10_12_out.zero_add(beaver4_tuples[11].a);  // restore designed mask for surviving consumers
                 // and_36: random_triples[4].a, random_triples[4].b, output mask=r138
-                B3G_13_15_g1 = a[13].prepare_dot_reshared(b[13], r138, random_triples[4].b);  // and_36
+                if (g_cut_frac_active && cut_frac_identity(32, 13))
+                    B3G_13_15_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    B3G_13_15_g1 = a[13].prepare_dot_reshared(b[13], r138, random_triples[4].b);  // and_36
                 // and3_38: a8=beaver3_tuples[8].a, b8=beaver3_tuples[8].b, c8=beaver3_tuples[8].c, output mask=(r137-r138)
-                B3G_13_15_t1 = p_13_p.prepare_dot3_and_assign(a_14_p, b_14_p, FUNC_XOR(r137, r138), beaver3_tuples[8]);  // and3_38
+                if (g_cut_frac_active && cut_frac_ppa4_skip(14) && current_phase != PHASE_INIT)
+                    B3G_13_15_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_13_15_t1 = p_13_p.prepare_dot3_and_assign(
+                    a_14_p, b_14_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 13)) ? FUNC_XOR(FUNC_XOR(r137, r138), r138) : (FUNC_XOR(r137, r138)),
+                    beaver3_tuples[8]);  // and3_38
                 // and4_40: a4=beaver4_tuples[4].a, b4=beaver4_tuples[4].b, c4=beaver4_tuples[4].c, d4=beaver4_tuples[4].d, output mask=(b42-r137)
-                B3G_13_15_t2 = p_13_p_1.prepare_dot4_and_assign(p_14_p, a_15_p, b_15_p, FUNC_XOR(triples[1].b, r137), beaver4_tuples[4]);  // and4_40
+                if (g_cut_frac_active && cut_frac_ppa4_skip(15) && current_phase != PHASE_INIT)
+                    B3G_13_15_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_13_15_t2 = p_13_p_1.prepare_dot4_and_assign(p_14_p, a_15_p, b_15_p, (g_cut_frac_active && cut_frac_ppa4_skip(14))
+                        ? FUNC_XOR(FUNC_XOR(triples[1].b, r137), FUNC_XOR(FUNC_XOR(r137, r138), r138))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(triples[1].b, r137)), beaver4_tuples[4]);  // and4_40
                 B3G_13_15_s1 = B3G_13_15_g1 ^ B3G_13_15_t1;  // B3G_13_15_s1
                 B3G_13_15_out = B3G_13_15_s1 ^ B3G_13_15_t2;  // B3G_13_15_out
-                B3G_13_15_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))
+                    B3G_13_15_out.mask_and_send_dot_without_remask();
                 // and3_44: a9=beaver3_tuples[9].a, b9=beaver3_tuples[9].b, c9=beaver3_tuples[9].c, output mask=b45
-                B3P_13_15_out = p_13_p_2.prepare_and3_and_assign(p_14_p_1, p_15_p, beaver4_tuples[11].b, beaver3_tuples[9]);  // and3_44
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(15)))
+                    B3P_13_15_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_13_15_out = p_13_p_2.prepare_and3_and_assign(p_14_p_1, p_15_p, beaver4_tuples[11].b, beaver3_tuples[9]);  // and3_44
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(15)) && !cut_frac_ppa4_skip(21))
+                    B3P_13_15_out = B3P_13_15_out.zero_add(beaver4_tuples[11].b);  // restore designed mask for surviving consumers
                 // and_45: random_triples[5].a, random_triples[5].b, output mask=r140
-                B3G_16_18_g1 = a[16].prepare_dot_reshared(b[16], r140, random_triples[5].b);  // and_45
+                if (g_cut_frac_active && cut_frac_identity(32, 16))
+                    B3G_16_18_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    B3G_16_18_g1 = a[16].prepare_dot_reshared(b[16], r140, random_triples[5].b);  // and_45
                 // and3_47: a10=beaver3_tuples[10].a, b10=beaver3_tuples[10].b, c10=beaver3_tuples[10].c, output mask=(r139-r140)
-                B3G_16_18_t1 = p_16_p.prepare_dot3_and_assign(a_17_p, b_17_p, FUNC_XOR(r139, r140), beaver3_tuples[10]);  // and3_47
+                if (g_cut_frac_active && cut_frac_ppa4_skip(17) && current_phase != PHASE_INIT)
+                    B3G_16_18_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_16_18_t1 = p_16_p.prepare_dot3_and_assign(
+                    a_17_p, b_17_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 16)) ? FUNC_XOR(FUNC_XOR(r139, r140), r140) : (FUNC_XOR(r139, r140)),
+                    beaver3_tuples[10]);  // and3_47
                 // and4_49: a5=beaver4_tuples[5].a, b5=beaver4_tuples[5].b, c5=beaver4_tuples[5].c, d5=beaver4_tuples[5].d, output mask=(c43-r139)
-                B3G_16_18_t2 = p_16_p_1.prepare_dot4_and_assign(p_17_p, a_18_p, b_18_p, FUNC_XOR(beaver3_tuples[21].c, r139), beaver4_tuples[5]);  // and4_49
+                if (g_cut_frac_active && cut_frac_ppa4_skip(18) && current_phase != PHASE_INIT)
+                    B3G_16_18_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_16_18_t2 = p_16_p_1.prepare_dot4_and_assign(p_17_p, a_18_p, b_18_p, (g_cut_frac_active && cut_frac_ppa4_skip(17))
+                        ? FUNC_XOR(FUNC_XOR(beaver3_tuples[21].c, r139), FUNC_XOR(FUNC_XOR(r139, r140), r140))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(beaver3_tuples[21].c, r139)), beaver4_tuples[5]);  // and4_49
                 B3G_16_18_s1 = B3G_16_18_g1 ^ B3G_16_18_t1;  // B3G_16_18_s1
                 B3G_16_18_out = B3G_16_18_s1 ^ B3G_16_18_t2;  // B3G_16_18_out
-                B3G_16_18_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))
+                    B3G_16_18_out.mask_and_send_dot_without_remask();
                 // and3_53: a11=beaver3_tuples[11].a, b11=beaver3_tuples[11].b, c11=beaver3_tuples[11].c, output mask=c45
-                B3P_16_18_out = p_16_p_2.prepare_and3_and_assign(p_17_p_1, p_18_p, beaver4_tuples[11].c, beaver3_tuples[11]);  // and3_53
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(18)))
+                    B3P_16_18_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_16_18_out = p_16_p_2.prepare_and3_and_assign(p_17_p_1, p_18_p, beaver4_tuples[11].c, beaver3_tuples[11]);  // and3_53
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(18)) && !cut_frac_ppa4_skip(21))
+                    B3P_16_18_out = B3P_16_18_out.zero_add(beaver4_tuples[11].c);  // restore designed mask for surviving consumers
                 // and_54: random_triples[6].a, random_triples[6].b, output mask=r142
-                B3G_19_21_g1 = a[19].prepare_dot_reshared(b[19], r142, random_triples[6].b);  // and_54
+                if (g_cut_frac_active && cut_frac_identity(32, 19))
+                    B3G_19_21_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    B3G_19_21_g1 = a[19].prepare_dot_reshared(b[19], r142, random_triples[6].b);  // and_54
                 // and3_56: a12=beaver3_tuples[12].a, b12=beaver3_tuples[12].b, c12=beaver3_tuples[12].c, output mask=(r141-r142)
-                B3G_19_21_t1 = p_19_p.prepare_dot3_and_assign(a_20_p, b_20_p, FUNC_XOR(r141, r142), beaver3_tuples[12]);  // and3_56
+                if (g_cut_frac_active && cut_frac_ppa4_skip(20) && current_phase != PHASE_INIT)
+                    B3G_19_21_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_19_21_t1 = p_19_p.prepare_dot3_and_assign(
+                    a_20_p, b_20_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 19)) ? FUNC_XOR(FUNC_XOR(r141, r142), r142) : (FUNC_XOR(r141, r142)),
+                    beaver3_tuples[12]);  // and3_56
                 // and4_58: a6=beaver4_tuples[6].a, b6=beaver4_tuples[6].b, c6=beaver4_tuples[6].c, d6=beaver4_tuples[6].d, output mask=(d44-r141)
-                B3G_19_21_t2 = p_19_p_1.prepare_dot4_and_assign(p_20_p, a_21_p, b_21_p, FUNC_XOR(beaver4_tuples[10].d, r141), beaver4_tuples[6]);  // and4_58
+                if (g_cut_frac_active && cut_frac_ppa4_skip(21) && current_phase != PHASE_INIT)
+                    B3G_19_21_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_19_21_t2 = p_19_p_1.prepare_dot4_and_assign(p_20_p, a_21_p, b_21_p, (g_cut_frac_active && cut_frac_ppa4_skip(20))
+                        ? FUNC_XOR(FUNC_XOR(beaver4_tuples[10].d, r141), FUNC_XOR(FUNC_XOR(r141, r142), r142))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(beaver4_tuples[10].d, r141)), beaver4_tuples[6]);  // and4_58
                 B3G_19_21_s1 = B3G_19_21_g1 ^ B3G_19_21_t1;  // B3G_19_21_s1
                 B3G_19_21_out = B3G_19_21_s1 ^ B3G_19_21_t2;  // B3G_19_21_out
-                B3G_19_21_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))
+                    B3G_19_21_out.mask_and_send_dot_without_remask();
                 // and3_62: a13=beaver3_tuples[13].a, b13=beaver3_tuples[13].b, c13=beaver3_tuples[13].c, output mask=d45
-                B3P_19_21_out = p_19_p_2.prepare_and3_and_assign(p_20_p_1, p_21_p, beaver4_tuples[11].d, beaver3_tuples[13]);  // and3_62
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(21)))
+                    B3P_19_21_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_19_21_out = p_19_p_2.prepare_and3_and_assign(p_20_p_1, p_21_p, beaver4_tuples[11].d, beaver3_tuples[13]);  // and3_62
                 // and_63: random_triples[7].a, random_triples[7].b, output mask=r144
-                B3G_23_25_g1 = a[23].prepare_dot_reshared(b[23], r144, random_triples[7].b);  // and_63
+                if (g_cut_frac_active && cut_frac_identity(32, 23))
+                    B3G_23_25_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    B3G_23_25_g1 = a[23].prepare_dot_reshared(b[23], r144, random_triples[7].b);  // and_63
                 // and3_65: a14=beaver3_tuples[14].a, b14=beaver3_tuples[14].b, c14=beaver3_tuples[14].c, output mask=(r143-r144)
-                B3G_23_25_t1 = p_23_p.prepare_dot3_and_assign(a_24_p, b_24_p, FUNC_XOR(r143, r144), beaver3_tuples[14]);  // and3_65
+                if (g_cut_frac_active && cut_frac_ppa4_skip(24) && current_phase != PHASE_INIT)
+                    B3G_23_25_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_23_25_t1 = p_23_p.prepare_dot3_and_assign(
+                    a_24_p, b_24_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 23)) ? FUNC_XOR(FUNC_XOR(r143, r144), r144) : (FUNC_XOR(r143, r144)),
+                    beaver3_tuples[14]);  // and3_65
                 // and4_67: a7=beaver4_tuples[7].a, b7=beaver4_tuples[7].b, c7=beaver4_tuples[7].c, d7=beaver4_tuples[7].d, output mask=(b47-r143)
-                B3G_23_25_t2 = p_23_p_1.prepare_dot4_and_assign(p_24_p, a_25_p, b_25_p, FUNC_XOR(triples[2].b, r143), beaver4_tuples[7]);  // and4_67
+                if (g_cut_frac_active && cut_frac_ppa4_skip(25) && current_phase != PHASE_INIT)
+                    B3G_23_25_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_23_25_t2 = p_23_p_1.prepare_dot4_and_assign(p_24_p, a_25_p, b_25_p, (g_cut_frac_active && cut_frac_ppa4_skip(24))
+                        ? FUNC_XOR(FUNC_XOR(triples[2].b, r143), FUNC_XOR(FUNC_XOR(r143, r144), r144))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(triples[2].b, r143)), beaver4_tuples[7]);  // and4_67
                 B3G_23_25_s1 = B3G_23_25_g1 ^ B3G_23_25_t1;  // B3G_23_25_s1
                 B3G_23_25_out = B3G_23_25_s1 ^ B3G_23_25_t2;  // B3G_23_25_out
-                B3G_23_25_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))
+                    B3G_23_25_out.mask_and_send_dot_without_remask();
                 // and3_71: a15=beaver3_tuples[15].a, b15=beaver3_tuples[15].b, c15=beaver3_tuples[15].c, output mask=b49
-                B3P_23_25_out = p_23_p_2.prepare_and3_and_assign(p_24_p_1, p_25_p, beaver4_tuples[12].b, beaver3_tuples[15]);  // and3_71
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(25)))
+                    B3P_23_25_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_23_25_out = p_23_p_2.prepare_and3_and_assign(p_24_p_1, p_25_p, beaver4_tuples[12].b, beaver3_tuples[15]);  // and3_71
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(25)))
+                    B3P_23_25_out = B3P_23_25_out.zero_add(beaver4_tuples[12].b);  // restore designed mask for surviving consumers
                 // and_72: random_triples[8].a, random_triples[8].b, output mask=r146
-                B3G_26_28_g1 = a[26].prepare_dot_reshared(b[26], r146, random_triples[8].b);  // and_72
+                if (g_cut_frac_active && cut_frac_identity(32, 26))
+                    B3G_26_28_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    B3G_26_28_g1 = a[26].prepare_dot_reshared(b[26], r146, random_triples[8].b);  // and_72
                 // and3_74: a16=beaver3_tuples[16].a, b16=beaver3_tuples[16].b, c16=beaver3_tuples[16].c, output mask=(r145-r146)
-                B3G_26_28_t1 = p_26_p.prepare_dot3_and_assign(a_27_p, b_27_p, FUNC_XOR(r145, r146), beaver3_tuples[16]);  // and3_74
+                if (g_cut_frac_active && cut_frac_ppa4_skip(27) && current_phase != PHASE_INIT)
+                    B3G_26_28_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_26_28_t1 = p_26_p.prepare_dot3_and_assign(
+                    a_27_p, b_27_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 26)) ? FUNC_XOR(FUNC_XOR(r145, r146), r146) : (FUNC_XOR(r145, r146)),
+                    beaver3_tuples[16]);  // and3_74
                 // and4_76: a8=beaver4_tuples[8].a, b8=beaver4_tuples[8].b, c8=beaver4_tuples[8].c, d8=beaver4_tuples[8].d, output mask=(c48-r145)
-                B3G_26_28_t2 = p_26_p_1.prepare_dot4_and_assign(p_27_p, a_28_p, b_28_p, FUNC_XOR(beaver3_tuples[22].c, r145), beaver4_tuples[8]);  // and4_76
+                if (g_cut_frac_active && cut_frac_ppa4_skip(28) && current_phase != PHASE_INIT)
+                    B3G_26_28_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    B3G_26_28_t2 = p_26_p_1.prepare_dot4_and_assign(p_27_p, a_28_p, b_28_p, (g_cut_frac_active && cut_frac_ppa4_skip(27))
+                        ? FUNC_XOR(FUNC_XOR(beaver3_tuples[22].c, r145), FUNC_XOR(FUNC_XOR(r145, r146), r146))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(beaver3_tuples[22].c, r145)), beaver4_tuples[8]);  // and4_76
                 B3G_26_28_s1 = B3G_26_28_g1 ^ B3G_26_28_t1;  // B3G_26_28_s1
                 B3G_26_28_out = B3G_26_28_s1 ^ B3G_26_28_t2;  // B3G_26_28_out
-                B3G_26_28_out.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))
+                    B3G_26_28_out.mask_and_send_dot_without_remask();
                 // and3_80: a17=beaver3_tuples[17].a, b17=beaver3_tuples[17].b, c17=beaver3_tuples[17].c, output mask=c49
-                B3P_26_28_out = p_26_p_2.prepare_and3_and_assign(p_27_p_1, p_28_p, beaver4_tuples[12].c, beaver3_tuples[17]);  // and3_80
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(28)))
+                    B3P_26_28_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    B3P_26_28_out = p_26_p_2.prepare_and3_and_assign(p_27_p_1, p_28_p, beaver4_tuples[12].c, beaver3_tuples[17]);  // and3_80
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(28)))
+                    B3P_26_28_out = B3P_26_28_out.zero_add(beaver4_tuples[12].c);  // restore designed mask for surviving consumers
                 // and_81: random_triples[9].a, random_triples[9].b, output mask=r148
-                W3L1_29_31_g1 = a[29].prepare_dot_reshared(b[29], r148, random_triples[9].b);  // and_81
+                if (g_cut_frac_active && cut_frac_identity(32, 29))
+                    W3L1_29_31_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    W3L1_29_31_g1 = a[29].prepare_dot_reshared(b[29], r148, random_triples[9].b);  // and_81
                 // and3_83: a18=beaver3_tuples[18].a, b18=beaver3_tuples[18].b, c18=beaver3_tuples[18].c, output mask=(r147-r148)
-                W3L1_29_31_t1 = p_29_p.prepare_dot3_and_assign(a_30_p, b_30_p, FUNC_XOR(r147, r148), beaver3_tuples[18]);  // and3_83
+                W3L1_29_31_t1 = p_29_p.prepare_dot3_and_assign(
+                    a_30_p, b_30_p,
+                    (g_cut_frac_active && cut_frac_identity(32, 29)) ? FUNC_XOR(FUNC_XOR(r147, r148), r148) : (FUNC_XOR(r147, r148)),
+                    beaver3_tuples[18]);  // and3_83
                 // and4_85: a9=beaver4_tuples[9].a, b9=beaver4_tuples[9].b, c9=beaver4_tuples[9].c, d9=beaver4_tuples[9].d, output mask=(d49-r147)
                 W3L1_29_31_t2 = p_29_p_1.prepare_dot4_and_assign(p_30_p, a_31_p, b_31_p, FUNC_XOR(beaver4_tuples[12].d, r147), beaver4_tuples[9]);  // and4_85
                 W3L1_29_31_s1 = W3L1_29_31_g1 ^ W3L1_29_31_t1;  // W3L1_29_31_s1
@@ -1325,80 +1777,165 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 32)>::type>
                 W3L1_29_31_out.mask_and_send_dot_without_remask();
                 break;
             case 1:
-                B3G_1_3_out.complete_and();
-                B3P_1_3_out.complete_and3();
-                B3G_4_6_out.complete_and();
-                B3P_4_6_out.complete_and3();
-                B3G_7_9_out.complete_and();
-                B3P_7_9_out.complete_and3();
-                B3G_10_12_out.complete_and();
-                B3P_10_12_out.complete_and3();
-                B3G_13_15_out.complete_and();
-                B3P_13_15_out.complete_and3();
-                B3G_16_18_out.complete_and();
-                B3P_16_18_out.complete_and3();
-                B3G_19_21_out.complete_and();
-                B3P_19_21_out.complete_and3();
-                B3G_23_25_out.complete_and();
-                B3P_23_25_out.complete_and3();
-                B3G_26_28_out.complete_and();
-                B3P_26_28_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))
+                    B3G_1_3_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(3)))
+                    B3P_1_3_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))
+                    B3G_4_6_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))
+                    B3P_4_6_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))
+                    B3G_7_9_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))
+                    B3P_7_9_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))
+                    B3G_10_12_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(12)))
+                    B3P_10_12_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))
+                    B3G_13_15_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))
+                    B3P_13_15_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))
+                    B3G_16_18_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))
+                    B3P_16_18_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))
+                    B3G_19_21_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))
+                    B3P_19_21_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))
+                    B3G_23_25_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(25)))
+                    B3P_23_25_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))
+                    B3G_26_28_out.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))
+                    B3P_26_28_out.complete_and3();
                 W3L1_29_31_out.complete_and();
-                B3P_1_3_out_p = B3P_1_3_out.zero_add(triples[0].a);  // B3P_1_3_out', mask=a39
-                B3P_1_3_out_p_1 = B3P_1_3_out.zero_add(beaver3_tuples[19].a);  // B3P_1_3_out'_1, mask=a40
-                B3P_4_6_out_p = B3P_4_6_out.zero_add(beaver3_tuples[19].b);  // B3P_4_6_out', mask=b40
-                B3P_10_12_out_p = B3P_10_12_out.zero_add(triples[1].a);  // B3P_10_12_out', mask=a42
-                B3P_10_12_out_p_1 = B3P_10_12_out.zero_add(beaver3_tuples[21].a);  // B3P_10_12_out'_1, mask=a43
-                B3P_10_12_out_p_2 = B3P_10_12_out.zero_add(beaver4_tuples[10].a);  // B3P_10_12_out'_2, mask=a44
-                B3P_13_15_out_p = B3P_13_15_out.zero_add(beaver3_tuples[21].b);  // B3P_13_15_out', mask=b43
-                B3P_13_15_out_p_1 = B3P_13_15_out.zero_add(beaver4_tuples[10].b);  // B3P_13_15_out'_1, mask=b44
-                B3P_16_18_out_p = B3P_16_18_out.zero_add(beaver4_tuples[10].c);  // B3P_16_18_out', mask=c44
-                B3P_23_25_out_p = B3P_23_25_out.zero_add(beaver3_tuples[22].b);  // B3P_23_25_out', mask=b48
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(6)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_1_3_out_p = B3P_1_3_out.zero_add(triples[0].a);  // B3P_1_3_out', mask=a39
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_1_3_out_p_1 = B3P_1_3_out.zero_add(beaver3_tuples[19].a);  // B3P_1_3_out'_1, mask=a40
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_4_6_out_p = B3P_4_6_out.zero_add(beaver3_tuples[19].b);  // B3P_4_6_out', mask=b40
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(15)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_10_12_out_p = B3P_10_12_out.zero_add(triples[1].a);  // B3P_10_12_out', mask=a42
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_10_12_out_p_1 = B3P_10_12_out.zero_add(beaver3_tuples[21].a);  // B3P_10_12_out'_1, mask=a43
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_10_12_out_p_2 = B3P_10_12_out.zero_add(beaver4_tuples[10].a);  // B3P_10_12_out'_2, mask=a44
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(18)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_13_15_out_p = B3P_13_15_out.zero_add(beaver3_tuples[21].b);  // B3P_13_15_out', mask=b43
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_13_15_out_p_1 = B3P_13_15_out.zero_add(beaver4_tuples[10].b);  // B3P_13_15_out'_1, mask=b44
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_16_18_out_p = B3P_16_18_out.zero_add(beaver4_tuples[10].c);  // B3P_16_18_out', mask=c44
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(28)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    B3P_23_25_out_p = B3P_23_25_out.zero_add(beaver3_tuples[22].b);  // B3P_23_25_out', mask=b48
                 // and_88: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r160
-                L1_B3G_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r160, triples[0].c);  // and_88
+                if (g_cut_frac_active && cut_frac_ppa4_skip(6) && current_phase != PHASE_INIT)
+                    L1_B3G_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    L1_B3G_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r160, triples[0].c);  // and_88
                 // and3_89: a19=beaver3_tuples[19].a, b19=beaver3_tuples[19].b, c19=beaver3_tuples[19].c, output mask=r161
-                L1_B3G_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r161, beaver3_tuples[19]);  // and3_89
+                if (g_cut_frac_active && cut_frac_ppa4_skip(9) && current_phase != PHASE_INIT)
+                    L1_B3G_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    L1_B3G_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r161, beaver3_tuples[19]);  // and3_89
                 L1_B3G_s1 = L1_B3G_t1 ^ L1_B3G_t2;  // L1_B3G_s1
-                L1_B3G_s1.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))
+                    L1_B3G_s1.mask_and_send_dot_without_remask();
                 // and3_92: a20=beaver3_tuples[20].a, b20=beaver3_tuples[20].b, c20=beaver3_tuples[20].c, output mask=a51
-                L1_B3P_out = B3P_1_3_out.prepare_and3_and_assign(B3P_4_6_out, B3P_7_9_out, beaver3_tuples[23].a, beaver3_tuples[20]);  // and3_92
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(9)))
+                    L1_B3P_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    L1_B3P_out = B3P_1_3_out.prepare_and3_and_assign(B3P_4_6_out, B3P_7_9_out, beaver3_tuples[23].a, beaver3_tuples[20]);  // and3_92
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(9)))
+                    L1_B3P_out = L1_B3P_out.zero_add(beaver3_tuples[23].a);  // restore designed mask for surviving consumers
                 // and_93: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r153
-                L1_B4G_t1 = B3P_10_12_out_p.prepare_dot_and_assign(B3G_13_15_out, r153, triples[1].c);  // and_93
+                if (g_cut_frac_active && cut_frac_ppa4_skip(15) && current_phase != PHASE_INIT)
+                    L1_B4G_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    L1_B4G_t1 = B3P_10_12_out_p.prepare_dot_and_assign(B3G_13_15_out, r153, triples[1].c);  // and_93
                 // and3_94: a21=beaver3_tuples[21].a, b21=beaver3_tuples[21].b, c21=beaver3_tuples[21].c, output mask=(r152-r153)
-                L1_B4G_t2 = B3P_10_12_out_p_1.prepare_dot3_and_assign(B3P_13_15_out_p, B3G_16_18_out, FUNC_XOR(r152, r153), beaver3_tuples[21]);  // and3_94
+                if (g_cut_frac_active && cut_frac_ppa4_skip(18) && current_phase != PHASE_INIT)
+                    L1_B4G_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    L1_B4G_t2 = B3P_10_12_out_p_1.prepare_dot3_and_assign(B3P_13_15_out_p, B3G_16_18_out, (g_cut_frac_active && cut_frac_ppa4_skip(15))
+                        ? FUNC_XOR(FUNC_XOR(r152, r153), r153)  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(r152, r153)), beaver3_tuples[21]);  // and3_94
                 // and4_95: a10=beaver4_tuples[10].a, b10=beaver4_tuples[10].b, c10=beaver4_tuples[10].c, d10=beaver4_tuples[10].d, output mask=(r149-r152)
-                L1_B4G_t3 = B3P_10_12_out_p_2.prepare_dot4_and_assign(B3P_13_15_out_p_1, B3P_16_18_out_p, B3G_19_21_out, FUNC_XOR(r149, r152), beaver4_tuples[10]);  // and4_95
+                if (g_cut_frac_active && cut_frac_ppa4_skip(21) && current_phase != PHASE_INIT)
+                    L1_B4G_t3 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    L1_B4G_t3 = B3P_10_12_out_p_2.prepare_dot4_and_assign(B3P_13_15_out_p_1, B3P_16_18_out_p, B3G_19_21_out, (g_cut_frac_active && cut_frac_ppa4_skip(18))
+                        ? FUNC_XOR(FUNC_XOR(r149, r152), FUNC_XOR(FUNC_XOR(r152, r153), r153))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(r149, r152)), beaver4_tuples[10]);  // and4_95
                 L1_B4G_s1 = L1_B4G_t1 ^ L1_B4G_t2;  // L1_B4G_s1
                 L1_B4G_s2 = L1_B4G_s1 ^ L1_B4G_t3;  // L1_B4G_s2
-                L1_B4G_s2.mask_and_send_dot_without_remask();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))
+                    L1_B4G_s2.mask_and_send_dot_without_remask();
                 // and4_99: a11=beaver4_tuples[11].a, b11=beaver4_tuples[11].b, c11=beaver4_tuples[11].c, d11=beaver4_tuples[11].d, output mask=b51
-                L1_B4P_out = B3P_10_12_out.prepare_and4_and_assign(B3P_13_15_out, B3P_16_18_out, B3P_19_21_out, beaver3_tuples[23].b, beaver4_tuples[11]);  // and4_99
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(21)))
+                    L1_B4P_out = Share(SET_ALL_ONE());  // CUT: all p-factors vacant -> public 1 (no gate, no send)
+                else
+                    L1_B4P_out = B3P_10_12_out.prepare_and4_and_assign(B3P_13_15_out, B3P_16_18_out, B3P_19_21_out, beaver3_tuples[23].b, beaver4_tuples[11]);  // and4_99
+                if ((g_cut_frac_active && cut_frac_ppa4_skip(21)))
+                    L1_B4P_out = L1_B4P_out.zero_add(beaver3_tuples[23].b);  // restore designed mask for surviving consumers
                 // and_100: random_triples[10].a, random_triples[10].b, output mask=r156
-                L1_W4S_g1 = a[22].prepare_dot_reshared(b[22], r156, random_triples[10].b);  // and_100
+                if (g_cut_frac_active && cut_frac_identity(32, 22))
+                    L1_W4S_g1 = Share(SET_ALL_ZERO());  // CUT: identity slice, reshared gate skipped
+                else
+                    L1_W4S_g1 = a[22].prepare_dot_reshared(b[22], r156, random_triples[10].b);  // and_100
                 // and_102: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=(r155-r156)
-                L1_W4S_t1 = p_22_p.prepare_dot_and_assign(B3G_23_25_out, FUNC_XOR(r155, r156), triples[2].c);  // and_102
+                if (g_cut_frac_active && cut_frac_ppa4_skip(25) && current_phase != PHASE_INIT)
+                    L1_W4S_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    L1_W4S_t1 = p_22_p.prepare_dot_and_assign(
+                    B3G_23_25_out,
+                    (g_cut_frac_active && cut_frac_identity(32, 22)) ? FUNC_XOR(FUNC_XOR(r155, r156), r156) : (FUNC_XOR(r155, r156)),
+                    triples[2].c);  // and_102
                 // and3_103: a22=beaver3_tuples[22].a, b22=beaver3_tuples[22].b, c22=beaver3_tuples[22].c, output mask=(r154-r155)
-                L1_W4S_t2 = p_22_p_1.prepare_dot3_and_assign(B3P_23_25_out_p, B3G_26_28_out, FUNC_XOR(r154, r155), beaver3_tuples[22]);  // and3_103
+                if (g_cut_frac_active && cut_frac_ppa4_skip(28) && current_phase != PHASE_INIT)
+                    L1_W4S_t2 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    L1_W4S_t2 = p_22_p_1.prepare_dot3_and_assign(B3P_23_25_out_p, B3G_26_28_out, (g_cut_frac_active && cut_frac_ppa4_skip(25))
+                        ? FUNC_XOR(FUNC_XOR(r154, r155), FUNC_XOR(FUNC_XOR(r155, r156), r156))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(r154, r155)), beaver3_tuples[22]);  // and3_103
                 // and4_104: a12=beaver4_tuples[12].a, b12=beaver4_tuples[12].b, c12=beaver4_tuples[12].c, d12=beaver4_tuples[12].d, output mask=(c51-r154)
-                L1_W4S_t3 = p_22_p_2.prepare_dot4_and_assign(B3P_23_25_out, B3P_26_28_out, W3L1_29_31_out, FUNC_XOR(beaver3_tuples[23].c, r154), beaver4_tuples[12]);  // and4_104
+                L1_W4S_t3 = p_22_p_2.prepare_dot4_and_assign(B3P_23_25_out, B3P_26_28_out, W3L1_29_31_out, (g_cut_frac_active && cut_frac_ppa4_skip(28))
+                        ? FUNC_XOR(FUNC_XOR(beaver3_tuples[23].c, r154), FUNC_XOR(FUNC_XOR(FUNC_XOR(r154, r155), FUNC_XOR(r155, r156)), r156))  // CUT: absorb skipped predecessors
+                        : (FUNC_XOR(beaver3_tuples[23].c, r154)), beaver4_tuples[12]);  // and4_104
                 L1_W4S_s1 = L1_W4S_g1 ^ L1_W4S_t1;  // L1_W4S_s1
                 L1_W4S_s2 = L1_W4S_s1 ^ L1_W4S_t2;  // L1_W4S_s2
                 L1_W4S_out = L1_W4S_s2 ^ L1_W4S_t3;  // L1_W4S_out
                 L1_W4S_out.mask_and_send_dot_without_remask();
                 break;
             case 2:
-                L1_B3G_s1.complete_and();
-                L1_B3P_out.complete_and3();
-                L1_B4G_s2.complete_and();
-                L1_B4P_out.complete_and4();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))
+                    L1_B3G_s1.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(9)))
+                    L1_B3P_out.complete_and3();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))
+                    L1_B4G_s2.complete_and();
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))
+                    L1_B4P_out.complete_and4();
                 L1_W4S_out.complete_and();
-                L1_B3P_out_p = L1_B3P_out.zero_add(triples[3].a);  // L1_B3P_out', mask=a50
+                if (!(g_cut_frac_active && cut_frac_ppa4_skip(21)))  // CUT: consumer gate skipped -> mask carrier not needed
+                    L1_B3P_out_p = L1_B3P_out.zero_add(triples[3].a);  // L1_B3P_out', mask=a50
                 L1_B3G_out = L1_B3G_s1 ^ B3G_1_3_out;  // L1_B3G_out
                 L1_B4G_out = L1_B4G_s2 ^ B3G_10_12_out;  // L1_B4G_out
                 // and_108: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r162
-                L2_W3_t1 = L1_B3P_out_p.prepare_dot_and_assign(L1_B4G_out, r162, triples[3].c);  // and_108
+                if (g_cut_frac_active && cut_frac_ppa4_skip(21) && current_phase != PHASE_INIT)
+                    L2_W3_t1 = Share(SET_ALL_ZERO());  // CUT: g-factor fully vacant -> public 0 (INIT keeps counting)
+                else
+                    L2_W3_t1 = L1_B3P_out_p.prepare_dot_and_assign(L1_B4G_out, r162, triples[3].c);  // and_108
                 // and3_109: a23=beaver3_tuples[23].a, b23=beaver3_tuples[23].b, c23=beaver3_tuples[23].c, output mask=r163
-                L2_W3_t2 = L1_B3P_out.prepare_dot3_and_assign(L1_B4P_out, L1_W4S_out, r163, beaver3_tuples[23]);  // and3_109
+                L2_W3_t2 = L1_B3P_out.prepare_dot3_and_assign(L1_B4P_out, L1_W4S_out, (g_cut_frac_active && cut_frac_ppa4_skip(21))
+                        ? FUNC_XOR(r163, r162)  // CUT: absorb skipped predecessors
+                        : (r163), beaver3_tuples[23]);  // and3_109
                 L2_W3_s1 = L2_W3_t1 ^ L2_W3_t2;  // L2_W3_s1
                 L2_W3_s1.mask_and_send_dot_without_remask();
                 break;

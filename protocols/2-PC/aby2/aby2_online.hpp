@@ -933,7 +933,10 @@ class ABY2_ONLINE_Share
         for (int i = m; i < k; i++)
         {
             out[i - m].l = SET_ALL_ZERO();
-            out[i - m].m = temp_p1[i];
+            // CUT_FRACTIONAL_BITS_OPT: vacant slice -> public constant a := 1 (identity for the
+            // prefix/carry algebra), mirroring the non-online-optimized path above. The sum bits of
+            // the substituted slices are discarded; the output tap moves to the boundary slice.
+            out[i - m].m = cut_frac_prep_vacant(m, k, i) ? SET_ALL_ONE() : temp_p1[i];
         }
 #else
 #if PARTY == 0
@@ -948,6 +951,24 @@ class ABY2_ONLINE_Share
 
         for (int i = m; i < k; i++)
         {
+            if (cut_frac_prep_vacant(m, k, i))
+            {
+                // CUT_FRACTIONAL_BITS_OPT: vacant slice, never shared. Write a PUBLIC constant so
+                // circuits that still read the wire (PPA4's block gates) see a := 1 (with b := 0
+                // on the S2 side this makes g = a&b = 0 and p = a^b = 1, the identity element).
+                out[i - m].m = SET_ALL_ONE();
+                out[i - m].l = SET_ALL_ZERO();
+                continue;
+            }
+            if (cut_frac_prep_boundary(m, k, i))
+            {
+                // boundary slice: raw wires feed the substituted output tap p_0 - mask + send it
+                // (taking over slice 0's original role), bypassing the reshared/zero_add branches
+                out[i - m].l = getRandomVal(PSELF);
+                out[i - m].m = OP_XOR(temp_p1[i], out[i - m].l);
+                send_to_live(PNEXT, out[i - m].m);
+                continue;
+            }
             #if RESHARE_OPT == 1 && RCA_MSB == 1
             if(i == k-1)
             {
@@ -1011,7 +1032,9 @@ class ABY2_ONLINE_Share
 #else
             Datatype c_i = retrieve_output_share_bool();
 #endif
-            out[i - m].l = c_i;
+            // CUT: vacant slice -> public constant b := 0. [c] is still CONSUMED (the boolean
+            // addition produces a fixed-stride slice per value, so skipping would misalign it).
+            out[i - m].l = cut_frac_prep_vacant(m, k, i) ? SET_ALL_ZERO() : c_i;
             out[i - m].m = SET_ALL_ZERO(); // v = lv = 0 xor lv1 xor lv2
         }
 #else
@@ -1027,7 +1050,8 @@ class ABY2_ONLINE_Share
 
         for (int i = m; i < k; i++)
         {
-            out[i - m].l = temp_p1[i];
+            // CUT: vacant slices become the public constant 0 on the S2 (b) side
+            out[i - m].l = cut_frac_prep_vacant(m, k, i) ? SET_ALL_ZERO() : temp_p1[i];
             out[i - m].m = SET_ALL_ZERO();
         }
 #endif
@@ -1044,6 +1068,18 @@ class ABY2_ONLINE_Share
 #if PARTY == 1
         for (int i = 0; i < k; i++)
         {
+            if (cut_frac_prep_vacant(0, k, i))
+            {
+                out[i].m = SET_ALL_ONE();  // public constant, mirrors prepare_A2B_S1 (nothing was sent)
+                out[i].l = SET_ALL_ZERO();
+                continue;
+            }
+            if (cut_frac_prep_boundary(0, k, i))
+            {
+                out[i].m = receive_from_live(PNEXT);  // boundary slice: masked + sent by P0
+                out[i].l = SET_ALL_ZERO();
+                continue;
+            }
             #if RESHARE_OPT == 1 && RCA_MSB == 1
             if(i == k-1)
                 continue;

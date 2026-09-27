@@ -319,6 +319,13 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define RESHARE_OPT_SIM 0
 #endif
 
+#ifndef CUT_FRACTIONAL_BITS_OPT
+#define CUT_FRACTIONAL_BITS_OPT 0  // Under TRUNC_DELAYED == 0 the ReLU input is already truncated by
+// FRACTIONAL bits, so the MSB adder's top FRACTIONAL slices are sign extension: skip their A2B sharing,
+// reshares and gates. Implemented for all nine 2PC msb circuits (RCA/PPA/PPA4 x plain/reshared/a_known);
+// BITLENGTH == 32 only. See docs/CUT_FRACTIONAL_BITS_OPT.md.
+#endif
+
 #ifndef A2B_ROUND_OPT_SIM
 #define A2B_ROUND_OPT_SIM 0  // Simulate round-optimized A2B, by reconstructing both ab + lc and ab xor lc in the Online Phase
 #endif

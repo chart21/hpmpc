@@ -90,6 +90,12 @@ uint64_t g_mwk_p1_fc_masks_consume = 0;
 #endif
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
+// CUT_FRACTIONAL_BITS_OPT (see docs): under TRUNC_DELAYED == 0, this wire's true (reconstructed)
+// value is provably bounded within BITLENGTH-FRACTIONAL signed bits, so the MSB adder's top
+// FRACTIONAL slices are redundant. Set by RELU around its get_msb_range call. Applies regardless
+// of MODELWEIGHTS_KNOWN_DURING_PREPROCESSING - the bound comes from the truncation invariant, not
+// from any mask-construction trick.
+bool g_cut_frac_active = false;
 // Whether the values entering the current MSB extraction carry the mask bake (A2B_CONV_BAKE's committed
 // mask, or RESHARE_OPT_SIM's rt.a bits in P1's mask). Only a conv/FC mask/send bakes, so the network clears
 // this for ReLUs fed by anything else (BatchNorm, residual sums), and max/min clears it for comparisons.

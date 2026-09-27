@@ -90,7 +90,11 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 #endif
 
     S* y = new S[len];
+#if CUT_FRAC_ELIGIBLE
+    g_cut_frac_active = true;
+#endif
     get_msb_range<m, k, Datatype, Share>(val, y, len);
+    g_cut_frac_active = false;
 
     for (int i = 0; i < len; i++)
     {
@@ -132,7 +136,11 @@ void RELU_range_in_place_optB2A(sint_t<Additive_Share<Datatype, Share>>* val, co
     using sint = sint_t<A>;
 
     S* y = new S[len];
+#if CUT_FRAC_ELIGIBLE
+    g_cut_frac_active = true;
+#endif
     get_msb_range<m, k, Datatype, Share>(val, y, len);
+    g_cut_frac_active = false;
     for (int i = 0; i < len; i++)
     {
         y[i] = ~y[i];
