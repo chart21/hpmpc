@@ -112,7 +112,19 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
     using sint = sint_t<A>;
     Bitset* s1 = new Bitset[len];
     Bitset* s2 = new Bitset[len];
-#if A2B_ROUND_OPT_SIM == 0 
+#if A2B_CONV_BAKE_ACTIVE
+    // [c] was committed for mask lz of every A2B slot. A value its producer could not bake (see
+    // g_msb_input_baked) is moved onto lz here; the delta is exchanged in preprocessing, so the online
+    // phase stays free of A2B communication.
+    if (!msb_input_baked())
+        for (int i = 0; i < len; i++)
+        {
+            auto* sh = val[i].get_share_pointer();
+            for (int j = 0; j < BITLENGTH; j++)
+                sh[j] = sh[j].rebase(a2b_bake_conv_mask<Datatype>((uint64_t) i * BITLENGTH + j, OP_SUB));
+        }
+#endif
+#if A2B_ROUND_OPT_SIM == 0
     //Skip if we are simulating A2B with round optimization
     for (int i = 0; i < len; i++)
     {
@@ -194,6 +206,13 @@ Share::communicate(); // For resharings
     delete[] s2;
     adders.clear();
     adders.shrink_to_fit();
+#if A2B_CONV_BAKE_ACTIVE
+    // Advance the conv-mask layer base to the A2B group boundary. A2B packs BITLENGTH values per sint and
+    // consumes BITLENGTH [c] slices even for a partial (< BITLENGTH) group, so the next layer's masks and
+    // [c] must start at the same boundary. g_a2b_c_cursor is already at that boundary (it advanced one
+    // slice per prepared A2B value). Identical in PRE and LIVE, so the msb-adder triples still match.
+    g_a2b_layer_base = g_a2b_c_cursor;
+#endif
 }
 
 template <int bm, int bk, typename Datatype, typename Share>

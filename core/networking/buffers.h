@@ -90,13 +90,13 @@ uint64_t g_mwk_p1_fc_masks_consume = 0;
 #endif
 uint64_t send_in_last_round[num_players - 1] = {0};
 #endif
-// Whether the values entering the current MSB extraction carry the mask bake (RESHARE_OPT_SIM's rt.a bits
-// in P1's mask). Only a conv/FC mask/send bakes, so the network clears this for ReLUs fed by anything else
-// (BatchNorm, residual sums), and max/min clears it for comparisons.
+// Whether the values entering the current MSB extraction carry the mask bake (A2B_CONV_BAKE's committed
+// mask, or RESHARE_OPT_SIM's rt.a bits in P1's mask). Only a conv/FC mask/send bakes, so the network clears
+// this for ReLUs fed by anything else (BatchNorm, residual sums), and max/min clears it for comparisons.
 bool g_msb_input_baked = true;
 // Set by the conv/FC layers around every GEMM regardless of protocol, hence declared outside the
 // preprocessing guard above.
-// RESHARE_OPT: the conv layer runs ONE GEMM per batch element, so the mask index passed to
+// RESHARE_OPT / A2B_CONV_BAKE: the conv layer runs ONE GEMM per batch element, so the mask index passed to
 // the indexed mask_and_send variants is layer-local per element (0..N-1), while the ReLU's MSB adders
 // consume the layer's reshare/bake material globally across the batch. The layer sets this to
 // (element * N) around each per-element GEMM so the bake sees the batch-global output index; FC runs a

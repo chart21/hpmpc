@@ -584,9 +584,13 @@ class ABY2_ONLINE_Share
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_baked(func_add ADD, func_sub SUB, int bake_index)
     {
+#if A2B_CONV_BAKE_ACTIVE
+        l = (bake_index >= 0) ? a2b_bake_conv_mask<Datatype>((uint64_t) bake_index, SUB) : getRandomVal(PSELF);
+#else
         l = getRandomVal(PSELF);
         if (bake_index >= 0)
             bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+#endif
         m = ADD(m, l);
         send_to_live(PNEXT, m);
     }
@@ -622,9 +626,13 @@ class ABY2_ONLINE_Share
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_with_triple(func_add ADD, func_sub SUB, int index)
     {
+#if A2B_CONV_BAKE_ACTIVE
+        l = (index >= 0) ? a2b_bake_conv_mask<Datatype>((uint64_t) index, SUB) : getRandomVal(PSELF);  // MWK=0 conv, TD=1
+#else
         l = getRandomVal(PSELF);
         if (index >= 0)
             bake_reshare_mask(l, index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+#endif
         Datatype lxly;
         lxly = retrieve_output_share_arithmetic(0, index);
         m = ADD(ADD(m, l), lxly);
@@ -635,9 +643,13 @@ class ABY2_ONLINE_Share
     template <typename func_add, typename func_sub>
     void mask_and_send_dot_with_triple_baked(func_add ADD, func_sub SUB, int bake_index)
     {
+#if A2B_CONV_BAKE_ACTIVE
+        l = (bake_index >= 0) ? a2b_bake_conv_mask<Datatype>((uint64_t) bake_index, SUB) : getRandomVal(PSELF);  // MWK=0 FC, TD=1
+#else
         l = getRandomVal(PSELF);
         if (bake_index >= 0)
             bake_reshare_mask(l, bake_index, SUB);  // no-op unless RESHARE_BAKE_ACTIVE && PARTY == 1
+#endif
         Datatype lxly;
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
             lxly = retrieve_output_share_bool();
@@ -675,13 +687,17 @@ class ABY2_ONLINE_Share
     void a_known_pre_mask_send_with_trunc(Datatype lxly, func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index)
     {
 #if PARTY == 0
+#if A2B_CONV_BAKE_ACTIVE
+        l = a2b_bake_conv_mask<Datatype>((uint64_t)(bake_index < 0 ? 0 : bake_index), SUB);  // committed lz0 (full)
+#else
         l = getRandomVal(PSELF);
+#endif
         m = ADD(TRUNC(ADD(SUB(SET_ALL_ZERO(), m), lxly)), l);
         send_to_live(PNEXT, m);
 #else
         // r1 == [lxly]_2 chosen in PRE (shared chooser + synced PSELF PRNG) == the retrieved lxly
-        Datatype r1 = mwk_choose_r1_trunc<Datatype>(bake_index, SUB);
-        l = TRUNC(SUB(SET_ALL_ZERO(), r1));  // SecureML l_P1 = TRUNC(-[lxly]_2)
+        Datatype r1 = mwk_choose_r1_trunc<Datatype>(bake_index, SUB);  // A2B bake: r1 = -((m1<<F)+low)
+        l = TRUNC(SUB(SET_ALL_ZERO(), r1));  // SecureML l_P1 = TRUNC(-[lxly]_2) == m1 (committed)
 #endif
     }
 
@@ -689,11 +705,15 @@ class ABY2_ONLINE_Share
     void a_known_pre_mask_send_without_trunc(Datatype lxly, func_add ADD, func_sub SUB, int bake_index)
     {
 #if PARTY == 0
+#if A2B_CONV_BAKE_ACTIVE
+        l = a2b_bake_conv_mask<Datatype>((uint64_t)(bake_index < 0 ? 0 : bake_index), SUB);  // committed lz0
+#else
         l = getRandomVal(PSELF);
+#endif
         m = ADD(ADD(SUB(SET_ALL_ZERO(), m), lxly), l);
         send_to_live(PNEXT, m);
 #else
-        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(bake_index, SUB);
+        Datatype r1 = mwk_choose_r1_no_trunc<Datatype>(bake_index, SUB);  // A2B bake: r1 = -lz1
         l = SUB(SET_ALL_ZERO(), r1);
 #endif
     }
@@ -727,7 +747,14 @@ class ABY2_ONLINE_Share
     template <typename func_add, typename func_sub, typename func_trunc>
     void mask_and_send_dot_with_trunc(func_add ADD, func_sub SUB, func_trunc TRUNC, int bake_index = -1)
     {
+#if A2B_CONV_BAKE_ACTIVE
+        // MWK=0 conv/FC output (symmetric SecureML path): BOTH parties' masks are free draws here, so
+        // both emit their committed lz (index >= 0 only at GEMM call sites). No trunc-image constraint:
+        // TRUNC applies to the masked share m, the mask l enters linearly after it.
+        l = (bake_index >= 0) ? a2b_bake_conv_mask<Datatype>((uint64_t) bake_index, SUB) : getRandomVal(PSELF);
+#else
         l = getRandomVal(PSELF);
+#endif
 #if PARTY == 0
         // m = ADD(TRUNC(m),l);
         m = ADD(SUB(SET_ALL_ZERO(), TRUNC(SUB(SET_ALL_ZERO(), m))), l);  // whyever this is necessary ...
@@ -922,7 +949,12 @@ class ABY2_ONLINE_Share
 #if A2B_ONLINE_OPT == 1
         for (int i = m; i < k; i++)
         {
-            out[i - m].l = retrieve_output_share_bool(); 
+#if A2B_CONV_BAKE_ACTIVE
+            Datatype c_i = a2b_bake_get_c();  // committed [c] = bool(-lv), same buffer PRE used
+#else
+            Datatype c_i = retrieve_output_share_bool();
+#endif
+            out[i - m].l = c_i;
             out[i - m].m = SET_ALL_ZERO(); // v = lv = 0 xor lv1 xor lv2
         }
 #else
