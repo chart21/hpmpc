@@ -193,11 +193,7 @@ bool avgpool_test()
                     if (ii >= 0 && ii < ih && jj >= 0 && jj < iw)
                         s += in_f[ii * iw + jj];
                 }
-#if FUSE_RELU_AVG == 1
-            expected[oi * ow + oj] = s;  // a standalone avgpool skips its division when fused (a preceding ReLU does it)
-#else
-            expected[oi * ow + oj] = s / (ks * ks);
-#endif
+            expected[oi * ow + oj] = s / (ks * ks);  // not fused into a ReLU, so the pool divides itself
         }
 
     bool ok = true;
@@ -375,6 +371,7 @@ bool relu_avgpool_test()
     pool.set_layer({batch, ch, ih, iw});
 #if FUSE_RELU_AVG == 1
     relu.set_fused_avgpool_denominator(pool.average_denominator());  // same wiring as SimpleNN::compile()
+    pool.set_fused_into_relu();
 #endif
 
     MatX<A> input(batch * ch, ih * iw);
