@@ -56,7 +56,9 @@ inline Counters snapshot()
     return c;
 }
 
-constexpr int kMinSegment = 512;  // below this, a segment runs serially (pool hand-off costs a few us)
+// below this, a segment runs serially (the pool hand-off costs a few us); an element of a wider DATATYPE
+// carries DATTYPE / 32 times the work
+constexpr int kMinSegment = DATTYPE >= 256 ? 64 : 512;
 }  // namespace stream_parallel
 #endif
 
