@@ -1,6 +1,6 @@
 // Thread-parallel accumulation with thread-safe prepare_dot variants.
 // Parallelizes the row dimension of the tiled GEMM across ADDITIONAL_GEMM_THREADS+1 threads.
-// All threads join before the serial mask_and_send_dot phase.
+// All threads join before the mask_and_send_dot phase (in send order; element-parallel with ADDITIONAL_RELU_THREADS).
 // Only activated when m*f >= 4096 (enough multiply-accumulates to be worth splitting). The threads are
 // GemmPool's (GEMM.hpp), kept across calls.
 //
@@ -66,12 +66,10 @@
             // complete_GEMM_CPU (and the serial path) visit the outputs: TILE_SIZE x TILE_SIZE tiles, row by row
             // within a tile. Sending in linear order paired each received value with another output as soon as
             // a matrix had more than TILE_SIZE columns (every conv layer).
-            for (int ti = 0; ti < m; ti += TILE_SIZE)
-            for (int tj = 0; tj < p; tj += TILE_SIZE)
-            for (int ii = ti; ii < std::min(ti + TILE_SIZE, m); ++ii)
-            for (int jj = tj; jj < std::min(tj + TILE_SIZE, p); ++jj)
+            // (element-parallel with ADDITIONAL_RELU_THREADS, see stream_parallel.hpp)
+            stream_parallel_for(m * p, [&](int k)
             {
-                const int i = ii * p + jj;
+                const int i = (int)gemm_tile_order(m, p, k);
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if INTERLEAVE_COMM == 1
@@ -124,7 +122,7 @@
                 C[i] = C[i].prepare_mult_public_fixed(1);
 #endif
 #endif
-            }
+            });
 #if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1 && PUBLIC_WEIGHTS == 0
             if(current_phase == PHASE_LIVE)
                 preprocessed_outputs_arithmetic_index[0] += m * p;

@@ -366,6 +366,18 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define ADDITIONAL_GEMM_THREADS 0  // Number of additional threads for parallelizing GEMM prepare_dot/mult_public accumulations. 0 = single-threaded. Only effective when dot products per output element are large enough (f >= 64).
 #endif
 
+#ifndef NET_WAIT_STATS
+#define NET_WAIT_STATS 0  // Print the time the main thread waited for data (receive_live) and the number of rounds
+#endif
+
+#ifndef NET_SPIN_US
+#define NET_SPIN_US 0  // Microseconds the main thread (waiting for a round's data) and the sender threads (waiting for the next round) spin before sleeping on their condition variable. Saves the futex wake-ups of latency-bound rounds (ReLU adder levels).
+#endif
+
+#ifndef ADDITIONAL_RELU_THREADS
+#define ADDITIONAL_RELU_THREADS 0  // Additional threads for single-batch circuit levels (MSB adders, A2B, bit injection): the elements of a level run in parallel with per-thread cursors into the send/receive/preprocessing/randomness streams. Must equal ADDITIONAL_GEMM_THREADS if both are set (one pool). Live phase only.
+#endif
+
 #ifndef ADDITIONAL_PPA_THREADS
 #define ADDITIONAL_PPA_THREADS 0  // Number of threads for parallelizing PPA adder compute steps in share conversion. 0 = single-threaded. Only effective when PPA4_MSB == 1.
 #endif

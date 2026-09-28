@@ -27,20 +27,37 @@ void send_live()
                 NEW(DATATYPE[sending_args[t].elements_to_send[sending_rounds + 1]]);  // Allocate memory for all sending
                                                                                       // buffers for next round
     pthread_mutex_lock(&mtx_send_next);
-    sending_rounds += 1;
+    __atomic_add_fetch(&sending_rounds, 1, __ATOMIC_RELEASE);
     pthread_cond_broadcast(&cond_send_next);  // signal all threads that sending buffer contains next data
     /* printf("boradcasted round %i \n", sending_rounds); */
     pthread_mutex_unlock(&mtx_send_next);
 }
 
+#if NET_WAIT_STATS == 1
+double g_net_wait_us = 0;  // main-thread time blocked in receive_live
+uint64_t g_net_wait_rounds = 0;
+#endif
 void receive_live()
 {
+#if NET_WAIT_STATS == 1
+    const auto wait_start = std::chrono::steady_clock::now();
+    struct Acc
+    {
+        std::chrono::steady_clock::time_point t;
+        ~Acc()
+        {
+            g_net_wait_us += std::chrono::duration<double, std::micro>(std::chrono::steady_clock::now() - t).count();
+            g_net_wait_rounds++;
+        }
+    } acc{wait_start};
+#endif
     for (int t = 0; t < (num_players - 1); t++)
         share_buffer[t] = 0;
 
     rounds += 1;
     // receive_data
     // wait until all sockets have finished received their last data
+    net_spin_until(&receiving_rounds, rounds);
     pthread_mutex_lock(&mtx_receive_next);
 
     /* std::chrono::high_resolution_clock::time_point c1 = */
@@ -77,6 +94,15 @@ DATATYPE receive_from_live(int player_id);
 
 void send_to_live(int player_id, DATATYPE a)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_stream)
+    {
+        if (player_id != PNEXT)
+            stream_cursor_misuse("send_to_live to another party");
+        *tl_stream->send++ = a;
+        return;
+    }
+#endif
 /* sending_args[player_id].sent_elements[sending_args[player_id].send_rounds][send_count[player_id]] = a; */
 #if SEND_BUFFER > 0
     if (send_count[player_id] == SEND_BUFFER)
@@ -98,6 +124,14 @@ void send_to_live(int player_id, DATATYPE a)
 
 DATATYPE receive_from_live(int player_id)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_stream)
+    {
+        if (player_id != PNEXT)
+            stream_cursor_misuse("receive_from_live from another party");
+        return *tl_stream->recv++;
+    }
+#endif
 #if RECV_BUFFER > 0
     if (share_buffer[player_id] == RECV_BUFFER)
     {
@@ -145,7 +179,7 @@ void send_pre()
         }
     }
     pthread_mutex_lock(&mtx_send_next);
-    sending_rounds += 1;
+    __atomic_add_fetch(&sending_rounds, 1, __ATOMIC_RELEASE);
     pthread_cond_broadcast(&cond_send_next);  // signal all threads that sending buffer contains next data
     pthread_mutex_unlock(&mtx_send_next);
 }
@@ -158,6 +192,7 @@ void receive_pre()
     rounds += 1;
     // receive_data
     // wait until all sockets have finished received their last data
+    net_spin_until(&receiving_rounds, rounds);
     pthread_mutex_lock(&mtx_receive_next);
 
     /* std::chrono::high_resolution_clock::time_point c1 = */
@@ -710,6 +745,14 @@ DATATYPE retrieve_output_share_bool(int index = 0)
 #if SKIP_PRE == 1
     return SET_ALL_ZERO();
 #endif
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_stream)
+    {
+        if (index != 0)
+            stream_cursor_misuse("retrieve_output_share_bool(index != 0)");
+        return *tl_stream->pre_bool++;
+    }
+#endif
     preprocessed_outputs_bool_index[index] += 1;
     return preprocessed_outputs_bool[index][preprocessed_outputs_bool_index[index] - 1];
 }
@@ -718,6 +761,14 @@ DATATYPE retrieve_output_share_arithmetic(int index = 0)
 {
 #if SKIP_PRE == 1
     return SET_ALL_ZERO();
+#endif
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_stream)
+    {
+        if (index != 0)
+            stream_cursor_misuse("retrieve_output_share_arithmetic(index != 0)");
+        return *tl_stream->pre_arith++;
+    }
 #endif
     preprocessed_outputs_arithmetic_index[index] += 1;
     return preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_index[index] - 1];
@@ -779,6 +830,10 @@ DATATYPE retrieve_output_share()
 {
 #if SKIP_PRE == 1
     return SET_ALL_ZERO();
+#endif
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_stream)
+        return *tl_stream->pre++;
 #endif
     preprocessed_outputs_index += 1;
     return preprocessed_outputs[preprocessed_outputs_index - 1];

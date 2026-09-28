@@ -34,7 +34,7 @@ void signal_all_data_received_in_round(int& rounds, int player_count)
     if (sockets_received[rounds] == player_count - 1)
     {
         pthread_mutex_lock(&mtx_receive_next);    // Mutex probably neccessary if one thread is alrady one round further
-        receiving_rounds += 1;                    // increase global receiving_rounds
+        __atomic_add_fetch(&receiving_rounds, 1, __ATOMIC_RELEASE);  // increase global receiving_rounds
         pthread_cond_signal(&cond_receive_next);  // signal main thread that receiving is finished
         pthread_mutex_unlock(&mtx_receive_next);
     }

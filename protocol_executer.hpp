@@ -652,6 +652,9 @@ void live_circuit()
           double((time_function_finished - time_function_start)) / CLOCKS_PER_SEC);
     print("Time measured to perform computation getTime: %fs \n", accum);
     print("Time measured to perform computation chrono: %fs \n", time / 1000000);
+#if NET_WAIT_STATS == 1
+    print("Online: waited %f s for data in %lu rounds\n", g_net_wait_us / 1e6, (unsigned long)g_net_wait_rounds);
+#endif
     // Join threads to ensure closing of sockets
 
 #if BEAVER == 1 
@@ -749,6 +752,9 @@ void simulate_live()
           double((time_function_finished - time_function_start)) / CLOCKS_PER_SEC);
     print("Time measured to perform computation getTime: %fs \n", accum);
     print("Time measured to perform computation chrono: %fs \n", time / 1000000);
+#if NET_WAIT_STATS == 1
+    print("Online: waited %f s for data in %lu rounds\n", g_net_wait_us / 1e6, (unsigned long)g_net_wait_rounds);
+#endif
     // Join threads to ensure closing of sockets
 }
 

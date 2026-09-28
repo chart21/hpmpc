@@ -2,91 +2,21 @@
 #include "../../config.h"
 #include "prob_truncation.hpp"
 #include <algorithm>
-#if ADDITIONAL_GEMM_THREADS > 0
-#include <atomic>
-#include <functional>
-#include <immintrin.h>
-#include <thread>
-#include <vector>
+#include "stream_parallel.hpp"
 
-// The ADDITIONAL_GEMM_THREADS workers of GEMM_threaded.hpp, kept for the whole run: a layer calls the
-// GEMM once per image, and spawning the threads on every call cost more than the parallel accumulation
-// saved (CIFAR-10 ResNet50, batch 10: online 0.63 -> 1.0 s)
-class GemmPool
+// Output index of the k-th element in the order in which the CPU GEMM sends and completes its m x p outputs:
+// 64 x 64 tiles, tiles row by row, row-major within a tile. Lets stream_parallel_for keep that order.
+inline int64_t gemm_tile_order(int m, int p, int64_t k)
 {
-  public:
-    static GemmPool& get()
-    {
-        static GemmPool pool(ADDITIONAL_GEMM_THREADS);
-        return pool;
-    }
-
-    // f(t) for t = 0 .. ADDITIONAL_GEMM_THREADS, the last one on the calling thread; returns when all are done.
-    // Lock-free hand-off: with a mutex and condition variables, the 31 workers woke up into the same mutex
-    // on every call, and the futex contention took a quarter of the online CPU time (CIFAR-10 ResNet50).
-    void run(const std::function<void(int)>& f)
-    {
-        job_ = &f;
-        pending_.store(int(workers_.size()), std::memory_order_relaxed);
-        generation_.fetch_add(1, std::memory_order_release);
-        generation_.notify_all();
-        f(int(workers_.size()));
-        for (int spin = 0; pending_.load(std::memory_order_acquire) != 0; ++spin)
-        {
-            if (spin < kSpin)
-                _mm_pause();
-            else
-                std::this_thread::yield();
-        }
-        job_ = nullptr;
-    }
-
-    ~GemmPool()
-    {
-        stop_.store(true, std::memory_order_relaxed);
-        generation_.fetch_add(1, std::memory_order_release);
-        generation_.notify_all();
-        for (auto& w : workers_)
-            w.join();
-    }
-
-  private:
-    static constexpr int kSpin = 1 << 14;  // ~100 us of pause before a worker sleeps (GEMMs of a layer follow closely)
-
-    explicit GemmPool(int n)
-    {
-        for (int t = 0; t < n; ++t)
-            workers_.emplace_back([this, t] { work(t); });
-    }
-
-    void work(int t)
-    {
-        uint64_t seen = 0;
-        for (;;)
-        {
-            uint64_t g;
-            for (int spin = 0; (g = generation_.load(std::memory_order_acquire)) == seen; ++spin)
-            {
-                if (spin < kSpin)
-                    _mm_pause();
-                else
-                    generation_.wait(seen, std::memory_order_acquire);
-            }
-            seen = g;
-            if (stop_.load(std::memory_order_relaxed))
-                return;
-            (*job_)(t);
-            pending_.fetch_sub(1, std::memory_order_release);
-        }
-    }
-
-    std::vector<std::thread> workers_;
-    const std::function<void(int)>* job_ = nullptr;
-    std::atomic<uint64_t> generation_{0};
-    std::atomic<int> pending_{0};
-    std::atomic<bool> stop_{false};
-};
-#endif
+    constexpr int TILE = 64;
+    const int i = int(k / ((int64_t)TILE * p)) * TILE;  // every row block but the last is full
+    const int64_t r = k - (int64_t)i * p;
+    const int h = std::min(TILE, m - i);
+    const int j = int(r / ((int64_t)h * TILE)) * TILE;
+    const int64_t r2 = r - (int64_t)h * j;
+    const int w = std::min(TILE, p - j);
+    return (int64_t)(i + r2 / w) * p + j + r2 % w;
+}
 
 template <typename T, typename U>
 void prepare_Matrix_Vector_Product(const U* W, const T* A, T* C, const int w_rows, const int w_cols)
@@ -405,51 +335,39 @@ if(current_phase != PHASE_INIT) {
 template <typename T>
 void complete_GEMM_CPU(T* C, const int m, const int p)
 {
-    const int TILE_SIZE = 64;
-    for (int i = 0; i < m; i += TILE_SIZE)
-    {
-        int i_max = std::min(i + TILE_SIZE, m);
-        for (int j = 0; j < p; j += TILE_SIZE)
-        {
-            int j_max = std::min(j + TILE_SIZE, p);
-            for (int ii = i; ii < i_max; ++ii)
-            {
-                const int row = ii * p;
-                for (int jj = j; jj < j_max; ++jj)
-                {
-                    /* C[row + jj].complete_mult(); */
+    // in the order of prepare_GEMM_CPU's sends (gemm_tile_order)
+    stream_parallel_for(m * p, [&](int k) {
+        T& c = C[gemm_tile_order(m, p, k)];
+            /* c.complete_mult(); */
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-                    C[row + jj].complete_mult_a_known_pre();  // MWK: only P1 receives
+            c.complete_mult_a_known_pre();  // MWK: only P1 receives
 #else
-                    C[row + jj].complete_mult_without_trunc();
+            c.complete_mult_without_trunc();
 #endif
 #else
 #if A2B_ROUND_OPT_SIM == 1
-                    C[row + jj].complete_mult(); // simulate second receive for XOR Share
+            c.complete_mult(); // simulate second receive for XOR Share
 #endif
 #if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-                    C[row + jj].complete_mult_a_known_pre();
+            c.complete_mult_a_known_pre();
 #else
-                    C[row + jj].complete_mult();
+            c.complete_mult();
 #endif
 #endif
 #else
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #else
 #if DATAOWNER != -1
-                    if (g_a_known_input)
-                        C[row + jj].complete_mult_public_fixed_a_known();
-                    else
+            if (g_a_known_input)
+                c.complete_mult_public_fixed_a_known();
+            else
 #endif
-                        C[row + jj].complete_public_mult_fixed();
+                c.complete_public_mult_fixed();
 #endif
 #endif
-                }
-            }
-        }
-    }
+    });
 }
 
 template <typename T>

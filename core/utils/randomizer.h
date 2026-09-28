@@ -43,6 +43,15 @@ void init_buffers(int link_id)
 
 DATATYPE getRandomVal(int link_id)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_stream)
+    {
+        if (link_id != PSELF)
+            stream_cursor_misuse("getRandomVal of a shared link");
+        return *tl_stream->rnd++;
+    }
+    rnd_calls_self += link_id == PSELF;
+#endif
 #if RANDOM_ALGORITHM == 0
     if (num_generated[link_id] > 63)
     {
@@ -92,6 +101,36 @@ DATATYPE getRandomVal(int link_id)
     return ret;
 #endif
 
+#endif
+}
+
+// n consecutive getRandomVal(link_id) values (the same stream), without the per-call block store
+void getRandomVals(int link_id, DATATYPE* out, size_t n)
+{
+#if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0 && BUFFER_SIZE > 1
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_stream)
+        stream_cursor_misuse("getRandomVals");
+    rnd_calls_self += link_id == PSELF ? n : 0;
+#endif
+    alignas(sizeof(AES_TYPE)) DATATYPE block[BUFFER_SIZE];
+    MM_AES_STORE((AES_TYPE*)block, aes_counter[link_id]);
+    for (size_t i = 0; i < n;)
+    {
+        if (num_generated[link_id] >= BUFFER_SIZE)
+        {
+            AES_enc(aes_counter[link_id], key_schedule[link_id]);
+            MM_AES_STORE((AES_TYPE*)block, aes_counter[link_id]);
+            num_generated[link_id] = 0;
+        }
+        const size_t take = std::min<size_t>(n - i, BUFFER_SIZE - num_generated[link_id]);
+        std::memcpy(out + i, block + num_generated[link_id], take * sizeof(DATATYPE));
+        num_generated[link_id] += take;
+        i += take;
+    }
+#else
+    for (size_t i = 0; i < n; i++)
+        out[i] = getRandomVal(link_id);
 #endif
 }
 

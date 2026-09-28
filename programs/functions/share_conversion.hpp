@@ -5,6 +5,7 @@
 #include "../../datatypes/k_bitset.hpp"
 #include "../../datatypes/k_sint.hpp"
 #include "../../protocols/Protocols.h"
+#include "stream_parallel.hpp"
 #if ADDITIONAL_PPA_THREADS > 0
 #include <thread>
 #endif
@@ -126,6 +127,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 #endif
 #if A2B_ROUND_OPT_SIM == 0
     //Skip if we are simulating A2B with round optimization
+#if A2B_CONV_BAKE_ACTIVE  // the bake's cursor (g_a2b_c_cursor) advances per value: keep the serial order
     for (int i = 0; i < len; i++)
     {
         s1[i] = Bitset::prepare_A2B_S1(bm, (S*)val[i].get_share_pointer());
@@ -137,9 +139,42 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
         s1[i].complete_A2B_S1();
         s2[i].complete_A2B_S2();
     }
+#else
+    stream_parallel_for(len, [&](int i) {
+        s1[i] = Bitset::prepare_A2B_S1(bm, (S*)val[i].get_share_pointer());
+        s2[i] = Bitset::prepare_A2B_S2(bm, (S*)val[i].get_share_pointer());
+    });
+    Share::communicate();
+    stream_parallel_for(len, [&](int i) {
+        s1[i].complete_A2B_S1();
+        s2[i].complete_A2B_S2();
+    });
+#endif
 #endif
 
 
+#if ADDITIONAL_RELU_THREADS > 0 && RCA_MSB == 1 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0)
+    // constructed in parallel: each adder retrieves its triples and one random mask (stream cursors)
+    using Adder = ADDER_TYPE<bk - bm, S>;
+    struct AdderArray
+    {
+        Adder* p;
+        int n = 0;
+        explicit AdderArray(int len)
+            : p(static_cast<Adder*>(::operator new[](sizeof(Adder) * len, std::align_val_t(alignof(Adder)))))
+        {
+        }
+        ~AdderArray()
+        {
+            for (int i = 0; i < n; i++)
+                p[i].~Adder();
+            ::operator delete[](p, std::align_val_t(alignof(Adder)));
+        }
+        Adder& operator[](int i) { return p[i]; }
+    } adders(len);
+    stream_parallel_for(len, [&](int i) { new (&adders.p[i]) Adder(s1[i], s2[i], msb[i]); });
+    adders.n = len;
+#else
 std::vector<ADDER_TYPE<bk - bm, S>> adders;
     adders.reserve(len);
     for (int i = 0; i < len; i++)
@@ -147,6 +182,7 @@ std::vector<ADDER_TYPE<bk - bm, S>> adders;
         /* adder[i].set_values(s1[i], s2[i], y[i]); */
         adders.emplace_back(s1[i], s2[i], msb[i]);
     }
+#endif
    
 #if RESHARE_OPT == 1
 Share::communicate(); // For resharings
@@ -195,17 +231,16 @@ Share::communicate(); // For resharings
 #else
     while (!adders[0].is_done())
     {
-        for (int i = 0; i < len; i++)
-        {
-            adders[i].step();
-        }
+        stream_parallel_for(len, [&](int i) { adders[i].step(); });
         Share::communicate();
     }
 #endif
     delete[] s1;
     delete[] s2;
+#if !(ADDITIONAL_RELU_THREADS > 0 && RCA_MSB == 1 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0))
     adders.clear();
     adders.shrink_to_fit();
+#endif
 #if A2B_CONV_BAKE_ACTIVE
     // Advance the conv-mask layer base to the A2B group boundary. A2B packs BITLENGTH values per sint and
     // consumes BITLENGTH [c] slices even for a partial (< BITLENGTH) group, so the next layer's masks and
@@ -346,23 +381,26 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
         auto reciprocal =
             FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1 / FLOATTYPE(curr_denom));
         const int fb = fold_delayed ? 2 * FRACTIONAL : FRACTIONAL;
-        for (int i = 0; i < len; i++)
+        stream_parallel_for(len, [&](int i) {
             y[i].prepare_opt_bit_injection_with_trunc(val[i].get_share_pointer(), val[i].get_share_pointer(),
                                                       PROMOTE(reciprocal), fb);
+        });
     }
     else if (fold_delayed)
     {
         // Pure delayed truncation (no avg pool, denom == 1): just shift right by FRACTIONAL. Use multiplier 1
         // rather than the fixed-point "1.0" (== 2^FRACTIONAL) so we don't scale up by 2^FRACTIONAL first (which
         // would risk overflow on larger activations) - mathematically identical, but safer.
-        for (int i = 0; i < len; i++)
+        stream_parallel_for(len, [&](int i) {
             y[i].prepare_opt_bit_injection_with_trunc(val[i].get_share_pointer(), val[i].get_share_pointer(),
                                                       PROMOTE(UINT_TYPE(1)), FRACTIONAL);
+        });
     }
     else
     {
-        for (int i = 0; i < len; i++)
+        stream_parallel_for(len, [&](int i) {
             y[i].prepare_opt_bit_injection(val[i].get_share_pointer(), val[i].get_share_pointer());
+        });
     }
 #if TRUNC_DELAYED == 1 && BIT_INJECTION_TRUNC_SIM == 1
     if (fold_delayed)
@@ -373,10 +411,7 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
         y[i].prepare_opt_bit_injection(val[i].get_share_pointer(), val[i].get_share_pointer());
 #endif
     Share::communicate();
-    for (int i = 0; i < len; i++)
-    {
-        val[i].complete_opt_bit_injection();
-    }
+    stream_parallel_for(len, [&](int i) { val[i].complete_opt_bit_injection(); });
 }
 
 template <typename Share, typename Datatype>

@@ -45,6 +45,7 @@ void* sender(void* threadParameters)
 
     while (rounds < ((sender_args*)threadParameters)->send_rounds)  // continue until all data is sent
     {
+        net_spin_until(&sending_rounds, rounds + 1);
         pthread_mutex_lock(&mtx_send_next);
         while (rounds >= sending_rounds)
             pthread_cond_wait(&cond_send_next,

@@ -114,6 +114,27 @@ const DATATYPE* g_bake_bias_l = nullptr;
 uint64_t g_bake_bias_len = 0;
 uint64_t num_generated[num_players * player_multiplier] = {0};
 
+// ADDITIONAL_RELU_THREADS (programs/functions/stream_parallel.hpp): while a worker runs elements of a
+// circuit level, its sends, receives, preprocessed outputs and own randomness come from these cursors
+// into the streams, at the positions the serial run would have used.
+struct StreamCursor
+{
+    DATATYPE* send;
+    const DATATYPE* recv;
+    const DATATYPE* pre;
+    const DATATYPE* pre_bool;
+    const DATATYPE* pre_arith;
+    const DATATYPE* rnd;
+    uint64_t btriple;  // index into the boolean triples (retrieveBooleanTriple)
+};
+inline thread_local StreamCursor* tl_stream = nullptr;
+uint64_t rnd_calls_self = 0;  // getRandomVal(PSELF) calls outside the cursors
+[[noreturn]] inline void stream_cursor_misuse(const char* what)
+{
+    fprintf(stderr, "ADDITIONAL_RELU_THREADS: %s inside a parallel circuit level\n", what);
+    abort();
+}
+
 int use_srng_for_inputs = 1;
 
 // Set by the conv/FC layer to its is_first flag: 1 only for the network's first layer, whose input is the raw

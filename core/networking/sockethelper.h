@@ -21,6 +21,23 @@ int sending_rounds = 0;
 pthread_mutex_t mtx_send_next;
 pthread_cond_t cond_send_next;
 
+// NET_SPIN_US: wait up to that long for *counter >= target without sleeping (the counters are written
+// under their mutex; the atomic loads only decide whether the mutex path still has to wait)
+inline void net_spin_until(const int* counter, int target)
+{
+#if NET_SPIN_US > 0
+    if (__atomic_load_n(counter, __ATOMIC_ACQUIRE) >= target)
+        return;
+    const auto end = std::chrono::steady_clock::now() + std::chrono::microseconds(NET_SPIN_US);
+    for (int i = 0; __atomic_load_n(counter, __ATOMIC_ACQUIRE) < target; i++)
+    {
+        __builtin_ia32_pause();
+        if ((i & 255) == 255 && std::chrono::steady_clock::now() > end)
+            return;
+    }
+#endif
+}
+
 int sockets_sent = 0;
 pthread_mutex_t mtx_data_sent;
 pthread_cond_t cond_data_sent;

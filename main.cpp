@@ -1,9 +1,15 @@
 #include "config.h"
 #include <cstdlib>
+#include <malloc.h>
 #include "protocol_executer.hpp"
 
 int main(int argc, char* argv[])
 {
+    // The round buffers (sent / received elements) are allocated and freed every communication round:
+    // keep them on the heap instead of fresh mmaps, whose page faults and zeroing cost more than the
+    // latency-bound rounds themselves
+    mallopt(M_MMAP_THRESHOLD, 512 << 20);
+    mallopt(M_TRIM_THRESHOLD, 1 << 30);
 #if CHEETAH_WAN_OPT == 1
     setenv("CHEETAH_WAN_OPT", "1", 1);
 #else

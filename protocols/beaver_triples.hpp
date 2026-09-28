@@ -768,6 +768,13 @@ triple<Datatype> retrieveBooleanTriple()
 #if SKIP_PRE == 1
     return triple<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()};
 #else
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_stream)
+    {
+        const uint64_t j = tl_stream->btriple++;
+        return triple<Datatype>{boolean_triple_a[j], boolean_triple_b[j], boolean_triple_c[j]};
+    }
+#endif
     curr_boolean_triple_index++;
     return triple<Datatype>{boolean_triple_a[curr_boolean_triple_index - 1],
                             boolean_triple_b[curr_boolean_triple_index - 1],
