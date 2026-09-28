@@ -1,5 +1,12 @@
 #pragma once
 #include "include/pch.h"
+
+// Port stride between the CHEETAH channels of one process. Process p's CHEETAH base port is
+// base_port + process_offset = BASE_PORT + num_players * (num_players - 1) * p + p (+ CHEETAH_PORT_OFFSET),
+// so the bases span (num_players * (num_players - 1) + 1) * PROCESS_NUM ports. A stride of PROCESS_NUM put
+// channel 1 of process p on channel 0 of process p + PROCESS_NUM / 3 as soon as CHEETAH_THREADS > 1
+// (hangs / wrong triples with 24 processes and 2 threads).
+#define CHEETAH_IO_OFFSET ((num_players * (num_players - 1) + 1) * PROCESS_NUM)
 #include "arch/DATATYPE.h"
 
 #ifndef FAKE_TRIPLES
@@ -165,7 +172,7 @@ void generateArithmeticDummyTriples(type a[],
     unorthogonalize_arithmetic(b, uint_b, num_triples / (DATTYPE / bitlength));
     UINT_TYPE* uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
 
-    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB, PROCESS_NUM);
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB, CHEETAH_IO_OFFSET);
 
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
@@ -223,11 +230,11 @@ void generateBooleanDummyTriples(type a[],
             uint_a, uint_b, uint_c,
             bitlength, num_triples ,ip, port, CHEETAH_PARTY,
             CHEETAH_THREADS,
-            ot, PROCESS_NUM);
+            ot, CHEETAH_IO_OFFSET);
 
 #if CHEETAH_DISCONNECT == 1
     if (disconnect)
-        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
 #endif
 }
 
@@ -255,11 +262,11 @@ void generateBooleanCOTMultiplyDummyTriples(type a[],
     Iface::generateBoolCOTMultTriplesCheetah(
             uint_a, uint_b, uint_c,
             bitlength, num_triples ,ip, port, CHEETAH_PARTY,
-            CHEETAH_THREADS, PROCESS_NUM);
+            CHEETAH_THREADS, CHEETAH_IO_OFFSET);
 
 #if CHEETAH_DISCONNECT == 1
     if (disconnect)
-        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
 #endif
 }
 
@@ -306,15 +313,15 @@ void generateBeaverNDummyTuples(Beaver3TuplesD<Datatype> &beaver_3_tuples, Beave
 #else
     constexpr bool b3_party_local_bc = false;
 #endif
-    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM, b3_party_local_bc);
+    Iface::generateBool3TupleCheetah(l_beaver_3_tuples, num_beaver_3_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, CHEETAH_IO_OFFSET, b3_party_local_bc);
 #if CHEETAH_WAN_OPT == 1
     if (num_beaver_3_tuples > 0 && num_beaver_4_tuples > 0) {
-        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).get_ios(CHEETAH_THREADS)[0]->sync();
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).get_ios(CHEETAH_THREADS)[0]->sync();
     }
 #endif
-    Iface::generateBool4TupleCheetah(l_beaver_4_tuples, num_beaver_4_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+    Iface::generateBool4TupleCheetah(l_beaver_4_tuples, num_beaver_4_tuples , ip, port, CHEETAH_PARTY, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
     #if CHEETAH_DISCONNECT == 1
-    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
     #endif
 }
 #endif
@@ -371,7 +378,7 @@ void generateArithmeticAB2DummyTriples(type a[],
         uint_c = (UINT_TYPE*)std::aligned_alloc(alignof(DATATYPE), num_triples * sizeof(UINT_TYPE));
     }
 
-    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB2, PROCESS_NUM);
+    Iface::generateArithTriplesCheetah(uint_a, uint_b, uint_c, bitlength, num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB2, CHEETAH_IO_OFFSET);
 
     // convert UINT triple to SIMD type
     if (vectorization_factor != 1) {
@@ -442,11 +449,11 @@ void generateBooleanAB2DummyTriples(type a[],
     };
 
     Iface::generateBoolTriplesCheetah(uint_a, uint_b, uint_c, bitlength,
-            num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, ot, PROCESS_NUM);
+            num_triples, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, ot, CHEETAH_IO_OFFSET);
 
 #if CHEETAH_DISCONNECT == 1
     if (disconnect)
-        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
 #endif
 }
 
@@ -467,7 +474,7 @@ void generateBooleanAdditionDummyTriples(type a[],
     if(num_triples == 0) return;
     if(num_bits_per_input <= 0) return;
 #if CHEETAH_WAN_OPT == 1
-    auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port + CHEETAH_PORT_OFFSET, CHEETAH_THREADS, PROCESS_NUM);
+    auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port + CHEETAH_PORT_OFFSET, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
 #endif
     //reinterpret SIMD bitstream as uint8 bitstream
 #if PARTY == 0
@@ -586,7 +593,7 @@ void generateBooleanAdditionDummyTriples(type a[],
                 delete[] ot_a;
                 delete[] ot_b;
 #if CHEETAH_DISCONNECT == 1
-                Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+                Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
 #endif
                 return;
 
@@ -622,10 +629,10 @@ void generateCOTDummyTriples(type a[],
 
 #if PARTY == 0
             Iface::generateCOT(CHEETAH_PARTY, uint_a, nullptr, uint_c, num_triples,
-                ip, port, CHEETAH_THREADS, PROCESS_NUM);
+                ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
 #else
             Iface::generateCOT(CHEETAH_PARTY, nullptr, uint_a, uint_c, num_triples,
-                ip, port, CHEETAH_THREADS, PROCESS_NUM);
+                ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
 #endif
             return;
         }
@@ -643,10 +650,10 @@ void generateCOTDummyTriples(type a[],
 
 #if PARTY == 0
     Iface::generateCOT(CHEETAH_PARTY, uint_a, nullptr, uint_c, num_triples,
-        ip, port, CHEETAH_THREADS, PROCESS_NUM);
+        ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
 #else
     Iface::generateCOT(CHEETAH_PARTY, nullptr, uint_a, uint_c, num_triples,
-        ip, port, CHEETAH_THREADS, PROCESS_NUM);
+        ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
 #endif
 
     // convert UINT triple to SIMD type
@@ -657,7 +664,7 @@ void generateCOTDummyTriples(type a[],
     DELETEARR(uint_c);
 
     #if CHEETAH_DISCONNECT == 1
-    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
     #endif
 }
 
@@ -685,7 +692,7 @@ void generateMultiplexerDummyTriples(type a[],
             UINT_TYPE* uint_c = (UINT_TYPE*) c;
 
             Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, CHEETAH_PARTY,
-                    ip, port, PROCESS_NUM, CHEETAH_THREADS);
+                    ip, port, CHEETAH_IO_OFFSET, CHEETAH_THREADS);
 
             return;
         }
@@ -696,7 +703,7 @@ void generateMultiplexerDummyTriples(type a[],
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
 
     Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, CHEETAH_PARTY,
-            ip, port, PROCESS_NUM, CHEETAH_THREADS);
+            ip, port, CHEETAH_IO_OFFSET, CHEETAH_THREADS);
 
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));
@@ -704,7 +711,7 @@ void generateMultiplexerDummyTriples(type a[],
     DELETEARR(uint_c);
 
     #if CHEETAH_DISCONNECT == 1
-    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
     #endif
 
 }
@@ -780,8 +787,8 @@ void generateLayerDummyTriples(type** a,
     }
 
 
-    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
-    auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM);
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
+    auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
     const int factor = DATTYPE/BITLENGTH;
 
     if(factor == 1) { // No need to unvectorize
@@ -1037,15 +1044,15 @@ void generateRandomMultiplicationDummyTriples(type a[],
     uint8_t* uint_a = (uint8_t*) a;
     uint8_t* uint_b = (uint8_t*) b;
 
-    Iface::generateRandomMultiplicationsCheetah(uint_a, uint_b, num_muls, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, PROCESS_NUM);
+    Iface::generateRandomMultiplicationsCheetah(uint_a, uint_b, num_muls, ip, port, CHEETAH_PARTY, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
     #if CHEETAH_DISCONNECT == 1
-    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
     #endif
 }
 
 void CheetahDisconnect(std::string ip, int port) {
     port += CHEETAH_PORT_OFFSET;
-    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, PROCESS_NUM).disconnect();
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
 }
 
 
