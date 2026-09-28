@@ -440,8 +440,13 @@ generate_beaver_triples(
     {
         pthread_cond_wait(&cond_successful_connection, &mtx_connection_established);
     }
+    // the network threads test num_successful_connections under mtx_start_communicating before they wait:
+    // change it and broadcast under that mutex too, or a thread between its test and its wait misses the
+    // start signal and blocks forever (rare hangs of single processes in multi-process runs)
+    pthread_mutex_lock(&mtx_start_communicating);
     num_successful_connections = -1;
     pthread_cond_broadcast(&cond_start_signal);  // signal all threads to start receiving
+    pthread_mutex_unlock(&mtx_start_communicating);
     pthread_mutex_unlock(&mtx_connection_established);
     print("All parties connected sucessfully, starting protocol and timer! \n");
 
@@ -591,8 +596,13 @@ void live_circuit()
         pthread_cond_wait(&cond_successful_connection, &mtx_connection_established);
     }
     /* printf("m: done waiting, modifying conn \n"); */
+    // the network threads test num_successful_connections under mtx_start_communicating before they wait:
+    // change it and broadcast under that mutex too, or a thread between its test and its wait misses the
+    // start signal and blocks forever (rare hangs of single processes in multi-process runs)
+    pthread_mutex_lock(&mtx_start_communicating);
     num_successful_connections = -1;
     pthread_cond_broadcast(&cond_start_signal);  // signal all threads to start receiving
+    pthread_mutex_unlock(&mtx_start_communicating);
     pthread_mutex_unlock(&mtx_connection_established);
     /* printf("m: unlocked conn \n"); */
     print("All parties connected sucessfully, starting protocol and timer! \n");
