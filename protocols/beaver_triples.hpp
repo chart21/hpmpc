@@ -429,7 +429,8 @@ constexpr uint64_t b3_tuples_per_adder(int k)
 // P0-side helper for the PPA4 SIM=1 zero_add skip: counts prepare_A2B_S1 calls since the last
 // beaver-3-tuple retrieval, so slice masks can be peeked at the tuple positions the group's adder
 // WILL consume (all groups are prepared before any adder is constructed). Reset in
-// retrieveBeaver3Tuple (any retrieval means the S1 batch has ended).
+// retrieveBeaver3Tuple (any retrieval means the S1 batch has ended), and by the ReLU's A2B right after
+// its prepare level. Inside a parallel circuit level each worker counts on its own cursor (IDX_A2B_S1_PENDING).
 uint64_t g_a2b_s1_pending = 0;
 
 
@@ -776,7 +777,8 @@ triple<Datatype> retrieveBooleanTriple()
 template <typename Datatype>
 Beaver3Tuple<Datatype> retrieveBeaver3Tuple()
 {
-    g_a2b_s1_pending = 0;  // an adder is consuming -> the prepare_A2B_S1 batch (if any) has ended
+    if (!tl_stream)  // parallel levels start with the count at rest (see share_conversion.hpp)
+        g_a2b_s1_pending = 0;  // an adder is consuming -> the prepare_A2B_S1 batch (if any) has ended
 #if SKIP_PRE == 1
     return Beaver3Tuple<Datatype>{
         SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(),

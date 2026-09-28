@@ -24,7 +24,7 @@ inline std::array<uint64_t*, IDX_COUNT> index_globals()
 #if BEAVER == 1 && PRE == 1
     return {&curr_boolean_triple_index, &curr_arithmetic_triple_index, &curr_beaver_3_triple_index,
             &curr_beaver_4_triple_index, &curr_random_multiplication_index, &curr_arithmetic_ab2_triple_index,
-            &curr_boolean_ab2_triple_index};
+            &curr_boolean_ab2_triple_index, &g_a2b_s1_pending};
 #else
     return {};
 #endif
@@ -81,10 +81,26 @@ constexpr int kMinSegment = DATTYPE >= 256 ? 64 : 512;
 }  // namespace stream_parallel
 #endif
 
+#ifndef STREAM_PARALLEL_GEMM
+#define STREAM_PARALLEL_GEMM 1  // GEMM mask-and-send / completion on the pool (debugging switch)
+#endif
+#ifndef STREAM_PARALLEL_CTOR
+#define STREAM_PARALLEL_CTOR 1  // MSB adders constructed on the pool (debugging switch)
+#endif
+#ifndef STREAM_PARALLEL_RELU
+#define STREAM_PARALLEL_RELU 1  // adder steps, A2B and bit injection on the pool (debugging switch)
+#endif
+
 // f(i) for i = 0 .. len - 1 with the side effects of the serial loop, on the worker pool when possible
-template <typename F>
+template <bool enabled = true, typename F>
 void stream_parallel_for(int len, F&& f)
 {
+    if constexpr (!enabled)
+    {
+        for (int i = 0; i < len; i++)
+            f(i);
+        return;
+    }
 #if ADDITIONAL_RELU_THREADS > 0
     using namespace stream_parallel;
     if (current_phase != PHASE_LIVE || len < 2 * kMinSegment || tl_stream)

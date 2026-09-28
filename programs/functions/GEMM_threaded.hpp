@@ -67,7 +67,7 @@
             // within a tile. Sending in linear order paired each received value with another output as soon as
             // a matrix had more than TILE_SIZE columns (every conv layer).
             // (element-parallel with ADDITIONAL_RELU_THREADS, see stream_parallel.hpp)
-            stream_parallel_for(m * p, [&](int k)
+            stream_parallel_for<STREAM_PARALLEL_GEMM>(m * p, [&](int k)
             {
                 const int i = (int)gemm_tile_order(m, p, k);
 #if PUBLIC_WEIGHTS == 0

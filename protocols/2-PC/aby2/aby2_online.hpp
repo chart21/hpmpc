@@ -1000,7 +1000,8 @@ class ABY2_ONLINE_Share
                 if (t3 >= 0 && reshare_sim_on())
                 {
                     const uint64_t b3i = curr_beaver_3_triple_index +
-                                         g_a2b_s1_pending * b3_tuples_per_adder(k - m) + (uint64_t) t3;
+                                         stream_index(IDX_A2B_S1_PENDING, g_a2b_s1_pending) *
+                                             b3_tuples_per_adder(k - m) + (uint64_t) t3;
                     if (b3i < num_beaver_3_tuples)
                     {
                         out[i - m].l = beaver_3_tuples.b[b3i];
@@ -1023,7 +1024,7 @@ class ABY2_ONLINE_Share
             send_to_live(PNEXT, out[i - m].m);
         }
 #if RESHARE_BAKE_ACTIVE && PPA4_MSB == 1
-        g_a2b_s1_pending++;  // this group's adder will consume its tuples after all groups are prepared
+        stream_index(IDX_A2B_S1_PENDING, g_a2b_s1_pending)++;  // this group's adder will consume its tuples after all groups are prepared
 #endif
 #endif
 #endif

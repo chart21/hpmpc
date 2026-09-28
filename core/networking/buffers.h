@@ -117,16 +117,6 @@ uint64_t num_generated[num_players * player_multiplier] = {0};
 // ADDITIONAL_RELU_THREADS (programs/functions/stream_parallel.hpp): while a worker runs elements of a
 // circuit level, its sends, receives, preprocessed outputs and own randomness come from these cursors
 // into the streams, at the positions the serial run would have used.
-struct StreamCursor
-{
-    DATATYPE* send;
-    const DATATYPE* recv;
-    const DATATYPE* pre;
-    const DATATYPE* pre_bool;
-    const DATATYPE* pre_arith;
-    const DATATYPE* rnd;
-    uint64_t idx[8];  // per-thread indices of the index-addressed preprocessing streams (enum StreamIndex)
-};
 // the preprocessing streams read by index (protocols/beaver_triples.hpp); a parallel circuit level gives every
 // worker its own copy of the index, at the position of its first element
 enum StreamIndex
@@ -138,7 +128,18 @@ enum StreamIndex
     IDX_RANDOM_MULT,
     IDX_ARITH_AB2,
     IDX_BOOL_AB2,
+    IDX_A2B_S1_PENDING,  // g_a2b_s1_pending: P0's A2B group count (PPA4 RESHARE_OPT_SIM bake)
     IDX_COUNT
+};
+struct StreamCursor
+{
+    DATATYPE* send;
+    const DATATYPE* recv;
+    const DATATYPE* pre;
+    const DATATYPE* pre_bool;
+    const DATATYPE* pre_arith;
+    const DATATYPE* rnd;
+    uint64_t idx[IDX_COUNT];  // per-thread indices of the index-addressed preprocessing streams (enum StreamIndex)
 };
 inline thread_local StreamCursor* tl_stream = nullptr;
 // the index a retrieval uses: the worker's cursor inside a parallel level, the global one otherwise

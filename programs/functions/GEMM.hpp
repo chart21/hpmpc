@@ -336,7 +336,7 @@ template <typename T>
 void complete_GEMM_CPU(T* C, const int m, const int p)
 {
     // in the order of prepare_GEMM_CPU's sends (gemm_tile_order)
-    stream_parallel_for(m * p, [&](int k) {
+    stream_parallel_for<STREAM_PARALLEL_GEMM>(m * p, [&](int k) {
         T& c = C[gemm_tile_order(m, p, k)];
             /* c.complete_mult(); */
 #if PUBLIC_WEIGHTS == 0
