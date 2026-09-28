@@ -77,16 +77,23 @@ alone, all 53 convolutions (`cheetah_conv_triple_test <party> <port> <ab> imagen
 
 | backend | hpmpc flag | AB2 P0->P1 / P1->P0 | AB2 total | AB total | AB2 time |
 |---|---|---|---|---|---|
-| Cheetah, CPU | - | 834.2 / 167.8 | 1001.9 | 2003.4 | 28.6 s (4 threads) |
-| troy, GPU | `CHEETAH_GPU=1` | 281.7 / 373.2 | 654.8 | 1309.7 | 9.7 s |
-| packed, CPU | `CHEETAH_CONV_PACKED=1` | 232.7 / 355.1 | 587.7 | 1175.5 | 23.6 s (4 threads) |
+| Cheetah, CPU | - | 834.2 / 167.8 | 1001.9 | 2003.4 | 28.9 s (4 threads) |
+| troy, GPU | `CHEETAH_GPU=1` | 281.8 / 373.3 | 655.1 | 1309.9 | 10.2 s |
+| packed, CPU | `CHEETAH_CONV_PACKED=1` | 232.7 / 355.1 | 587.7 | 1175.5 | 8.3 s (4 threads), 5.7 s (8) |
 
 `HomConv2DSS` returns one ciphertext per output channel and spatial tile, and sends its whole second
 polynomial however few outputs it carries: on 7x7 feature maps 49 of 4096 coefficients, so the three
 512->2048 1x1 convolutions cost 170.9 MiB. troy's layout packs several output channels (and images) into
 one ciphertext and pays with more input ciphertexts; `CHEETAH_CONV_PACKED` uses that layout on the CPU
-with Cheetah's output flooding and truncation. With all preprocessing randomness fixed, CIFAR-10
-ResNet50 gives bitwise identical triples and layer outputs with each of the three backends.
+with Cheetah's output flooding and truncation (the GPU path floods and re-randomizes its outputs the
+same way). With all preprocessing randomness fixed, CIFAR-10 ResNet50 gives bitwise identical triples
+and layer outputs with each of the three backends.
+
+Whole preprocessing of this model (one image, `CHEETAH_THREADS=4`, both parties on one laptop, Core
+Ultra 7 265H / RTX 500 Ada): Cheetah 45.8 s (30.2 s conv, 11.4 s bool triples), GPU 24.6 s (10.7 s
+conv), packed 17.6 s (3.9 s conv, 9.6 s bool triples). The packed evaluator transforms each weight
+polynomial right before its only use, with NTTs of size 64-1024 for 1x1 weights on even tile sizes,
+and sums the products lazily in 128 bits; the bool triples are generated bit-packed.
 
 ## Reproducing
 
