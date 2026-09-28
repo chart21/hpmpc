@@ -1,6 +1,8 @@
 #pragma once
 #include "../../config.h"
 #include "../include/pch.h"
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #if USE_SSL == 1
 #include <openssl/err.h>
 #include <openssl/ssl.h>
@@ -28,6 +30,16 @@ class Socket
 
     // Private constructor for creating a Socket object from a socket descriptor
     Socket(int sock) : sock_(sock) {}
+
+    // Send each round's data right away: with Nagle's algorithm the last partial segment of a small round
+    // waited for the ACK of the previous one, which the peer delays by up to 40 ms (ReLU layers of
+    // ResNet50 with a few KB per round took 45 instead of 6 ms, and some 300 instead of 48 ms)
+    static void no_delay(int sock)
+    {
+        int one = 1;
+        if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one)) == -1)
+            perror("setsockopt TCP_NODELAY");
+    }
 
   public:
     // Create a socket object
@@ -142,6 +154,7 @@ class Socket
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(CONNECTION_RETRY));
         }
+        no_delay(sock_);
 #if USE_SSL == 1
         // Create an SSL context
         ssl_ctx_ = SSL_CTX_new(SSLv23_client_method());
@@ -186,6 +199,7 @@ class Socket
         {
             throw std::runtime_error("Error accepting connection");
         }
+        no_delay(client_sock);
         ssl = SSL_new(ssl_ctx_);
         SSL_set_fd(ssl, client_sock);
         if (SSL_accept(ssl) <= 0)
@@ -200,6 +214,7 @@ class Socket
         {
             throw std::runtime_error("Error accepting connection");
         }
+        no_delay(client_sock);
         // Return the new socket
         return Socket(client_sock);
 
