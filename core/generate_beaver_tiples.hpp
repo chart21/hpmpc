@@ -789,6 +789,10 @@ void generateLayerDummyTriples(type** a,
         std::vector<Utils::ConvParm> parms(params.size());
         size_t total_batches = 0;
 #endif
+        // packed convs pipelined across layers: collected here, generated after the loop
+        constexpr bool conv_batched = CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_PIPELINE == 1 &&
+                                      std::is_same_v<LayerParams, ConvolutionParameter>;
+        std::vector<Utils::ConvParm> batched_parms;
         UINT_TYPE** uint_w = (UINT_TYPE**) a;
         UINT_TYPE** uint_x = (UINT_TYPE**) b;
         UINT_TYPE* uint_y = (UINT_TYPE*) c;
@@ -814,7 +818,9 @@ void generateLayerDummyTriples(type** a,
                     .padding = p.padding,
                 };
 
-#if CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1
+#if CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_PIPELINE == 1
+                batched_parms.push_back(conv);
+#elif CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1
                 Iface::generateConvTriplesPacked(keys,
                         A_KNOWN == 0 || PARTY == 1 ? uint_x[n] : nullptr,
                         A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
@@ -866,7 +872,7 @@ void generateLayerDummyTriples(type** a,
                 std::cerr << "Unsupported Param type\n";
             }
 #if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
-            if constexpr (std::is_same_v<LayerParams, ConvolutionParameter> ||
+            if constexpr ((std::is_same_v<LayerParams, ConvolutionParameter> && !conv_batched) ||
                           std::is_same_v<LayerParams, FullyConnectedParameter>)
                 mwk_fix_p1_share<LayerParams>(keys, uint_y + y_index_counter,
                                               (uint64_t) p.y_size_per_batch * p.batchSize, p.y_size_per_batch);
@@ -875,6 +881,21 @@ void generateLayerDummyTriples(type** a,
 #if CHEETAH_WAN_OPT == 1
             if (n + 1 < params.size()) {
                 keys.get_ios(CHEETAH_THREADS)[0]->sync();
+            }
+#endif
+        }
+        if constexpr (conv_batched) {
+            Iface::generateConvTriplesPackedBatch(keys, batched_parms,
+                    A_KNOWN == 0 || PARTY == 1 ? uint_x : nullptr,
+                    A_KNOWN == 0 || PARTY == 0 ? uint_w : nullptr,
+                    uint_y, CHEETAH_PARTY, CHEETAH_THREADS,
+                    A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2);
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+            uint64_t y_offset = 0;
+            for (auto& p : params) {  // in layer order, as the masks were recorded
+                mwk_fix_p1_share<LayerParams>(keys, uint_y + y_offset, (uint64_t) p.y_size_per_batch * p.batchSize,
+                                              p.y_size_per_batch);
+                y_offset += p.y_size_per_batch * p.batchSize;
             }
 #endif
         }

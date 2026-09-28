@@ -95,6 +95,12 @@ conv), packed 17.6 s (3.9 s conv, 9.6 s bool triples). The packed evaluator tran
 polynomial right before its only use, with NTTs of size 64-1024 for 1x1 weights on even tile sizes,
 and sums the products lazily in 128 bits; the bool triples are generated bit-packed.
 
+On two EPYC 7543 hosts (25 Gbit/s, 0.3 ms, `CHEETAH_THREADS=32`) the whole preprocessing takes 17.1 s with
+Cheetah and 4.7 s packed. There `CHEETAH_CONV_PIPELINE=1` (the default with `CHEETAH_CONV_PACKED=1`)
+generates all convolutions in one call, pipelined across layers: P1 encrypts the next layers and
+decrypts the previous ones while P0 evaluates, instead of both waiting at every layer. Conv triples
+2.9 -> 1.9 s (A_KNOWN=1), 2.7 -> 2.1 s (A_KNOWN=0), same traffic.
+
 ## Reproducing
 
 Distributed: build on both machines with the same line, `PARTY=0` on one and `PARTY=1` on the other, then run
