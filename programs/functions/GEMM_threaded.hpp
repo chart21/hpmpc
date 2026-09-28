@@ -1,7 +1,8 @@
 // Thread-parallel accumulation with thread-safe prepare_dot variants.
 // Parallelizes the row dimension of the tiled GEMM across ADDITIONAL_GEMM_THREADS+1 threads.
 // All threads join before the serial mask_and_send_dot phase.
-// Only activated when m*f >= 4096 (enough multiply-accumulates to amortize spawn cost).
+// Only activated when m*f >= 4096 (enough multiply-accumulates to be worth splitting). The threads are
+// GemmPool's (GEMM.hpp), kept across calls.
 //
 // This file is included inline inside prepare_GEMM_CPU, guarded by:
 //   #if ADDITIONAL_GEMM_THREADS > 0 && FUSE_DOT == 1 && FUSE_CONV_BN_SIM == 0 &&
@@ -13,7 +14,6 @@
         const int total_threads = ADDITIONAL_GEMM_THREADS + 1;
         if ((static_cast<long long>(m) * f >= 4096) && (m >= total_threads))
         {
-            std::thread workers[ADDITIONAL_GEMM_THREADS];
             auto accum_rows = [&](int row_start, int row_end) {
                 for (int i = row_start; i < row_end; i += TILE_SIZE_T)
                 {
@@ -57,21 +57,21 @@
             };
 
             const int rows_per_thread = m / total_threads;
-            int row_start = 0;
-            for (int t = 0; t < ADDITIONAL_GEMM_THREADS; ++t)
-            {
-                int row_end = row_start + rows_per_thread;
-                workers[t] = std::thread(accum_rows, row_start, row_end);
-                row_start = row_end;
-            }
-            accum_rows(row_start, m); // main thread handles remainder
+            GemmPool::get().run([&](int t) {  // the calling thread (t = ADDITIONAL_GEMM_THREADS) takes the remainder
+                const int row_start = t * rows_per_thread;
+                accum_rows(row_start, t == ADDITIONAL_GEMM_THREADS ? m : row_start + rows_per_thread);
+            });
 
-            for (int t = 0; t < ADDITIONAL_GEMM_THREADS; ++t)
-                workers[t].join();
-
-            // mask_and_send_dot must be serial (accesses shared protocol send buffer)
-            for (int i = 0; i < m * p; ++i)
+            // mask_and_send_dot must be serial (accesses shared protocol send buffer), and in the order in which
+            // complete_GEMM_CPU (and the serial path) visit the outputs: TILE_SIZE x TILE_SIZE tiles, row by row
+            // within a tile. Sending in linear order paired each received value with another output as soon as
+            // a matrix had more than TILE_SIZE columns (every conv layer).
+            for (int ti = 0; ti < m; ti += TILE_SIZE)
+            for (int tj = 0; tj < p; tj += TILE_SIZE)
+            for (int ii = ti; ii < std::min(ti + TILE_SIZE, m); ++ii)
+            for (int jj = tj; jj < std::min(tj + TILE_SIZE, p); ++jj)
             {
+                const int i = ii * p + jj;
 #if PUBLIC_WEIGHTS == 0
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
 #if INTERLEAVE_COMM == 1

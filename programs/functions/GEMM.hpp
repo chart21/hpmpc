@@ -3,7 +3,84 @@
 #include "prob_truncation.hpp"
 #include <algorithm>
 #if ADDITIONAL_GEMM_THREADS > 0
+#include <condition_variable>
+#include <functional>
+#include <mutex>
 #include <thread>
+#include <vector>
+
+// The ADDITIONAL_GEMM_THREADS workers of GEMM_threaded.hpp, kept for the whole run: a layer calls the
+// GEMM once per image, and spawning the threads on every call cost more than the parallel accumulation
+// saved (CIFAR-10 ResNet50, batch 10: online 0.63 -> 1.0 s)
+class GemmPool
+{
+  public:
+    static GemmPool& get()
+    {
+        static GemmPool pool(ADDITIONAL_GEMM_THREADS);
+        return pool;
+    }
+
+    // f(t) for t = 0 .. ADDITIONAL_GEMM_THREADS, the last one on the calling thread; returns when all are done
+    void run(const std::function<void(int)>& f)
+    {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            job_ = &f;
+            pending_ = workers_.size();
+            ++generation_;
+        }
+        start_.notify_all();
+        f(int(workers_.size()));
+        std::unique_lock<std::mutex> lock(mutex_);
+        done_.wait(lock, [&] { return pending_ == 0; });
+        job_ = nullptr;
+    }
+
+    ~GemmPool()
+    {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            stop_ = true;
+        }
+        start_.notify_all();
+        for (auto& w : workers_)
+            w.join();
+    }
+
+  private:
+    explicit GemmPool(int n)
+    {
+        for (int t = 0; t < n; ++t)
+            workers_.emplace_back([this, t] { work(t); });
+    }
+
+    void work(int t)
+    {
+        size_t seen = 0;
+        std::unique_lock<std::mutex> lock(mutex_);
+        for (;;)
+        {
+            start_.wait(lock, [&] { return stop_ || generation_ != seen; });
+            if (stop_)
+                return;
+            seen = generation_;
+            const auto* f = job_;
+            lock.unlock();
+            (*f)(t);
+            lock.lock();
+            if (--pending_ == 0)
+                done_.notify_one();
+        }
+    }
+
+    std::vector<std::thread> workers_;
+    std::mutex mutex_;
+    std::condition_variable start_, done_;
+    const std::function<void(int)>* job_ = nullptr;
+    size_t generation_ = 0, pending_ = 0;
+    bool stop_ = false;
+};
 #endif
 
 template <typename T, typename U>
