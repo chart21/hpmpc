@@ -378,9 +378,11 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
     {
         // Fold the 1/denom average-pool division into the truncation. If a delayed truncation is also pending the
         // input is still at scale 2^(2*FRACTIONAL), so truncate by 2*FRACTIONAL instead of FRACTIONAL.
-        auto reciprocal =
-            FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(1 / FLOATTYPE(curr_denom));
-        const int fb = fold_delayed ? 2 * FRACTIONAL : FRACTIONAL;
+        // AVG_RECIP_EXTRA_BITS: the reciprocal gets that many more fractional bits (truncated away again): with
+        // FRACTIONAL = 5 alone, 1/9 (the ResNet stem's 3x3 pool) becomes 4/32 = 0.125, a 12.5% scaling error.
+        auto reciprocal = FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(
+            1 / FLOATTYPE(curr_denom), FRACTIONAL + AVG_RECIP_EXTRA_BITS);
+        const int fb = (fold_delayed ? 2 * FRACTIONAL : FRACTIONAL) + AVG_RECIP_EXTRA_BITS;
         stream_parallel_for(len, [&](int i) {
             y[i].prepare_opt_bit_injection_with_trunc(val[i].get_share_pointer(), val[i].get_share_pointer(),
                                                       PROMOTE(reciprocal), fb);

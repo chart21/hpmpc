@@ -277,6 +277,10 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define FUSE_RELU_AVG 0  // Fuse ReLU and Average Pooling into one operation
 #endif
 
+#ifndef AVG_RECIP_EXTRA_BITS
+#define AVG_RECIP_EXTRA_BITS 0  // FUSE_RELU_AVG: extra fractional bits of the folded 1/denom (0: FRACTIONAL bits, 1/9 -> 0.125)
+#endif
+
 #ifndef FUSE_RELU_MAX
 #define FUSE_RELU_MAX 0  // Fuse ReLU and Average Pooling into one operation
 #endif
