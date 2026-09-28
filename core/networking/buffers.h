@@ -125,9 +125,24 @@ struct StreamCursor
     const DATATYPE* pre_bool;
     const DATATYPE* pre_arith;
     const DATATYPE* rnd;
-    uint64_t btriple;  // index into the boolean triples (retrieveBooleanTriple)
+    uint64_t idx[8];  // per-thread indices of the index-addressed preprocessing streams (enum StreamIndex)
+};
+// the preprocessing streams read by index (protocols/beaver_triples.hpp); a parallel circuit level gives every
+// worker its own copy of the index, at the position of its first element
+enum StreamIndex
+{
+    IDX_BOOL,
+    IDX_ARITH,
+    IDX_BEAVER3,
+    IDX_BEAVER4,
+    IDX_RANDOM_MULT,
+    IDX_ARITH_AB2,
+    IDX_BOOL_AB2,
+    IDX_COUNT
 };
 inline thread_local StreamCursor* tl_stream = nullptr;
+// the index a retrieval uses: the worker's cursor inside a parallel level, the global one otherwise
+inline uint64_t& stream_index(int k, uint64_t& global) { return tl_stream ? tl_stream->idx[k] : global; }
 uint64_t rnd_calls_self = 0;  // getRandomVal(PSELF) calls outside the cursors
 [[noreturn]] inline void stream_cursor_misuse(const char* what)
 {

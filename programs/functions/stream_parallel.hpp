@@ -18,42 +18,61 @@
 #if ADDITIONAL_RELU_THREADS > 0
 namespace stream_parallel
 {
+// the global indices of the index-addressed preprocessing streams (StreamIndex order)
+inline std::array<uint64_t*, IDX_COUNT> index_globals()
+{
+#if BEAVER == 1 && PRE == 1
+    return {&curr_boolean_triple_index, &curr_arithmetic_triple_index, &curr_beaver_3_triple_index,
+            &curr_beaver_4_triple_index, &curr_random_multiplication_index, &curr_arithmetic_ab2_triple_index,
+            &curr_boolean_ab2_triple_index};
+#else
+    return {};
+#endif
+}
+
 // positions in the streams a level element may use, and the ones it must not
 struct Counters
 {
-    int64_t send, recv, pre, pre_bool, pre_arith, rnd, btriple;
+    int64_t send, recv, pre, pre_bool, pre_arith, rnd;
+    std::array<int64_t, IDX_COUNT> idx;
     int send_round, recv_round;
-    std::array<int64_t, 5> fixed;  // other parties, triples: must not move inside a parallel segment
+    std::array<int64_t, 3> fixed;  // the other party's counters, preprocessing stores: must not move in a segment
 };
 
 inline Counters snapshot()
 {
-    Counters c;
+    Counters c{};
     c.send = send_count[PNEXT];
     c.recv = share_buffer[PNEXT];
     c.pre = (int64_t)preprocessed_outputs_index;
 #if BEAVER == 1 && PRE == 1
     c.pre_bool = preprocessed_outputs_bool_index ? (int64_t)preprocessed_outputs_bool_index[0] : 0;
     c.pre_arith = preprocessed_outputs_arithmetic_index ? (int64_t)preprocessed_outputs_arithmetic_index[0] : 0;
-#else
-    c.pre_bool = c.pre_arith = 0;
 #endif
     c.rnd = (int64_t)rnd_calls_self;
-#if BEAVER == 1 && PRE == 1
-    c.btriple = (int64_t)curr_boolean_triple_index;
-#else
-    c.btriple = 0;
-#endif
+    const auto g = index_globals();
+    for (int k = 0; k < IDX_COUNT; k++)
+        c.idx[k] = g[k] ? (int64_t)*g[k] : 0;
     c.send_round = sending_rounds;
     c.recv_round = rounds;
-    c.fixed = {send_count[PSELF], share_buffer[PSELF],
-#if BEAVER == 1 && PRE == 1
-               0, (int64_t)curr_arithmetic_triple_index,
-#else
-               0, 0,
-#endif
-               (int64_t)preprocessed_outputs_input_index};
+    c.fixed = {send_count[PSELF], share_buffer[PSELF], (int64_t)preprocessed_outputs_input_index};
     return c;
+}
+
+inline Counters diff(const Counters& b, const Counters& a)
+{
+    Counters d{};
+    d.send = b.send - a.send, d.recv = b.recv - a.recv, d.pre = b.pre - a.pre;
+    d.pre_bool = b.pre_bool - a.pre_bool, d.pre_arith = b.pre_arith - a.pre_arith, d.rnd = b.rnd - a.rnd;
+    for (int k = 0; k < IDX_COUNT; k++)
+        d.idx[k] = b.idx[k] - a.idx[k];
+    return d;
+}
+
+inline bool same_positions(const Counters& a, const Counters& b)
+{
+    return a.fixed == b.fixed && a.send == b.send && a.recv == b.recv && a.pre == b.pre && a.pre_bool == b.pre_bool &&
+           a.pre_arith == b.pre_arith && a.idx == b.idx && a.send_round == b.send_round && a.recv_round == b.recv_round;
 }
 
 // below this, a segment runs serially (the pool hand-off costs a few us); an element of a wider DATATYPE
@@ -86,8 +105,7 @@ void stream_parallel_for(int len, F&& f)
         const Counters b = snapshot();
         if (a.send_round == b.send_round && a.recv_round == b.recv_round && b.send >= a.send && b.recv >= a.recv)
         {
-            d = {b.send - a.send, b.recv - a.recv, b.pre - a.pre, b.pre_bool - a.pre_bool,
-                 b.pre_arith - a.pre_arith, b.rnd - a.rnd, b.btriple - a.btriple, 0, 0, {}};
+            d = diff(b, a);
             break;
         }
     }
@@ -123,7 +141,9 @@ void stream_parallel_for(int len, F&& f)
 #else
                           nullptr, nullptr,
 #endif
-                          rnd.data(), (uint64_t)a.btriple};
+                          rnd.data(), {}};
+        for (int x = 0; x < IDX_COUNT; x++)
+            base.idx[x] = (uint64_t)a.idx[x];
         std::array<int, T> bad{};
         const int start = i;
         GemmPool::get().run([&](int t) {
@@ -131,27 +151,28 @@ void stream_parallel_for(int len, F&& f)
             StreamCursor c{base.send + lo * d.send, base.recv ? base.recv + lo * d.recv : nullptr,
                            base.pre ? base.pre + lo * d.pre : nullptr,
                            base.pre_bool ? base.pre_bool + lo * d.pre_bool : nullptr,
-                           base.pre_arith ? base.pre_arith + lo * d.pre_arith : nullptr, base.rnd + lo * d.rnd,
-                           base.btriple + lo * d.btriple};
+                           base.pre_arith ? base.pre_arith + lo * d.pre_arith : nullptr, base.rnd + lo * d.rnd, {}};
+            for (int x = 0; x < IDX_COUNT; x++)
+                c.idx[x] = base.idx[x] + lo * d.idx[x];
             tl_stream = &c;
             for (int64_t e = lo; e < hi; e++)
                 f(start + (int)e);
             tl_stream = nullptr;
             // every element must have consumed exactly the measured amount
-            bad[t] = c.send != base.send + hi * d.send || c.rnd != base.rnd + hi * d.rnd ||
+            bool b = c.send != base.send + hi * d.send || c.rnd != base.rnd + hi * d.rnd ||
                      (base.recv && c.recv != base.recv + hi * d.recv) ||
                      (base.pre && c.pre != base.pre + hi * d.pre) ||
                      (base.pre_bool && c.pre_bool != base.pre_bool + hi * d.pre_bool) ||
-                     (base.pre_arith && c.pre_arith != base.pre_arith + hi * d.pre_arith) ||
-                     c.btriple != base.btriple + hi * d.btriple;
+                     (base.pre_arith && c.pre_arith != base.pre_arith + hi * d.pre_arith);
+            for (int x = 0; x < IDX_COUNT; x++)
+                b = b || c.idx[x] != base.idx[x] + hi * d.idx[x];
+            bad[t] = b;
         });
         const Counters b = snapshot();
         for (int t = 0; t < T; t++)
             if (bad[t])
                 stream_cursor_misuse("an element whose stream use differs from the first one");
-        if (b.fixed != a.fixed || b.send != a.send || b.recv != a.recv || b.pre != a.pre ||
-            b.pre_bool != a.pre_bool || b.pre_arith != a.pre_arith || b.btriple != a.btriple || b.send_round != a.send_round ||
-            b.recv_round != a.recv_round)
+        if (!same_positions(a, b))
             stream_cursor_misuse("a stream without cursor");
         send_count[PNEXT] += k * d.send;
         share_buffer[PNEXT] += k * d.recv;
@@ -163,9 +184,10 @@ void stream_parallel_for(int len, F&& f)
             preprocessed_outputs_arithmetic_index[0] += k * d.pre_arith;
 #endif
         rnd_calls_self += rnd.size();
-#if BEAVER == 1 && PRE == 1
-        curr_boolean_triple_index += k * d.btriple;
-#endif
+        const auto g = index_globals();
+        for (int x = 0; x < IDX_COUNT; x++)
+            if (g[x])
+                *g[x] += k * d.idx[x];
         i += k;
     }
 #else

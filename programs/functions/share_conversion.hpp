@@ -153,7 +153,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 #endif
 
 
-#if ADDITIONAL_RELU_THREADS > 0 && RCA_MSB == 1 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0)
+#if ADDITIONAL_RELU_THREADS > 0 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0)
     // constructed in parallel: each adder retrieves its triples and one random mask (stream cursors)
     using Adder = ADDER_TYPE<bk - bm, S>;
     struct AdderArray
@@ -237,7 +237,7 @@ Share::communicate(); // For resharings
 #endif
     delete[] s1;
     delete[] s2;
-#if !(ADDITIONAL_RELU_THREADS > 0 && RCA_MSB == 1 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0))
+#if !(ADDITIONAL_RELU_THREADS > 0 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0))
     adders.clear();
     adders.shrink_to_fit();
 #endif

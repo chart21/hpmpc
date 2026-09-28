@@ -755,10 +755,8 @@ triple<Datatype> retrieveArithmeticTriple()
 #if SKIP_PRE == 1
     return triple<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()};
 #else
-    curr_arithmetic_triple_index++;
-    return triple<Datatype>{arithmetic_triple_a[curr_arithmetic_triple_index - 1],
-                            arithmetic_triple_b[curr_arithmetic_triple_index - 1],
-                            arithmetic_triple_c[curr_arithmetic_triple_index - 1]};
+    const uint64_t j = stream_index(IDX_ARITH, curr_arithmetic_triple_index)++;
+    return triple<Datatype>{arithmetic_triple_a[j], arithmetic_triple_b[j], arithmetic_triple_c[j]};
 #endif
 }
 
@@ -768,17 +766,8 @@ triple<Datatype> retrieveBooleanTriple()
 #if SKIP_PRE == 1
     return triple<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()};
 #else
-#if ADDITIONAL_RELU_THREADS > 0
-    if (tl_stream)
-    {
-        const uint64_t j = tl_stream->btriple++;
-        return triple<Datatype>{boolean_triple_a[j], boolean_triple_b[j], boolean_triple_c[j]};
-    }
-#endif
-    curr_boolean_triple_index++;
-    return triple<Datatype>{boolean_triple_a[curr_boolean_triple_index - 1],
-                            boolean_triple_b[curr_boolean_triple_index - 1],
-                            boolean_triple_c[curr_boolean_triple_index - 1]};
+    const uint64_t j = stream_index(IDX_BOOL, curr_boolean_triple_index)++;
+    return triple<Datatype>{boolean_triple_a[j], boolean_triple_b[j], boolean_triple_c[j]};
     /* return triple<Datatype>{boolean_triple_a[boolean_triple_index], boolean_triple_b[boolean_triple_index],
      * boolean_triple_c[boolean_triple_index++]}; */
 #endif
@@ -794,16 +783,17 @@ Beaver3Tuple<Datatype> retrieveBeaver3Tuple()
         SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()
     };
 #else
+    const uint64_t j_IDX_BEAVER3 = stream_index(IDX_BEAVER3, curr_beaver_3_triple_index);
     Beaver3Tuple<Datatype> tuple{
-        beaver_3_tuples.a[curr_beaver_3_triple_index],
-        beaver_3_tuples.b[curr_beaver_3_triple_index],
-        beaver_3_tuples.c[curr_beaver_3_triple_index],
-        beaver_3_tuples.ab[curr_beaver_3_triple_index],
-        beaver_3_tuples.ac[curr_beaver_3_triple_index],
-        beaver_3_tuples.bc[curr_beaver_3_triple_index],
-        beaver_3_tuples.abc[curr_beaver_3_triple_index]
+        beaver_3_tuples.a[j_IDX_BEAVER3],
+        beaver_3_tuples.b[j_IDX_BEAVER3],
+        beaver_3_tuples.c[j_IDX_BEAVER3],
+        beaver_3_tuples.ab[j_IDX_BEAVER3],
+        beaver_3_tuples.ac[j_IDX_BEAVER3],
+        beaver_3_tuples.bc[j_IDX_BEAVER3],
+        beaver_3_tuples.abc[j_IDX_BEAVER3]
     };
-    curr_beaver_3_triple_index++;
+    stream_index(IDX_BEAVER3, curr_beaver_3_triple_index)++;
     return tuple;
 #endif
 }
@@ -819,24 +809,25 @@ Beaver4Tuple<Datatype> retrieveBeaver4Tuple()
         SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()
     };
 #else
+    const uint64_t j_IDX_BEAVER4 = stream_index(IDX_BEAVER4, curr_beaver_4_triple_index);
     Beaver4Tuple<Datatype> tuple{
-        beaver_4_tuples.a[curr_beaver_4_triple_index],
-        beaver_4_tuples.b[curr_beaver_4_triple_index],
-        beaver_4_tuples.c[curr_beaver_4_triple_index],
-        beaver_4_tuples.d[curr_beaver_4_triple_index],
-        beaver_4_tuples.ab[curr_beaver_4_triple_index],
-        beaver_4_tuples.ac[curr_beaver_4_triple_index],
-        beaver_4_tuples.ad[curr_beaver_4_triple_index],
-        beaver_4_tuples.bc[curr_beaver_4_triple_index],
-        beaver_4_tuples.bd[curr_beaver_4_triple_index],
-        beaver_4_tuples.cd[curr_beaver_4_triple_index],
-        beaver_4_tuples.abc[curr_beaver_4_triple_index],
-        beaver_4_tuples.abd[curr_beaver_4_triple_index],
-        beaver_4_tuples.acd[curr_beaver_4_triple_index],
-        beaver_4_tuples.bcd[curr_beaver_4_triple_index],
-        beaver_4_tuples.abcd[curr_beaver_4_triple_index]
+        beaver_4_tuples.a[j_IDX_BEAVER4],
+        beaver_4_tuples.b[j_IDX_BEAVER4],
+        beaver_4_tuples.c[j_IDX_BEAVER4],
+        beaver_4_tuples.d[j_IDX_BEAVER4],
+        beaver_4_tuples.ab[j_IDX_BEAVER4],
+        beaver_4_tuples.ac[j_IDX_BEAVER4],
+        beaver_4_tuples.ad[j_IDX_BEAVER4],
+        beaver_4_tuples.bc[j_IDX_BEAVER4],
+        beaver_4_tuples.bd[j_IDX_BEAVER4],
+        beaver_4_tuples.cd[j_IDX_BEAVER4],
+        beaver_4_tuples.abc[j_IDX_BEAVER4],
+        beaver_4_tuples.abd[j_IDX_BEAVER4],
+        beaver_4_tuples.acd[j_IDX_BEAVER4],
+        beaver_4_tuples.bcd[j_IDX_BEAVER4],
+        beaver_4_tuples.abcd[j_IDX_BEAVER4]
     };
-    curr_beaver_4_triple_index++;
+    stream_index(IDX_BEAVER4, curr_beaver_4_triple_index)++;
     return tuple;
 #endif
 }
@@ -847,11 +838,12 @@ RandomMultiplication<Datatype> retrieveRandomMultiplication()
 #if SKIP_PRE == 1
     return RandomMultiplication<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO()};
 #else
+    const uint64_t j_IDX_RANDOM_MULT = stream_index(IDX_RANDOM_MULT, curr_random_multiplication_index);
     RandomMultiplication<Datatype> tuple{
-        random_multiplication_a[curr_random_multiplication_index],
-        random_multiplication_b[curr_random_multiplication_index]
+        random_multiplication_a[j_IDX_RANDOM_MULT],
+        random_multiplication_b[j_IDX_RANDOM_MULT]
     };
-    curr_random_multiplication_index++;
+    stream_index(IDX_RANDOM_MULT, curr_random_multiplication_index)++;
     return tuple;
 #endif
 }
@@ -862,10 +854,8 @@ triple<Datatype> retrieveArithmeticAB2Triple()
 #if SKIP_PRE == 1
     return triple<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()};
 #else
-    curr_arithmetic_ab2_triple_index++;
-    return triple<Datatype>{arithmetic_ab2_triple_a[curr_arithmetic_ab2_triple_index - 1],
-                            arithmetic_ab2_triple_b[curr_arithmetic_ab2_triple_index - 1],
-                            arithmetic_ab2_triple_c[curr_arithmetic_ab2_triple_index - 1]};
+    const uint64_t j = stream_index(IDX_ARITH_AB2, curr_arithmetic_ab2_triple_index)++;
+    return triple<Datatype>{arithmetic_ab2_triple_a[j], arithmetic_ab2_triple_b[j], arithmetic_ab2_triple_c[j]};
 #endif
 }
 
@@ -875,10 +865,8 @@ triple<Datatype> retrieveBooleanAB2Triple()
 #if SKIP_PRE == 1
     return triple<Datatype>{SET_ALL_ZERO(), SET_ALL_ZERO(), SET_ALL_ZERO()};
 #else
-    curr_boolean_ab2_triple_index++;
-    return triple<Datatype>{boolean_ab2_triple_a[curr_boolean_ab2_triple_index - 1],
-                            boolean_ab2_triple_b[curr_boolean_ab2_triple_index - 1],
-                            boolean_ab2_triple_c[curr_boolean_ab2_triple_index - 1]};
+    const uint64_t j = stream_index(IDX_BOOL_AB2, curr_boolean_ab2_triple_index)++;
+    return triple<Datatype>{boolean_ab2_triple_a[j], boolean_ab2_triple_b[j], boolean_ab2_triple_c[j]};
 #endif
 }
     
