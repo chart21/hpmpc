@@ -79,14 +79,16 @@ alone, all 53 convolutions (`cheetah_conv_triple_test <party> <port> <ab> imagen
 |---|---|---|---|---|---|
 | Cheetah, CPU | - | 834.2 / 167.8 | 1001.9 | 2003.4 | 28.9 s (4 threads) |
 | troy, GPU | `CHEETAH_GPU=1` | 281.8 / 373.3 | 655.1 | 1309.9 | 10.2 s |
-| packed, CPU | `CHEETAH_CONV_PACKED=1` | 232.7 / 355.1 | 587.7 | 1175.5 | 8.3 s (4 threads), 5.7 s (8) |
+| packed, CPU | `CHEETAH_CONV_PACKED=1` | 234.9 / 244.1 | 479.1 | 958.2 | 6.1 s (4 threads), 3.8 s (8) |
 
 `HomConv2DSS` returns one ciphertext per output channel and spatial tile, and sends its whole second
 polynomial however few outputs it carries: on 7x7 feature maps 49 of 4096 coefficients, so the three
 512->2048 1x1 convolutions cost 170.9 MiB. troy's layout packs several output channels (and images) into
 one ciphertext and pays with more input ciphertexts; `CHEETAH_CONV_PACKED` uses that layout on the CPU
 with Cheetah's output flooding and truncation (the GPU path floods and re-randomizes its outputs the
-same way). With all preprocessing randomness fixed, CIFAR-10 ResNet50 gives bitwise identical triples
+same way). On the wire the packed path sends an input ciphertext as a seed and c0 at the primes' widths
+and an output ciphertext as only the bits decryption uses (46 per c1 coefficient, 34 per used c0
+coefficient), with the tile layout chosen for the fewest bytes rather than ciphertexts. With all preprocessing randomness fixed, CIFAR-10 ResNet50 gives bitwise identical triples
 and layer outputs with each of the three backends.
 
 Whole preprocessing of this model (one image, `CHEETAH_THREADS=4`, both parties on one laptop, Core
@@ -96,10 +98,10 @@ polynomial right before its only use, with NTTs of size 64-1024 for 1x1 weights 
 and sums the products lazily in 128 bits; the bool triples are generated bit-packed.
 
 On two EPYC 7543 hosts (25 Gbit/s, 0.3 ms, `CHEETAH_THREADS=32`) the whole preprocessing takes 17.1 s with
-Cheetah and 4.7 s packed. There `CHEETAH_CONV_PIPELINE=1` (the default with `CHEETAH_CONV_PACKED=1`)
+Cheetah and 4.3 s packed (ferret's LPN parameters b12 and a prefetching LPN step: key setup 1.4 -> 1.1 s). There `CHEETAH_CONV_PIPELINE=1` (the default with `CHEETAH_CONV_PACKED=1`)
 generates all convolutions in one call, pipelined across layers: P1 encrypts the next layers and
 decrypts the previous ones while P0 evaluates, instead of both waiting at every layer. Conv triples
-2.9 -> 1.9 s (A_KNOWN=1), 2.7 -> 2.1 s (A_KNOWN=0), same traffic.
+2.9 -> 1.9 s (A_KNOWN=1), 2.7 -> 2.1 s (A_KNOWN=0), same traffic; with the exact wire format 1.7 s.
 
 ## Reproducing
 
