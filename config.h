@@ -370,6 +370,10 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define RNG_AHEAD 0  // Live phase: a background thread produces this party's own random stream (getRandomVal(PSELF), a sequential AES chain) ahead into a ring buffer. Same values, off the critical path.
 #endif
 
+#ifndef PRINT_OUTPUT_HASH
+#define PRINT_OUTPUT_HASH 0  // Print a hash of the revealed network outputs (checks that runs are reproducible)
+#endif
+
 #ifndef NET_WAIT_STATS
 #define NET_WAIT_STATS 0  // Print the time the main thread waited for data (receive_live) and the number of rounds
 #endif
