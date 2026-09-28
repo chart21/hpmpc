@@ -16,6 +16,9 @@
 #define TEST_LTZ 1               // [a] < 0 ? [1] : [0]
 #define TEST_MAX_MIN 0           // [A] -> [max(A)] [min(A)]
 #define TEST_RELU 1              // [a] > 0 ? [a] : 0
+#ifndef TEST_RELU_RANDOM
+#define TEST_RELU_RANDOM 1       // ReLU of secret-shared random values over all magnitudes, errors per magnitude
+#endif
 #define TEST_BOOLEAN_ADDITION 0  // [a]^B + [b]^B
 #define TEST_A2B_ADD 0           // Test A2B followed by addition when testing boolean addition
 #define TEST_A2B 0               // [a]^A -> [a]^B
@@ -193,6 +196,72 @@ bool test_RELU()
         }
     }
     return true;
+}
+#endif
+
+#if TEST_RELU_RANDOM == 1
+// ReLU of RELU_RANDOM_N secret-shared values (P0's input, random masks), |v| = 2^e * (1 + mantissa) for e
+// uniform in 0..30 and random signs: every output must equal max(v, 0) exactly. Prints the errors per
+// exponent, which tells an MSB circuit that fails on a range of values from noise elsewhere.
+#ifndef RELU_RANDOM_N
+#define RELU_RANDOM_N 4096
+#endif
+template <typename Share>
+bool test_RELU_random()
+{
+    constexpr int vf = DATTYPE / BITLENGTH;
+    constexpr int N = RELU_RANDOM_N;
+    using A = Additive_Share<DATATYPE, Share>;
+    std::vector<std::array<UINT_TYPE, vf>> plain(N);
+    uint64_t x = 0x9e3779b97f4a7c15ULL;
+    auto next = [&x]() {
+        x ^= x << 13, x ^= x >> 7, x ^= x << 17;
+        return x;
+    };
+    std::vector<A> in(N), out(N);
+    for (int i = 0; i < N; i++)
+    {
+        for (int k = 0; k < vf; k++)
+        {
+            const uint64_t r = next();
+            const int e = int(r % 31);
+            const uint64_t mag = (uint64_t(1) << e) | ((r >> 8) & ((uint64_t(1) << e) - 1));
+            const int64_t v = (r >> 40) & 1 ? -int64_t(mag) : int64_t(mag);
+            plain[i][k] = UINT_TYPE(v);
+        }
+        DATATYPE vec;
+        orthogonalize_arithmetic(plain[i].data(), &vec, 1);
+        in[i].template prepare_receive_from<P_0>(vec);
+    }
+    Share::communicate();
+    for (int i = 0; i < N; i++)
+        in[i].template complete_receive_from<P_0>();
+    RELU<0, BITLENGTH, Share, DATATYPE>(in.data(), in.data() + N, out.data());
+    for (int i = 0; i < N; i++)
+        out[i].prepare_reveal_to_all();
+    Share::communicate();
+    int errors[32] = {0}, total[32] = {0}, bad = 0;
+    for (int i = 0; i < N; i++)
+    {
+        const DATATYPE r = out[i].complete_reveal_to_all();
+        alignas(sizeof(DATATYPE)) UINT_TYPE o[vf];
+        unorthogonalize_arithmetic(&r, o, 1);
+        for (int k = 0; k < vf; k++)
+        {
+            const INT_TYPE v = INT_TYPE(plain[i][k]);
+            const UINT_TYPE expect = v > 0 ? UINT_TYPE(v) : 0;
+            const int e = 63 - __builtin_clzll(uint64_t(v < 0 ? -int64_t(v) : int64_t(v)) | 1);
+            total[e]++;
+            if (o[k] != expect)
+                errors[e]++, bad++;
+        }
+    }
+    for (int e = 0; e < 31; e++)
+        if (errors[e])
+            print_online("RELU_RANDOM: 2^" + std::to_string(e) + ": " + std::to_string(errors[e]) + " of " +
+                         std::to_string(total[e]) + " wrong");
+    print_online("RELU_RANDOM: " + std::to_string(bad) + " of " + std::to_string(N * vf) + " wrong");
+    return bad == 0;
 }
 #endif
 
@@ -607,6 +676,10 @@ bool test_comparisons(DATATYPE* res)
 
 #if TEST_RELU == 1
     test_function(num_tests, num_passed, "RELU", test_RELU<Share>);
+#endif
+
+#if TEST_RELU_RANDOM == 1
+    test_function(num_tests, num_passed, "RELU_RANDOM", test_RELU_random<Share>);
 #endif
 
 #if TEST_BOOLEAN_ADDITION == 1
