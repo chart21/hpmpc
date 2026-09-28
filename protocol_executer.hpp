@@ -365,6 +365,11 @@ void preprocess_circuit(std::string ips[])
         clock_t time_pre_function_start = clock();
         clock_gettime(CLOCK_REALTIME, &p1);
         std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
+        // size the CHEETAH OT packs for everything the preprocessing will extend, not just the first request
+        Iface::ot_demand_hint() = uint64_t(total_boolean_triples_num + total_ab2_boolean_triples_num +
+                                           2 * num_beaver_3_tuples + 3 * num_beaver_4_tuples +
+                                           num_boolean_addition_triples + num_random_multiplications) * DATTYPE +
+                                  uint64_t(num_multiplexer_triples + num_cot_triples) * DATTYPE / BITLENGTH;
         init_beaverC_boolean(0);
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, num_boolean_triples[0], "LXLY");
