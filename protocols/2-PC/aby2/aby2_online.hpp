@@ -225,17 +225,30 @@ class ABY2_ONLINE_Share
         m = ADD(m, msg);
     }
 
+    // unorthogonalize_boolean + orthogonalize_arithmetic of slices whose only non-zero entry is the
+    // last one (a bit per value to inject): with one value per word (DATTYPE == BITLENGTH), the
+    // 32 x 32 bit transpose reduces to scattering the bits of that word
+    static void single_row_ortho(Datatype v[BITLENGTH], UINT_TYPE* temp2 [[maybe_unused]])
+    {
+#if DATTYPE == BITLENGTH && BITLENGTH == 32
+        const Datatype w = v[BITLENGTH - 1];
+        for (int i = 0; i < BITLENGTH; i++)
+            v[i] = (w >> (BITLENGTH - 1 - i)) & 1;
+#else
+        unorthogonalize_boolean(v, temp2);
+        orthogonalize_arithmetic(temp2, v);
+#endif
+    }
+
     void prepare_opt_bit_injection(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[])
     {
         Datatype b0[BITLENGTH]{0};
         b0[BITLENGTH - 1] = m;  // convert b0 to an arithemtic value
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
-        unorthogonalize_boolean(b0, temp2);
-        orthogonalize_arithmetic(temp2, b0);
+        single_row_ortho(b0, temp2);
         Datatype lbi[BITLENGTH]{0};
         lbi[BITLENGTH - 1] = l;
-        unorthogonalize_boolean(lbi, temp2);
-        orthogonalize_arithmetic(temp2, lbi);
+        single_row_ortho(lbi, temp2);
         for (int i = 0; i < BITLENGTH; i++)
         {
 #if BIT_INJECTION_PREPROCESSING_OPT == 1
@@ -269,12 +282,10 @@ class ABY2_ONLINE_Share
         Datatype b0[BITLENGTH]{0};
         b0[BITLENGTH - 1] = m;  // convert b0 to an arithemtic value
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
-        unorthogonalize_boolean(b0, temp2);
-        orthogonalize_arithmetic(temp2, b0);
+        single_row_ortho(b0, temp2);
         Datatype lbi[BITLENGTH]{0};
         lbi[BITLENGTH - 1] = l;
-        unorthogonalize_boolean(lbi, temp2);
-        orthogonalize_arithmetic(temp2, lbi);
+        single_row_ortho(lbi, temp2);
         for (int i = 0; i < BITLENGTH; i++)
         {
 #if BIT_INJECTION_PREPROCESSING_OPT == 1
@@ -1119,12 +1130,10 @@ class ABY2_ONLINE_Share
         Datatype b0[BITLENGTH]{0};
         b0[BITLENGTH - 1] = m;  // convert b0 to an arithemtic value
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
-        unorthogonalize_boolean(b0, temp2);
-        orthogonalize_arithmetic(temp2, b0);
+        single_row_ortho(b0, temp2);
         Datatype lb[BITLENGTH]{0};
         lb[BITLENGTH - 1] = l;
-        unorthogonalize_boolean(lb, temp2);
-        orthogonalize_arithmetic(temp2, lb);
+        single_row_ortho(lb, temp2);
         for (int i = 0; i < BITLENGTH; i++)
         {
             Datatype lxly = retrieve_output_share_arithmetic();
