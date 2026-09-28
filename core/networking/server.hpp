@@ -36,6 +36,10 @@ void* sender(void* threadParameters)
     server.Bind(((sender_args*)threadParameters)->port);
     server.Listen(2);
     Socket client = server.Accept();
+    // Stop listening right away: the thread lives as long as the phase sends, and a listener left open on the
+    // port queued the NEXT phase's connection from the other party (the new listener's Bind retries while the
+    // port is taken), which then waited forever - rare hangs at the start of the live phase.
+    server.Close_Context();
 #if PRINT == 1
     printf("P%i: Sending Socket connected to Player %i\n", PARTY, ((sender_args*)threadParameters)->connected_to);
 #endif
