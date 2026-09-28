@@ -30,6 +30,7 @@
 #include <new>
 #include <random>
 #include <string>
+#include <atomic>
 #include <thread>
 #include <unordered_map>
 #include <vector>

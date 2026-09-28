@@ -424,6 +424,9 @@ void finalize_(std::string* ips)
     rb = 0;
     sb = 0;
     current_phase = PHASE_LIVE;
+#if RNG_AHEAD == 1 && RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0 && BUFFER_SIZE > 1
+    rng_ahead_start();
+#endif
     print_communication();
 #if WAIT_AFTER_MESSAGES_IF_AHEAD >= 0
     for (int t = 0; t < num_players - 1; t++)

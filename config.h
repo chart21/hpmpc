@@ -366,6 +366,10 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define ADDITIONAL_GEMM_THREADS 0  // Number of additional threads for parallelizing GEMM prepare_dot/mult_public accumulations. 0 = single-threaded. Only effective when dot products per output element are large enough (f >= 64).
 #endif
 
+#ifndef RNG_AHEAD
+#define RNG_AHEAD 0  // Live phase: a background thread produces this party's own random stream (getRandomVal(PSELF), a sequential AES chain) ahead into a ring buffer. Same values, off the critical path.
+#endif
+
 #ifndef NET_WAIT_STATS
 #define NET_WAIT_STATS 0  // Print the time the main thread waited for data (receive_live) and the number of rounds
 #endif
