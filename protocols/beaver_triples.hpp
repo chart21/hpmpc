@@ -135,7 +135,10 @@ inline bool reshare_sim_on()
 // addition [c] = ia0 (+) ia1 = bool(-lz) EARLY (same stage as the LXLY triples); and then handing lz to
 // every conv mask/send and [c] to every A2B-S2 slice in BOTH phases. g_a2b_ia -> boolean-adder input;
 // g_a2b_lz -> conv mask; g_a2b_c -> [c] share consumed by prepare_A2B_S2.
-#define A2B_CONV_BAKE_ACTIVE (A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && DATTYPE == BITLENGTH)
+// Multi-batch (DATTYPE > BITLENGTH) is covered except with MODELWEIGHTS_KNOWN_DURING_PREPROCESSING, whose prescribed
+// triple shares (mwk_choose_r1_*) still treat a Datatype as one word.
+#define A2B_CONV_BAKE_ACTIVE (A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && \
+                              (DATTYPE == BITLENGTH || MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0))
 #if A2B_CONV_BAKE_ACTIVE
 std::vector<DATATYPE> g_a2b_ia;   // this party's random boolean A2B-mask slices (boolean-adder input)
 std::vector<DATATYPE> g_a2b_lz;   // derived conv mask -untranspose(ia); ortho(-lz) == ia
@@ -526,7 +529,7 @@ inline Datatype construct_mwk_r1_baked(Datatype r1_base, Datatype low_rand, int 
 template <typename Datatype, typename func_sub>
 inline Datatype mwk_choose_r1_trunc(int bake_index, func_sub SUB)
 {
-#if A2B_CONV_BAKE_ACTIVE
+#if A2B_CONV_BAKE_ACTIVE && DATTYPE == BITLENGTH  // one word per Datatype (the bake excludes MWK otherwise)
     // A2B bake, TD=0: prescribe r1 so P1's SecureML-truncated mask l1 = TRUNC(-r1) == the committed
     // (sign-extended) mask m1 = a2b_bake_conv_mask. -r1 := (m1 << FRACTIONAL) + low, low < 2^FRACTIONAL
     // fresh: the low bits are truncated away, and m1's top FRACTIONAL bits are sign-extension so
@@ -655,34 +658,41 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
     AES_TYPE saved_counter = aes_counter[PSELF];
     uint64_t saved_numgen = num_generated[PSELF];
 #endif
+    (void) SUB;  // the masks are derived value by value (UINT_TYPE arithmetic), independent of the lane layout
     for (uint64_t base = 0; base + K <= num_slices; base += K)
     {
         Datatype ia[K];
         for (int i = 0; i < K; i++) { ia[i] = getRandomVal(PSELF); g_a2b_ia[base + i] = ia[i]; }
-        // real_ortho (unorthogonalize_boolean) is self-inverse, so with lz = -untranspose(ia): ortho(-lz)==ia.
+        // The A2B slices a group of K words as orthogonalize_boolean(unorthogonalize_arithmetic(x)) (prepare_A2B_S1/S2).
+        // So -lz, value by value (DATTYPE values: K words x DATTYPE / K lanes), is unorthogonalize_boolean(ia), and lz
+        // is packed back with orthogonalize_arithmetic: then ortho(-lz) == ia. With DATTYPE == BITLENGTH the arithmetic
+        // packing is the identity and real_ortho is self-inverse (the original single-batch construction).
         alignas(sizeof(Datatype)) UINT_TYPE t2[DATTYPE];
+        alignas(sizeof(Datatype)) UINT_TYPE m[DATTYPE];
         Datatype tmp[K];
         for (int i = 0; i < K; i++) tmp[i] = ia[i];
         unorthogonalize_boolean(tmp, t2);
-#if TRUNC_DELAYED == 0 && PARTY == 1
-        // TD=0: P1's conv/FC output mask is l1 = TRUNC(-r1), and TRUNC (FUNC_TRUNC = OP_TRUNC under
-        // SKIP_PRE=0) is a LOGICAL shift - its image has the top FRACTIONAL bits ZERO. Constrain the
-        // committed m1 the same way (zero the top F bits; NOT sign-extension) and RE-derive
-        // ia = bool(-m1) so the early boolean addition still yields [c] = bool(-(lz0+m1)). The remask
-        // path (no trunc) also uses this m1 - a validly-masked, just constrained, value - stays correct.
-        for (int i = 0; i < K; i++)
+        for (int j = 0; j < DATTYPE; j++)
         {
-            UINT_TYPE mi = (UINT_TYPE) SUB(SET_ALL_ZERO(), (Datatype) t2[i]);      // m1 = -t2 (numeric)
-            mi &= (((UINT_TYPE) 1 << (BITLENGTH - FRACTIONAL)) - (UINT_TYPE) 1);   // logical-trunc image
-            g_a2b_lz[base + i] = (Datatype) mi;
-            t2[i] = (UINT_TYPE) (0 - mi);                                          // t2 := -m1 (for ia)
+            m[j] = (UINT_TYPE) 0 - t2[j];  // lz, numeric
+#if TRUNC_DELAYED == 0 && PARTY == 1
+            // TD=0: P1's conv/FC output mask is l1 = TRUNC(-r1), and TRUNC (FUNC_TRUNC = OP_TRUNC under
+            // SKIP_PRE=0) is a LOGICAL shift - its image has the top FRACTIONAL bits ZERO. Constrain the
+            // committed m1 the same way (zero the top F bits; NOT sign-extension) and RE-derive
+            // ia = bool(-m1) so the early boolean addition still yields [c] = bool(-(lz0+m1)). The remask
+            // path (no trunc) also uses this m1 - a validly-masked, just constrained, value - stays correct.
+            m[j] &= (((UINT_TYPE) 1 << (BITLENGTH - FRACTIONAL)) - (UINT_TYPE) 1);
+            t2[j] = (UINT_TYPE) 0 - m[j];
+#endif
         }
+#if TRUNC_DELAYED == 0 && PARTY == 1
         Datatype ia_new[K];
         orthogonalize_boolean(t2, ia_new);  // ia = bool(-lz) = bool(-m1)
         for (int i = 0; i < K; i++) g_a2b_ia[base + i] = ia_new[i];
-#else
-        for (int i = 0; i < K; i++) g_a2b_lz[base + i] = SUB(SET_ALL_ZERO(), (Datatype) t2[i]);
 #endif
+        Datatype lz[K];
+        orthogonalize_arithmetic(m, lz);
+        for (int i = 0; i < K; i++) g_a2b_lz[base + i] = lz[i];
     }
 #if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
     aes_counter[PSELF] = saved_counter;
