@@ -661,6 +661,9 @@ bool test_comparisons(DATATYPE* res)
 {
     int num_tests = 0;
     int num_passed = 0;
+    // the test inputs are shared directly, not produced by a conv / FC with a baked mask: RESHARE_OPT_SIM's
+    // skip (and the A2B conv bake) must not assume one
+    g_msb_input_baked = false;
 
 #if TEST_EQZ == 1
     test_function(num_tests, num_passed, "EQZ", test_EQZ<Share>);
