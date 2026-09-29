@@ -1,10 +1,16 @@
 #!/bin/bash
 # mxall.sh PAIR LIST REPS [FILTER]: run the variants of LIST (built in /root/vx on both nodes) REPS times each,
 # appending CSV rows to /tmp/mx/res_<PAIR>.csv (see vsum.sh for the columns)
+# MX_MODEL=wd: the AdamW model (adam_001_wd) instead of Cifar_adam_001; MX_OUT: another CSV
 PAIR=$1 L=$2 R=${3:-1} F=${4:-.}
-E="MODEL_DIR=nn/Pygeon/models/pretrained/Cifar_adam_001 MODEL_FILE=ResNet50_avg_CIFAR-10_standard_best.bin DATA_DIR=nn/Pygeon/data/datasets SAMPLES_FILE=CIFAR-10_standard_test_images.bin LABELS_FILE=CIFAR-10_standard_test_labels.bin"
+if [ "$MX_MODEL" = wd ]; then
+  M="MODEL_DIR=nn/Pygeon/models/pretrained/adam_001_wd MODEL_FILE=ResNet50_avg_AdamW_d05_wd003_lr0001_ep100_acc74_35.bin"
+else
+  M="MODEL_DIR=nn/Pygeon/models/pretrained/Cifar_adam_001 MODEL_FILE=ResNet50_avg_CIFAR-10_standard_best.bin"
+fi
+E="$M DATA_DIR=nn/Pygeon/data/datasets SAMPLES_FILE=CIFAR-10_standard_test_images.bin LABELS_FILE=CIFAR-10_standard_test_labels.bin"
 if [ $PAIR = fp ]; then A=flare B=polynize; else A=algofi B=goracle; fi
-OUT=/tmp/mx/res_$PAIR.csv
+OUT=${MX_OUT:-/tmp/mx/res_$PAIR.csv}
 [ -f $OUT ] || echo "pair,name,tag,wall,pre,online,acc_ok,acc_n,hash,procs,pre_phases_CONV;BN;BOOL;COT;MUX;FC,live_ms_ACT;CONV;BN,mb_pre,mb_live,wait_s;rounds,errors" > $OUT
 for N in $(grep -v '^#' $L | awk '{print $1}' | grep -E "$F"); do
   if ! ssh $A "test -x /root/vx/$N.p0" || ! ssh $B "test -x /root/vx/$N.p1"; then echo "$PAIR,$N,missing" >> $OUT; continue; fi

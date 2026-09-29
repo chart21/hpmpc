@@ -34,8 +34,10 @@ def med(rows, key):
     return statistics.median(vals) if vals else None
 
 
-def cell(rows):
+def cell(rows, full=None):
     ok = [r for r in rows if r]
+    if full:  # a run that lost a process (fewer images classified) is a failed run, not a hash mismatch
+        ok = [r for r in ok if int(r["acc_n"] or 0) == full]
     if not ok:
         return None
     d = {
@@ -69,13 +71,16 @@ def table(runs, pair, mode):
     for fuse in ("0", "1"):
         for a in ADDERS:
             for fam in FAMILIES:
-                t = cell(runs.get((pair, f"{mode}_{a}_{fam}_f{fuse}_t"), []))
-                r = cell(runs.get((pair, f"{mode}_{a}_{fam}_f{fuse}_r"), []))
+                tr = runs.get((pair, f"{mode}_{a}_{fam}_f{fuse}_t"), [])
+                rr = runs.get((pair, f"{mode}_{a}_{fam}_f{fuse}_r"), [])
+                full = max([int(x["acc_n"] or 0) for x in tr + rr if x] or [0])
+                t, r = cell(tr, full), cell(rr, full)
                 bn = "fused" if fuse == "1" else "unfused"
                 if t is None:
                     out.append(f"| {a} | {FAMILY_NAME[fam]} | {bn} | missing / failed | | | | | | | | |")
                     continue
-                same = "-" if r is None else ("yes" if t["hash"] == r["hash"] and len(t["hash"]) == 1 else "NO")
+                same = "- (no complete serial run)" if r is None else (
+                    "yes" if t["hash"] == r["hash"] and len(t["hash"]) == 1 else "NO")
                 if len(t["hash"]) > 1:
                     same += " (runs differ)"
                 if t["errors"]:
