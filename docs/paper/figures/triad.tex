@@ -1,0 +1,35 @@
+% Triad 2PC single-batch all_opt configs, ImageNet ResNet50, dummy weights: preprocessing and online time,
+% configs as given vs. with all optimizations, both machine pairs. Data: data/triad_c{0,1}.dat (make_triad.py)
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 2, horizontal sep=6mm, vertical sep=16mm, yticklabels at=edge left, group name=tri},
+  paper, height=6.2cm, width=6.4cm, y dir=reverse, ymin=-0.6, ymax=17.6,
+  ytick={0,...,17}, yticklabels from table={data/triad_c0.dat}{label},
+  xmajorgrids, axis x line*=bottom, axis y line*=left, title style={align=center},
+  unbounded coords=discard, xmode=log, log basis x=10,
+]
+\nextgroupplot[title={\flag{COMPRESS=0}: preprocessing (s)}, xmin=1, xmax=30, xtick={1,2,5,10,20}, xticklabels={1,2,5,10,20}]
+  \addplot[only marks, mark=o, mark size=1.8pt, draw=sOne] table[x=conffp, y=y] {data/triad_c0.dat};
+  \addplot[dotfp] table[x=finfp, y=y] {data/triad_c0.dat};
+  \addplot[only marks, mark=diamond, mark size=2.2pt, draw=sTwo] table[x=confag, y=y] {data/triad_c0.dat};
+  \addplot[dotag] table[x=finag, y=y] {data/triad_c0.dat};
+\nextgroupplot[title={\flag{COMPRESS=0}: online (s)}, xmin=0.3, xmax=2, xtick={0.3,0.5,1,2}, xticklabels={0.3,0.5,1,2},
+  legend to name=trilegend, legend columns=4, legend style={column sep=8pt}]
+  \addplot[only marks, mark=o, mark size=1.8pt, draw=sOne] table[x=onconffp, y=y] {data/triad_c0.dat};
+  \addplot[dotfp] table[x=onfinfp, y=y] {data/triad_c0.dat};
+  \addplot[only marks, mark=diamond, mark size=2.2pt, draw=sTwo] table[x=onconfag, y=y] {data/triad_c0.dat};
+  \addplot[dotag] table[x=onfinag, y=y] {data/triad_c0.dat};
+  \legend{{as given, Zen 4}, {optimized, Zen 4}, {as given, Zen 3}, {optimized, Zen 3}}
+\nextgroupplot[title={\flag{COMPRESS=1}: preprocessing (s)}, xmin=1, xmax=30, xtick={1,2,5,10,20}, xticklabels={1,2,5,10,20}]
+  \addplot[only marks, mark=o, mark size=1.8pt, draw=sOne] table[x=conffp, y=y] {data/triad_c1.dat};
+  \addplot[dotfp] table[x=finfp, y=y] {data/triad_c1.dat};
+  \addplot[only marks, mark=diamond, mark size=2.2pt, draw=sTwo] table[x=confag, y=y] {data/triad_c1.dat};
+  \addplot[dotag] table[x=finag, y=y] {data/triad_c1.dat};
+\nextgroupplot[title={\flag{COMPRESS=1}: online (s)}, xmin=0.2, xmax=2, xtick={0.2,0.3,0.5,1,2}, xticklabels={0.2,0.3,0.5,1,2}]
+  \addplot[only marks, mark=o, mark size=1.8pt, draw=sOne] table[x=onconffp, y=y] {data/triad_c1.dat};
+  \addplot[dotfp] table[x=onfinfp, y=y] {data/triad_c1.dat};
+  \addplot[only marks, mark=diamond, mark size=2.2pt, draw=sTwo] table[x=onconfag, y=y] {data/triad_c1.dat};
+  \addplot[dotag] table[x=onfinag, y=y] {data/triad_c1.dat};
+\end{groupplot}
+\node[anchor=north] at ($(tri c1r2.south west)!0.5!(tri c2r2.south east) + (0,-0.75cm)$) {\pgfplotslegendfromname{trilegend}};
+\end{tikzpicture}
