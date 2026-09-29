@@ -65,7 +65,7 @@ worker threads.
 ## Results
 
 ImageNet ResNet50, one image, dummy weights; median of two runs; fp = flare / polynize (Zen 4), ag = algofi / goracle
-(Zen 3). : the config as given; : optimized (hpmpc `aeab3ae`); : optimized with `CHEETAH_THREADS=64`
+(Zen 3). `conf`: the config as given; `fin`: optimized (hpmpc `aeab3ae`); `fin64`: optimized with `CHEETAH_THREADS=64`
 (at `ce0608a`).
 
 * Secret weights (A2bits and reshared, A known and A shared): preprocessing 11.3-17.4 -> 2.2-7.1 s on fp (2.3-5.5x),
