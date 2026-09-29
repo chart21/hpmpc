@@ -12,6 +12,10 @@ class ABY2_ONLINE_Share
   public:
     ABY2_ONLINE_Share() {}
     ABY2_ONLINE_Share(Datatype x) { this->m = x; }
+    // raw fields for the vectorized GEMM accumulation (programs/functions/GEMM_fast.hpp)
+    Datatype& raw_m() { return m; }
+    const Datatype& raw_m() const { return m; }
+    const Datatype& raw_l() const { return l; }
     ABY2_ONLINE_Share(Datatype x, Datatype l)
     {
         this->m = x;

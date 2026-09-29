@@ -7,6 +7,17 @@
 #include <thread>
 #include <vector>
 
+// Pause iterations before an idle worker sleeps. Single process: ~6 ms, longer than an online round trip, so the
+// workers are still spinning when the next circuit level arrives (a futex wake per level cost 17-20% of the ImageNet
+// online phase). Several processes share the cores (multi-batch): ~100 us.
+#ifndef GEMM_POOL_SPIN
+#if PROCESS_NUM > 1
+#define GEMM_POOL_SPIN (1 << 14)
+#else
+#define GEMM_POOL_SPIN (1 << 20)
+#endif
+#endif
+
 static_assert(ADDITIONAL_GEMM_THREADS == 0 || ADDITIONAL_RELU_THREADS == 0 || ADDITIONAL_GEMM_THREADS == ADDITIONAL_RELU_THREADS,
               "the GEMM and the ReLU share one pool: its size is the GEMM partition");
 #define WORKER_POOL_THREADS (ADDITIONAL_GEMM_THREADS > ADDITIONAL_RELU_THREADS ? ADDITIONAL_GEMM_THREADS : ADDITIONAL_RELU_THREADS)
@@ -53,7 +64,8 @@ class GemmPool
     }
 
   private:
-    static constexpr int kSpin = 1 << 14;  // ~100 us of pause before a worker sleeps (GEMMs of a layer follow closely)
+    // pause iterations before a worker sleeps (GEMMs of a layer follow closely; 1 << 14 ~ 100 us on Zen 4)
+    static constexpr int kSpin = GEMM_POOL_SPIN;
 
     explicit GemmPool(int n)
     {

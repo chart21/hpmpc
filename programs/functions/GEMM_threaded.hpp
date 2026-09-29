@@ -57,6 +57,9 @@
             };
 
             const int rows_per_thread = m / total_threads;
+#if GEMM_FAST_ELIGIBLE
+            if (!gemm_fast::accumulate(A, B, C, m, p, f))  // vectorized (GEMM_fast.hpp), bit-identical
+#endif
             GemmPool::get().run([&](int t) {  // the calling thread (t = ADDITIONAL_GEMM_THREADS) takes the remainder
                 const int row_start = t * rows_per_thread;
                 accum_rows(row_start, t == ADDITIONAL_GEMM_THREADS ? m : row_start + rows_per_thread);

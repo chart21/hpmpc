@@ -13,6 +13,8 @@
 #include "../../protocols/Protocols.h"
 #include "worker_pool.hpp"
 #include <array>
+#include <cstdio>
+#include <source_location>
 #include <vector>
 
 #if ADDITIONAL_RELU_THREADS > 0
@@ -93,7 +95,7 @@ constexpr int kMinSegment = DATTYPE >= 256 ? 64 : 512;
 
 // f(i) for i = 0 .. len - 1 with the side effects of the serial loop, on the worker pool when possible
 template <bool enabled = true, typename F>
-void stream_parallel_for(int len, F&& f)
+void stream_parallel_for(int len, F&& f, std::source_location loc = std::source_location::current())
 {
     if constexpr (!enabled)
     {
@@ -175,19 +177,25 @@ void stream_parallel_for(int len, F&& f)
                 f(start + (int)e);
             tl_stream = nullptr;
             // every element must have consumed exactly the measured amount
-            bool b = c.send != base.send + hi * d.send || c.rnd != base.rnd + hi * d.rnd ||
-                     (base.recv && c.recv != base.recv + hi * d.recv) ||
-                     (base.pre && c.pre != base.pre + hi * d.pre) ||
-                     (base.pre_bool && c.pre_bool != base.pre_bool + hi * d.pre_bool) ||
-                     (base.pre_arith && c.pre_arith != base.pre_arith + hi * d.pre_arith);
+            // bit set of the streams whose use differs: 1 send, 2 rnd, 4 recv, 8 pre, 16 pre_bool, 32 pre_arith,
+            // 64 << x index stream x
+            int b = (c.send != base.send + hi * d.send) | (c.rnd != base.rnd + hi * d.rnd) << 1 |
+                    (base.recv && c.recv != base.recv + hi * d.recv) << 2 |
+                    (base.pre && c.pre != base.pre + hi * d.pre) << 3 |
+                    (base.pre_bool && c.pre_bool != base.pre_bool + hi * d.pre_bool) << 4 |
+                    (base.pre_arith && c.pre_arith != base.pre_arith + hi * d.pre_arith) << 5;
             for (int x = 0; x < IDX_COUNT; x++)
-                b = b || c.idx[x] != base.idx[x] + hi * d.idx[x];
+                b |= (c.idx[x] != base.idx[x] + hi * d.idx[x]) << (6 + x);
             bad[t] = b;
         });
         const Counters b = snapshot();
         for (int t = 0; t < T; t++)
             if (bad[t])
+            {
+                fprintf(stderr, "stream_parallel_for at %s:%u: streams 0x%x differ (1 send, 2 rnd, 4 recv, 8 pre, "
+                        "16 pre_bool, 32 pre_arith, 64<<x index x)\n", loc.file_name(), (unsigned) loc.line(), bad[t]);
                 stream_cursor_misuse("an element whose stream use differs from the first one");
+            }
         if (!same_positions(a, b))
             stream_cursor_misuse("a stream without cursor");
         send_count[PNEXT] += k * d.send;

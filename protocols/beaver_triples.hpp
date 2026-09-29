@@ -137,8 +137,12 @@ inline bool reshare_sim_on()
 // g_a2b_lz -> conv mask; g_a2b_c -> [c] share consumed by prepare_A2B_S2.
 // Multi-batch (DATTYPE > BITLENGTH) is covered except with MODELWEIGHTS_KNOWN_DURING_PREPROCESSING, whose prescribed
 // triple shares (mwk_choose_r1_*) still treat a Datatype as one word.
+// The bake commits one conv mask per full-width A2B slice group: with a reduced ReLU range (COMPRESS: bits
+// REDUCED_BITLENGTH_m..k only) the boolean addition covers k - m of the 32 slices, so most outputs would have no
+// committed mask. Full-width ReLUs only; COMPRESS runs the A2B unbaked.
 #define A2B_CONV_BAKE_ACTIVE (A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && \
-                              (DATTYPE == BITLENGTH || MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0))
+                              (DATTYPE == BITLENGTH || MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0) && \
+                              REDUCED_BITLENGTH_m == 0 && REDUCED_BITLENGTH_k == BITLENGTH)
 #if A2B_CONV_BAKE_ACTIVE
 std::vector<DATATYPE> g_a2b_ia;   // this party's random boolean A2B-mask slices (boolean-adder input)
 std::vector<DATATYPE> g_a2b_lz;   // derived conv mask -untranspose(ia); ortho(-lz) == ia
