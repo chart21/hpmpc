@@ -997,8 +997,8 @@ void generateLayerDummyTriples(type** a,
                 };
 
 #if CHEETAH_CONV_LANES_ACTIVE
-                // The weight masks are the same in every lane (SHARE_PREP: the model owner's mask is -w, and the
-                // model's weights are the same for all lanes' images), so the lanes' convolutions are ONE
+                // The weight masks are the same in every lane (SHARE_PREP: the model owner's share is -w and the other
+                // party's 0, and the model's weights are the same for all lanes' images), so the lanes' convolutions are ONE
                 // convolution over all their images with lane 0's weights: full ciphertexts and one set of weight
                 // transforms instead of one single-image convolution per lane. All layers go to one pipelined call
                 // after the loop (see conv_layers).
@@ -1082,7 +1082,8 @@ void generateLayerDummyTriples(type** a,
             for (auto& d : conv_layers) xs.push_back(d.x), ws.push_back(d.w);
             Iface::generateConvTriplesPackedBatch(keys, conv_parms, A_KNOWN == 0 || PARTY == 1 ? xs.data() : nullptr,
                                                   A_KNOWN == 0 || PARTY == 0 ? ws.data() : nullptr, y_all.data(),
-                                                  CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB2);
+                                                  CHEETAH_PARTY, CHEETAH_THREADS,
+                                                  A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB);
             uint64_t off = 0;
             for (auto& d : conv_layers) {
                 for (uint64_t i = 0; i < d.y_size; i++) {
