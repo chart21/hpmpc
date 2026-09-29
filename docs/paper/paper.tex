@@ -506,6 +506,11 @@ The eight triples of a layer are therefore one convolution over eight images wit
 that no lane's masks differ in any layer or process. With three HE/OT threads per process the conv phase falls from 8.4--8.7 to 3.8--3.9\s
 and P0's preprocessing traffic by 50--62\% (\cref{tab:lanes}); four threads, which enable the pipeline, gain nothing more.
 With the AdamW model the accuracy is unchanged (PPA 121 of 192 against 123 without, RCA 131, PPA4 127).
+The premise does not depend on \flag{A_KNOWN}: input sharing gives the model owner the share $-w$ and the other party 0 in
+every lane either way, and \flag{A_KNOWN=0} only turns the triple into an AB triple, for which both parties encrypt their
+shares. The lane batching therefore also applies to \flag{A_KNOWN=0}. In a local test (one process, 8 lanes of 4 images,
+4 HE threads, AdamW model) the lane check stays silent for both parties, the conv phase falls from 12.9 to 7.2\s and the
+conv traffic from 1036 to 540\,MB per direction, and 22 against 23 of 32 images are classified correctly.
 
 \begin{table}[t]
 \centering\small
@@ -670,9 +675,9 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
 \section{Limitations and open problems}
 
 \begin{itemize}\itemsep1pt
-\item \textbf{Multi-batch convolutions with \flag{A_KNOWN=0}.} The lane batching needs identical weight masks in every
-  lane, which only \flag{A_KNOWN=1} guarantees. With \flag{A_KNOWN=0} each lane's masks are shared independently, and the
-  conv triples still take one single-image convolution per lane and layer.
+\item \textbf{Multi-batch \flag{A_KNOWN=0} on the testbed.} The lane batching applies to \flag{A_KNOWN=0} as well
+  (\cref{sec:multi}), but the multi-batch \flag{A_KNOWN=0} numbers of \cref{fig:settings} were measured before it was
+  enabled there; only the local test above covers it.
 \item \textbf{Truncation.} ABY2 has no reduced-slack or exact truncation yet. It is not needed for accuracy with the
   AdamW model, but it would remove the truncation noise (\cref{sec:eval}).
 \item \textbf{Weights known in preprocessing.} The multi-batch a2b bake still excludes
