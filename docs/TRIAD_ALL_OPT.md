@@ -122,3 +122,64 @@ ImageNet ResNet50, one image, dummy weights; median of two runs; fp = flare / po
 | reshared, public | RCA | 1.30 | 1.28 | 1.25 | 1.40 | 1.34 | 1.31 | 0.625 | 0.390 | 0.549 | 0.379 |
 | reshared, public | PPA | 1.72 | 1.71 | 1.61 | 1.93 | 1.83 | 1.74 | 0.635 | 0.397 | 0.596 | 0.410 |
 | reshared, public | PPA4 | 1.93 | 1.88 | 1.81 | 2.08 | 1.99 | 1.88 | 0.658 | 0.402 | 0.593 | 0.415 |
+
+## Communication
+
+MiB sent plus received by P0 (both directions; P1's counters mirror P0's), from the fp logs; every value is identical
+in both reruns and on ag. Source `docs/variant_data/triad/comm_fp.csv` (triple counters in MiB, network counters in
+10^6 bytes, converted), plot data `docs/paper/data/triad_comm_c{0,1}.dat` (`make_triad.py`), paper Fig. 17.
+`triples`: HE + OT generation incl. key exchange; `pre`: triples + the network's preprocessing pass.
+
+* Secret weights: preprocessing 1.35-1.86x less with COMPRESS=0, 1.61-1.92x with COMPRESS=1. Conv triples ~1,000 ->
+  479 MiB (A known), 2,003 -> 958 MiB (A not known). MWK builds also send P1's share corrections (4 B per conv output,
+  42 MiB); the pipelined build sends them after the conv batch, so the log counts them under `FC`.
+* CUT: PPA4 needs 12 MiB (reshared) / 74 MiB (A2bits, with the bake) fewer multi-input AND tuples; online -4..8% for the
+  secret-weight COMPRESS=0 builds except A2bits PPA4. Not eligible for public weights (TRUNC_DELAYED=1).
+* A2B bake with public weights (A2bits, COMPRESS=0): +69 MiB in the preprocessing pass, the rebase of all 9.0 M ReLU
+  inputs (one word per value and party); online unchanged.
+
+### COMPRESS=0
+
+| config | adder | triples conf | triples fin | pre conf | pre fin | pre factor | online conf | online fin | online factor |
+|---|---|---|---|---|---|---|---|---|---|
+| A2bits | RCA | 1453 | 930 | 1518 | 992 | 1.53 | 178.5 | 167.8 | 1.06 |
+| A2bits | PPA | 1514 | 991 | 1633 | 1118 | 1.46 | 296.5 | 279.3 | 1.06 |
+| A2bits | PPA4 | 1749 | 1152 | 1973 | 1365 | 1.45 | 165.5 | 165.5 | 1.00 |
+| A2bits, A not known | RCA | 2414 | 1368 | 2480 | 1432 | 1.73 | 220.9 | 210.2 | 1.05 |
+| A2bits, A not known | PPA | 2475 | 1430 | 2595 | 1557 | 1.67 | 338.9 | 321.8 | 1.05 |
+| A2bits, A not known | PPA4 | 2710 | 1591 | 2936 | 1804 | 1.63 | 207.9 | 207.9 | 1.00 |
+| A2bits, public | RCA | 406 | 406 | 478 | 546 | 0.87 | 142.2 | 142.2 | 1.00 |
+| A2bits, public | PPA | 468 | 468 | 593 | 661 | 0.90 | 260.3 | 260.3 | 1.00 |
+| A2bits, public | PPA4 | 703 | 703 | 933 | 1002 | 0.93 | 129.3 | 129.3 | 1.00 |
+| reshared | RCA | 1258 | 735 | 1323 | 790 | 1.68 | 212.8 | 196.7 | 1.08 |
+| reshared | PPA | 1350 | 827 | 1502 | 949 | 1.58 | 330.8 | 306.2 | 1.08 |
+| reshared | PPA4 | 2061 | 1526 | 2312 | 1710 | 1.35 | 200.0 | 190.3 | 1.05 |
+| reshared, A not known | RCA | 2219 | 1174 | 2285 | 1230 | 1.86 | 255.2 | 239.2 | 1.07 |
+| reshared, A not known | PPA | 2311 | 1266 | 2434 | 1389 | 1.75 | 373.3 | 348.7 | 1.07 |
+| reshared, A not known | PPA4 | 3022 | 1965 | 3225 | 2150 | 1.50 | 242.3 | 232.7 | 1.04 |
+| reshared, public | RCA | 212 | 212 | 284 | 284 | 1.00 | 176.6 | 176.6 | 1.00 |
+| reshared, public | PPA | 304 | 304 | 462 | 462 | 1.00 | 294.6 | 294.6 | 1.00 |
+| reshared, public | PPA4 | 886 | 886 | 1143 | 1143 | 1.00 | 163.6 | 163.6 | 1.00 |
+
+### COMPRESS=1
+
+| config | adder | triples conf | triples fin | pre conf | pre fin | pre factor | online conf | online fin | online factor |
+|---|---|---|---|---|---|---|---|---|---|
+| A2bits | RCA | 1288 | 765 | 1302 | 779 | 1.67 | 126.9 | 126.9 | 1.00 |
+| A2bits | PPA | 1288 | 765 | 1308 | 785 | 1.67 | 146.2 | 146.2 | 1.00 |
+| A2bits | PPA4 | 1307 | 785 | 1351 | 828 | 1.63 | 120.5 | 120.5 | 1.00 |
+| A2bits, A not known | RCA | 2249 | 1204 | 2264 | 1219 | 1.86 | 169.3 | 169.3 | 1.00 |
+| A2bits, A not known | PPA | 2249 | 1204 | 2270 | 1225 | 1.85 | 188.6 | 188.6 | 1.00 |
+| A2bits, A not known | PPA4 | 2268 | 1223 | 2313 | 1268 | 1.82 | 162.9 | 162.9 | 1.00 |
+| A2bits, public | RCA | 242 | 242 | 262 | 262 | 1.00 | 90.6 | 90.6 | 1.00 |
+| A2bits, public | PPA | 242 | 242 | 268 | 268 | 1.00 | 110.0 | 110.0 | 1.00 |
+| A2bits, public | PPA4 | 261 | 261 | 311 | 311 | 1.00 | 84.2 | 84.2 | 1.00 |
+| reshared | RCA | 1206 | 683 | 1219 | 696 | 1.75 | 135.5 | 135.5 | 1.00 |
+| reshared | PPA | 1258 | 735 | 1286 | 756 | 1.70 | 154.8 | 154.8 | 1.00 |
+| reshared | PPA4 | 1357 | 834 | 1402 | 868 | 1.61 | 129.1 | 129.1 | 1.00 |
+| reshared, A not known | RCA | 2166 | 1121 | 2182 | 1136 | 1.92 | 177.9 | 177.9 | 1.00 |
+| reshared, A not known | PPA | 2219 | 1174 | 2241 | 1196 | 1.87 | 197.2 | 197.2 | 1.00 |
+| reshared, A not known | PPA4 | 2318 | 1273 | 2353 | 1308 | 1.80 | 171.5 | 171.5 | 1.00 |
+| reshared, public | RCA | 159 | 159 | 180 | 180 | 1.00 | 99.2 | 99.2 | 1.00 |
+| reshared, public | PPA | 212 | 212 | 246 | 246 | 1.00 | 118.6 | 118.6 | 1.00 |
+| reshared, public | PPA4 | 289 | 289 | 340 | 340 | 1.00 | 92.8 | 92.8 | 1.00 |

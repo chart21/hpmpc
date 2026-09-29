@@ -1,0 +1,31 @@
+% Triad 2PC single-batch all_opt configs, ImageNet ResNet50, dummy weights: preprocessing and online traffic (MiB sent
+% plus received by P0), configs as given vs. with all optimizations. Traffic is identical in every run and on both
+% machine pairs. Data: data/triad_comm_c{0,1}.dat (make_triad.py)
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 2, horizontal sep=6mm, vertical sep=16mm, yticklabels at=edge left, group name=trc},
+  paper, height=6.2cm, width=6.4cm, y dir=reverse, ymin=-0.6, ymax=17.6,
+  ytick={0,...,17}, yticklabels from table={data/triad_comm_c0.dat}{label},
+  xmajorgrids, axis x line*=bottom, axis y line*=left, title style={align=center},
+  unbounded coords=discard, xmode=log, log basis x=10,
+]
+\nextgroupplot[title={\flag{COMPRESS=0}: preprocessing (MiB)}, xmin=150, xmax=4000, xtick={200,500,1000,2000,4000},
+  xticklabels={200,500,1000,2000,4000}]
+  \addplot[only marks, mark=o, mark size=1.8pt, draw=sOne] table[x=preconf, y=y] {data/triad_comm_c0.dat};
+  \addplot[dotfp] table[x=prefin, y=y] {data/triad_comm_c0.dat};
+\nextgroupplot[title={\flag{COMPRESS=0}: online (MiB)}, xmin=80, xmax=450, xtick={100,200,300,400},
+  xticklabels={100,200,300,400}, legend to name=trclegend, legend columns=2, legend style={column sep=8pt}]
+  \addplot[only marks, mark=o, mark size=1.8pt, draw=sOne] table[x=onconf, y=y] {data/triad_comm_c0.dat};
+  \addplot[dotfp] table[x=onfin, y=y] {data/triad_comm_c0.dat};
+  \legend{{as given}, {optimized}}
+\nextgroupplot[title={\flag{COMPRESS=1}: preprocessing (MiB)}, xmin=150, xmax=4000, xtick={200,500,1000,2000,4000},
+  xticklabels={200,500,1000,2000,4000}]
+  \addplot[only marks, mark=o, mark size=1.8pt, draw=sOne] table[x=preconf, y=y] {data/triad_comm_c1.dat};
+  \addplot[dotfp] table[x=prefin, y=y] {data/triad_comm_c1.dat};
+\nextgroupplot[title={\flag{COMPRESS=1}: online (MiB)}, xmin=80, xmax=450, xtick={100,200,300,400},
+  xticklabels={100,200,300,400}]
+  \addplot[only marks, mark=o, mark size=1.8pt, draw=sOne] table[x=onconf, y=y] {data/triad_comm_c1.dat};
+  \addplot[dotfp] table[x=onfin, y=y] {data/triad_comm_c1.dat};
+\end{groupplot}
+\node[anchor=north] at ($(trc c1r2.south west)!0.5!(trc c2r2.south east) + (0,-0.75cm)$) {\pgfplotslegendfromname{trclegend}};
+\end{tikzpicture}
