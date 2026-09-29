@@ -454,6 +454,13 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef CHEETAH_CONV_PIPELINE
 #define CHEETAH_CONV_PIPELINE 1  // with CHEETAH_CONV_PACKED 1: all convs in one call, pipelined across layers (encrypt next / evaluate / decrypt previous overlap) instead of one round trip per layer
 #endif
+#ifndef CHEETAH_CONV_LANES
+#define CHEETAH_CONV_LANES 1  // multi-batch: the lanes' conv triples as one convolution over all images, all layers pipelined
+#endif
+// Only where every lane has the same weight masks by construction (SHARE_PREP: lambda_w = -w for the model owner)
+#define CHEETAH_CONV_LANES_ACTIVE (CHEETAH_CONV_LANES == 1 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_TYPE == 0 && \
+    DATTYPE > BITLENGTH && PROTOCOL == 4 && A_KNOWN == 1 && SHARE_PREP == 1 && PUBLIC_WEIGHTS == 0 && \
+    MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0)
 #ifndef CHEETAH_BN_BATCHED
 #define CHEETAH_BN_BATCHED 1  // BN triples of all layers in one elementwise HE product instead of one latency-bound call per layer
 #endif

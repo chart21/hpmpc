@@ -932,10 +932,14 @@ void generateLayerDummyTriples(type** a,
 #endif
     } else {
         uint64_t c_index = 0;
+        struct Deferred { UINT_TYPE *x, *w, *y; uint64_t y_size, c_index; };  // converted back after the call
 #if CHEETAH_BN_BATCHED == 1
-        struct DeferredBN { UINT_TYPE *x, *w, *y; uint64_t y_size, c_index; };  // converted back after the product
-        std::vector<DeferredBN> deferred_bn;
+        std::vector<Deferred> deferred_bn;
         std::vector<Iface::BNTripleLayer> bn_layers;
+#endif
+#if CHEETAH_CONV_LANES_ACTIVE
+        std::vector<Utils::ConvParm> conv_parms;
+        std::vector<Deferred> conv_layers;
 #endif
         for(size_t n = 0; n < params.size(); n++) {
             auto p = params[n];
@@ -992,6 +996,27 @@ void generateLayerDummyTriples(type** a,
                     .padding = p.padding,
                 };
 
+#if CHEETAH_CONV_LANES_ACTIVE
+                // The weight masks are the same in every lane (SHARE_PREP: the model owner's mask is -w, and the
+                // model's weights are the same for all lanes' images), so the lanes' convolutions are ONE
+                // convolution over all their images with lane 0's weights: full ciphertexts and one set of weight
+                // transforms instead of one single-image convolution per lane. All layers go to one pipelined call
+                // after the loop (see conv_layers).
+#if defined(CHEETAH_CONV_LANES_CHECK) && (A_KNOWN == 0 || PARTY == 0)
+                {  // debug: the premise, every lane's weight masks equal lane 0's
+                    uint64_t diff = 0;
+                    for (int j = 1; j < factor; j++)
+                        for (uint64_t i = 0; i < w_size; i++) diff += w[j * w_size + i] != w[i];
+                    if (diff)
+                        std::cout << "CONV_LANES_CHECK layer " << n << ": " << diff << " of " << w_size * (factor - 1)
+                                  << " weight masks differ from lane 0" << std::endl;
+                }
+#endif
+                conv_parms.push_back(conv);
+                conv_layers.push_back({x, w, y, y_size, c_index});
+                c_index += y_size;
+                continue;
+#else
 #if CHEETAH_CONV_PACKED == 1
                 Iface::generateConvTriplesPacked(keys,
 #else
@@ -1003,6 +1028,7 @@ void generateLayerDummyTriples(type** a,
                         A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
                         factor
                 );
+#endif
             } else if constexpr (std::is_same_v<LayerParams, FullyConnectedParameter>) {
                 Iface::generateFCTriplesCheetah(keys,
                         x, w, y,
@@ -1046,6 +1072,32 @@ void generateLayerDummyTriples(type** a,
             delete[] y;
             c_index += y_size;
         }
+#if CHEETAH_CONV_LANES_ACTIVE
+        if (!conv_layers.empty()) {
+            // one output buffer, the layers at consecutive offsets (generateConvTriplesPackedBatch's layout)
+            uint64_t total = 0;
+            for (auto& d : conv_layers) total += d.y_size * factor;
+            std::vector<UINT_TYPE> y_all(total);
+            std::vector<UINT_TYPE*> xs, ws;
+            for (auto& d : conv_layers) xs.push_back(d.x), ws.push_back(d.w);
+            Iface::generateConvTriplesPackedBatch(keys, conv_parms, A_KNOWN == 0 || PARTY == 1 ? xs.data() : nullptr,
+                                                  A_KNOWN == 0 || PARTY == 0 ? ws.data() : nullptr, y_all.data(),
+                                                  CHEETAH_PARTY, CHEETAH_THREADS, Utils::PROTO::AB2);
+            uint64_t off = 0;
+            for (auto& d : conv_layers) {
+                for (uint64_t i = 0; i < d.y_size; i++) {
+                    alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+                    for (int j = 0; j < factor; j++)
+                        temp[j] = y_all[off + j * d.y_size + i];
+                    orthogonalize_arithmetic(temp, c + d.c_index + i, 1);
+                }
+                off += d.y_size * factor;
+                delete[] d.x;
+                delete[] d.w;
+                delete[] d.y;
+            }
+        }
+#endif
 #if CHEETAH_BN_BATCHED == 1
         if (!bn_layers.empty()) {
             Iface::generateBNTriplesBatched(keys, bn_layers, CHEETAH_PARTY, CHEETAH_THREADS,
