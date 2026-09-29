@@ -69,3 +69,19 @@ static void trunc_pr_in_place(T* val, const int len)
         val[i].complete_public_mult_fixed();
     }
 }
+
+#if PROTOCOL == 4 && PUBLIC_WEIGHTS == 1 && DATAOWNER != -1
+// trunc_pr_in_place for the output of the FIRST layer under PUBLIC_WEIGHTS (g_a_known_input): its input was the raw
+// data-owner share (the non-owner's mask is 0) and the public weights multiply locally, so the value still sits
+// entirely in the data owner's share, where the SecureML local truncation wraps for positive values (see GEMM.hpp).
+// The owner truncates it in the clear with an arithmetic shift and re-masks; same single message as trunc_pr.
+template <typename T>
+static void trunc_a_known_in_place(T* val, const int len)
+{
+    for (int i = 0; i < len; i++)
+        val[i] = val[i].prepare_mult_public_fixed_a_known(1);
+    T::communicate();
+    for (int i = 0; i < len; i++)
+        val[i].complete_mult_public_fixed_a_known();
+}
+#endif
