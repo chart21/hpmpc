@@ -78,12 +78,10 @@
 #endif
 #if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
                 C[i].mask_and_send_dot_a_known_pre_with_triple(i);
-#else
-#if A_KNOWN == 1
+#elif CONV_TRIPLES == 1 && PROTOCOL == 4  // as the serial path: the conv triple's share for ANY A_KNOWN
                 C[i].mask_and_send_dot_without_trunc_with_triple(i);
 #else
-                C[i].mask_and_send_dot();
-#endif
+                C[i].mask_and_send_dot_without_trunc();
 #endif
 #else // INTERLEAVE_COMM == 0
 #if A_KNOWN == 1
@@ -96,12 +94,10 @@
 #if INTERLEAVE_COMM == 1
 #if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
                 C[i].mask_and_send_dot_a_known_pre_with_triple(i);
-#else
-#if A_KNOWN == 1
+#elif CONV_TRIPLES == 1 && PROTOCOL == 4  // as the serial path: the conv triple's share for ANY A_KNOWN
                 C[i].mask_and_send_dot_with_triple(i);
 #else
                 C[i].mask_and_send_dot();
-#endif
 #endif
 #else // INTERLEAVE_COMM == 0
 #if A_KNOWN == 1
@@ -119,11 +115,19 @@
 #if TRUNC_DELAYED == 1 || TRUNC_APPROACH > 0
                 // no truncation needed
 #else
-                C[i] = C[i].prepare_mult_public_fixed(1);
+#if DATAOWNER != -1
+                // as the serial path: the first layer's input is the raw data-owner share, so the owner truncates
+                // in the clear (complete_GEMM_CPU completes it the same way; the regular truncation deadlocked)
+                if (g_a_known_input)
+                    C[i] = C[i].prepare_mult_public_fixed_a_known(1);
+                else
+#endif
+                    C[i] = C[i].prepare_mult_public_fixed(1);
 #endif
 #endif
             });
-#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && A_KNOWN == 1 && PUBLIC_WEIGHTS == 0
+// the indexed conv-triple reads above do not advance the cursor: skip the layer's block (ANY A_KNOWN, as GEMM.hpp)
+#if INTERLEAVE_COMM == 1 && PROTOCOL == 4 && CONV_TRIPLES == 1 && PUBLIC_WEIGHTS == 0
             if(current_phase == PHASE_LIVE)
                 preprocessed_outputs_arithmetic_index[0] += m * p;
 #endif
