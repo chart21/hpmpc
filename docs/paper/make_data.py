@@ -59,8 +59,18 @@ for i, (label, key) in enumerate(steps):
 write("imagenet_steps.dat", ["x", "step", "conv", "keysetup", "bool", "muxcotfc", "other", "total", "trafficMiB"], lines)
 
 # Variant study, round 4 (+ multi-batch a2b from the 64404c3 builds): per variant pre / online on both pairs
+def latest(*names):
+    """the first existing CSV of names (newest round first)"""
+    for n in names:
+        if (VD / n).exists():
+            return load(VD / n)
+    raise FileNotFoundError(names)
+
+
+SRC = {"s": ("res_fp_r5.csv", "res_ag_r5.csv"), "m": ("res_fp_r5m.csv", "res_ag_r5m.csv")}
 for mode in ("s", "m"):
-    fp, ag = load(VD / "res_fp_r4a.csv"), load(VD / "res_ag_r4a.csv")
+    fp = latest(SRC[mode][0], "res_fp_r4a.csv")
+    ag = latest(SRC[mode][1], "res_ag_r4a.csv")
     lines = []
     x = 0
     for fuse in ("1", "0"):
@@ -86,17 +96,29 @@ write("machine_ratio.dat", ["mode", "variant", "pre", "online"], lines)
 
 # Round 2 -> round 4 (flare / polynize), plain family: the effect of the shared-OT tuples and the batched BN
 r2, r4 = load(VD / "res_fp.csv"), load(VD / "res_fp_r4.csv")
+final = {"s": latest("res_fp_r5.csv", "res_fp_r4.csv"), "m": latest("res_fp_r5m.csv", "res_fp_r4.csv")}
 lines = []
 for mode in ("s", "m"):
     for fuse in ("1", "0"):
         for a in ADDERS:
             n = f"{mode}_{a}_plain_f{fuse}_t2"
-            lines.append((f"{mode}-{a}-f{fuse}", f"{med(r2[n], 4):.3f}", f"{med(r4[n], 4):.3f}"))
+            lines.append((f"{mode}-{a}-f{fuse}", f"{med(r2[n], 4):.3f}", f"{med(final[mode][n], 4):.3f}"))
 write("r2_r4.dat", ["variant", "r2", "r4"], lines)
+# per mode for the figure: round 2, round 4 and the final code, PPA4 first
+for mode in ("s", "m"):
+    lines = []
+    for i, (a, fuse) in enumerate((a, f) for a in ("ppa4", "ppa", "rca") for f in ("1", "0")):
+        n = f"{mode}_{a}_plain_f{fuse}_t2"
+        lines.append((str(i), "{" + PRETTY[a] + (", fused}" if fuse == "1" else ", unfused}"), f"{med(r2[n], 4):.3f}",
+                      f"{med(r4[n], 4):.3f}", f"{med(final[mode][n], 4):.3f}"))
+    write(f"rounds_{mode}.dat", ["i", "label", "r2", "r4", "fin"], lines)
 
 # Accuracy with the AdamW model: 100-image single batch and 192-image multi-batch, per variant
-single = {r["name"]: r for r in csv.DictReader(open(VD / "res_fp_wd.csv")) if r.get("pre")}
-multi = {r["name"]: r for r in csv.DictReader(open(VD / "res_ag_wda.csv")) if r.get("pre")}
+if (VD / "res_fp_final_wd.csv").exists():  # final code, both modes on flare / polynize
+    single = multi = {r["name"]: r for r in csv.DictReader(open(VD / "res_fp_final_wd.csv")) if r.get("pre")}
+else:
+    single = {r["name"]: r for r in csv.DictReader(open(VD / "res_fp_wd.csv")) if r.get("pre")}
+    multi = {r["name"]: r for r in csv.DictReader(open(VD / "res_ag_wda.csv")) if r.get("pre")}
 lines = []
 x = 0
 for fuse in ("1", "0"):
@@ -127,6 +149,8 @@ print("wrote", sorted(p.name for p in OUT.glob("*.dat")))
 # Settings: A_KNOWN=1 (round 4) vs A_KNOWN=0 vs public weights (TRUNC_DELAYED=1, BIT_INJECTION_TRUNC_SIM=1),
 # all families, flare / polynize; public-weight accuracy with the AdamW model on algofi / goracle
 kpw = load(VD / "res_fp_kpw.csv")
+r5 = latest("res_fp_r5.csv", "res_fp_r4.csv")
+r5m = latest("res_fp_r5m.csv", "res_fp_r4.csv")
 pwacc = {r["name"]: r for r in csv.DictReader(open(VD / "res_ag_pwwd.csv")) if r.get("pre")}
 for mode in ("s", "m"):
     lines = []
@@ -135,9 +159,11 @@ for mode in ("s", "m"):
         for a in ADDERS:
             n1, n0, npw = (f"{mode}_{a}_plain_f{fuse}_{s}" for s in ("t2", "k0", "pw"))
             val = lambda rows, n, i: f"{med(rows[n], i):.3f}" if n in rows else "nan"
+            a1 = r5 if mode == "s" else r5m                     # final rounds
+            a0 = r5 if (mode == "s" and n0 in r5) else kpw
             lines.append((y, "{" + PRETTY[a] + (", fused" if fuse == "1" else ", unfused") + "}",
-                          val(r4, n1, 4), val(kpw, n0, 4), val(kpw, npw, 4),
-                          val(r4, n1, 5), val(kpw, n0, 5), val(kpw, npw, 5)))
+                          val(a1, n1, 4), val(a0, n0, 4), val(kpw, npw, 4),
+                          val(a1, n1, 5), val(a0, n0, 5), val(kpw, npw, 5)))
             y += 1
     write(f"settings_{mode}.dat", ["y", "label", "pre1", "pre0", "prepw", "on1", "on0", "onpw"], lines)
 # ranges over all 30 variants per setting, for the text

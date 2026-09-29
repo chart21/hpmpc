@@ -28,7 +28,7 @@
 \title{Communication and Runtime Engineering\\for Two-Party ResNet Inference in HPMPC\\[4pt]
 \large ABY2 with HE and silent-OT preprocessing}
 \author{Technical report, HPMPC \texttt{dbg} branch\\[2pt]
-\small hpmpc \texttt{4dd999b}, ConvTriple \texttt{3e80748}, flexNN \texttt{ce50579}}
+\small hpmpc \texttt{97772ef}, ConvTriple \texttt{fa7b952}, flexNN \texttt{b1ce619}}
 \date{September 29, 2026}
 
 \begin{document}
@@ -39,16 +39,21 @@ We describe the optimizations and fixes that make HPMPC's two-party ABY2 inferen
 reproducible and correct across all of its protocol variants. The work targets both communication and
 runtime, in the preprocessing phase (homomorphic encryption for linear layers, silent OT for Boolean
 material) and in the online phase (round latency and per-round work). For one ImageNet image,
-preprocessing drops from 17.1\s to 4.3\s on two AMD EPYC 7543 hosts (3.2\s on EPYC 9354) and
+preprocessing drops from 17.1\s to 4.3\s on two AMD EPYC 7543 hosts (3.3\s on EPYC 9354) and
 its triple traffic from 1112 to 587\,MiB. The online phase drops from 2.4--4.3\s to 0.70\s.
 BatchNorm triples shrink from 5.7\,GB to 0.19\,GB of traffic per
 10 CIFAR-10 images, and Beaver 3- and 4-tuples need half the OTs and about 45\% less traffic.
+Evaluating several conv-triple chunks at once halves the CIFAR-10 conv phase, and in multi-batch mode the eight
+lanes of a register share one convolution, which cuts the conv phase per process from 8.6 to 3.9\s and the
+preprocessing traffic by half.
 On CIFAR-10 we evaluate 30 protocol variants (three MSB adders, five ReLU families, fused and unfused
-BatchNorm) in single-batch and 192-image multi-batch mode on two machine pairs. Per 10 images, preprocessing takes 1.6--3.1\s and the online phase 0.35--0.52\s; 192 images take 12.5--24.4\s of preprocessing. With public weights, which need no linear-layer triples, preprocessing takes 0.9--2.0\s per 10 images.
-With the AdamW-trained ResNet50, every variant classifies 62--73 of 100 images (plaintext 76) and
-60--69\% of 192 images (plaintext 71.9\%). Along the way we fixed a thread race, two connection hangs, two protocol
-bugs that broke whole variant families, and the sources of run-to-run nondeterminism: all 60
-threaded builds now reproduce their serial reference bit for bit.
+BatchNorm) in single-batch and 192-image multi-batch mode on two machine pairs. On the EPYC 9354 pair, preprocessing
+takes 1.3--2.7\s per 10 images and the online phase 0.35--0.50\s; 192 images take 7.8--19.5\s of preprocessing.
+Public weights, which need no linear-layer triples, and fully shared weight masks (\flag{A_KNOWN=0}) work in every variant.
+With the AdamW-trained ResNet50, every variant classifies 62--72 of 100 images (plaintext 76) and
+118--131 of 192 (61--68\%; plaintext 71.9\%). Along the way we fixed a thread race, two connection hangs, four protocol
+bugs that broke whole variant families, and the sources of run-to-run nondeterminism: all 60 threaded builds
+reproduced their serial reference bit for bit, and the final single-batch builds still give the same outputs.
 \end{abstract}
 
 \section{Introduction}
@@ -67,14 +72,16 @@ and reproducible system. Its focus is communication and runtime; \cref{fig:summa
 \begin{itemize}\itemsep1pt
 \item \textbf{HE preprocessing} (\cref{sec:he}): a packed and pipelined convolution evaluator, an exact
   wire format that sends only the bits decryption needs, and BatchNorm triples packed into full
-  ciphertexts and generated for all layers in one product. ImageNet preprocessing: $17.1\s \to 4.3\s$ ($4.0\times$).
+  ciphertexts and generated for all layers in one product, several chunks evaluated at once, and in multi-batch
+  mode one convolution for all lanes. ImageNet preprocessing: $17.1\s \to 4.3\s$ ($4.0\times$).
 \item \textbf{Boolean preprocessing} (\cref{sec:ot}): OT packs sized by total demand, ferret parameters and
   a prefetching LPN step, \flag{TCP_NODELAY} on every channel, bit-packed random OTs, and Beaver tuples
   whose products share one OT per common factor (half the OTs, ${\approx}45\%$ less traffic).
 \item \textbf{Online phase} (\cref{sec:online}): Nagle-free sockets, element-parallel circuit levels for
   batch size one, pooled GEMM threads, an ahead-of-time PRNG and fewer rounds per ReLU. ImageNet online: $2.4\text{--}4.3\s \to 0.70\s$.
 \item \textbf{Correctness and reproducibility} (\cref{sec:correct}): deterministic OT and HE randomness,
-  and fixes for a worker race, lost wake-ups, stale listeners, multi-batch A2B and public-weight BatchNorm.
+  and fixes for a worker race, lost wake-ups, stale listeners, multi-batch A2B, the threaded GEMM, and the
+  BatchNorm of \flag{A_KNOWN=0} and of public weights.
 \item \textbf{Evaluation} (\cref{sec:eval}): 30 variants $\times$ 2 batch modes $\times$ 2 machine pairs,
   with final accuracy on a trained model.
 \end{itemize}
@@ -119,8 +126,33 @@ BatchNorm fused into the preceding convolution or unfused. All variants share \f
 \paragraph{Workloads.} ResNet50 on CIFAR-10 in two modes. \emph{Single batch}: one process,
 32-bit lanes (\flag{DATTYPE=32}), 10 images, 32 HE/OT threads and 31 extra online threads.
 \emph{Multi-batch}: 24 processes with 256-bit registers of eight 32-bit lanes, 192 images, 3 HE/OT
-threads and one extra online thread per process. The HE preprocessing study uses ResNet50 on one
-$224\times224$ ImageNet image.
+threads and one extra online thread per process. The HE preprocessing study and the online steps use ResNet50 on one
+ImageNet image, \flag{FUNCTION_IDENTIFIER=87}: CHEETAH's ResNet50 layout for 1000 classes, whose $224\times224$ input
+arrives padded to $230\times230$. It runs with a dummy model and image; since no code path depends on the values
+(\cref{sec:zero}), the times are those of a trained model. \Cref{tab:imagenet} lists every flag that differs from the
+defaults in \texttt{config.h}.
+
+\begin{table}[t]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+ImageNet runs & flags beyond the \texttt{config.h} defaults\\
+\midrule
+Model, input & \flag{FUNCTION_IDENTIFIER=87} (default 15), \flag{NUM_INPUTS=1}, \flag{DATTYPE=32} (one image, one process)\\
+Preprocessing & \flag{PRE=1}, \flag{CHEETAH_CONV_PACKED=1} (from s1 on; s0 is CHEETAH's \texttt{HomConv2DSS}),
+  \flag{CHEETAH_CONV_PIPELINE=1} (the default with packing, from s8 on), \flag{CHEETAH_THREADS=32}\\
+Network layers & \flag{FUSE_CONV_BN=1}, \flag{FUSE_RELU_AVG=1}, \flag{RCA_MSB=1}\\
+Roles & \flag{MODELOWNER=P_0}, \flag{DATAOWNER=P_1} (secret weights: \flag{A_KNOWN=1}, \flag{PUBLIC_WEIGHTS=0},
+  \flag{TRUNC_DELAYED=0} and \flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=0} were set explicitly, equal to the defaults)\\
+ConvTriple (CMake) & \flag{TRIPLE_ZERO=ON}; \flag{TRIPLE_FERRET=b12} from s10 on (b13 before)\\
+Online steps (\cref{fig:online}) & in addition \flag{CUT_FRACTIONAL_BITS_OPT=1}, \flag{SEND_BUFFER=100000},
+  \flag{RECV_BUFFER=100000}, \flag{ADDITIONAL_GEMM_THREADS=31}, \flag{ADDITIONAL_RELU_THREADS=31}, \flag{RNG_AHEAD=1}\\
+\bottomrule
+\end{tabularx}
+\caption{Build configuration of the ImageNet measurements. The other flags keep their defaults, e.g.\
+\flag{PROTOCOL=4}, \flag{BITLENGTH=32}, \flag{FRACTIONAL=5}.}
+\label{tab:imagenet}
+\end{table}
 
 \begin{table}[t]
 \centering\small
@@ -178,9 +210,38 @@ s9 & Exact wire format and byte-optimal tiling (conv traffic $588\to479$\,MiB) &
 s10 & Prefetching LPN step, ferret parameters b12 (key setup $1.42\to1.13\s$) & 4.26 & 1.74\\
 \bottomrule
 \end{tabularx}
-\caption{The HE and OT preprocessing steps (ImageNet, algofi / goracle, 32 threads). The same build
-preprocesses in 3.2--3.3\s on flare / polynize.}
+\caption{The HE and OT preprocessing steps (ImageNet, algofi / goracle, 32 threads). \Cref{tab:pairs} compares the s10 build
+on both machine pairs.}
 \label{tab:steps}
+\end{table}
+
+\paragraph{The two machine pairs.} We ran the s10 build on flare / polynize as well (\cref{tab:pairs}). It sends exactly the
+same bytes, and preprocessing takes 3.31 instead of 4.26\s (22\% less). Most of the gap is the convolution
+(1.13 against 1.74\s): the packed evaluator's NTTs and multiply-accumulate use AVX-512 on Zen~4 and AVX2 on Zen~3. The ferret key
+setup and the AND triples, which are bound by memory and AES, gain only 12--14\%. The online phase of this build was still
+dominated by delayed-ACK stalls on both pairs (medians 3.08 and 4.77\s); after the changes of \cref{sec:online} it takes
+0.69--0.73\s on flare / polynize (1,820 rounds, of which P0 waited 0.15--0.16\s for data). The online steps were measured on flare
+/ polynize only, and the PPA4 adder only there: preprocessing 10.8--11.4\s (before the shared-OT tuples) and online 1.05--1.06\s.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+ImageNet, one image, s10 build (median of 3 runs) & algofi / goracle (Zen 3) & flare / polynize (Zen 4) & ratio\\
+\midrule
+Preprocessing (s) & 4.26 & 3.31 & 1.29\\
+\quad key setup (ferret, HE keys) & 1.15 & 1.01 & 1.13\\
+\quad conv triples & 1.74 & 1.13 & 1.55\\
+\quad AND triples & 0.34 & 0.29 & 1.17\\
+\quad multiplexer / COT / FC triples & 0.07 / 0.03 / 0.10 & 0.08 / 0.07 / 0.08 & \\
+Triple traffic, P0 sent / received (MB) & 305.5 / 281.9 & 305.5 / 281.9 & 1\\
+Online (s), before the online changes & 4.77 & 3.08 & \\
+Online (s), final online build (\cref{fig:online}) & -- & 0.69--0.73 & \\
+\bottomrule
+\end{tabular}
+\caption{The same ImageNet build on both machine pairs. The online times of the s10 build vary with delayed-ACK stalls
+(flare / polynize 2.43--3.21\s over three runs).}
+\label{tab:pairs}
 \end{table}
 
 \paragraph{Packed evaluator (s1, s2).} CHEETAH's convolution encrypts one input tile per ciphertext and
@@ -208,6 +269,43 @@ the multiplexer and COT triples run on all threads. Together these steps take pr
 encryption and decryption with P0's evaluation. It sends exactly the same bytes and cuts convolution
 time from 2.6 to 1.9\s; with \flag{A_KNOWN=0}, where both parties encrypt, from 3.9--4.0 to 2.0\s in
 isolation.
+
+\paragraph{Concurrent evaluation.} Even pipelined, AB2 was slower than AB on CIFAR-10: 0.34--0.39\s against
+0.26--0.30\s for the 23 convolutions of the isolated test, although in AB each party evaluates a full convolution under HE.
+Evaluating one chunk (up to 16 images) is a sequence of parallel regions: loading the inputs, the multiply-accumulate over
+blocks of output groups and primes, and masking, flooding and truncating the outputs. On CIFAR's small layers these regions
+have fewer tasks than threads. An AB party keeps its threads busy by overlapping encryption, evaluation and decryption;
+the AB2 weight holder evaluated one chunk after another and sent each result before starting the next (\cref{fig:concurrent}).
+Now three evaluator threads take the chunks in order and a sender thread emits the outputs in chunk order. Chunk $k$
+draws its masks and flooding noise from the PRNG call that the serial loop gave it, so the triples are the same bits
+and every output hash is unchanged. \Cref{tab:concurrent} shows the effect of the number of chunks in flight. AB got the same change.
+End to end, the conv phase of a 10-image preprocessing halves, from 0.54--0.65 to 0.26--0.31\s.
+
+\begin{figure}[t]
+  \centering\input{figures/concurrent}
+  \caption{Why concurrent evaluation helps (schematic). The tail of each evaluation has fewer tasks than threads; with
+  several chunks in flight, the next chunk fills the idle threads.}
+  \label{fig:concurrent}
+\end{figure}
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+isolated pipelined suites, flare / polynize, 32 threads & \multicolumn{2}{c}{AB2 (\flag{A_KNOWN=1})} & \multicolumn{2}{c}{AB (\flag{A_KNOWN=0})}\\
+chunks evaluated at once & CIFAR (s) & ImageNet (s) & CIFAR (s) & ImageNet (s)\\
+\midrule
+1, sending in the evaluation loop (before) & 0.34--0.39 & -- & 0.26--0.30 & 1.03\\
+1, separate sender thread & 0.27--0.29 & 0.94 & & \\
+2 & 0.19--0.20 & 0.77 & & \\
+3 (default) & 0.18--0.19 & 0.73 & 0.21 & 0.82\\
+4 & 0.17--0.18 & 0.75 & & \\
+\bottomrule
+\end{tabular}
+\caption{Conv triples with several chunks in flight (\flag{CONV_PIPE_EVALUATORS}); every output checked exactly. Traffic
+is unchanged: CIFAR 99\,MiB (AB2) and 197\,MiB (AB), ImageNet 479 and 958\,MiB.}
+\label{tab:concurrent}
+\end{table}
 
 \paragraph{Exact wire format (s9).} SEAL serializes a seeded input ciphertext with zstd to 62.4\,KB. P1
 now sends only a 16-byte seed and $c_0$ at exactly $60+49=109$ bits per coefficient (55.8\,KB). P0
@@ -399,6 +497,33 @@ process bases stepped by 3, which caused hangs and wrong triples. With a stride 
 25.0 to 14.0\s with three threads per process (\cref{tab:multi}). One extra online thread per process cuts
 the online phase from 0.81 to 0.67\s with an identical output hash.
 
+\paragraph{Lanes in one convolution.} Each 256-bit register holds eight images (lanes), and the conv triples were
+generated as one single-image convolution per lane and layer, each with its own copy of the weight masks: 424 small,
+unpipelined convolutions per process, with ciphertexts that are mostly empty. The model owner's mask of a weight is $-w$
+(\flag{SHARE_PREP}), and every lane's image uses the same weights, so all lanes have the same weight masks by construction.
+The eight triples of a layer are therefore one convolution over eight images with one set of weights.
+\flag{CHEETAH_CONV_LANES} generates them that way and passes all layers to one pipelined call. A debug check confirmed
+that no lane's masks differ in any layer or process. With three HE/OT threads per process the conv phase falls from 8.4--8.7 to 3.8--3.9\s
+and P0's preprocessing traffic by 50--62\% (\cref{tab:lanes}); four threads, which enable the pipeline, gain nothing more.
+With the AdamW model the accuracy is unchanged (PPA 121 of 192 against 123 without, RCA 131, PPA4 127).
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+multi-batch, 192 images, flare / polynize & \multicolumn{2}{c}{preprocessing (s)} & \multicolumn{2}{c}{conv phase per process (s)} & P0 sent (MB)\\
+& before & lanes & before & lanes & before $\to$ lanes\\
+\midrule
+RCA, unfused & 13.7 & 8.9 & 8.64 & 3.87 & 8,884 $\to$ 4,459\\
+RCA, fused & 12.5 & 8.0 & 8.43 & 3.86 & 7,188 $\to$ 2,763\\
+PPA, unfused & 16.9 & 12.0 & 8.73 & 3.88 & 9,022 $\to$ 4,597\\
+PPA4, unfused & 22.6 & 16.7 & 8.67 & 3.82 & 10,238 $\to$ 5,813\\
+\bottomrule
+\end{tabular}
+\caption{Conv triples of all lanes as one convolution (\flag{CHEETAH_CONV_LANES}), plain family, 3 HE/OT threads per process.}
+\label{tab:lanes}
+\end{table}
+
 \begin{table}[t]
 \centering\small
 \begin{tabular}{@{}rrrrrr@{}}
@@ -419,8 +544,9 @@ threads per process, after the port-stride fix.}
 % ------------------------------------------------------------------------------------------------
 \section{Correctness and reproducibility}\label{sec:correct}
 
-Fast code is only useful if its outputs are right and repeatable. We made every run bit-reproducible and
-compared each threaded build against a serial one; this exposed the following bugs.
+Fast code is only useful if its outputs are right and repeatable. We made every run bit-reproducible, compared each
+threaded build against a serial one and bisected every configuration that lost accuracy over the added
+optimizations; this exposed the following bugs.
 
 \begin{itemize}\itemsep1pt
 \item \textbf{Nondeterministic OT.} COT and multiplexer triple shares are the ferret outputs, and hpmpc
@@ -436,15 +562,27 @@ compared each threaded build against a serial one; this exposed the following bu
   which holds only for 32-bit lanes; with 256-bit registers the a2b families classified 13--29 of 192
   images. The mask is now computed value by value with the A2B's own inverse packing, which leaves single-batch
   hashes unchanged, and the multi-batch a2b families classify 99--132 of 192 images, like the plain family.
-\item \textbf{Public weights with unfused BN.} With public weights the first convolution's output is
-  still the data owner's sharing (the other party's mask is zero), and SecureML truncation of that sharing wraps for positive values:
-  0 of 10 correct. The owner now truncates it exactly and re-masks, in the same single message.
+\item \textbf{Threaded GEMM with \flag{A_KNOWN=0} or public weights.} The threaded GEMM had diverged from the serial one.
+  With \flag{A_KNOWN=0} it sent the outputs without the conv triple's share and left the triple cursor behind, so
+  every threaded build classified at chance (1 of 10). With public weights and \flag{TRUNC_DELAYED=0} it truncated the
+  first layer with the regular truncation while the completion expected the data owner's exact one, and both parties
+  waited forever in preprocessing. It now follows the serial path.
+\item \textbf{BatchNorm triples with \flag{A_KNOWN=0}.} AB triples multiply the full masks, and the BN product's operand is
+  $x - \mu$, whose mask includes the model owner's mask of $\mu$. The triple was set up over the masks of $x$, which left
+  out $\lambda_s\lambda_\mu = s\mu$: every output was $s\cdot x + \beta$ (unit test failed, ResNet50 unfused 0 of 10).
+  With \flag{A_KNOWN=1} only the data owner's mask share enters, and $\mu$ does not change it.
+\item \textbf{Public weights with unfused BN and delayed truncation.} With public weights the first convolution's output is
+  still the data owner's sharing (the other party's mask is zero). With \flag{TRUNC_DELAYED=1}, with or without
+  \flag{BIT_INJECTION_TRUNC_SIM}, the BN truncated it with the SecureML local truncation, which wraps for positive values
+  (0--1 of 10 correct). The owner now truncates it exactly and re-masks, in the same single message.
 \item \textbf{Test harness.} The ReLU tests fed unbaked inputs to the reshare+sim skip (35\% wrong); the
   harness now declares its inputs unbaked.
 \end{itemize}
 
-After these fixes, all 60 threaded variants (30 single-batch, 30 multi-batch) reproduce their serial build's output hash on flare /
-polynize, and repeated runs are bit-identical. Hashes differ between the machine pairs, because the PRNG
+After these fixes, all 60 threaded variants (30 single-batch, 30 multi-batch) reproduced their serial build's output hash on flare /
+polynize (round 4), and repeated runs are bit-identical. The concurrent conv-triple evaluation keeps every single-batch hash
+of round 4. The lane batching gives the multi-batch triples different random shares, so those hashes changed; its
+correctness rests on the lane check and on the accuracy (\cref{sec:multi,fig:acc}). Hashes differ between the machine pairs, because the PRNG
 draws 512-bit AES blocks with VAES-512 on Zen~4 and 256-bit blocks on Zen~3.
 
 % ------------------------------------------------------------------------------------------------
@@ -460,29 +598,35 @@ draws 512-bit AES blocks with VAES-512 on Zen~4 and 256-bit blocks on Zen~3.
 
 \Cref{fig:matrix} shows preprocessing and online time for every variant on both machine pairs.
 
-\paragraph{Single batch.} On flare / polynize, preprocessing takes 1.6--2.2\s with RCA,
-2.3--2.5\s with PPA and 2.5--2.8\s with PPA4 when BN is fused, and 1.9--2.4, 2.6--2.9 and 2.7--3.1\s
-unfused; the a2b families sit at the upper end. The online phase takes 0.35--0.52\s. Because it is
+\paragraph{Single batch.} On flare / polynize, preprocessing takes 1.3--1.8\s with RCA,
+1.9--2.2\s with PPA and 2.1--2.5\s with PPA4 when BN is fused, and 1.6--2.0, 2.2--2.4 and 2.3--2.7\s
+unfused; the a2b families sit at the upper end. The online phase takes 0.35--0.50\s. Because it is
 round-latency-bound, PPA and PPA4 are slightly faster online than RCA despite more AND gates. The fastest
-configuration in total is RCA with fused BN (1.66\s + 0.40\s).
+configuration in total is RCA with fused BN (1.32\s + 0.39\s).
 
-\paragraph{Multi-batch.} 192 images take 12.5--16.6\s (RCA), 15.7--19.8\s (PPA) and 18.7--24.4\s (PPA4)
-of preprocessing and 0.54--0.79\s online. Per image that is 65--127\ms of preprocessing, against 166--310\ms in single batch.
+\paragraph{Multi-batch.} 192 images take 7.8--11.7\s (RCA), 11.0--15.0\s (PPA) and 13.9--19.5\s (PPA4)
+of preprocessing and 0.54--0.81\s online. Per image that is 41--101\ms of preprocessing, against 132--267\ms in single batch.
+The a2b+AKTE family is the fastest PPA4 variant here (13.9--14.8\s): its adder needs fewer tuples.
 
-\paragraph{Machines.} In single batch, algofi / goracle is 1--16\% slower in preprocessing than flare / polynize and
-about equal online. Multi-batch is compute-bound, and there Zen~3 needs 1.4--1.7$\times$ as long:
-it lacks AVX-512 for the HE NTTs and the GEMM.
+\paragraph{Machines.} In single batch, algofi / goracle needs 1.13--1.25$\times$ the preprocessing time of flare / polynize
+and 0.84--1.30$\times$ the online time. Multi-batch is compute-bound, and there Zen~3 needs 1.46--1.75$\times$ as long for
+preprocessing and 1.04--1.84$\times$ online: it lacks AVX-512 for the HE NTTs and the GEMM. The lane batching gains less there
+(conv phase per process $14.8\to8.0\s$ against $8.4\to3.8\s$; preprocessing 20--35\% less against 19--38\%).
+ImageNet shows the same pattern (\cref{tab:pairs}).
 
 \begin{figure}[t]
   \centering\input{figures/r2r4}
-  \caption{Preprocessing of the plain family before (round 2) and after (round 4) the shared-OT tuples and the
-  batched BN triples (flare / polynize).}
+  \caption{Preprocessing of the plain family in round 2, round 4 (after the shared-OT tuples and the
+  batched BN triples) and with the final code (concurrent conv-triple evaluation; multi-batch: lane batching), flare / polynize.}
   \label{fig:r2r4}
 \end{figure}
 
-\paragraph{The last two optimizations.} \Cref{fig:r2r4} isolates the effect of the shared-OT tuples and the batched BN
-triples. PPA4 gains most: single batch $4.35\to2.68\s$ unfused and $3.46\to2.61\s$ fused, multi-batch
-$31.5\to22.6\s$ and $30.2\to20.2\s$. Unfused RCA gains $2.51\to1.94\s$ from the batched BN.
+\paragraph{The last optimizations.} \Cref{fig:r2r4} separates the steps. The shared-OT tuples and the batched BN triples
+(round 2 to round 4) help PPA4 most: single batch $4.35\to2.68\s$ unfused and $3.46\to2.61\s$ fused, multi-batch
+$31.5\to22.6\s$ and $30.2\to20.2\s$; unfused RCA gains $2.51\to1.94\s$ from the batched BN. The concurrent conv-triple
+evaluation then saves 0.26--0.55\s in every single-batch variant (10--26\%), and the lane batching 4.5--6.3\s in every
+multi-batch variant (19--38\%). From round 2 to the final code, preprocessing of the plain family falls by 17--44\% in single
+batch and by 30--48\% in multi-batch.
 
 \input{kpw}
 
@@ -490,8 +634,8 @@ $31.5\to22.6\s$ and $30.2\to20.2\s$. Unfused RCA gains $2.51\to1.94\s$ from the 
 
 \begin{figure}[t]
   \centering\input{figures/accuracy}
-  \caption{Accuracy with the AdamW-trained ResNet50, standard probabilistic truncation. Single batch on
-  flare / polynize, multi-batch on algofi / goracle (a2b families: builds with the multi-batch A2B bake).}
+  \caption{Accuracy with the AdamW-trained ResNet50, standard probabilistic truncation, final builds on
+  flare / polynize: 100 images in single batch, 192 in multi-batch (lane-batched conv triples).}
   \label{fig:acc}
 \end{figure}
 
@@ -504,8 +648,10 @@ Setting & images & correct\\
 Plaintext, float (PyTorch) & 100 / 192 & 76 / 138 (71.9\%)\\
 Trio 3PC, standard configuration & 100 & 71\\
 Trio 3PC, reduced-slack truncation (\flag{TRUNC_APPROACH=1}) & 100 & 70\\
-2PC ABY2, single batch, all 30 variants & 100 & 62--73\\
-2PC ABY2, multi-batch, all 30 variants & 192 & 116--132\\
+2PC ABY2, single batch, all 30 variants & 100 & 62--72\\
+2PC ABY2, multi-batch, all 30 variants & 192 & 118--131\\
+2PC ABY2, \flag{A_KNOWN=0}, single / multi-batch & 100 / 192 & 64--72 / 117--133\\
+2PC ABY2, public weights, single / multi-batch & 100 / 192 & 63--73 / 115--131\\
 2PC ABY2, CUT on / off (plain family, 12 runs each) & 1,752 & 1,134 / 1,138\\
 \bottomrule
 \end{tabular}
@@ -514,7 +660,7 @@ Trio 3PC, reduced-slack truncation (\flag{TRUNC_APPROACH=1}) & 100 & 70\\
 \end{table}
 
 Every variant stays above 60\% (\cref{fig:acc,tab:acc}). The spread between variants
-(62--73 of 100) is truncation noise: the variants draw different amounts of randomness, so different
+(62--72 of 100, 118--131 of 192) is truncation noise: the variants draw different amounts of randomness, so different
 values wrap. The adders are exact, with 0 of 32,768 random ReLU inputs wrong for each adder. Fused and unfused BN are equally accurate with this model.
 With the older \texttt{Cifar\_adam\_001} model, probabilistic truncation in the 32-bit ring cost 10--17
 points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW model is much less sensitive to it.
@@ -524,8 +670,11 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
 \section{Limitations and open problems}
 
 \begin{itemize}\itemsep1pt
-\item \textbf{Truncation.} ABY2 has no reduced-slack or exact truncation yet; with fully shared masks
-  (\flag{A_KNOWN=0}) the local truncation wraps, and ResNet50 classifies at chance (\cref{sec:kpw}).
+\item \textbf{Multi-batch convolutions with \flag{A_KNOWN=0}.} The lane batching needs identical weight masks in every
+  lane, which only \flag{A_KNOWN=1} guarantees. With \flag{A_KNOWN=0} each lane's masks are shared independently, and the
+  conv triples still take one single-image convolution per lane and layer.
+\item \textbf{Truncation.} ABY2 has no reduced-slack or exact truncation yet. It is not needed for accuracy with the
+  AdamW model, but it would remove the truncation noise (\cref{sec:eval}).
 \item \textbf{Weights known in preprocessing.} The multi-batch a2b bake still excludes
   \flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING}, whose prescribed shares assume one word per register.
 \item \textbf{Ciphertext occupancy.} At $7\times7$ feature maps, inputs are 5--19\% data and outputs

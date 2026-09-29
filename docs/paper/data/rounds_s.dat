@@ -1,0 +1,7 @@
+i label r2 r4 fin
+0 {PPA4, fused} 3.463 2.614 2.126
+1 {PPA4, unfused} 4.351 2.679 2.421
+2 {PPA, fused} 2.348 2.286 1.942
+3 {PPA, unfused} 3.003 2.563 2.152
+4 {RCA, fused} 1.733 1.662 1.316
+5 {RCA, unfused} 2.513 1.939 1.552

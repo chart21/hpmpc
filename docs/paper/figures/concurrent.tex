@@ -1,0 +1,32 @@
+% Thread occupancy of the conv-triple evaluator (schematic): 8 worker threads, three chunks
+\begin{tikzpicture}[x=0.55cm, y=0.16cm]
+  \tikzset{lbl/.style={font=\scriptsize, text=white}}
+  % \occ{x0}{x1}{thread0}{thread1}{color}
+  \newcommand{\occ}[5]{\fill[#5] (#1,#3) rectangle (#2,#4); \draw[white, line width=0.5pt] (#1,#3) rectangle (#2,#4);}
+  % ---------------- one chunk at a time
+  \node[anchor=east, font=\footnotesize\bfseries, text=inkOne, align=right] at (-0.3,4) {one chunk\\at a time};
+  \fill[gridc] (0,0) rectangle (13.5,8);
+  \foreach \c/\t/\col in {1/0/sOne, 2/4.5/sTwo, 3/9/sThree} {
+    \occ{\t}{\t+2}{0}{8}{\col}
+    \occ{\t+2}{\t+4}{5}{8}{\col}
+    \occ{\t+4}{\t+4.5}{7}{8}{inkTwo}
+    \node[lbl] at (\t+1,4) {chunk \c};
+  }
+  \draw[inkTwo, line width=0.4pt] (13.5,-0.6) -- (13.5,8.6);
+  \node[note, anchor=west] at (13.6,4) {idle threads: the tail of each\\evaluation has few tasks};
+  % ---------------- three chunks at a time
+  \begin{scope}[yshift=-3.3cm]
+    \node[anchor=east, font=\footnotesize\bfseries, text=inkOne, align=right] at (-0.3,4) {three chunks\\at a time};
+    \fill[gridc] (0,0) rectangle (13.5,8);
+    \occ{0}{2}{0}{8}{sOne}   \occ{2}{4}{5}{8}{sOne}
+    \occ{2}{4}{0}{5}{sTwo}   \occ{4}{5.2}{0}{8}{sTwo}  \occ{5.2}{7.2}{5}{8}{sTwo}
+    \occ{5.2}{7.2}{0}{5}{sThree} \occ{7.2}{8.4}{0}{8}{sThree} \occ{8.4}{10.4}{5}{8}{sThree}
+    \occ{4}{4.5}{4}{5}{inkTwo} \occ{7.2}{7.7}{4}{5}{inkTwo} \occ{10.4}{10.9}{7}{8}{inkTwo}
+    \node[lbl] at (1,4) {chunk 1};
+    \node[lbl] at (3,2.5) {chunk 2};
+    \node[lbl] at (6.2,2.5) {chunk 3};
+    \draw[inkTwo, line width=0.4pt] (10.9,-0.6) -- (10.9,8.6);
+    \node[note, anchor=west] at (13.6,4) {the next chunk fills them;\\results still leave in order};
+  \end{scope}
+  \node[note, anchor=north west] at (0,-4.1) {rows: worker threads; dark gray: sending the chunk's output};
+\end{tikzpicture}
