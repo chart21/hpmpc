@@ -1,0 +1,28 @@
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=4 by 1, horizontal sep=2.5mm, yticklabels at=edge left},
+  paper, height=12.2cm, width=4.15cm, y dir=reverse, ymin=-0.8, ymax=33.6,
+  ytick=data, yticklabels from table={data/matrix_s.dat}{variant},
+  xmajorgrids, axis x line*=bottom, axis y line*=left, enlarge x limits=0.06,
+  title style={align=center},
+]
+\nextgroupplot[title={single batch\\preprocessing (s)}, xmin=1.4, xmax=3.6]
+  \addplot[dotfp] table[x=prefp, y=x] {data/matrix_s.dat};
+  \addplot[dotag] table[x=preag, y=x] {data/matrix_s.dat};
+  \draw[gridc, line width=0.6pt] (axis cs:1.4,16.4) -- (axis cs:3.6,16.4);
+\nextgroupplot[title={single batch\\online (s)}, xmin=0.28, xmax=0.62]
+  \addplot[dotfp] table[x=onfp, y=x] {data/matrix_s.dat};
+  \addplot[dotag] table[x=onag, y=x] {data/matrix_s.dat};
+  \draw[gridc, line width=0.6pt] (axis cs:0.28,16.4) -- (axis cs:0.62,16.4);
+\nextgroupplot[title={multi-batch\\preprocessing (s)}, xmin=10, xmax=38,
+  legend style={at={(0.0,-0.045)}, anchor=north, legend columns=2}]
+  \addplot[dotfp] table[x=prefp, y=x] {data/matrix_m.dat};
+  \addplot[dotag] table[x=preag, y=x] {data/matrix_m.dat};
+  \legend{flare / polynize (Zen 4), algofi / goracle (Zen 3)}
+  \draw[gridc, line width=0.6pt] (axis cs:10,16.4) -- (axis cs:38,16.4);
+\nextgroupplot[title={multi-batch\\online (s)}, xmin=0.45, xmax=1.2]
+  \addplot[dotfp] table[x=onfp, y=x] {data/matrix_m.dat};
+  \addplot[dotag] table[x=onag, y=x] {data/matrix_m.dat};
+  \draw[gridc, line width=0.6pt] (axis cs:0.45,16.4) -- (axis cs:1.2,16.4);
+\end{groupplot}
+\end{tikzpicture}

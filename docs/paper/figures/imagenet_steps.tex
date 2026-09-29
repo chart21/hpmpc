@@ -1,0 +1,31 @@
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=1 by 2, vertical sep=6mm, xticklabels at=edge bottom},
+  paper, width=0.98\linewidth, xmin=-0.6, xmax=10.6,
+  xtick={0,...,10}, xticklabels from table={data/imagenet_steps.dat}{step},
+  ymajorgrids, axis x line*=bottom, axis y line*=left,
+]
+\nextgroupplot[
+  height=6.2cm, ybar stacked, bar width=13pt, ymin=0, ymax=19.5,
+  ylabel={preprocessing (s)},
+  legend style={at={(0.99,0.98)}, anchor=north east, legend columns=1},
+  reverse legend,
+]
+  \addplot[fill=sOne, draw=white, line width=0.8pt] table[x=x, y=conv] {data/imagenet_steps.dat};
+  \addplot[fill=sTwo, draw=white, line width=0.8pt] table[x=x, y=keysetup] {data/imagenet_steps.dat};
+  \addplot[fill=sThree, draw=white, line width=0.8pt] table[x=x, y=bool] {data/imagenet_steps.dat};
+  \addplot[fill=sFour, draw=white, line width=0.8pt] table[x=x, y=muxcotfc] {data/imagenet_steps.dat};
+  \addplot[fill=sOther, draw=white, line width=0.8pt] table[x=x, y=other] {data/imagenet_steps.dat};
+  \legend{conv triples (HE), key + OT setup, AND triples, MUX + COT + FC, other}
+  % totals above the stacks
+  \addplot[forget plot, ybar=0pt, draw=none, fill=none, nodes near coords, point meta=explicit symbolic,
+    every node near coord/.style={font=\scriptsize, text=inkOne, anchor=south}]
+    table[x=x, y expr=0.0001, meta=total] {data/imagenet_steps.dat};
+\nextgroupplot[
+  height=3.4cm, ybar, bar width=13pt, ymin=0, ymax=1300,
+  ylabel={triples (MiB)},
+  nodes near coords, every node near coord/.style={font=\scriptsize, text=inkTwo, anchor=south},
+]
+  \addplot[fill=inkTwo!55, draw=white] table[x=x, y=trafficMiB] {data/imagenet_steps.dat};
+\end{groupplot}
+\end{tikzpicture}

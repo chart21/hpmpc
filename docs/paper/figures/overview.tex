@@ -1,0 +1,31 @@
+\begin{tikzpicture}
+  % bands
+  \fill[boxfill!55] (-0.2,0.25) rectangle (13.4,-2.3);
+  \fill[boxfill!55] (-0.2,-2.6) rectangle (13.4,-5.45);
+  \node[anchor=north west, font=\footnotesize\bfseries, text=inkOne] at (-0.1,0.18)
+    {Preprocessing \textmd{(independent of the input; a pass of the circuit over the masks fixes every $\lambda$)}};
+  \node[anchor=south west, font=\footnotesize\bfseries, text=inkOne] at (-0.1,-5.4)
+    {Online \textmd{(per input, on masked values $m = v + \lambda$)}};
+
+  % preprocessing sources, each above the layers that consume it
+  \node[box, minimum width=5.9cm, minimum height=1.2cm] (he) at (3.2,-1.25)
+    {\textbf{HE} (SEAL, $N = 4096$): conv / FC / BN triples $[\lambda_w\cdot\lambda_x]$\\
+     packed, pipelined across layers, exact wire format};
+  \node[box, minimum width=5.8cm, minimum height=1.2cm] (ot) at (10.1,-1.25)
+    {\textbf{Silent OT} (ferret): AND triples,\\Beaver 3/4-tuples, COT / multiplexer triples};
+
+  % online chain
+  \node[box, minimum width=2.9cm, minimum height=1.1cm] (conv) at (1.65,-3.75)
+    {\textbf{Conv / FC}\\local GEMM on $m$\\1 message};
+  \node[box, minimum width=2.4cm, minimum height=1.1cm] (bn) at (4.75,-3.75)
+    {\textbf{BN} (or fused)\\local product\\1 message};
+  \node[box, minimum width=5.8cm, minimum height=1.1cm] (relu) at (10.1,-3.75)
+    {\textbf{ReLU}: A2B $\rightarrow$ MSB adder $\rightarrow$ bit injection\\
+     1 message per adder level: RCA 27 levels,\\PPA / PPA4 fewer levels, more ANDs};
+  \draw[arr] (conv) -- (bn);
+  \draw[arr] (bn) -- (relu);
+
+  \draw[arr, draw=sOne, line width=0.9pt] (conv.north |- he.south) -- (conv.north);
+  \draw[arr, draw=sOne, line width=0.9pt] (bn.north |- he.south) -- (bn.north);
+  \draw[arr, draw=sTwo, line width=0.9pt] (ot.south) -- (relu.north);
+\end{tikzpicture}

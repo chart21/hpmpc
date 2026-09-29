@@ -1,0 +1,34 @@
+% Figure style: palette slots (validated categorical order, light mode), text inks and recessive axes.
+\definecolor{sOne}{HTML}{2A78D6}    % series 1, blue
+\definecolor{sTwo}{HTML}{EB6834}    % series 2, orange
+\definecolor{sThree}{HTML}{1BAF7A}  % series 3, aqua
+\definecolor{sFour}{HTML}{EDA100}   % series 4, yellow
+\definecolor{sOther}{HTML}{A8A6A0}  % neutral "other"
+\definecolor{inkOne}{HTML}{0B0B0B}
+\definecolor{inkTwo}{HTML}{52514E}
+\definecolor{gridc}{HTML}{E4E3DE}
+\definecolor{boxfill}{HTML}{F4F3EF}
+
+\pgfplotsset{
+  compat=1.18,
+  paper/.style={
+    axis line style={draw=inkTwo, line width=0.4pt},
+    tick style={draw=inkTwo, line width=0.4pt},
+    major tick length=2pt,
+    tick label style={font=\scriptsize, text=inkTwo},
+    label style={font=\footnotesize, text=inkOne},
+    title style={font=\footnotesize\bfseries, text=inkOne},
+    legend style={font=\scriptsize, draw=none, fill=none, text=inkOne},
+    legend cell align=left,
+    grid style={draw=gridc, line width=0.4pt},
+    every axis plot/.append style={line width=1pt},
+  },
+  dotfp/.style={only marks, mark=*, mark size=1.9pt, draw=white, line width=0.5pt, fill=sOne},
+  dotag/.style={only marks, mark=diamond*, mark size=2.3pt, draw=white, line width=0.5pt, fill=sTwo},
+}
+\tikzset{
+  box/.style={draw=inkTwo, line width=0.5pt, rounded corners=2pt, fill=boxfill, align=center, font=\footnotesize,
+    inner sep=3pt},
+  note/.style={font=\scriptsize, text=inkTwo, align=center},
+  arr/.style={-{Stealth[length=4pt]}, draw=inkTwo, line width=0.6pt},
+}

@@ -1,0 +1,27 @@
+% Per process, multi-batch PPA4 (24 x DATTYPE 256), flare / polynize: tuple phases before (ConvTriple e3fc972) and after (ed4f83f)
+\pgfplotstableread{
+x kind oldMB newMB olds news oldOT newOT
+0 {3-tuples} 40.16 21.51 7.62 4.56 8 4
+1 {4-tuples} 66.72 37.78 11.42 4.64 22 10
+}\tuples
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=3 by 1, horizontal sep=14mm},
+  paper, width=4.6cm, height=4.4cm,
+  xtick=data, xticklabels from table={\tuples}{kind}, xmin=-0.6, xmax=1.6,
+  ymin=0, ymajorgrids, axis x line*=bottom, axis y line*=left,
+  nodes near coords, every node near coord/.style={font=\scriptsize, text=inkTwo},
+]
+\nextgroupplot[title={random OTs per tuple}, ymax=26, ybar=1pt, bar width=11pt]
+  \addplot[fill=sOther, draw=white] table[x=x, y=oldOT] {\tuples};
+  \addplot[fill=sOne, draw=white] table[x=x, y=newOT] {\tuples};
+\nextgroupplot[title={P0 sent per process (MB)}, ymax=80, ybar=1pt, bar width=11pt]
+  \addplot[fill=sOther, draw=white] table[x=x, y=oldMB] {\tuples};
+  \addplot[fill=sOne, draw=white] table[x=x, y=newMB] {\tuples};
+\nextgroupplot[title={generation time (s)}, ymax=13.5, ybar=1pt, bar width=11pt,
+  legend style={at={(1.02,0.98)}, anchor=north west}]
+  \addplot[fill=sOther, draw=white] table[x=x, y=olds] {\tuples};
+  \addplot[fill=sOne, draw=white] table[x=x, y=news] {\tuples};
+  \legend{one OT per product, one OT per common factor}
+\end{groupplot}
+\end{tikzpicture}

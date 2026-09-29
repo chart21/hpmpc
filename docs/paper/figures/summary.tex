@@ -1,0 +1,43 @@
+% Headline effects: traffic reductions (left) and runtime speedups (right), each labeled before -> after.
+\pgfplotstableread{
+i red txt label
+0 96.7 {5733 $\to$ 187 MB} {BN triples, 10 CIFAR images}
+1 47.2 {1112 $\to$ 587 MiB} {all triples, 1 ImageNet image}
+2 46.4 {40.2 $\to$ 21.5 MB} {Beaver 3-tuples, per process}
+3 43.4 {66.7 $\to$ 37.8 MB} {Beaver 4-tuples, per process}
+4 18.5 {588 $\to$ 479 MiB} {conv triples, exact wire format}
+5 10.7 {23.3 $\to$ 20.8 MB} {ReLU online traffic, RCA (CUT)}
+}\traffic
+\pgfplotstableread{
+i speed txt label
+0 32.6 {6.2 $\to$ 0.19 s} {BN triples, 10 CIFAR images}
+1 7.4 {12.9 $\to$ 1.7 s} {conv triples, 1 ImageNet image}
+2 4.0 {17.1 $\to$ 4.3 s} {preprocessing, 1 ImageNet image}
+3 3.5 {2.4 $\to$ 0.70 s} {online, 1 ImageNet image}
+4 2.4 {8.4 $\to$ 3.5 s} {PPA a2b preprocessing (Nagle off)}
+5 2.1 {19.0 $\to$ 9.2 s} {Beaver tuples, per process}
+6 1.8 {25.0 $\to$ 14.0 s} {multi-batch preprocessing}
+}\speed
+\begin{tikzpicture}
+\begin{axis}[
+  paper, name=traffic, width=8.2cm, height=4.9cm, y dir=reverse, ymin=-0.6, ymax=5.6,
+  xbar, bar width=7pt, xmin=0, xmax=100, xlabel={less traffic (\%)},
+  ytick=data, yticklabels from table={\traffic}{label}, xmajorgrids, axis x line*=bottom, axis y line*=left,
+  title={Communication},
+  nodes near coords, point meta=explicit symbolic,
+  every node near coord/.style={font=\scriptsize, text=inkTwo, anchor=west, xshift=1pt},
+]
+  \addplot[fill=sOne, draw=none] table[x=red, y=i, meta=txt] {\traffic};
+\end{axis}
+\begin{axis}[
+  paper, at={(traffic.south west)}, anchor=north west, yshift=-1.75cm, width=8.2cm, height=5.5cm, y dir=reverse,
+  ymin=-0.6, ymax=6.6, xbar, bar width=7pt, xmode=log, xmin=1, xmax=100, log basis x=10,
+  xtick={1,2,5,10,20,50,100}, xticklabels={1$\times$,2$\times$,5$\times$,10$\times$,20$\times$,50$\times$,100$\times$},
+  xlabel={speedup}, ytick=data, yticklabels from table={\speed}{label}, xmajorgrids,
+  axis x line*=bottom, axis y line*=left, title={Runtime},
+  nodes near coords, point meta=explicit symbolic,
+  every node near coord/.style={font=\scriptsize, text=inkTwo, anchor=west, xshift=1pt},
+]
+  \addplot[fill=sTwo, draw=none] table[x=speed, y=i, meta=txt] {\speed};
+\end{axis}
+\end{tikzpicture}

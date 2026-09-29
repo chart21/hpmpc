@@ -1,0 +1,33 @@
+\begin{tikzpicture}[x=0.95cm, y=0.55cm]
+  \tikzset{blk/.style={draw=white, line width=0.6pt, minimum height=0.46cm, inner sep=0pt, font=\scriptsize,
+    text=white, anchor=west}}
+  % \blk{start}{length}{row y}{color}{label}
+  \newcommand{\blk}[5]{\node[blk, fill=#4, minimum width=#2*0.95cm] at (#1,#3) {#5};}
+  % ---- per layer: enc (1.2) -> eval (2.0) -> dec (1.0), layer by layer
+  \node[anchor=east, font=\footnotesize\bfseries, text=inkOne] at (-0.25,1.7) {per layer};
+  \node[anchor=east, note] at (-0.25,1) {P1}; \node[anchor=east, note] at (-0.25,0) {P0};
+  \foreach \l/\t in {1/0, 2/4.2, 3/8.4} {
+    \blk{\t}{1.2}{1}{sTwo}{enc \l}
+    \blk{\t+1.2}{2}{0}{sOne}{eval \l}
+    \blk{\t+3.2}{1.0}{1}{sThree}{dec \l}
+  }
+  \draw[inkTwo, line width=0.4pt] (0,-0.65) -- (12.6,-0.65);
+  \draw[inkTwo, line width=0.4pt] (12.6,-0.8) -- (12.6,-0.5) node[note, above] {12.6};
+  % ---- pipelined: P1 encrypts ahead and decrypts behind while P0 evaluates
+  \node[anchor=east, font=\footnotesize\bfseries, text=inkOne] at (-0.25,-1.9) {pipelined};
+  \node[anchor=east, note] at (-0.25,-2.6) {P1}; \node[anchor=east, note] at (-0.25,-3.6) {P0};
+  \blk{0}{1.2}{-2.6}{sTwo}{enc 1}
+  \blk{1.2}{1.2}{-2.6}{sTwo}{enc 2}
+  \blk{2.4}{1.2}{-2.6}{sTwo}{enc 3}
+  \blk{3.6}{1.0}{-2.6}{sThree}{dec 1}
+  \blk{5.2}{1.0}{-2.6}{sThree}{dec 2}
+  \blk{7.2}{1.0}{-2.6}{sThree}{dec 3}
+  \blk{1.2}{2}{-3.6}{sOne}{eval 1}
+  \blk{3.2}{2}{-3.6}{sOne}{eval 2}
+  \blk{5.2}{2}{-3.6}{sOne}{eval 3}
+  \draw[inkTwo, line width=0.4pt] (0,-4.25) -- (12.6,-4.25);
+  \draw[inkTwo, line width=0.4pt] (8.2,-4.4) -- (8.2,-4.1) node[note, above] {8.2};
+  \draw[decorate, decoration={brace, amplitude=3pt, mirror}, draw=sOne, line width=0.6pt] (8.2,-4.55) -- (12.6,-4.55);
+  \node[note, text=sOne, anchor=north] at (10.4,-4.75) {no idle waiting};
+  \node[note, anchor=north west] at (0,-4.55) {time units: encrypt 1.2, evaluate 2.0, decrypt 1.0 per layer};
+\end{tikzpicture}

@@ -1,0 +1,33 @@
+\begin{tikzpicture}[x=0.36cm, y=0.5cm]
+  \node[anchor=east, font=\footnotesize, text=inkOne] at (-0.4,0) {one level,};
+  \node[anchor=east, font=\footnotesize, text=inkOne] at (-0.4,-0.7) {send stream};
+  % element 0, measured serially
+  \fill[sOther] (0,-0.25) rectangle (1,0.25);
+  \node[note, anchor=south] at (0.5,0.35) {el.\ 0};
+  % segment 1 on T = 4 workers
+  \foreach \t/\c in {0/sOne, 1/sTwo, 2/sThree, 3/sFour} {
+    \fill[\c] (1+\t*5,-0.25) rectangle (1+\t*5+5,0.25);
+    \node[font=\scriptsize, text=white] at (3.5+\t*5,0) {worker \t};
+  }
+  % elements near the buffer boundary run serially
+  \fill[sOther] (21,-0.25) rectangle (22.2,0.25);
+  % segment 2
+  \foreach \t/\c in {0/sOne, 1/sTwo, 2/sThree, 3/sFour} {
+    \fill[\c] (22.2+\t*2.7,-0.25) rectangle (22.2+\t*2.7+2.7,0.25);
+  }
+  \foreach \x in {1,6,11,16,21,22.2,24.9,27.6,30.3,33} { \draw[white, line width=0.7pt] (\x,-0.25) -- (\x,0.25); }
+  \draw[inkOne, line width=1.1pt] (21.6,-0.6) -- (21.6,0.6);
+  \node[note, anchor=south] at (21.6,0.65) {SEND\_BUFFER boundary};
+  % braces
+  \draw[decorate, decoration={brace, amplitude=3pt, mirror}, draw=inkTwo] (1,-0.5) -- (21,-0.5);
+  \node[note, anchor=north] at (11,-0.85) {segment 1: $k$ elements; worker $t$ starts at $\mathrm{base} + \mathrm{lo}_t\cdot\Delta$};
+  \draw[decorate, decoration={brace, amplitude=3pt, mirror}, draw=inkTwo] (22.2,-0.5) -- (33,-0.5);
+  \node[note, anchor=north] at (27.6,-0.85) {segment 2};
+  % steps
+  \node[note, anchor=north west, align=left] at (0,-2.3)
+    {1.\ Element 0 runs serially and is measured: $\Delta$ = the words it sent, received and read from each\\
+     \phantom{1.\ }preprocessing stream, the random words it drew, and its advances of the triple indices.\\
+     2.\ The other elements run on the pool, each worker with its own cursors into every stream;\\
+     \phantom{2.\ }elements next to a buffer boundary run serially, and every worker's consumption is checked.\\
+     3.\ Messages, their order and their split into buffers are exactly those of the serial loop.};
+\end{tikzpicture}

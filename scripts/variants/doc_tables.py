@@ -40,7 +40,7 @@ def table(rows, mode, suffix):
                 if not ref:
                     continue
                 cell = lambda rs, i, d: "-" if med(rs, i) is None else f"{med(rs, i):.{d}f}"
-                acc = lambda rs: f"{rs[0][6]}/{rs[0][7]}" if rs else "-"
+                acc = lambda rs: f"{rs[0][6]}/{rs[0][7]}" if rs and rs[0][6] else "-"
                 rounds = ref[0][-2].split(";")[-1] if ";" in ref[0][-2] else ""
                 mb = ref[0][-4] if len(ref[0]) >= 16 else ref[0][-3]
                 out.append(f"| {a} | {fname} | {'fused' if fuse == '1' else 'unfused'} | {cell(fp, 4, 2)} | "

@@ -1,0 +1,18 @@
+\begin{tikzpicture}
+\begin{axis}[
+  paper, width=0.62\linewidth, height=11.5cm, y dir=reverse, ymin=-0.8, ymax=33.6,
+  ytick=data, yticklabels from table={data/accuracy.dat}{variant},
+  xmin=50, xmax=82, xlabel={correctly classified (\%)},
+  xmajorgrids, axis x line*=bottom, axis y line*=left,
+  legend style={at={(0.5,-0.07)}, anchor=north, legend columns=2, column sep=6pt},
+]
+  \addplot[only marks, mark=*, mark size=2pt, fill=sOne, draw=white] table[x=single, y=x] {data/accuracy.dat};
+  \addplot[only marks, mark=diamond*, mark size=2.4pt, fill=sTwo, draw=white] table[x=multi, y=x] {data/accuracy.dat};
+    \addplot[sOne, dashed, line width=0.8pt] coordinates {(76,-0.8) (76,33.6)};
+  \addplot[sTwo, dashed, line width=0.8pt] coordinates {(71.9,-0.8) (71.9,33.6)};
+  \legend{{single batch, 100 images}, {multi-batch, 192 images}, {plaintext, 100 images (76\%)}, {plaintext, 192 images (71.9\%)}}
+  \draw[gridc, line width=0.6pt] (axis cs:50,16.4) -- (axis cs:82,16.4);
+  \node[note, anchor=east] at (axis cs:81.6,0.2) {fused BN};
+  \node[note, anchor=east] at (axis cs:81.6,17.6) {unfused BN};
+\end{axis}
+\end{tikzpicture}

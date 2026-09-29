@@ -1,0 +1,42 @@
+% Round 2 (before) -> round 4 (after the shared-OT tuples and the batched BN), plain family, flare / polynize
+\pgfplotstableread{
+i label r2 r4
+0 {PPA4, fused} 3.463 2.614
+1 {PPA4, unfused} 4.349 2.679
+2 {PPA, fused} 2.348 2.286
+3 {PPA, unfused} 3.003 2.563
+4 {RCA, fused} 1.733 1.662
+5 {RCA, unfused} 2.513 1.939
+}\rsingle
+\pgfplotstableread{
+i label r2 r4
+0 {PPA4, fused} 30.21 20.23
+1 {PPA4, unfused} 31.54 22.63
+2 {PPA, fused} 15.68 15.75
+3 {PPA, unfused} 17.22 16.85
+4 {RCA, fused} 12.47 12.52
+5 {RCA, unfused} 13.92 13.71
+}\rmulti
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 1, horizontal sep=6mm, yticklabels at=edge left},
+  paper, width=5.6cm, height=4.6cm, y dir=reverse, ymin=-0.6, ymax=5.6,
+  ytick=data, yticklabels from table={\rsingle}{label},
+  xmajorgrids, axis x line*=bottom, axis y line*=left,
+]
+\nextgroupplot[title={single batch, 10 images (s)}, xmin=1.4, xmax=4.6]
+  \addplot[forget plot, only marks, mark=none, error bars/.cd, x dir=both, x explicit, error mark=none,
+    error bar style={draw=inkTwo!45, line width=1.6pt}]
+    table[x=r4, y=i, x error plus expr={max(\thisrow{r2}-\thisrow{r4},0)}, x error minus expr={max(\thisrow{r4}-\thisrow{r2},0)}] {\rsingle};
+  \addplot[only marks, mark=*, mark size=2pt, fill=sOther, draw=white] table[x=r2, y=i] {\rsingle};
+  \addplot[only marks, mark=*, mark size=2pt, fill=sOne, draw=white] table[x=r4, y=i] {\rsingle};
+\nextgroupplot[title={multi-batch, 192 images (s)}, xmin=10, xmax=33,
+  legend style={at={(1.02,0.98)}, anchor=north west}]
+  \addplot[forget plot, only marks, mark=none, error bars/.cd, x dir=both, x explicit, error mark=none,
+    error bar style={draw=inkTwo!45, line width=1.6pt}]
+    table[x=r4, y=i, x error plus expr={max(\thisrow{r2}-\thisrow{r4},0)}, x error minus expr={max(\thisrow{r4}-\thisrow{r2},0)}] {\rmulti};
+  \addplot[only marks, mark=*, mark size=2pt, fill=sOther, draw=white] table[x=r2, y=i] {\rmulti};
+  \addplot[only marks, mark=*, mark size=2pt, fill=sOne, draw=white] table[x=r4, y=i] {\rmulti};
+  \legend{round 2, round 4}
+\end{groupplot}
+\end{tikzpicture}

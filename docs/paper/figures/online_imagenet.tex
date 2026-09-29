@@ -1,0 +1,29 @@
+\pgfplotstableread{
+i lo hi txt label
+0 2.43 4.32 {2.43--4.32} {s10 build (baseline)}
+1 1.91 2.19 {1.91--2.19} {+ TCP\_NODELAY on hpmpc's sockets}
+2 1.19 1.37 {1.19--1.37} {+ pooled GEMM threads, CUT\_FRACTIONAL\_BITS\_OPT}
+3 1.09 1.09 1.09 {+ lock-free pool, parallel im2col, bit scatter}
+4 0.99 0.99 0.99 {+ threaded ReLU levels (adder, A2B, bit injection)}
+5 0.84 0.84 0.84 {+ bulk random words, parallel adder construction}
+6 0.80 0.80 0.80 {+ GEMM completion on threads}
+7 0.76 0.76 0.76 {+ GEMM mask-and-send on threads}
+8 0.70 0.70 0.70 {+ own PRNG stream produced ahead (RNG\_AHEAD)}
+}\onlinesteps
+\begin{tikzpicture}
+\begin{axis}[
+  paper, width=0.5\linewidth, height=6.2cm, y dir=reverse, ymin=-0.6, ymax=8.6,
+  ytick=data, yticklabels from table={\onlinesteps}{label},
+  xmin=0, xmax=4.6, xlabel={online time, one ImageNet image (s)},
+  xmajorgrids, axis x line*=bottom, axis y line*=left,
+]
+  \addplot[only marks, mark=*, mark size=2pt, draw=white, fill=sOne,
+    error bars/.cd, x dir=both, x explicit, error bar style={draw=sOne, line width=1pt},
+    error mark options={rotate=90, mark size=2.5pt, draw=sOne}]
+    table[x expr={(\thisrow{lo}+\thisrow{hi})/2}, y=i, x error minus expr={(\thisrow{hi}-\thisrow{lo})/2},
+      x error plus expr={(\thisrow{hi}-\thisrow{lo})/2}] {\onlinesteps};
+  \addplot[only marks, mark=none, nodes near coords, point meta=explicit symbolic,
+    every node near coord/.style={font=\scriptsize, text=inkTwo, anchor=west, xshift=4pt}]
+    table[x=hi, y=i, meta=txt] {\onlinesteps};
+\end{axis}
+\end{tikzpicture}
