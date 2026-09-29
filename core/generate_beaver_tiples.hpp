@@ -800,6 +800,7 @@ void generateLayerDummyTriples(type** a,
         constexpr bool conv_batched = CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_PIPELINE == 1 &&
                                       std::is_same_v<LayerParams, ConvolutionParameter>;
         std::vector<Utils::ConvParm> batched_parms;
+        std::vector<Iface::BNTripleLayer> bn_layers;  // CHEETAH_BN_BATCHED: generated after the loop, in one product
         UINT_TYPE** uint_w = (UINT_TYPE**) a;
         UINT_TYPE** uint_x = (UINT_TYPE**) b;
         UINT_TYPE* uint_y = (UINT_TYPE*) c;
@@ -866,6 +867,12 @@ void generateLayerDummyTriples(type** a,
                         factor
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
+#if CHEETAH_BN_BATCHED == 1
+                bn_layers.push_back({A_KNOWN == 0 || PARTY == 1 ? uint_x[n] : nullptr,
+                                     A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
+                                     uint_y + y_index_counter, p.batchSize, (size_t) p.ch, (size_t) p.h,
+                                     (size_t) p.w});
+#else
                 Iface::generateBNTriplesCheetah(keys,
                         A_KNOWN == 0 || PARTY == 1 ? uint_x[n] : nullptr,
                         A_KNOWN == 0 || PARTY == 0 ? uint_w[n] : nullptr,
@@ -875,6 +882,7 @@ void generateLayerDummyTriples(type** a,
                         A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2,
                         factor
                 );
+#endif
             } else {
                 std::cerr << "Unsupported Param type\n";
             }
@@ -906,6 +914,11 @@ void generateLayerDummyTriples(type** a,
             }
 #endif
         }
+#if CHEETAH_BN_BATCHED == 1
+        if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>)
+            Iface::generateBNTriplesBatched(keys, bn_layers, CHEETAH_PARTY, CHEETAH_THREADS,
+                                            A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2, factor);
+#endif
 #if CHEETAH_CONV_TYPE == 1
         if constexpr (std::is_same_v<LayerParams, ConvolutionParameter>) {
             Iface::generateConvTriplesCheetah2(keys, total_batches, parms,
@@ -919,6 +932,11 @@ void generateLayerDummyTriples(type** a,
 #endif
     } else {
         uint64_t c_index = 0;
+#if CHEETAH_BN_BATCHED == 1
+        struct DeferredBN { UINT_TYPE *x, *w, *y; uint64_t y_size, c_index; };  // converted back after the product
+        std::vector<DeferredBN> deferred_bn;
+        std::vector<Iface::BNTripleLayer> bn_layers;
+#endif
         for(size_t n = 0; n < params.size(); n++) {
             auto p = params[n];
             const uint64_t x_size = p.x_size_per_batch * p.batchSize;
@@ -994,6 +1012,12 @@ void generateLayerDummyTriples(type** a,
                         factor
                 );
             } else if constexpr (std::is_same_v<LayerParams, BatchNorm2DParameter>) {
+#if CHEETAH_BN_BATCHED == 1
+                bn_layers.push_back({x, w, y, p.batchSize, (size_t) p.ch, (size_t) p.h, (size_t) p.w});
+                deferred_bn.push_back({x, w, y, y_size, c_index});
+                c_index += y_size;
+                continue;
+#else
                 Iface::generateBNTriplesCheetah(keys,
                         x, w, y,
                         p.batchSize, p.ch, p.h, p.w,
@@ -1001,6 +1025,7 @@ void generateLayerDummyTriples(type** a,
                         A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB,
                         factor
                 );
+#endif
             } else {
                 std::cerr << "Unsupported Param type\n";
             }
@@ -1021,6 +1046,23 @@ void generateLayerDummyTriples(type** a,
             delete[] y;
             c_index += y_size;
         }
+#if CHEETAH_BN_BATCHED == 1
+        if (!bn_layers.empty()) {
+            Iface::generateBNTriplesBatched(keys, bn_layers, CHEETAH_PARTY, CHEETAH_THREADS,
+                                            A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB, factor);
+            for (auto& d : deferred_bn) {
+                for (uint64_t i = 0; i < d.y_size; i++) {
+                    alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
+                    for (int j = 0; j < factor; j++)
+                        temp[j] = d.y[j * d.y_size + i];
+                    orthogonalize_arithmetic(temp, c + d.c_index + i, 1);
+                }
+                delete[] d.x;
+                delete[] d.w;
+                delete[] d.y;
+            }
+        }
+#endif
     }
     #if CHEETAH_DISCONNECT == 1
     keys.disconnect();

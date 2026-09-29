@@ -454,6 +454,9 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef CHEETAH_CONV_PIPELINE
 #define CHEETAH_CONV_PIPELINE 1  // with CHEETAH_CONV_PACKED 1: all convs in one call, pipelined across layers (encrypt next / evaluate / decrypt previous overlap) instead of one round trip per layer
 #endif
+#ifndef CHEETAH_BN_BATCHED
+#define CHEETAH_BN_BATCHED 1  // BN triples of all layers in one elementwise HE product instead of one latency-bound call per layer
+#endif
 
 #ifndef CHEETAH_THREADS
 #define CHEETAH_THREADS 32  // Number of threads to use for Cheetah triples generation
