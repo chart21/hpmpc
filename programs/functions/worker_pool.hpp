@@ -4,12 +4,16 @@
 #include <atomic>
 #include <functional>
 #include <immintrin.h>
+#include <x86intrin.h>
 #include <thread>
 #include <vector>
 
 // Pause iterations before an idle worker sleeps. Single process: ~6 ms, longer than an online round trip, so the
 // workers are still spinning when the next circuit level arrives (a futex wake per level cost 17-20% of the ImageNet
 // online phase). Several processes share the cores (multi-batch): ~100 us.
+#ifndef GEMM_POOL_MWAITX
+#define GEMM_POOL_MWAITX 1  // idle workers wait with MONITORX/MWAITX where the CPU has it (AMD), else pause
+#endif
 #ifndef GEMM_POOL_SPIN
 #if PROCESS_NUM > 1
 #define GEMM_POOL_SPIN (1 << 14)
@@ -73,12 +77,30 @@ class GemmPool
             workers_.emplace_back([this, t] { work(t); });
     }
 
+    // Wait for the next job. With MONITORX/MWAITX (AMD, -march=native on Zen) a worker parks on generation_'s cache
+    // line until it is written (or a short timer expires), without taking issue slots from its SMT sibling, which a
+    // pause loop does: with 24 spinning workers the Zen 3 hosts' serial parts of the online phase slowed down.
+    // Either way the worker sleeps on a futex after the spin budget.
     void work(int t)
     {
         uint64_t seen = 0;
         for (;;)
         {
             uint64_t g;
+#if defined(__MWAITX__) && GEMM_POOL_MWAITX == 1
+            for (int spin = 0; (g = generation_.load(std::memory_order_acquire)) == seen; ++spin)
+            {
+                if (spin < (kSpin >> 8))
+                {
+                    _mm_monitorx((void*) &generation_, 0, 0);
+                    if ((g = generation_.load(std::memory_order_acquire)) != seen)
+                        break;
+                    _mm_mwaitx(2, 0, 1u << 14);  // timer enabled: at most 2^14 TSC ticks per wait
+                }
+                else
+                    generation_.wait(seen, std::memory_order_acquire);
+            }
+#else
             for (int spin = 0; (g = generation_.load(std::memory_order_acquire)) == seen; ++spin)
             {
                 if (spin < kSpin)
@@ -86,6 +108,7 @@ class GemmPool
                 else
                     generation_.wait(seen, std::memory_order_acquire);
             }
+#endif
             seen = g;
             if (stop_.load(std::memory_order_relaxed))
                 return;
@@ -96,8 +119,8 @@ class GemmPool
 
     std::vector<std::thread> workers_;
     const std::function<void(int)>* job_ = nullptr;
-    std::atomic<uint64_t> generation_{0};
-    std::atomic<int> pending_{0};
+    alignas(64) std::atomic<uint64_t> generation_{0};  // own cache line: MWAITX wakes on any write to it
+    alignas(64) std::atomic<int> pending_{0};
     std::atomic<bool> stop_{false};
 };
 #endif
