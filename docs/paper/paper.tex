@@ -182,6 +182,10 @@ AdamW-trained model (74.35\% on the test set) for the final accuracy.
 % ------------------------------------------------------------------------------------------------
 \section{Linear layers: HE preprocessing}\label{sec:he}
 
+\input{he_formal}
+
+\subsection{Engineering the HE preprocessing}
+
 \Cref{fig:steps} traces ImageNet preprocessing through the ten ConvTriple changes (s1--s10); \cref{tab:steps} lists what each step does.
 
 \begin{figure}[t]
@@ -370,6 +374,10 @@ timing. All evaluators now do the same work for any weight values, and all numbe
 % ------------------------------------------------------------------------------------------------
 \section{Boolean material: OT preprocessing}\label{sec:ot}
 
+\input{ot_formal}
+
+\subsection{Engineering the OT preprocessing}
+
 The ReLUs consume AND triples, Beaver 3- and 4-tuples (PPA4), COT triples (bit injection) and multiplexer
 triples. All come from ferret silent OT, 32 OT packs of two ferret instances each.
 
@@ -403,20 +411,14 @@ reads the same bits with far less memory traffic.
   \label{fig:outer}
 \end{figure}
 
-\paragraph{Beaver 3- and 4-tuples with shared OTs.} A 3-tuple $(a,b,c,ab,ac,bc,abc)$ was generated as an
-AND triple $(a,b,ab)$ plus three independent share multiplications $a\cdot c$, $b\cdot c$ and $ab\cdot c$.
-Each multiplication took one random OT per direction: the receiver sent a choice correction
-$e = s\oplus x$, the sender a masked value $y\oplus r_0\oplus r_1$. The three products share the factor $c$.
-A random OT's messages are hashes of 128-bit blocks, so one OT can carry $k$ message bits for the price of one
-(\texttt{send/recv\_rot\_bitplanes}). \texttt{cot\_outer\_multiply} computes all $x_p\cdot y$ for
-$k$ values $x_p$ from one OT per direction, sending $k$ masked bits and at most one correction bit.
-Because $c$ is fresh, each party takes its share of $c$ from the random choice bits of its receiving OTs and
-sends no correction at all (\cref{fig:outer}). A 4-tuple needs the nine products $\{a,b,ab\}\times\{c,d,cd\}$:
-three OTs per direction instead of nine. Per tuple, AND triples included, a 3-tuple now needs 4 random OTs instead of 8 and a 4-tuple 10 instead of 22.
-In a multi-batch PPA4 run the tuple phases fall from 19.0 to 9.2\s per process and their traffic by
-43--46\% (\cref{fig:tuples}). The party-local variant used by reshare+sim, where P0 holds $b$ and P1 holds
-$c$ in full, is covered by the same code with one correction bit for P0's zero share. Unit tests check all
-products; ReLU exactness tests report 0 wrong outputs.
+\paragraph{Beaver 3- and 4-tuples with shared OTs.} Before this work, a 3-tuple was an AND triple plus three
+independent correlated-OT multiplications $a\cdot c$, $b\cdot c$ and $ab\cdot c$, each with its own random OT per
+direction. $\Pi_{\mathrm{outer}}$ (\cref{sec:otformal}) computes all products with the common factor $c$ from one
+random OT per direction, whose $k$ message bits (\texttt{send/recv\_rot\_bitplanes}) cost one hash, and takes the
+fresh $c$ from the OT choices (\cref{fig:outer}). A 3-tuple now needs 4 random OTs instead of 8 and a 4-tuple 10
+instead of 22 (\cref{tab:otcost}). In a multi-batch PPA4 run the tuple phases fall from 19.0 to 9.2\s per process
+and their traffic by 43--46\% (\cref{fig:tuples}). Unit tests check all products; ReLU exactness tests report 0 wrong
+outputs.
 
 \begin{figure}[t]
   \centering\input{figures/tuples}

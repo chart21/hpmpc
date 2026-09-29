@@ -1,0 +1,97 @@
+\subsection{Boolean correlations: protocol and security}\label{sec:otformal}
+
+All Boolean material is XOR-shared: $v = v^A \oplus v^B$ between the two OT roles A and B (P0 and P1, or reversed in
+the second direction). This subsection states the protocols of \texttt{ot\_proto.hpp} and \texttt{silent\_ot.h}.
+
+\paragraph{Random OT with $k$-bit messages.} The functionality $\mathcal{F}^{k}_{\mathrm{ROT}}$ gives the sender two
+uniform strings $r_0, r_1 \in \{0,1\}^k$ and the receiver a uniform choice bit $s$ and $r_s$. Ferret silent OT
+(LPN parameters b12) produces correlated OTs: the sender gets $K_i \in \{0,1\}^{128}$ and a global $\Delta$ with
+$\mathrm{lsb}(\Delta) = 1$, the receiver $M_i = K_i \oplus s_i\Delta$ with $s_i = \mathrm{lsb}(M_i)$. A tweakable
+correlation-robust hash $H$ (emp's MITCCRH, with a fresh key per call) turns them into random OTs,
+$r_b = H(i, K_i \oplus b\Delta)|_k$ for the sender and $r_{s_i} = H(i, M_i)|_k$ for the receiver. One hash yields 128
+bits, of which \texttt{send/recv\_rot\_bitplanes} keep $k \le 64$ as $k$ independent message bits and store them as
+$k$ bit planes, eight OTs per byte. By correlation robustness, $r_{1-s_i}$ is pseudorandom to the receiver: a
+$k$-bit random OT costs one COT and one hash per message, the same as a 1-bit one.
+
+\paragraph{Products with a common factor.} Let $x_1, \ldots, x_k$ and $y$ be shared bits; the goal is shares of
+$z_p = x_p\, y$ for all $p$. Expanding,
+$z_p = x_p^A y^A \oplus x_p^B y^B \oplus x_p^A y^B \oplus x_p^B y^A$: two local terms and two cross terms, one in each
+direction. \Cref{fig:otproto} computes the cross term $x_p^A y^B$ for all $p$ from a single $\mathcal{F}^{k}_{\mathrm{ROT}}$
+with A as sender. The other direction is symmetric, with B as sender.
+
+\begin{figure}[t]
+\centering\small
+\fbox{\begin{minipage}{0.95\linewidth}
+\textbf{Protocol $\Pi_{\mathrm{outer}}$} (one element, direction A $\to$ B; \texttt{cot\_outer\_multiply})\\[2pt]
+\emph{Inputs:} A: $x^A_1, \ldots, x^A_k$. B: $y^B$, or nothing if B's share of $y$ is to be fresh.
+\emph{Outputs:} A: $u_1, \ldots, u_k$; B: $v_1, \ldots, v_k$ and, if fresh, $y^B$; with $u_p \oplus v_p = x^A_p\, y^B$.
+\begin{enumerate}\itemsep1pt
+\item $\mathcal{F}^{k}_{\mathrm{ROT}}$: A gets $r_0, r_1 \in \{0,1\}^k$, B gets $s$ and $r_s$.
+\item \textbf{B corrects its choice.} If $y^B$ is given, B sends $e = s \oplus y^B$ (1 bit). If $y^B$ is to be fresh,
+  B sets $y^B := s$ and sends nothing; A uses $e = 0$.
+\item \textbf{A masks its $k$ values} with the sum of both messages: sends $m_p = x^A_p \oplus r_{0,p} \oplus r_{1,p}$ ($k$ bits).
+\item A outputs $u_p = r_{e,p}$. B outputs $v_p = r_{s,p} \oplus (y^B \wedge m_p)$.
+\end{enumerate}
+Both directions run in parallel, and each party adds its local term $x_p^P y^P$: shares of $x_p\,y$ for all $p$ from
+two random OTs and, per party, $k$ bits (plus one correction bit unless $y$ is fresh).
+\end{minipage}}
+\caption{Products $x_p\,y$ with a common factor from one random OT per direction.}
+\label{fig:otproto}
+\end{figure}
+
+\textbf{Lemma 2 (correctness).} $u_p \oplus v_p = x^A_p\, y^B$. \emph{Proof.} If $y^B = 0$, then $e = s$ and
+$u_p \oplus v_p = r_{s,p} \oplus r_{s,p} = 0$. If $y^B = 1$, then $e = 1 - s$ and
+$u_p \oplus v_p = r_{1-s,p} \oplus r_{s,p} \oplus x^A_p \oplus r_{0,p} \oplus r_{1,p} = x^A_p$. With the fresh factor,
+$y^B = s$ and $e = 0$, and the same two cases hold. \hfill$\square$
+
+\textbf{Theorem 2 (security).} In the $\mathcal{F}^{k}_{\mathrm{ROT}}$-hybrid model, $\Pi_{\mathrm{outer}}$ securely
+computes shares of $\{x_p\,y\}_p$ against a semi-honest adversary; with ferret and a correlation-robust hash
+realizing $\mathcal{F}^{k}_{\mathrm{ROT}}$ (under the LPN assumption), so does the full protocol.
+\emph{Proof sketch.} \emph{Corrupted A (sender).} It receives $e = s \oplus y^B$; $s$ is uniform and independent of A's
+view, so $e$ is a uniform bit and the simulator sends a uniform bit (nothing, if $y^B$ is fresh). A's output
+$u_p = r_{e,p}$ is uniform, and B's output completes it to $x^A_p y^B$. \emph{Corrupted B (receiver).} It receives
+$m_p = x^A_p \oplus r_{0,p} \oplus r_{1,p} = x^A_p \oplus r_{s,p} \oplus r_{1-s,p}$; since $r_{1-s,p}$ is uniform and
+unknown to B, $m_p$ is uniform, and the simulator sends $k$ uniform bits. With the fresh factor, B's share
+$y^B = s$ is a uniform bit independent of A's view, exactly as a freshly sampled share would be. All messages are
+simulated independently of the other party's inputs, and every output share is uniform subject to the XOR relation.
+The $k$ bits of one hash are independent pseudorandom bits under correlation robustness, so sharing one OT among
+$k$ products does not correlate them. \hfill$\square$
+
+\paragraph{Beaver tuples.} A 3-tuple is $(a, b, c)$ with shares of all products $ab, ac, bc, abc$; a 4-tuple has
+$(a, b, c, d)$ and all 11 products of two or more of them. PPA4's 4-input AND gates consume them online in one round.
+\begin{itemize}\itemsep1pt
+\item \textbf{3-tuple:} an AND triple $(a, b, ab)$ from two random OTs (\texttt{send/recv\_rot\_bits}), then one
+  $\Pi_{\mathrm{outer}}$ per direction with $x = (a, b, ab)$ and the fresh $y = c$: $ac$, $bc$ and $abc$. Total: 4 random
+  OTs and, for the products, 3 bits per party.
+\item \textbf{4-tuple:} AND triples $(a, b, ab)$ and $(c, d, cd)$ (4 random OTs), then $\Pi_{\mathrm{outer}}$ with
+  $x = (a, b, ab)$ for each $y \in \{c, d, cd\}$: the nine products $\{a, b, ab\} \times \{c, d, cd\}$ (6 random OTs).
+  $cd$ is not fresh, so these calls send the correction bit. Total: 10 random OTs and, for the products, 12 bits
+  per party.
+\item \textbf{Party-local tuples} (\flag{RESHARE_OPT_SIM}). P0 holds $b$ and P1 holds $c$ in full, the other shares
+  being zero. The same protocol runs with the zero share as a given input: only P0's zero share of $c$ needs a
+  correction bit.
+\end{itemize}
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+& \multicolumn{2}{c}{random OTs} & \multicolumn{2}{c}{bits sent per party, products}\\
+& one per product & $\Pi_{\mathrm{outer}}$ & one per product & $\Pi_{\mathrm{outer}}$\\
+\midrule
+3-tuple (3 products with $c$) & 8 & 4 & 6 & 3\\
+4-tuple (9 products of $\{a,b,ab\}\times\{c,d,cd\}$) & 22 & 10 & 18 & 12\\
+\bottomrule
+\end{tabular}
+\caption{Cost of one Beaver tuple, AND triples included in the OT counts. ``One per product'': a separate
+correlated-OT multiplication for each product, as before this work.}
+\label{tab:otcost}
+\end{table}
+
+\paragraph{Where the protocols are used.} AND triples feed the RCA and PPA adders, 3- and 4-tuples the PPA4 adder, COT
+triples the bit injection and multiplexer triples the ReLU's final selection. The A2B bake of the a2b family
+(\flag{A2B_CONV_BAKE}) computes Boolean shares of $-(\ell_0 + \ell_1)$ for the committed conv output masks, where
+each party knows its own $\ell_i$ in full: a ripple-carry addition whose 31 carry levels are one multiplication
+each, run over all values of the network at once (ImageNet: 9.0 million values per level). Every OT consumer draws
+from the same OT packs (one per HE/OT thread, two ferret instances each, one per direction), which are sized from the
+total demand of the preprocessing before their first extension (\texttt{ot\_demand\_hint}) and extend in parallel.

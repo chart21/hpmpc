@@ -1,0 +1,168 @@
+\subsection{Convolution triples: construction and security}\label{sec:heformal}
+
+This subsection defines the convolution triple, the packed encoding and the protocol that generates it, and argues
+correctness, security and cost. The engineering steps that follow (\cref{fig:steps}) change how fast the
+protocol runs, not what it sends.
+
+\paragraph{Notation.} All arithmetic shares live in $\mathbb{Z}_{2^{32}}$. BFV works over
+$R_t = \mathbb{Z}_t[X]/(X^N+1)$ with $N = 4096$ and plaintext modulus $t = 2^{32}$, so a plaintext coefficient
+is exactly one ring element. The ciphertext modulus is $q = q_0 q_1$ with primes of 60 and 49 bits
+(109 bits, 128-bit security by the HE standard's table), $\Delta = \lfloor q/t\rfloor$, $s$ is a party's
+ternary secret key and $\chi$ the error distribution. $\mathrm{Enc}_s$ denotes secret-key and
+$\mathrm{Enc}_{\mathit{pk}}$ public-key encryption. A convolution $y = W \star x$ is computed after the
+polyphase reduction of \texttt{ConvLayout}: a stride-$\sigma$, padded convolution is rewritten as a stride-1,
+unpadded convolution over $\sigma^2$ phase channels, which yields exactly the strided outputs. We therefore only
+treat stride-1 valid convolutions of $B$ images of $C \times H \times W$ with $M$ filters of
+$C \times k_h \times k_w$.
+
+\paragraph{The triple, and why AB2 halves the traffic.} With masked values $m_v = v + \lambda_v$, the
+ABY2 online step of a convolution is
+\[
+  m_y \;=\; m_W \star m_x \;-\; m_W \star \lambda_x \;-\; \lambda_W \star m_x \;+\; \Gamma \;+\; \lambda_y,
+  \qquad \Gamma = \lambda_W \star \lambda_x ,
+\]
+computed share-wise (P0 adds $m_W \star m_x$). The preprocessing must deliver additive shares of $\Gamma$, the
+\emph{convolution triple}. Write $\lambda_v = \lambda_v^0 + \lambda_v^1$ for the parties' shares.
+\begin{itemize}\itemsep1pt
+\item \textbf{AB} (\flag{A_KNOWN=0}). Both masks are shared, and
+  $\Gamma = \lambda_W^0 \star \lambda_x^0 + \lambda_W^1 \star \lambda_x^1 + \lambda_W^0 \star \lambda_x^1 + \lambda_W^1 \star \lambda_x^0$.
+  The first two terms are local; each cross term needs one secure product in which one party holds a filter and
+  the other an input: two HE products per layer, one in each direction.
+\item \textbf{AB2} (\flag{A_KNOWN=1}). The model owner P0 holds the whole weight mask ($\lambda_W^1 = 0$), and
+  $\Gamma = \lambda_W \star (\lambda_x^0 + \lambda_x^1)$ is a \emph{single} product: P1 encrypts $\lambda_x^1$,
+  P0 adds its own $\lambda_x^0$ inside the ciphertext and multiplies by its plaintext filters.
+\end{itemize}
+AB2 therefore needs half the ciphertexts, half the bytes and half the HE work of AB: 479 against 958\,MiB for
+the ImageNet convolutions and 99 against 197\,MiB for 10 CIFAR-10 images (\cref{tab:concurrent}), with the same
+protocol for each product.
+It is secure because it is ABY2's own input semantics: the party that inputs a value chooses that value's whole
+mask. The weights are P0's input. With \flag{SHARE_PREP} P0 sets $\lambda_W = -W$, so the public masked
+weight is $m_W = 0$ and P1's share is 0: P1 learns nothing about $W$, and P0 learns only a mask of its own input.
+Nothing about $x$ reaches P0, since $\lambda_x^1$ stays encrypted under P1's key. AB is needed only when no single
+party owns the weights (e.g.\ a secret-shared model); with the weights known in preprocessing
+(\flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING}) the same single product is used, with P1's share of $\Gamma$
+prescribed by its PRNG stream instead of drawn fresh, so no extra message is needed.
+
+\paragraph{Packed encoding.} The encoding follows the block layout of troy's \texttt{Conv2dHelper}. A tiling is
+$(b, c_i, c_o, h, w)$ with $b\,c_i\,c_o\,h\,w \le N$, $h \ge k_h$, $w \ge k_w$; a tile covers $b$ images and an
+$h \times w$ window, and yields $y_h \times y_w = (h - k_h + 1) \times (w - k_w + 1)$ outputs per image and filter.
+For a tile $\tau$ (first image $\beta_0$, first row $r_0$, first column $s_0$) and an input group $g$ of $c_i$
+channels, and an output group $\gamma$ of $c_o$ filters,
+\begin{align*}
+  \pi_x^{\tau,g}(X) &= \sum_{\beta<b}\sum_{c<c_i}\sum_{i<h}\sum_{j<w}
+     x[\beta_0{+}\beta,\; g c_i{+}c,\; r_0{+}i,\; s_0{+}j]\; X^{(\beta c_i c_o + c)\,hw + iw + j}, \\
+  \pi_W^{\gamma,g}(X) &= \sum_{o<c_o}\sum_{c<c_i}\sum_{a<k_h}\sum_{d<k_w}
+     W[\gamma c_o{+}o,\; g c_i{+}c,\; k_h{-}1{-}a,\; k_w{-}1{-}d]\; X^{(o c_i + c_i - 1 - c)\,hw + aw + d}.
+\end{align*}
+\textbf{Lemma 1.} For $\beta < b$, $o < c_o$, $i < y_h$, $j < y_w$ let
+$e(\beta,o,i,j) = (\beta c_i c_o + o c_i + c_i - 1)\,hw + (k_h - 1 + i)\,w + (k_w - 1 + j)$. Then
+$[\pi_x^{\tau,g}\cdot\pi_W^{\gamma,g}]_{e(\beta,o,i,j)} =
+\sum_{c<c_i}\sum_{a<k_h}\sum_{d<k_w} x[\beta_0{+}\beta, gc_i{+}c, r_0{+}i{+}a, s_0{+}j{+}d]\cdot W[\gamma c_o{+}o, gc_i{+}c, a, d]$
+in $R_t$, i.e.\ the input group's partial sum of output $(\beta_0{+}\beta,\gamma c_o{+}o, r_0{+}i, s_0{+}j)$, and
+$\sum_g \pi_x^{\tau,g}\pi_W^{\gamma,g}$ holds the full output there.
+
+\emph{Proof sketch.} A product term of input $(\beta, c, i', j')$ and flipped tap $(o, c', a, d)$ has exponent
+$(\beta c_i c_o + o c_i + c_i - 1 + c - c')\,hw + (i'+a)\,w + (j'+d)$. (i) The column offset $j'+d \le w + k_w - 2$
+never reaches $w + k_w - 1 + j$, so no term carries from the previous row onto an output position, and the row offset
+is at most $(h + k_h - 2)w + w + k_w - 2$, so a carry from the previous block lands below $(k_h-1)w + k_w - 1$, the
+smallest output offset. (ii) Within the target block $\beta c_i c_o + o c_i + c_i - 1$ only $c = c'$ contributes;
+$i' + a = k_h - 1 + i$ and $j' + d = k_w - 1 + j$ select exactly the taps of the valid convolution after the flip.
+(iii) Exponents reach $N$ only for $\beta = b-1$, $o = c_o - 1$, $c > c'$, i.e.\ blocks $b c_i c_o + (0 \ldots c_i - 2)$;
+negacyclic reduction maps them to blocks $0 \ldots c_i - 2$ (with a sign), and output blocks are $\equiv c_i - 1
+\pmod{c_i}$, so no wrapped term reaches an output coefficient. \hfill$\square$
+
+The remaining coefficients hold partial sums of other channel pairings; they are masked like the outputs and never
+decrypted. The conv-triple test (\texttt{cheetah\_conv\_triple\_test}) checks every output exactly against a plaintext
+convolution, for the 23 CIFAR-10 layer shapes, the ImageNet layers and randomized shapes.
+
+\paragraph{Tiling.} A layer needs $T = \lceil B/b\rceil\lceil (H{-}k_h{+}1)/y_h\rceil\lceil (W{-}k_w{+}1)/y_w\rceil$
+tiles, $G_{\mathrm{in}} = \lceil C/c_i\rceil$ input ciphertexts and $G_{\mathrm{out}} = \lceil M/c_o\rceil$ output
+ciphertexts per tile. The tiling minimizes the bytes on the wire (below),
+\[
+  \min_{b, h, w, c_o}\; T\cdot\bigl(G_{\mathrm{in}}\cdot \mathit{in} + G_{\mathrm{out}}\cdot \mathit{out}(b\,c_o\,y_h y_w)\bigr),
+  \qquad c_i = \min\bigl(\lfloor N/(b c_o h w)\rfloor, C\bigr),
+\]
+where $\mathit{in}$ and $\mathit{out}(u)$ are the sizes of an input ciphertext and of an output ciphertext with $u$
+used coefficients. CHEETAH's \texttt{HomConv2DSS} fixes $c_o = 1$: one output ciphertext per filter and tile. On
+ImageNet's $7\times 7$ stage, such a ciphertext carries 49 useful coefficients out of 4096; the packed layout
+puts up to $\lfloor N/(b\,hw)\rfloor$ filters and several images into one output ciphertext.
+
+\begin{figure}[t]
+\centering\small
+\fbox{\begin{minipage}{0.95\linewidth}
+\textbf{Protocol $\Pi^{\mathrm{AB2}}_{\mathrm{conv}}$} (one layer; all tiles $\tau$, input groups $g$, output groups $\gamma$)\\[2pt]
+\emph{Inputs:} P0: $\lambda_W$, $\lambda_x^0$, P1's public key $\mathit{pk}_1$. P1: $\lambda_x^1$, secret key $s_1$.
+\emph{Outputs:} P0: $R$; P1: $\Gamma - R$ with $\Gamma = \lambda_W \star (\lambda_x^0 + \lambda_x^1)$, $R$ uniform.
+\begin{enumerate}\itemsep1pt
+\item \textbf{P1 encrypts.} For each $(\tau, g)$: draw a seed $\varsigma$, expand $a = \mathrm{PRG}(\varsigma) \in R_q$,
+  draw $e \leftarrow \chi$, set $c_0 = -a s_1 + e + \Delta\,\pi_x^{\tau,g}(\lambda_x^1)$. Send $(\varsigma, c_0)$:
+  16 bytes and $N(60+49)$ bits.
+\item \textbf{P0 evaluates.} Expand $a$ from $\varsigma$ directly in NTT form; add its own share,
+  $c_0 \mathrel{+}= \Delta\,\pi_x^{\tau,g}(\lambda_x^0)$. For each $\gamma$:
+  $\mathit{ct}_{\tau,\gamma} = \sum_g \pi_W^{\gamma,g}(\lambda_W)\cdot(c_0, a)_{\tau,g}$ (plaintext--ciphertext
+  products, accumulated lazily in 128 bits).
+\item \textbf{P0 re-randomizes and masks.} Flood: add a polynomial with uniform 64-bit coefficients to $c_0$
+  (CHEETAH's $\min(64, \lceil\log q\rceil - \lceil\log t\rceil - 2)$ bits), switch to modulus $q_0$, add a fresh
+  $\mathrm{Enc}_{\mathit{pk}_1}(0)$. Draw $R_{\tau,\gamma} \leftarrow R_t$
+  uniformly (all $N$ coefficients) and subtract $\Delta R_{\tau,\gamma}$. P0's output share of output $(\beta,o,i,j)$
+  is $R_{\tau,\gamma}[e(\beta,o,i,j)]$.
+\item \textbf{P0 sends only what decryption reads.} Truncate for decryption as CHEETAH does: at $q_0$ (60 bits) drop
+  the low 26 bits of $c_0$ and the low 14 bits of $c_1$, the widths below which bits only carry noise. Send $c_1$ (all $N$ coefficients, 46 bits each) and $c_0$ only at the used positions $E_{\tau}$
+  (34 bits each).
+\item \textbf{P1 decrypts} the coefficients $E_\tau$: $\lfloor (c_0 + c_1 s_1)_e \cdot t/q_0 \rceil$ for $e \in E_\tau$,
+  its share of the outputs.
+\end{enumerate}
+\end{minipage}}
+\caption{The AB2 convolution-triple protocol (\texttt{PackedConv2D}). AB runs it twice, once in each direction,
+with P0's and P1's roles swapped for the second cross term.}
+\label{fig:convproto}
+\end{figure}
+
+\paragraph{Security.} \textbf{Theorem 1.} $\Pi^{\mathrm{AB2}}_{\mathrm{conv}}$ securely computes the functionality that
+outputs a uniformly random $R$ to P0 and $\Gamma - R$ to P1 against a semi-honest adversary corrupting one party,
+assuming decision-RLWE for $(N, q, \chi)$, the seed expansion modeled as a random oracle, and the statistical
+circuit privacy of CHEETAH's flooding with its parameters.
+
+\emph{Proof sketch.} \emph{Corrupted P0.} Its view is the pairs $(\varsigma, c_0)$. With $a = \mathrm{PRG}(\varsigma)$
+modeled as a random oracle, $a$ is uniform and public, which is exactly the RLWE setting (SEAL's seeded
+ciphertexts rely on the same argument). A hybrid over the ciphertexts replaces each $c_0 = -a s_1 + e + \Delta m$ by
+a uniform element; the simulator sends uniform $(\varsigma, c_0)$. \emph{Corrupted P1.} Its output
+$\Gamma - R$ is uniform because $R$ is. Before truncation, the ciphertext P1 receives is, by the flooding and the fresh
+encryption of zero, statistically close to a fresh $\mathrm{Enc}_{\mathit{pk}_1}(\Pi)$ of the plaintext $\Pi = P - R$,
+where $P$ is the product polynomial. Since $R$ covers all $N$ coefficients, $\Pi$ is uniform in $R_t$: its used
+coefficients equal P1's output and the others are independent and uniform. The simulator therefore samples
+$\Pi$ uniform subject to P1's output on $E_\tau$, encrypts it with flooding, and applies the same deterministic
+truncation and selection of $c_0$ coefficients. The changes of this work leave this argument intact: the
+layout only changes where values sit (the tiling depends on public shapes only), and the exact wire format and the
+partial $c_0$ are deterministic functions of the message CHEETAH would send, so they cannot reveal more. The
+bits that are not sent are either zero after truncation (checked at run time) or coefficients that decryption
+never reads. Finally, the evaluator's work does not depend on the weights' values (\cref{sec:zero}), so its running
+time reveals nothing about zero weights, which matters when the weights are known in preprocessing.
+\hfill$\square$
+
+\paragraph{Communication.} An input ciphertext costs $\mathit{in} = 16 + N(60+49)/8 = 55{,}824$ bytes, against
+62.4\,KB as a zstd-compressed SEAL seeded ciphertext; an output ciphertext costs
+$\mathit{out}(u) = \lceil 34u/8\rceil + 46N/8 = 23{,}552 + 4.25\,u$ bytes. For each layer, the tiling minimizes
+$T(G_{\mathrm{in}}\,\mathit{in} + G_{\mathrm{out}}\,\mathit{out})$; since an input costs about twice an output, it
+favors fewer inputs. Two effects add up on ImageNet (\cref{tab:heformal}). Packing several filters and images into
+an output ciphertext removes most of the output ciphertexts of the late stages, and the exact wire format then cuts
+the remaining bytes. Together with AB2, the conv triples of a ResNet50 inference need 479\,MiB, about a quarter
+of the roughly 2,000\,MiB of AB with CHEETAH's layout (s0 with \flag{A_KNOWN=0}: 2,115\,MiB of triples in total).
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ImageNet ResNet50, one image & triples, P0 sent + received (MiB) & factor\\
+\midrule
+CHEETAH \texttt{HomConv2DSS} ($c_o = 1$), SEAL serialization (s0) & 1,112 & 1.00\\
+packed layout (s1) & 698 & 0.63\\
++ exact wire format, byte-optimal tiling (s9, s10) & 587 & 0.53\\
+\midrule
+conv triples only, final: AB2 (\flag{A_KNOWN=1}) / AB (\flag{A_KNOWN=0}) & 479 / 958 & 1 / 2\\
+\bottomrule
+\end{tabular}
+\caption{Where the conv-triple traffic goes. The first three rows include the Boolean and FC material (108\,MiB,
+unchanged); the last row compares the two triple types with the same protocol.}
+\label{tab:heformal}
+\end{table}
