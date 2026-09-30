@@ -114,6 +114,26 @@ bool g_mask_pass = false;
 // sum carries lz. g_msb_input_residual: the running ReLU's input is such a sum.
 const DATATYPE* g_bake_res_l = nullptr;
 bool g_msb_input_residual = false;
+// P1 with weights known in preprocessing and SecureML truncation: its conv/FC masks lie in the truncation's image, so
+// the partner cannot draw lz_1 - (a free mask). Instead the other addend's P1 mask m_b is committed too (a conv/FC's: a
+// PRF value in the image; a ReLU's: its committed output masks) and P1's committed mask of residual sum k becomes
+// lz_1 = m_a + m_b (init_a2b_bake); the partner then draws lz_1 - m_b = m_a, in the image. Sums numbered in network
+// order: the network marks the other addend's producer (g_res_producer_k while a conv/FC runs, g_relu_identity_k while
+// a ReLU runs), the sum's ReLU (g_residual_k) and the partner (g_bake_res_k); the INIT pass records the slots.
+int g_residual_k = -1, g_res_producer_k = -1, g_relu_identity_k = -1, g_bake_res_k = -1;
+struct ResidualSum
+{
+    uint64_t slot_base = 0, slots = 0;  // the sum's A2B slots (INIT pass)
+    int producer = 0;                    // the other addend's producer: 0 another layer or the input, 1 conv/FC, 2 ReLU
+    uint64_t relu_base = 0;              // ReLU producer: its first committed output slot (g_relu_out, INIT pass)
+};
+std::vector<ResidualSum> g_residual_sums;
+inline ResidualSum& residual_sum(int k)
+{
+    if ((size_t) k >= g_residual_sums.size())
+        g_residual_sums.resize(k + 1);
+    return g_residual_sums[k];
+}
 // Set by the conv/FC layers around every GEMM regardless of protocol, hence declared outside the
 // preprocessing guard above.
 // RESHARE_OPT / A2B_CONV_BAKE: the conv layer runs ONE GEMM per batch element, so the mask index passed to

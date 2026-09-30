@@ -267,6 +267,10 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
         g_relu_slots += relu_slots;
     const uint64_t relu_base = g_relu_base;
     g_relu_base += relu_slots;
+#if A2B_CONV_BAKE_ACTIVE
+    if (current_phase == PHASE_INIT && g_relu_identity_k >= 0)
+        residual_sum(g_relu_identity_k).relu_base = relu_base;  // a residual sum's other addend (a2b_residual_other_mask)
+#endif
     if (g_mask_pass)
     {
 #if A2B_MASK_PASS_ACTIVE

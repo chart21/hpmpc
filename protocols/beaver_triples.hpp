@@ -186,6 +186,29 @@ inline uint64_t g_bi_base = UINT64_MAX;  // the running ReLU's first slot, for i
     std::abort();
 }
 #endif
+#if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
+// Counter-mode values under this party's PSELF key, by (tweak, index): random access, and independent of the
+// generator stream (PSELF), whose position after a ReLU differs between the mask-only forward and the real one.
+inline DATATYPE prf_value(uint64_t tweak, uint64_t k)
+{
+    static thread_local uint64_t cached_tweak = 0, cached = UINT64_MAX;
+    alignas(sizeof(AES_TYPE)) static thread_local DATATYPE buf[BUFFER_SIZE];
+    const uint64_t blk = k / BUFFER_SIZE;
+    if (blk != cached || tweak != cached_tweak)
+    {
+        alignas(sizeof(AES_TYPE)) uint64_t in[sizeof(AES_TYPE) / 8];
+        for (size_t i = 0; i < sizeof(AES_TYPE) / 8; i++) in[i] = tweak ^ ((uint64_t) i << 56) ^ blk;
+        AES_TYPE st;
+        std::memcpy(&st, in, sizeof(st));
+        AES_enc(st, key_schedule[PSELF]);
+        MM_AES_STORE((AES_TYPE*) buf, st);
+        cached = blk, cached_tweak = tweak;
+    }
+    return buf[k % BUFFER_SIZE];
+}
+constexpr uint64_t kTweakTrunc = 0x5bd1e995a2b0c0deULL, kTweakRelu = 0x2545f4914f6cdd1dULL,
+                   kTweakResidual = 0x7a3d2c1b0f9e8d7cULL;
+#endif
 #if A2B_CONV_BAKE_ACTIVE
 std::vector<DATATYPE> g_a2b_ia;   // this party's random boolean A2B-mask slices (boolean-adder input)
 std::vector<DATATYPE> g_a2b_lz;   // derived conv mask -untranspose(ia); ortho(-lz) == ia
@@ -221,26 +244,72 @@ inline Datatype a2b_bake_slot_mask(uint64_t e, func_sub SUB)
     return lz;
 }
 
+// P1's conv/FC output masks lie in the SecureML truncation's image (top FRACTIONAL bits zero) when it prescribes its
+// triple share (weights known in preprocessing, a known, TRUNC_DELAYED=0: l1 = TRUNC(-r1)). Everywhere else the masks
+// are free draws: the committed masks must then be uniform on the whole ring, since the other party sees the masked
+// share value (a narrowed mask would reveal part of it).
+#define A2B_P1_IMAGE_MASKS (PARTY == 1 && TRUNC_DELAYED == 0 && A_KNOWN == 1)
+// Residual partners: every party subtracts the other addend's mask. P1 with image masks can only if the other addend's
+// mask is committed as well (A2B_RESIDUAL_COMMIT, see g_residual_sums): then lz_1 = m_a + m_b and the partner draws
+// m_a. Otherwise P1 draws fresh and moves the sum with a one-sided rebase (rebase_p1); drawing lz there would reuse
+// the slot through the rebase.
+#define A2B_RESIDUAL_BAKE_P1 (MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0 || A_KNOWN == 0 || TRUNC_DELAYED == 1)
+#define A2B_RESIDUAL_COMMIT (!A2B_RESIDUAL_BAKE_P1 && A2B_BAKE_RESIDUAL == 1 && DATTYPE == BITLENGTH && \
+                             RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0)
+
+// Is P1's part of residual sum k committed (no rebase_p1)? The same answer at both parties: from the network's marks
+// (the producer kind) alone. A ReLU producer's masks are committed only with a mask-only forward (g_relu_out).
+inline bool a2b_residual_committed(int k)
+{
+#if A2B_RESIDUAL_COMMIT
+    if (k < 0 || (size_t) k >= g_residual_sums.size())
+        return false;
+    const int p = g_residual_sums[k].producer;
+    return p == 1 || (p == 2 && MASK_FORWARD_ACTIVE);
+#else
+    (void) k;
+    return false;
+#endif
+}
+
+#if A2B_RESIDUAL_COMMIT && PARTY == 1
+// P1's committed mask m_b of value j of residual sum k's other addend: a conv/FC's is a PRF value in the truncation's
+// image (uniform there, like a fresh m1: the prescribed r1 = -((m_b << F) + low) stays uniform), a ReLU's is its
+// committed bit-injection output mask.
+inline DATATYPE a2b_residual_other_mask(int k, uint64_t j)
+{
+    const ResidualSum& r = g_residual_sums[k];
+#if MASK_FORWARD_ACTIVE
+    if (r.producer == 2)
+        return r.relu_base + j < g_relu_out.size() ? g_relu_out[r.relu_base + j] : SET_ALL_ZERO();
+#endif
+    const UINT_TYPE v = (UINT_TYPE) prf_value(kTweakResidual, ((uint64_t) k << 40) | j);
+    return (DATATYPE) (v & (((UINT_TYPE) 1 << (BITLENGTH - FRACTIONAL)) - (UINT_TYPE) 1));
+}
+#endif
+
 // A conv/FC output's mask: the committed slot mask when the layer feeds a baked ReLU (g_conv_bake), a fresh
 // synced draw otherwise, so that every committed slot masks exactly one value (see g_conv_bake).
-// Residual partners: every party subtracts the other addend's mask, except P1 with weights known in preprocessing and
-// SecureML truncation, whose masks lie in the truncation's image (top FRACTIONAL bits zero); P1 then draws fresh and
-// moves the sum with a one-sided rebase (rebase_p1). Drawing lz there would reuse the slot through the rebase.
-#define A2B_RESIDUAL_BAKE_P1 (MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0 || A_KNOWN == 0 || TRUNC_DELAYED == 1)
 template <typename Datatype, typename func_sub>
 inline Datatype a2b_bake_conv_mask(uint64_t e, func_sub SUB)
 {
+#if A2B_RESIDUAL_COMMIT && PARTY == 1
+    // the other addend of a residual sum whose P1 part is committed: its committed mask m_b
+    if (g_res_producer_k >= 0 && a2b_residual_committed(g_res_producer_k))
+        return current_phase == PHASE_INIT ? SET_ALL_ZERO()
+                                           : (Datatype) a2b_residual_other_mask(g_res_producer_k, g_bake_batch_offset + e);
+#endif
     if (!g_conv_bake)
         return current_phase == PHASE_INIT ? SET_ALL_ZERO() : getRandomVal(PSELF);
     if (g_bake_res_l != nullptr)
     {
 #if PARTY == 1 && !A2B_RESIDUAL_BAKE_P1
-        return current_phase == PHASE_INIT ? SET_ALL_ZERO() : getRandomVal(PSELF);
-#else
+        if (!a2b_residual_committed(g_bake_res_k))
+            return current_phase == PHASE_INIT ? SET_ALL_ZERO() : getRandomVal(PSELF);
+#endif
         if (current_phase == PHASE_INIT)
             return SET_ALL_ZERO();
         return SUB(a2b_bake_slot_mask<Datatype>(e, SUB), (Datatype) g_bake_res_l[g_bake_batch_offset + e]);
-#endif
     }
     return a2b_bake_slot_mask<Datatype>(e, SUB);
 }
@@ -775,7 +844,7 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
         for (int j = 0; j < DATTYPE; j++)
         {
             m[j] = (UINT_TYPE) 0 - t2[j];  // lz, numeric
-#if TRUNC_DELAYED == 0 && PARTY == 1
+#if A2B_P1_IMAGE_MASKS
             // TD=0: P1's conv/FC output mask is l1 = TRUNC(-r1), and TRUNC (FUNC_TRUNC = OP_TRUNC under
             // SKIP_PRE=0) is a LOGICAL shift - its image has the top FRACTIONAL bits ZERO. Constrain the
             // committed m1 the same way (zero the top F bits; NOT sign-extension) and RE-derive
@@ -785,7 +854,7 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
             t2[j] = (UINT_TYPE) 0 - m[j];
 #endif
         }
-#if TRUNC_DELAYED == 0 && PARTY == 1
+#if A2B_P1_IMAGE_MASKS
         Datatype ia_new[K];
         orthogonalize_boolean(t2, ia_new);  // ia = bool(-lz) = bool(-m1)
         for (int i = 0; i < K; i++) g_a2b_ia[base + i] = ia_new[i];
@@ -797,6 +866,36 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
 #if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
     aes_counter[PSELF] = saved_counter;
     num_generated[PSELF] = saved_numgen;
+#endif
+#if A2B_RESIDUAL_COMMIT && PARTY == 1
+    // Residual sums with a committed other addend (a2b_residual_committed): lz_1 = m_a + m_b, with m_a the image
+    // value drawn above (the partner's mask) and m_b the other addend's committed mask; ia = bool(-lz_1) again.
+    for (size_t k = 0; k < g_residual_sums.size(); k++)
+    {
+        const ResidualSum& r = g_residual_sums[k];
+        if (!a2b_residual_committed((int) k) || r.slots == 0)
+            continue;
+        if (r.slot_base % K != 0 || r.slot_base + r.slots > num_slices)
+        {
+            fprintf(stderr, "A2B_CONV_BAKE: residual sum %zu has slots %lu..%lu of %lu\n", k,
+                    (unsigned long) r.slot_base, (unsigned long) (r.slot_base + r.slots), (unsigned long) num_slices);
+            std::abort();
+        }
+        for (uint64_t base = r.slot_base; base < r.slot_base + r.slots; base += K)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE t2[DATTYPE];  // DATTYPE == BITLENGTH: one value per word
+            for (int j = 0; j < K; j++)
+            {
+                const UINT_TYPE lz1 = (UINT_TYPE) g_a2b_lz[base + j] +
+                                      (UINT_TYPE) a2b_residual_other_mask((int) k, base + j - r.slot_base);
+                g_a2b_lz[base + j] = (DATATYPE) lz1;
+                t2[j] = (UINT_TYPE) 0 - lz1;
+            }
+            Datatype ia[K];
+            orthogonalize_boolean(t2, ia);
+            for (int i = 0; i < K; i++) g_a2b_ia[base + i] = ia[i];
+        }
+    }
 #endif
     // Hand this party's ia to the boolean-addition input buffer (P0 -> a, P1 -> b), in slice order.
     for (uint64_t e = 0; e < num_slices; e++)
@@ -863,26 +962,6 @@ inline void a2b_mask_pass_commit(uint64_t num_slices)
 #endif
 
 #if MASK_FORWARD_ACTIVE
-// Counter-mode values under this party's PSELF key, by (tweak, index): random access, and independent of the
-// generator stream (PSELF), whose position after a ReLU differs between the mask-only forward and the real one.
-inline DATATYPE prf_value(uint64_t tweak, uint64_t k)
-{
-    static thread_local uint64_t cached_tweak = 0, cached = UINT64_MAX;
-    alignas(sizeof(AES_TYPE)) static thread_local DATATYPE buf[BUFFER_SIZE];
-    const uint64_t blk = k / BUFFER_SIZE;
-    if (blk != cached || tweak != cached_tweak)
-    {
-        alignas(sizeof(AES_TYPE)) uint64_t in[sizeof(AES_TYPE) / 8];
-        for (size_t i = 0; i < sizeof(AES_TYPE) / 8; i++) in[i] = tweak ^ ((uint64_t) i << 56) ^ blk;
-        AES_TYPE st;
-        std::memcpy(&st, in, sizeof(st));
-        AES_enc(st, key_schedule[PSELF]);
-        MM_AES_STORE((AES_TYPE*) buf, st);
-        cached = blk, cached_tweak = tweak;
-    }
-    return buf[k % BUFFER_SIZE];
-}
-constexpr uint64_t kTweakTrunc = 0x5bd1e995a2b0c0deULL, kTweakRelu = 0x2545f4914f6cdd1dULL;
 
 // The masks of the truncations outside ReLUs (pooling, delayed conv truncations, the data owner's first layer): a
 // stream that restarts with every forward.

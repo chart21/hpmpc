@@ -141,10 +141,19 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
                     mask_pass_abort("a ReLU input's mask differs from the mask-only forward's");
         }
 #else
-    // residual sums: the partner drew lz - (other addend), so the sum carries lz (P1 with truncation-image masks: only
-    // P0's, P1 moves its part alone)
+    // residual sums: the partner drew lz - (other addend), so the sum carries lz. P1 with truncation-image masks: only
+    // if the other addend's mask is committed as well (a2b_residual_committed), otherwise P1 moves its part alone.
     const bool residual = g_msb_input_residual && !msb_input_baked();
-    const bool moved_by_producer = msb_input_baked() || (residual && (A2B_RESIDUAL_BAKE_P1 || PARTY == 0));
+    const bool p1_moves = residual && !A2B_RESIDUAL_BAKE_P1 && !a2b_residual_committed(g_residual_k);
+    const bool moved_by_producer = msb_input_baked() || (residual && (!p1_moves || PARTY == 0));
+    if (current_phase == PHASE_INIT && residual && g_residual_k >= 0)
+    {
+        // the sum's A2B slots: the Boolean addition's slices counted so far (one per value and bit)
+        ResidualSum& r = residual_sum(g_residual_k);
+        if (r.slots == 0)
+            r.slot_base = num_boolean_addition_triples;
+        r.slots += (uint64_t) len * BITLENGTH;
+    }
     // the bake's invariant: every such input's mask share is its slot's committed mask (all but the last value group,
     // whose padding is not initialized). Not checked for P1 with weights known in preprocessing, SecureML truncation
     // and dummy weights (MODELOWNER -1): its masks lie in the truncation's image, and the dummy biases give P1 a bias
@@ -169,7 +178,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
                 }
             }
         }
-    if (residual && !A2B_RESIDUAL_BAKE_P1)
+    if (p1_moves)
         for (int i = 0; i < len; i++)
         {
             auto* sh = val[i].get_share_pointer();
