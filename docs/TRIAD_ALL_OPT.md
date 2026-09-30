@@ -295,7 +295,8 @@ were re-imaged by another user).
 * **Privacy fixes in the A2B bake** (`d8a48ae`, `3c70834`, details in `docs/A2B_CONV_BAKE.md`): committed slots were
   reused by convs not feeding a baked ReLU (1,505,280 slots masked two values, and the rebase revealed the
   downsample conv's mask), and the committed values replayed the passes' own generator stream. Fixed without any
-  change in traffic or time; the performance numbers of rounds 1-3 stand.
+  change in traffic or time; the performance numbers of rounds 1-3 stand. Multi-batch (`res_fp_pm3.csv`): A2bits RCA 129 / 192
+  (115 before, new hash), reshared PPA4 the same hash as before.
 * **UC3 bake for free** (`A2B_BAKE_MASK_PASS`, default on): a mask-only forward in the pass records every ReLU's input
   mask before the Boolean addition, so no ReLU input is rebased. UC3 A2bits: preprocessing traffic -69 MiB (RCA 546 ->
   478, PPA 661 -> 593, PPA4 1,002 -> 933 MiB), preprocessing 3.54 -> 3.52, 4.63 -> 4.54, 5.92 -> 5.82 s, online
