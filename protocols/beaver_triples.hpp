@@ -452,12 +452,37 @@ uint64_t g_a2b_s1_pending = 0;
 // value j (= e % BITLENGTH), numeric bit b -> slice (BITLENGTH-1-b), lane-bit (BITLENGTH-1-j). The adder for group
 // g (= e / BITLENGTH) consumes random_multiplication_a[base + g*R + t] where base = curr_random_multiplication_index
 // at conv-mask time (nothing else consumes between the conv and its ReLU A2B) and t = reshare_rt_offset(k, slice).
+// The baked slices of one adder of width k as (numeric bit, tuple offset) pairs, fixed at compile time: the
+// per-slice helpers (the PPA4 cut ranks scan the retrieval order) ran for all k slices of every conv output.
+struct BakeSlices
+{
+    int n = 0;
+    int nb[BITLENGTH] = {};
+    int t[BITLENGTH] = {};
+};
+constexpr BakeSlices bake_slices(int k, bool b3)
+{
+    BakeSlices s;
+    for (int i = 1; i < k; i++)  // slice 0 (numeric MSB) is never reshared
+    {
+        if (cut_frac_identity(k, i))
+            continue;  // CUT_FRACTIONAL_BITS_OPT: identity-substituted slice, neither reshared nor zero_added
+        const int t = b3 ? ppa4_zero_add_t3(k, i) : reshare_rt_offset(k, i);
+        if (t < 0)
+            continue;
+        s.nb[s.n] = k - 1 - i;  // numeric bit position of slice i
+        s.t[s.n++] = t;
+    }
+    return s;
+}
+
 template <typename Datatype, typename func_sub>
 inline void bake_reshare_mask(Datatype& l, int bake_index, func_sub SUB)
 {
 #if PARTY == 1 && RESHARE_BAKE_ACTIVE  // P1-ONLY: baking P0's mask online would desync its PRE vs LIVE masks
     constexpr int K = BITLENGTH;
     constexpr uint64_t R = reshares_per_adder(K);
+    static constexpr BakeSlices rs = bake_slices(K, false);
     const uint64_t e = (uint64_t) bake_index + g_bake_batch_offset;  // batch-global output index
     const uint64_t g = e / K;        // bit-sliced A2B group (one adder per group)
     const int j = (int) (e % K);     // value's word index in the group -> lane-bit (K-1-j) after the transpose
@@ -465,36 +490,26 @@ inline void bake_reshare_mask(Datatype& l, int bake_index, func_sub SUB)
     if (base + R > num_random_multiplications)
         return;  // this layer's outputs never reach an MSB adder (e.g. final layer) - leave the mask random
     UINT_TYPE negl = (UINT_TYPE) l;
-    for (int i = 1; i < K; i++)  // slice 0 (numeric MSB) is never reshared
+    for (int s = 0; s < rs.n; s++)
     {
-        if (cut_frac_identity(K, i))
-            continue;  // CUT_FRACTIONAL_BITS_OPT: identity-substituted slice, not reshared in the circuit
-        const int t = reshare_rt_offset(K, i);
-        if (t < 0)
-            continue;
-        const UINT_TYPE rta = (UINT_TYPE) random_multiplication_a[base + (uint64_t) t];
+        const UINT_TYPE rta = (UINT_TYPE) random_multiplication_a[base + (uint64_t) rs.t[s]];
         const UINT_TYPE bit = (rta >> (K - 1 - j)) & (UINT_TYPE) 1;
-        const int nb = K - 1 - i;  // numeric bit position of slice i
-        negl = (negl & ~((UINT_TYPE) 1 << nb)) | (bit << nb);
+        negl = (negl & ~((UINT_TYPE) 1 << rs.nb[s])) | (bit << rs.nb[s]);
     }
 #if PPA4_MSB == 1
     // PPA4 additionally SIM-skips the input-wire zero_adds: bake our (P1-local, see party_local_bc
     // in the tuple generation) beaver3 .c fields into the zero_added b-wire slices so the skipped
     // re-masking would have been a no-op. Same base-offset reasoning as the random multiplications.
-    const uint64_t b3_base = curr_beaver_3_triple_index + g * b3_tuples_per_adder(K);
-    if (b3_base + b3_tuples_per_adder(K) <= num_beaver_3_tuples)
+    static constexpr BakeSlices zs = bake_slices(K, true);
+    constexpr uint64_t B3 = b3_tuples_per_adder(K);
+    const uint64_t b3_base = curr_beaver_3_triple_index + g * B3;
+    if (b3_base + B3 <= num_beaver_3_tuples)
     {
-        for (int i = 1; i < K; i++)
+        for (int s = 0; s < zs.n; s++)
         {
-            if (cut_frac_identity(K, i))
-                continue;  // CUT_FRACTIONAL_BITS_OPT: identity-substituted slice, zero_add skipped
-            const int t3 = ppa4_zero_add_t3(K, i);
-            if (t3 < 0)
-                continue;
-            const UINT_TYPE c3 = (UINT_TYPE) beaver_3_tuples.c[b3_base + (uint64_t) t3];
+            const UINT_TYPE c3 = (UINT_TYPE) beaver_3_tuples.c[b3_base + (uint64_t) zs.t[s]];
             const UINT_TYPE bit = (c3 >> (K - 1 - j)) & (UINT_TYPE) 1;
-            const int nb = K - 1 - i;
-            negl = (negl & ~((UINT_TYPE) 1 << nb)) | (bit << nb);
+            negl = (negl & ~((UINT_TYPE) 1 << zs.nb[s])) | (bit << zs.nb[s]);
         }
     }
 #endif
