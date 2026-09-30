@@ -687,6 +687,19 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
 #if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
     AES_TYPE saved_counter = aes_counter[PSELF];
     uint64_t saved_numgen = num_generated[PSELF];
+    // Draw from a separate stream: the generator runs AES on its own state (output feedback), so restoring the
+    // state replays the same values, and the passes would draw ia again as their own masks (conv, gate and
+    // bit-injection mask shares): lz = -untranspose(ia) would be a known function of other masks of the same
+    // party, and both kinds of masked values are public. Same key, the state XORed with a constant: an
+    // independent sequence.
+    {
+        alignas(sizeof(AES_TYPE)) uint64_t tweak[sizeof(AES_TYPE) / 8];
+        for (size_t i = 0; i < sizeof(AES_TYPE) / 8; i++) tweak[i] = 0x9e3779b97f4a7c15ULL ^ (0xa2bULL << 32) ^ i;
+        AES_TYPE t;
+        std::memcpy(&t, tweak, sizeof(t));
+        aes_counter[PSELF] = MM_XOR(saved_counter, t);
+        num_generated[PSELF] = BUFFER_SIZE;  // the next draw encrypts the tweaked state
+    }
 #endif
     (void) SUB;  // the masks are derived value by value (UINT_TYPE arithmetic), independent of the lane layout
     for (uint64_t base = 0; base + K <= num_slices; base += K)
