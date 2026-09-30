@@ -136,6 +136,11 @@ struct FullyConnectedParameter
 // (conv_async_start in protocols/beaver_triples.hpp). The pass records each layer's masks (SetupConv2dTriples) and
 // then calls mark_ready; the HE pipeline waits for each layer in ready(); complete_preprocessing joins before the
 // next generator uses the CHEETAH channels, and the CONV generation there only finishes up (MWK share corrections).
+#if CHEETAH_CONV_REPACK == 1 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_TYPE == 0
+// the packed convs in ConvTriple's repacking ring: set before the first Keys::instance (which sets it up and
+// exchanges the Galois keys: both parties' for AB triples, A_KNOWN = 0)
+inline const bool g_conv_repack_set = (Iface::conv_repack() = true, Iface::conv_repack_ab() = (A_KNOWN == 0), true);
+#endif
 #define CHEETAH_CONV_ASYNC_ACTIVE (CHEETAH_CONV_ASYNC == 1 && CHEETAH_WAN_OPT == 0 && PROTOCOL == 4 && DATTYPE == BITLENGTH && \
                                    CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_PIPELINE == 1)
 #if CHEETAH_CONV_ASYNC_ACTIVE
