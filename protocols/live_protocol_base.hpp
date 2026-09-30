@@ -226,6 +226,8 @@ void communicate_pre()
 
 void pre_send_to_live(int player_id, DATATYPE a)
 {
+    if (g_mask_pass)
+        return;  // the mask-only forward (A2B_BAKE_MASK_PASS) sends nothing; the real forward sends it again
 #if ADDITIONAL_RELU_THREADS > 0
     if (tl_pre)
     {

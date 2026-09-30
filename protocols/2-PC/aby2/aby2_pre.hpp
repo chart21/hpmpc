@@ -553,9 +553,9 @@ class ABY2_PRE_Share
     {
 #if PARTY == 0
         put_triple_type(0, CaseDefault);
-        return ABY2_PRE_Share(getRandomVal(PSELF));
+        return ABY2_PRE_Share(lin_mask<Datatype>());
 #else
-        auto c = ABY2_PRE_Share(getRandomVal(PSELF));
+        auto c = ABY2_PRE_Share(lin_mask<Datatype>());
         pre_send_to_live(
             PNEXT, ADD(c.l, SUB(SET_ALL_ZERO(), TRUNC(MULT(l, b), fractional_bits))));  // Share Trunc -(lv1 * b) + lz
         return c;
@@ -575,9 +575,9 @@ class ABY2_PRE_Share
     {
 #if PSELF == DATAOWNER
         put_triple_type(0, CaseDefault);
-        return ABY2_PRE_Share(getRandomVal(PSELF));
+        return ABY2_PRE_Share(lin_mask<Datatype>());
 #else
-        auto c = ABY2_PRE_Share(getRandomVal(PSELF));
+        auto c = ABY2_PRE_Share(lin_mask<Datatype>());
         pre_send_to_live(PNEXT, c.l);  // non-owner's online c.m == its fresh mask
         return c;
 #endif
@@ -888,7 +888,7 @@ class ABY2_PRE_Share
             put_triple_type(0, CaseMultiplexer);
             put_triple_type(0, CaseCOT);
             put_multiplexer_arith(x[i].l);
-            out[i].l = getRandomVal(PSELF);
+            out[i].l = bi_output_mask<Datatype>(i);  // committed in a ReLU (A2B_BAKE_MASK_PASS)
         }
         // Bit-reverse each lane using SIMD butterfly
         // Two-level indirection to force BITLENGTH expansion before ## token pasting
@@ -956,7 +956,7 @@ class ABY2_PRE_Share
             //     OP_ADD);  // communication can be cut in half if triple of type x(P_0),y(P_1),[z] is used
             store_output_share_arithmetic(lb[i],helper_index);
             store_output_share_arithmetic(x[i].l, helper_index);
-            out[i].l = getRandomVal(PSELF);
+            out[i].l = bi_output_mask<Datatype>(i);  // committed in a ReLU (A2B_BAKE_MASK_PASS)
         }
 #endif
     }

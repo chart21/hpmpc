@@ -106,6 +106,9 @@ bool g_msb_input_baked = true;
 // conv before a pooling layer would reuse slots of other values (their differences, or through the rebase their
 // masks, would become public).
 bool g_conv_bake = true;
+// A2B_BAKE_MASK_PASS: the preprocessing pass's mask-only forward is running (ReLUs record their input masks and
+// output the committed bit-injection masks, protocols/beaver_triples.hpp)
+bool g_mask_pass = false;
 // Set by the conv/FC layers around every GEMM regardless of protocol, hence declared outside the
 // preprocessing guard above.
 // RESHARE_OPT / A2B_CONV_BAKE: the conv layer runs ONE GEMM per batch element, so the mask index passed to

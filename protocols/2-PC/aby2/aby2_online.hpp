@@ -46,7 +46,7 @@ class ABY2_ONLINE_Share
 #else
         c.m = SUB(SET_ALL_ZERO(), TRUNC(MULT(l, b), fractional_bits));  // Share Trunc -(lv1 * b)
 #endif
-        c.l = getRandomVal(PSELF);
+        c.l = lin_mask<Datatype>();
         c.m = ADD(c.m, c.l);
 #if PARTY == 0
         send_to_live(PNEXT, c.m);
@@ -69,7 +69,7 @@ class ABY2_ONLINE_Share
                                                         int fractional_bits = FRACTIONAL) const
     {
         ABY2_ONLINE_Share c;
-        c.l = getRandomVal(PSELF);
+        c.l = lin_mask<Datatype>();
 #if PSELF == DATAOWNER
         c.m = ADD(TRUNC(MULT(SUB(m, l), b), fractional_bits), c.l);  // Trunc(a*b) + mask, a = m - l (in the clear)
         send_to_live(PNEXT, c.m);
@@ -275,7 +275,7 @@ class ABY2_ONLINE_Share
                                      OP_MULT(b0[i], xil)),                       // - mb [la]
                               OP_MULT(OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1)),  // + (2mb -1)
                                       OP_SUB(lalb, OP_MULT(xim, lb))));          // ([lalb] - ma [lb])
-            out[i].l = getRandomVal(PSELF);
+            out[i].l = bi_output_mask<Datatype>(i);  // committed in a ReLU (A2B_BAKE_MASK_PASS)
             out[i].m = OP_ADD(out[i].m, out[i].l);
             send_to_live(PNEXT, out[i].m);
         }
@@ -311,7 +311,7 @@ class ABY2_ONLINE_Share
                                      OP_MULT(b0[i], xil)),
                               OP_MULT(OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1)),
                                       OP_SUB(lalb, OP_MULT(xim, lb))));
-            out[i].l = getRandomVal(PSELF);
+            out[i].l = bi_output_mask<Datatype>(i);  // committed in a ReLU (A2B_BAKE_MASK_PASS)
             // SecureML-style local truncation of (value_share * trunc_factor), THEN add the fresh mask.
             // (The previous code added the mask first and scaled the masked value, so the mask did not
             //  cancel on reconstruction -> garbage. Mirrors mask_and_send_dot_with_trunc.)

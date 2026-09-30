@@ -457,6 +457,9 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef CHEETAH_CONV_ASYNC
 #define CHEETAH_CONV_ASYNC 1  // single batch, packed + pipelined convs: the conv triples start with the preprocessing pass, each layer as soon as the pass has recorded its masks, instead of after it
 #endif
+#ifndef A2B_BAKE_MASK_PASS
+#define A2B_BAKE_MASK_PASS 1  // A2B_CONV_BAKE with public weights (UC3): a mask-only forward in the preprocessing pass gives every ReLU input's actual mask before the Boolean addition, so no ReLU input needs the rebase message (bit-injection output masks committed)
+#endif
 #ifndef CHEETAH_CONV_REPACK
 #define CHEETAH_CONV_REPACK 0  // with CHEETAH_CONV_PACKED 1: communication-optimized conv triples (ConvTriple conv_repack): ring N = 8192 with a special prime, dense inputs, the evaluator packs the outputs with Galois automorphisms (Galois keys once); about half the conv-triple traffic, slower HE
 #endif

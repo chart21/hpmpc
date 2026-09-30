@@ -87,11 +87,68 @@ sweep. A conv/FC with secret weights re-masks its output with a mask each party 
 the BatchNorm layers here), so `rebase` sends `lz_i - l_i` per value and party in preprocessing: a one-time pad of `l_i`
 (`lz_i` is fresh and private), 4 B each, nothing online.
 
-CHEETAH ResNet50 (FUNCTION_IDENTIFIER 87/187/287) has 9,006,592 ReLU inputs; 7,300,608 come straight from a conv (BN
-fused). UC1 / UC2 rebase the 1,705,984 after the stem's pooling and the four residual additions (13 MiB); UC3 (public
-weights) rebases all 9,006,592: 2 x 4 B x 9.0 M = 69 MiB, the measured difference to the (wrong) as-given build.
-Avoiding it would need the actual masks before the Boolean addition, i.e. an extra mask-only pass (estimated at the
-PRE pass's 0.3-0.5 s single-threaded) to save 22 ms of transfer at 25 Gbit/s.
+CHEETAH ResNet50 (FUNCTION_IDENTIFIER 87/187/287) has 9,006,592 ReLU inputs in 49 ReLUs; 8,003,072 come straight
+from a conv (BN fused). UC1 / UC2 rebase the 1,003,520 after the stem's pooling (+ unfused BatchNorm, 200,704) and
+after the one residual addition the layout keeps (stage 1, 802,816; the other three are commented out in
+`Cheetah_ResNet`): 2 x 4 B x 1.0 M = 7.7 MiB (measured per ReLU, `DBGRELU`, 2026-09-30; an earlier version of this
+paragraph said 1,705,984 / four residual additions / 13 MiB, which was wrong). UC3 (public weights) rebases all
+9,006,592: 2 x 4 B x 9.0 M = 69 MiB, the measured difference to the (wrong) as-given build. UC3 no longer does:
+see the mask-only forward below.
+
+### Privacy fixes (2026-09-30)
+
+Two ways in which committed randomness masked more than one value:
+
+1. **Slot reuse (hpmpc d8a48ae, PIGEON d3e2948).** The committed masks are addressed as `g_a2b_layer_base + e`, and
+   the base moves only at an A2B. Every conv/FC took them, so a conv whose output does not go straight into a baked
+   ReLU used the slots of other values: the downsample conv and the conv after it (the same base) masked their
+   outputs at equal positions with the same mask (the difference of two secret activations became public), and the
+   stem conv's 802,816 outputs spilled into the next layers' slots. And the rebase `delta_i = lz_i - l_i` is a
+   one-time pad only if `lz_i` masks nothing else: at the residual ReLU, `lz_i` had already masked the residual
+   partner (conv #5), so `delta_i = -l_i(downsample)` - both parties learned the downsample conv's mask, and with its
+   public masked value its output. Measured in the PRE pass (ImageNet, UC1 and UC2 A2bits): 1,505,280 slots used by
+   two convs, all 1,003,520 rebased slots also used by a conv. Fix: `SimpleNN::mark_baked_relu_inputs` marks the
+   conv/FC right before a baked ReLU (`bake_output`, not for a ReLU fused into max pooling); only those take committed
+   masks (`g_conv_bake`), all others draw fresh ones, and the rebase reads the slot (`a2b_bake_slot_mask`). Afterwards:
+   0 reused slots, 8,003,072 conv-used slots (exactly the baked ReLU inputs), rebases on unused slots only.
+2. **Replayed generator (this commit).** `init_a2b_bake` drew `ia` with `getRandomVal(PSELF)` and restored the
+   generator so that the passes stay in step. The generator runs AES on its own state (output feedback), so the
+   passes then drew exactly these values again as their own masks: `lz = -untranspose(ia)` was a fixed function of
+   mask shares the same party used elsewhere (conv, gate and bit-injection masks), whose masked values are public
+   too. The committed values now come from the same key with the state XORed with a constant, an independent
+   sequence.
+
+Neither fix changes traffic or work; the A2bits UC1 / UC2 CIFAR checks classify 4-7 / 10 as before (new output
+hashes, since the masks changed).
+
+### UC3: the mask-only forward (A2B_BAKE_MASK_PASS, default 1)
+
+With public weights no producer can hit a committed mask: a conv's output mask is `W * lambda_in`, a linear function
+of earlier bit-injection masks (choosing those so that `W * lambda_in = lz` is a linear system without a solution in
+general). But every ReLU input mask is then a function of the input masks and the earlier ReLUs' output masks alone.
+So the preprocessing pass first runs the network over the masks (`a2b_mask_forward`, from `SimpleNN::evaluate`):
+
+* the ReLUs record their input masks at their A2B slots and output **committed bit-injection masks** (`g_a2b_bi`,
+  drawn with `ia`); the real passes' bit injections take the same ones (`bi_output_mask`, slot per element via
+  `BiSlotScope`);
+* all other layers run their normal preprocessing code; their truncations (pooling, delayed conv truncations, the
+  data owner's first layer) take their masks from a counter-mode stream under the party's key that restarts with
+  every forward (`lin_mask`), since a PSELF draw after a ReLU would differ between the two forwards;
+* pre-sends are dropped (`pre_send_to_live`), the triple-type index and the generators are restored, and every
+  other preprocessing stream must not have moved (abort otherwise, as for an A2B outside a ReLU);
+* then the Boolean addition runs on `bool(-lambda_v)` of the recorded masks (moved from the OT phase into the pass),
+  and no ReLU input needs the rebase; in preprocessing every A2B input's mask is checked against the recorded one.
+
+UC3 A2bits, ImageNet: 69 MiB less preprocessing traffic (hpmpc's pass messages 140 -> 75 MB for RCA), no mismatch
+in any of the 49 ReLUs.
+
+### UC1 / UC2: stem and residual (not done)
+
+The remaining 7.7 MiB could also go: the stem's BatchNorm has secret parameters and re-masks its output, so it could
+draw the committed slot masks like a conv; at the residual sum, the partner conv could draw `lz - l_identity` (the
+identity's mask is known when it runs), which makes the sum carry `lz` - free for P0 and, without truncation-image
+constraints, for P1; with weights known in preprocessing and `TRUNC_DELAYED=0`, P1's conv masks must lie in the
+truncation's image, so P1 would need a committed identity mask as well (or keep its half of the rebase).
 
 The one invariant all of this relies on: the counting (INIT) pass must not draw from the PRNG,
 because the PRNG is reseeded only after preprocessing and every PRE mask would otherwise be shifted

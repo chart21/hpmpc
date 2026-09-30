@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include "../../datatypes/Additive_Share.hpp"
 #include "../../datatypes/XOR_Share.hpp"
 #include "../../datatypes/float_fixed_converter.hpp"  // FloatFixedConverter (reciprocal for fused avg / delayed trunc)
@@ -104,6 +105,12 @@
 #endif
 #endif
 // compute msbs of a range of arithemtic shares
+template <typename D>
+inline bool equal_word(const D& a, const D& b)
+{
+    return std::memcmp(&a, &b, sizeof(D)) == 0;
+}
+
 template <int bm, int bk, typename Datatype, typename Share>
 void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int len)
 {
@@ -117,6 +124,21 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
     // [c] was committed for mask lz of every A2B slot. A value its producer could not bake (see
     // g_msb_input_baked) is moved onto lz here; the delta is exchanged in preprocessing, so the online
     // phase stays free of A2B communication.
+#if A2B_MASK_PASS_ACTIVE
+    // The mask-only forward recorded each input's mask at its slot and [c] was built for it: nothing to move. In
+    // preprocessing, check that the masks are what the mask forward saw (all but the last value group, whose
+    // padding is not initialized).
+    if (g_mask_pass)
+        mask_pass_abort("an A2B outside a ReLU (the mask-only forward models ReLUs only)");
+    if (current_phase == PHASE_PRE)
+        for (int i = 0; i + 1 < len; i++)
+        {
+            auto* sh = val[i].get_share_pointer();
+            for (int j = 0; j < BITLENGTH; j++)
+                if (!equal_word(sh[j].get_mask(), a2b_bake_slot_mask<Datatype>((uint64_t) i * BITLENGTH + j, OP_SUB)))
+                    mask_pass_abort("a ReLU input's mask differs from the mask-only forward's");
+        }
+#else
     if (!msb_input_baked())
         for (int i = 0; i < len; i++)
         {
@@ -124,6 +146,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
             for (int j = 0; j < BITLENGTH; j++)
                 sh[j] = sh[j].rebase(a2b_bake_slot_mask<Datatype>((uint64_t) i * BITLENGTH + j, OP_SUB));
         }
+#endif
 #endif
 #if A2B_ROUND_OPT_SIM == 0
     //Skip if we are simulating A2B with round optimization
@@ -358,6 +381,21 @@ void B2A_range(sbitset_t<bk - bm, XOR_Share<Datatype, Share>>* y, sint_t<Additiv
     delete[] random_mask;
 }
 
+// A2B_BAKE_MASK_PASS: while bit injection element i of a ReLU runs, its outputs take the committed masks of their
+// slots (bi_output_mask); reset afterwards, also on the pool's workers
+struct BiSlotScope
+{
+    explicit BiSlotScope(int i)
+    {
+#if A2B_MASK_PASS_ACTIVE
+        tl_bi_slot = g_bi_base == UINT64_MAX ? -1 : (int64_t) (g_bi_base + (uint64_t) i * BITLENGTH);
+#else
+        (void) i;
+#endif
+    }
+    ~BiSlotScope() { tl_bi_slot = -1; }
+};
+
 template <typename Datatype, typename Share>
 void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Share<Datatype, Share>>* val, const int len)
 {
@@ -389,6 +427,7 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
             1 / FLOATTYPE(curr_denom), FRACTIONAL + AVG_RECIP_EXTRA_BITS);
         const int fb = (fold_delayed ? 2 * FRACTIONAL : FRACTIONAL) + AVG_RECIP_EXTRA_BITS;
         stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
+            BiSlotScope bi(i);
             y[i].prepare_opt_bit_injection_with_trunc(val[i].get_share_pointer(), val[i].get_share_pointer(),
                                                       PROMOTE(reciprocal), fb);
         });
@@ -399,6 +438,7 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
         // rather than the fixed-point "1.0" (== 2^FRACTIONAL) so we don't scale up by 2^FRACTIONAL first (which
         // would risk overflow on larger activations) - mathematically identical, but safer.
         stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
+            BiSlotScope bi(i);
             y[i].prepare_opt_bit_injection_with_trunc(val[i].get_share_pointer(), val[i].get_share_pointer(),
                                                       PROMOTE(UINT_TYPE(1)), FRACTIONAL);
         });
@@ -406,6 +446,7 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
     else
     {
         stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
+            BiSlotScope bi(i);
             y[i].prepare_opt_bit_injection(val[i].get_share_pointer(), val[i].get_share_pointer());
         });
     }
@@ -415,11 +456,78 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
 #endif
 #else
     for (int i = 0; i < len; i++)
+    {
+        BiSlotScope bi(i);
         y[i].prepare_opt_bit_injection(val[i].get_share_pointer(), val[i].get_share_pointer());
+    }
 #endif
     Share::communicate();
     stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { val[i].complete_opt_bit_injection(); });
 }
+
+#if A2B_MASK_PASS_ACTIVE
+// The mask-only forward (SimpleNN::evaluate, preprocessing pass, before the real forward): forward() with every ReLU
+// recording its input masks and outputting committed masks. Nothing else in a public-weight network draws or writes
+// preprocessing material; the random generators are restored anyway, and the preprocessing streams must not have
+// moved. Then the Boolean addition, and the real forward starts from the same state.
+template <typename F>
+void a2b_mask_forward(F&& forward)
+{
+    constexpr int links = num_players * player_multiplier;
+    AES_TYPE counters[links];
+    uint64_t generated[links];
+    for (int l = 0; l < links; l++) counters[l] = aes_counter[l], generated[l] = num_generated[l];
+#if TRUNC_DELAYED == 1
+    const bool delayed0 = delayed;
+#endif
+#if FUSE_RELU_AVG == 1
+    const auto denom0 = curr_denom;
+#endif
+#if STREAM_PARALLEL_PRE_ACTIVE
+    const auto before = stream_parallel::pre_flat(stream_parallel::pre_snapshot());
+#endif
+#if ADDITIONAL_RELU_THREADS > 0
+    const auto rnd0 = rnd_calls_self;
+#endif
+    const uint64_t send0 = send_count_pre[PNEXT];
+    // the truncations of the pooling layers record a triple type per value (for the online phase's bookkeeping):
+    // an append-only stream the real forward writes again from the same position
+    const auto types0 = triple_type_index;
+    g_a2b_layer_base = 0;
+    g_lin_counter = 0;
+    g_mask_pass = true;
+    forward();
+    g_mask_pass = false;
+    g_lin_counter = 0;  // the real forward draws the same truncation masks
+    if (g_a2b_layer_base != g_a2b_lz.size())
+        mask_pass_abort("the mask-only forward did not reach every A2B slot");
+    for (int l = 0; l < links; l++) aes_counter[l] = counters[l], num_generated[l] = generated[l];
+#if TRUNC_DELAYED == 1
+    delayed = delayed0;
+#endif
+#if FUSE_RELU_AVG == 1
+    curr_denom = denom0;
+#endif
+#if ADDITIONAL_RELU_THREADS > 0
+    rnd_calls_self = rnd0;
+#endif
+    for (size_t r = 0; r < types0.size() && r < triple_type_index.size(); r++) triple_type_index[r] = types0[r];
+#if STREAM_PARALLEL_PRE_ACTIVE
+    if (const auto now = stream_parallel::pre_flat(stream_parallel::pre_snapshot()); now != before)  // every stream where it was
+    {
+        for (size_t k = 0; k < now.size(); k++)
+            if (now[k] != before[k])
+                fprintf(stderr, "A2B_BAKE_MASK_PASS: preprocessing stream %zu moved from %ld to %ld\n", k, (long) before[k], (long) now[k]);
+        mask_pass_abort("the mask-only forward wrote preprocessing material");
+    }
+#endif
+    if (send_count_pre[PNEXT] != send0)
+        mask_pass_abort("the mask-only forward wrote preprocessing material");
+    g_mask_pass_hook();
+    g_a2b_layer_base = 0;
+    g_a2b_c_cursor = 0;
+}
+#endif
 
 template <typename Share, typename Datatype>
 void bit2A_range(XOR_Share<Datatype, Share>* bit_val, int len, sint_t<Additive_Share<Datatype, Share>>* output)

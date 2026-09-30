@@ -90,6 +90,9 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 #endif
 
     S* y = new S[len];
+#if A2B_MASK_PASS_ACTIVE
+    const uint64_t slot_base = g_a2b_layer_base;  // this ReLU's first A2B slot (get_msb_range moves on)
+#endif
 #if CUT_FRAC_ELIGIBLE || CUT_FRAC_ELIGIBLE_GENERIC
     g_cut_frac_active = true;
 #endif
@@ -101,7 +104,13 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
         y[i] = ~y[i];
     }
 
+#if A2B_MASK_PASS_ACTIVE
+    g_bi_base = slot_base;  // the outputs take the committed masks of the input slots
+#endif
     bit_injection_opt_range<Datatype, Share>(y, val, len);
+#if A2B_MASK_PASS_ACTIVE
+    g_bi_base = UINT64_MAX;
+#endif
 
     delete[] y;
 
@@ -260,6 +269,19 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
                  Additive_Share<Datatype, Share>* output)
 {
     const int len = end - begin;
+#if A2B_MASK_PASS_ACTIVE
+    if (g_mask_pass)
+    {
+        a2b_mask_pass_relu<Datatype, Share>(begin, len, output);
+#if TRUNC_DELAYED == 1
+        delayed = false;
+#endif
+#if TRUNC_APPROACH > 0
+        all_positive = true;
+#endif
+        return;
+    }
+#endif
 #if TRUNC_DELAYED == 1 && TRUNC_APPROACH > 0
     if (delayed)
     {

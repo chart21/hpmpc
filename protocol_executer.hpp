@@ -392,6 +392,19 @@ generate_beaver_triples(
         // not in complete_preprocessing) so [c] is available to prepare_A2B_S2 in BOTH the PRE and LIVE
         // passes - the msb adder's beaver triples (built in PRE from s2.l = [c]) must match LIVE.
         init_a2b_bake<DATATYPE>(num_boolean_addition_triples, std::minus<DATATYPE>());
+#if A2B_MASK_PASS_ACTIVE
+        // the Boolean addition waits for the actual masks: after the pass's mask-only forward (a2b_mask_forward)
+        g_mask_pass_hook = [ips] {
+            a2b_mask_pass_commit(num_boolean_addition_triples);
+            if (num_boolean_addition_triples > 0)
+            {
+                init_booleanAdditionBeaverC();
+                generate_beaver_triples(
+                        ips, base_port, process_offset, num_boolean_addition_triples, 0, "BOOLEANADDITION");
+                a2b_bake_store_c(num_boolean_addition_triples);
+            }
+        };
+#else
         if (num_boolean_addition_triples > 0)
         {
             init_booleanAdditionBeaverC();
@@ -399,6 +412,7 @@ generate_beaver_triples(
                     ips, base_port, process_offset, num_boolean_addition_triples, 0, "BOOLEANADDITION");
             a2b_bake_store_c(num_boolean_addition_triples);
         }
+#endif
         g_a2b_layer_base = 0;  // conv-mask layer base starts at 0 for the PRE pass
         g_a2b_c_cursor = 0;  // A2B-S2 [c] cursor starts at 0 for the PRE pass
 #endif
