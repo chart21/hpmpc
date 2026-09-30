@@ -15,12 +15,21 @@ def load(f):
             d.setdefault(r["name"].split("_", 1)[1], []).append(r)
     return d
 res = {(pair, k): load(f"res_{pair}_{k}.csv") for pair in ("fp", "ag") for k in ("conf", "opt", "fin", "fin64", "fin2")}
-# UC3: five interleaved runs of each build (res_*_ab.csv) replace the earlier conf / fin2 runs
+# the final rerun (res_*_final4.csv, conf_ / fin3_) replaces conf / fin2 where present; else UC3 from five interleaved
+# runs (res_*_ab.csv)
 for pair in ("fp", "ag"):
-    ab = load(f"res_{pair}_ab.csv")
-    for k, prefix in (("conf", "conf_"), ("fin2", "fin2_")):
-        res[(pair, k)].update({n: [r for r in rows if r["name"].startswith(prefix)] for n, rows in ab.items()
-                               if any(r["name"].startswith(prefix) for r in rows)})
+    f4, f5 = load(f"res_{pair}_final4.csv"), load(f"res_{pair}_final5.csv")
+    src, pre_fin = (f4, "fin3_") if f4 else (load(f"res_{pair}_ab.csv"), "fin2_")
+    if f5:  # the optimized builds without RNG_AHEAD (final flag set)
+        src, pre_fin = {**{n: [r for r in v if r["name"].startswith("conf_")] for n, v in f4.items()},
+                        **{n: [r for r in f4.get(n, []) if r["name"].startswith("conf_")] + v for n, v in f5.items()}}, "fin4_"
+    for k, prefix in (("conf", "conf_"), ("fin2", pre_fin)):
+        part = {n: [r for r in rows if r["name"].startswith(prefix)] for n, rows in src.items()
+                if any(r["name"].startswith(prefix) for r in rows)}
+        if f4:
+            res[(pair, k)] = part
+        else:
+            res[(pair, k)].update(part)
 def med(pair, k, n, col):
     rows = res[(pair, k)].get(n)
     return st.median(float(r[col]) for r in rows) if rows else None

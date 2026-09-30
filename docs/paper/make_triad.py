@@ -20,9 +20,14 @@ def load_prefix(f, prefix):
     return {n: [r for r in rows if r["name"].startswith(prefix + "_")] for n, rows in load(f).items()
             if any(r["name"].startswith(prefix + "_") for r in rows)}
 res = {(p, k): load(f"res_{p}_{'fin2' if k == 'fin' else k}.csv") for p in ("fp", "ag") for k in ("conf", "fin")}
-# UC3: five interleaved runs of each build, as given and optimized (res_*_ab.csv), replace the earlier one / two
+# the final rerun (res_*_final4.csv: as given and the final code, three interleaved runs of every build) where present;
+# else the earlier runs, UC3 from five interleaved runs (res_*_ab.csv)
 for p in ("fp", "ag"):
-    if (VD / f"res_{p}_ab.csv").exists():
+    if (VD / f"res_{p}_final4.csv").exists():
+        res[(p, "conf")], res[(p, "fin")] = load_prefix(f"res_{p}_final4.csv", "conf"), load_prefix(f"res_{p}_final4.csv", "fin3")
+        if (VD / f"res_{p}_final5.csv").exists():  # the optimized builds without RNG_AHEAD (final flag set)
+            res[(p, "fin")] = load_prefix(f"res_{p}_final5.csv", "fin4")
+    elif (VD / f"res_{p}_ab.csv").exists():
         res[(p, "conf")].update(load_prefix(f"res_{p}_ab.csv", "conf"))
         res[(p, "fin")].update(load_prefix(f"res_{p}_ab.csv", "fin2"))
 def med(p, k, n, c):

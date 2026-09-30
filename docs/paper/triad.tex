@@ -11,11 +11,15 @@ the image are dummies (\flag{MODELOWNER=-1}, \flag{DATAOWNER=-1}); the runtime d
 
 \paragraph{Builds.} \emph{As given}: the configuration unchanged (hpmpc \texttt{161cf1d}); its conv triples use
 CHEETAH's \texttt{HomConv2DSS}. \emph{Optimized}: the configuration plus every optimization of this report
-(hpmpc \texttt{aeab3ae}): \flag{CHEETAH_CONV_PACKED=1} with the pipeline, \flag{CUT_FRACTIONAL_BITS_OPT=1},
+(hpmpc \texttt{1421df0}, ConvTriple \texttt{5b568e9}): \flag{CHEETAH_CONV_PACKED=1} with the pipeline, \flag{CUT_FRACTIONAL_BITS_OPT=1},
 \flag{ADDITIONAL_RELU_THREADS=24} (equal to the configuration's \flag{ADDITIONAL_GEMM_THREADS}, as the two share one
-pool), \flag{RNG_AHEAD=1}, 100,000-word buffers, and \flag{A2B_CONV_BAKE=1} for the A2bits configurations; everything
-else of \cref{sec:he,sec:ot,sec:online} is on by default. Each build runs twice per machine pair (median); the UC3
-builds run five times, alternating with the as-given build.
+pool), 100,000-word buffers, and \flag{A2B_CONV_BAKE=1} for the A2bits configurations; everything
+else of \cref{sec:he,sec:ot,sec:online} is on by default. \flag{RNG_AHEAD=1}, part of the optimized set until this
+last round, is left out: at the final code it saves the Zen~4 hosts about 0.04\s of online time (median over the 36
+builds) but costs the Zen~3 hosts up to 0.17\s (UC3, \flag{COMPRESS=1}: 0.51 against 0.36\s); a profile puts that in
+the online draws, most likely waiting for the ring's producer thread. Each
+build runs three times per machine pair (median): the as-given builds alternating with the final code, the optimized
+builds in a separate series.
 
 \paragraph{Correctness.} The same flags on CIFAR-10 with the AdamW model and real data (P0 / P1 as owners, 10
 images) classify 4--7 images correctly for every configuration with \flag{COMPRESS=0} (plaintext: 6), including all
@@ -89,6 +93,15 @@ the RCA online phase by only 7\%.
   weights known in preprocessing, P1's accumulation, which its mask/send never reads, is skipped. The conv layers'
   online time falls by a quarter on Zen~3; on Zen~4 the accumulation was not on the critical path.
 \item \textbf{The A2B bake} is restricted to full-width ReLUs (above).
+\item \textbf{Conv triples alongside the preprocessing pass} (\flag{CHEETAH_CONV_ASYNC}). The conv triples used to
+  start after the pass, whose single thread fixes their input masks. Now the batched HE pipeline starts on its own thread
+  together with the pass and takes each layer as soon as the pass has recorded its masks; the rest of the preprocessing
+  waits for it before the next generator uses the channels. Only the layers the pass reaches last leave a tail.
+\item \textbf{Parallel preprocessing levels} (\flag{STREAM_PARALLEL_PRE}). The A2B, adder and bit-injection levels of
+  the pass run on the worker pool like online. The pass's append-only streams (triple types and triple inputs, the
+  pre-send buffer, stored outputs) get per-worker cursors, reads use the online cursors, and every worker's use of each
+  stream is checked against the first element's. The GEMM levels stay serial. Both changes leave all 18 CIFAR-10 output
+  hashes and two multi-batch hashes unchanged.
 \end{itemize}
 More HE/OT threads help the OT-heavy builds: \flag{CHEETAH_THREADS=64} instead of the configurations' 32 (64 OT packs)
 shortens preprocessing by 8\% (median) on Zen~4 and 4\% on Zen~3, by up to 20\% for PPA4, but lengthens it by up to 30\%
@@ -98,31 +111,26 @@ busy-polling the receive path and 31 instead of 24 workers did not help.
 \begin{figure}[t]
   \centering\input{figures/triad}
   \caption{The 36 all\_opt builds on ImageNet (dummy weights) by use case, as given and optimized, on both machine pairs
-  (log scale; median of two runs, UC3 of five interleaved runs).}
+  (log scale; median of three runs).}
   \label{fig:triad}
 \end{figure}
 
-\paragraph{Results.} \Cref{fig:triad} shows all 36 builds; \cref{tab:triad} summarizes them. In UC1 and UC2 the
-packed, pipelined and concurrent conv triples, the exact wire format, the shared-OT tuples and \flag{TCP_NODELAY} cut
-preprocessing from 11.3--17.4\s to 2.2--7.1\s on the Zen~4 pair ($2.3$--$5.5\times$) and from 15.5--21.7\s to
-3.0--8.8\s on the Zen~3 pair, and the online phase from 0.77--1.57\s to 0.34--0.67\s ($2.0$--$2.7\times$; Zen~3:
-0.27--0.68\s, up to $3.3\times$). In UC2, with the weights known in preprocessing, the online phase takes 0.34--0.59\s
-on Zen~4 and 0.27--0.48\s on Zen~3. Against the same flags before this round's changes, the online phase is
-1.0--1.5$\times$ faster on both pairs.
+\paragraph{Results.} \Cref{fig:triad} shows all 36 builds; \cref{tab:triad} summarizes them. At the final code every
+build is faster than as given, in both phases and on both pairs. In UC1 and UC2 the packed, pipelined and concurrent
+conv triples running alongside the parallel preprocessing pass, the exact wire format, the shared-OT tuples and
+\flag{TCP_NODELAY} cut preprocessing from 11.7--17.3\s to 1.9--6.2\s on the Zen~4 pair ($2.6$--$6.7\times$) and from
+15.1--21.9\s to 2.7--7.8\s on the Zen~3 pair ($2.8$--$6.0\times$). The online phase falls from 0.77--1.55\s to
+0.39--0.70\s ($1.8$--$2.8\times$; Zen~3: 0.72--1.73 to 0.27--0.70\s, $2.0$--$3.8\times$). In UC2, with the weights
+known in preprocessing, the online phase takes 0.39--0.62\s on Zen~4 and 0.27--0.54\s on Zen~3.
 
-UC3 needs no linear-layer triples, so its preprocessing is OT-bound and changes little. Its online phase is
-$1.3$--$2.4\times$ faster. For UC3 the figure and table use five interleaved runs of each build, as given and
-optimized, on both pairs. On Zen~4 the optimized builds preprocess 0.02--0.20\s faster than as given in all 12
-builds. On Zen~3 the reshared builds are 0.08--0.31\s faster and the A2bits builds with \flag{COMPRESS=0} within
-their runs' spread ($+0.01$ to $+0.08\s$). Only the A2bits builds with \flag{COMPRESS=1} preprocess 0.11--0.14\s
-slower there, in five of five paired runs. A one-flag-off ablation places all of it in \flag{ADDITIONAL_RELU_THREADS},
-which in turn makes their online phase 0.15\s faster. With the flag, every draw of randomness and every read of a
-preprocessed output checks whether the thread works on a parallel level's stream cursors. The preprocessing pass never
-does, but pays the checks: P0's last preprocessing step takes 0.44--0.49 instead of 0.32--0.34\s. Versions of these
-functions without the check for the preprocessing share remove the 0.13\s from these builds, but add 0.1\s to the
-\flag{COMPRESS=0} builds on the same hosts and change nothing on Zen~4. It is a code-layout effect rather than
-work, and we kept the flag and the code as they are. As-given A2bits also skips the 69\,MiB rebase of the A2B bake
-and is not correct (Correctness).
+UC3 needs no linear-layer triples, so its preprocessing is OT-bound and changes least: $1.0$--$1.2\times$ faster on
+both pairs, with the online phase $1.4$--$1.9\times$ faster ($1.4$--$2.1\times$ on Zen~3). Before the parallel
+preprocessing levels, the Zen~3 hosts' A2bits builds with \flag{COMPRESS=1} preprocessed 0.11--0.14\s \emph{slower} than
+as given (five interleaved runs each). A one-flag-off ablation placed all of it in \flag{ADDITIONAL_RELU_THREADS}, whose
+per-call stream-cursor checks slowed P0's last preprocessing step from 0.32--0.34 to 0.44--0.49\s. Unchecked versions
+for the preprocessing share removed that but slowed the \flag{COMPRESS=0} builds by as much, a code-layout effect we
+did not keep. The parallel preprocessing levels now more than make up for it. As-given A2bits also skips the 69\,MiB
+rebase of the A2B bake and is not correct (Correctness).
 
 \begin{table}[t]
 \centering\small
@@ -134,7 +142,7 @@ builds & pair & as given & optimized & as given & optimized\\
 \input{data/triad_tab}
 \end{tabular}
 \caption{The all\_opt builds on ImageNet by use case (A2bits and reshared, three adders each), as given and optimized
-(median of two runs, UC3 of five interleaved runs). Per-build values: \texttt{docs/TRIAD\_ALL\_OPT.md}.}
+(median of three runs). Per-build values: \texttt{docs/TRIAD\_ALL\_OPT.md}.}
 \label{tab:triad}
 \end{table}
 
@@ -170,39 +178,39 @@ apply to UC3; with \flag{COMPRESS=1} the online traffic does not change.
 \toprule
 & & \multicolumn{7}{c}{preprocessing (s)} & \multicolumn{3}{c}{online}\\
 \cmidrule(lr){2-9}\cmidrule(l){10-12}
-build & total & OT setup & tuples & bake add. & pass & conv & after pass & other & (s) & rounds & wait (s)\\
+build & total & OT setup & tuples & bake add. & pass & conv tail & after & other & (s) & rounds & wait (s)\\
 \midrule
 \input{data/triad_phases}
 \end{tabular}
-\caption{Where the time of six optimized builds goes (\flag{COMPRESS=0}, ImageNet, flare / polynize, phase timestamps,
-median of two runs). Tuples: OT-based triples and tuples after the OT setup; bake add.: the A2B bake's Boolean
-addition; pass: the network's preprocessing pass; conv: the conv triples; after pass: the rest of the preprocessing
-after the pass (COT, multiplexer, FC triples, triple bookkeeping); other: key exchange, the bake's input preparation and
-gaps. Wait: online time spent waiting for the other party.}
+\caption{Where the time of six builds goes at the final code (\flag{COMPRESS=0}, ImageNet, flare / polynize, phase
+timestamps, median of two runs). Tuples: OT-based triples and tuples after the OT setup; bake add.: the A2B bake's
+Boolean addition; pass: the network's preprocessing pass, whose ReLU levels now run on the pool; conv tail: the part of
+the conv triples still running after the pass (they start with it); after: the rest of the preprocessing (COT,
+multiplexer, FC triples, triple bookkeeping); other: key exchange, the bake's input preparation and gaps. Wait: online
+time spent waiting for the other party.}
 \label{tab:triadphases}
 \end{table}
 
-\paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds, and a CPU profile adds where the
-threads spend it.
+\paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds at the final code, and CPU profiles add
+where the threads spend it. Before the last two changes the preprocessing pass took 0.43--0.86\s over the 18 builds
+and the conv triples (0.71--0.84\s) followed it; now the pass takes 0.25--0.64\s and the conv triples run alongside.
 \begin{enumerate}\itemsep1pt
-\item \textbf{OT generation} remains the largest cost. Every build pays 0.84--0.90\s to set up the 32 ferret packs;
-  the tuples after that take 0.25--0.33\s for RCA but 3.5\s for PPA4, whose Beaver 3- and 4-tuples need six more
-  extension rounds of all 32 packs. Ferret's LPN step takes 33--41\% of all CPU samples, the AES key schedules of the
+\item \textbf{OT generation} remains the largest cost. Every build pays 0.82--0.93\s to set up the 32 ferret packs;
+  the tuples after that take 0.24--0.37\s for RCA but 1.5--3.5\s for PPA4, whose Beaver 3- and 4-tuples need up to six
+  more extension rounds of all 32 packs. Ferret's LPN step takes 33--41\% of all CPU samples, the AES key schedules of the
   correlation-robust hash 8--11\%. The last extension round is only partly used, but that wastes at most one round
   (about 0.3\s for PPA4). A fixed-key hash would remove most of the key schedules, but that is a security decision
   (\cref{sec:limits}).
 \item \textbf{The bake's Boolean addition} costs the A2bits builds 1.5\s: 31 dependent COT-multiplication rounds of
   15--22\ms plus an extension round. Preparing its inputs costs another 0.25\s of serial time (column other). A
   log-depth adder would need 5--6 rounds but more AND gates, and so more OTs.
-\item \textbf{Serial work} takes about 1.4\s of every preprocessing run on the main thread. The network's preprocessing
-  pass (0.43--0.86\s over the 18 builds) runs its ReLU levels element by element on one thread, although the online
-  phase runs the same levels on the pool; hpmpc's triple bookkeeping adds 0.2--0.3\s, and the conv layout's tiling
-  search and polyphase weights 0.09\s. Element-parallel preprocessing levels need cursors for the pre-send and
-  stored-output streams, the same machinery as online.
-\item \textbf{Conv triples after the pass.} In UC1 and UC2 the conv triples (0.71--0.84\s) wait for the preprocessing
-  pass, which fixes their input masks, and do not overlap the OT phase. Committing those masks early, as the bake does
-  for the conv outputs, would let the HE run next to the OT generation.
-\item \textbf{Online}, RCA's 1,714--2,012 rounds cost 0.15--0.18\s of waiting. Of the rest, the main thread spends
+\item \textbf{The conv triples' tail.} In UC1 and UC2 the HE still runs 0.28--0.60\s past the pass, and 1.0--1.1\s
+  for reshared PPA4, where it proceeds at about half its serial speed next to the pass: the pass's worker levels and the
+  HE's 32 threads share the 32 cores. The layers the pass reaches last can only start at its end; committing their
+  input masks early, as the bake does for the conv outputs, would let all layers start at once.
+\item \textbf{Serial work} in the pass: the GEMM levels (the weights-known-in-preprocessing path pushes into vectors
+  there) and the bake's input preparation still run on one thread.
+\item \textbf{Online}, RCA's 1,714--2,012 rounds cost 0.14--0.18\s of waiting. Of the rest, the main thread spends
   0.11\s handing levels to the pool, 0.05\s transposing bits for the A2B serially, and 0.06\s in layer glue (copies,
   residual additions, freeing buffers).
 \item \textbf{Communication:} output repacking could halve the conv-triple traffic (\cref{sec:heformal}), at a CPU cost

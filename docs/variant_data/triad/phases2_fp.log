@@ -1,0 +1,221 @@
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+18
+18
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2b_rca_c0 r1 P0 pre=4.256195 online=0.527712 wait=0.119450 rounds=1714 otsetup=0.857623 pre_start=0.000 pass_start=2.996 pass_end=3.518 conv_joined=3.819 complete_end=4.256 | FC=0.035612 MULTIPLEX=0.093743 COT=0.033088 CONV=0.822954 BOOL_COT_MULT=1.45021 BOOL=1.20331 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2b_ppa_c0 r1 P0 pre=4.856052 online=0.564311 wait=0.107698 rounds=878 otsetup=0.896798 pre_start=0.000 pass_start=3.749 pass_end=4.203 conv_joined=4.581 complete_end=4.856 | FC=0.036632 MULTIPLEX=0.074548 COT=0.024328 CONV=0.831191 BOOL_COT_MULT=1.47593 BOOL=1.92717 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2b_ppa4_c0 r1 P0 pre=5.483190 online=0.613246 wait=0.104083 rounds=626 otsetup=0.935074 pre_start=0.000 pass_start=4.244 pass_end=4.936 conv_joined=5.174 complete_end=5.483 | FC=0.039705 MULTIPLEX=0.077648 CONV=0.929947 BOOL_COT_MULT=1.46744 COT=0.027832 BOOL3=1.014 BOOL4=0.17179 BOOL=1.21592 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bk0_rca_c0 r1 P0 pre=4.100232 online=0.623336 wait=0.137131 rounds=1818 otsetup=0.885955 pre_start=0.000 pass_start=2.995 pass_end=3.445 conv_joined=3.884 complete_end=4.100 | FC=0.04633 MULTIPLEX=0.068085 COT=0.032414 CONV=0.888766 BOOL_COT_MULT=1.52771 BOOL=1.1418 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bk0_ppa_c0 r1 P0 pre=4.987836 online=0.595128 wait=0.080966 rounds=982 otsetup=0.823095 pre_start=0.000 pass_start=3.818 pass_end=4.323 conv_joined=4.726 complete_end=4.988 | FC=0.079288 MULTIPLEX=0.081737 COT=0.025566 CONV=0.907176 BOOL_COT_MULT=1.50273 BOOL=1.97226 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bk0_ppa4_c0 r1 P0 pre=5.341370 online=0.642638 wait=0.079279 rounds=730 otsetup=0.833528 pre_start=0.000 pass_start=4.100 pass_end=4.721 conv_joined=5.061 complete_end=5.341 | FC=0.07908 MULTIPLEX=0.065593 CONV=0.960975 BOOL_COT_MULT=1.45508 COT=0.030835 BOOL3=1.04242 BOOL4=0.164612 BOOL=1.0869 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bpw_rca_c0 r1 P0 pre=3.500971 online=0.699861 wait=0.207814 rounds=1963 otsetup=0.922079 pre_start=0.000 pass_start=2.980 pass_end=3.326 conv_joined=3.326 complete_end=3.501 | CONV=0.002687 MULTIPLEX=0.063511 COT=0.034072 BOOL_COT_MULT=1.42338 BOOL=1.19443 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bpw_ppa_c0 r1 P0 pre=4.483766 online=0.628745 wait=0.079705 rounds=891 otsetup=0.914616 pre_start=0.000 pass_start=3.943 pass_end=4.290 conv_joined=4.290 complete_end=4.483 | CONV=0.012551 MULTIPLEX=0.065522 COT=0.023772 BOOL_COT_MULT=1.48103 BOOL=2.05538 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bpw_ppa4_c0 r1 P0 pre=5.791970 online=0.678916 wait=0.075384 rounds=630 otsetup=0.867812 pre_start=0.000 pass_start=5.030 pass_end=5.583 conv_joined=5.583 complete_end=5.792 | CONV=0.0145 MULTIPLEX=0.056271 BOOL_COT_MULT=1.50667 COT=0.027982 BOOL3=1.08228 BOOL4=0.906718 BOOL=1.19638 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rs_rca_c0 r1 P0 pre=2.382303 online=0.500835 wait=0.150871 rounds=1763 otsetup=0.88375 pre_start=0.000 pass_start=1.288 pass_end=1.743 conv_joined=2.112 complete_end=2.382 | FC=0.036878 MULTIPLEX=0.070159 COT=0.030491 CONV=0.822185 RANDOM_MUL=0.070691 BOOL=1.1257 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rs_ppa_c0 r1 P0 pre=3.941122 online=0.543768 wait=0.130306 rounds=900 otsetup=0.86547 pre_start=0.000 pass_start=2.736 pass_end=3.226 conv_joined=3.667 complete_end=3.941 | FC=0.049776 MULTIPLEX=0.074437 COT=0.028639 CONV=0.930583 RANDOM_MUL=0.640401 BOOL=2.00869 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rs_ppa4_c0 r1 P0 pre=6.041279 online=0.515758 wait=0.121972 rounds=675 otsetup=0.875191 pre_start=0.000 pass_start=4.359 pass_end=4.783 conv_joined=5.750 complete_end=6.041 | FC=0.044959 MULTIPLEX=0.067826 CONV=1.39055 RANDOM_MUL=0.092336 COT=0.040942 BOOL3=1.22286 BOOL4=1.98192 BOOL=0.959409 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rsk0_rca_c0 r1 P0 pre=2.406650 online=0.600467 wait=0.192217 rounds=1867 otsetup=0.91427 pre_start=0.000 pass_start=1.324 pass_end=1.749 conv_joined=2.203 complete_end=2.406 | FC=0.044818 MULTIPLEX=0.064344 COT=0.019624 CONV=0.878293 RANDOM_MUL=0.055276 BOOL=1.16784 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rsk0_ppa_c0 r1 P0 pre=4.023747 online=0.651141 wait=0.150719 rounds=1004 otsetup=0.90373 pre_start=0.000 pass_start=2.775 pass_end=3.227 conv_joined=3.747 complete_end=4.024 | FC=0.070434 MULTIPLEX=0.070174 COT=0.036507 CONV=0.971835 RANDOM_MUL=0.611293 BOOL=2.0554 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rsk0_ppa4_c0 r1 P0 pre=6.423502 online=0.621851 wait=0.175836 rounds=779 otsetup=0.831946 pre_start=0.000 pass_start=4.611 pass_end=5.041 conv_joined=6.149 complete_end=6.423 | FC=0.063924 MULTIPLEX=0.062092 CONV=1.53699 RANDOM_MUL=0.105444 COT=0.045711 BOOL3=1.32808 BOOL4=2.20629 BOOL=0.896647 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rspw_rca_c0 r1 P0 pre=1.747007 online=0.581414 wait=0.181459 rounds=2012 otsetup=0.884971 pre_start=0.000 pass_start=1.315 pass_end=1.575 conv_joined=1.575 complete_end=1.747 | CONV=0.007218 MULTIPLEX=0.060425 COT=0.03149 RANDOM_MUL=0.072939 BOOL=1.1608 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rspw_ppa_c0 r1 P0 pre=3.275159 online=0.606940 wait=0.118868 rounds=907 otsetup=0.891554 pre_start=0.000 pass_start=2.830 pass_end=3.115 conv_joined=3.115 complete_end=3.275 | CONV=0.004941 MULTIPLEX=0.046035 COT=0.021602 RANDOM_MUL=0.622047 BOOL=2.13003 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rspw_ppa4_c0 r1 P0 pre=5.014544 online=0.446263 wait=0.109055 rounds=679 otsetup=0.876567 pre_start=0.000 pass_start=4.494 pass_end=4.829 conv_joined=4.829 complete_end=5.014 | CONV=0.002826 MULTIPLEX=0.05789 RANDOM_MUL=0.118649 COT=0.023156 BOOL3=1.26831 BOOL4=2.08973 BOOL=0.944757 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2b_rca_c0 r2 P0 pre=4.173579 online=0.563669 wait=0.160455 rounds=1714 otsetup=0.90448 pre_start=0.000 pass_start=2.994 pass_end=3.475 conv_joined=3.794 complete_end=4.173 | FC=0.040321 MULTIPLEX=0.054814 COT=0.027099 CONV=0.800173 BOOL_COT_MULT=1.50028 BOOL=1.14159 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2b_ppa_c0 r2 P0 pre=4.907506 online=0.561626 wait=0.099957 rounds=878 otsetup=0.876301 pre_start=0.000 pass_start=3.760 pass_end=4.306 conv_joined=4.615 complete_end=4.907 | FC=0.036246 MULTIPLEX=0.073318 COT=0.023453 CONV=0.852926 BOOL_COT_MULT=1.47904 BOOL=1.91281 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2b_ppa4_c0 r2 P0 pre=5.506131 online=0.565284 wait=0.077788 rounds=626 otsetup=0.920581 pre_start=0.000 pass_start=4.292 pass_end=4.872 conv_joined=5.201 complete_end=5.506 | FC=0.035235 MULTIPLEX=0.074747 CONV=0.909195 BOOL_COT_MULT=1.44236 COT=0.02896 BOOL3=1.03163 BOOL4=0.174983 BOOL=1.22274 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bk0_rca_c0 r2 P0 pre=4.045395 online=0.640440 wait=0.173316 rounds=1818 otsetup=0.903274 pre_start=0.000 pass_start=2.922 pass_end=3.308 conv_joined=3.789 complete_end=4.045 | FC=0.08978 MULTIPLEX=0.076231 COT=0.023398 CONV=0.866835 BOOL_COT_MULT=1.45193 BOOL=1.13073 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bk0_ppa_c0 r2 P0 pre=4.967291 online=0.656136 wait=0.132989 rounds=982 otsetup=0.850736 pre_start=0.000 pass_start=3.858 pass_end=4.338 conv_joined=4.732 complete_end=4.967 | FC=0.061334 MULTIPLEX=0.077258 COT=0.022868 CONV=0.873734 BOOL_COT_MULT=1.49245 BOOL=2.00095 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bk0_ppa4_c0 r2 P0 pre=5.409355 online=0.694305 wait=0.090426 rounds=730 otsetup=0.815117 pre_start=0.000 pass_start=4.190 pass_end=4.847 conv_joined=5.168 complete_end=5.409 | FC=0.05845 MULTIPLEX=0.052215 CONV=0.977929 BOOL_COT_MULT=1.53087 COT=0.024736 BOOL3=1.07591 BOOL4=0.171145 BOOL=1.07775 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bpw_rca_c0 r2 P0 pre=3.647966 online=0.638993 wait=0.127831 rounds=1963 otsetup=0.922368 pre_start=0.000 pass_start=3.102 pass_end=3.446 conv_joined=3.446 complete_end=3.648 | CONV=0.021186 MULTIPLEX=0.067764 COT=0.044797 BOOL_COT_MULT=1.53547 BOOL=1.21789 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bpw_ppa_c0 r2 P0 pre=4.652750 online=0.636762 wait=0.086514 rounds=891 otsetup=0.902507 pre_start=0.000 pass_start=4.101 pass_end=4.468 conv_joined=4.468 complete_end=4.653 | CONV=0.009569 MULTIPLEX=0.067043 COT=0.024139 BOOL_COT_MULT=1.55501 BOOL=2.1491 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_a2bpw_ppa4_c0 r2 P0 pre=5.723768 online=0.657795 wait=0.053813 rounds=630 otsetup=0.860578 pre_start=0.000 pass_start=4.950 pass_end=5.500 conv_joined=5.500 complete_end=5.723 | CONV=0.002745 MULTIPLEX=0.075503 BOOL_COT_MULT=1.44767 COT=0.030085 BOOL3=1.09104 BOOL4=0.88055 BOOL=1.16395 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rs_rca_c0 r2 P0 pre=2.250146 online=0.519478 wait=0.156261 rounds=1763 otsetup=0.833474 pre_start=0.000 pass_start=1.199 pass_end=1.622 conv_joined=2.006 complete_end=2.250 | FC=0.038955 MULTIPLEX=0.070693 COT=0.037844 CONV=0.806805 RANDOM_MUL=0.042992 BOOL=1.06509 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rs_ppa_c0 r2 P0 pre=3.907589 online=0.562362 wait=0.159013 rounds=900 otsetup=0.86206 pre_start=0.000 pass_start=2.739 pass_end=3.173 conv_joined=3.631 complete_end=3.907 | FC=0.035222 MULTIPLEX=0.069986 COT=0.034495 CONV=0.891888 RANDOM_MUL=0.658422 BOOL=2.01131 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rs_ppa4_c0 r2 P0 pre=5.972359 online=0.506972 wait=0.123976 rounds=675 otsetup=0.832416 pre_start=0.000 pass_start=4.253 pass_end=4.631 conv_joined=5.666 complete_end=5.972 | FC=0.038268 MULTIPLEX=0.075288 CONV=1.41321 RANDOM_MUL=0.104624 COT=0.026354 BOOL3=1.19709 BOOL4=1.92122 BOOL=0.928539 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rsk0_rca_c0 r2 P0 pre=2.426084 online=0.611472 wait=0.168202 rounds=1867 otsetup=0.863843 pre_start=0.000 pass_start=1.297 pass_end=1.702 conv_joined=2.190 complete_end=2.426 | FC=0.065697 MULTIPLEX=0.058225 COT=0.028436 CONV=0.892576 RANDOM_MUL=0.071632 BOOL=1.14596 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rsk0_ppa_c0 r2 P0 pre=4.073867 online=0.599829 wait=0.154982 rounds=1004 otsetup=0.90048 pre_start=0.000 pass_start=2.809 pass_end=3.178 conv_joined=3.852 complete_end=4.074 | FC=0.061779 MULTIPLEX=0.066241 COT=0.022538 CONV=1.04243 RANDOM_MUL=0.640014 BOOL=2.09314 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rsk0_ppa4_c0 r2 P0 pre=6.074695 online=0.623846 wait=0.175164 rounds=779 otsetup=0.843506 pre_start=0.000 pass_start=4.254 pass_end=4.676 conv_joined=5.839 complete_end=6.074 | FC=0.049466 MULTIPLEX=0.06258 CONV=1.58469 RANDOM_MUL=0.107731 COT=0.026331 BOOL3=1.18272 BOOL4=1.9758 BOOL=0.907945 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rspw_rca_c0 r2 P0 pre=1.689038 online=0.552254 wait=0.164840 rounds=2012 otsetup=0.835997 pre_start=0.000 pass_start=1.286 pass_end=1.521 conv_joined=1.521 complete_end=1.689 | CONV=0.003975 MULTIPLEX=0.072632 COT=0.022913 RANDOM_MUL=0.079038 BOOL=1.14875 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rspw_ppa_c0 r2 P0 pre=3.278329 online=0.549160 wait=0.106868 rounds=907 otsetup=0.922363 pre_start=0.000 pass_start=2.830 pass_end=3.107 conv_joined=3.107 complete_end=3.278 | CONV=0.005817 MULTIPLEX=0.056692 COT=0.022528 RANDOM_MUL=0.672957 BOOL=2.08213 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pq3_rspw_ppa4_c0 r2 P0 pre=4.899634 online=0.486457 wait=0.083167 rounds=679 otsetup=0.896479 pre_start=0.000 pass_start=4.410 pass_end=4.702 conv_joined=4.702 complete_end=4.899 | CONV=0.002606 MULTIPLEX=0.052299 RANDOM_MUL=0.117414 COT=0.042348 BOOL3=1.24331 BOOL4=2.02126 BOOL=0.954698 
+FPPROF2_DONE

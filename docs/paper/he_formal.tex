@@ -173,14 +173,27 @@ the same format would need 234.7\,MiB, so about half of the traffic is unused co
 fills 3,136 of 4,096 coefficients (77\%). At $14\times14$ and $7\times7$ the layout has to trade inputs against
 outputs: a polynomial holds $c_i$ input channels and $c_o$ output-channel blocks, so inputs use about $1/c_o$ and
 outputs about $1/c_i$ of their coefficients (10--48\% and 4--24\% in the chosen layouts). Stages~3 and~4 send 237\,MiB
-where dense packing would need 67\,MiB. Three cheap levers do not help. A per-layer ring dimension $N = 8192$ (same 109-bit modulus)
-is never cheaper, except on the first layer at equal cost. Fewer bits of the input ciphertexts would raise the product
-noise, which P1 knows and the 64-bit flooding must hide: with 12 bits of headroom below $\Delta = 2^{77}$, at most
-about 16 of 109 bits could go, paid for with more output bits. The output format already keeps only the bits
-decryption needs. The remaining lever is \emph{output repacking}. With $c_o = 1$ the inputs are dense (133\,MiB). The
-evaluator would then zero each output ciphertext's unused coefficients with a ring trace ($\log_2 c_i$ automorphisms)
-or merge them PackLWEs-style, and combine the sparse outputs into dense ones (107\,MiB): 240 instead of 479\,MiB.
-P1 would send Galois keys once, and P0 would do about $2.3\cdot10^5$ key switches with a merge tree (traces:
-$1.8\cdot10^6$). For stages~3 and~4 alone, $1.2\cdot10^5$ key switches, which we estimate at 0.3\s on 32 threads,
-would remove 169\,MiB. On the 25\,Gbit/s testbed that costs more time than the transfer it saves (0.06\,s); on slower
-links it pays off. It is not implemented.
+where dense packing would need 67\,MiB. Three cheap levers do not help. A per-layer ring dimension $N = 8192$ (same
+109-bit modulus) is never cheaper, except on the first layer at equal cost. Fewer bits of the input ciphertexts would
+raise the product noise, which P1 knows and the 64-bit flooding must hide: with 12 bits of headroom below $\Delta =
+2^{77}$, at most about 16 of 109 bits could go, paid for with more output bits. The output format already keeps only
+the bits decryption needs.
+
+The remaining lever is \emph{output repacking}: the evaluator packs the used coefficients of several sparse output
+ciphertexts into dense ones with ring automorphisms (a trace per ciphertext, or PackLWEs-style merging). That needs key
+switching, and key switching needs a special prime on top of the 109-bit data modulus (60 + 49 bits: $2^{32}$ plaintexts
+and 64-bit flooding). At $N = 4096$ the 128-bit security bound is already exhausted by those 109 bits, so repacking
+forces $N = 8192$ (with a 60-bit special prime, 169 of at most 218 bits). With the layout free to use dense inputs
+($c_o = 1$) and outputs packed after the evaluation, the model gives 134\,MiB of inputs and 108\,MiB of outputs,
+243 instead of 479\,MiB per HE product, plus 4.7\,MiB of Galois keys that P1 sends once (13 keys, SEAL serialization).
+Keeping today's layouts and repacking only the outputs would give just 420\,MiB. Over the whole preprocessing
+(\texttt{repack\_estimate.py}, measured traffic of the other components) this removes 22--38\% of the traffic in UC1,
+whose AB triples need both products (1,230--2,150 to 766--1,686\,MiB), and 14--29\% in UC2 (790--1,710 to
+558--1,478\,MiB), or 19--32\% and 12--23\% counting the online phase as well. UC3 has no linear-layer triples and
+gains nothing. The runtime cost is in the key switches. SEAL takes 583\,\textmu s for one Galois automorphism at
+$N = 8192$ on the Zen~4 hosts (1,308\,\textmu s on Zen~3), single-threaded. Calibrated against the measured conv
+phase, the evaluation itself stays about the same (0.64 against 0.71\,s on Zen~4), and the repacking adds 1.1\,s with a
+merge tree ($7.2\cdot10^4$ key switches) or 8.2\,s with traces ($5.4\cdot10^5$) on 32 threads; on Zen~3, 1.7 or
+12.4\,s. So repacking would make an inference's preprocessing about 1.0\,s slower on Zen~4 (1.8\,s on Zen~3) to save
+236\,MiB per HE product. That breaks even at about 1.9\,Gbit/s (Zen~3: 1.1\,Gbit/s): it pays off on WAN links and
+loses on the 25\,Gbit/s testbed. It is not implemented.
