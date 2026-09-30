@@ -133,7 +133,7 @@ class ABY2_PRE_Share
     void prepare_reveal_to_all() const
     {
         pre_send_to_live(PNEXT, l);
-        triple_type[0][triple_type_index[0]++] = CaseDefault;  
+        put_triple_type(0, CaseDefault);  
     }
 
     template <typename func_add, typename func_sub>
@@ -154,14 +154,14 @@ class ABY2_PRE_Share
     {
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
-            triple_type[0][triple_type_index[0]++] = CaseAND;
+            put_triple_type(0, CaseAND);
             #if ROT_PREPROCESSING_OPT == 1
             return ABY2_PRE_Share(getRandomVal(PSELF));
             #endif
         }
         else
         {
-            triple_type[0][triple_type_index[0]++] = CaseMult;
+            put_triple_type(0, CaseMult);
         }
         generate_triple(b, ADD);
         return ABY2_PRE_Share(getRandomVal(PSELF));  // new mask
@@ -179,11 +179,11 @@ class ABY2_PRE_Share
     {
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
-            triple_type[0][triple_type_index[0]++] = CaseANDAKnown;
+            put_triple_type(0, CaseANDAKnown);
         }
         else
         {
-            triple_type[0][triple_type_index[0]++] = CaseMultAKnown;
+            put_triple_type(0, CaseMultAKnown);
         }
         generate_ab2_triple(b, ADD);
         return ABY2_PRE_Share(getRandomVal(PSELF));  // new mask
@@ -194,14 +194,14 @@ class ABY2_PRE_Share
     {
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
-            triple_type[0][triple_type_index[0]++] = CaseAND;
+            put_triple_type(0, CaseAND);
             #if ROT_PREPROCESSING_OPT == 1
             return ABY2_PRE_Share();
             #endif
         }
         else
         {
-            triple_type[0][triple_type_index[0]++] = CaseMult;
+            put_triple_type(0, CaseMult);
         }
         generate_triple(b, ADD);
         return ABY2_PRE_Share();
@@ -229,7 +229,7 @@ class ABY2_PRE_Share
     ABY2_PRE_Share zero_add(Datatype assign, func_add ADD) const
     {
         pre_send_to_live(PNEXT, ADD(l, assign));
-        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        put_triple_type(0, CaseDefault);
         return ABY2_PRE_Share(assign);
     }
 
@@ -239,7 +239,7 @@ class ABY2_PRE_Share
     ABY2_PRE_Share rebase(Datatype assign, func_add ADD, func_sub SUB) const
     {
         pre_send_to_live(PNEXT, SUB(assign, l));
-        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        put_triple_type(0, CaseDefault);
         return ABY2_PRE_Share(assign);
     }
 
@@ -261,14 +261,14 @@ class ABY2_PRE_Share
     {
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
-            triple_type[0][triple_type_index[0]++] = CaseAND;
+            put_triple_type(0, CaseAND);
             #if ROT_PREPROCESSING_OPT == 1
             return ABY2_PRE_Share(mask);
             #endif
         }
         else
         {
-            triple_type[0][triple_type_index[0]++] = CaseMult;
+            put_triple_type(0, CaseMult);
         }
         generate_triple(b, ADD);
         return ABY2_PRE_Share(mask);
@@ -307,10 +307,10 @@ class ABY2_PRE_Share
         const auto lsigma = ABY2_PRE_Share(sigma.l);
         
 #if BN2D_TRIPLES == 0 //otherwise use 3x BatchNorm triples
-        triple_type[0][triple_type_index[0]++] = CaseMultAKnown;
-        triple_type[0][triple_type_index[0]++] = CaseMultAKnown;
-        triple_type[0][triple_type_index[0]++] = CaseConvBN;
-        triple_type[1][triple_type_index[1]++] = CaseConvBN;
+        put_triple_type(0, CaseMultAKnown);
+        put_triple_type(0, CaseMultAKnown);
+        put_triple_type(0, CaseConvBN);
+        put_triple_type(1, CaseConvBN);
         
         store_output_share_ab(lsigma, ADD, helper_index);
         lw.generate_ab2_triple(sigma, ADD);
@@ -331,11 +331,11 @@ class ABY2_PRE_Share
     {
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
-            triple_type[0][triple_type_index[0]++] = CaseANDAKnown;
+            put_triple_type(0, CaseANDAKnown);
         }
         else
         {
-            triple_type[0][triple_type_index[0]++] = CaseMultAKnown;
+            put_triple_type(0, CaseMultAKnown);
         }
         generate_ab2_triple(b, ADD);
         return ABY2_PRE_Share();
@@ -552,7 +552,7 @@ class ABY2_PRE_Share
                                              int fractional_bits = FRACTIONAL) const
     {
 #if PARTY == 0
-        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        put_triple_type(0, CaseDefault);
         return ABY2_PRE_Share(getRandomVal(PSELF));
 #else
         auto c = ABY2_PRE_Share(getRandomVal(PSELF));
@@ -574,7 +574,7 @@ class ABY2_PRE_Share
                                                      int fractional_bits = FRACTIONAL) const
     {
 #if PSELF == DATAOWNER
-        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        put_triple_type(0, CaseDefault);
         return ABY2_PRE_Share(getRandomVal(PSELF));
 #else
         auto c = ABY2_PRE_Share(getRandomVal(PSELF));
@@ -659,7 +659,7 @@ class ABY2_PRE_Share
     ABY2_PRE_Share prepare_div_exp2(const int b, func_mul MULT, func_add ADD, func_sub SUB, func_trunc TRUNC) const
     {
 #if PARTY == 0
-        triple_type[0][triple_type_index[0]++] = CaseDefault;
+        put_triple_type(0, CaseDefault);
         return ABY2_PRE_Share(getRandomVal(PSELF));
 #else
         auto result = l;  // Share Trunc - Trunc(lv1)
@@ -737,7 +737,8 @@ class ABY2_PRE_Share
                 if (t3 >= 0 && reshare_sim_on())
                 {
                     const uint64_t b3i = curr_beaver_3_triple_index +
-                                         g_a2b_s1_pending * b3_tuples_per_adder(k - m) + (uint64_t) t3;
+                                         stream_index(IDX_A2B_S1_PENDING, g_a2b_s1_pending) *
+                                             b3_tuples_per_adder(k - m) + (uint64_t) t3;
                     if (b3i < num_beaver_3_tuples)
                     {
                         out[i - m].l = beaver_3_tuples.b[b3i];
@@ -753,7 +754,7 @@ class ABY2_PRE_Share
             out[i - m].l = getRandomVal(PSELF);
         }
 #if RESHARE_BAKE_ACTIVE && PPA4_MSB == 1
-        g_a2b_s1_pending++;
+        stream_index(IDX_A2B_S1_PENDING, g_a2b_s1_pending)++;  // per-worker stream in a parallel preprocessing level
 #endif
 #endif
 #endif
@@ -774,7 +775,7 @@ class ABY2_PRE_Share
 #if PARTY == 0
         l = SET_ALL_ZERO();
         if (!reshare_sim_on())
-            triple_type[0][triple_type_index[0]++] = CaseDefault;
+            put_triple_type(0, CaseDefault);
 #else
         if (!reshare_sim_on())  // with the bake the delta l + b is zero and not sent
             pre_send_to_live(PNEXT, ADD(l, mask));
@@ -812,12 +813,8 @@ class ABY2_PRE_Share
         {
             Datatype ia = temp_p1[i];  // input shares for boolean additions are -lvi
             out[i - m].l = ia;
-            triple_type[0][triple_type_index[0]++] = CaseBooleanAddition;
-#if PARTY == 0
-            boolean_addition_triple_a[boolean_addition_triple_index++] = ia;
-#else
-            boolean_addition_triple_b[boolean_addition_triple_index++] = ia;
-#endif
+            put_triple_type(0, CaseBooleanAddition);
+            put_boolean_addition_input(ia);
         }
 #endif
 #else
@@ -848,7 +845,7 @@ class ABY2_PRE_Share
         orthogonalize_arithmetic(temp2, lb);
         for (int i = 0; i < BITLENGTH; i++)
         {
-            triple_type[0][triple_type_index[0]++] = CaseBit2A;
+            put_triple_type(0, CaseBit2A);
 #if PARTY == 0
             ABY2_PRE_Share b1{lb[i]};
             ABY2_PRE_Share b2{SET_ALL_ZERO()};
@@ -888,9 +885,9 @@ class ABY2_PRE_Share
 #if BIT_INJECTION_PREPROCESSING_OPT == 1
         for (int i = 0; i < BITLENGTH; i++)
         {
-            triple_type[0][triple_type_index[0]++] = CaseMultiplexer;
-            triple_type[0][triple_type_index[0]++] = CaseCOT;
-            multiplexer_triple_a[arithmetic_multiplexer_triple_index++] = x[i].l;
+            put_triple_type(0, CaseMultiplexer);
+            put_triple_type(0, CaseCOT);
+            put_multiplexer_arith(x[i].l);
             out[i].l = getRandomVal(PSELF);
         }
         // Bit-reverse each lane using SIMD butterfly
@@ -919,7 +916,7 @@ class ABY2_PRE_Share
             lanes[vectorization_factor - 1 - i] = tmp;
         }
         orthogonalize_arithmetic(lanes, &dlo, 1);
-        multiplexer_triple_b[boolean_multiplexer_triple_index++] = dlo;
+        put_multiplexer_bool(dlo);
 #if PARTY == 0
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
         Datatype lb[BITLENGTH]{0};
@@ -928,7 +925,7 @@ class ABY2_PRE_Share
         orthogonalize_arithmetic(temp2, lb);
         for (int i = 0; i < BITLENGTH; i++)
         {
-           cot_triple_a[arithmetic_cot_triple_index++] = lb[i];  //corr
+           put_cot_arith(lb[i]);  //corr
         }
 #else
        // cot_triple_a[boolean_cot_triple_index++] = l;  //choice bit -> already set by multiplexer
@@ -942,8 +939,8 @@ class ABY2_PRE_Share
         orthogonalize_arithmetic(temp2, lb);
         for (int i = 0; i < BITLENGTH; i++)
         {
-            triple_type[0][triple_type_index[0]++] = CaseBitInjection;
-            triple_type[1][triple_type_index[1]++] = CaseBitInjection;
+            put_triple_type(0, CaseBitInjection);
+            put_triple_type(1, CaseBitInjection);
 #if PARTY == 0
             ABY2_PRE_Share b1{lb[i]};
             ABY2_PRE_Share b2{SET_ALL_ZERO()};
@@ -1012,17 +1009,17 @@ class ABY2_PRE_Share
     {
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
-            triple_type[0][triple_type_index[0]++] = CaseDot3Bool;
-            triple_type[0][triple_type_index[0]++] = CaseAND;
-            triple_type[0][triple_type_index[0]++] = CaseAND;
-            triple_type[1][triple_type_index[1]++] = CaseDot3Bool;
+            put_triple_type(0, CaseDot3Bool);
+            put_triple_type(0, CaseAND);
+            put_triple_type(0, CaseAND);
+            put_triple_type(1, CaseDot3Bool);
         }
         else
         {
-            triple_type[0][triple_type_index[0]++] = CaseDot3Arithmetic;
-            triple_type[0][triple_type_index[0]++] = CaseMult;
-            triple_type[0][triple_type_index[0]++] = CaseMult;
-            triple_type[1][triple_type_index[1]++] = CaseDot3Arithmetic;
+            put_triple_type(0, CaseDot3Arithmetic);
+            put_triple_type(0, CaseMult);
+            put_triple_type(0, CaseMult);
+            put_triple_type(1, CaseDot3Arithmetic);
         }
         #if ROT_PREPROCESSING_OPT == 0
         store_output_share_ab(c.l, ADD, helper_index);
@@ -1054,31 +1051,31 @@ class ABY2_PRE_Share
     {
         if constexpr (std::is_same_v<func_add(), OP_XOR>)
         {
-            triple_type[0][triple_type_index[0]++] = CaseDot4Bool;   // xy, zw
-            triple_type[0][triple_type_index[0]++] = CaseTripleAlreadyConsumed;  // since xy,zw are together, skip next triple
-            triple_type[0][triple_type_index[0]++] = CaseAND;   // xz
-            triple_type[0][triple_type_index[0]++] = CaseAND;   // xw
-            triple_type[0][triple_type_index[0]++] = CaseAND;   // yz
-            triple_type[0][triple_type_index[0]++] = CaseAND;   // yw
-            triple_type[1][triple_type_index[1]++] = CaseDot4Bool;   // xyzw
-            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
-            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
-            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
-            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
+            put_triple_type(0, CaseDot4Bool);   // xy, zw
+            put_triple_type(0, CaseTripleAlreadyConsumed);  // since xy,zw are together, skip next triple
+            put_triple_type(0, CaseAND);   // xz
+            put_triple_type(0, CaseAND);   // xw
+            put_triple_type(0, CaseAND);   // yz
+            put_triple_type(0, CaseAND);   // yw
+            put_triple_type(1, CaseDot4Bool);   // xyzw
+            put_triple_type(1, CaseTripleAlreadyConsumed); // 5 values are generated together
+            put_triple_type(1, CaseTripleAlreadyConsumed); // 5 values are generated together
+            put_triple_type(1, CaseTripleAlreadyConsumed); // 5 values are generated together
+            put_triple_type(1, CaseTripleAlreadyConsumed); // 5 values are generated together
         }
         else
         {
-            triple_type[0][triple_type_index[0]++] = CaseDot4Arithmetic;   // xy, zw
-            triple_type[0][triple_type_index[0]++] = CaseTripleAlreadyConsumed;  // since xy,zw are together, skip next triple 
-            triple_type[0][triple_type_index[0]++] = CaseMult;   // xz 
-            triple_type[0][triple_type_index[0]++] = CaseMult;   // xw
-            triple_type[0][triple_type_index[0]++] = CaseMult;   // yz
-            triple_type[0][triple_type_index[0]++] = CaseMult;   // yw
-            triple_type[1][triple_type_index[1]++] = CaseDot4Arithmetic;   // xyzw
-            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
-            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
-            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
-            triple_type[1][triple_type_index[1]++] = CaseTripleAlreadyConsumed; // 5 values are generated together
+            put_triple_type(0, CaseDot4Arithmetic);   // xy, zw
+            put_triple_type(0, CaseTripleAlreadyConsumed);  // since xy,zw are together, skip next triple 
+            put_triple_type(0, CaseMult);   // xz 
+            put_triple_type(0, CaseMult);   // xw
+            put_triple_type(0, CaseMult);   // yz
+            put_triple_type(0, CaseMult);   // yw
+            put_triple_type(1, CaseDot4Arithmetic);   // xyzw
+            put_triple_type(1, CaseTripleAlreadyConsumed); // 5 values are generated together
+            put_triple_type(1, CaseTripleAlreadyConsumed); // 5 values are generated together
+            put_triple_type(1, CaseTripleAlreadyConsumed); // 5 values are generated together
+            put_triple_type(1, CaseTripleAlreadyConsumed); // 5 values are generated together
         }
 
         store_output_share_ab(l, ADD, helper_index);                   // xzw
@@ -1560,6 +1557,9 @@ static void get_fc_triples_from_file()
 
     static void complete_preprocessing(std::string ips[], int port, int process_offset)
     {
+#if CHEETAH_CONV_ASYNC_ACTIVE
+        conv_async::join();  // the conv triples of the preprocessing pass, before the next generator takes the channels
+#endif
     
 #if ROT_PREPROCESSING_OPT == 0
         init_beaverC(0);
@@ -1648,6 +1648,9 @@ static void get_fc_triples_from_file()
         deinit_multiplexerBeaverAB();
 
 
+#if CHEETAH_CONV_ASYNC_ACTIVE
+        if (!conv_async::launched)  // else allocated and generated during the pass (conv_async_start)
+#endif
         init_ConvC();
 #if FAKE_TRIPLES == 1
         get_conv_ab2_triples_from_file();
@@ -2102,8 +2105,11 @@ static void get_fc_triples_from_file()
 
         uint64_t num_conv_triples = conv_triple_params[curr_conv_triple_index].out_h * conv_triple_params[curr_conv_triple_index].out_w * batchSize * dout;
         for(uint64_t i = 0; i < num_conv_triples; i++)
-            triple_type[0][triple_type_index[0]++] = CaseConv;
+            put_triple_type(0, CaseConv);
         curr_conv_triple_index++;
+#if CHEETAH_CONV_ASYNC_ACTIVE
+        conv_async::mark_ready(curr_conv_triple_index);  // the conv triple thread may take this layer now
+#endif
     }
 
     static void SetupFullyConnectedTriples(const ABY2_PRE_Share* X,
@@ -2132,7 +2138,7 @@ static void get_fc_triples_from_file()
 
 
         for(uint64_t i = 0; i < y_size; i++)
-            triple_type[0][triple_type_index[0]++] = CaseFullyConnected;
+            put_triple_type(0, CaseFullyConnected);
         curr_fc_triple_index++;
     }
     
@@ -2161,7 +2167,7 @@ static void get_fc_triples_from_file()
 #endif
 
         for(uint64_t i = 0; i < y_size; i++)
-            triple_type[0][triple_type_index[0]++] = CaseBatchNorm2D;
+            put_triple_type(0, CaseBatchNorm2D);
         curr_bc2D_triple_index++;
     }
 
@@ -2188,7 +2194,7 @@ static void get_fc_triples_from_file()
                 for (int l = 0; l < k; l++)
                 {
                     a[i * k + l].generate_lxly_triple(b[l * n + j], OP_ADD);
-                    triple_type[0][triple_type_index[0]++] = CaseMatMul;
+                    put_triple_type(0, CaseMatMul);
                 }
                 triple_type[0][triple_type_index[0] - k] = CaseMatMulFirstDot;  
             }
@@ -2217,7 +2223,7 @@ static void get_fc_triples_from_file()
                 for (int l = 0; l < k; l++)
                 {
                     a[i * k + l].generate_lxly_triple(b[l * n + j], OP_ADD);
-                    triple_type[0][triple_type_index[0]++] = CaseMatMul;
+                    put_triple_type(0, CaseMatMul);
                 }
                 triple_type[0][triple_type_index[0] - k] = CaseMatMulFirstDot;
             }
@@ -2636,7 +2642,7 @@ static void CONV_2D(const ABY2_PRE_Share* X,
     //            for (int l = 0; l < k; l++)
     //            {
     //                a[i * k + l].generate_lxly_triple(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
-    //                triple_type[0][triple_type_index[0]++] = CaseMatMul;
+    //                put_triple_type(0, CaseMatMul);
     //            }
     //            triple_type[0][triple_type_index[0] - k] = CaseMatMulFirstDot;  
     //        }
@@ -2665,7 +2671,7 @@ static void CONV_2D(const ABY2_PRE_Share* X,
     //            for (int l = 0; l < k; l++)
     //            {
     //                a[i * k + l].generate_lxly_triple(b[l * n + j], OP_ADD, OP_SUB, OP_MULT);
-    //                triple_type[0][triple_type_index[0]++] = CaseMatMul;
+    //                put_triple_type(0, CaseMatMul);
     //            }
     //            triple_type[0][triple_type_index[0] - k] = CaseMatMulFirstDot;
     //        }

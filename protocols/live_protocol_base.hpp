@@ -226,6 +226,15 @@ void communicate_pre()
 
 void pre_send_to_live(int player_id, DATATYPE a)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        if (player_id != PNEXT)
+            stream_cursor_misuse("pre_send_to_live to another party");
+        *tl_pre->send++ = a;
+        return;
+    }
+#endif
 /* sending_args[player_id].sent_elements[sending_args[player_id].send_rounds][send_count[player_id]] = a; */
 #if SKIP_PRE == 1
     return;
@@ -730,12 +739,26 @@ void load_preprocessed_data(DATATYPE* bool_triples_round0, uint64_t size_bool_tr
 #if BEAVER == 1 && PRE == 1
 void store_output_share_bool(DATATYPE val, int index = 0)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->out_bool[index]++ = val;
+        return;
+    }
+#endif
     preprocessed_outputs_bool[index][preprocessed_outputs_bool_input_index[index]] = val;
     preprocessed_outputs_bool_input_index[index] += 1;
 }
 
 void store_output_share_arithmetic(DATATYPE val, int index = 0)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->out_arith[index]++ = val;
+        return;
+    }
+#endif
     preprocessed_outputs_arithmetic[index][preprocessed_outputs_arithmetic_input_index[index]] = val;
     preprocessed_outputs_arithmetic_input_index[index] += 1;
 }
@@ -821,6 +844,13 @@ void store_output_share(DATATYPE val)
 {
 #if SKIP_PRE == 1
     return;
+#endif
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->out++ = val;
+        return;
+    }
 #endif
     preprocessed_outputs[preprocessed_outputs_input_index] = val;
     preprocessed_outputs_input_index += 1;

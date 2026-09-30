@@ -465,6 +465,9 @@ generate_beaver_triples(
     // receive only
 #else
     RESULTTYPE garbage_PRE;
+#if CHEETAH_CONV_ASYNC_ACTIVE
+    conv_async_start(ips, base_port, process_offset);  // conv triples alongside the pass
+#endif
     FUNCTION<PROTOCOL_PRE<DATATYPE>>(&garbage_PRE);
     #if CV_FIX == 1 && PROTOCOL == 12
         check_eqs_quad_pre();

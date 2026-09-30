@@ -454,6 +454,9 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef CHEETAH_CONV_PIPELINE
 #define CHEETAH_CONV_PIPELINE 1  // with CHEETAH_CONV_PACKED 1: all convs in one call, pipelined across layers (encrypt next / evaluate / decrypt previous overlap) instead of one round trip per layer
 #endif
+#ifndef CHEETAH_CONV_ASYNC
+#define CHEETAH_CONV_ASYNC 1  // single batch, packed + pipelined convs: the conv triples start with the preprocessing pass, each layer as soon as the pass has recorded its masks, instead of after it
+#endif
 #ifndef CHEETAH_CONV_LANES
 #define CHEETAH_CONV_LANES 1  // multi-batch: the lanes' conv triples as one convolution over all images, all layers pipelined
 #endif

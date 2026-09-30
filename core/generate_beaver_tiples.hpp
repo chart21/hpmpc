@@ -132,6 +132,44 @@ struct FullyConnectedParameter
 
 #define CHEETAH_PARTY (PARTY+1)
 
+// CHEETAH_CONV_ASYNC: the batched conv triples run on their own thread during the ABY2 preprocessing pass
+// (conv_async_start in protocols/beaver_triples.hpp). The pass records each layer's masks (SetupConv2dTriples) and
+// then calls mark_ready; the HE pipeline waits for each layer in ready(); complete_preprocessing joins before the
+// next generator uses the CHEETAH channels, and the CONV generation there only finishes up (MWK share corrections).
+#define CHEETAH_CONV_ASYNC_ACTIVE (CHEETAH_CONV_ASYNC == 1 && CHEETAH_WAN_OPT == 0 && PROTOCOL == 4 && DATTYPE == BITLENGTH && \
+                                   CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_PIPELINE == 1)
+#if CHEETAH_CONV_ASYNC_ACTIVE
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+namespace conv_async
+{
+inline std::thread worker;
+inline std::mutex mutex;
+inline std::condition_variable cv;
+inline size_t ready_layers = 0;  // layers whose masks the preprocessing pass has recorded
+inline bool launched = false, done = false;
+inline void mark_ready(size_t n)
+{
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        ready_layers = n;
+    }
+    cv.notify_all();
+}
+inline void wait_ready(size_t i)
+{
+    std::unique_lock<std::mutex> lock(mutex);
+    cv.wait(lock, [i] { return ready_layers > i; });
+}
+inline void join()
+{
+    if (worker.joinable())
+        worker.join();
+}
+}  // namespace conv_async
+#endif
+
 #if CHEETAH_WAN_OPT == 1
 inline void sync_cheetah_wan_barrier(Iface::Keys<IO::NetIO>& keys)
 {
@@ -900,6 +938,9 @@ void generateLayerDummyTriples(type** a,
 #endif
         }
         if constexpr (conv_batched) {
+#if CHEETAH_CONV_ASYNC_ACTIVE
+            if (!conv_async::done)  // else generated during the preprocessing pass (conv_async)
+#endif
             Iface::generateConvTriplesPackedBatch(keys, batched_parms,
                     A_KNOWN == 0 || PARTY == 1 ? uint_x : nullptr,
                     A_KNOWN == 0 || PARTY == 0 ? uint_w : nullptr,

@@ -741,6 +741,68 @@ uint64_t curr_conv_triple_index = 0;
 uint64_t num_conv_c_triples = 0;
 std::vector<ConvolutionParameter> conv_triple_params;
 
+// Writes of the preprocessing share into its append-only streams. Inside a parallel preprocessing level
+// (stream_parallel_for in PHASE_PRE) they go through the worker's cursor (tl_pre) instead of the global index.
+inline void put_triple_type(int r, uint8_t t)
+{
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->type[r]++ = t;
+        return;
+    }
+#endif
+    triple_type[r][triple_type_index[r]++] = t;
+}
+inline void put_boolean_addition_input(DATATYPE ia)  // P0 the a side, P1 the b side
+{
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->bool_add++ = ia;
+        return;
+    }
+#endif
+#if PARTY == 0
+    boolean_addition_triple_a[boolean_addition_triple_index++] = ia;
+#else
+    boolean_addition_triple_b[boolean_addition_triple_index++] = ia;
+#endif
+}
+inline void put_multiplexer_arith(DATATYPE v)
+{
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->mux_arith++ = v;
+        return;
+    }
+#endif
+    multiplexer_triple_a[arithmetic_multiplexer_triple_index++] = v;
+}
+inline void put_multiplexer_bool(DATATYPE v)
+{
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->mux_bool++ = v;
+        return;
+    }
+#endif
+    multiplexer_triple_b[boolean_multiplexer_triple_index++] = v;
+}
+inline void put_cot_arith(DATATYPE v)
+{
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->cot_arith++ = v;
+        return;
+    }
+#endif
+    cot_triple_a[arithmetic_cot_triple_index++] = v;
+}
+
 DATATYPE** fc_triple_w = nullptr;
 DATATYPE** fc_triple_x = nullptr;
 DATATYPE* fc_triple_y = nullptr;
@@ -889,6 +951,14 @@ triple<Datatype> retrieveBooleanAB2Triple()
     template <typename Datatype>
 void storeArithmeticABTriple(const Datatype a, const Datatype b)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->ab_arith_a++ = a;
+        *tl_pre->ab_arith_b++ = b;
+        return;
+    }
+#endif
     arithmetic_triple_a[arithmetic_triple_index] = a;
     arithmetic_triple_b[arithmetic_triple_index] = b;
     arithmetic_triple_index++;
@@ -897,6 +967,14 @@ void storeArithmeticABTriple(const Datatype a, const Datatype b)
 template <typename Datatype>
 void storeBooleanABTriple(const Datatype a, const Datatype b)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->ab_bool_a++ = a;
+        *tl_pre->ab_bool_b++ = b;
+        return;
+    }
+#endif
     boolean_triple_a[boolean_triple_index] = a;
     boolean_triple_b[boolean_triple_index] = b; //B1 is not needed for the AB2 protocol
     boolean_triple_index++;
@@ -905,6 +983,13 @@ void storeBooleanABTriple(const Datatype a, const Datatype b)
     template <typename Datatype>
 void storeArithmeticAB2Triple(const Datatype a, const Datatype b)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->ab2_arith++ = PARTY == 0 ? a : b;
+        return;
+    }
+#endif
 #if PARTY == 0
     arithmetic_ab2_triple_a[arithmetic_ab2_triple_index] = a; //P0 holds A0 in plain in AB2 setting
 #endif
@@ -917,6 +1002,13 @@ void storeArithmeticAB2Triple(const Datatype a, const Datatype b)
 template <typename Datatype>
 void storeBooleanAB2Triple(const Datatype a, const Datatype b)
 {
+#if ADDITIONAL_RELU_THREADS > 0
+    if (tl_pre)
+    {
+        *tl_pre->ab2_bool++ = PARTY == 0 ? a : b;
+        return;
+    }
+#endif
 #if PARTY == 0
     boolean_ab2_triple_a[boolean_ab2_triple_index] = a;
 #endif
@@ -1204,6 +1296,36 @@ void init_ConvC()
 {
     conv_triple_y = new DATATYPE[num_conv_c_triples];
 }
+
+#if CHEETAH_CONV_ASYNC_ACTIVE
+// Starts the batched conv triples (generateLayerDummyTriples' conv_batched branch) on their own thread, before the ABY2
+// preprocessing pass: the HE pipeline takes layer i once SetupConv2dTriples has recorded its masks, while the pass goes
+// on. Same calls, same order and the same PRNG streams as after the pass, so the triples are unchanged.
+void conv_async_start(std::string* ips, int base_port, int process_offset)
+{
+    if (conv_triple_params.empty())
+        return;
+    init_ConvC();
+    std::vector<Utils::ConvParm> parms;
+    for (const auto& p : conv_triple_params)
+        parms.push_back(Utils::ConvParm{.batchsize = p.batchSize, .ic = p.din, .iw = p.inw, .ih = p.inh, .fc = p.din,
+                                        .fw = p.ww, .fh = p.wh, .n_filters = p.dout, .stride = p.stride,
+                                        .padding = p.padding});
+    const std::string ip = ips[0];
+    const int port = base_port + process_offset + CHEETAH_PORT_OFFSET;
+    conv_async::launched = true;
+    conv_async::worker = std::thread([parms, ip, port] {
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
+        auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
+        Iface::generateConvTriplesPackedBatch(keys, parms,
+                                              A_KNOWN == 0 || PARTY == 1 ? (UINT_TYPE**) conv_triple_x : nullptr,
+                                              A_KNOWN == 0 || PARTY == 0 ? (UINT_TYPE**) conv_triple_w : nullptr,
+                                              (UINT_TYPE*) conv_triple_y, CHEETAH_PARTY, CHEETAH_THREADS,
+                                              A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2, conv_async::wait_ready);
+        conv_async::done = true;
+    });
+}
+#endif
 
 void init_BatchNorm2DC()
 {

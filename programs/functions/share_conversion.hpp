@@ -140,12 +140,12 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
         s2[i].complete_A2B_S2();
     }
 #else
-    stream_parallel_for<STREAM_PARALLEL_RELU>(len, [&](int i) {
+    stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
         s1[i] = Bitset::prepare_A2B_S1(bm, (S*)val[i].get_share_pointer());
         s2[i] = Bitset::prepare_A2B_S2(bm, (S*)val[i].get_share_pointer());
     });
     Share::communicate();
-    stream_parallel_for<STREAM_PARALLEL_RELU>(len, [&](int i) {
+    stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
         s1[i].complete_A2B_S1();
         s2[i].complete_A2B_S2();
     });
@@ -177,7 +177,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
         }
         Adder& operator[](int i) { return p[i]; }
     } adders(len);
-    stream_parallel_for<STREAM_PARALLEL_CTOR>(len, [&](int i) { new (&adders.p[i]) Adder(s1[i], s2[i], msb[i]); });
+    stream_parallel_for<STREAM_PARALLEL_CTOR, true>(len, [&](int i) { new (&adders.p[i]) Adder(s1[i], s2[i], msb[i]); });
     adders.n = len;
 #else
 std::vector<ADDER_TYPE<bk - bm, S>> adders;
@@ -236,7 +236,7 @@ Share::communicate(); // For resharings
 #else
     while (!adders[0].is_done())
     {
-        stream_parallel_for<STREAM_PARALLEL_RELU>(len, [&](int i) { adders[i].step(); });
+        stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { adders[i].step(); });
         Share::communicate();
     }
 #endif
@@ -388,7 +388,7 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
         auto reciprocal = FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(
             1 / FLOATTYPE(curr_denom), FRACTIONAL + AVG_RECIP_EXTRA_BITS);
         const int fb = (fold_delayed ? 2 * FRACTIONAL : FRACTIONAL) + AVG_RECIP_EXTRA_BITS;
-        stream_parallel_for<STREAM_PARALLEL_RELU>(len, [&](int i) {
+        stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
             y[i].prepare_opt_bit_injection_with_trunc(val[i].get_share_pointer(), val[i].get_share_pointer(),
                                                       PROMOTE(reciprocal), fb);
         });
@@ -398,14 +398,14 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
         // Pure delayed truncation (no avg pool, denom == 1): just shift right by FRACTIONAL. Use multiplier 1
         // rather than the fixed-point "1.0" (== 2^FRACTIONAL) so we don't scale up by 2^FRACTIONAL first (which
         // would risk overflow on larger activations) - mathematically identical, but safer.
-        stream_parallel_for<STREAM_PARALLEL_RELU>(len, [&](int i) {
+        stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
             y[i].prepare_opt_bit_injection_with_trunc(val[i].get_share_pointer(), val[i].get_share_pointer(),
                                                       PROMOTE(UINT_TYPE(1)), FRACTIONAL);
         });
     }
     else
     {
-        stream_parallel_for<STREAM_PARALLEL_RELU>(len, [&](int i) {
+        stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
             y[i].prepare_opt_bit_injection(val[i].get_share_pointer(), val[i].get_share_pointer());
         });
     }
@@ -418,7 +418,7 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
         y[i].prepare_opt_bit_injection(val[i].get_share_pointer(), val[i].get_share_pointer());
 #endif
     Share::communicate();
-    stream_parallel_for<STREAM_PARALLEL_RELU>(len, [&](int i) { val[i].complete_opt_bit_injection(); });
+    stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { val[i].complete_opt_bit_injection(); });
 }
 
 template <typename Share, typename Datatype>

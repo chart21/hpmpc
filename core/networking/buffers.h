@@ -142,6 +142,23 @@ struct StreamCursor
     uint64_t idx[IDX_COUNT];  // per-thread indices of the index-addressed preprocessing streams (enum StreamIndex)
 };
 inline thread_local StreamCursor* tl_stream = nullptr;
+// The same for the preprocessing pass (PHASE_PRE): the append-only streams its elements write. A worker of a
+// parallel preprocessing level writes through these; reads (randomness, retrieved triples, stored outputs) go
+// through tl_stream as online. Each pointer is the element's next slot in the stream, null if the level does not use it.
+struct PreCursor
+{
+    DATATYPE* send;                     // pre_send_to_live(PNEXT)
+    uint8_t* type[2];                   // triple_type[r]
+    DATATYPE *ab_bool_a, *ab_bool_b;    // storeBooleanABTriple
+    DATATYPE *ab_arith_a, *ab_arith_b;  // storeArithmeticABTriple
+    DATATYPE *ab2_bool, *ab2_arith;     // storeBooleanAB2Triple / storeArithmeticAB2Triple (this party's array)
+    DATATYPE* bool_add;                 // boolean_addition_triple_{a,b}
+    DATATYPE *mux_arith, *mux_bool;     // multiplexer_triple_{a,b}
+    DATATYPE *cot_arith, *cot_bool;     // cot_triple_a (arithmetic / boolean index)
+    DATATYPE* out;                      // store_output_share
+    DATATYPE *out_bool[2], *out_arith[2];  // store_output_share_{bool,arithmetic}(index)
+};
+inline thread_local PreCursor* tl_pre = nullptr;
 // the index a retrieval uses: the worker's cursor inside a parallel level, the global one otherwise
 inline uint64_t& stream_index(int k, uint64_t& global) { return tl_stream ? tl_stream->idx[k] : global; }
 uint64_t rnd_calls_self = 0;  // getRandomVal(PSELF) calls outside the cursors
