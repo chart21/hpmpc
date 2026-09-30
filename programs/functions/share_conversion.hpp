@@ -122,7 +122,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
         {
             auto* sh = val[i].get_share_pointer();
             for (int j = 0; j < BITLENGTH; j++)
-                sh[j] = sh[j].rebase(a2b_bake_conv_mask<Datatype>((uint64_t) i * BITLENGTH + j, OP_SUB));
+                sh[j] = sh[j].rebase(a2b_bake_slot_mask<Datatype>((uint64_t) i * BITLENGTH + j, OP_SUB));
         }
 #endif
 #if A2B_ROUND_OPT_SIM == 0

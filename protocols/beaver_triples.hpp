@@ -157,8 +157,9 @@ uint64_t g_a2b_c_cursor = 0;      // A2B-S2 [c] cursor (reset per phase)
 // conv/FC forward), g_a2b_layer_base the layer base (snapped to the [c] group boundary after each
 // A2B). This matches the A2B, which packs C[] linearly into sints and consumes [c] slice-per-position,
 // even when the conv mask/send is called in tiled (non-linear) order.
+// The committed mask of A2B slot e of the current layer (a ReLU input's rebase target; bias-compensated for a conv/FC).
 template <typename Datatype, typename func_sub>
-inline Datatype a2b_bake_conv_mask(uint64_t e, func_sub SUB)
+inline Datatype a2b_bake_slot_mask(uint64_t e, func_sub SUB)
 {
     const uint64_t idx = g_a2b_layer_base + g_bake_batch_offset + e;
     // Out of range == this output never feeds an A2B (g_a2b_lz covers exactly the INIT-counted A2B
@@ -175,6 +176,16 @@ inline Datatype a2b_bake_conv_mask(uint64_t e, func_sub SUB)
     if (g_bake_bias_l != nullptr && g_bake_bias_len > 0)
         lz = SUB(lz, g_bake_bias_l[(g_bake_batch_offset + e) % g_bake_bias_len]);
     return lz;
+}
+
+// A conv/FC output's mask: the committed slot mask when the layer feeds a baked ReLU (g_conv_bake), a fresh
+// synced draw otherwise, so that every committed slot masks exactly one value (see g_conv_bake).
+template <typename Datatype, typename func_sub>
+inline Datatype a2b_bake_conv_mask(uint64_t e, func_sub SUB)
+{
+    if (!g_conv_bake)
+        return current_phase == PHASE_INIT ? SET_ALL_ZERO() : getRandomVal(PSELF);
+    return a2b_bake_slot_mask<Datatype>(e, SUB);
 }
 
 // [c] share for the next A2B-S2 slice - identical in PRE and LIVE, so the msb adder's beaver triples

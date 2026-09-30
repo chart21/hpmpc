@@ -100,6 +100,12 @@ bool g_cut_frac_active = false;
 // mask, or RESHARE_OPT_SIM's rt.a bits in P1's mask). Only a conv/FC mask/send bakes, so the network clears
 // this for ReLUs fed by anything else (BatchNorm, residual sums), and max/min clears it for comparisons.
 bool g_msb_input_baked = true;
+// The conv/FC being evaluated feeds a baked ReLU directly (Conv2d / Linear bake_output): only then may its output
+// masks be the committed A2B masks of those ReLU inputs (A2B_CONV_BAKE). Any other conv/FC draws fresh masks: the
+// committed slots are addressed by the NEXT A2B's base, so an identity-branch conv, a residual partner or the stem
+// conv before a pooling layer would reuse slots of other values (their differences, or through the rebase their
+// masks, would become public).
+bool g_conv_bake = true;
 // Set by the conv/FC layers around every GEMM regardless of protocol, hence declared outside the
 // preprocessing guard above.
 // RESHARE_OPT / A2B_CONV_BAKE: the conv layer runs ONE GEMM per batch element, so the mask index passed to
