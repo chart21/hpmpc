@@ -339,6 +339,17 @@ hpmpc `26119e6`, `3673aad`; ConvTriple `ccb84d8`; flexNN (PIGEON) `74f85d8`, `49
   before (`res_fp_bc2.csv`), A2bits hashes unchanged by the residual bake; on the CIFAR ResNet50 (a residual sum per
   block) hpmpc's preprocessing messages 21.5 -> 12.5 MB (UC1) / 21.3 -> 16.8 MB (UC2). Multi-batch: bit for bit as round
   4 (`res_fp_pm6.csv`).
+* **Final rerun, both pairs** (algofi / goracle re-imaged and set up again): at hpmpc `f353bb2` (`res_*_final6.csv`)
+  Zen 3's builds with short OT phases (COMPRESS=1 UC1 / UC2, reshared RCA) were 0.36-0.70 s slower than round 3 - the
+  conv triples at half the threads became their tail (`res_ag_th.csv`: with 32 threads 0.4-0.7 s faster, the long-OT
+  PPA4 build prefers 16). hpmpc `7913adb` / ConvTriple `8d8f244`: the limit (`conv_threads_now`) is lifted when the OT
+  phase returns. At that code (`res_*_final7.csv`, 3 runs of all 36 builds per pair, the paper's Table 14 / Fig. 16):
+  against round 3 preprocessing median -0.15 s on Zen 4 (-0.80..+0.09) and -0.03 s on Zen 3 (-0.81..+0.20; a few
+  short-OT UC1 / UC2 builds up to +0.11 s, UC3 reshared - untouched by rounds 4-5 - up to +0.20 s: noise / layout);
+  online median -0.03 / -0.02 s. As given -> final: UC1 / UC2 preprocessing 11.7-17.3 -> 1.7-5.5 s (3.0-7.2x) on Zen 4,
+  15.1-21.9 -> 2.7-7.0 s (3.0-6.0x) on Zen 3; online 2.0-3.0x / 2.1-4.1x; UC3 preprocessing 1.1-1.2x / 1.0-1.1x, online
+  1.5-2.0x / 1.5-2.2x (`docs/paper/triad_ranges.py`). Traffic (`comm_fp6.csv`, Fig. 17): UC3 A2bits now sends exactly
+  what as given sends (the mask-only forward), and computes correctly.
 
 ## Output repacking: the estimate before round 4
 

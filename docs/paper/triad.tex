@@ -68,7 +68,8 @@ fused into it); only the ReLUs after the stem's pooling and BatchNorm and after 
 else, which the first version of the bake did not ensure (\cref{sec:triadround4}): it handed the committed masks to
 every convolution, also to those whose output does not go straight into a ReLU, and it drew them by replaying the
 generator stream the passes use for their own masks. In UC3 every convolution is local, so all 9.01 million inputs
-need the remask: $9.01\cdot 10^6 \cdot 2 \cdot 4$ bytes $= 69$\,MiB, exactly the difference in \cref{fig:triadcomm}.
+need the remask: $9.01\cdot 10^6 \cdot 2 \cdot 4$ bytes $= 69$\,MiB, exactly what the round-3 builds sent more than
+the as-given ones.
 Choosing the previous layer's bit-injection masks so that $W \ast \lambda_{\mathrm{in}} = \ell$ is a linear system
 over $\mathbb{Z}_{2^{32}}$ without a solution in general. But every ReLU input's mask is a function of the input's
 masks and the earlier bit-injection masks alone, so the pass can compute them first: it runs the network over the
@@ -122,14 +123,14 @@ busy-polling the receive path and 31 instead of 24 workers did not help.
 
 \paragraph{Results.} \Cref{fig:triad} shows all 36 builds; \cref{tab:triad} summarizes them. At the final code every
 build is faster than as given, in both phases and on both pairs. In UC1 and UC2 the packed, pipelined and concurrent
-conv triples running alongside the parallel preprocessing pass, the exact wire format, the shared-OT tuples and
-\flag{TCP_NODELAY} cut preprocessing from 11.7--17.3\s to 1.9--6.2\s on the Zen~4 pair ($2.6$--$6.7\times$) and from
-15.1--21.9\s to 2.7--7.8\s on the Zen~3 pair ($2.8$--$6.0\times$). The online phase falls from 0.77--1.55\s to
-0.39--0.70\s ($1.8$--$2.8\times$; Zen~3: 0.72--1.73 to 0.27--0.70\s, $2.0$--$3.8\times$). In UC2, with the weights
-known in preprocessing, the online phase takes 0.39--0.62\s on Zen~4 and 0.27--0.54\s on Zen~3.
+conv triples (since round~5 alongside the OT phase), the exact wire format, the shared-OT tuples and
+\flag{TCP_NODELAY} cut preprocessing from 11.7--17.3\s to 1.7--5.5\s on the Zen~4 pair ($3.0$--$7.2\times$) and from
+15.1--21.9\s to 2.7--7.0\s on the Zen~3 pair ($3.0$--$6.0\times$). The online phase falls from 0.77--1.55\s to
+0.34--0.67\s ($2.0$--$3.0\times$; Zen~3: 0.72--1.73 to 0.25--0.68\s, $2.1$--$4.1\times$). In UC2, with the weights
+known in preprocessing, the online phase takes 0.34--0.60\s on Zen~4 and 0.25--0.53\s on Zen~3.
 
-UC3 needs no linear-layer triples, so its preprocessing is OT-bound and changes least: $1.0$--$1.2\times$ faster on
-both pairs, with the online phase $1.4$--$1.9\times$ faster ($1.4$--$2.1\times$ on Zen~3). Before the parallel
+UC3 needs no linear-layer triples, so its preprocessing is OT-bound and changes least: $1.1$--$1.2\times$ faster
+($1.0$--$1.1\times$ on Zen~3), with the online phase $1.5$--$2.0\times$ faster ($1.5$--$2.2\times$ on Zen~3). Before the parallel
 preprocessing levels, the Zen~3 hosts' A2bits builds with \flag{COMPRESS=1} preprocessed 0.11--0.14\s \emph{slower} than
 as given (five interleaved runs each). A one-flag-off ablation placed all of it in \flag{ADDITIONAL_RELU_THREADS}, whose
 per-call stream-cursor checks slowed P0's last preprocessing step from 0.32--0.34 to 0.44--0.49\s. Unchecked versions
@@ -147,7 +148,7 @@ builds & pair & as given & optimized & as given & optimized\\
 \input{data/triad_tab}
 \end{tabular}
 \caption{The all\_opt builds on ImageNet by use case (A2bits and reshared, three adders each), as given and optimized
-(median of three runs). Per-build values: \texttt{docs/TRIAD\_ALL\_OPT.md}.}
+at the final code (round~5; median of three runs). Per-build values: \texttt{docs/TRIAD\_ALL\_OPT.md}.}
 \label{tab:triad}
 \end{table}
 
@@ -168,11 +169,12 @@ both cross products, from 2,003 to 958\,MiB. With the weights known in preproces
 share corrections, 4 bytes per conv output (42\,MiB). The OT-based tuples are unchanged, except that with
 \flag{CUT_FRACTIONAL_BITS_OPT} PPA4 needs fewer multi-input AND tuples: 12\,MiB less for reshared and 74\,MiB less
 for A2bits, where the bake lets the cut skip the $b$-product gates. The network's preprocessing pass changes by
-$-67$ to $+8$\,MiB in UC1 and UC2. UC3 needs no linear-layer triples, and its traffic is unchanged except in the
-A2bits builds with \flag{COMPRESS=0}, where the A2B bake adds 69\,MiB to the preprocessing pass. There, no ReLU input
-comes straight from a masked conv layer, so the bake rebases every one of the 9.0 million inputs onto its committed
-mask, one 32-bit word per value and party. The as-given builds skip that rebase, which is why they send less, and
-compute wrong signs (see Correctness). Online, \flag{CUT_FRACTIONAL_BITS_OPT} removes 4--8\% of the traffic of the
+$-67$ to $+4$\,MiB in UC1 and UC2 (the bake's remask of the residual sum's ReLU inputs costs the A2bits builds 3.1 to
+6.1\,MiB less since round~5). UC3 needs no linear-layer triples, and its traffic is unchanged. In round~3 its A2bits
+builds with \flag{COMPRESS=0} sent 69\,MiB more than as given: no ReLU input comes straight from a masked conv layer,
+so the bake rebased every one of the 9.0 million inputs onto its committed mask, which the as-given builds skip (and
+compute wrong signs, see Correctness). The mask-only forward of round~4 bakes them without that message, so the
+final builds send exactly what the as-given ones do, and compute correctly. Online, \flag{CUT_FRACTIONAL_BITS_OPT} removes 4--8\% of the traffic of the
 UC1 and UC2 builds with \flag{COMPRESS=0} (A2bits PPA4: none). The cut needs \flag{TRUNC_DELAYED=0}, so it does not
 apply to UC3; with \flag{COMPRESS=1} the online traffic does not change.
 
@@ -196,8 +198,9 @@ time spent waiting for the other party.}
 \label{tab:triadphases}
 \end{table}
 
-\paragraph{Round 4.}\label{sec:triadround4} Four further changes, measured on flare / polynize only (the Zen~3 pair
-was not available); \cref{tab:triad,tab:triadphases} and \cref{fig:triad,fig:triadcomm} are from round~3.
+\paragraph{Round 4.}\label{sec:triadround4} Four further changes; their measurements below are from flare / polynize,
+the rerun of all 36 builds at the final code (\cref{tab:triad}, \cref{fig:triad,fig:triadcomm}) from both pairs.
+\Cref{tab:triadphases} shows round~3.
 \begin{enumerate}\itemsep1pt
 \item \textbf{P1's bake in the pass.} The conv triples of reshared PPA4 did not run at half speed next to the pass:
   they waited for P1, whose pass took 1.28--1.43\s against P0's 0.38--0.50\s. P1 bakes the reshare bits into every
@@ -223,7 +226,7 @@ was not available); \cref{tab:triad,tab:triadphases} and \cref{fig:triad,fig:tri
   preprocessing; the online phase is unchanged.
 \end{enumerate}
 
-\paragraph{Round 5.}\label{sec:triadround5} Two more changes, again on flare / polynize.
+\paragraph{Round 5.}\label{sec:triadround5} Two more changes.
 \begin{enumerate}\itemsep1pt
 \item \textbf{Conv triples alongside the OT phase.} During the OT phase only about 20 of the 64 hardware threads are
   busy (sampled every 50\ms), while the conv triples ran with the pass and after it. Every ReLU's outputs now take
@@ -231,8 +234,11 @@ was not available); \cref{tab:triad,tab:triadphases} and \cref{fig:triad,fig:tri
   before the pass: the pass first runs the network over the masks, where each convolution records its triple's
   inputs and stops, then starts the conv triples on four channels of their own, runs the OT phase (moved into the
   pass), and then the real sweep, which checks every convolution's inputs against the recorded ones. With all 32
-  threads the conv triples slowed the OT phase down by about as much as they gained; with 16, preprocessing takes
-  0.03--0.34\s less over the 12 UC1 and UC2 builds (0.18--0.34\s for RCA). The online phase gets 0.02--0.07\s faster,
+  threads the conv triples slowed the OT phase down by about as much as they gained, with 16 throughout they became the
+  tail of the Zen~3 builds with short OT phases (up to 0.7\s slower); they now take 16 while the OT phase runs and all
+  32 after it. Against round~4 on Zen~4 preprocessing takes 0.03--0.34\s less over the 12 UC1 and UC2 builds; over all
+  36 builds, the final code preprocesses a median 0.15\s faster than round~3 on Zen~4 (up to 0.8\s) and 0.03\s on
+  Zen~3, where a few builds with short OT phases are up to 0.11\s slower. The online phase gets 0.02--0.07\s faster,
   since the bit injections no longer draw masks.
 \item \textbf{Residual sums baked.} The layer computed last of a residual sum's two addends draws $\ell - \lambda'$,
   where $\lambda'$ is the other addend's mask, so that the sum carries $\ell$. In UC1 this removes the residual sum's

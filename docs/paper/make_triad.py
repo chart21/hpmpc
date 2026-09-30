@@ -27,6 +27,10 @@ for p in ("fp", "ag"):
         res[(p, "conf")], res[(p, "fin")] = load_prefix(f"res_{p}_final4.csv", "conf"), load_prefix(f"res_{p}_final4.csv", "fin3")
         if (VD / f"res_{p}_final5.csv").exists():  # the optimized builds without RNG_AHEAD (final flag set)
             res[(p, "fin")] = load_prefix(f"res_{p}_final5.csv", "fin4")
+        if (VD / f"res_{p}_final6.csv").exists():  # the same flags at the round-5 code (hpmpc f353bb2)
+            res[(p, "fin")] = load_prefix(f"res_{p}_final6.csv", "fin6")
+        if (VD / f"res_{p}_final7.csv").exists():  # round-5 code, conv threads following the OT phase (hpmpc 7913adb)
+            res[(p, "fin")] = load_prefix(f"res_{p}_final7.csv", "fin7")
     elif (VD / f"res_{p}_ab.csv").exists():
         res[(p, "conf")].update(load_prefix(f"res_{p}_ab.csv", "conf"))
         res[(p, "fin")].update(load_prefix(f"res_{p}_ab.csv", "fin2"))
@@ -52,7 +56,10 @@ print("wrote", [f"triad_c{c}.dat" for c in "01"])
 # 10^6 bytes (core/utils/print.hpp); everything is written in MiB, as in the rest of the paper.
 MIB = 1e6 / 2**20
 comm = {}
-for r in csv.DictReader(open(VD / "comm_fp.csv")):
+comm_rows = list(csv.DictReader(open(VD / "comm_fp.csv")))
+if (VD / "comm_fp6.csv").exists():  # the final builds at the round-5 code
+    comm_rows += list(csv.DictReader(open(VD / "comm_fp6.csv")))
+for r in comm_rows:
     v = {k: float(x) for k, x in r.items() if k != "tag"}
     comm[r["tag"].rsplit("_r", 1)[0]] = {
         "trip": v["trip_sent"] + v["trip_recv"] + v["keyex_sent"] + v["keyex_recv"],
@@ -64,7 +71,7 @@ for c in ("0", "1"):
         for key, name in CONF:
             for a, an in ADD:
                 n = f"{key}_{a}_c{c}"
-                g, o = comm[f"conf_{n}"], comm[f"fin2_{n}"]
+                g, o = comm[f"conf_{n}"], comm.get(f"fin6_{n}", comm[f"fin2_{n}"])
                 f.write(f"{y} {{{name}, {an}}} {g['trip'] + g['pass']:.1f} {o['trip'] + o['pass']:.1f} "
                         f"{g['trip']:.1f} {o['trip']:.1f} {g['online']:.1f} {o['online']:.1f}\n")
                 y += 1
