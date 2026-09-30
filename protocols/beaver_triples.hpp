@@ -152,7 +152,7 @@ inline bool reshare_sim_on()
 // Not with FUSE_CONV_BN: then every BatchNorm forward passes its input on (also one that follows a pooling layer).
 #define BN_BAKE_SUPPORTED (PROTOCOL == 4 && BN2D_TRIPLES == 1 && PUBLIC_WEIGHTS == 0 && TRUNC_DELAYED == 0 && \
                            TRUNC_APPROACH == 0 && FUSE_CONV_BN_SIM == 0 && FUSE_CONV_BN == 0 && ROT_PREPROCESSING_OPT == 1 && \
-                           (A2B_CONV_BAKE_ACTIVE || RESHARE_BAKE_ACTIVE))
+                           A2B_BAKE_BN == 1 && (A2B_CONV_BAKE_ACTIVE || RESHARE_BAKE_ACTIVE))
 // A2B_BAKE_MASK_PASS (public weights, single batch): no ReLU input can be baked by its producer (a public-weight conv,
 // pooling or BatchNorm fixes the mask as a linear function of earlier bit-injection masks), so instead the
 // preprocessing pass first runs the network over the masks alone: ReLUs record their input masks lambda_v and

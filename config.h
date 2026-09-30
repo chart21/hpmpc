@@ -457,6 +457,12 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef CHEETAH_CONV_ASYNC
 #define CHEETAH_CONV_ASYNC 1  // single batch, packed + pipelined convs: the conv triples start with the preprocessing pass, each layer as soon as the pass has recorded its masks, instead of after it
 #endif
+#ifndef A2B_BAKE_RESIDUAL
+#define A2B_BAKE_RESIDUAL 1  // A2B_CONV_BAKE: a residual sum's partner conv/FC draws lz - (the other addend's mask), instead of the ReLU moving the sum with the rebase message
+#endif
+#ifndef A2B_BAKE_BN
+#define A2B_BAKE_BN 0  // A2B_CONV_BAKE / RESHARE_OPT_SIM bakes: a BatchNorm with secret parameters in front of a ReLU takes the committed masks like a conv (not with FUSE_CONV_BN). Off: in the multi-batch CIFAR check with FUSE_CONV_BN=0 it changed the outputs (105 instead of 129 of 192), not understood yet
+#endif
 #ifndef A2B_BAKE_MASK_PASS
 #define A2B_BAKE_MASK_PASS 1  // A2B_CONV_BAKE with public weights (UC3): a mask-only forward in the preprocessing pass gives every ReLU input's actual mask before the Boolean addition, so no ReLU input needs the rebase message (bit-injection output masks committed)
 #endif
