@@ -1,5 +1,8 @@
 #pragma once
 #include <functional>
+#include <sys/resource.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 #include "../core/generate_beaver_tiples.hpp"
 #include "../core/init.hpp"
 #include "../config.h"  
@@ -144,25 +147,49 @@ inline bool reshare_sim_on()
 #define A2B_CONV_BAKE_ACTIVE (A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && \
                               (DATTYPE == BITLENGTH || MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0) && \
                               REDUCED_BITLENGTH_m == 0 && REDUCED_BITLENGTH_k == BITLENGTH)
+// A BatchNorm with secret parameters re-masks its output (BN triples, SecureML truncation leaves the drawn mask, beta's
+// mask is added afterwards like a conv's bias), so it can take the committed / reshare-baked masks like a conv/FC.
+// Not with FUSE_CONV_BN: then every BatchNorm forward passes its input on (also one that follows a pooling layer).
+#define BN_BAKE_SUPPORTED (PROTOCOL == 4 && BN2D_TRIPLES == 1 && PUBLIC_WEIGHTS == 0 && TRUNC_DELAYED == 0 && \
+                           TRUNC_APPROACH == 0 && FUSE_CONV_BN_SIM == 0 && FUSE_CONV_BN == 0 && ROT_PREPROCESSING_OPT == 1 && \
+                           (A2B_CONV_BAKE_ACTIVE || RESHARE_BAKE_ACTIVE))
 // A2B_BAKE_MASK_PASS (public weights, single batch): no ReLU input can be baked by its producer (a public-weight conv,
 // pooling or BatchNorm fixes the mask as a linear function of earlier bit-injection masks), so instead the
 // preprocessing pass first runs the network over the masks alone: ReLUs record their input masks lambda_v and
-// output committed bit-injection masks (g_a2b_bi), which the real passes use as well. The Boolean addition then
+// output committed bit-injection masks (g_relu_out), which the real passes use as well. The Boolean addition then
 // runs on bool(-lambda_v) itself, and no ReLU input needs the rebase message.
 #define A2B_MASK_PASS_ACTIVE (A2B_CONV_BAKE_ACTIVE && A2B_BAKE_MASK_PASS == 1 && PUBLIC_WEIGHTS == 1 && DATTYPE == BITLENGTH && \
                               OPTIMIZED_BIT_INJECTION_RELU == 1 && TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1 && \
                               RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0)
-// The slot of the current bit injection's first output (A2B_BAKE_MASK_PASS, set per element by
+// CHEETAH_CONV_EARLY (secret weights, packed + pipelined convs, single batch): the preprocessing pass first runs the
+// network over the masks alone; the convs record their triples' inputs (every conv input is a ReLU output, whose mask
+// is committed, or the network input), and the conv triples start on channels of their own while the OT phase runs
+// (instead of alongside the pass). The OT phase runs from within the pass, after the mask-only forward.
+#define CHEETAH_CONV_EARLY_ACTIVE (CHEETAH_CONV_ASYNC_ACTIVE && CHEETAH_CONV_EARLY == 1 && PUBLIC_WEIGHTS == 0 && \
+                                   CONV_TRIPLES == 1 && ROT_PREPROCESSING_OPT == 1 && OPTIMIZED_BIT_INJECTION_RELU == 1 && \
+                                   TRUNC_APPROACH == 0 && RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0)
+#define MASK_FORWARD_ACTIVE (A2B_MASK_PASS_ACTIVE || CHEETAH_CONV_EARLY_ACTIVE)
+// The slot of the current bit injection's first output (MASK_FORWARD_ACTIVE, set per element by
 // bit_injection_opt_range inside a ReLU; -1: a fresh mask)
 inline thread_local int64_t tl_bi_slot = -1;
+#if MASK_FORWARD_ACTIVE
+// Every ReLU's outputs have committed masks (bit injection), by slot: a ReLU of len values takes len rounded up to
+// BITLENGTH slots, from g_relu_base on, which restarts with every forward. Counted in the INIT pass.
+inline std::vector<DATATYPE> g_relu_out;
+inline uint64_t g_relu_slots = 0;
+inline uint64_t g_relu_base = 0;
+inline uint64_t g_bi_base = UINT64_MAX;  // the running ReLU's first slot, for its bit injection
+
+[[noreturn]] inline void mask_pass_abort(const char* what)
+{
+    fprintf(stderr, "mask-only forward: %s\n", what);
+    std::abort();
+}
+#endif
 #if A2B_CONV_BAKE_ACTIVE
 std::vector<DATATYPE> g_a2b_ia;   // this party's random boolean A2B-mask slices (boolean-adder input)
 std::vector<DATATYPE> g_a2b_lz;   // derived conv mask -untranspose(ia); ortho(-lz) == ia
 std::vector<DATATYPE> g_a2b_c;    // this party's share of [c] = bool(-lz), from the early boolean addition
-#if A2B_MASK_PASS_ACTIVE
-std::vector<DATATYPE> g_a2b_bi;   // committed bit-injection output mask of every ReLU output (by A2B slot)
-uint64_t g_bi_base = UINT64_MAX;  // the running ReLU's first slot, for its bit injection
-#endif
 uint64_t g_a2b_layer_base = 0;    // g_a2b_lz base for the current layer's A2B group (reset per phase)
 uint64_t g_a2b_c_cursor = 0;      // A2B-S2 [c] cursor (reset per phase)
 // init_a2b_bake / a2b_bake_store_c are defined further down, after the boolean_addition_triple buffers.
@@ -196,11 +223,25 @@ inline Datatype a2b_bake_slot_mask(uint64_t e, func_sub SUB)
 
 // A conv/FC output's mask: the committed slot mask when the layer feeds a baked ReLU (g_conv_bake), a fresh
 // synced draw otherwise, so that every committed slot masks exactly one value (see g_conv_bake).
+// Residual partners: every party subtracts the other addend's mask, except P1 with weights known in preprocessing and
+// SecureML truncation, whose masks lie in the truncation's image (top FRACTIONAL bits zero); P1 then draws fresh and
+// moves the sum with a one-sided rebase (rebase_p1). Drawing lz there would reuse the slot through the rebase.
+#define A2B_RESIDUAL_BAKE_P1 (MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0 || A_KNOWN == 0 || TRUNC_DELAYED == 1)
 template <typename Datatype, typename func_sub>
 inline Datatype a2b_bake_conv_mask(uint64_t e, func_sub SUB)
 {
     if (!g_conv_bake)
         return current_phase == PHASE_INIT ? SET_ALL_ZERO() : getRandomVal(PSELF);
+    if (g_bake_res_l != nullptr)
+    {
+#if PARTY == 1 && !A2B_RESIDUAL_BAKE_P1
+        return current_phase == PHASE_INIT ? SET_ALL_ZERO() : getRandomVal(PSELF);
+#else
+        if (current_phase == PHASE_INIT)
+            return SET_ALL_ZERO();
+        return SUB(a2b_bake_slot_mask<Datatype>(e, SUB), (Datatype) g_bake_res_l[g_bake_batch_offset + e]);
+#endif
+    }
     return a2b_bake_slot_mask<Datatype>(e, SUB);
 }
 
@@ -753,10 +794,6 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
         orthogonalize_arithmetic(m, lz);
         for (int i = 0; i < K; i++) g_a2b_lz[base + i] = lz[i];
     }
-#if A2B_MASK_PASS_ACTIVE
-    g_a2b_bi.resize(num_slices);
-    for (uint64_t e = 0; e < num_slices; e++) g_a2b_bi[e] = getRandomVal(PSELF);
-#endif
 #if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
     aes_counter[PSELF] = saved_counter;
     num_generated[PSELF] = saved_numgen;
@@ -778,32 +815,21 @@ inline void a2b_bake_store_c(uint64_t num_slices)
 }
 
 #if A2B_MASK_PASS_ACTIVE
-// Set by the executer, run by a2b_mask_forward once the mask-only forward is done: the Boolean addition on the
-// recorded masks
+// Set by the executer, run by the mask-only forward once it is done: the Boolean addition on the recorded masks
 inline std::function<void()> g_mask_pass_hook;
 
-[[noreturn]] inline void mask_pass_abort(const char* what)
-{
-    fprintf(stderr, "A2B_BAKE_MASK_PASS: %s\n", what);
-    std::abort();
-}
-
-// The mask-only forward's ReLU: record the input masks at this ReLU's slots (padding: 0) and output the committed
-// bit-injection masks. Slots advance as get_msb_range advances them (BITLENGTH per packed sint).
+// UC3: the mask-only forward's ReLU also records its input masks at its A2B slots (padding: 0), which advance as
+// get_msb_range advances them (BITLENGTH per packed sint), in step with g_relu_base.
 template <typename Datatype, typename Share, typename A>  // A: Additive_Share<Datatype, Share>
-void a2b_mask_pass_relu(const A* in, int len, A* out)
+void a2b_mask_pass_record(const A* in, int len)
 {
-    if constexpr (requires(const Share& s) { s.get_mask(); Share(Datatype{}); })
+    if constexpr (requires(const Share& s) { s.get_mask(); })
     {
         const uint64_t base = g_a2b_layer_base;
         const uint64_t slots = (uint64_t) ((len + BITLENGTH - 1) / BITLENGTH) * BITLENGTH;
         if (base + slots > g_a2b_lz.size())
             mask_pass_abort("more ReLU inputs than A2B slots");
-        for (int v = 0; v < len; v++)
-        {
-            g_a2b_lz[base + v] = in[v].get_mask();
-            out[v] = A(Share(g_a2b_bi[base + v]));
-        }
+        for (int v = 0; v < len; v++) g_a2b_lz[base + v] = in[v].get_mask();
         for (uint64_t v = len; v < slots; v++) g_a2b_lz[base + v] = SET_ALL_ZERO();
         g_a2b_layer_base = base + slots;
     }
@@ -836,53 +862,77 @@ inline void a2b_mask_pass_commit(uint64_t num_slices)
 #endif
 #endif
 
-#if A2B_MASK_PASS_ACTIVE
-// The masks of the truncations outside ReLUs (pooling, delayed conv truncations, the data owner's first layer): a
-// counter-mode stream under this party's PSELF key, restarted at the beginning of every forward. ReLUs draw from
-// PSELF, and the mask-only forward skips them, so a PSELF draw after a ReLU would differ between the two forwards.
-inline uint64_t g_lin_counter = 0;
-inline DATATYPE lin_stream_value(uint64_t k)
+#if MASK_FORWARD_ACTIVE
+// Counter-mode values under this party's PSELF key, by (tweak, index): random access, and independent of the
+// generator stream (PSELF), whose position after a ReLU differs between the mask-only forward and the real one.
+inline DATATYPE prf_value(uint64_t tweak, uint64_t k)
 {
-    static thread_local uint64_t cached = UINT64_MAX;
+    static thread_local uint64_t cached_tweak = 0, cached = UINT64_MAX;
     alignas(sizeof(AES_TYPE)) static thread_local DATATYPE buf[BUFFER_SIZE];
     const uint64_t blk = k / BUFFER_SIZE;
-    if (blk != cached)
+    if (blk != cached || tweak != cached_tweak)
     {
         alignas(sizeof(AES_TYPE)) uint64_t in[sizeof(AES_TYPE) / 8];
-        for (size_t i = 0; i < sizeof(AES_TYPE) / 8; i++) in[i] = 0x5bd1e995a2b0c0deULL ^ ((uint64_t) i << 56) ^ blk;
+        for (size_t i = 0; i < sizeof(AES_TYPE) / 8; i++) in[i] = tweak ^ ((uint64_t) i << 56) ^ blk;
         AES_TYPE st;
         std::memcpy(&st, in, sizeof(st));
         AES_enc(st, key_schedule[PSELF]);
         MM_AES_STORE((AES_TYPE*) buf, st);
-        cached = blk;
+        cached = blk, cached_tweak = tweak;
     }
     return buf[k % BUFFER_SIZE];
 }
+constexpr uint64_t kTweakTrunc = 0x5bd1e995a2b0c0deULL, kTweakRelu = 0x2545f4914f6cdd1dULL;
+
+// The masks of the truncations outside ReLUs (pooling, delayed conv truncations, the data owner's first layer): a
+// stream that restarts with every forward.
+inline uint64_t g_lin_counter = 0;
+
+// The committed ReLU output masks, before the preprocessing pass (g_relu_slots from the INIT pass)
+inline void init_relu_out_masks()
+{
+    g_relu_out.resize(g_relu_slots);
+    for (uint64_t k = 0; k < g_relu_slots; k++) g_relu_out[k] = prf_value(kTweakRelu, k);
+}
+
+// The mask-only forward's ReLU: its outputs take the committed masks of its slots
+template <typename Datatype, typename Share, typename A>  // A: Additive_Share<Datatype, Share>
+void mask_pass_relu_outputs(int len, A* out, uint64_t base)
+{
+    if constexpr (requires { Share(Datatype{}); })
+    {
+        if (base + (uint64_t) len > g_relu_out.size())
+            mask_pass_abort("more ReLU outputs than committed masks");
+        for (int v = 0; v < len; v++) out[v] = A(Share(g_relu_out[base + v]));
+    }
+    else
+        mask_pass_abort("not a preprocessing share");
+}
 #endif
 
-// The fresh mask of a truncation's output (see lin_stream_value)
+// The fresh mask of a truncation's output (see prf_value)
 template <typename Datatype>
 inline Datatype lin_mask()
 {
-#if A2B_MASK_PASS_ACTIVE
+#if MASK_FORWARD_ACTIVE
 #if ADDITIONAL_RELU_THREADS > 0
     if (tl_stream || tl_pre)
         mask_pass_abort("a truncation inside a parallel level");
 #endif
-    return lin_stream_value(g_lin_counter++);
+    return prf_value(kTweakTrunc, g_lin_counter++);
 #else
     return getRandomVal(PSELF);
 #endif
 }
 
-// The output mask of bit-injection output i: inside a ReLU with A2B_BAKE_MASK_PASS the committed one of its slot,
+// The output mask of bit-injection output i: inside a ReLU with a mask-only forward the committed one of its slot,
 // otherwise a fresh draw.
 template <typename Datatype>
 inline Datatype bi_output_mask(int i)
 {
-#if A2B_MASK_PASS_ACTIVE
+#if MASK_FORWARD_ACTIVE
     if (tl_bi_slot >= 0)
-        return g_a2b_bi[(uint64_t) tl_bi_slot + (uint64_t) i];
+        return g_relu_out[(uint64_t) tl_bi_slot + (uint64_t) i];
 #endif
     (void) i;
     return getRandomVal(PSELF);
@@ -1491,6 +1541,48 @@ void conv_async_start(std::string* ips, int base_port, int process_offset)
                                               A_KNOWN == 0 || PARTY == 0 ? (UINT_TYPE**) conv_triple_w : nullptr,
                                               (UINT_TYPE*) conv_triple_y, CHEETAH_PARTY, CHEETAH_THREADS,
                                               A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2, conv_async::wait_ready);
+        conv_async::done = true;
+    });
+}
+#endif
+
+#if CHEETAH_CONV_EARLY_ACTIVE
+// The OT phase (protocol_executer.hpp run_ot_phase), run by the mask-only forward once the convs have recorded their
+// inputs and the conv triples have started
+inline std::function<void()> g_early_ot_hook;
+inline uint64_t g_early_conv_index = 0;  // convs recorded by the mask-only forward
+
+// The conv triples of all layers, on four channels of their own (Keys::get_side_ios) next to the OT packs, which keep
+// the regular channels; the inputs were recorded by the mask-only forward, so no layer waits. Same calls, same PRNG
+// streams: the triples are the ones the pass would have started.
+void conv_early_start(std::string* ips, int base_port, int process_offset)
+{
+    if (conv_triple_params.empty())
+        return;
+    init_ConvC();
+    std::vector<Utils::ConvParm> parms;
+    for (const auto& p : conv_triple_params)
+        parms.push_back(Utils::ConvParm{.batchsize = p.batchSize, .ic = p.din, .iw = p.inw, .ih = p.inh, .fc = p.din,
+                                        .fw = p.ww, .fh = p.wh, .n_filters = p.dout, .stride = p.stride,
+                                        .padding = p.padding});
+    const std::string ip = ips[0];
+    const int port = base_port + process_offset + CHEETAH_PORT_OFFSET;
+    conv_async::launched = true;
+    // They are to use the cores the OT phase leaves idle: CONV_EARLY_THREADS threads (default half the CHEETAH threads:
+    // at 32 the OT phase slowed down by about as much as the conv triples gained), CONV_EARLY_NICE their nice value
+    // (inherited by the threads they start; default 0: with 10-19 they became the tail of the PPA4 builds)
+    const int nice_value = getenv("CONV_EARLY_NICE") ? atoi(getenv("CONV_EARLY_NICE")) : CHEETAH_CONV_EARLY_NICE;
+    const int threads = getenv("CONV_EARLY_THREADS") ? std::max(4, atoi(getenv("CONV_EARLY_THREADS"))) : CHEETAH_CONV_EARLY_THREADS;
+    conv_async::worker = std::thread([parms, ip, port, nice_value, threads] {
+        if (nice_value != 0)
+            setpriority(PRIO_PROCESS, (id_t) syscall(SYS_gettid), nice_value);
+        auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
+        Iface::generateConvTriplesPackedBatch(keys, parms,
+                                              A_KNOWN == 0 || PARTY == 1 ? (UINT_TYPE**) conv_triple_x : nullptr,
+                                              A_KNOWN == 0 || PARTY == 0 ? (UINT_TYPE**) conv_triple_w : nullptr,
+                                              (UINT_TYPE*) conv_triple_y, CHEETAH_PARTY, threads,
+                                              A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2, nullptr,
+                                              keys.get_side_ios(4));
         conv_async::done = true;
     });
 }

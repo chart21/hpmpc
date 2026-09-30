@@ -608,6 +608,20 @@ class ABY2_ONLINE_Share
         return c;
     }
 
+    // see aby2_pre.hpp: only P1's delta travels, P0's is zero
+    template <typename func_add, typename func_sub>
+    ABY2_ONLINE_Share rebase_p1(Datatype assign, func_add ADD, func_sub SUB) const
+    {
+        ABY2_ONLINE_Share c;
+#if PARTY == 1
+        c.m = ADD(m, SUB(assign, l));
+#else
+        c.m = ADD(ADD(m, SUB(assign, l)), retrieve_output_share());
+#endif
+        c.l = assign;
+        return c;
+    }
+
     // zero_add with BOTH deltas (l ^ assign of each party) known to be zero (RESHARE_OPT baking):
     // the re-masking keeps m unchanged. Substituting the deltas by their guaranteed value keeps the
     // parties consistent even at lanes the bake could not cover (padding lanes of partial groups).
@@ -1483,6 +1497,12 @@ class ABY2_ONLINE_Share
         l = getRandomVal(PSELF);
     }
     
+    // the mask-only forward runs in preprocessing only (see ABY2_PRE_Share::RecordConv2dInputs)
+    static void RecordConv2dInputs(const ABY2_ONLINE_Share* X, const ABY2_ONLINE_Share* W, int batchSize, int inh, int inw, int din, int dout,
+                                   int wh, int ww)
+    {
+    }
+
     static void SetupConv2dTriples(const ABY2_ONLINE_Share* X,
                                    const ABY2_ONLINE_Share* W,
                                    ABY2_ONLINE_Share* Y,

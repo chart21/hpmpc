@@ -250,6 +250,8 @@ class Additive_Share : public Share_Type
 
     // Move the value onto mask share `assign`; the only communication is one preprocessing message.
     Additive_Share rebase(Datatype assign) const { return Additive_Share(Share_Type::rebase(assign, OP_ADD, OP_SUB)); }
+    // ... where P0's mask already is `assign`: only P1's delta travels
+    Additive_Share rebase_p1(Datatype assign) const { return Additive_Share(Share_Type::rebase_p1(assign, OP_ADD, OP_SUB)); }
 
     // Sequential (call-order) triple retrieval like the no-index variant, but with a bake index so
     // RESHARE_OPT can bake the reshare masks into l (linear-order GEMMs, e.g. the FC layer).

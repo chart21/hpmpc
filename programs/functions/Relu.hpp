@@ -90,9 +90,6 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 #endif
 
     S* y = new S[len];
-#if A2B_MASK_PASS_ACTIVE
-    const uint64_t slot_base = g_a2b_layer_base;  // this ReLU's first A2B slot (get_msb_range moves on)
-#endif
 #if CUT_FRAC_ELIGIBLE || CUT_FRAC_ELIGIBLE_GENERIC
     g_cut_frac_active = true;
 #endif
@@ -104,13 +101,7 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
         y[i] = ~y[i];
     }
 
-#if A2B_MASK_PASS_ACTIVE
-    g_bi_base = slot_base;  // the outputs take the committed masks of the input slots
-#endif
     bit_injection_opt_range<Datatype, Share>(y, val, len);
-#if A2B_MASK_PASS_ACTIVE
-    g_bi_base = UINT64_MAX;
-#endif
 
     delete[] y;
 
@@ -269,10 +260,19 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
                  Additive_Share<Datatype, Share>* output)
 {
     const int len = end - begin;
-#if A2B_MASK_PASS_ACTIVE
+#if MASK_FORWARD_ACTIVE
+    // this ReLU's committed output masks: slots relu_base.. (BITLENGTH per packed sint), counted in the INIT pass
+    const uint64_t relu_slots = (uint64_t) ((len + BITLENGTH - 1) / BITLENGTH) * BITLENGTH;
+    if (current_phase == PHASE_INIT)
+        g_relu_slots += relu_slots;
+    const uint64_t relu_base = g_relu_base;
+    g_relu_base += relu_slots;
     if (g_mask_pass)
     {
-        a2b_mask_pass_relu<Datatype, Share>(begin, len, output);
+#if A2B_MASK_PASS_ACTIVE
+        a2b_mask_pass_record<Datatype, Share>(begin, len);
+#endif
+        mask_pass_relu_outputs<Datatype, Share>(len, output, relu_base);
 #if TRUNC_DELAYED == 1
         delayed = false;
 #endif
@@ -281,6 +281,8 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
 #endif
         return;
     }
+    if (current_phase != PHASE_INIT)
+        g_bi_base = relu_base;  // the bit injection gives the outputs these masks
 #endif
 #if TRUNC_DELAYED == 1 && TRUNC_APPROACH > 0
     if (delayed)
@@ -300,6 +302,9 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
         pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place<rm, rk, Share, Datatype>);
 #endif
 
+#if MASK_FORWARD_ACTIVE
+    g_bi_base = UINT64_MAX;
+#endif
 #if TRUNC_DELAYED == 1
     delayed = false;
 #endif

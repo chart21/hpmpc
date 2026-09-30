@@ -114,6 +114,10 @@ inline bool equal_word(const D& a, const D& b)
 template <int bm, int bk, typename Datatype, typename Share>
 void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int len)
 {
+#if MASK_FORWARD_ACTIVE
+    if (g_mask_pass)
+        mask_pass_abort("an A2B outside a ReLU (the mask-only forward models ReLUs only)");
+#endif
     using S = XOR_Share<Datatype, Share>;
     using A = Additive_Share<Datatype, Share>;
     using Bitset = sbitset_t<bk - bm, S>;
@@ -128,8 +132,6 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
     // The mask-only forward recorded each input's mask at its slot and [c] was built for it: nothing to move. In
     // preprocessing, check that the masks are what the mask forward saw (all but the last value group, whose
     // padding is not initialized).
-    if (g_mask_pass)
-        mask_pass_abort("an A2B outside a ReLU (the mask-only forward models ReLUs only)");
     if (current_phase == PHASE_PRE)
         for (int i = 0; i + 1 < len; i++)
         {
@@ -139,7 +141,42 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
                     mask_pass_abort("a ReLU input's mask differs from the mask-only forward's");
         }
 #else
-    if (!msb_input_baked())
+    // residual sums: the partner drew lz - (other addend), so the sum carries lz (P1 with truncation-image masks: only
+    // P0's, P1 moves its part alone)
+    const bool residual = g_msb_input_residual && !msb_input_baked();
+    const bool moved_by_producer = msb_input_baked() || (residual && (A2B_RESIDUAL_BAKE_P1 || PARTY == 0));
+    // the bake's invariant: every such input's mask share is its slot's committed mask (all but the last value group,
+    // whose padding is not initialized). Not checked for P1 with weights known in preprocessing, SecureML truncation
+    // and dummy weights (MODELOWNER -1): its masks lie in the truncation's image, and the dummy biases give P1 a bias
+    // mask, which the bake then cannot compensate (a real model owner's bias has no mask at P1).
+    constexpr bool check_bake = !(PARTY == 1 && MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 && TRUNC_DELAYED == 0 &&
+                                  MODELOWNER == -1);
+    if (check_bake && current_phase == PHASE_PRE && moved_by_producer)
+        for (int i = 0; i + 1 < len; i++)
+        {
+            auto* sh = val[i].get_share_pointer();
+            for (int j = 0; j < BITLENGTH; j++)
+            {
+                const Datatype want = a2b_bake_slot_mask<Datatype>((uint64_t) i * BITLENGTH + j, OP_SUB);
+                const Datatype have = sh[j].get_share().get_mask();
+                if (std::memcmp(&want, &have, sizeof(Datatype)) != 0)
+                {
+                    fprintf(stderr, "A2B_CONV_BAKE: a baked ReLU input's mask is not its committed mask (P%d, slot base %lu, "
+                            "value %d of %d, residual %d, want %u, have %u)\n", (int) PARTY, (unsigned long) g_a2b_layer_base,
+                            i * BITLENGTH + j, len * BITLENGTH, (int) residual, (unsigned) *(const UINT_TYPE*) &want,
+                            (unsigned) *(const UINT_TYPE*) &have);
+                    std::abort();
+                }
+            }
+        }
+    if (residual && !A2B_RESIDUAL_BAKE_P1)
+        for (int i = 0; i < len; i++)
+        {
+            auto* sh = val[i].get_share_pointer();
+            for (int j = 0; j < BITLENGTH; j++)
+                sh[j] = sh[j].rebase_p1(a2b_bake_slot_mask<Datatype>((uint64_t) i * BITLENGTH + j, OP_SUB));
+        }
+    else if (!msb_input_baked() && !residual)
         for (int i = 0; i < len; i++)
         {
             auto* sh = val[i].get_share_pointer();
@@ -387,7 +424,7 @@ struct BiSlotScope
 {
     explicit BiSlotScope(int i)
     {
-#if A2B_MASK_PASS_ACTIVE
+#if MASK_FORWARD_ACTIVE
         tl_bi_slot = g_bi_base == UINT64_MAX ? -1 : (int64_t) (g_bi_base + (uint64_t) i * BITLENGTH);
 #else
         (void) i;
@@ -465,13 +502,16 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
     stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { val[i].complete_opt_bit_injection(); });
 }
 
-#if A2B_MASK_PASS_ACTIVE
-// The mask-only forward (SimpleNN::evaluate, preprocessing pass, before the real forward): forward() with every ReLU
-// recording its input masks and outputting committed masks. Nothing else in a public-weight network draws or writes
-// preprocessing material; the random generators are restored anyway, and the preprocessing streams must not have
-// moved. Then the Boolean addition, and the real forward starts from the same state.
+#if MASK_FORWARD_ACTIVE
+// The mask-only forward (SimpleNN::evaluate, preprocessing pass, before the real forward, on a copy of the input):
+// forward() with every ReLU outputting its committed masks. UC3 (A2B_BAKE_MASK_PASS): the ReLUs record their input
+// masks, all other layers run their preprocessing code (public weights draw and write nothing but the truncations'
+// masks), then the Boolean addition runs on the recorded masks. Secret weights (CHEETAH_CONV_EARLY): the convs record
+// their triples' inputs, conv, FC and BatchNorm layers stop there, then the conv triples start and the OT phase runs.
+// The random generators are restored, pre-sends are dropped, the triple-type index is restored, and every other
+// preprocessing stream must not have moved. The real forward then starts from the same state.
 template <typename F>
-void a2b_mask_forward(F&& forward)
+void mask_forward(F&& forward)
 {
     constexpr int links = num_players * player_multiplier;
     AES_TYPE counters[links];
@@ -493,14 +533,29 @@ void a2b_mask_forward(F&& forward)
     // the truncations of the pooling layers record a triple type per value (for the online phase's bookkeeping):
     // an append-only stream the real forward writes again from the same position
     const auto types0 = triple_type_index;
+#if A2B_MASK_PASS_ACTIVE
     g_a2b_layer_base = 0;
+#endif
+#if CHEETAH_CONV_EARLY_ACTIVE
+    g_early_conv_index = 0;
+#endif
+    g_relu_base = 0;
     g_lin_counter = 0;
     g_mask_pass = true;
     forward();
     g_mask_pass = false;
+    if (g_relu_base != g_relu_out.size())
+        mask_pass_abort("did not reach every ReLU");
+    g_relu_base = 0;
     g_lin_counter = 0;  // the real forward draws the same truncation masks
+#if A2B_MASK_PASS_ACTIVE
     if (g_a2b_layer_base != g_a2b_lz.size())
-        mask_pass_abort("the mask-only forward did not reach every A2B slot");
+        mask_pass_abort("did not reach every A2B slot");
+#endif
+#if CHEETAH_CONV_EARLY_ACTIVE
+    if (g_early_conv_index != conv_triple_params.size())
+        mask_pass_abort("did not reach every conv");
+#endif
     for (int l = 0; l < links; l++) aes_counter[l] = counters[l], num_generated[l] = generated[l];
 #if TRUNC_DELAYED == 1
     delayed = delayed0;
@@ -517,15 +572,20 @@ void a2b_mask_forward(F&& forward)
     {
         for (size_t k = 0; k < now.size(); k++)
             if (now[k] != before[k])
-                fprintf(stderr, "A2B_BAKE_MASK_PASS: preprocessing stream %zu moved from %ld to %ld\n", k, (long) before[k], (long) now[k]);
-        mask_pass_abort("the mask-only forward wrote preprocessing material");
+                fprintf(stderr, "mask-only forward: preprocessing stream %zu moved from %ld to %ld\n", k, (long) before[k], (long) now[k]);
+        mask_pass_abort("wrote preprocessing material");
     }
 #endif
     if (send_count_pre[PNEXT] != send0)
-        mask_pass_abort("the mask-only forward wrote preprocessing material");
+        mask_pass_abort("wrote preprocessing material");
+#if A2B_MASK_PASS_ACTIVE
     g_mask_pass_hook();
     g_a2b_layer_base = 0;
     g_a2b_c_cursor = 0;
+#endif
+#if CHEETAH_CONV_EARLY_ACTIVE
+    g_early_ot_hook();  // starts the conv triples, then runs the OT phase
+#endif
 }
 #endif
 

@@ -349,22 +349,12 @@ void load_preprocessed_data()
 
 
 #if PRE == 1 && SKIP_PRE == 0
-void preprocess_circuit(std::string ips[])
+#if PROTOCOL == 4 && ROT_PREPROCESSING_OPT == 1
+// The OT phase of the preprocessing: the triples and tuples the preprocessing pass consumes, and the bake's Boolean
+// addition. With CHEETAH_CONV_EARLY it runs from within the pass, after its mask-only forward, alongside the conv
+// triples.
+void run_ot_phase(std::string ips[])
 {
-#if PROTOCOL == 4
-#if BEAVER == 1
-    curr_beaver_3_triple_index = 0;
-    curr_beaver_4_triple_index = 0;
-    curr_boolean_triple_index = 0;
-    curr_arithmetic_triple_index = 0;
-    curr_arithmetic_ab2_triple_index = 0;
-    curr_boolean_ab2_triple_index = 0;
-    curr_random_multiplication_index = 0;
-#endif
-#if ROT_PREPROCESSING_OPT == 1 
-        clock_t time_pre_function_start = clock();
-        clock_gettime(CLOCK_REALTIME, &p1);
-        std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
         // size the CHEETAH OT packs for everything the preprocessing will extend, not just the first request
         Iface::ot_demand_hint() = uint64_t(total_boolean_triples_num + total_ab2_boolean_triples_num +
                                            2 * num_beaver_3_tuples + 3 * num_beaver_4_tuples +
@@ -393,7 +383,7 @@ generate_beaver_triples(
         // passes - the msb adder's beaver triples (built in PRE from s2.l = [c]) must match LIVE.
         init_a2b_bake<DATATYPE>(num_boolean_addition_triples, std::minus<DATATYPE>());
 #if A2B_MASK_PASS_ACTIVE
-        // the Boolean addition waits for the actual masks: after the pass's mask-only forward (a2b_mask_forward)
+        // the Boolean addition waits for the actual masks: after the pass's mask-only forward (mask_forward)
         g_mask_pass_hook = [ips] {
             a2b_mask_pass_commit(num_boolean_addition_triples);
             if (num_boolean_addition_triples > 0)
@@ -416,8 +406,42 @@ generate_beaver_triples(
         g_a2b_layer_base = 0;  // conv-mask layer base starts at 0 for the PRE pass
         g_a2b_c_cursor = 0;  // A2B-S2 [c] cursor starts at 0 for the PRE pass
 #endif
-#endif
 #if CHEETAH_DISCONNECT == 0
+    CheetahDisconnect(ips[0], base_port + process_offset);
+#endif
+}
+#endif
+
+void preprocess_circuit(std::string ips[])
+{
+#if PROTOCOL == 4
+#if BEAVER == 1
+    curr_beaver_3_triple_index = 0;
+    curr_beaver_4_triple_index = 0;
+    curr_boolean_triple_index = 0;
+    curr_arithmetic_triple_index = 0;
+    curr_arithmetic_ab2_triple_index = 0;
+    curr_boolean_ab2_triple_index = 0;
+    curr_random_multiplication_index = 0;
+#endif
+#if ROT_PREPROCESSING_OPT == 1 
+        clock_t time_pre_function_start = clock();
+        clock_gettime(CLOCK_REALTIME, &p1);
+        std::chrono::high_resolution_clock::time_point p = std::chrono::high_resolution_clock::now();
+#if MASK_FORWARD_ACTIVE
+        init_relu_out_masks();  // the committed ReLU output masks (g_relu_slots from the INIT pass)
+#endif
+#if CHEETAH_CONV_EARLY_ACTIVE
+        // the pass's mask-only forward records the conv inputs, starts the conv triples and then runs the OT phase
+        g_early_ot_hook = [ips] {
+            conv_early_start(ips, base_port, process_offset);
+            run_ot_phase(ips);
+        };
+#else
+        run_ot_phase(ips);
+#endif
+#endif
+#if CHEETAH_DISCONNECT == 0 && ROT_PREPROCESSING_OPT == 0
     CheetahDisconnect(ips[0], base_port + process_offset);
 #endif
 #endif
@@ -479,7 +503,7 @@ generate_beaver_triples(
     // receive only
 #else
     RESULTTYPE garbage_PRE;
-#if CHEETAH_CONV_ASYNC_ACTIVE
+#if CHEETAH_CONV_ASYNC_ACTIVE && !CHEETAH_CONV_EARLY_ACTIVE
     conv_async_start(ips, base_port, process_offset);  // conv triples alongside the pass
 #endif
     FUNCTION<PROTOCOL_PRE<DATATYPE>>(&garbage_PRE);

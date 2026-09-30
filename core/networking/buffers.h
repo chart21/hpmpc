@@ -109,6 +109,11 @@ bool g_conv_bake = true;
 // A2B_BAKE_MASK_PASS: the preprocessing pass's mask-only forward is running (ReLUs record their input masks and
 // output the committed bit-injection masks, protocols/beaver_triples.hpp)
 bool g_mask_pass = false;
+// A2B_CONV_BAKE, residual sums: the ReLU input is the sum of two layer outputs; the conv/FC computed last (the partner)
+// draws lz - (the other addend's mask), which ResNet's forward publishes here (NCHW, like the output), so that the
+// sum carries lz. g_msb_input_residual: the running ReLU's input is such a sum.
+const DATATYPE* g_bake_res_l = nullptr;
+bool g_msb_input_residual = false;
 // Set by the conv/FC layers around every GEMM regardless of protocol, hence declared outside the
 // preprocessing guard above.
 // RESHARE_OPT / A2B_CONV_BAKE: the conv layer runs ONE GEMM per batch element, so the mask index passed to

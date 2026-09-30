@@ -463,6 +463,15 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef CHEETAH_CONV_REPACK
 #define CHEETAH_CONV_REPACK 0  // with CHEETAH_CONV_PACKED 1: communication-optimized conv triples (ConvTriple conv_repack): ring N = 8192 with a special prime, dense inputs, the evaluator packs the outputs with Galois automorphisms (Galois keys once); about half the conv-triple traffic, slower HE
 #endif
+#ifndef CHEETAH_CONV_EARLY
+#define CHEETAH_CONV_EARLY 1  // with CHEETAH_CONV_ASYNC and secret weights: a mask-only forward at the start of the preprocessing pass records every conv's triple inputs (ReLU outputs get committed masks), and the conv triples run on channels of their own alongside the OT phase, which moves into the pass
+#endif
+#ifndef CHEETAH_CONV_EARLY_THREADS
+#define CHEETAH_CONV_EARLY_THREADS (CHEETAH_THREADS / 2 > 4 ? CHEETAH_THREADS / 2 : 4)  // CHEETAH_CONV_EARLY: threads of the conv triples alongside the OT phase (CONV_EARLY_THREADS overrides)
+#endif
+#ifndef CHEETAH_CONV_EARLY_NICE
+#define CHEETAH_CONV_EARLY_NICE 0  // CHEETAH_CONV_EARLY: nice value of the conv triples running alongside the OT phase (CONV_EARLY_NICE overrides)
+#endif
 #ifndef CHEETAH_CONV_LANES
 #define CHEETAH_CONV_LANES 1  // multi-batch: the lanes' conv triples as one convolution over all images, all layers pipelined
 #endif

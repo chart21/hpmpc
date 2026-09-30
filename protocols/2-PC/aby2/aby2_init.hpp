@@ -85,6 +85,17 @@ class ABY2_init
         return ABY2_init();
     }
 
+    template <typename func_add, typename func_sub>
+    ABY2_init rebase_p1(Datatype assign, func_add ADD, func_sub SUB) const
+    {
+#if PARTY == 1
+        pre_send_to_(PNEXT);
+#else
+        store_output_share_();
+#endif
+        return ABY2_init();
+    }
+
     // zero_add minus the communication (RESHARE_OPT baking) - nothing to count
     template <typename func_add>
     ABY2_init zero_add_local(Datatype assign, func_add ADD) const
@@ -834,6 +845,12 @@ class ABY2_init
     void get_random_B2A() {}
 
         // T::SetupConv2dTriples(prev_out.data(), kernel.data(), this->output.data(),batch, ic, oc, ih, iw, kh, kw, stride, pad);
+    // the mask-only forward runs in preprocessing only (see ABY2_PRE_Share::RecordConv2dInputs)
+    static void RecordConv2dInputs(const ABY2_init* X, const ABY2_init* W, int batchSize, int inh, int inw, int din, int dout,
+                                   int wh, int ww)
+    {
+    }
+
     static void SetupConv2dTriples(const ABY2_init* X,
                                    const ABY2_init* W,
                                    ABY2_init* Y,

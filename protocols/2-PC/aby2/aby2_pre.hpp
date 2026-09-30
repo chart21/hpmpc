@@ -243,6 +243,18 @@ class ABY2_PRE_Share
         return ABY2_PRE_Share(assign);
     }
 
+    // rebase where P0's delta is zero by construction (its mask already is `assign`): only P1 sends its delta
+    template <typename func_add, typename func_sub>
+    ABY2_PRE_Share rebase_p1(Datatype assign, func_add ADD, func_sub SUB) const
+    {
+#if PARTY == 1
+        pre_send_to_live(PNEXT, SUB(assign, l));
+#else
+        put_triple_type(0, CaseDefault);
+#endif
+        return ABY2_PRE_Share(assign);
+    }
+
     // zero_add minus the communication (RESHARE_OPT baking: l == assign on both parties)
     template <typename func_add>
     ABY2_PRE_Share zero_add_local(Datatype assign, func_add ADD) const
@@ -2091,6 +2103,19 @@ static void get_fc_triples_from_file()
                                    int dilation = 1,
                                    bool ab2 = true)
     {
+#if CHEETAH_CONV_EARLY_ACTIVE
+        // recorded by the mask-only forward and in use by the conv triples: must be what the pass sees
+#if PARTY == 0 || A_KNOWN == 0
+        for (int i = 0; i < wh * ww * din * dout; i++)
+            if (std::memcmp(&conv_triple_w[curr_conv_triple_index][i], &W[i].l, sizeof(Datatype)) != 0)
+                mask_pass_abort("a conv's weights differ from the mask-only forward's");
+#endif
+#if PARTY == 1 || A_KNOWN == 0
+        for (int i = 0; i < batchSize * inh * inw * din; i++)
+            if (std::memcmp(&conv_triple_x[curr_conv_triple_index][i], &X[i].l, sizeof(Datatype)) != 0)
+                mask_pass_abort("a conv's input masks differ from the mask-only forward's");
+#endif
+#else
 #if PARTY == 0 || A_KNOWN == 0 // Party0 holds W in plain in AB2 setting
         conv_triple_w[curr_conv_triple_index] = new Datatype[wh * ww * din * dout];
         for (int i = 0; i < wh * ww * din * dout; i++)
@@ -2102,13 +2127,35 @@ static void get_fc_triples_from_file()
         for (int i = 0; i < batchSize * inh * inw * din; i++)
             conv_triple_x[curr_conv_triple_index][i] = X[i].l;
 #endif
+#endif
 
         uint64_t num_conv_triples = conv_triple_params[curr_conv_triple_index].out_h * conv_triple_params[curr_conv_triple_index].out_w * batchSize * dout;
         for(uint64_t i = 0; i < num_conv_triples; i++)
             put_triple_type(0, CaseConv);
         curr_conv_triple_index++;
-#if CHEETAH_CONV_ASYNC_ACTIVE
+#if CHEETAH_CONV_ASYNC_ACTIVE && !CHEETAH_CONV_EARLY_ACTIVE
         conv_async::mark_ready(curr_conv_triple_index);  // the conv triple thread may take this layer now
+#endif
+    }
+
+    // The mask-only forward (CHEETAH_CONV_EARLY): the triple inputs of the next conv, as SetupConv2dTriples records them
+    static void RecordConv2dInputs(const ABY2_PRE_Share* X, const ABY2_PRE_Share* W, int batchSize, int inh, int inw,
+                                   int din, int dout, int wh, int ww)
+    {
+#if CHEETAH_CONV_EARLY_ACTIVE
+        if (g_early_conv_index >= conv_triple_params.size())
+            mask_pass_abort("more convs than counted");
+#if PARTY == 0 || A_KNOWN == 0
+        conv_triple_w[g_early_conv_index] = new Datatype[wh * ww * din * dout];
+        for (int i = 0; i < wh * ww * din * dout; i++)
+            conv_triple_w[g_early_conv_index][i] = W[i].l;
+#endif
+#if PARTY == 1 || A_KNOWN == 0
+        conv_triple_x[g_early_conv_index] = new Datatype[batchSize * inh * inw * din];
+        for (int i = 0; i < batchSize * inh * inw * din; i++)
+            conv_triple_x[g_early_conv_index][i] = X[i].l;
+#endif
+        g_early_conv_index++;
 #endif
     }
 
