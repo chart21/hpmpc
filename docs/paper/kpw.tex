@@ -1,34 +1,34 @@
-\subsection{Fully shared masks and public weights}\label{sec:kpw}
+\subsection{Weights known to none (UC1) and to all (UC3)}\label{sec:kpw}
 
-Two further settings change who holds the weights. With \flag{A_KNOWN=0} both parties hold shares of
-the weight masks as well as of the activation masks, so the conv, FC and BN triples are AB triples for
-which both parties encrypt. With public weights (\flag{PUBLIC_WEIGHTS=1}) the linear layers multiply locally
+Besides UC2, the default, two use cases change who holds the weights. In UC1 (\flag{A_KNOWN=0}) both parties hold
+shares of the weight masks as well as of the activation masks, so the conv, FC and BN triples are AB triples for
+which both parties encrypt. In UC3 (public weights, \flag{PUBLIC_WEIGHTS=1}) the linear layers multiply locally
 and need no triples at all. We run public weights with \flag{TRUNC_DELAYED=1} and
 \flag{BIT_INJECTION_TRUNC_SIM=1}: each linear layer's truncation is deferred and folded into the next
-ReLU's bit injection instead of costing a round of its own. \Cref{fig:settings} compares both settings
-with the secret-weight default for the plain family.
+ReLU's bit injection instead of costing a round of its own. \Cref{fig:settings} compares the three use cases for
+the plain family.
 
 \begin{figure}[t]
   \centering\input{figures/settings}
-  \caption{Secret weights with \flag{A_KNOWN=1} (default) and \flag{A_KNOWN=0}, and public weights, plain family,
-  flare / polynize (final builds; multi-batch \flag{A_KNOWN=0} before the lane batching was enabled for it, public weights
-  have no conv triples).}
+  \caption{The three use cases, plain family, flare / polynize: UC1 (weights known to none, \flag{A_KNOWN=0}), UC2
+  (known to the model owner, \flag{A_KNOWN=1}, default) and UC3 (public weights, no conv triples). Final builds;
+  multi-batch with lane-batched conv triples in UC1 and UC2.}
   \label{fig:settings}
 \end{figure}
 
-\paragraph{Public weights.} Only the ReLU material remains to be preprocessed: across all 30 variants,
+\paragraph{UC3: public weights.} Only the ReLU material remains to be preprocessed: across all 30 variants,
 preprocessing takes 0.92--2.03\s per 10 images and 3.5--14.3\s per 192 images, 16--41\% and 22--61\%
-less than the same variant with secret weights in the final builds. The online phase takes 0.27--0.41\s and 0.33--0.42\s
-(9--33\% and 30--50\% less): convolutions send nothing, and the truncation shares the bit injection's message. With the AdamW model, the public-weight variants
+less than the same variant in UC2 in the final builds. The online phase takes 0.27--0.41\s and 0.33--0.42\s
+(9--33\% and 30--50\% less): convolutions send nothing, and the truncation shares the bit injection's message. With the AdamW model, the UC3 variants
 classify 63--73 of 100 images in single batch and 115--131 of 192 (60--68\%) in multi-batch. Unfused
 BatchNorm needed the first-layer truncation fix of \cref{sec:correct}; before it, those variants classified 0 of 10 images.
 
-\paragraph{Fully shared masks.} With \flag{A_KNOWN=0} the linear-layer triples are AB triples, and the preprocessing traffic
+\paragraph{UC1: weights known to none.} With \flag{A_KNOWN=0} the linear-layer triples are AB triples, and the preprocessing traffic
 grows by a factor of 1.4--1.9 (RCA, unfused BN, 10 images: 229 to 428\,MB). In single batch, preprocessing takes 1.34--2.74\s over the 30 variants and the online phase 0.34--0.52\s. Since the
 concurrent evaluation (\cref{sec:he}), \flag{A_KNOWN=1} is faster in both HE phases of every variant (conv 0.27--0.33 against
 0.30--0.39\s, BN 0.20--0.24 against 0.23--0.26\s); the totals differ by $-0.07$ to $+0.13\s$, within the noise of the
-OT phases. In multi-batch, measured before the lane batching was enabled for it (\cref{sec:multi}), \flag{A_KNOWN=0} takes
-13.8--26.4\s, 5.8--7.1\s (1.3--1.8$\times$) more than \flag{A_KNOWN=1} with lanes. With the
-AdamW model \flag{A_KNOWN=0} classifies 64--72 of 100 images in single batch and 117--133 of 192 in multi-batch. Its accuracy first looked like
+OT phases. In multi-batch, with the lane batching (\cref{sec:multi}), UC1 takes 8.3--20.6\s over the 30 variants
+(before it, 13.8--26.4\s), 0.4--1.3\s (2--14\%) more than UC2; the online phase takes 0.56--0.78\s. With the
+AdamW model UC1 classifies 64--72 of 100 images in single batch and 116--133 of 192 in multi-batch. Its accuracy first looked like
 chance level: a bisection over the added optimizations found the threaded GEMM (with the extra threads off, 5 of 10 correct)
 and, for unfused BN, the BatchNorm triples, both described in \cref{sec:correct}.

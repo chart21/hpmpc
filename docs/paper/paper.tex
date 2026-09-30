@@ -108,7 +108,10 @@ additive shares of the mask $\lambda = \lambda_0 + \lambda_1$. Every mask is fix
 linear layer is local except for one message that re-masks its output, and its preprocessing is a triple
 over the masks, e.g.\ $[\lambda_w \cdot \lambda_x]$ for a convolution (\cref{fig:overview}). With
 \flag{A_KNOWN=1} the model owner P0 holds the weight masks and the data owner P1 the activation masks
-(the AB2 triple); with \flag{A_KNOWN=0} both are shared (AB). A ReLU converts its input to Boolean
+(the AB2 triple); with \flag{A_KNOWN=0} both are shared (AB). We name the three weight settings by who knows
+the weights: \emph{UC1}, known to none (secret-shared, \flag{A_KNOWN=0}); \emph{UC2}, known to one party, the model
+owner (\flag{A_KNOWN=1}); \emph{UC3}, known to all (public weights, \flag{PUBLIC_WEIGHTS=1}, no linear-layer
+triples). A ReLU converts its input to Boolean
 shares (A2B), extracts the sign with an MSB adder and injects the bit back into the arithmetic domain
 (bit injection). The adder sets the number of online rounds per ReLU: the ripple-carry adder
 (RCA) needs 27 AND levels, the parallel-prefix adders PPA and PPA4 (4-input prefix gates, which use
@@ -512,7 +515,9 @@ The premise does not depend on \flag{A_KNOWN}: input sharing gives the model own
 every lane either way, and \flag{A_KNOWN=0} only turns the triple into an AB triple, for which both parties encrypt their
 shares. The lane batching therefore also applies to \flag{A_KNOWN=0}. In a local test (one process, 8 lanes of 4 images,
 4 HE threads, AdamW model) the lane check stays silent for both parties, the conv phase falls from 12.9 to 7.2\s and the
-conv traffic from 1036 to 540\,MB per direction, and 22 against 23 of 32 images are classified correctly.
+conv traffic from 1036 to 540\,MB per direction, and 22 against 23 of 32 images are classified correctly. On flare /
+polynize (24 processes, 192 images) the conv phase per process falls from 9.7--10.0 to 4.1--4.4\s and preprocessing by
+a factor of 1.28--1.67 over the 30 variants (\cref{sec:kpw}).
 
 \begin{table}[t]
 \centering\small
@@ -657,7 +662,7 @@ Trio 3PC, standard configuration & 100 & 71\\
 Trio 3PC, reduced-slack truncation (\flag{TRUNC_APPROACH=1}) & 100 & 70\\
 2PC ABY2, single batch, all 30 variants & 100 & 62--72\\
 2PC ABY2, multi-batch, all 30 variants & 192 & 118--131\\
-2PC ABY2, \flag{A_KNOWN=0}, single / multi-batch & 100 / 192 & 64--72 / 117--133\\
+2PC ABY2, \flag{A_KNOWN=0}, single / multi-batch & 100 / 192 & 64--72 / 116--133\\
 2PC ABY2, public weights, single / multi-batch & 100 / 192 & 63--73 / 115--131\\
 2PC ABY2, CUT on / off (plain family, 12 runs each) & 1,752 & 1,134 / 1,138\\
 \bottomrule
@@ -680,9 +685,6 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
 \section{Limitations and open problems}
 
 \begin{itemize}\itemsep1pt
-\item \textbf{Multi-batch \flag{A_KNOWN=0} on the testbed.} The lane batching applies to \flag{A_KNOWN=0} as well
-  (\cref{sec:multi}), but the multi-batch \flag{A_KNOWN=0} numbers of \cref{fig:settings} were measured before it was
-  enabled there; only the local test above covers it.
 \item \textbf{Truncation.} ABY2 has no reduced-slack or exact truncation yet. It is not needed for accuracy with the
   AdamW model, but it would remove the truncation noise (\cref{sec:eval}).
 \item \textbf{Weights known in preprocessing.} The multi-batch a2b bake still excludes

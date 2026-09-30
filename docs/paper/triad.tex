@@ -2,9 +2,10 @@
 \section{The all\_opt configurations on ImageNet}\label{sec:triad}
 
 The artifact's single-batch 2PC configurations (\texttt{measurements/configs/artifacts/triad/2pc/single\_batch}) combine
-the online optimizations of the protocol: six configurations, A2bits and reshared, each with secret weights known in
-preprocessing (\flag{A_KNOWN=1}, \flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1}), with fully shared masks
-(\flag{A_KNOWN=0}) and with public weights. Each runs ResNet50 on one ImageNet image with the three adders
+the online optimizations of the protocol: six configurations, A2bits and reshared, each in the three use cases of
+\cref{sec:setting}: UC1, weights known to none (\flag{A_KNOWN=0}); UC2, weights known to the model owner
+(\flag{A_KNOWN=1}, here also known in preprocessing, \flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING=1}); and UC3,
+weights known to all (public weights). Each runs ResNet50 on one ImageNet image with the three adders
 (\flag{FUNCTION_IDENTIFIER=87,187,287}) and with \flag{COMPRESS=0,1}: 36 builds. As in the configurations, the model and
 the image are dummies (\flag{MODELOWNER=-1}, \flag{DATAOWNER=-1}); the runtime does not depend on their values.
 
@@ -13,16 +14,25 @@ CHEETAH's \texttt{HomConv2DSS}. \emph{Optimized}: the configuration plus every o
 (hpmpc \texttt{aeab3ae}): \flag{CHEETAH_CONV_PACKED=1} with the pipeline, \flag{CUT_FRACTIONAL_BITS_OPT=1},
 \flag{ADDITIONAL_RELU_THREADS=24} (equal to the configuration's \flag{ADDITIONAL_GEMM_THREADS}, as the two share one
 pool), \flag{RNG_AHEAD=1}, 100,000-word buffers, and \flag{A2B_CONV_BAKE=1} for the A2bits configurations; everything
-else of \cref{sec:he,sec:ot,sec:online} is on by default. Each build runs twice per machine pair (median).
+else of \cref{sec:he,sec:ot,sec:online} is on by default. Each build runs twice per machine pair (median); the UC3
+builds run five times, alternating with the as-given build.
 
 \paragraph{Correctness.} The same flags on CIFAR-10 with the AdamW model and real data (P0 / P1 as owners, 10
 images) classify 4--7 images correctly for every configuration with \flag{COMPRESS=0} (plaintext: 6), including all
-weights-known-in-preprocessing builds, and every output hash is unchanged by the changes below. \flag{COMPRESS=1}
+UC2 builds, and every output hash is unchanged by the changes below. \flag{COMPRESS=1}
 evaluates the ReLU on bits 12--19 only (\flag{REDUCED_BITLENGTH_m=12}, \flag{k=20}). With \flag{FRACTIONAL=5} the
 carry dropped from the 12 low bits flips the sign of activations below 128.0, and even the plain RCA build without any of
 our changes classifies 0 of 10. It is a runtime setting only, and we keep it running rather than accurate. Its A2bits
 builds aborted with the element-parallel levels: the A2B bake committed conv masks for 8 of the 32 slices, so most
 outputs drew fresh masks. The bake now requires a full-width ReLU, and \flag{COMPRESS=1} runs the A2B unbaked.
+
+The A2bits configurations \emph{as given} are not correct. They set \flag{A2B_ONLINE_OPT=1}, which precomputes the
+A2B's secret operand $[c] = \mathrm{bool}(-\lambda)$ by a Boolean addition in preprocessing, but not the bake
+(\flag{A2B_CONV_BAKE}), and without it the preprocessing pass generates the MSB adder's Beaver triples for the
+Boolean addition's input while the online phase uses its output $[c]$. On CIFAR-10 with the AdamW model, the as-given
+A2bits flags classify 0--2 of 10 images in all three use cases and every adder, as do the optimized flags without
+the bake (same output hashes as as-given in UC3); with the bake they classify 4--7. The reshared configurations do not
+use \flag{A2B_ONLINE_OPT} and classify 4--7 of 10 as given.
 
 \paragraph{Where the time goes.} Preprocessing is bound by OT generation: in a CPU profile over all threads, ferret's LPN
 step takes 31--44\%, the MITCCRH key schedules 8--11\% and MPCOT 10--13\%. Per A2bits RCA inference the OT packs'
@@ -37,7 +47,7 @@ the RCA online phase by only 7\%.
 \item \textbf{Worker wake-ups.} Between two circuit levels a worker spun about 100\,\textmu s and then slept on a
   futex, shorter than a round trip, so every level woke 24 threads. Workers now wait about 20\ms, on the counter's own
   cache line: with the counter next to the completion count, every completion invalidated the line for all spinning
-  workers, which slowed the Zen~3 hosts' public-weight builds by up to 35\%. On AMD CPUs the wait uses
+  workers, which slowed the Zen~3 hosts' UC3 builds by up to 35\%. On AMD CPUs the wait uses
   MONITORX/MWAITX, which parks the thread on the cache line without taking issue slots from its SMT sibling.
 \item \textbf{Vectorized GEMM accumulation} (\flag{A_KNOWN=1}). The online GEMM called a share-level kernel per
   multiply-accumulate on $\{m, \lambda\}$ structs, about 0.2 MAC per cycle. The kernel of each variant is a sum of plain
@@ -49,25 +59,37 @@ the RCA online phase by only 7\%.
 \end{itemize}
 More HE/OT threads help the OT-heavy builds: \flag{CHEETAH_THREADS=64} instead of the configurations' 32 (64 OT packs)
 shortens preprocessing by 8\% (median) on Zen~4 and 4\% on Zen~3, by up to 20\% for PPA4, but lengthens it by up to 30\%
-for the public-weight RCA builds, where setting up 64 packs costs more than it saves. Two ferret threads per pack,
+for the UC3 RCA builds, where setting up 64 packs costs more than it saves. Two ferret threads per pack,
 busy-polling the receive path and 31 instead of 24 workers did not help.
 
 \begin{figure}[t]
   \centering\input{figures/triad}
-  \caption{The 36 all\_opt builds on ImageNet (dummy weights), as given and optimized, on both machine pairs
-  (log scale; median of two runs).}
+  \caption{The 36 all\_opt builds on ImageNet (dummy weights) by use case, as given and optimized, on both machine pairs
+  (log scale; median of two runs, UC3 of five interleaved runs).}
   \label{fig:triad}
 \end{figure}
 
-\paragraph{Results.} \Cref{fig:triad} shows all 36 builds; \cref{tab:triad} summarizes them. With secret weights, the
+\paragraph{Results.} \Cref{fig:triad} shows all 36 builds; \cref{tab:triad} summarizes them. In UC1 and UC2 the
 packed, pipelined and concurrent conv triples, the exact wire format, the shared-OT tuples and \flag{TCP_NODELAY} cut
 preprocessing from 11.3--17.4\s to 2.2--7.1\s on the Zen~4 pair ($2.3$--$5.5\times$) and from 15.5--21.7\s to
 3.0--8.8\s on the Zen~3 pair, and the online phase from 0.77--1.57\s to 0.34--0.67\s ($2.0$--$2.7\times$; Zen~3:
-0.27--0.68\s, up to $3.3\times$). With weights known in preprocessing, the A2bits and reshared builds, the online phase
-takes 0.34--0.59\s on Zen~4 and 0.27--0.48\s on Zen~3. Public weights need no linear-layer triples, so their
-preprocessing is OT-bound and changes by $-8$ to $+10\%$; their online phase is $1.3$--$2.4\times$ faster. Against
-the same flags before this round's changes, the online phase is 1.0--1.5$\times$ faster on both pairs, and no build
-got slower.
+0.27--0.68\s, up to $3.3\times$). In UC2, with the weights known in preprocessing, the online phase takes 0.34--0.59\s
+on Zen~4 and 0.27--0.48\s on Zen~3. Against the same flags before this round's changes, the online phase is
+1.0--1.5$\times$ faster on both pairs.
+
+UC3 needs no linear-layer triples, so its preprocessing is OT-bound and changes little. Its online phase is
+$1.3$--$2.4\times$ faster. For UC3 the figure and table use five interleaved runs of each build, as given and
+optimized, on both pairs. On Zen~4 the optimized builds preprocess 0.02--0.20\s faster than as given in all 12
+builds. On Zen~3 the reshared builds are 0.08--0.31\s faster and the A2bits builds with \flag{COMPRESS=0} within
+their runs' spread ($+0.01$ to $+0.08\s$). Only the A2bits builds with \flag{COMPRESS=1} preprocess 0.11--0.14\s
+slower there, in five of five paired runs. A one-flag-off ablation places all of it in \flag{ADDITIONAL_RELU_THREADS},
+which in turn makes their online phase 0.15\s faster. With the flag, every draw of randomness and every read of a
+preprocessed output checks whether the thread works on a parallel level's stream cursors. The preprocessing pass never
+does, but pays the checks: P0's last preprocessing step takes 0.44--0.49 instead of 0.32--0.34\s. Versions of these
+functions without the check for the preprocessing share remove the 0.13\s from these builds, but add 0.1\s to the
+\flag{COMPRESS=0} builds on the same hosts and change nothing on Zen~4. It is a code-layout effect rather than
+work, and we kept the flag and the code as they are. As-given A2bits also skips the 69\,MiB rebase of the A2B bake
+and is not correct (Correctness).
 
 \begin{table}[t]
 \centering\small
@@ -76,42 +98,34 @@ got slower.
 & & \multicolumn{2}{c}{preprocessing (s)} & \multicolumn{2}{c}{online (s)}\\
 builds & pair & as given & optimized & as given & optimized\\
 \midrule
-secret weights, \flag{COMPRESS=0} (12) & Zen 4 & 11.8--17.4 & 2.8--7.1 & 1.11--1.57 & 0.53--0.67\\
- & Zen 3 & 16.3--21.7 & 3.7--8.8 & 1.06--1.75 & 0.42--0.68\\
-secret weights, \flag{COMPRESS=1} (12) & Zen 4 & 11.3--13.6 & 2.2--3.7 & 0.77--1.28 & 0.34--0.54\\
- & Zen 3 & 15.5--17.7 & 3.0--4.9 & 0.73--1.54 & 0.27--0.57\\
-public weights, \flag{COMPRESS=0} (6) & Zen 4 & 1.9--6.1 & 2.0--6.1 & 1.01--1.12 & 0.47--0.67\\
- & Zen 3 & 2.3--6.6 & 2.1--6.7 & 0.91--1.08 & 0.41--0.64\\
-public weights, \flag{COMPRESS=1} (6) & Zen 4 & 1.3--2.2 & 1.3--2.0 & 0.60--0.68 & 0.37--0.40\\
- & Zen 3 & 1.4--2.1 & 1.3--2.2 & 0.50--0.60 & 0.38--0.43\\
-\bottomrule
+\input{data/triad_tab}
 \end{tabular}
-\caption{The all\_opt builds on ImageNet, as given and optimized (median of two runs; secret weights: A2bits and
-reshared with $A$ known and with $A$ shared). Per-build values: \texttt{docs/TRIAD\_ALL\_OPT.md}.}
+\caption{The all\_opt builds on ImageNet by use case (A2bits and reshared, three adders each), as given and optimized
+(median of two runs, UC3 of five interleaved runs). Per-build values: \texttt{docs/TRIAD\_ALL\_OPT.md}.}
 \label{tab:triad}
 \end{table}
 
 \begin{figure}[t]
   \centering\input{figures/triad_comm}
-  \caption{Traffic of the 36 all\_opt builds on ImageNet (dummy weights), as given and optimized: MiB sent plus
+  \caption{Traffic of the 36 all\_opt builds on ImageNet (dummy weights) by use case, as given and optimized: MiB sent plus
   received by P0, i.e.\ in both directions (log scale). Preprocessing counts the triple generation (HE, OT, key
   exchange) and the network's preprocessing pass. Every run and both machine pairs send the same bytes.}
   \label{fig:triadcomm}
 \end{figure}
 
 \paragraph{Communication.} \Cref{fig:triadcomm} shows the traffic of the same builds as P0 counts it; P1's counters
-mirror P0's, and the reruns and the Zen~3 pair send the same bytes. With secret weights, the optimized builds send
+mirror P0's, and the reruns and the Zen~3 pair send the same bytes. In UC1 and UC2 the optimized builds send
 $1.35$--$1.86\times$ less in preprocessing with \flag{COMPRESS=0} (1,323--3,225 to 790--2,150\,MiB) and
 $1.61$--$1.92\times$ less with \flag{COMPRESS=1} (1,219--2,353 to 696--1,308\,MiB). The conv triples account for
-nearly all of it: with $A$ known they fall from about 1,000 to 479\,MiB (\cref{tab:heformal}), with $A$ shared
-from 2,003 to 958\,MiB. Both builds of the configurations with weights known in preprocessing also send P1's share
-corrections, 4 bytes per conv output (42\,MiB). The OT-based tuples are unchanged, except that with
+nearly all of it: in UC2 they fall from about 1,000 to 479\,MiB (\cref{tab:heformal}), in UC1, whose AB triples need
+both cross products, from 2,003 to 958\,MiB. With the weights known in preprocessing, both UC2 builds also send P1's
+share corrections, 4 bytes per conv output (42\,MiB). The OT-based tuples are unchanged, except that with
 \flag{CUT_FRACTIONAL_BITS_OPT} PPA4 needs fewer multi-input AND tuples: 12\,MiB less for reshared and 74\,MiB less
 for A2bits, where the bake lets the cut skip the $b$-product gates. The network's preprocessing pass changes by
-$-67$ to $+8$\,MiB with secret weights. Public weights need no linear-layer triples, and their traffic is unchanged
-except in the A2bits builds with \flag{COMPRESS=0}, where the A2B bake adds 69\,MiB to the preprocessing pass. There,
-no ReLU input comes straight from a masked conv layer, so the bake rebases every one of the 9.0 million inputs onto
-its committed mask, one 32-bit word per value and party. Online, \flag{CUT_FRACTIONAL_BITS_OPT} removes 4--8\% of
-the traffic of the secret-weight builds with \flag{COMPRESS=0} (A2bits PPA4: none). The cut needs
-\flag{TRUNC_DELAYED=0}, so it does not apply to the public-weight configurations; with \flag{COMPRESS=1} the online
-traffic does not change.
+$-67$ to $+8$\,MiB in UC1 and UC2. UC3 needs no linear-layer triples, and its traffic is unchanged except in the
+A2bits builds with \flag{COMPRESS=0}, where the A2B bake adds 69\,MiB to the preprocessing pass. There, no ReLU input
+comes straight from a masked conv layer, so the bake rebases every one of the 9.0 million inputs onto its committed
+mask, one 32-bit word per value and party. The as-given builds skip that rebase, which is why they send less, and
+compute wrong signs (see Correctness). Online, \flag{CUT_FRACTIONAL_BITS_OPT} removes 4--8\% of the traffic of the
+UC1 and UC2 builds with \flag{COMPRESS=0} (A2bits PPA4: none). The cut needs \flag{TRUNC_DELAYED=0}, so it does not
+apply to UC3; with \flag{COMPRESS=1} the online traffic does not change.

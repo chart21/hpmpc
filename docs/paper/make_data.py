@@ -149,6 +149,8 @@ print("wrote", sorted(p.name for p in OUT.glob("*.dat")))
 # Settings: A_KNOWN=1 (round 4) vs A_KNOWN=0 vs public weights (TRUNC_DELAYED=1, BIT_INJECTION_TRUNC_SIM=1),
 # all families, flare / polynize; public-weight accuracy with the AdamW model on algofi / goracle
 kpw = load(VD / "res_fp_kpw.csv")
+# multi-batch A_KNOWN=0 with the lane batching (hpmpc aeab3ae; the kpw rows predate it)
+k0l = load(VD / "res_fp_k0l.csv") if (VD / "res_fp_k0l.csv").exists() else {}
 r5 = latest("res_fp_r5.csv", "res_fp_r4.csv")
 r5m = latest("res_fp_r5m.csv", "res_fp_r4.csv")
 pwacc = {r["name"]: r for r in csv.DictReader(open(VD / "res_ag_pwwd.csv")) if r.get("pre")}
@@ -160,7 +162,7 @@ for mode in ("s", "m"):
             n1, n0, npw = (f"{mode}_{a}_plain_f{fuse}_{s}" for s in ("t2", "k0", "pw"))
             val = lambda rows, n, i: f"{med(rows[n], i):.3f}" if n in rows else "nan"
             a1 = r5 if mode == "s" else r5m                     # final rounds
-            a0 = r5 if (mode == "s" and n0 in r5) else kpw
+            a0 = r5 if (mode == "s" and n0 in r5) else (k0l if (mode == "m" and n0 in k0l) else kpw)
             lines.append((y, "{" + PRETTY[a] + (", fused" if fuse == "1" else ", unfused") + "}",
                           val(a1, n1, 4), val(a0, n0, 4), val(kpw, npw, 4),
                           val(a1, n1, 5), val(a0, n0, 5), val(kpw, npw, 5)))
@@ -169,8 +171,9 @@ for mode in ("s", "m"):
 # ranges over all 30 variants per setting, for the text
 for mode in ("s", "m"):
     for suf in ("k0", "pw"):
-        pre = [med(kpw[n], 4) for n in kpw if n.startswith(mode + "_") and n.endswith("_" + suf)]
-        on = [med(kpw[n], 5) for n in kpw if n.startswith(mode + "_") and n.endswith("_" + suf)]
+        src = k0l if (mode == "m" and suf == "k0" and k0l) else kpw
+        pre = [med(src[n], 4) for n in src if n.startswith(mode + "_") and n.endswith("_" + suf)]
+        on = [med(src[n], 5) for n in src if n.startswith(mode + "_") and n.endswith("_" + suf)]
         if pre:
             print(f"{mode} {suf}: {len(pre)} variants, pre {min(pre):.2f}-{max(pre):.2f}, online {min(on):.3f}-{max(on):.3f}")
 acc_s = [100 * int(r["acc_ok"]) / int(r["acc_n"]) for n, r in pwacc.items() if n.startswith("a_")]

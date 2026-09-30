@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""make_triad.py: data/triad_c{0,1}.dat from docs/variant_data/triad/res_{fp,ag}_{conf,fin}.csv (medians)."""
+"""make_triad.py: data/triad_c{0,1}.dat from docs/variant_data/triad/res_{fp,ag}_{conf,fin2,ab}.csv (medians)."""
 import csv, statistics as st
 from pathlib import Path
 VD, OUT = Path("../variant_data/triad"), Path("data")
-CONF = [("a2b", "A2bits"), ("a2bk0", "A2bits, $A$ shared"), ("a2bpw", "A2bits, public"),
-        ("rs", "reshared"), ("rsk0", "reshared, $A$ shared"), ("rspw", "reshared, public")]
+# use cases: UC1 weights known to none (A_KNOWN=0), UC2 known to one (the model owner: A_KNOWN=1, weights known in
+# preprocessing), UC3 known to all (public weights); rows sorted by use case, then protocol, then adder
+CONF = [("a2bk0", "UC1, A2bits"), ("rsk0", "UC1, reshared"), ("a2b", "UC2, A2bits"), ("rs", "UC2, reshared"),
+        ("a2bpw", "UC3, A2bits"), ("rspw", "UC3, reshared")]
 ADD = [("rca", "RCA"), ("ppa", "PPA"), ("ppa4", "PPA4")]
 def load(f):
     d = {}
@@ -14,7 +16,15 @@ def load(f):
             if r.get("pre") and r.get("online") and float(r["online"]) > 0:
                 d.setdefault(r["name"].split("_", 1)[1], []).append(r)
     return d
+def load_prefix(f, prefix):
+    return {n: [r for r in rows if r["name"].startswith(prefix + "_")] for n, rows in load(f).items()
+            if any(r["name"].startswith(prefix + "_") for r in rows)}
 res = {(p, k): load(f"res_{p}_{'fin2' if k == 'fin' else k}.csv") for p in ("fp", "ag") for k in ("conf", "fin")}
+# UC3: five interleaved runs of each build, as given and optimized (res_*_ab.csv), replace the earlier one / two
+for p in ("fp", "ag"):
+    if (VD / f"res_{p}_ab.csv").exists():
+        res[(p, "conf")].update(load_prefix(f"res_{p}_ab.csv", "conf"))
+        res[(p, "fin")].update(load_prefix(f"res_{p}_ab.csv", "fin2"))
 def med(p, k, n, c):
     rows = res[(p, k)].get(n)
     return f"{st.median(float(r[c]) for r in rows):.3f}" if rows else "nan"
@@ -54,3 +64,19 @@ for c in ("0", "1"):
                         f"{g['trip']:.1f} {o['trip']:.1f} {g['online']:.1f} {o['online']:.1f}\n")
                 y += 1
 print("wrote", [f"triad_comm_c{c}.dat" for c in "01"])
+
+# rows of tab:triad (triad.tex): ranges per use case, COMPRESS and pair, from the figure data
+names = {"UC1": "UC1, known to none", "UC2": "UC2, known to one", "UC3": "UC3, known to all"}
+tab = []
+for uc in ("UC1", "UC2", "UC3"):
+    for c in ("0", "1"):
+        rows = [l.split("}")[1].split() for l in list(open(OUT / f"triad_c{c}.dat"))[1:] if l.split("{")[1].startswith(uc)]
+        cols = "conffp finfp confag finag onconffp onfinfp onconfag onfinag".split()
+        v = {k: [float(r[i]) for r in rows] for i, k in enumerate(cols)}
+        rg = lambda k, d: f"{min(v[k]):.{d}f}--{max(v[k]):.{d}f}"
+        for i, (p, nm) in enumerate((("fp", "Zen 4"), ("ag", "Zen 3"))):
+            lead = f"{names[uc]}, \\flag{{COMPRESS={c}}} ({len(rows)})" if i == 0 else ""
+            tab.append(f"{lead} & {nm} & {rg('conf' + p, 1)} & {rg('fin' + p, 1)} & {rg('onconf' + p, 2)} & {rg('onfin' + p, 2)}\\\\")
+# \bottomrule is part of the file: after \input, the table cannot take a \noalign
+open(OUT / "triad_tab.tex", "w").write("\n".join(tab) + "\n\\bottomrule\n")
+print("wrote triad_tab.tex")

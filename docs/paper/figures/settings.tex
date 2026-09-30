@@ -7,22 +7,22 @@
   unbounded coords=discard,
 ]
 \nextgroupplot[title={single batch\\preprocessing (s)}, xmin=0.6, xmax=3.0]
-  \addplot[dotfp] table[x=pre1, y=y] {data/settings_s.dat};
   \addplot[dotag] table[x=pre0, y=y] {data/settings_s.dat};
+  \addplot[dotfp] table[x=pre1, y=y] {data/settings_s.dat};
   \addplot[only marks, mark=square*, mark size=1.8pt, draw=white, line width=0.5pt, fill=sThree] table[x=prepw, y=y] {data/settings_s.dat};
 \nextgroupplot[title={single batch\\online (s)}, xmin=0.2, xmax=0.6]
-  \addplot[dotfp] table[x=on1, y=y] {data/settings_s.dat};
   \addplot[dotag] table[x=on0, y=y] {data/settings_s.dat};
+  \addplot[dotfp] table[x=on1, y=y] {data/settings_s.dat};
   \addplot[only marks, mark=square*, mark size=1.8pt, draw=white, line width=0.5pt, fill=sThree] table[x=onpw, y=y] {data/settings_s.dat};
 \nextgroupplot[title={multi-batch\\preprocessing (s)}, xmin=0, xmax=26,
   legend to name=setlegend, legend columns=3, legend style={column sep=8pt}]
-  \addplot[dotfp] table[x=pre1, y=y] {data/settings_m.dat};
   \addplot[dotag] table[x=pre0, y=y] {data/settings_m.dat};
+  \addplot[dotfp] table[x=pre1, y=y] {data/settings_m.dat};
   \addplot[only marks, mark=square*, mark size=1.8pt, draw=white, line width=0.5pt, fill=sThree] table[x=prepw, y=y] {data/settings_m.dat};
-  \legend{{secret weights, \flag{A_KNOWN=1}}, {secret weights, \flag{A_KNOWN=0}}, {public weights}}
+  \legend{{UC1: weights known to none}, {UC2: known to one}, {UC3: known to all}}
 \nextgroupplot[title={multi-batch\\online (s)}, xmin=0.2, xmax=1.0]
-  \addplot[dotfp] table[x=on1, y=y] {data/settings_m.dat};
   \addplot[dotag] table[x=on0, y=y] {data/settings_m.dat};
+  \addplot[dotfp] table[x=on1, y=y] {data/settings_m.dat};
   \addplot[only marks, mark=square*, mark size=1.8pt, draw=white, line width=0.5pt, fill=sThree] table[x=onpw, y=y] {data/settings_m.dat};
 \end{groupplot}
 \node[anchor=north] at ($(set c1r1.south west)!0.5!(set c4r1.south east) + (0,-0.75cm)$) {\pgfplotslegendfromname{setlegend}};
