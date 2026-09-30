@@ -217,3 +217,23 @@ in both reruns and on ag. Source `docs/variant_data/triad/comm_fp.csv` (triple c
 | UC3, reshared | RCA | 159 | 159 | 180 | 180 | 1.00 | 99.2 | 99.2 | 1.00 |
 | UC3, reshared | PPA | 212 | 212 | 245 | 245 | 1.00 | 118.6 | 118.6 | 1.00 |
 | UC3, reshared | PPA4 | 289 | 289 | 340 | 340 | 1.00 | 92.8 | 92.8 | 1.00 |
+
+## What is left (profile 2026-09-30, flare / polynize, hpmpc `aeab3ae`)
+
+Phase timestamps of the 18 COMPRESS=0 builds (temporary instrumentation, `phases_fp.log`, table: `docs/paper/make_phases.py`)
+and CPU profiles of UC2 A2bits RCA, UC2 reshared PPA4, UC3 reshared RCA:
+
+* OT: setup of the 32 ferret packs 0.84-0.90 s in every build; tuples after it 0.25-0.33 s (RCA) but 3.5 s (PPA4: six
+  more extension rounds of all 32 packs; PPA: four; A2bits RCA: two, from the bake). LPN 33-41% of all CPU samples, AES
+  key schedules 8-11%. The partly used last round wastes at most one round (~0.3 s).
+* Bake Boolean addition (A2bits): 1.5 s (31 COT-multiplication rounds of 15-22 ms + an extension round) and 0.25 s of
+  serial input preparation.
+* Serial main-thread work in preprocessing: ~1.4 s CPU (per-sample profile): PRE pass 0.43-0.86 s (ReLU levels on one
+  thread), triple bookkeeping 0.2-0.3 s, conv tiling search + polyphase weights 0.09 s.
+* UC1 / UC2 conv triples (0.71-0.84 s) start only after the PRE pass (it fixes their input masks); no overlap with OT.
+* Online: RCA waits 0.15-0.18 s in 1,714-2,012 rounds; main thread: pool hand-offs 0.11 s, serial bit transposition
+  (`real_ortho`) 0.05 s, layer glue 0.06 s.
+* HE packing (`docs/paper/he_model.py`, reproduces 244.1 + 234.9 MiB): dense packing in the same format would be
+  234.7 MiB; N = 8192 never helps; rounding input ciphertexts is limited by the 64-bit flooding (12 bits headroom).
+  Output repacking (dense co = 1 inputs + automorphism-based packing of outputs) would reach ~240 MiB with ~2.3e5 key
+  switches (merge tree; stages 3-4 alone: 1.2e5 key switches, -169 MiB). Not implemented.

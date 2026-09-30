@@ -34,6 +34,39 @@ A2bits flags classify 0--2 of 10 images in all three use cases and every adder, 
 the bake (same output hashes as as-given in UC3); with the bake they classify 4--7. The reshared configurations do not
 use \flag{A2B_ONLINE_OPT} and classify 4--7 of 10 as given.
 
+\paragraph{Why the bake remasks ReLU inputs.} A ReLU on $m = v + \lambda$ runs its MSB adder on $s_1 = \mathrm{bool}(m)$,
+public, and $s_2 = \mathrm{bool}(-\lambda)$, secret, since $\mathrm{bool}(m) \boxplus \mathrm{bool}(-\lambda) =
+\mathrm{bool}(v)$. \flag{A2B_ONLINE_OPT} computes $[c] = \mathrm{bool}(-\lambda)$ in preprocessing, from the parties'
+$\mathrm{bool}(-\lambda_0)$ and $\mathrm{bool}(-\lambda_1)$ by a Boolean addition (31 levels of AND gates). Two facts fix
+\emph{when} this can happen. The adder's Beaver triples are defined by the masks of its input wires, $[c]$ among them,
+and are requested while the preprocessing pass walks the circuit. And that pass is a single non-interactive sweep that
+fixes masks, sends one-way messages and records triple requests; the triples are generated in bulk afterwards. So $[c]$
+cannot be computed inside the pass, which would need 31 interactive rounds mid-sweep. It cannot be computed after the
+pass either, which is the as-given configuration: its triples then belong to a different mask. It must exist
+\emph{before} the pass, and with it every ReLU input's mask $\lambda$.
+
+The bake therefore commits the masks first. Each party $i$ draws a random $\ell_i$ per ReLU input, the Boolean addition
+runs on $\mathrm{bool}(-\ell_i)$ before the pass, and the pass then has to deliver every ReLU input under the mask
+$\ell = \ell_0 + \ell_1$. Whether that is free depends on the layer that produces the input. A convolution or FC layer
+with secret weights (UC1, UC2) ends with a message that re-masks its output under a mask each party draws: the party
+draws $\ell_i$ instead (with weights known in preprocessing, P1's triple share is chosen to produce it). Every other
+producer fixes $\lambda$ without such a choice: a convolution with public weights is local, so its output mask is
+$W \ast \lambda_{\mathrm{in}}$, a linear function of the previous bit injections' masks; a residual addition gives
+$\lambda_a + \lambda_b$; pooling is linear too, and the BatchNorm layers that follow them do not commit their output
+masks in this implementation. Such an input is moved onto the committed mask:
+party $i$ sends $\delta_i = \ell_i - \lambda_i$ in preprocessing, and online both parties add $\delta_0 + \delta_1$ to
+$m$, which gives $v + \ell$. Since $\ell_i$ is uniform and known only to party $i$, $\delta_i$ is a one-time pad of
+$\lambda_i$ and reveals nothing. The price is one ring element per value and party, in preprocessing only.
+
+In the CHEETAH ResNet50 layout, 7.30 of the 9.01 million ReLU inputs come straight from a convolution (with BatchNorm
+fused into it); only the ReLUs after the stem's pooling and after the four residual additions (1.71 million) need the
+remask in UC1 and UC2, 13\,MiB. In UC3 every convolution is local, so all 9.01 million do: $9.01\cdot 10^6 \cdot 2
+\cdot 4$ bytes $= 69$\,MiB, exactly the difference in \cref{fig:triadcomm}. Avoiding it would take the actual masks
+before the Boolean addition: a second, mask-only pass over the network ahead of it. We estimate that pass at about the
+single-threaded time of the preprocessing pass (0.3--0.5\s), to save 69\,MiB, 22\,ms at 25\,Gbit/s. Alternatively the
+previous layer's bit-injection masks could be chosen so that $W \ast \lambda_{\mathrm{in}} = \ell$, but that is a linear
+system over $\mathbb{Z}_{2^{32}}$ without a solution in general.
+
 \paragraph{Where the time goes.} Preprocessing is bound by OT generation: in a CPU profile over all threads, ferret's LPN
 step takes 31--44\%, the MITCCRH key schedules 8--11\% and MPCOT 10--13\%. Per A2bits RCA inference the OT packs'
 setup costs 0.9\s, the bake's Boolean addition 1.5\s (31 carry levels over 9.0 million values; one level pays a ferret
@@ -129,3 +162,49 @@ mask, one 32-bit word per value and party. The as-given builds skip that rebase,
 compute wrong signs (see Correctness). Online, \flag{CUT_FRACTIONAL_BITS_OPT} removes 4--8\% of the traffic of the
 UC1 and UC2 builds with \flag{COMPRESS=0} (A2bits PPA4: none). The cut needs \flag{TRUNC_DELAYED=0}, so it does not
 apply to UC3; with \flag{COMPRESS=1} the online traffic does not change.
+
+\begin{table}[t]
+\centering\small
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lrrrrrrrrrrr@{}}
+\toprule
+& & \multicolumn{7}{c}{preprocessing (s)} & \multicolumn{3}{c}{online}\\
+\cmidrule(lr){2-9}\cmidrule(l){10-12}
+build & total & OT setup & tuples & bake add. & pass & conv & after pass & other & (s) & rounds & wait (s)\\
+\midrule
+\input{data/triad_phases}
+\end{tabular}
+\caption{Where the time of six optimized builds goes (\flag{COMPRESS=0}, ImageNet, flare / polynize, phase timestamps,
+median of two runs). Tuples: OT-based triples and tuples after the OT setup; bake add.: the A2B bake's Boolean
+addition; pass: the network's preprocessing pass; conv: the conv triples; after pass: the rest of the preprocessing
+after the pass (COT, multiplexer, FC triples, triple bookkeeping); other: key exchange, the bake's input preparation and
+gaps. Wait: online time spent waiting for the other party.}
+\label{tab:triadphases}
+\end{table}
+
+\paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds, and a CPU profile adds where the
+threads spend it.
+\begin{enumerate}\itemsep1pt
+\item \textbf{OT generation} remains the largest cost. Every build pays 0.84--0.90\s to set up the 32 ferret packs;
+  the tuples after that take 0.25--0.33\s for RCA but 3.5\s for PPA4, whose Beaver 3- and 4-tuples need six more
+  extension rounds of all 32 packs. Ferret's LPN step takes 33--41\% of all CPU samples, the AES key schedules of the
+  correlation-robust hash 8--11\%. The last extension round is only partly used, but that wastes at most one round
+  (about 0.3\s for PPA4). A fixed-key hash would remove most of the key schedules, but that is a security decision
+  (\cref{sec:limits}).
+\item \textbf{The bake's Boolean addition} costs the A2bits builds 1.5\s: 31 dependent COT-multiplication rounds of
+  15--22\ms plus an extension round. Preparing its inputs costs another 0.25\s of serial time (column other). A
+  log-depth adder would need 5--6 rounds but more AND gates, and so more OTs.
+\item \textbf{Serial work} takes about 1.4\s of every preprocessing run on the main thread. The network's preprocessing
+  pass (0.43--0.86\s over the 18 builds) runs its ReLU levels element by element on one thread, although the online
+  phase runs the same levels on the pool; hpmpc's triple bookkeeping adds 0.2--0.3\s, and the conv layout's tiling
+  search and polyphase weights 0.09\s. Element-parallel preprocessing levels need cursors for the pre-send and
+  stored-output streams, the same machinery as online.
+\item \textbf{Conv triples after the pass.} In UC1 and UC2 the conv triples (0.71--0.84\s) wait for the preprocessing
+  pass, which fixes their input masks, and do not overlap the OT phase. Committing those masks early, as the bake does
+  for the conv outputs, would let the HE run next to the OT generation.
+\item \textbf{Online}, RCA's 1,714--2,012 rounds cost 0.15--0.18\s of waiting. Of the rest, the main thread spends
+  0.11\s handing levels to the pool, 0.05\s transposing bits for the A2B serially, and 0.06\s in layer glue (copies,
+  residual additions, freeing buffers).
+\item \textbf{Communication:} output repacking could halve the conv-triple traffic (\cref{sec:heformal}), at a CPU cost
+  that only pays off on slower links.
+\end{enumerate}

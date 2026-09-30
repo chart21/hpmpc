@@ -1,0 +1,293 @@
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+18
+18
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2b_rca_c0 r1 P0 pre=4.633500 online=0.572600 wait=0.177842 rounds=1714 keyex=0.088289 otsetup=0.83303 packs=32x1 pre_pass_start=2.993914 pre_pass_end=3.503816 complete_pre_end=4.633244 join_end=4.633431 finalize_start=4.633432 finalize_end=4.633500 | CONV=0.703524 FC=0.048866 MULTIPLEX=0.06926 COT=0.185844 BOOL_COT_MULT=1.50766 BOOL=1.10281 | LINEAR=0.5820/5.6550 ADAPTIVEAVGPOOL2D=0.0970/0.0570 ACTIVATION=387.5270/289.9110 BATCHNORM2D=0.5480/0.0690 AVGPOOL2D=8.6140/4.0400 CONV2D=161.1550/201.9490 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2b_rca_c0 r1 P1 pre=4.600600 online=0.572734 wait=0.227660 rounds=1820 keyex=0.065786 otsetup=0.859664 packs=32x1 pre_pass_start=2.972073 pre_pass_end=3.633666 complete_pre_end=4.600354 join_end=4.600536 finalize_start=4.600537 finalize_end=4.600599 | CONV=0.705418 FC=0.053874 MULTIPLEX=0.064899 COT=0.039718 BOOL_COT_MULT=1.51979 BOOL=1.1031 | LINEAR=0.4420/0.0130 ADAPTIVEAVGPOOL2D=0.1200/0.0590 ACTIVATION=338.9480/435.8140 BATCHNORM2D=0.1000/0.0940 AVGPOOL2D=7.8500/3.9670 CONV2D=209.5690/215.5340 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2b_ppa_c0 r1 P0 pre=5.434624 online=0.560635 wait=0.096116 rounds=878 keyex=0.112235 otsetup=0.854279 packs=32x1 pre_pass_start=3.809817 pre_pass_end=4.434549 complete_pre_end=5.434404 join_end=5.434554 finalize_start=5.434555 finalize_end=5.434624 | CONV=0.693182 FC=0.058783 MULTIPLEX=0.06868 COT=0.035242 BOOL_COT_MULT=1.44256 BOOL=1.96674 | LINEAR=0.5860/1.7600 ADAPTIVEAVGPOOL2D=0.0940/0.0580 ACTIVATION=377.3330/396.2910 BATCHNORM2D=0.0950/0.0970 AVGPOOL2D=8.5480/3.5320 CONV2D=146.0940/214.6710 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2b_ppa_c0 r1 P1 pre=5.403562 online=0.561062 wait=0.202634 rounds=984 keyex=0.081215 otsetup=0.814035 packs=32x1 pre_pass_start=3.779149 pre_pass_end=4.267873 complete_pre_end=5.403249 join_end=5.403396 finalize_start=5.403397 finalize_end=5.403561 | CONV=0.697422 FC=0.063931 MULTIPLEX=0.062338 COT=0.178676 BOOL_COT_MULT=1.43789 BOOL=1.96705 | LINEAR=0.5750/0.0130 ADAPTIVEAVGPOOL2D=0.2180/0.0600 ACTIVATION=345.8320/272.0550 BATCHNORM2D=0.0910/0.0700 AVGPOOL2D=7.5620/4.1640 CONV2D=194.1370/205.7080 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2b_ppa4_c0 r1 P0 pre=6.136538 online=0.561422 wait=0.054266 rounds=626 keyex=0.059856 otsetup=0.866887 packs=32x1 pre_pass_start=4.237966 pre_pass_end=5.103989 complete_pre_end=6.136279 join_end=6.136468 finalize_start=6.136469 finalize_end=6.136538 | CONV=0.733197 FC=0.049872 MULTIPLEX=0.065371 BOOL_COT_MULT=1.46709 COT=0.033241 BOOL3=1.09717 BOOL4=0.176247 BOOL=1.13505 | LINEAR=0.6780/0.5190 ADAPTIVEAVGPOOL2D=0.1130/0.0580 ACTIVATION=372.3910/671.0230 BATCHNORM2D=0.0950/0.0900 AVGPOOL2D=9.7590/3.5880 CONV2D=164.8310/182.4890 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2b_ppa4_c0 r1 P1 pre=6.135209 online=0.561347 wait=0.133021 rounds=732 keyex=0.056932 otsetup=0.835762 packs=32x1 pre_pass_start=4.235125 pre_pass_end=5.030078 complete_pre_end=6.134965 join_end=6.135144 finalize_start=6.135145 finalize_end=6.135208 | CONV=0.741017 FC=0.054834 MULTIPLEX=0.055877 BOOL_COT_MULT=1.44993 COT=0.112916 BOOL3=1.09673 BOOL4=0.176783 BOOL=1.13516 | LINEAR=0.6540/0.0170 ADAPTIVEAVGPOOL2D=0.2210/0.0650 ACTIVATION=347.1780/569.8130 BATCHNORM2D=0.0930/0.0740 AVGPOOL2D=10.2650/4.1430 CONV2D=189.1950/211.8400 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bk0_rca_c0 r1 P0 pre=4.440139 online=0.577823 wait=0.149868 rounds=1818 keyex=0.065731 otsetup=0.831695 packs=32x1 pre_pass_start=2.881856 pre_pass_end=3.369944 complete_pre_end=4.439884 join_end=4.440059 finalize_start=4.440061 finalize_end=4.440139 | CONV=0.843716 FC=0.065117 MULTIPLEX=0.056736 COT=0.023855 BOOL_COT_MULT=1.46364 BOOL=1.07722 | LINEAR=0.7510/1.1840 ADAPTIVEAVGPOOL2D=0.1020/0.0590 ACTIVATION=352.6150/284.7720 BATCHNORM2D=0.1560/0.0990 AVGPOOL2D=7.1420/3.5460 CONV2D=207.8140/190.9340 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bk0_rca_c0 r1 P1 pre=4.417764 online=0.577802 wait=0.222514 rounds=1820 keyex=0.063456 otsetup=0.847285 packs=32x1 pre_pass_start=2.879840 pre_pass_end=3.343258 complete_pre_end=4.417531 join_end=4.417693 finalize_start=4.417695 finalize_end=4.417763 | CONV=0.847257 FC=0.064059 MULTIPLEX=0.050844 COT=0.051945 BOOL_COT_MULT=1.45426 BOOL=1.0765 | LINEAR=0.6390/0.6250 ADAPTIVEAVGPOOL2D=0.2940/0.0630 ACTIVATION=350.1720/266.1820 BATCHNORM2D=0.1500/0.1410 AVGPOOL2D=6.4000/6.4070 CONV2D=209.7630/180.8290 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bk0_ppa_c0 r1 P0 pre=5.345044 online=0.587957 wait=0.060886 rounds=982 keyex=0.064243 otsetup=0.862127 packs=32x1 pre_pass_start=3.820183 pre_pass_end=4.326405 complete_pre_end=5.344716 join_end=5.344881 finalize_start=5.344883 finalize_end=5.345044 | CONV=0.789837 FC=0.044715 MULTIPLEX=0.062531 COT=0.033682 BOOL_COT_MULT=1.52469 BOOL=1.97091 | LINEAR=0.9150/0.8250 ADAPTIVEAVGPOOL2D=0.0750/0.0580 ACTIVATION=358.7430/318.0600 BATCHNORM2D=0.1350/0.0990 AVGPOOL2D=8.8200/3.4820 CONV2D=207.3420/176.2330 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bk0_ppa_c0 r1 P1 pre=5.332313 online=0.587992 wait=0.185386 rounds=984 keyex=0.062193 otsetup=0.829785 packs=32x1 pre_pass_start=3.818440 pre_pass_end=4.336001 complete_pre_end=5.331990 join_end=5.332147 finalize_start=5.332149 finalize_end=5.332313 | CONV=0.793942 FC=0.047018 MULTIPLEX=0.053001 COT=0.026086 BOOL_COT_MULT=1.4861 BOOL=1.97089 | LINEAR=0.7100/0.9610 ADAPTIVEAVGPOOL2D=0.0770/0.0720 ACTIVATION=362.2200/318.3640 BATCHNORM2D=0.1580/0.1380 AVGPOOL2D=19.8080/6.6310 CONV2D=195.2140/181.3620 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bk0_ppa4_c0 r1 P0 pre=6.142174 online=0.650333 wait=0.073447 rounds=730 keyex=0.060302 otsetup=0.859993 packs=32x1 pre_pass_start=4.238124 pre_pass_end=5.050018 complete_pre_end=6.141915 join_end=6.142100 finalize_start=6.142101 finalize_end=6.142173 | CONV=0.782411 FC=0.056627 MULTIPLEX=0.075952 BOOL_COT_MULT=1.44159 COT=0.055909 BOOL3=1.07979 BOOL4=0.190715 BOOL=1.15186 | LINEAR=0.9810/0.5430 ADAPTIVEAVGPOOL2D=0.1130/0.0580 ACTIVATION=414.0010/634.4300 BATCHNORM2D=0.1230/0.0690 AVGPOOL2D=6.4970/3.4800 CONV2D=215.8090/165.0920 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bk0_ppa4_c0 r1 P1 pre=6.192140 online=0.650344 wait=0.157886 rounds=732 keyex=0.061384 otsetup=0.869597 packs=32x1 pre_pass_start=4.239644 pre_pass_end=5.078723 complete_pre_end=6.191884 join_end=6.192071 finalize_start=6.192072 finalize_end=6.192140 | CONV=0.773292 FC=0.058923 MULTIPLEX=0.083031 BOOL_COT_MULT=1.46195 COT=0.030884 BOOL3=1.08054 BOOL4=0.190646 BOOL=1.15233 | LINEAR=0.9580/0.5360 ADAPTIVEAVGPOOL2D=0.2970/0.0600 ACTIVATION=406.1140/641.5710 BATCHNORM2D=0.1380/0.0980 AVGPOOL2D=7.9020/4.3640 CONV2D=220.3390/183.8920 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bpw_rca_c0 r1 P0 pre=3.741375 online=0.674013 wait=0.168467 rounds=1963 keyex=0.061157 otsetup=0.923509 packs=32x1 pre_pass_start=3.058241 pre_pass_end=3.551093 complete_pre_end=3.741174 join_end=3.741309 finalize_start=3.741310 finalize_end=3.741375 | CONV=0.003321 MULTIPLEX=0.083292 COT=0.032852 BOOL_COT_MULT=1.47302 BOOL=1.25472 | LINEAR=0.4660/0.5890 ADAPTIVEAVGPOOL2D=0.0920/0.0600 ACTIVATION=436.6720/362.2890 BATCHNORM2D=0.1680/0.1400 AVGPOOL2D=8.8210/7.8390 CONV2D=214.5570/111.5040 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bpw_rca_c0 r1 P1 pre=3.732312 online=0.674132 wait=0.245912 rounds=1981 keyex=0.057481 otsetup=0.879299 packs=32x1 pre_pass_start=3.054879 pre_pass_end=3.478132 complete_pre_end=3.732112 join_end=3.732242 finalize_start=3.732243 finalize_end=3.732312 | CONV=0.002108 MULTIPLEX=0.075709 COT=0.111084 BOOL_COT_MULT=1.47702 BOOL=1.25507 | LINEAR=0.4790/0.4510 ADAPTIVEAVGPOOL2D=0.1450/0.0700 ACTIVATION=461.9430/326.8350 BATCHNORM2D=0.1070/0.1370 AVGPOOL2D=9.0930/6.8110 CONV2D=192.0570/80.9100 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bpw_ppa_c0 r1 P0 pre=4.710011 online=0.586792 wait=0.059544 rounds=891 keyex=0.074408 otsetup=0.866708 packs=32x1 pre_pass_start=3.998373 pre_pass_end=4.519788 complete_pre_end=4.709695 join_end=4.709839 finalize_start=4.709840 finalize_end=4.710010 | CONV=0.002598 MULTIPLEX=0.068334 COT=0.026822 BOOL_COT_MULT=1.54982 BOOL=2.06889 | LINEAR=0.5170/0.4010 ADAPTIVEAVGPOOL2D=0.1080/0.0570 ACTIVATION=372.5750/406.0280 BATCHNORM2D=0.1340/0.0890 AVGPOOL2D=5.8690/3.5440 CONV2D=193.0610/104.3600 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bpw_ppa_c0 r1 P1 pre=4.723281 online=0.586936 wait=0.152491 rounds=909 keyex=0.066822 otsetup=0.867422 packs=32x1 pre_pass_start=3.990994 pre_pass_end=4.439679 complete_pre_end=4.723076 join_end=4.723210 finalize_start=4.723211 finalize_end=4.723280 | CONV=0.005608 MULTIPLEX=0.064191 COT=0.10196 BOOL_COT_MULT=1.58418 BOOL=2.06912 | LINEAR=0.4640/0.4200 ADAPTIVEAVGPOOL2D=0.0900/0.0600 ACTIVATION=398.5910/358.2040 BATCHNORM2D=0.1040/0.1100 AVGPOOL2D=16.5710/4.2740 CONV2D=158.2390/78.4480 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bpw_ppa4_c0 r1 P0 pre=6.134391 online=0.666331 wait=0.051766 rounds=630 keyex=0.085589 otsetup=0.882379 packs=32x1 pre_pass_start=5.108591 pre_pass_end=5.915024 complete_pre_end=6.134060 join_end=6.134223 finalize_start=6.134224 finalize_end=6.134390 | CONV=0.007808 MULTIPLEX=0.060425 BOOL_COT_MULT=1.55419 COT=0.036411 BOOL3=1.07671 BOOL4=0.886138 BOOL=1.20418 | LINEAR=0.5360/0.4330 ADAPTIVEAVGPOOL2D=0.1030/0.0620 ACTIVATION=470.5360/692.4660 BATCHNORM2D=0.1140/0.1040 AVGPOOL2D=5.5570/3.4470 CONV2D=176.5910/102.3320 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bpw_ppa4_c0 r1 P1 pre=6.101952 online=0.666795 wait=0.154034 rounds=648 keyex=0.05667 otsetup=0.853208 packs=32x1 pre_pass_start=5.079561 pre_pass_end=5.892415 complete_pre_end=6.101633 join_end=6.101792 finalize_start=6.101793 finalize_end=6.101951 | CONV=0.001734 MULTIPLEX=0.060182 BOOL_COT_MULT=1.5252 COT=0.033045 BOOL3=1.07635 BOOL4=0.886009 BOOL=1.20427 | LINEAR=0.7760/0.4070 ADAPTIVEAVGPOOL2D=0.1390/0.0640 ACTIVATION=485.5780/714.9810 BATCHNORM2D=0.1360/0.1000 AVGPOOL2D=7.5040/4.5210 CONV2D=160.9090/84.1540 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rs_rca_c0 r1 P0 pre=2.792108 online=0.505830 wait=0.154683 rounds=1763 keyex=0.122892 otsetup=0.892207 packs=32x1 pre_pass_start=1.287658 pre_pass_end=1.803498 complete_pre_end=2.791845 join_end=2.792036 finalize_start=2.792037 finalize_end=2.792108 | CONV=0.684766 FC=0.060768 MULTIPLEX=0.060807 COT=0.051896 RANDOM_MUL=0.026344 BOOL=1.13329 | LINEAR=0.6400/1.3190 ADAPTIVEAVGPOOL2D=0.0980/0.0640 ACTIVATION=318.8300/324.2010 BATCHNORM2D=0.1490/0.0970 AVGPOOL2D=5.6550/4.5880 CONV2D=169.6280/175.0400 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rs_rca_c0 r1 P1 pre=2.782146 online=0.505855 wait=0.223724 rounds=1916 keyex=0.067585 otsetup=0.880532 packs=32x1 pre_pass_start=1.232694 pre_pass_end=1.741859 complete_pre_end=2.781874 join_end=2.782072 finalize_start=2.782074 finalize_end=2.782145 | CONV=0.686068 FC=0.068151 MULTIPLEX=0.064645 COT=0.060875 RANDOM_MUL=0.024128 BOOL=1.13384 | LINEAR=0.2010/0.0130 ADAPTIVEAVGPOOL2D=0.1270/0.0630 ACTIVATION=282.2230/246.2360 BATCHNORM2D=0.1520/0.1430 AVGPOOL2D=10.0460/6.4550 CONV2D=197.8030/246.5240 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rs_ppa_c0 r1 P0 pre=4.548763 online=0.553722 wait=0.163294 rounds=900 keyex=0.074663 otsetup=0.84738 packs=32x1 pre_pass_start=2.693128 pre_pass_end=3.281166 complete_pre_end=4.548531 join_end=4.548695 finalize_start=4.548696 finalize_end=4.548763 | CONV=0.75344 FC=0.042028 MULTIPLEX=0.073722 COT=0.258025 RANDOM_MUL=0.611709 BOOL=2.00246 | LINEAR=0.5800/1.8900 ADAPTIVEAVGPOOL2D=0.0910/0.0610 ACTIVATION=359.5500/390.9130 BATCHNORM2D=0.1550/0.0940 AVGPOOL2D=8.6740/4.0820 CONV2D=171.9880/182.4540 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rs_ppa_c0 r1 P1 pre=4.554266 online=0.553665 wait=0.170415 rounds=1053 keyex=0.07841 otsetup=0.827059 packs=32x1 pre_pass_start=2.696802 pre_pass_end=3.511250 complete_pre_end=4.554046 join_end=4.554196 finalize_start=4.554197 finalize_end=4.554265 | CONV=0.760362 FC=0.049695 MULTIPLEX=0.06798 COT=0.034115 RANDOM_MUL=0.571566 BOOL=2.0024 | LINEAR=0.5460/0.0140 ADAPTIVEAVGPOOL2D=0.1060/0.0600 ACTIVATION=301.3430/315.3820 BATCHNORM2D=0.1520/0.0670 AVGPOOL2D=8.3430/3.7150 CONV2D=228.7750/486.0030 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rs_ppa4_c0 r1 P0 pre=7.082948 online=0.546122 wait=0.167108 rounds=675 keyex=0.062014 otsetup=0.883324 packs=32x1 pre_pass_start=4.445756 pre_pass_end=5.165145 complete_pre_end=7.082673 join_end=7.082874 finalize_start=7.082875 finalize_end=7.082947 | CONV=0.746701 FC=0.037029 MULTIPLEX=0.07549 RANDOM_MUL=0.104234 COT=0.85867 BOOL3=1.27727 BOOL4=2.03778 BOOL=0.95942 | LINEAR=0.5990/2.3570 ADAPTIVEAVGPOOL2D=0.0970/0.0570 ACTIVATION=315.4170/546.9770 BATCHNORM2D=0.1590/0.0970 AVGPOOL2D=8.7960/3.5390 CONV2D=207.9550/159.1020 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rs_ppa4_c0 r1 P1 pre=7.050987 online=0.546244 wait=0.094408 rounds=828 keyex=0.066586 otsetup=0.850044 packs=32x1 pre_pass_start=4.450763 pre_pass_end=5.998166 complete_pre_end=7.050741 join_end=7.050917 finalize_start=7.050919 finalize_end=7.050987 | CONV=0.756885 FC=0.042107 MULTIPLEX=0.065198 RANDOM_MUL=0.084247 COT=0.034042 BOOL3=1.27618 BOOL4=2.03818 BOOL=0.960133 | LINEAR=0.5910/0.0130 ADAPTIVEAVGPOOL2D=0.3340/0.0610 ACTIVATION=215.3430/391.6490 BATCHNORM2D=0.1480/0.0990 AVGPOOL2D=6.1590/3.5980 CONV2D=312.0140/1144.6730 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rsk0_rca_c0 r1 P0 pre=2.801433 online=0.560120 wait=0.162692 rounds=1867 keyex=0.071522 otsetup=0.900469 packs=32x1 pre_pass_start=1.261596 pre_pass_end=1.750666 complete_pre_end=2.801165 join_end=2.801361 finalize_start=2.801362 finalize_end=2.801433 | CONV=0.827963 FC=0.069202 MULTIPLEX=0.060225 COT=0.035352 RANDOM_MUL=0.055261 BOOL=1.12786 | LINEAR=0.8760/0.5680 ADAPTIVEAVGPOOL2D=0.0830/0.0570 ACTIVATION=305.5770/313.7610 BATCHNORM2D=0.1650/0.1300 AVGPOOL2D=5.4140/4.8750 CONV2D=236.9290/162.1450 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rsk0_rca_c0 r1 P1 pre=2.804878 online=0.560154 wait=0.233688 rounds=1916 keyex=0.074025 otsetup=0.850659 packs=32x1 pre_pass_start=1.264398 pre_pass_end=1.768152 complete_pre_end=2.804639 join_end=2.804812 finalize_start=2.804814 finalize_end=2.804877 | CONV=0.828566 FC=0.072375 MULTIPLEX=0.053855 COT=0.023855 RANDOM_MUL=0.054111 BOOL=1.12859 | LINEAR=0.8640/0.5730 ADAPTIVEAVGPOOL2D=0.2750/0.0600 ACTIVATION=306.5860/274.1530 BATCHNORM2D=0.1370/0.1400 AVGPOOL2D=6.9180/7.7720 CONV2D=234.4060/211.9120 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rsk0_ppa_c0 r1 P0 pre=4.714255 online=0.612138 wait=0.166677 rounds=1004 keyex=0.069113 otsetup=0.921283 packs=32x1 pre_pass_start=2.774934 pre_pass_end=3.396922 complete_pre_end=4.714031 join_end=4.714195 finalize_start=4.714196 finalize_end=4.714255 | CONV=0.860975 FC=0.058383 MULTIPLEX=0.066396 COT=0.250194 RANDOM_MUL=0.604689 BOOL=2.09581 | LINEAR=0.8650/3.8660 ADAPTIVEAVGPOOL2D=0.0990/0.0570 ACTIVATION=303.0290/418.8000 BATCHNORM2D=0.0960/3.9940 AVGPOOL2D=7.3090/14.3410 CONV2D=288.5320/172.0540 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rsk0_ppa_c0 r1 P1 pre=4.716158 online=0.612322 wait=0.176254 rounds=1053 keyex=0.077122 otsetup=0.886887 packs=32x1 pre_pass_start=2.783162 pre_pass_end=3.629155 complete_pre_end=4.715936 join_end=4.716086 finalize_start=4.716087 finalize_end=4.716157 | CONV=0.852697 FC=0.060457 MULTIPLEX=0.070452 COT=0.031075 RANDOM_MUL=0.577258 BOOL=2.09574 | LINEAR=0.8540/0.6950 ADAPTIVEAVGPOOL2D=0.3820/0.0650 ACTIVATION=307.2110/353.0110 BATCHNORM2D=0.1360/0.0950 AVGPOOL2D=7.7080/3.8020 CONV2D=285.9490/478.7120 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rsk0_ppa4_c0 r1 P0 pre=7.244774 online=0.686000 wait=0.221476 rounds=779 keyex=0.083711 otsetup=0.842876 packs=32x1 pre_pass_start=4.382850 pre_pass_end=5.099539 complete_pre_end=7.244501 join_end=7.244710 finalize_start=7.244711 finalize_end=7.244773 | CONV=0.886217 FC=0.061409 MULTIPLEX=0.058356 RANDOM_MUL=0.102427 COT=1.03167 BOOL3=1.25374 BOOL4=2.02258 BOOL=0.913809 | LINEAR=1.1780/0.5100 ADAPTIVEAVGPOOL2D=0.0950/0.0570 ACTIVATION=324.2090/511.8790 BATCHNORM2D=0.1280/0.0980 AVGPOOL2D=5.3330/4.1570 CONV2D=343.9200/190.5820 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rsk0_ppa4_c0 r1 P1 pre=7.244325 online=0.685962 wait=0.170796 rounds=828 keyex=0.086019 otsetup=0.829066 packs=32x1 pre_pass_start=4.385187 pre_pass_end=6.103083 complete_pre_end=7.244074 join_end=7.244259 finalize_start=7.244260 finalize_end=7.244324 | CONV=0.875757 FC=0.066828 MULTIPLEX=0.056974 RANDOM_MUL=0.098854 COT=0.037781 BOOL3=1.25431 BOOL4=2.02263 BOOL=0.913135 | LINEAR=0.8760/0.5440 ADAPTIVEAVGPOOL2D=0.0930/0.0600 ACTIVATION=334.2040/642.2720 BATCHNORM2D=0.1600/0.1040 AVGPOOL2D=6.1970/3.6620 CONV2D=333.5640/1064.9010 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rspw_rca_c0 r1 P0 pre=1.811974 online=0.619677 wait=0.198044 rounds=2012 keyex=0.055826 otsetup=0.855082 packs=32x1 pre_pass_start=1.224526 pre_pass_end=1.647314 complete_pre_end=1.811733 join_end=1.811906 finalize_start=1.811907 finalize_end=1.811974 | CONV=0.002409 MULTIPLEX=0.062581 COT=0.022506 RANDOM_MUL=0.048178 BOOL=1.11783 | LINEAR=0.5090/0.4680 ADAPTIVEAVGPOOL2D=0.0930/0.0600 ACTIVATION=445.0990/328.7270 BATCHNORM2D=0.1420/0.0680 AVGPOOL2D=8.6170/3.4290 CONV2D=152.8510/82.5190 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rspw_rca_c0 r1 P1 pre=1.800173 online=0.619817 wait=0.263451 rounds=2113 keyex=0.061949 otsetup=0.857757 packs=32x1 pre_pass_start=1.231748 pre_pass_end=1.647540 complete_pre_end=1.799949 join_end=1.800103 finalize_start=1.800105 finalize_end=1.800173 | CONV=0.005672 MULTIPLEX=0.057352 COT=0.03188 RANDOM_MUL=0.037823 BOOL=1.11892 | LINEAR=0.5370/0.4650 ADAPTIVEAVGPOOL2D=0.2730/0.0600 ACTIVATION=420.8300/315.9720 BATCHNORM2D=0.1430/0.1830 AVGPOOL2D=8.7310/9.6220 CONV2D=173.8950/78.4690 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rspw_ppa_c0 r1 P0 pre=3.383010 online=0.542591 wait=0.119331 rounds=907 keyex=0.069328 otsetup=0.847822 packs=32x1 pre_pass_start=2.680931 pre_pass_end=3.206414 complete_pre_end=3.382805 join_end=3.382949 finalize_start=3.382950 finalize_end=3.383009 | CONV=0.005294 MULTIPLEX=0.059927 COT=0.021714 RANDOM_MUL=0.637976 BOOL=1.96678 | LINEAR=0.4580/0.4240 ADAPTIVEAVGPOOL2D=0.0950/0.0590 ACTIVATION=338.1680/388.7810 BATCHNORM2D=0.1310/0.4110 AVGPOOL2D=9.3270/5.8110 CONV2D=182.8860/122.8480 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rspw_ppa_c0 r1 P1 pre=3.374210 online=0.542706 wait=0.211288 rounds=1008 keyex=0.069446 otsetup=0.846475 packs=32x1 pre_pass_start=2.680983 pre_pass_end=3.159268 complete_pre_end=3.373999 join_end=3.374131 finalize_start=3.374133 finalize_end=3.374209 | CONV=0.00273 MULTIPLEX=0.055086 COT=0.075639 RANDOM_MUL=0.595826 BOOL=1.96667 | LINEAR=0.4560/0.4040 ADAPTIVEAVGPOOL2D=0.1930/0.0600 ACTIVATION=367.6830/385.9800 BATCHNORM2D=0.1800/0.0940 AVGPOOL2D=8.3230/6.7020 CONV2D=150.4050/74.5040 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rspw_ppa4_c0 r1 P0 pre=5.190930 online=0.428856 wait=0.082031 rounds=679 keyex=0.069657 otsetup=0.883334 packs=32x1 pre_pass_start=4.383441 pre_pass_end=4.994300 complete_pre_end=5.190651 join_end=5.190851 finalize_start=5.190852 finalize_end=5.190930 | CONV=0.008652 MULTIPLEX=0.070559 RANDOM_MUL=0.112225 COT=0.028442 BOOL3=1.24267 BOOL4=1.98815 BOOL=0.96229 | LINEAR=0.4690/0.4050 ADAPTIVEAVGPOOL2D=0.0920/0.0580 ACTIVATION=252.5380/509.2460 BATCHNORM2D=0.1360/0.0890 AVGPOOL2D=5.7070/3.4180 CONV2D=159.9860/88.3370 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rspw_ppa4_c0 r1 P1 pre=5.194112 online=0.428838 wait=0.142113 rounds=780 keyex=0.055111 otsetup=0.818107 packs=32x1 pre_pass_start=4.368991 pre_pass_end=4.923429 complete_pre_end=5.193835 join_end=5.194037 finalize_start=5.194039 finalize_end=5.194111 | CONV=0.004979 MULTIPLEX=0.070778 RANDOM_MUL=0.106209 COT=0.087214 BOOL3=1.24201 BOOL4=1.98805 BOOL=0.96273 | LINEAR=0.4610/0.4110 ADAPTIVEAVGPOOL2D=0.3710/0.0670 ACTIVATION=272.2570/473.6440 BATCHNORM2D=0.1760/0.3350 AVGPOOL2D=7.7740/4.2120 CONV2D=136.4300/69.6040 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2b_rca_c0 r2 P0 pre=4.457412 online=0.519098 wait=0.154265 rounds=1714 keyex=0.075415 otsetup=0.85251 packs=32x1 pre_pass_start=2.960775 pre_pass_end=3.473935 complete_pre_end=4.457154 join_end=4.457348 finalize_start=4.457350 finalize_end=4.457411 | CONV=0.712832 FC=0.039791 MULTIPLEX=0.061871 COT=0.040826 BOOL_COT_MULT=1.50107 BOOL=1.08977 | LINEAR=0.6040/5.8270 ADAPTIVEAVGPOOL2D=0.1150/0.0630 ACTIVATION=342.5930/295.8160 BATCHNORM2D=0.0990/0.1000 AVGPOOL2D=8.0580/3.5450 CONV2D=155.9960/198.1150 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2b_rca_c0 r2 P1 pre=4.429632 online=0.519317 wait=0.212406 rounds=1820 keyex=0.058325 otsetup=0.841489 packs=32x1 pre_pass_start=2.943923 pre_pass_end=3.406789 complete_pre_end=4.429380 join_end=4.429565 finalize_start=4.429567 finalize_end=4.429632 | CONV=0.717145 FC=0.044447 MULTIPLEX=0.058863 COT=0.093678 BOOL_COT_MULT=1.51401 BOOL=1.09004 | LINEAR=0.0150/0.0180 ADAPTIVEAVGPOOL2D=0.1360/0.0600 ACTIVATION=305.1770/230.2520 BATCHNORM2D=0.1470/0.1010 AVGPOOL2D=7.9110/5.9650 CONV2D=192.5040/218.4910 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2b_ppa_c0 r2 P0 pre=5.478003 online=0.529444 wait=0.092196 rounds=878 keyex=0.088206 otsetup=0.892775 packs=32x1 pre_pass_start=3.949615 pre_pass_end=4.491682 complete_pre_end=5.477688 join_end=5.477845 finalize_start=5.477846 finalize_end=5.478003 | CONV=0.70281 FC=0.035733 MULTIPLEX=0.078301 COT=0.03016 BOOL_COT_MULT=1.50877 BOOL=2.08955 | LINEAR=0.9210/2.8510 ADAPTIVEAVGPOOL2D=0.0800/0.0590 ACTIVATION=359.4400/336.7960 BATCHNORM2D=0.1340/0.0990 AVGPOOL2D=12.2100/3.4810 CONV2D=144.3990/190.2750 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2b_ppa_c0 r2 P1 pre=5.469728 online=0.529428 wait=0.179081 rounds=984 keyex=0.078021 otsetup=0.888804 packs=32x1 pre_pass_start=3.939722 pre_pass_end=4.432735 complete_pre_end=5.469509 join_end=5.469656 finalize_start=5.469657 finalize_end=5.469727 | CONV=0.703691 FC=0.041014 MULTIPLEX=0.071288 COT=0.087762 BOOL_COT_MULT=1.45002 BOOL=2.08983 | LINEAR=0.9070/0.0130 ADAPTIVEAVGPOOL2D=0.2140/0.0600 ACTIVATION=324.4760/275.4620 BATCHNORM2D=0.1000/0.0990 AVGPOOL2D=10.2740/4.0480 CONV2D=181.0470/206.3620 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2b_ppa4_c0 r2 P0 pre=6.045389 online=0.565966 wait=0.068070 rounds=626 keyex=0.062148 otsetup=0.912935 packs=32x1 pre_pass_start=4.203223 pre_pass_end=5.054892 complete_pre_end=6.045134 join_end=6.045320 finalize_start=6.045321 finalize_end=6.045389 | CONV=0.688124 FC=0.048355 MULTIPLEX=0.064553 BOOL_COT_MULT=1.51172 COT=0.031353 BOOL3=0.986309 BOOL4=0.178618 BOOL=1.18505 | LINEAR=1.0130/4.7660 ADAPTIVEAVGPOOL2D=0.1100/0.0590 ACTIVATION=390.4460/672.6680 BATCHNORM2D=0.1560/0.0900 AVGPOOL2D=6.8880/3.6120 CONV2D=154.2890/161.6430 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2b_ppa4_c0 r2 P1 pre=6.048913 online=0.566089 wait=0.144148 rounds=732 keyex=0.069469 otsetup=0.862924 packs=32x1 pre_pass_start=4.210819 pre_pass_end=4.948256 complete_pre_end=6.048675 join_end=6.048841 finalize_start=6.048842 finalize_end=6.048912 | CONV=0.690892 FC=0.053609 MULTIPLEX=0.05889 BOOL_COT_MULT=1.50481 COT=0.15115 BOOL3=0.986709 BOOL4=0.178331 BOOL=1.18527 | LINEAR=0.9950/0.0170 ADAPTIVEAVGPOOL2D=0.1000/0.0650 ACTIVATION=358.3990/526.0210 BATCHNORM2D=0.0930/0.0990 AVGPOOL2D=7.5490/4.1350 CONV2D=187.1740/199.5130 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bk0_rca_c0 r2 P0 pre=4.845342 online=0.607547 wait=0.182016 rounds=1818 keyex=0.07399 otsetup=0.968373 packs=32x1 pre_pass_start=3.095470 pre_pass_end=3.582779 complete_pre_end=4.844994 join_end=4.845169 finalize_start=4.845170 finalize_end=4.845341 | CONV=0.842883 FC=0.049444 MULTIPLEX=0.07917 COT=0.209339 BOOL_COT_MULT=1.54833 BOOL=1.21791 | LINEAR=0.6890/1.3160 ADAPTIVEAVGPOOL2D=0.0750/0.0580 ACTIVATION=361.2470/299.9940 BATCHNORM2D=0.1540/0.1010 AVGPOOL2D=5.9480/4.1680 CONV2D=229.2490/173.4570 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bk0_rca_c0 r2 P1 pre=4.836974 online=0.607530 wait=0.250783 rounds=1820 keyex=0.086632 otsetup=0.914101 packs=32x1 pre_pass_start=3.108476 pre_pass_end=3.776589 complete_pre_end=4.836719 join_end=4.836893 finalize_start=4.836894 finalize_end=4.836973 | CONV=0.846325 FC=0.055075 MULTIPLEX=0.066932 COT=0.032708 BOOL_COT_MULT=1.52665 BOOL=1.21857 | LINEAR=0.5470/0.5970 ADAPTIVEAVGPOOL2D=0.2590/0.0630 ACTIVATION=362.1320/471.1060 BATCHNORM2D=0.1530/0.0970 AVGPOOL2D=6.1230/4.5190 CONV2D=227.9970/182.2380 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bk0_ppa_c0 r2 P0 pre=5.630567 online=0.593423 wait=0.116827 rounds=982 keyex=0.090986 otsetup=0.907924 packs=32x1 pre_pass_start=3.888336 pre_pass_end=4.472490 complete_pre_end=5.630345 join_end=5.630501 finalize_start=5.630502 finalize_end=5.630566 | CONV=0.907702 FC=0.074538 MULTIPLEX=0.083505 COT=0.023043 BOOL_COT_MULT=1.43194 BOOL=2.04545 | LINEAR=0.6610/0.8600 ADAPTIVEAVGPOOL2D=0.1020/0.0580 ACTIVATION=356.3900/387.0460 BATCHNORM2D=0.1360/0.1400 AVGPOOL2D=9.6160/6.0580 CONV2D=214.2470/180.6540 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bk0_ppa_c0 r2 P1 pre=5.625205 online=0.593311 wait=0.165283 rounds=984 keyex=0.069993 otsetup=0.875596 packs=32x1 pre_pass_start=3.867712 pre_pass_end=4.408388 complete_pre_end=5.624994 join_end=5.625139 finalize_start=5.625140 finalize_end=5.625205 | CONV=0.906419 FC=0.078228 MULTIPLEX=0.073862 COT=0.076908 BOOL_COT_MULT=1.44435 BOOL=2.04596 | LINEAR=0.5830/0.9440 ADAPTIVEAVGPOOL2D=0.1480/0.0660 ACTIVATION=361.5480/359.4600 BATCHNORM2D=0.1560/0.1000 AVGPOOL2D=8.2860/4.4700 CONV2D=211.7780/167.9370 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bk0_ppa4_c0 r2 P0 pre=6.136019 online=0.631345 wait=0.071797 rounds=730 keyex=0.070981 otsetup=0.856499 packs=32x1 pre_pass_start=4.145302 pre_pass_end=5.035424 complete_pre_end=6.135737 join_end=6.135945 finalize_start=6.135946 finalize_end=6.136019 | CONV=0.831982 FC=0.055785 MULTIPLEX=0.075555 BOOL_COT_MULT=1.45519 COT=0.023499 BOOL3=1.03886 BOOL4=0.166572 BOOL=1.14182 | LINEAR=0.9800/0.5300 ADAPTIVEAVGPOOL2D=0.1160/0.0580 ACTIVATION=388.3920/708.9220 BATCHNORM2D=0.1280/0.0690 AVGPOOL2D=5.9820/3.5260 CONV2D=223.4630/168.8610 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bk0_ppa4_c0 r2 P1 pre=6.139287 online=0.631335 wait=0.153234 rounds=732 keyex=0.060207 otsetup=0.865357 packs=32x1 pre_pass_start=4.134809 pre_pass_end=4.902891 complete_pre_end=6.139043 join_end=6.139222 finalize_start=6.139223 finalize_end=6.139286 | CONV=0.834078 FC=0.057785 MULTIPLEX=0.065088 BOOL_COT_MULT=1.43809 COT=0.152473 BOOL3=1.03827 BOOL4=0.166783 BOOL=1.14225 | LINEAR=0.9050/0.5330 ADAPTIVEAVGPOOL2D=0.1030/0.0600 ACTIVATION=384.6630/593.4590 BATCHNORM2D=0.1360/0.0680 AVGPOOL2D=5.4100/3.8410 CONV2D=225.8920/162.4610 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bpw_rca_c0 r2 P0 pre=3.752589 online=0.624527 wait=0.133101 rounds=1963 keyex=0.081931 otsetup=0.86631 packs=32x1 pre_pass_start=3.079742 pre_pass_end=3.564528 complete_pre_end=3.752396 join_end=3.752529 finalize_start=3.752530 finalize_end=3.752588 | CONV=0.00368 MULTIPLEX=0.07645 COT=0.029862 BOOL_COT_MULT=1.54761 BOOL=1.16101 | LINEAR=0.4730/0.4200 ADAPTIVEAVGPOOL2D=0.0950/0.0650 ACTIVATION=417.3520/369.2390 BATCHNORM2D=0.1030/0.0990 AVGPOOL2D=9.3500/4.1070 CONV2D=184.8860/103.8030 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bpw_rca_c0 r2 P1 pre=3.739161 online=0.624731 wait=0.218490 rounds=1981 keyex=0.077816 otsetup=0.870313 packs=32x1 pre_pass_start=3.075849 pre_pass_end=3.492358 complete_pre_end=3.738955 join_end=3.739091 finalize_start=3.739093 finalize_end=3.739161 | CONV=0.00203 MULTIPLEX=0.070838 COT=0.10539 BOOL_COT_MULT=1.55158 BOOL=1.1613 | LINEAR=0.4720/0.4140 ADAPTIVEAVGPOOL2D=0.0940/0.0650 ACTIVATION=429.6580/326.6680 BATCHNORM2D=0.1300/0.0970 AVGPOOL2D=7.5030/4.1860 CONV2D=176.0040/78.5490 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bpw_ppa_c0 r2 P0 pre=4.650039 online=0.612306 wait=0.074144 rounds=891 keyex=0.056958 otsetup=0.865106 packs=32x1 pre_pass_start=3.911605 pre_pass_end=4.456860 complete_pre_end=4.649729 join_end=4.649873 finalize_start=4.649874 finalize_end=4.650038 | CONV=0.006104 MULTIPLEX=0.063527 COT=0.023817 BOOL_COT_MULT=1.49582 BOOL=2.01661 | LINEAR=0.5320/0.4470 ADAPTIVEAVGPOOL2D=0.1090/0.0610 ACTIVATION=396.0050/422.5240 BATCHNORM2D=0.1460/0.0880 AVGPOOL2D=7.8770/3.4930 CONV2D=194.1290/112.2620 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bpw_ppa_c0 r2 P1 pre=4.644297 online=0.612373 wait=0.171202 rounds=909 keyex=0.067709 otsetup=0.843572 packs=32x1 pre_pass_start=3.922339 pre_pass_end=4.464138 complete_pre_end=4.644056 join_end=4.644225 finalize_start=4.644226 finalize_end=4.644296 | CONV=0.002124 MULTIPLEX=0.059596 COT=0.035059 BOOL_COT_MULT=1.53991 BOOL=2.0168 | LINEAR=0.4800/0.4070 ADAPTIVEAVGPOOL2D=0.2830/0.0730 ACTIVATION=432.0900/447.2350 BATCHNORM2D=0.1860/0.0980 AVGPOOL2D=7.8610/4.2590 CONV2D=159.0620/83.6430 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_a2bpw_ppa4_c0 r2 P0 pre=6.074831 online=0.670476 wait=0.057997 rounds=630 keyex=0.063823 otsetup=0.889895 packs=32x1 pre_pass_start=5.024496 pre_pass_end=5.866736 complete_pre_end=6.074499 join_end=6.074669 finalize_start=6.074670 finalize_end=6.074830 | CONV=0.004075 MULTIPLEX=0.063496 BOOL_COT_MULT=1.44648 COT=0.026792 BOOL3=1.09899 BOOL4=0.927682 BOOL=1.20831 | LINEAR=0.6980/0.4190 ADAPTIVEAVGPOOL2D=0.1020/0.0640 ACTIVATION=450.9050/706.6900 BATCHNORM2D=0.0990/0.1360 AVGPOOL2D=5.4610/5.9740 CONV2D=199.9270/119.9710 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_a2bpw_ppa4_c0 r2 P1 pre=6.070328 online=0.670251 wait=0.148116 rounds=648 keyex=0.053808 otsetup=0.848942 packs=32x1 pre_pass_start=5.014558 pre_pass_end=5.788471 complete_pre_end=6.070004 join_end=6.070159 finalize_start=6.070160 finalize_end=6.070328 | CONV=0.002378 MULTIPLEX=0.061088 BOOL_COT_MULT=1.42893 COT=0.099005 BOOL3=1.1039 BOOL4=0.928781 BOOL=1.20513 | LINEAR=0.4610/0.4800 ADAPTIVEAVGPOOL2D=0.2000/0.0670 ACTIVATION=483.8000/672.2190 BATCHNORM2D=0.1330/0.0990 AVGPOOL2D=7.8760/6.4890 CONV2D=166.0860/85.3810 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rs_rca_c0 r2 P0 pre=2.778885 online=0.514490 wait=0.151879 rounds=1763 keyex=0.073712 otsetup=0.904577 packs=32x1 pre_pass_start=1.284809 pre_pass_end=1.784221 complete_pre_end=2.778628 join_end=2.778812 finalize_start=2.778813 finalize_end=2.778885 | CONV=0.737037 FC=0.03832 MULTIPLEX=0.062481 COT=0.024918 RANDOM_MUL=0.046487 BOOL=1.15619 | LINEAR=0.5820/1.3130 ADAPTIVEAVGPOOL2D=0.0940/0.0640 ACTIVATION=309.0270/316.5780 BATCHNORM2D=0.1350/0.1010 AVGPOOL2D=5.8430/3.6650 CONV2D=188.2840/171.2940 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rs_rca_c0 r2 P1 pre=2.857573 online=0.514496 wait=0.230566 rounds=1916 keyex=0.076901 otsetup=0.868968 packs=32x1 pre_pass_start=1.288711 pre_pass_end=1.791870 complete_pre_end=2.857320 join_end=2.857503 finalize_start=2.857504 finalize_end=2.857573 | CONV=0.74131 FC=0.043756 MULTIPLEX=0.065134 COT=0.023206 RANDOM_MUL=0.047222 BOOL=1.15661 | LINEAR=0.5610/0.0140 ADAPTIVEAVGPOOL2D=0.1470/0.0730 ACTIVATION=271.7410/253.5290 BATCHNORM2D=0.1550/0.0990 AVGPOOL2D=11.0170/3.9720 CONV2D=215.4060/235.2580 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rs_ppa_c0 r2 P0 pre=4.559525 online=0.556204 wait=0.149690 rounds=900 keyex=0.065701 otsetup=0.92954 packs=32x1 pre_pass_start=2.780469 pre_pass_end=3.359700 complete_pre_end=4.559288 join_end=4.559459 finalize_start=4.559460 finalize_end=4.559525 | CONV=0.687723 FC=0.045169 MULTIPLEX=0.058971 COT=0.271834 RANDOM_MUL=0.612964 BOOL=2.09401 | LINEAR=0.5720/1.9180 ADAPTIVEAVGPOOL2D=0.0920/0.0590 ACTIVATION=329.3100/362.2780 BATCHNORM2D=0.2030/0.1760 AVGPOOL2D=9.0290/8.6500 CONV2D=205.6250/195.3780 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rs_ppa_c0 r2 P1 pre=4.544659 online=0.556324 wait=0.171931 rounds=1053 keyex=0.060338 otsetup=0.905831 packs=32x1 pre_pass_start=2.775358 pre_pass_end=3.592006 complete_pre_end=4.544436 join_end=4.544589 finalize_start=4.544590 finalize_end=4.544659 | CONV=0.687584 FC=0.049564 MULTIPLEX=0.055961 COT=0.041085 RANDOM_MUL=0.616256 BOOL=2.09406 | LINEAR=0.5440/0.0140 ADAPTIVEAVGPOOL2D=0.2690/0.0610 ACTIVATION=278.5570/315.0470 BATCHNORM2D=0.1540/0.0970 AVGPOOL2D=7.7500/3.6720 CONV2D=254.0140/488.3290 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rs_ppa4_c0 r2 P0 pre=7.078857 online=0.549837 wait=0.159371 rounds=675 keyex=0.102058 otsetup=0.917374 packs=32x1 pre_pass_start=4.518455 pre_pass_end=5.213118 complete_pre_end=7.078593 join_end=7.078791 finalize_start=7.078792 finalize_end=7.078857 | CONV=0.689226 FC=0.040982 MULTIPLEX=0.071852 RANDOM_MUL=0.086462 COT=0.881659 BOOL3=1.25567 BOOL4=2.06705 BOOL=0.97989 | LINEAR=0.9350/2.2580 ADAPTIVEAVGPOOL2D=0.0810/0.0580 ACTIVATION=353.0970/506.8510 BATCHNORM2D=0.0940/0.0970 AVGPOOL2D=10.0410/3.4750 CONV2D=173.5570/174.7010 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rs_ppa4_c0 r2 P1 pre=7.012975 online=0.549969 wait=0.099179 rounds=828 keyex=0.075561 otsetup=0.910177 packs=32x1 pre_pass_start=4.492231 pre_pass_end=6.024959 complete_pre_end=7.012628 join_end=7.012811 finalize_start=7.012812 finalize_end=7.012974 | CONV=0.690353 FC=0.046 MULTIPLEX=0.067233 RANDOM_MUL=0.103753 COT=0.05044 BOOL3=1.25866 BOOL4=2.06688 BOOL=0.978309 | LINEAR=0.9290/0.0140 ADAPTIVEAVGPOOL2D=0.2820/0.0600 ACTIVATION=248.4810/402.1000 BATCHNORM2D=0.0940/0.0990 AVGPOOL2D=5.2680/3.5620 CONV2D=283.3520/1120.3610 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rsk0_rca_c0 r2 P0 pre=2.801270 online=0.597010 wait=0.189215 rounds=1867 keyex=0.070644 otsetup=0.832385 packs=32x1 pre_pass_start=1.194135 pre_pass_end=1.740673 complete_pre_end=2.801024 join_end=2.801208 finalize_start=2.801210 finalize_end=2.801270 | CONV=0.855369 FC=0.051043 MULTIPLEX=0.071965 COT=0.029433 RANDOM_MUL=0.047823 BOOL=1.06675 | LINEAR=0.6880/0.6290 ADAPTIVEAVGPOOL2D=0.0990/0.0570 ACTIVATION=324.1580/320.1770 BATCHNORM2D=0.1560/0.0940 AVGPOOL2D=8.2130/3.7050 CONV2D=251.7620/213.1050 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rsk0_rca_c0 r2 P1 pre=2.799076 online=0.596903 wait=0.263290 rounds=1916 keyex=0.06162 otsetup=0.816069 packs=32x1 pre_pass_start=1.185299 pre_pass_end=1.681344 complete_pre_end=2.798846 join_end=2.799009 finalize_start=2.799010 finalize_end=2.799076 | CONV=0.863559 FC=0.051898 MULTIPLEX=0.055024 COT=0.088256 RANDOM_MUL=0.048988 BOOL=1.06718 | LINEAR=0.6290/0.5680 ADAPTIVEAVGPOOL2D=0.2460/0.0590 ACTIVATION=319.4320/266.9660 BATCHNORM2D=0.1580/0.1390 AVGPOOL2D=9.5770/8.6980 CONV2D=254.3240/209.1130 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rsk0_ppa_c0 r2 P0 pre=4.719596 online=0.630947 wait=0.173755 rounds=1004 keyex=0.067563 otsetup=0.840011 packs=32x1 pre_pass_start=2.771914 pre_pass_end=3.342008 complete_pre_end=4.719361 join_end=4.719527 finalize_start=4.719529 finalize_end=4.719595 | CONV=0.885164 FC=0.059385 MULTIPLEX=0.067287 COT=0.290159 RANDOM_MUL=0.729893 BOOL=1.96651 | LINEAR=0.8630/0.5420 ADAPTIVEAVGPOOL2D=0.1090/0.0570 ACTIVATION=336.9210/377.3590 BATCHNORM2D=0.1230/0.1660 AVGPOOL2D=12.3010/8.6900 CONV2D=266.8440/172.5320 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rsk0_ppa_c0 r2 P1 pre=4.711838 online=0.631141 wait=0.198407 rounds=1053 keyex=0.061734 otsetup=0.834254 packs=32x1 pre_pass_start=2.766638 pre_pass_end=3.593403 complete_pre_end=4.711612 join_end=4.711767 finalize_start=4.711768 finalize_end=4.711837 | CONV=0.880328 FC=0.059516 MULTIPLEX=0.070878 COT=0.037374 RANDOM_MUL=0.684244 BOOL=1.96669 | LINEAR=0.8270/0.7060 ADAPTIVEAVGPOOL2D=0.0740/0.0600 ACTIVATION=342.9920/354.9640 BATCHNORM2D=0.1350/0.0920 AVGPOOL2D=14.2440/3.9960 CONV2D=261.4690/457.5490 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rsk0_ppa4_c0 r2 P0 pre=7.018309 online=0.675706 wait=0.213212 rounds=779 keyex=0.075192 otsetup=0.872987 packs=32x1 pre_pass_start=4.430764 pre_pass_end=5.190490 complete_pre_end=7.018041 join_end=7.018237 finalize_start=7.018238 finalize_end=7.018309 | CONV=0.784223 FC=0.069815 MULTIPLEX=0.064018 RANDOM_MUL=0.100077 COT=0.803614 BOOL3=1.21162 BOOL4=2.06782 BOOL=0.967117 | LINEAR=0.7120/0.5030 ADAPTIVEAVGPOOL2D=0.0940/0.0580 ACTIVATION=312.0650/552.6050 BATCHNORM2D=0.1340/0.0980 AVGPOOL2D=5.4950/3.8470 CONV2D=344.8270/180.2640 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rsk0_ppa4_c0 r2 P1 pre=7.026172 online=0.675580 wait=0.166004 rounds=828 keyex=0.079079 otsetup=0.898799 packs=32x1 pre_pass_start=4.435250 pre_pass_end=5.969863 complete_pre_end=7.025908 join_end=7.026090 finalize_start=7.026091 finalize_end=7.026172 | CONV=0.778024 FC=0.07732 MULTIPLEX=0.060594 RANDOM_MUL=0.092512 COT=0.034395 BOOL3=1.21394 BOOL4=2.06815 BOOL=0.967009 | LINEAR=0.5720/0.5670 ADAPTIVEAVGPOOL2D=0.0910/0.0600 ACTIVATION=293.9610/445.3700 BATCHNORM2D=0.1500/0.0990 AVGPOOL2D=11.0720/3.6910 CONV2D=356.6940/1078.6540 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rspw_rca_c0 r2 P0 pre=1.898227 online=0.583275 wait=0.171636 rounds=2012 keyex=0.085079 otsetup=0.84773 packs=32x1 pre_pass_start=1.291802 pre_pass_end=1.727101 complete_pre_end=1.897996 join_end=1.898163 finalize_start=1.898164 finalize_end=1.898226 | CONV=0.00338 MULTIPLEX=0.075964 COT=0.029775 RANDOM_MUL=0.072068 BOOL=1.12838 | LINEAR=0.4860/0.4630 ADAPTIVEAVGPOOL2D=0.1050/0.0590 ACTIVATION=377.9130/336.5390 BATCHNORM2D=0.1390/0.0880 AVGPOOL2D=8.7800/5.8370 CONV2D=183.7410/80.9860 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rspw_rca_c0 r2 P1 pre=1.916171 online=0.583677 wait=0.282455 rounds=2113 keyex=0.074607 otsetup=0.856301 packs=32x1 pre_pass_start=1.296930 pre_pass_end=1.706641 complete_pre_end=1.915936 join_end=1.916101 finalize_start=1.916103 finalize_end=1.916171 | CONV=0.005412 MULTIPLEX=0.070718 COT=0.059093 RANDOM_MUL=0.071047 BOOL=1.14411 | LINEAR=0.7920/0.4500 ADAPTIVEAVGPOOL2D=0.1380/0.0590 ACTIVATION=417.9380/316.0690 BATCHNORM2D=0.1420/0.0960 AVGPOOL2D=11.5270/6.8810 CONV2D=139.0100/75.3550 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rspw_ppa_c0 r2 P0 pre=3.597676 online=0.532027 wait=0.110561 rounds=907 keyex=0.082452 otsetup=0.891584 packs=32x1 pre_pass_start=2.827765 pre_pass_end=3.392961 complete_pre_end=3.597457 join_end=3.597604 finalize_start=3.597605 finalize_end=3.597675 | CONV=0.013916 MULTIPLEX=0.072881 COT=0.029979 RANDOM_MUL=0.662159 BOOL=2.04945 | LINEAR=0.4840/0.4000 ADAPTIVEAVGPOOL2D=0.1070/0.0590 ACTIVATION=347.7440/455.4860 BATCHNORM2D=0.1480/0.3150 AVGPOOL2D=9.0310/3.4230 CONV2D=162.7390/94.4680 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rspw_ppa_c0 r2 P1 pre=3.565287 online=0.532132 wait=0.210348 rounds=1008 keyex=0.072395 otsetup=0.867099 packs=32x1 pre_pass_start=2.817998 pre_pass_end=3.289772 complete_pre_end=3.565075 join_end=3.565213 finalize_start=3.565214 finalize_end=3.565286 | CONV=0.014551 MULTIPLEX=0.064636 COT=0.130332 RANDOM_MUL=0.689895 BOOL=2.04976 | LINEAR=0.4630/0.4040 ADAPTIVEAVGPOOL2D=0.3210/0.0600 ACTIVATION=364.5110/389.7790 BATCHNORM2D=0.1400/0.0980 AVGPOOL2D=6.4620/4.1960 CONV2D=144.0360/69.7220 
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+Warning: Permanently added 'flare' (ED25519) to the list of known hosts.
+pp_rspw_ppa4_c0 r2 P0 pre=5.523493 online=0.532166 wait=0.099984 rounds=679 keyex=0.087579 otsetup=0.906613 packs=32x1 pre_pass_start=4.676553 pre_pass_end=5.307734 complete_pre_end=5.523242 join_end=5.523424 finalize_start=5.523425 finalize_end=5.523493 | CONV=0.003341 MULTIPLEX=0.054229 RANDOM_MUL=0.116306 COT=0.051637 BOOL3=1.35326 BOOL4=2.1486 BOOL=0.965228 | LINEAR=0.4660/0.4120 ADAPTIVEAVGPOOL2D=0.0910/0.0570 ACTIVATION=294.7130/523.2120 BATCHNORM2D=0.1350/0.1710 AVGPOOL2D=8.6180/8.5980 CONV2D=203.8390/88.4260 
+Warning: Permanently added 'polynize' (ED25519) to the list of known hosts.
+pp_rspw_ppa4_c0 r2 P1 pre=5.490564 online=0.532610 wait=0.220548 rounds=780 keyex=0.07584 otsetup=0.900491 packs=32x1 pre_pass_start=4.664831 pre_pass_end=5.323191 complete_pre_end=5.490292 join_end=5.490494 finalize_start=5.490496 finalize_end=5.490563 | CONV=0.001626 MULTIPLEX=0.052195 RANDOM_MUL=0.106755 COT=0.028185 BOOL3=1.3535 BOOL4=2.14853 BOOL=0.96592 | LINEAR=0.4740/0.4260 ADAPTIVEAVGPOOL2D=0.0860/0.0760 ACTIVATION=330.4420/565.2680 BATCHNORM2D=0.1460/0.5030 AVGPOOL2D=22.7810/6.3280 CONV2D=165.3320/77.3350 
+FPPROF_DONE

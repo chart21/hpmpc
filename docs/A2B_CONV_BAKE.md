@@ -76,6 +76,23 @@ negative logit into `+2^(K-F)`.
   sends `lz_i - l_i` in preprocessing and adds both deltas to `m` online. It costs one preprocessing
   message per value and party, and nothing online.
 
+### Why the rebase, and what it costs (2026-09-30)
+
+`[c]` must exist before the PRE pass: the msb adder's triples are requested during that single non-interactive sweep
+from its input masks (`[c]` among them), and the sweep cannot host the Boolean addition's 31 interactive rounds. Doing
+the addition after the sweep is the unbaked configuration, whose triples then belong to the wrong mask (bug 2 above; the
+triad all_opt A2bits configs as given classify 0-2 of 10). So every ReLU input's mask has to be committed before the
+sweep. A conv/FC with secret weights re-masks its output with a mask each party draws, so it draws the committed `lz`
+(free). Every other producer fixes the mask itself (public-weight conv: `W * l_in`; residual sum `l_a + l_b`; pooling;
+the BatchNorm layers here), so `rebase` sends `lz_i - l_i` per value and party in preprocessing: a one-time pad of `l_i`
+(`lz_i` is fresh and private), 4 B each, nothing online.
+
+CHEETAH ResNet50 (FUNCTION_IDENTIFIER 87/187/287) has 9,006,592 ReLU inputs; 7,300,608 come straight from a conv (BN
+fused). UC1 / UC2 rebase the 1,705,984 after the stem's pooling and the four residual additions (13 MiB); UC3 (public
+weights) rebases all 9,006,592: 2 x 4 B x 9.0 M = 69 MiB, the measured difference to the (wrong) as-given build.
+Avoiding it would need the actual masks before the Boolean addition, i.e. an extra mask-only pass (estimated at the
+PRE pass's 0.3-0.5 s single-threaded) to save 22 ms of transfer at 25 Gbit/s.
+
 The one invariant all of this relies on: the counting (INIT) pass must not draw from the PRNG,
 because the PRNG is reseeded only after preprocessing and every PRE mask would otherwise be shifted
 against LIVE. `a2b_bake_conv_mask` returns 0 there.

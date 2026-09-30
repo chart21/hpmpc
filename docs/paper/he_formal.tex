@@ -162,7 +162,25 @@ packed layout (s1) & 698 & 0.63\\
 conv triples only, final: AB2 (\flag{A_KNOWN=1}) / AB (\flag{A_KNOWN=0}) & 479 / 958 & 1 / 2\\
 \bottomrule
 \end{tabular}
-\caption{Where the conv-triple traffic goes. The first three rows include the Boolean and FC material (108\,MiB,
+\caption{Where the conv-triple traffic goes (UC2, 32-bit ring). The first three rows include the Boolean and FC material (108\,MiB,
 unchanged); the last row compares the two triple types with the same protocol.}
 \label{tab:heformal}
 \end{table}
+
+\paragraph{What is left.} A model of the layout search and the wire format (\texttt{docs/paper/he\_model.py}) reproduces
+the measured 244.1\,MiB of input and 234.9\,MiB of output ciphertexts of the ImageNet convolutions. Dense packing in
+the same format would need 234.7\,MiB, so about half of the traffic is unused coefficients. At $56\times56$ a channel
+fills 3,136 of 4,096 coefficients (77\%). At $14\times14$ and $7\times7$ the layout has to trade inputs against
+outputs: a polynomial holds $c_i$ input channels and $c_o$ output-channel blocks, so inputs use about $1/c_o$ and
+outputs about $1/c_i$ of their coefficients (10--48\% and 4--24\% in the chosen layouts). Stages~3 and~4 send 237\,MiB
+where dense packing would need 67\,MiB. Three cheap levers do not help. A per-layer ring dimension $N = 8192$ (same 109-bit modulus)
+is never cheaper, except on the first layer at equal cost. Fewer bits of the input ciphertexts would raise the product
+noise, which P1 knows and the 64-bit flooding must hide: with 12 bits of headroom below $\Delta = 2^{77}$, at most
+about 16 of 109 bits could go, paid for with more output bits. The output format already keeps only the bits
+decryption needs. The remaining lever is \emph{output repacking}. With $c_o = 1$ the inputs are dense (133\,MiB). The
+evaluator would then zero each output ciphertext's unused coefficients with a ring trace ($\log_2 c_i$ automorphisms)
+or merge them PackLWEs-style, and combine the sparse outputs into dense ones (107\,MiB): 240 instead of 479\,MiB.
+P1 would send Galois keys once, and P0 would do about $2.3\cdot10^5$ key switches with a merge tree (traces:
+$1.8\cdot10^6$). For stages~3 and~4 alone, $1.2\cdot10^5$ key switches, which we estimate at 0.3\s on 32 threads,
+would remove 169\,MiB. On the 25\,Gbit/s testbed that costs more time than the transfer it saves (0.06\,s); on slower
+links it pays off. It is not implemented.
