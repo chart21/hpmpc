@@ -1568,19 +1568,22 @@ void conv_early_start(std::string* ips, int base_port, int process_offset)
     const std::string ip = ips[0];
     const int port = base_port + process_offset + CHEETAH_PORT_OFFSET;
     conv_async::launched = true;
-    // They are to use the cores the OT phase leaves idle: CONV_EARLY_THREADS threads (default half the CHEETAH threads:
-    // at 32 the OT phase slowed down by about as much as the conv triples gained), CONV_EARLY_NICE their nice value
-    // (inherited by the threads they start; default 0: with 10-19 they became the tail of the PPA4 builds)
+    // They are to use the cores the OT phase leaves idle: CONV_EARLY_THREADS threads while it runs (default half the
+    // CHEETAH threads: with all of them the OT phase slowed down by about as much as the conv triples gained), all
+    // CHEETAH threads after it (g_early_ot_hook lifts the limit; with half, the Zen 3 builds with short OT phases had
+    // the conv triples as their tail); CONV_EARLY_NICE their nice value (inherited by the threads they start; default
+    // 0: with 10-19 they became the tail of the PPA4 builds)
     const int nice_value = getenv("CONV_EARLY_NICE") ? atoi(getenv("CONV_EARLY_NICE")) : CHEETAH_CONV_EARLY_NICE;
     const int threads = getenv("CONV_EARLY_THREADS") ? std::max(4, atoi(getenv("CONV_EARLY_THREADS"))) : CHEETAH_CONV_EARLY_THREADS;
-    conv_async::worker = std::thread([parms, ip, port, nice_value, threads] {
+    Iface::conv_threads_now() = (size_t) threads;
+    conv_async::worker = std::thread([parms, ip, port, nice_value] {
         if (nice_value != 0)
             setpriority(PRIO_PROCESS, (id_t) syscall(SYS_gettid), nice_value);
         auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
         Iface::generateConvTriplesPackedBatch(keys, parms,
                                               A_KNOWN == 0 || PARTY == 1 ? (UINT_TYPE**) conv_triple_x : nullptr,
                                               A_KNOWN == 0 || PARTY == 0 ? (UINT_TYPE**) conv_triple_w : nullptr,
-                                              (UINT_TYPE*) conv_triple_y, CHEETAH_PARTY, threads,
+                                              (UINT_TYPE*) conv_triple_y, CHEETAH_PARTY, CHEETAH_THREADS,
                                               A_KNOWN == 0 ? Utils::PROTO::AB : Utils::PROTO::AB2, nullptr,
                                               keys.get_side_ios(4));
         conv_async::done = true;

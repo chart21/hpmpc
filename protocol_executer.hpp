@@ -436,6 +436,7 @@ void preprocess_circuit(std::string ips[])
         g_early_ot_hook = [ips] {
             conv_early_start(ips, base_port, process_offset);
             run_ot_phase(ips);
+            Iface::conv_threads_now() = 0;  // the OT phase is done: the conv triples may take all their threads
         };
 #else
         run_ot_phase(ips);
