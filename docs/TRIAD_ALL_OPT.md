@@ -163,8 +163,9 @@ Question: why does the as-given A2bits UC3 build look slightly better in preproc
 ## Communication
 
 MiB sent plus received by P0 (both directions; P1's counters mirror P0's), from the fp logs; every value is identical
-in both reruns and on ag. Source `docs/variant_data/triad/comm_fp.csv` (triple counters in MiB, network counters in
-10^6 bytes, converted), plot data `docs/paper/data/triad_comm_c{0,1}.dat` (`make_triad.py`), paper Fig. 17.
+in both reruns and on ag. Source `docs/variant_data/triad/comm_fp.csv` (as given), `comm_fp6.csv` (final builds at
+the round-5 code) and `comm_fp7.csv` (UC1 / UC2 A2bits at the round-6 code); triple counters in MiB, network counters
+in 10^6 bytes, converted; plot data `docs/paper/data/triad_comm_c{0,1}.dat` (`make_triad.py`), paper Fig. 17.
 `triples`: HE + OT generation incl. key exchange; `pre`: triples + the network's preprocessing pass.
 
 * UC1 and UC2: preprocessing 1.35-1.86x less with COMPRESS=0, 1.61-1.92x with COMPRESS=1. Conv triples ~1,000 ->
@@ -172,28 +173,30 @@ in both reruns and on ag. Source `docs/variant_data/triad/comm_fp.csv` (triple c
   42 MiB); the pipelined build sends them after the conv batch, so the log counts them under `FC`.
 * CUT: PPA4 needs 12 MiB (reshared) / 74 MiB (A2bits, with the bake) fewer multi-input AND tuples; online -4..8% for the
   UC1 / UC2 COMPRESS=0 builds except A2bits PPA4. Not eligible in UC3 (TRUNC_DELAYED=1).
-* A2B bake in UC3 (A2bits, COMPRESS=0): +69 MiB in the preprocessing pass, the rebase of all 9.0 M ReLU inputs (one word
-  per value and party); online unchanged. The as-given build skips it and is not correct.
+* A2B bake (A2bits, COMPRESS=0): UC3 sends exactly what as given sends (the mask-only forward, round 4; round 3 rebased
+  all 9.0 M ReLU inputs, +69 MiB), and computes correctly. UC1 / UC2 rebase only the stem's 200,704 ReLU inputs after
+  its pooling (1.5 MiB); the residual sum is baked since rounds 5 (UC1) / 6 (UC2). With COMPRESS=1 the bake is not
+  active (reduced bit lengths).
 
 ### Communication, COMPRESS=0
 
 | use case, config | adder | triples conf | triples fin | pre conf | pre fin | pre factor | online conf | online fin | online factor |
 |---|---|---|---|---|---|---|---|---|---|
-| UC1, A2bits | RCA | 2414 | 1368 | 2480 | 1432 | 1.73 | 220.9 | 210.2 | 1.05 |
-| UC1, A2bits | PPA | 2475 | 1430 | 2595 | 1557 | 1.67 | 338.9 | 321.8 | 1.05 |
-| UC1, A2bits | PPA4 | 2710 | 1591 | 2935 | 1805 | 1.63 | 207.9 | 207.9 | 1.00 |
+| UC1, A2bits | RCA | 2414 | 1368 | 2480 | 1426 | 1.74 | 220.9 | 210.2 | 1.05 |
+| UC1, A2bits | PPA | 2475 | 1430 | 2595 | 1551 | 1.67 | 338.9 | 321.8 | 1.05 |
+| UC1, A2bits | PPA4 | 2710 | 1591 | 2935 | 1798 | 1.63 | 207.9 | 207.9 | 1.00 |
 | UC1, reshared | RCA | 2219 | 1174 | 2285 | 1230 | 1.86 | 255.2 | 239.2 | 1.07 |
 | UC1, reshared | PPA | 2311 | 1266 | 2435 | 1389 | 1.75 | 373.3 | 348.7 | 1.07 |
 | UC1, reshared | PPA4 | 3022 | 1965 | 3225 | 2150 | 1.50 | 242.3 | 232.7 | 1.04 |
-| UC2, A2bits | RCA | 1453 | 930 | 1518 | 992 | 1.53 | 178.5 | 167.8 | 1.06 |
-| UC2, A2bits | PPA | 1514 | 991 | 1633 | 1118 | 1.46 | 296.5 | 279.3 | 1.06 |
-| UC2, A2bits | PPA4 | 1749 | 1152 | 1973 | 1365 | 1.45 | 165.5 | 165.5 | 1.00 |
+| UC2, A2bits | RCA | 1453 | 930 | 1518 | 986 | 1.54 | 178.5 | 167.8 | 1.06 |
+| UC2, A2bits | PPA | 1514 | 991 | 1633 | 1111 | 1.47 | 296.5 | 279.3 | 1.06 |
+| UC2, A2bits | PPA4 | 1749 | 1152 | 1973 | 1359 | 1.45 | 165.5 | 165.5 | 1.00 |
 | UC2, reshared | RCA | 1258 | 735 | 1323 | 790 | 1.68 | 212.8 | 196.7 | 1.08 |
 | UC2, reshared | PPA | 1350 | 827 | 1502 | 949 | 1.58 | 330.8 | 306.2 | 1.08 |
 | UC2, reshared | PPA4 | 2061 | 1526 | 2312 | 1710 | 1.35 | 200.0 | 190.3 | 1.05 |
-| UC3, A2bits | RCA | 406 | 406 | 478 | 546 | 0.87 | 142.2 | 142.2 | 1.00 |
-| UC3, A2bits | PPA | 468 | 468 | 593 | 661 | 0.90 | 260.3 | 260.3 | 1.00 |
-| UC3, A2bits | PPA4 | 703 | 703 | 933 | 1002 | 0.93 | 129.3 | 129.3 | 1.00 |
+| UC3, A2bits | RCA | 406 | 406 | 478 | 478 | 1.00 | 142.2 | 142.2 | 1.00 |
+| UC3, A2bits | PPA | 468 | 468 | 593 | 593 | 1.00 | 260.3 | 260.3 | 1.00 |
+| UC3, A2bits | PPA4 | 703 | 703 | 933 | 933 | 1.00 | 129.3 | 129.3 | 1.00 |
 | UC3, reshared | RCA | 212 | 212 | 284 | 284 | 1.00 | 176.6 | 176.6 | 1.00 |
 | UC3, reshared | PPA | 304 | 304 | 462 | 462 | 1.00 | 294.6 | 294.6 | 1.00 |
 | UC3, reshared | PPA4 | 886 | 886 | 1143 | 1143 | 1.00 | 163.6 | 163.6 | 1.00 |
@@ -350,6 +353,31 @@ hpmpc `26119e6`, `3673aad`; ConvTriple `ccb84d8`; flexNN (PIGEON) `74f85d8`, `49
   15.1-21.9 -> 2.7-7.0 s (3.0-6.0x) on Zen 3; online 2.0-3.0x / 2.1-4.1x; UC3 preprocessing 1.1-1.2x / 1.0-1.1x, online
   1.5-2.0x / 1.5-2.2x (`docs/paper/triad_ranges.py`). Traffic (`comm_fp6.csv`, Fig. 17): UC3 A2bits now sends exactly
   what as given sends (the mask-only forward), and computes correctly.
+
+## Round 6 (2026-10-01): UC2 residual sums without rebase, UC1 masks
+
+hpmpc `841335d`, flexNN (PIGEON) `417f12b`; flare / polynize.
+
+* **UC2 residual sums:** P1's conv/FC masks lie in the SecureML truncation's image, so its residual partner could not
+  draw `lz_1 - (a free mask)` and P1 moved the sum alone (`rebase_p1`, 3.1 MiB). Now the other addend's P1 mask `m_b`
+  is committed as well (a conv/FC producer: a PRF value in the image; a ReLU producer: its committed bit-injection
+  outputs from the mask-only forward), P1's committed mask of the sum is `lz_1 = m_a + m_b`, and the partner draws
+  `m_a`, in the image. Which sums are committed follows from the network (both parties agree); details in
+  `docs/A2B_CONV_BAKE.md`. ImageNet UC2 A2bits: P0's received pass messages -3.21 MB (802,816 x 4 B; RCA 32.97 ->
+  29.76 MB), UC1 unchanged, COMPRESS=1 unchanged (no bake there); UC1 and UC2 now rebase only the stem's 200,704 ReLU
+  inputs after its pooling. CIFAR ResNet50 (16 residual sums, 12 of them ReLU-produced) UC2: pass messages 6.13 /
+  10.63 -> 6.13 / 6.13 MB sent / received; the P1 invariant check (real weights) passes everywhere; 5 / 5 / 6 of 10
+  (RCA / PPA / PPA4, round 5 6 / 5 / 5, new hashes: P1's prescribed shares changed), 69 / 100 on 100 images
+  (`res_fp_pc6.csv`, `comm_fp7.csv`).
+* **UC1 privacy fix:** P1's committed masks were narrowed to the truncation's image with every `TRUNC_DELAYED=0` build.
+  In UC1 (`A_KNOWN=0`) the masks are free draws and P1 sends `TRUNC(m_1) + l_1`, which a narrowed `l_1` does not
+  fully hide from P0. Now only `A_KNOWN=1` narrows. UC1 outputs bit for bit as before (they do not depend on the masks).
+* **Timing:** UC2 unchanged (A/B against round 5's binaries, 4 runs each, `res_fp_r6ab.csv`: RCA median 3.81 vs
+  3.74 s, BOOL phase equal). UC1 RCA 0.1-0.2 s slower (3.89-3.99 vs 3.67-3.88 s), all in P1's OT pack setup; a
+  control build with only the old narrowing restored is as fast as round 5 (`res_fp_r6n.csv`: 3.71-3.78 s). Not a
+  value effect: the OT packs are set up before `init_a2b_bake` (the only code the macro touches) runs, P0's binaries
+  are byte-identical, and P1's differ by 184 bytes, which moves the inlined ferret LPN code by 192 bytes - the same
+  kind of layout effect as before (`aeab3ae`).
 
 ## Output repacking: the estimate before round 4
 

@@ -88,7 +88,7 @@ the BatchNorm layers here), so `rebase` sends `lz_i - l_i` per value and party i
 (`lz_i` is fresh and private), 4 B each, nothing online.
 
 CHEETAH ResNet50 (FUNCTION_IDENTIFIER 87/187/287) has 9,006,592 ReLU inputs in 49 ReLUs; 8,003,072 come straight
-from a conv (BN fused). UC1 / UC2 rebase the 1,003,520 after the stem's pooling (+ unfused BatchNorm, 200,704) and
+from a conv (BN fused). UC1 / UC2 rebased (before the residual bake below) the 1,003,520 after the stem's pooling (+ unfused BatchNorm, 200,704) and
 after the one residual addition the layout keeps (stage 1, 802,816; the other three are commented out in
 `Cheetah_ResNet`): 2 x 4 B x 1.0 M = 7.7 MiB (measured per ReLU, `DBGRELU`, 2026-09-30; an earlier version of this
 paragraph said 1,705,984 / four residual additions / 13 MiB, which was wrong). UC3 (public weights) rebases all
@@ -121,6 +121,15 @@ Two ways in which committed randomness masked more than one value:
 Neither fix changes traffic or work; the A2bits UC1 / UC2 CIFAR checks classify 4-7 / 10 as before (new output
 hashes, since the masks changed).
 
+3. **Narrowed masks in UC1 (hpmpc 841335d, 2026-10-01).** `init_a2b_bake` zeroed the top FRACTIONAL bits of P1's
+   committed masks whenever `TRUNC_DELAYED=0`. That is needed where P1's conv/FC mask is the truncation's image of its
+   prescribed triple share (`l1 = TRUNC(-r1)`: weights known in preprocessing, `A_KNOWN=1`), and there it reveals
+   nothing (P0 forms the masked value from its own share, `v' + r1` with `r1` uniform). With `A_KNOWN=0` (UC1) the
+   masks are free draws and P1 sends `TRUNC(m_1) + l_1` for its share `m_1`: with `l_1 < 2^27`, P0 learns an
+   interval constraint on `TRUNC(m_1)`, i.e. on the secret value shifted by a known offset (about one bit on average).
+   Now only `A2B_P1_IMAGE_MASKS` (P1, `A_KNOWN=1`, `TRUNC_DELAYED=0`) narrows. Traffic and work unchanged; the UC1
+   outputs do not depend on the masks (CIFAR hashes bit for bit as before).
+
 ### UC3: the mask-only forward (A2B_BAKE_MASK_PASS, default 1)
 
 With public weights no producer can hit a committed mask: a conv's output mask is `W * lambda_in`, a linear function
@@ -142,15 +151,40 @@ So the preprocessing pass first runs the network over the masks (`a2b_mask_forwa
 UC3 A2bits, ImageNet: 69 MiB less preprocessing traffic (hpmpc's pass messages 140 -> 75 MB for RCA), no mismatch
 in any of the 49 ReLUs.
 
-### UC1 / UC2: residual sums (A2B_BAKE_RESIDUAL, 2026-09-30)
+### UC1 / UC2: residual sums (A2B_BAKE_RESIDUAL, 2026-09-30 / 2026-10-01)
 
-The conv/FC computed last of a residual sum's two addends draws `lz - (the other addend's mask)`: ResNet's forward
-publishes that mask (`g_bake_res_l`; the identity, or `temp` when a downsample branch finishes at the sum), and
-`a2b_bake_conv_mask` subtracts it, so the sum carries `lz`. Every party can, except P1 with weights known in
-preprocessing and SecureML truncation (`TRUNC_DELAYED=0`), whose masks lie in the truncation's image: P1 then draws a
-fresh mask (not `lz`: the rebase would reveal its own mask) and moves the sum alone (`rebase_p1`; P0's delta is zero
-by construction). UC1: the residual sum's 6.1 MiB are gone; UC2: half of them. The outputs do not change (only the
-masks do).
+The conv/FC computed last of a residual sum's two addends (the partner) draws `lz - (the other addend's mask)`:
+ResNet's forward publishes that mask (`g_bake_res_l`; the identity, or `temp` when a downsample branch finishes at the
+sum), and `a2b_bake_conv_mask` subtracts it, so the sum carries `lz`. UC1: the residual sum's 6.1 MiB are gone.
+
+UC2 (weights known in preprocessing, SecureML truncation): P1's conv/FC masks lie in the truncation's image (top
+FRACTIONAL bits zero), so `lz_1 - (a free mask)` is not a mask P1 can produce. Until 2026-10-01 P1 drew fresh there
+and moved the sum alone (`rebase_p1`, 3.1 MiB). Now the other addend's P1 mask `m_b` is committed too, and P1's
+committed mask of the sum is `lz_1 = m_a + m_b` (`m_a` the image value `init_a2b_bake` draws), so the partner draws
+`lz_1 - m_b = m_a`, again in the image:
+
+* **conv/FC producer** (the downsample branch's conv or, after it, the block's last conv): draws `m_b` as a PRF value
+  (`prf_value(kTweakResidual, k << 40 | j)` under its own key) in the image. Like a fresh `m1`, it is uniform there,
+  so its prescribed triple share `r1 = -((m_b << F) + low)` stays uniform;
+* **ReLU producer** (the identity of a block without downsample): its committed bit-injection output masks
+  (`g_relu_out`), available in builds with a mask-only forward (`CHEETAH_CONV_EARLY`, i.e. every single-batch UC2
+  build with packed pipelined convs); without one, that sum keeps `rebase_p1`.
+
+`ResNet::mark_residual_producers` numbers the sums in network order and replays the `Identity_*` events to find each
+sum's other addend (the partner is the layer computed last); the producer layer publishes the sum's number while it
+runs (`g_res_producer_k`, `g_relu_identity_k`), the sum's ReLU its own (`g_residual_k`), the partner `g_bake_res_k`.
+The INIT pass records the sum's A2B slots (`g_residual_sums`: the Boolean addition's slices counted so far) and a ReLU
+producer's first slot; `init_a2b_bake` then adds `m_b` on those slots and re-derives `ia = bool(-lz_1)`. Whether a sum
+is committed follows from the producer kinds alone (`a2b_residual_committed`), so both parties agree on who sends
+what. This reveals nothing new: `lz_1 = m_a + m_b` is exactly the mask the sum's local addition gives, and `m_a`,
+`m_b` are independent and uniform in the image, as fresh masks would be.
+
+Measured (flare / polynize, hpmpc 841335d): UC2 A2bits ImageNet, P0's received pass messages 32.97 -> 29.76 MB (RCA),
+66.75 -> 63.54 (PPA), 111.8 -> 108.6 (PPA4), exactly the 802,816 x 4 B; UC1 unchanged. CIFAR ResNet50 (16 residual
+sums: 4 conv-, 12 ReLU-produced) UC2: 6.13 / 10.63 -> 6.13 / 6.13 MB sent / received, i.e. every residual sum is free
+and the pass traffic is symmetric; the P1 invariant check (real weights) passes on every ReLU; 5 / 5 / 6 of 10
+(RCA / PPA / PPA4; round 5: 6 / 5 / 5, new hashes since P1's prescribed shares changed), 69 / 100 for RCA on 100
+images (UC1: 68 / 100).
 
 The stem stays rebased: with `FUSE_CONV_BN=1` its BatchNorm passes the pooling's output on, whose mask is the
 pooling's truncation mask. A BatchNorm with secret parameters could take the committed masks like a conv

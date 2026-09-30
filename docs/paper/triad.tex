@@ -64,7 +64,8 @@ $\lambda_i$ and reveals nothing. The price is one ring element per value and par
 
 In the CHEETAH ResNet50 layout, 8.00 of the 9.01 million ReLU inputs come straight from a convolution (with BatchNorm
 fused into it); only the ReLUs after the stem's pooling and BatchNorm and after the one residual sum the layout keeps
-(1.00 million) need the remask in UC1 and UC2, 7.7\,MiB. The one-time-pad argument needs $\ell_i$ to mask nothing
+(1.00 million) need the remask in UC1 and UC2, 7.7\,MiB (since rounds 5 and 6 only the stem's 0.20 million, 1.5\,MiB,
+\cref{sec:triadround5,sec:triadround6}). The one-time-pad argument needs $\ell_i$ to mask nothing
 else, which the first version of the bake did not ensure (\cref{sec:triadround4}): it handed the committed masks to
 every convolution, also to those whose output does not go straight into a ReLU, and it drew them by replaying the
 generator stream the passes use for their own masks. In UC3 every convolution is local, so all 9.01 million inputs
@@ -169,8 +170,8 @@ both cross products, from 2,003 to 958\,MiB. With the weights known in preproces
 share corrections, 4 bytes per conv output (42\,MiB). The OT-based tuples are unchanged, except that with
 \flag{CUT_FRACTIONAL_BITS_OPT} PPA4 needs fewer multi-input AND tuples: 12\,MiB less for reshared and 74\,MiB less
 for A2bits, where the bake lets the cut skip the $b$-product gates. The network's preprocessing pass changes by
-$-67$ to $+4$\,MiB in UC1 and UC2 (the bake's remask of the residual sum's ReLU inputs costs the A2bits builds 3.1 to
-6.1\,MiB less since round~5). UC3 needs no linear-layer triples, and its traffic is unchanged. In round~3 its A2bits
+$-67$ to $+2$\,MiB in UC1 and UC2 (of the bake's remask only the stem's ReLU inputs are left, 1.5\,MiB: the residual
+sum's 6.1\,MiB are baked since rounds 5 and 6). UC3 needs no linear-layer triples, and its traffic is unchanged. In round~3 its A2bits
 builds with \flag{COMPRESS=0} sent 69\,MiB more than as given: no ReLU input comes straight from a masked conv layer,
 so the bake rebased every one of the 9.0 million inputs onto its committed mask, which the as-given builds skip (and
 compute wrong signs, see Correctness). The mask-only forward of round~4 bakes them without that message, so the
@@ -242,12 +243,26 @@ the rerun of all 36 builds at the final code (\cref{tab:triad}, \cref{fig:triad,
   since the bit injections no longer draw masks.
 \item \textbf{Residual sums baked.} The layer computed last of a residual sum's two addends draws $\ell - \lambda'$,
   where $\lambda'$ is the other addend's mask, so that the sum carries $\ell$. In UC1 this removes the residual sum's
-  remask (6.1\,MiB); in UC2 P1's masks must lie in the SecureML truncation's image, so P1 still sends its half alone
-  (3.1\,MiB saved). The outputs are unchanged bit for bit. In preprocessing, every baked ReLU input's mask is checked
+  remask (6.1\,MiB); in UC2 P1's masks must lie in the SecureML truncation's image, so P1 still sent its half alone
+  (3.1\,MiB saved; round~6 removes the other half). The outputs are unchanged bit for bit. In preprocessing, every baked ReLU input's mask is checked
   against its committed mask; the check showed that with dummy weights P1 holds a bias mask that the UC2 bake cannot
   compensate, so P1's A2B inputs were off after biased convolutions in the dummy-weight ImageNet runs (the timing
   measurements are unaffected).
 \end{enumerate}
+
+\paragraph{Round 6.}\label{sec:triadround6} In UC2, P1 now also bakes the residual sum. P1's partner cannot draw
+$\ell_1 - \lambda'_1$ for a free $\lambda'_1$, since with weights known in preprocessing P1's conv masks are the
+truncation's image of its prescribed triple share. So the other addend's P1 mask is committed as well: a
+convolution producing it draws a PRF value in the image (uniform there, like a fresh mask, so the prescribed share
+stays uniform), a ReLU producing it has committed bit-injection masks anyway (round~5). P1's committed mask of the sum
+is then $\ell_1 = m_a + m_b$, exactly the mask the local addition gives, and the partner draws $m_a$, again in the
+image. This removes the remaining 3.1\,MiB (ImageNet); on the CIFAR ResNet50, whose every block has a residual sum,
+the UC2 pass traffic falls from 16.8 to 12.3\,MB, and P1's check of every baked ReLU input passes with the real
+weights. The round also fixes a leak in UC1: the committed masks were narrowed to the truncation's image in every
+build with \flag{TRUNC_DELAYED=0}, but in UC1 P1's masks are free draws that hide the truncated share it sends, so a
+narrowed mask revealed part of it; only builds with weights known in preprocessing narrow now. Neither change costs
+time; UC1's RCA build moved by 0.1--0.2\s in P1's OT setup, which runs before the changed code: a code-layout effect
+(a control build with the old code there is as fast as before).
 
 \paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds at the final code, and CPU profiles add
 where the threads spend it. Before the last two changes the preprocessing pass took 0.43--0.86\s over the 18 builds

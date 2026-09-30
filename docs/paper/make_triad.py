@@ -59,6 +59,8 @@ comm = {}
 comm_rows = list(csv.DictReader(open(VD / "comm_fp.csv")))
 if (VD / "comm_fp6.csv").exists():  # the final builds at the round-5 code
     comm_rows += list(csv.DictReader(open(VD / "comm_fp6.csv")))
+if (VD / "comm_fp7.csv").exists():  # UC1 / UC2 A2bits at the round-6 code (UC2: residual sums without rebase_p1)
+    comm_rows += list(csv.DictReader(open(VD / "comm_fp7.csv")))
 for r in comm_rows:
     v = {k: float(x) for k, x in r.items() if k != "tag"}
     comm[r["tag"].rsplit("_r", 1)[0]] = {
@@ -71,7 +73,7 @@ for c in ("0", "1"):
         for key, name in CONF:
             for a, an in ADD:
                 n = f"{key}_{a}_c{c}"
-                g, o = comm[f"conf_{n}"], comm.get(f"fin6_{n}", comm[f"fin2_{n}"])
+                g, o = comm[f"conf_{n}"], comm.get(f"r6_{n}", comm.get(f"fin6_{n}", comm[f"fin2_{n}"]))
                 f.write(f"{y} {{{name}, {an}}} {g['trip'] + g['pass']:.1f} {o['trip'] + o['pass']:.1f} "
                         f"{g['trip']:.1f} {o['trip']:.1f} {g['online']:.1f} {o['online']:.1f}\n")
                 y += 1
