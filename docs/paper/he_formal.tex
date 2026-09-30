@@ -196,4 +196,22 @@ phase, the evaluation itself stays about the same (0.64 against 0.71\,s on Zen~4
 merge tree ($7.2\cdot10^4$ key switches) or 8.2\,s with traces ($5.4\cdot10^5$) on 32 threads; on Zen~3, 1.7 or
 12.4\,s. So repacking would make an inference's preprocessing about 1.0\,s slower on Zen~4 (1.8\,s on Zen~3) to save
 236\,MiB per HE product. That breaks even at about 1.9\,Gbit/s (Zen~3: 1.1\,Gbit/s): it pays off on WAN links and
-loses on the 25\,Gbit/s testbed. It is not implemented.
+loses on the 25\,Gbit/s testbed.
+
+\paragraph{Output repacking, implemented.} \flag{CHEETAH_CONV_REPACK=1} (round~4 of \cref{sec:triad}) packs with
+PackLWEs' merge tree. The input polynomial holds $C$ channel slots per position, channels fastest ($C$ a power of
+two), and a weight polynomial one filter, channel $c$ at $X^{C \cdot p - c}$ for kernel offset $p$; the product then
+holds each output at a multiple of $C$, and every other coefficient mixes different channels, also where it wraps
+around. The evaluator merges the products of $C$ filters of a tile level by level, $m = C/2, \dots, 1$: with the
+automorphism $\sigma: X \mapsto X^{N/m + 1}$, which fixes $X^{2mk}$ and negates $X^{m(2k+1)}$, the node
+$A + X^m B + \sigma(A - X^m B)$ doubles the used coefficients of $A$ and $B$ and cancels their other coefficients at
+the multiples of $m$; after the last level filter $r$ sits at residue $r$. The products are multiplied by
+$C^{-1} \bmod q$ first ($q$ is odd), which the $\log_2 C$ doublings cancel exactly, so only the key-switching noise of
+the $C - 1$ automorphisms adds up, far below the flooding, which follows the packing (as does the mask, over all
+coefficients). P1 sends its Galois keys once (both parties for AB triples, 1.8\,MB each). Measured on the 53
+ImageNet convolutions (32 threads, all triples exact): the byte-optimal tilings take 148{,}622 automorphisms for
+264\,MiB and 6.3\s of HE; pricing each automorphism at 2\,KB in the tiling search gives 26{,}000 for 285\,MiB in 2.1\s,
+against 479\,MiB in 0.71\s without repacking. The model's 243\,MiB assumed dense outputs; with $C$ a power of two,
+the $49 \cdot 2^k$ positions of the feature maps fill only 77\% of a polynomial. End to end, preprocessing traffic
+falls by 18--31\% in UC1 and 11--24\% in UC2, for 1.3--1.7\s more preprocessing on Zen~4 (break-even about
+1.2\,Gbit/s for UC2, 2.1\,Gbit/s for UC1); the online phase is unchanged.

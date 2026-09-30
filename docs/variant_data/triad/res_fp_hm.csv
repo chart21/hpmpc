@@ -1,0 +1,5 @@
+pair,name,tag,wall,pre,online,acc_ok,acc_n,hash,procs,pre_phases_CONV;BN;BOOL;COT;MUX;FC,live_ms_ACT;CONV;BN,mb_pre,mb_live,wait_s;rounds,errors
+fp,hm_a2bpw_rca_c0,hm_a2bpw_rca_c0_r1,,7.19224,1.3314,63,100,ecda9ba8f1,1,0.00;0.00;2.21;0.05;0.10;0.00,547;655;0,441,0.241185;2069,0
+fp,hm_a2bpw_ppa4_c0,hm_a2bpw_ppa4_c0_r1,,10.9461,1.43001,66,100,2264e661b1,1,0.01;0.00;3.01;0.05;0.10;0.00,619;670;0,723,0.106800;803,0
+fp,hm0_a2bpw_rca_c0,hm0_a2bpw_rca_c0_r1,,6.90224,1.33686,71,100,edbb72d734,1,0.01;0.00;2.13;0.05;0.10;0.00,546;659;0,441,0.194383;2069,0
+fp,hm0_a2bpw_ppa4_c0,hm0_a2bpw_ppa4_c0_r1,,10.4696,1.44143,63,100,6644990839,1,0.01;0.00;2.83;0.05;0.08;0.00,663;639;0,723,0.061342;803,0

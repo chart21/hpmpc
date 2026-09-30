@@ -265,7 +265,46 @@ hpmpc `1421df0`, ConvTriple `5b568e9` (both default on):
   4.12 -> 4.09 s, UC2 reshared PPA4 7.02 -> 6.41 -> 6.16 s, UC3 A2bits RCA 3.72 -> 3.49 s, UC3 reshared RCA 1.92 ->
   1.68 s; online unchanged within noise.
 
-## Output repacking: estimate (not implemented)
+## Round 4 (2026-09-30): P1's bake in the pass, output repacking, privacy fixes, UC3 bake
+
+hpmpc `a57871b`..`c26d99f`, ConvTriple `7778034`, flexNN (PIGEON) `f41b3ba`; flare / polynize only (algofi / goracle
+were re-imaged by another user).
+
+* **Reshared PPA4 tail** (`a57871b`). The ~1 s of conv triples after the pass was not the HE competing with the pass:
+  P1's pass took 1.28-1.43 s against P0's 0.38-0.50 s, and the HE waits for P1's input masks. 77% of P1's pass was its
+  serial GEMM level, where P1 bakes the reshare bits into every conv output mask (RESHARE_OPT_SIM, P1 only); under
+  CUT_FRACTIONAL_BITS_OPT the PPA4 rank helper scanned the retrieval order for each of the 32 slices of each of the
+  7.3 M outputs. Compile-time (numeric bit, tuple offset) tables: P1's pass 0.55-0.66 s, reshared PPA4 preprocessing
+  UC2 6.0 -> 5.5-5.7 s, UC1 6.1-6.4 -> 5.4-5.7 s; CIFAR hashes unchanged.
+* **Output repacking** (`CHEETAH_CONV_REPACK=1`, ConvTriple `conv_repack`, default off): the packed convs run in a ring
+  of N = 8192 with a special prime; inputs hold channels interleaved (C slots per position, a power of two), one
+  filter per product, and the evaluator merges the products of C filters into one dense ciphertext with PackLWEs'
+  tree (C - 1 automorphisms, products scaled by C^-1 mod q first), then floods / masks / truncates as before. Galois
+  keys once (P1's, both parties' for AB; 1.8 MB each, the public keys of the new ring 0.36 MB). The tiling minimizes
+  bytes with each automorphism priced at `CONV_REPACK_KS_BYTES` (default 2048): at 0 it takes 148,622 automorphisms
+  for 264 MiB (6.3 s of HE), at 256 53,000 for 271 MiB (3.0 s), at 2048 26,000 for 285 MiB (2.1 s), against 479 MiB
+  in 0.71 s without repacking (ConvTriple test, 53 ImageNet convs, 32 threads, all exact for AB2 and AB). Powers of
+  two leave 23% of the coefficients unused at 56x56 ... 7x7 (49 * 2^k positions), which the model (`he_model.py`,
+  dense outputs) did not count. End to end (`res_fp_rp.csv`, 2 interleaved runs): preprocessing traffic UC1 -18..-31%
+  (1,229-2,150 -> 845-1,766 MiB), UC2 -11..-24% (790-1,710 -> 598-1,518 MiB), preprocessing +1.3..+1.7 s, online
+  unchanged. Break-even about 1.2 Gbit/s (UC2) and 2.1 Gbit/s (UC1). UC2 output hashes unchanged; UC1 CIFAR 100
+  images 72 / 64 (71 / 67 without). The price per automorphism end to end (`res_fp_ks.csv`, `comm_ks.csv`, 2 runs,
+  `CONV_REPACK_KS_BYTES` at run time): UC2 A2bits RCA 780 / 786 / 800 MiB in 9.8 / 6.3 / 5.5 s for 0 / 256 / 2048,
+  UC1 reshared RCA 804 / 817 / 845 MiB in 8.0 / 4.7 / 3.9 s, UC2 reshared PPA4 1,498 / 1,504 / 1,518 MiB in 11.2 /
+  7.9 / 7.0 s: the last 14-41 MiB cost 4 s.
+* **Privacy fixes in the A2B bake** (`d8a48ae`, `3c70834`, details in `docs/A2B_CONV_BAKE.md`): committed slots were
+  reused by convs not feeding a baked ReLU (1,505,280 slots masked two values, and the rebase revealed the
+  downsample conv's mask), and the committed values replayed the passes' own generator stream. Fixed without any
+  change in traffic or time; the performance numbers of rounds 1-3 stand.
+* **UC3 bake for free** (`A2B_BAKE_MASK_PASS`, default on): a mask-only forward in the pass records every ReLU's input
+  mask before the Boolean addition, so no ReLU input is rebased. UC3 A2bits: preprocessing traffic -69 MiB (RCA 546 ->
+  478, PPA 661 -> 593, PPA4 1,002 -> 933 MiB), preprocessing 3.54 -> 3.52, 4.63 -> 4.54, 5.92 -> 5.82 s, online
+  0.63 -> 0.58, 0.63 -> 0.56, 0.68 -> 0.64 s (`res_fp_mp.csv`, 3 runs). CIFAR 100 images: 63 / 66 (71 / 63 without).
+* ReLU-input counts corrected: UC1 / UC2 rebase 1,003,520 inputs (stem + one residual sum), 7.7 MiB, not 1.7 M /
+  13 MiB (the CHEETAH layout keeps one of its four residual sums). These could be baked too (stem BatchNorm like a
+  conv, the residual partner drawing `lz - l_identity`), see `docs/A2B_CONV_BAKE.md`.
+
+## Output repacking: the estimate before round 4
 
 Needs key switching, hence a special prime; at N = 4096 the 109-bit data modulus (2^32 plaintexts, 64-bit flooding)
 already uses the whole 128-bit budget, so N = 8192 (60 + 49 data + 60 special bits). `docs/paper/he_model.py`: with
