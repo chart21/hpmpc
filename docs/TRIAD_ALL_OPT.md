@@ -305,6 +305,41 @@ were re-imaged by another user).
   13 MiB (the CHEETAH layout keeps one of its four residual sums). These could be baked too (stem BatchNorm like a
   conv, the residual partner drawing `lz - l_identity`), see `docs/A2B_CONV_BAKE.md`.
 
+## Round 5 (2026-09-30): conv triples alongside the OT phase, residual sums baked
+
+hpmpc `26119e6`, `3673aad`; ConvTriple `ccb84d8`; flexNN (PIGEON) `74f85d8`, `49b7658`; flare / polynize.
+
+* **Why:** during the OT phase only about 20 of the 64 hardware threads are busy (`/proc/stat` every 50 ms, phase
+  stamps; `cpu_phases_fp.txt`): UC2 A2bits RCA 19.6 over its 3.0 s OT phase, reshared RCA 21.9 over 1.3 s; the pass
+  keeps 46-50 busy, the conv tail after it 34-35.
+* **`CHEETAH_CONV_EARLY`** (default 1; secret weights, packed + pipelined convs, single batch): every ReLU's outputs
+  get committed masks (counter-mode values under the party's key, by slot, `g_relu_out`; both phases' bit injections
+  take them), so every conv input (a ReLU output, or the network input) is known before the pass. The pass first runs
+  the network over the masks (`mask_forward`, generalized from the UC3 mask pass, on a copy of the input): the convs
+  record their triple inputs (`RecordConv2dInputs`) and stop, as do FC and BatchNorm. Then the conv triples start on
+  four channels of their own (`Keys::get_side_ios`, ports after the regular ones) and the OT phase runs, moved from
+  `preprocess_circuit` into the pass (`run_ot_phase`); then the real pass, which checks each conv's inputs against the
+  recorded ones. At 32 HE threads the OT phase slowed down by about what the conv triples gained (OT setup stage +0.3 s);
+  a sweep of threads and nice values (`res_fp_en.csv`) gave half the threads (`CHEETAH_CONV_EARLY_THREADS`), normal
+  priority (nice 10-19 made the conv triples the tail of the PPA4 builds).
+* **Residual sums (A2B bake, `A2B_BAKE_RESIDUAL`, default 1):** the conv/FC computed last draws `lz - (the other
+  addend's mask)` (ResNet's forward publishes it: the identity, or `temp` when a downsample branch finishes there), so
+  the sum carries `lz`. UC1 needs no rebase there; in UC2 (weights known in preprocessing, SecureML truncation) P1's
+  masks lie in the truncation's image, so P1 draws fresh and moves the sum alone (`rebase_p1`, P0's delta is zero).
+  The stem stays rebased: with `FUSE_CONV_BN=1` its BatchNorm passes the pooling's output on. A BatchNorm bake
+  (`A2B_BAKE_BN`) works mechanically but changed the outputs of the multi-batch `FUSE_CONV_BN=0` check (105 instead of
+  129 of 192) for reasons not understood yet: off by default (no triad build uses `FUSE_CONV_BN=0`).
+* **Check:** in preprocessing every baked ReLU input's mask share must equal its committed slot. It found that with
+  dummy weights (`MODELOWNER=-1`) P1 holds a bias mask, which the UC2 bake (P1's masks in the truncation's image) cannot
+  compensate: UC2 A2bits ImageNet dummy runs had P1 off after biased convs all along (their outputs never mattered;
+  timing unaffected; a real model owner's bias has no mask at P1). The check skips that case.
+* **Results** (`res_fp_b.csv`, `comm_b.csv`, 3 interleaved runs against round 4): preprocessing -0.03..-0.34 s over the
+  12 UC1 / UC2 builds (RCA -0.18..-0.34), online -0.02..-0.07 s (the bit injections draw no masks online); preprocessing
+  traffic -6.1 MiB (UC1 A2bits) / -3.1 MiB (UC2 A2bits), reshared unchanged. CIFAR: all 12 builds and UC3 classify as
+  before (`res_fp_bc2.csv`), A2bits hashes unchanged by the residual bake; on the CIFAR ResNet50 (a residual sum per
+  block) hpmpc's preprocessing messages 21.5 -> 12.5 MB (UC1) / 21.3 -> 16.8 MB (UC2). Multi-batch: bit for bit as round
+  4 (`res_fp_pm6.csv`).
+
 ## Output repacking: the estimate before round 4
 
 Needs key switching, hence a special prime; at N = 4096 the 109-bit data modulus (2^32 plaintexts, 64-bit flooding)

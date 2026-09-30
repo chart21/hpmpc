@@ -1,0 +1,2 @@
+pair,name,tag,wall,pre,online,acc_ok,acc_n,hash,procs,pre_phases_CONV;BN;BOOL;COT;MUX;FC,live_ms_ACT;CONV;BN,mb_pre,mb_live,wait_s;rounds,errors
+fp,pm6_def,pm6_def_r1,,11.7647,0.726152,129,192,15ae67c585,24,3.88;0.87;3.00;30.55;0.58;0.14,167;143;24,4875,0.223335;1738,0

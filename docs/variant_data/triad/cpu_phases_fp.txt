@@ -1,0 +1,14 @@
+== pq3_a2b_rca_c0
+phases: pre_start=0.00 pass_start=2.97 pass_end=3.47 conv_joined=3.83 complete_end=4.11
+  OT phase    0.00- 2.97 s: busy  19.6 of 64 hw threads
+  pass        2.97- 3.47 s: busy  49.8 of 64 hw threads
+  conv tail   3.47- 3.83 s: busy  34.2 of 64 hw threads
+  after       3.83- 4.11 s: busy   8.3 of 64 hw threads
+  OT phase per 0.25 s: 17 31 28 17 17 10 24 31 26 9 10 11
+== pq3_rs_rca_c0
+phases: pre_start=0.00 pass_start=1.32 pass_end=1.73 conv_joined=2.13 complete_end=2.36
+  OT phase    0.00- 1.32 s: busy  21.9 of 64 hw threads
+  pass        1.32- 1.73 s: busy  45.8 of 64 hw threads
+  conv tail   1.73- 2.13 s: busy  35.1 of 64 hw threads
+  after       2.13- 2.36 s: busy  10.8 of 64 hw threads
+  OT phase per 0.25 s: 18 31 28 16 21 0

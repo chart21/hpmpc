@@ -223,6 +223,26 @@ was not available); \cref{tab:triad,tab:triadphases} and \cref{fig:triad,fig:tri
   preprocessing; the online phase is unchanged.
 \end{enumerate}
 
+\paragraph{Round 5.}\label{sec:triadround5} Two more changes, again on flare / polynize.
+\begin{enumerate}\itemsep1pt
+\item \textbf{Conv triples alongside the OT phase.} During the OT phase only about 20 of the 64 hardware threads are
+  busy (sampled every 50\ms), while the conv triples ran with the pass and after it. Every ReLU's outputs now take
+  committed masks (values of a PRF under the party's key, by position), so every convolution's input masks are known
+  before the pass: the pass first runs the network over the masks, where each convolution records its triple's
+  inputs and stops, then starts the conv triples on four channels of their own, runs the OT phase (moved into the
+  pass), and then the real sweep, which checks every convolution's inputs against the recorded ones. With all 32
+  threads the conv triples slowed the OT phase down by about as much as they gained; with 16, preprocessing takes
+  0.03--0.34\s less over the 12 UC1 and UC2 builds (0.18--0.34\s for RCA). The online phase gets 0.02--0.07\s faster,
+  since the bit injections no longer draw masks.
+\item \textbf{Residual sums baked.} The layer computed last of a residual sum's two addends draws $\ell - \lambda'$,
+  where $\lambda'$ is the other addend's mask, so that the sum carries $\ell$. In UC1 this removes the residual sum's
+  remask (6.1\,MiB); in UC2 P1's masks must lie in the SecureML truncation's image, so P1 still sends its half alone
+  (3.1\,MiB saved). The outputs are unchanged bit for bit. In preprocessing, every baked ReLU input's mask is checked
+  against its committed mask; the check showed that with dummy weights P1 holds a bias mask that the UC2 bake cannot
+  compensate, so P1's A2B inputs were off after biased convolutions in the dummy-weight ImageNet runs (the timing
+  measurements are unaffected).
+\end{enumerate}
+
 \paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds at the final code, and CPU profiles add
 where the threads spend it. Before the last two changes the preprocessing pass took 0.43--0.86\s over the 18 builds
 and the conv triples (0.71--0.84\s) followed it; now the pass takes 0.25--0.64\s and the conv triples run alongside.
@@ -236,10 +256,9 @@ and the conv triples (0.71--0.84\s) followed it; now the pass takes 0.25--0.64\s
 \item \textbf{The bake's Boolean addition} costs the A2bits builds 1.5\s: 31 dependent COT-multiplication rounds of
   15--22\ms plus an extension round. Preparing its inputs costs another 0.25\s of serial time (column other). A
   log-depth adder would need 5--6 rounds but more AND gates, and so more OTs.
-\item \textbf{The conv triples' tail.} In UC1 and UC2 the HE runs 0.28--0.60\s past the pass (reshared PPA4:
-  1.0--1.1\s in round~3, from P1's serial bake, fixed in round~4). The layers the pass reaches last can only start at
-  its end; committing their input masks early, as the mask-only forward does for UC3, would let all layers start at
-  once, alongside the OT phase.
+\item \textbf{The conv triples' tail.} In round~3 the HE ran 0.28--0.60\s past the pass (reshared PPA4: 1.0--1.1\s,
+  from P1's serial bake, fixed in round~4). Round~5 runs it alongside the OT phase instead; it still competes with the
+  OT phase for cores and memory bandwidth, so it gains less than its tail.
 \item \textbf{Serial work} in the pass: the GEMM levels (the weights-known-in-preprocessing path pushes into vectors
   there) and the bake's input preparation still run on one thread.
 \item \textbf{Online}, RCA's 1,714--2,012 rounds cost 0.14--0.18\s of waiting. Of the rest, the main thread spends

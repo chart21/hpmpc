@@ -128,9 +128,9 @@ of earlier bit-injection masks (choosing those so that `W * lambda_in = lz` is a
 general). But every ReLU input mask is then a function of the input masks and the earlier ReLUs' output masks alone.
 So the preprocessing pass first runs the network over the masks (`a2b_mask_forward`, from `SimpleNN::evaluate`):
 
-* the ReLUs record their input masks at their A2B slots and output **committed bit-injection masks** (`g_a2b_bi`,
-  drawn with `ia`); the real passes' bit injections take the same ones (`bi_output_mask`, slot per element via
-  `BiSlotScope`);
+* the ReLUs record their input masks at their A2B slots and output **committed bit-injection masks** (`g_relu_out`,
+  counter-mode values under the party's key, by slot; since round 5 shared with `CHEETAH_CONV_EARLY`); the real passes'
+  bit injections take the same ones (`bi_output_mask`, slot per element via `BiSlotScope`);
 * all other layers run their normal preprocessing code; their truncations (pooling, delayed conv truncations, the
   data owner's first layer) take their masks from a counter-mode stream under the party's key that restarts with
   every forward (`lin_mask`), since a PSELF draw after a ReLU would differ between the two forwards;
@@ -142,13 +142,26 @@ So the preprocessing pass first runs the network over the masks (`a2b_mask_forwa
 UC3 A2bits, ImageNet: 69 MiB less preprocessing traffic (hpmpc's pass messages 140 -> 75 MB for RCA), no mismatch
 in any of the 49 ReLUs.
 
-### UC1 / UC2: stem and residual (not done)
+### UC1 / UC2: residual sums (A2B_BAKE_RESIDUAL, 2026-09-30)
 
-The remaining 7.7 MiB could also go: the stem's BatchNorm has secret parameters and re-masks its output, so it could
-draw the committed slot masks like a conv; at the residual sum, the partner conv could draw `lz - l_identity` (the
-identity's mask is known when it runs), which makes the sum carry `lz` - free for P0 and, without truncation-image
-constraints, for P1; with weights known in preprocessing and `TRUNC_DELAYED=0`, P1's conv masks must lie in the
-truncation's image, so P1 would need a committed identity mask as well (or keep its half of the rebase).
+The conv/FC computed last of a residual sum's two addends draws `lz - (the other addend's mask)`: ResNet's forward
+publishes that mask (`g_bake_res_l`; the identity, or `temp` when a downsample branch finishes at the sum), and
+`a2b_bake_conv_mask` subtracts it, so the sum carries `lz`. Every party can, except P1 with weights known in
+preprocessing and SecureML truncation (`TRUNC_DELAYED=0`), whose masks lie in the truncation's image: P1 then draws a
+fresh mask (not `lz`: the rebase would reveal its own mask) and moves the sum alone (`rebase_p1`; P0's delta is zero
+by construction). UC1: the residual sum's 6.1 MiB are gone; UC2: half of them. The outputs do not change (only the
+masks do).
+
+The stem stays rebased: with `FUSE_CONV_BN=1` its BatchNorm passes the pooling's output on, whose mask is the
+pooling's truncation mask. A BatchNorm with secret parameters could take the committed masks like a conv
+(`A2B_BAKE_BN`, BatchNorm through the `_baked` mask call with its beta compensated like a conv bias); in the
+multi-batch `FUSE_CONV_BN=0` check that changed the outputs (105 instead of 129 of 192) although every mask matched
+its slot - not understood yet, so it is off by default.
+
+In preprocessing, every ReLU input the bake moved by its producer is checked against its committed slot (abort
+otherwise). Not for P1 with weights known in preprocessing, `TRUNC_DELAYED=0` and dummy weights: the dummy biases give
+P1 a bias mask that its image-constrained mask cannot compensate (so those dummy runs' A2Bs were off at P1 after biased
+convs; timing is unaffected, and a real model owner's bias carries no mask at P1).
 
 The one invariant all of this relies on: the counting (INIT) pass must not draw from the PRNG,
 because the PRNG is reseeded only after preprocessing and every PRE mask would otherwise be shifted
