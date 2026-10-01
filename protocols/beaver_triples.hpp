@@ -110,6 +110,9 @@ DATATYPE* random_multiplication_b = nullptr;
 
 // Public-weight layers multiply locally and never bake a mask.
 inline bool msb_input_baked() { return g_msb_input_baked && PUBLIC_WEIGHTS == 0; }
+// The same for a residual sum's partner (A2B_BAKE_RESIDUAL): a conv with public weights is local and draws no mask, so
+// with public weights only the mask-only forward (A2B_BAKE_MASK_PASS) gives a residual sum its committed mask.
+inline bool msb_input_residual() { return g_msb_input_residual && PUBLIC_WEIGHTS == 0; }
 
 // RESHARE_OPT_SIM skips the reshare pre-send only where the bake guarantees it would be zero. Elsewhere the
 // adder takes the real reshare: for inputs that were not baked, and for PPA/PPA4 under MWK with SecureML
@@ -207,9 +210,12 @@ inline DATATYPE prf_value(uint64_t tweak, uint64_t k)
     return buf[k % BUFFER_SIZE];
 }
 constexpr uint64_t kTweakTrunc = 0x5bd1e995a2b0c0deULL, kTweakRelu = 0x2545f4914f6cdd1dULL,
-                   kTweakResidual = 0x7a3d2c1b0f9e8d7cULL;
+                   kTweakResidual = 0x7a3d2c1b0f9e8d7cULL, kTweakA2bIa = 0x3c6ef372fe94f82bULL;
 #endif
 #if A2B_CONV_BAKE_ACTIVE
+#ifndef A2B_BAKE_INIT_THREADS
+#define A2B_BAKE_INIT_THREADS 16  // threads deriving the committed masks (init_a2b_bake), in the OT phase
+#endif
 std::vector<DATATYPE> g_a2b_ia;   // this party's random boolean A2B-mask slices (boolean-adder input)
 std::vector<DATATYPE> g_a2b_lz;   // derived conv mask -untranspose(ia); ortho(-lz) == ia
 std::vector<DATATYPE> g_a2b_c;    // this party's share of [c] = bool(-lz), from the early boolean addition
@@ -316,8 +322,13 @@ inline Datatype a2b_bake_conv_mask(uint64_t e, func_sub SUB)
 
 // [c] share for the next A2B-S2 slice - identical in PRE and LIVE, so the msb adder's beaver triples
 // (generated in PRE from this out.l) match what LIVE consumes.
+// The value being prepared reads its slices from tl_a2b_c on (set per value by get_msb_range, so that the values are
+// prepared on the pool); -1: the serial cursor.
+inline thread_local int64_t tl_a2b_c = -1;
 inline DATATYPE a2b_bake_get_c()
 {
+    if (tl_a2b_c >= 0)
+        return (uint64_t) tl_a2b_c < g_a2b_c.size() ? g_a2b_c[tl_a2b_c++] : SET_ALL_ZERO();
     return (g_a2b_c_cursor < g_a2b_c.size()) ? g_a2b_c[g_a2b_c_cursor++] : SET_ALL_ZERO();
 }
 #endif
@@ -810,28 +821,12 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
     g_a2b_ia.assign(num_slices, SET_ALL_ZERO());
     g_a2b_lz.assign(num_slices, SET_ALL_ZERO());
     g_a2b_c.assign(num_slices, SET_ALL_ZERO());
-#if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
-    AES_TYPE saved_counter = aes_counter[PSELF];
-    uint64_t saved_numgen = num_generated[PSELF];
-    // Draw from a separate stream: the generator runs AES on its own state (output feedback), so restoring the
-    // state replays the same values, and the passes would draw ia again as their own masks (conv, gate and
-    // bit-injection mask shares): lz = -untranspose(ia) would be a known function of other masks of the same
-    // party, and both kinds of masked values are public. Same key, the state XORed with a constant: an
-    // independent sequence.
-    {
-        alignas(sizeof(AES_TYPE)) uint64_t tweak[sizeof(AES_TYPE) / 8];
-        for (size_t i = 0; i < sizeof(AES_TYPE) / 8; i++) tweak[i] = 0x9e3779b97f4a7c15ULL ^ (0xa2bULL << 32) ^ i;
-        AES_TYPE t;
-        std::memcpy(&t, tweak, sizeof(t));
-        aes_counter[PSELF] = MM_XOR(saved_counter, t);
-        num_generated[PSELF] = BUFFER_SIZE;  // the next draw encrypts the tweaked state
-    }
-#endif
     (void) SUB;  // the masks are derived value by value (UINT_TYPE arithmetic), independent of the lane layout
-    for (uint64_t base = 0; base + K <= num_slices; base += K)
+    // One group of K words: ia drawn, lz derived.
+    auto group = [&](uint64_t base, auto draw)
     {
         Datatype ia[K];
-        for (int i = 0; i < K; i++) { ia[i] = getRandomVal(PSELF); g_a2b_ia[base + i] = ia[i]; }
+        for (int i = 0; i < K; i++) { ia[i] = draw(base + i); g_a2b_ia[base + i] = ia[i]; }
         // The A2B slices a group of K words as orthogonalize_boolean(unorthogonalize_arithmetic(x)) (prepare_A2B_S1/S2).
         // So -lz, value by value (DATTYPE values: K words x DATTYPE / K lanes), is unorthogonalize_boolean(ia), and lz
         // is packed back with orthogonalize_arithmetic: then ortho(-lz) == ia. With DATTYPE == BITLENGTH the arithmetic
@@ -862,10 +857,24 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
         Datatype lz[K];
         orthogonalize_arithmetic(m, lz);
         for (int i = 0; i < K; i++) g_a2b_lz[base + i] = lz[i];
-    }
+    };
 #if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
-    aes_counter[PSELF] = saved_counter;
-    num_generated[PSELF] = saved_numgen;
+    // Counter-mode values under this party's key with a tweak of their own (prf_value): independent of the generator
+    // stream the passes draw their own masks from (a replay of that stream would make lz a known function of other
+    // masks of the same party, whose masked values are public too), and random access, so the groups are derived on
+    // several threads (this runs in the OT phase).
+    const uint64_t groups = num_slices / K;
+    const uint64_t T = std::max<uint64_t>(1, std::min<uint64_t>(A2B_BAKE_INIT_THREADS, groups));
+    std::vector<std::thread> workers;
+    for (uint64_t t = 0; t < T; t++)
+        workers.emplace_back([&, t] {
+            for (uint64_t g = groups * t / T; g < groups * (t + 1) / T; g++)
+                group(g * K, [](uint64_t slot) { return prf_value(kTweakA2bIa, slot); });
+        });
+    for (auto& w : workers) w.join();
+#else
+    for (uint64_t base = 0; base + K <= num_slices; base += K)  // (as before the PRF path)
+        group(base, [](uint64_t) { return getRandomVal(PSELF); });
 #endif
 #if A2B_RESIDUAL_COMMIT && PARTY == 1
     // Residual sums with a committed other addend (a2b_residual_committed): lz_1 = m_a + m_b, with m_a the image

@@ -143,7 +143,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 #else
     // residual sums: the partner drew lz - (other addend), so the sum carries lz. P1 with truncation-image masks: only
     // if the other addend's mask is committed as well (a2b_residual_committed), otherwise P1 moves its part alone.
-    const bool residual = g_msb_input_residual && !msb_input_baked();
+    const bool residual = msb_input_residual() && !msb_input_baked();
     const bool p1_moves = residual && !A2B_RESIDUAL_BAKE_P1 && !a2b_residual_committed(g_residual_k);
     const bool moved_by_producer = msb_input_baked() || (residual && (!p1_moves || PARTY == 0));
     if (current_phase == PHASE_INIT && residual && g_residual_k >= 0)
@@ -196,18 +196,23 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 #endif
 #if A2B_ROUND_OPT_SIM == 0
     //Skip if we are simulating A2B with round optimization
-#if A2B_CONV_BAKE_ACTIVE  // the bake's cursor (g_a2b_c_cursor) advances per value: keep the serial order
-    for (int i = 0; i < len; i++)
-    {
+#if A2B_CONV_BAKE_ACTIVE
+    // [c] is addressed by value: value i reads the BITLENGTH slices from c_base + i * BITLENGTH on (tl_a2b_c), so the
+    // values are prepared on the pool like the unbaked A2B's
+    const uint64_t c_base = g_a2b_c_cursor;
+    stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
         s1[i] = Bitset::prepare_A2B_S1(bm, (S*)val[i].get_share_pointer());
+        tl_a2b_c = (int64_t) (c_base + (uint64_t) i * BITLENGTH);
         s2[i] = Bitset::prepare_A2B_S2(bm, (S*)val[i].get_share_pointer());
-    }
+        tl_a2b_c = -1;
+    });
+    if (current_phase != PHASE_INIT)
+        g_a2b_c_cursor = c_base + (uint64_t) len * BITLENGTH;
     Share::communicate();
-    for (int i = 0; i < len; i++)
-    {
+    stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
         s1[i].complete_A2B_S1();
         s2[i].complete_A2B_S2();
-    }
+    });
 #else
     stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
         s1[i] = Bitset::prepare_A2B_S1(bm, (S*)val[i].get_share_pointer());
