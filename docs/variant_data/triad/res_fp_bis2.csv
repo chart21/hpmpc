@@ -1,0 +1,3 @@
+pair,name,tag,wall,pre,online,acc_ok,acc_n,hash,procs,pre_phases_CONV;BN;BOOL;COT;MUX;FC,live_ms_ACT;CONV;BN,mb_pre,mb_live,wait_s;rounds,errors
+fp,bsE_a2b_rca_c0,bsE_a2b_rca_c0_r1,,1.50227,0.417887,0,10,fd8b042840,1,0.57;0.00;0.67;0.01;0.03;0.08,180;86;0,168,0.112093;1636,0
+fp,bsF_a2bk0_rca_c0,bsF_a2bk0_rca_c0_r1,,1.53848,0.348618,5,10,a85581e4d0,1,0.65;0.00;0.70;0.01;0.03;0.07,108;107;0,268,0.083684;1641,0

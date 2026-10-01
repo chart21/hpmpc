@@ -130,6 +130,22 @@ hashes, since the masks changed).
    Now only `A2B_P1_IMAGE_MASKS` (P1, `A_KNOWN=1`, `TRUNC_DELAYED=0`) narrows. Traffic and work unchanged; the UC1
    outputs do not depend on the masks (CIFAR hashes bit for bit as before).
 
+4. **Repeated committed masks (hpmpc 92a2c0e).** `prf_value`, the counter-mode PRF of the committed masks, took its block
+   and slot as `k / BUFFER_SIZE` and `k % BUFFER_SIZE` of a macro without parentheses (`AES_DATTYPE / DATTYPE`): `k /
+   512 / 32` and `(k % 512) / 32`. Each value came back for 32 consecutive masks (16 distinct per 16,384): the mask-only
+   forward's truncation masks (since round 4), every committed ReLU output mask (round 5) and UC2's residual masks (round
+   6) each masked many values. Correctness and timing unaffected; parenthesized, and `prf_value_check()` aborts if
+   neighbouring values repeat.
+
+### What the bake costs (2026-10-01)
+
+Against the same flags with `A2B_CONV_BAKE=0` (the as-given A2B: same Boolean addition, after the pass, wrong signs), 9
+A2bits COMPRESS=0 ImageNet builds, flare / polynize, 3 interleaved runs, hpmpc 92a2c0e (`res_fp_bake10.csv`):
+traffic of the triples and of the online phase identical byte for byte; the pass +0.80 MB per direction in UC1 / UC2
+(the stem's remask, 1.53 MiB, 0.1% of preprocessing), +0 in UC3. Preprocessing -0.10..+0.09 s with secret weights,
++0.06..+0.16 s with public weights (the mask-only forward); online 0.00..-0.07 s. Before b4577f5 the baked A2B prepared
+its values serially (one global [c] cursor) and cost up to 0.1 s online.
+
 ### UC3: the mask-only forward (A2B_BAKE_MASK_PASS, default 1)
 
 With public weights no producer can hit a committed mask: a conv's output mask is `W * lambda_in`, a linear function

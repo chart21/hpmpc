@@ -77,66 +77,66 @@ worker threads.
 
 ImageNet ResNet50, one image, dummy weights; fp = flare / polynize (Zen 4), ag = algofi / goracle (Zen 3). Final data
 (2026-10-01): `conf` = the config as given (res_*_final4.csv, 3 runs alternating with the round-3 code), `fin` = the
-configs plus every optimization at the round-6 code, hpmpc `841335d` / ConvTriple `8d8f244` / flexNN `417f12b`, without
-`RNG_AHEAD` (res_*_final8.csv, `fin8_`, 3 runs); `fin64`: `CHEETAH_THREADS=64` at `ce0608a` (earlier round).
+configs plus every optimization at the round-7 code, hpmpc `92a2c0e` / ConvTriple `8d8f244` / flexNN `417f12b`, without
+`RNG_AHEAD` (res_*_final9.csv, `fin9_`, 3 runs); `fin64`: `CHEETAH_THREADS=64` at `ce0608a` (earlier round).
 
-* Every build is faster than as given online on both pairs, and in preprocessing all but UC3 A2bits RCA COMPRESS=0 on
-  ag (3.82 vs 3.75 s: the correct bake's mask-only forward, which the as-given build skips).
-* UC1 and UC2: preprocessing 11.7-17.3 -> 1.6-5.5 s on fp (3.0-7.3x), 15.1-21.9 -> 2.7-7.0 s on ag (3.0-6.0x); online
-  0.77-1.55 -> 0.35-0.70 s on fp (2.0-3.2x), 0.72-1.73 -> 0.26-0.68 s on ag (2.1-4.3x). UC2 online 0.35-0.61 s (fp),
-  0.26-0.53 s (ag).
-* UC3: preprocessing 1.05-1.21x faster (ag 0.98-1.14x), online 1.5-1.9x (ag 1.4-2.2x).
+* Every build is faster than as given online on both pairs, and in preprocessing all but two UC3 COMPRESS=1 builds on
+  ag, 1-2% slower (a2bpw_ppa_c1 1.88 vs 1.86 s, rspw_ppa_c1 2.01 vs 1.97 s; code untouched by rounds 4-7: spread).
+* UC1 and UC2: preprocessing 11.7-17.3 -> 1.7-5.5 s on fp (2.9-7.1x), 15.1-21.9 -> 2.7-6.9 s on ag (3.0-6.0x); online
+  0.77-1.55 -> 0.34-0.63 s on fp (2.0-3.0x), 0.72-1.73 -> 0.24-0.63 s on ag (2.2-4.2x). UC2 online 0.34-0.56 s (fp),
+  0.24-0.48 s (ag).
+* UC3: preprocessing 1.05-1.21x faster (ag 0.98-1.13x), online 1.5-2.2x (ag 1.4-2.2x).
 * `RNG_AHEAD` is no longer in the optimized set: at the round-3 code it saved ~0.04 s online on Zen 4 (median) but cost
   up to 0.17 s on Zen 3 (UC3 COMPRESS=1: 0.51 vs 0.36 s; the online draws wait, most likely for the ring's producer).
 * `CHEETAH_THREADS=64` (earlier round): preprocessing -8% (median, fp) / -4% (ag), up to -20% for PPA4, +19..30% for UC3
   RCA; a per-config choice, not a default.
-* Correctness: all 18 COMPRESS=0 CIFAR builds classify 3-7 of 10 at the final code (`res_fp_pc8.csv`).
+* Correctness: all 18 COMPRESS=0 CIFAR builds classify 3-7 of 10 at the final code (`res_fp_pc10.csv`).
 
 ### COMPRESS=0
 
 | use case, config | adder | pre conf fp | pre fin fp | pre fin64 fp | pre conf ag | pre fin ag | pre fin64 ag | online conf fp | online fin fp | online conf ag | online fin ag |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| UC1, A2bits | RCA | 14.84 | 3.71 | 3.92 | 18.88 | 4.51 | 4.90 | 1.179 | 0.590 | 1.256 | 0.564 |
-| UC1, A2bits | PPA | 16.11 | 4.75 | 5.11 | 19.71 | 5.60 | 6.50 | 1.323 | 0.590 | 1.343 | 0.559 |
-| UC1, A2bits | PPA4 | 17.28 | 5.30 | 5.77 | 21.85 | 6.14 | 7.11 | 1.371 | 0.701 | 1.440 | 0.680 |
-| UC1, reshared | RCA | 13.37 | 2.12 | 2.63 | 17.05 | 3.27 | 3.62 | 1.392 | 0.594 | 1.363 | 0.544 |
-| UC1, reshared | PPA | 15.20 | 3.90 | 4.38 | 19.40 | 5.15 | 5.82 | 1.550 | 0.646 | 1.588 | 0.593 |
-| UC1, reshared | PPA4 | 17.06 | 5.43 | 5.96 | 21.69 | 6.96 | 8.06 | 1.550 | 0.598 | 1.726 | 0.565 |
-| UC2, A2bits | RCA | 13.82 | 3.71 | 3.77 | 17.53 | 4.64 | 4.83 | 1.155 | 0.523 | 1.007 | 0.426 |
-| UC2, A2bits | PPA | 15.00 | 4.65 | 5.22 | 18.61 | 5.73 | 6.41 | 1.200 | 0.524 | 1.114 | 0.399 |
-| UC2, A2bits | PPA4 | 16.54 | 5.25 | 5.67 | 20.05 | 6.23 | 7.06 | 1.242 | 0.611 | 1.204 | 0.532 |
-| UC2, reshared | RCA | 11.90 | 2.04 | 2.55 | 16.12 | 3.21 | 3.53 | 1.191 | 0.547 | 1.148 | 0.415 |
-| UC2, reshared | PPA | 14.04 | 3.80 | 4.44 | 18.51 | 5.08 | 5.69 | 1.362 | 0.553 | 1.285 | 0.431 |
-| UC2, reshared | PPA4 | 16.17 | 5.46 | 6.03 | 20.77 | 6.91 | 7.89 | 1.506 | 0.538 | 1.485 | 0.412 |
-| UC3, A2bits | RCA | 3.75 | 3.56 | 3.05 | 3.75 | 3.82 | 3.40 | 0.917 | 0.603 | 0.878 | 0.552 |
-| UC3, A2bits | PPA | 4.70 | 4.44 | 4.34 | 4.92 | 4.89 | 5.12 | 1.028 | 0.561 | 0.968 | 0.502 |
-| UC3, A2bits | PPA4 | 6.15 | 5.71 | 4.96 | 6.62 | 6.32 | 5.69 | 1.064 | 0.649 | 1.024 | 0.650 |
-| UC3, reshared | RCA | 2.05 | 1.70 | 2.32 | 2.31 | 2.03 | 2.76 | 1.071 | 0.619 | 0.918 | 0.500 |
-| UC3, reshared | PPA | 3.69 | 3.20 | 3.32 | 4.34 | 3.93 | 4.07 | 1.128 | 0.583 | 1.093 | 0.509 |
-| UC3, reshared | PPA4 | 5.45 | 4.91 | 4.42 | 6.55 | 5.92 | 5.28 | 0.971 | 0.498 | 0.887 | 0.447 |
+| UC1, A2bits | RCA | 14.84 | 3.72 | 3.92 | 18.88 | 4.44 | 4.90 | 1.179 | 0.492 | 1.256 | 0.510 |
+| UC1, A2bits | PPA | 16.11 | 4.72 | 5.11 | 19.71 | 5.58 | 6.50 | 1.323 | 0.501 | 1.343 | 0.504 |
+| UC1, A2bits | PPA4 | 17.28 | 5.24 | 5.77 | 21.85 | 6.15 | 7.11 | 1.371 | 0.597 | 1.440 | 0.634 |
+| UC1, reshared | RCA | 13.37 | 2.08 | 2.63 | 17.05 | 3.30 | 3.62 | 1.392 | 0.605 | 1.363 | 0.565 |
+| UC1, reshared | PPA | 15.20 | 3.90 | 4.38 | 19.40 | 5.09 | 5.82 | 1.550 | 0.632 | 1.588 | 0.590 |
+| UC1, reshared | PPA4 | 17.06 | 5.46 | 5.96 | 21.69 | 6.86 | 8.06 | 1.550 | 0.597 | 1.726 | 0.553 |
+| UC2, A2bits | RCA | 13.82 | 3.68 | 3.77 | 17.53 | 4.48 | 4.83 | 1.155 | 0.430 | 1.007 | 0.381 |
+| UC2, A2bits | PPA | 15.00 | 4.67 | 5.22 | 18.61 | 5.69 | 6.41 | 1.200 | 0.447 | 1.114 | 0.352 |
+| UC2, A2bits | PPA4 | 16.54 | 5.23 | 5.67 | 20.05 | 6.19 | 7.06 | 1.242 | 0.531 | 1.204 | 0.481 |
+| UC2, reshared | RCA | 11.90 | 2.02 | 2.55 | 16.12 | 3.17 | 3.53 | 1.191 | 0.515 | 1.148 | 0.386 |
+| UC2, reshared | PPA | 14.04 | 3.85 | 4.44 | 18.51 | 5.14 | 5.69 | 1.362 | 0.557 | 1.285 | 0.442 |
+| UC2, reshared | PPA4 | 16.17 | 5.51 | 6.03 | 20.77 | 6.83 | 7.89 | 1.506 | 0.536 | 1.485 | 0.420 |
+| UC3, A2bits | RCA | 3.75 | 3.38 | 3.05 | 3.75 | 3.67 | 3.40 | 0.917 | 0.507 | 0.878 | 0.480 |
+| UC3, A2bits | PPA | 4.70 | 4.39 | 4.34 | 4.92 | 4.85 | 5.12 | 1.028 | 0.461 | 0.968 | 0.452 |
+| UC3, A2bits | PPA4 | 6.15 | 5.78 | 4.96 | 6.62 | 6.14 | 5.69 | 1.064 | 0.565 | 1.024 | 0.578 |
+| UC3, reshared | RCA | 2.05 | 1.76 | 2.32 | 2.31 | 2.04 | 2.76 | 1.071 | 0.610 | 0.918 | 0.520 |
+| UC3, reshared | PPA | 3.69 | 3.25 | 3.32 | 4.34 | 3.96 | 4.07 | 1.128 | 0.586 | 1.093 | 0.498 |
+| UC3, reshared | PPA4 | 5.45 | 4.95 | 4.42 | 6.55 | 6.07 | 5.28 | 0.971 | 0.514 | 0.887 | 0.428 |
 
 ### COMPRESS=1
 
 | use case, config | adder | pre conf fp | pre fin fp | pre fin64 fp | pre conf ag | pre fin ag | pre fin64 ag | online conf fp | online fin fp | online conf ag | online fin ag |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| UC1, A2bits | RCA | 13.20 | 2.13 | 2.58 | 16.99 | 3.22 | 3.38 | 0.845 | 0.433 | 0.924 | 0.427 |
-| UC1, A2bits | PPA | 13.13 | 2.14 | 2.59 | 16.92 | 3.26 | 3.45 | 0.954 | 0.413 | 0.941 | 0.401 |
-| UC1, A2bits | PPA4 | 13.31 | 2.18 | 2.75 | 16.94 | 3.29 | 3.63 | 0.933 | 0.416 | 0.989 | 0.419 |
-| UC1, reshared | RCA | 12.52 | 1.72 | 2.05 | 16.77 | 2.81 | 2.97 | 0.876 | 0.434 | 0.988 | 0.436 |
-| UC1, reshared | PPA | 13.12 | 2.27 | 2.67 | 17.15 | 3.30 | 3.59 | 1.164 | 0.457 | 1.228 | 0.464 |
-| UC1, reshared | PPA4 | 13.81 | 2.28 | 3.44 | 17.77 | 3.28 | 4.66 | 1.295 | 0.445 | 1.497 | 0.483 |
-| UC2, A2bits | RCA | 11.71 | 2.09 | 2.41 | 15.49 | 3.14 | 3.33 | 0.765 | 0.361 | 0.719 | 0.264 |
-| UC2, A2bits | PPA | 11.95 | 2.07 | 2.51 | 15.69 | 3.15 | 3.39 | 0.824 | 0.390 | 0.730 | 0.258 |
-| UC2, A2bits | PPA4 | 12.18 | 2.16 | 2.64 | 15.73 | 3.22 | 3.59 | 0.810 | 0.347 | 0.764 | 0.271 |
-| UC2, reshared | RCA | 11.74 | 1.63 | 2.02 | 15.08 | 2.65 | 2.87 | 0.775 | 0.385 | 0.795 | 0.292 |
-| UC2, reshared | PPA | 11.87 | 2.21 | 2.51 | 15.93 | 3.08 | 3.55 | 0.984 | 0.410 | 0.919 | 0.329 |
-| UC2, reshared | PPA4 | 12.39 | 2.21 | 3.40 | 16.41 | 3.18 | 4.51 | 1.181 | 0.374 | 1.274 | 0.297 |
-| UC3, A2bits | RCA | 1.77 | 1.59 | 1.71 | 1.86 | 1.82 | 1.91 | 0.576 | 0.390 | 0.522 | 0.367 |
-| UC3, A2bits | PPA | 1.82 | 1.71 | 1.74 | 1.86 | 1.85 | 1.97 | 0.608 | 0.390 | 0.549 | 0.368 |
-| UC3, A2bits | PPA4 | 2.04 | 1.79 | 1.87 | 2.05 | 1.98 | 2.11 | 0.638 | 0.401 | 0.565 | 0.368 |
-| UC3, reshared | RCA | 1.36 | 1.16 | 1.25 | 1.40 | 1.32 | 1.31 | 0.616 | 0.388 | 0.524 | 0.347 |
-| UC3, reshared | PPA | 1.68 | 1.54 | 1.61 | 1.97 | 1.94 | 1.74 | 0.658 | 0.400 | 0.577 | 0.383 |
-| UC3, reshared | PPA4 | 1.94 | 1.71 | 1.81 | 2.12 | 1.91 | 1.88 | 0.711 | 0.376 | 0.585 | 0.368 |
+| UC1, A2bits | RCA | 13.20 | 2.13 | 2.58 | 16.99 | 3.25 | 3.38 | 0.845 | 0.410 | 0.924 | 0.403 |
+| UC1, A2bits | PPA | 13.13 | 2.11 | 2.59 | 16.92 | 3.26 | 3.45 | 0.954 | 0.430 | 0.941 | 0.401 |
+| UC1, A2bits | PPA4 | 13.31 | 2.19 | 2.75 | 16.94 | 3.36 | 3.63 | 0.933 | 0.429 | 0.989 | 0.443 |
+| UC1, reshared | RCA | 12.52 | 1.78 | 2.05 | 16.77 | 2.78 | 2.97 | 0.876 | 0.442 | 0.988 | 0.432 |
+| UC1, reshared | PPA | 13.12 | 2.24 | 2.67 | 17.15 | 3.29 | 3.59 | 1.164 | 0.470 | 1.228 | 0.467 |
+| UC1, reshared | PPA4 | 13.81 | 2.22 | 3.44 | 17.77 | 3.36 | 4.66 | 1.295 | 0.441 | 1.497 | 0.441 |
+| UC2, A2bits | RCA | 11.71 | 2.06 | 2.41 | 15.49 | 3.16 | 3.33 | 0.765 | 0.345 | 0.719 | 0.255 |
+| UC2, A2bits | PPA | 11.95 | 1.98 | 2.51 | 15.69 | 3.14 | 3.39 | 0.824 | 0.364 | 0.730 | 0.244 |
+| UC2, A2bits | PPA4 | 12.18 | 2.13 | 2.64 | 15.73 | 3.18 | 3.59 | 0.810 | 0.338 | 0.764 | 0.269 |
+| UC2, reshared | RCA | 11.74 | 1.65 | 2.02 | 15.08 | 2.68 | 2.87 | 0.775 | 0.395 | 0.795 | 0.312 |
+| UC2, reshared | PPA | 11.87 | 2.19 | 2.51 | 15.93 | 3.03 | 3.55 | 0.984 | 0.401 | 0.919 | 0.311 |
+| UC2, reshared | PPA4 | 12.39 | 2.20 | 3.40 | 16.41 | 3.11 | 4.51 | 1.181 | 0.392 | 1.274 | 0.307 |
+| UC3, A2bits | RCA | 1.77 | 1.62 | 1.71 | 1.86 | 1.82 | 1.91 | 0.576 | 0.383 | 0.522 | 0.370 |
+| UC3, A2bits | PPA | 1.82 | 1.73 | 1.74 | 1.86 | 1.88 | 1.97 | 0.608 | 0.378 | 0.549 | 0.360 |
+| UC3, A2bits | PPA4 | 2.04 | 1.82 | 1.87 | 2.05 | 2.01 | 2.11 | 0.638 | 0.389 | 0.565 | 0.383 |
+| UC3, reshared | RCA | 1.36 | 1.13 | 1.25 | 1.40 | 1.29 | 1.31 | 0.616 | 0.397 | 0.524 | 0.357 |
+| UC3, reshared | PPA | 1.68 | 1.55 | 1.61 | 1.97 | 2.01 | 1.74 | 0.658 | 0.412 | 0.577 | 0.380 |
+| UC3, reshared | PPA4 | 1.94 | 1.75 | 1.81 | 2.12 | 1.92 | 1.88 | 0.711 | 0.383 | 0.585 | 0.377 |
 
 ## UC3: as given vs optimized (2026-09-30)
 
@@ -165,8 +165,8 @@ Question: why does the as-given A2bits UC3 build look slightly better in preproc
 
 MiB sent plus received by P0 (both directions; P1's counters mirror P0's), from the fp logs; every value is identical
 in both reruns and on ag. Source `docs/variant_data/triad/comm_fp.csv` (as given), `comm_fp6.csv` (final builds at
-the round-5 code), `comm_fp7.csv` (UC1 / UC2 A2bits at the round-6 code) and `comm_fp8.csv` (all final builds at
-the round-6 code); triple counters in MiB, network counters
+the round-5 code), `comm_fp7.csv` (UC1 / UC2 A2bits at the round-6 code) `comm_fp8.csv` (all final builds at
+the round-6 code) and `comm_fp9.csv` (round 7, the same bytes); triple counters in MiB, network counters
 in 10^6 bytes, converted; plot data `docs/paper/data/triad_comm_c{0,1}.dat` (`make_triad.py`), paper Fig. 17.
 `triples`: HE + OT generation incl. key exchange; `pre`: triples + the network's preprocessing pass.
 
@@ -395,6 +395,60 @@ hpmpc `841335d`, flexNN (PIGEON) `417f12b`; flare / polynize.
   0.06-0.20 s.
 * **CIFAR at the final code** (`res_fp_pc8.csv`, all 18 COMPRESS=0 builds, 10 images): 3-7 of 10 (plaintext 6); every
   hash as in round 5 except UC2 A2bits (round 6 changed P1's prescribed shares).
+
+## Round 7 (2026-10-01): what the bake costs, its runtime, repeated committed masks
+
+hpmpc `b4577f5`, `92a2c0e`; flare / polynize, algofi / goracle.
+
+* **What the bake costs** (`res_fp_bake8.csv`, round 6; `res_fp_bake10.csv` + `comm_fp9.csv` / `comm_nb10.csv`, round 7):
+  the 9 A2bits COMPRESS=0 builds against the same flags with `A2B_CONV_BAKE=0` (the as-given A2B: same Boolean addition,
+  after the pass, wrong signs), 3 interleaved runs. Triple and online traffic identical byte for byte; the pass sends
+  +0.80 MB per direction in UC1 / UC2 (the stem's 200,704 remasked ReLU inputs, 1.53 MiB = 0.1%), nothing in UC3.
+  Round 6: preprocessing +0.03..+0.17 s, online +0.01..+0.10 s. The online cost was the baked A2B's serial prepare /
+  complete (one global [c] cursor), the preprocessing cost partly its serial commitment.
+* **Baked A2B on the pool** (`b4577f5`): [c] addressed by value (`tl_a2b_c`), prepare / complete on the worker pool.
+  **Parallel commitment**: ia from `prf_value(kTweakA2bIa, slot)` on `A2B_BAKE_INIT_THREADS` (16) threads.
+  **Residual bake off with public weights** (`msb_input_residual()`): UC3 with `A2B_BAKE_MASK_PASS=0` aborted in the bake
+  check (a public-weight conv draws no mask).
+* **Repeated committed masks** (`92a2c0e`, privacy): `BUFFER_SIZE` was `AES_DATTYPE / DATTYPE` without parentheses, so
+  `prf_value` took `k / 512 / 32` and `(k % 512) / 32`: each value came back for 32 consecutive k, 16 distinct per 16,384.
+  Affected: the mask-only forward's truncation masks (round 4), every committed ReLU output mask (round 5: UC3 and the
+  CHEETAH_CONV_EARLY builds of UC1 / UC2), UC2's committed residual masks (round 6). No timing, traffic or accuracy number
+  changes (masks never change the work); it surfaced when b4577f5 drew the commitment from `prf_value` too and P1's
+  narrowed UC2 masks came out tiny (CIFAR 0-2/10; bisected with `A2B_BAKE_PAR_PREP` / `A2B_BAKE_INIT_PRF` knobs, since
+  removed). Parenthesized; `prf_value_check()` aborts if neighbouring values repeat.
+* **Results**: CIFAR, all 18 builds 3-7 of 10 (`res_fp_pc10.csv`), multi-batch A2bits 130/192 (`res_fp_pm10.csv`). The bake
+  at round 7 (`res_fp_bake10.csv`): preprocessing -0.10..+0.09 s with secret weights (UC1 -0.05..-0.10, UC2
+  +0.03..+0.09), +0.06..+0.16 s with public weights (mask-only forward); online 0.00..-0.07 s (faster with the bake).
+  Final rerun of all 36 builds, both pairs (`res_*_final9.csv`, paper Table 14 / Fig. 16): against round 6 preprocessing
+  median +-0.00 s (fp) / -0.01 s (ag), online median -0.01 s, up to -0.10 s. Phase profile at round 7 (`phases9_fp.log`,
+  Table 15). ConvTriple `6980819` (GPU evaluator, see below) leaves the CPU path bit for bit (all 18 CIFAR hashes as
+  `pc10`, `res_fp_pc11.csv`; timing `res_fp_ct11.csv`).
+
+## GPU (2026-10-01, workstation cmucl771615)
+
+RTX 4000 Ada (20 GB, sm_89), 2x Xeon Silver 4410Y (24 cores, 48 threads), CUDA 12.6; both parties on the machine
+(loopback). Data: `docs/variant_data/gpu/` (`ws_convtriples.log`, `ws_hpmpc.csv`).
+
+* **GPU evaluator in the packed pipeline** (ConvTriple `6980819`, `TRIPLE_GPU` builds, `CONV_GPU=0` off):
+  `packed_gpu::Engine` (src/core/conv_packed_gpu.cu) builds each weight polynomial in the shared memory of its NTT kernel,
+  transforms the inputs' c0, sums products (128-bit, both ciphertext halves per thread), inverse-transforms; SEAL's
+  NTT replicated with SEAL's tables (c1 arrives in SEAL's NTT form; the triples are the CPU's values). Pinned staging.
+  The host keeps parsing, flooding, masking, truncation, wire format; repacking stays on the CPU.
+* **Conv triples in isolation** (`cheetah_conv_triple_test imagenet --pipelined`, 16 threads per party, median of 3, all
+  exact): old per-layer troy path 5.26 s AB2 / 10.22 s AB (655 / 1,310 MiB); CPU packed 2.18 / 3.02 s (479 / 958 MiB); GPU
+  evaluator 0.94 / 1.45 s. Profile (nsys, AB2): weight NTTs 0.30 s, products 0.17 s, copies 0.09 s of GPU time.
+* **Whole inference** (final flags but 16 HE/OT threads and 11 workers per party; the configurations' 32 / 24 oversubscribe
+  the shared machine: online 7.0-7.3 s): CPU vs GPU conv triples, median of 3: UC1 A2bits RCA pre 12.38 / 11.53 s,
+  UC2 A2bits RCA 11.61 / 11.48, UC1 reshared RCA 7.43 / 6.82, UC2 reshared RCA 6.46 / 6.56; online unchanged (0.47-0.68 s).
+  Preprocessing is the OT phase (ferret pack setup 2.4 s; A2bits: the bake's Boolean addition 4.8-5.1 s); the conv
+  triples (CPU 4.6-6.4 s, GPU 1.4-2.3 s) run alongside it; 24 OT threads per party are slower (setup 3.7 s).
+* **Online on the GPU**: `GEMM_FAST_GPU=1` (core/cuda/gemm_fast_gpu.cu: GEMM_FAST's uint32 product via CUTLASS, the weight
+  operand kept on the device, exact; `GEMM_FAST_GPU_CHECK=1` recomputes 64 sampled entries per product): UC2 online 0.46 s
+  either way; the conv layers' 0.2 s are per-output mask work and the exchange. `USE_CUDA_GEMM=2` (CUTLASS conv) bypasses
+  the per-output mask step and breaks the A2B bake (check aborts). core/cuda: the uint16_t CUTLASS instantiation does not
+  build with current CUTLASS.
+* Next for the GPU: the OT phase (ferret's LPN step: 10 AES-indexed gathers per output; the COT rounds' hashing).
 
 ## Output repacking: the estimate before round 4
 

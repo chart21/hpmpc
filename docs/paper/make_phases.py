@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """make_phases.py: data/triad_phases.tex, the preprocessing / online phases of six COMPRESS=0 all_opt builds on flare /
-polynize at the final code (round 6: hpmpc 841335d; median of two phase-instrumented runs,
-docs/variant_data/triad/phases8_fp.log; the round-3 profile is phases2_fp.log).
+polynize at the final code (round 7: hpmpc 92a2c0e; median of two phase-instrumented runs,
+docs/variant_data/triad/phases9_fp.log; round 6: phases8_fp.log, round 3: phases2_fp.log).
 
 Timeline (P0, relative to the preprocessing timer): with secret weights the pass first runs the network over the masks,
 then starts the conv triples and runs the OT phase (ot_start .. ot_end) inside the pass, then the real sweep; with
@@ -11,8 +11,8 @@ the conv triples left after the pass, 'after' the rest of the preprocessing."""
 import re, statistics as st
 from pathlib import Path
 rows = {}
-for l in open("../variant_data/triad/phases8_fp.log"):
-    m = re.match(r"pq8_(\S+) r\d P0 (.*)", l)
+for l in open("../variant_data/triad/phases9_fp.log"):
+    m = re.match(r"pq9_(\S+) r\d P0 (.*)", l)
     if m:
         parts = m.group(2).split("|")
         rows.setdefault(m.group(1), []).append({k: float(v) for k, v in re.findall(r"([A-Za-z_0-9]+)=([0-9.]+)", parts[0] + " " + parts[1])})

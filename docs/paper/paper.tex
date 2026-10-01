@@ -29,7 +29,8 @@
 \large ABY2 with HE and silent-OT preprocessing}
 \author{Technical report, HPMPC \texttt{dbg} branch\\[2pt]
 \small hpmpc \texttt{97772ef}, ConvTriple \texttt{fa7b952}, flexNN \texttt{b1ce619};
-ImageNet all\_opt (\cref{sec:triad}): hpmpc \texttt{841335d}, ConvTriple \texttt{8d8f244}, flexNN \texttt{417f12b}}
+ImageNet all\_opt (\cref{sec:triad}): hpmpc \texttt{92a2c0e}, ConvTriple \texttt{8d8f244} (GPU, \cref{sec:gpu}:
+\texttt{6980819}), flexNN \texttt{417f12b}}
 \date{October 1, 2026}
 
 \begin{document}
@@ -55,11 +56,13 @@ With the AdamW-trained ResNet50, every variant classifies 62--72 of 100 images (
 118--131 of 192 (61--68\%; plaintext 71.9\%). Along the way we fixed a thread race, two connection hangs, four protocol
 bugs that broke whole variant families, and the sources of run-to-run nondeterminism: all 60 threaded builds
 reproduced their serial reference bit for bit, and the final single-batch builds still give the same outputs.
-For the artifact's 36 single-batch all\_opt configurations on ImageNet, preprocessing gets $3.0$--$7.3\times$
-faster with secret weights and the online phase $2.0$--$3.2\times$ (EPYC 9354). Their A2bits configurations
+For the artifact's 36 single-batch all\_opt configurations on ImageNet, preprocessing gets $2.9$--$7.1\times$
+faster with secret weights and the online phase $2.0$--$3.0\times$ (EPYC 9354). Their A2bits configurations
 were not correct as given; the A2B bake that fixes them commits every ReLU input's mask before the preprocessing pass,
 for free behind convolutions and residual sums and through a mask-only forward with public weights, and an optional
-output repacking cuts the conv triples' traffic by 40\%.
+output repacking cuts the conv triples' traffic by 40\%. On a GPU, the packed pipeline's evaluator produces the conv
+triples $2.1$--$2.3\times$ faster than the CPU and $5.6$--$7.0\times$ faster than the previous GPU path; on one machine
+shared by both parties the whole inference stays bound by the OT phase.
 \end{abstract}
 
 \section{Introduction}
@@ -93,8 +96,10 @@ and reproducible system. Its focus is communication and runtime; \cref{fig:summa
 \item \textbf{The all\_opt configurations on ImageNet} (\cref{sec:triad}): 36 builds over three weight settings, two
   ReLU protocols and three adders. The A2bits configurations as given compute wrong signs; the A2B bake fixes them
   by committing every ReLU input's mask before the preprocessing pass, at no traffic behind convolutions and residual
-  sums. The conv triples start alongside the OT phase. Preprocessing $3.0\text{--}7.3\times$ faster with secret weights,
-  online $2.0\text{--}3.2\times$.
+  sums. The conv triples start alongside the OT phase. Preprocessing $2.9\text{--}7.1\times$ faster with secret weights,
+  online $2.0\text{--}3.0\times$.
+\item \textbf{GPU} (\cref{sec:gpu}): a GPU evaluator inside the packed conv pipeline, bit-identical to the CPU's.
+  Conv triples $2.1\text{--}2.3\times$ faster than on the CPU; end to end, on one shared machine, the OT phase dominates.
 \end{itemize}
 
 \begin{figure}[t]
@@ -384,6 +389,67 @@ all 53 layers in one product & 88 / 99 & 0.19 & 1.94 (RCA)\\
 versions of the packed evaluator skipped zero weights, so their benchmark times looked 0.6--2.9\s
 faster. With weights known in preprocessing, a zero-skipping evaluator would also leak the number of zero weights through its
 timing. All evaluators now do the same work for any weight values, and all numbers in this report are value-independent.
+
+\subsection{The conv triples on a GPU}\label{sec:gpu}
+
+ConvTriple's GPU path (\texttt{TRIPLE\_GPU}, troy-nova) evaluates each convolution with troy's \texttt{Conv2dHelper}, one
+round trip per layer, full ciphertexts on the wire. The packed CPU evaluator started from its tiling (s1) and then went
+further: the exact wire format, the pipeline across layers, concurrent evaluation, the start alongside the OT phase and the
+repacking variant. The GPU path got none of these. Now the packed pipeline itself has a GPU evaluator (\texttt{TRIPLE\_GPU}
+builds, \texttt{CONV\_GPU=0} turns it off), so all of them carry over. The device builds each weight polynomial directly in
+the shared memory of its NTT kernel (every coefficient, zero or a weight, computed from the weight tensor: no memset and
+no extra pass), transforms the inputs' $c_0$, sums the products with 128-bit accumulators (both halves of a ciphertext per
+thread, so each weight value is loaded once) and transforms the results back. The host keeps parsing the inputs,
+flooding, masking, truncation and the wire format, through pinned staging buffers. The transforms replicate SEAL's
+\texttt{ntt\_negacyclic\_harvey} with SEAL's own tables and slot order. So $c_1$, which arrives in SEAL's NTT form, needs no
+conversion, the triples are the same values as on the CPU, and the two-party check of all 53 ImageNet convolutions passes
+exactly.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+conv triples, ImageNet, 53 convolutions & AB2 (s) & AB (s) & traffic AB2 / AB (MiB)\\
+\midrule
+old GPU path (troy, per layer) & 5.26 & 10.22 & 655 / 1{,}310\\
+CPU, packed and pipelined & 2.18 & 3.02 & 479 / 958\\
+GPU evaluator in the packed pipeline & 0.94 & 1.45 & 479 / 958\\
+\bottomrule
+\end{tabular}
+
+\vspace{6pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+ImageNet, final flags & \multicolumn{2}{c}{preprocessing (s)} & \multicolumn{2}{c}{online (s)}\\
+build & CPU & GPU & CPU & GPU\\
+\midrule
+UC1, A2bits, RCA & 12.38 & 11.53 & 0.65 & 0.63\\
+UC2, A2bits, RCA & 11.61 & 11.48 & 0.47 & 0.47\\
+UC1, reshared, RCA & 7.43 & 6.82 & 0.68 & 0.67\\
+UC2, reshared, RCA & 6.46 & 6.56 & 0.48 & 0.49\\
+\bottomrule
+\end{tabular}
+\caption{CPU against GPU on one workstation (RTX 4000 Ada, two Xeon Silver 4410Y with 24 cores, both parties on it,
+loopback; median of three runs). Top: the conv triples in isolation (16 threads per party), exact in every run. Bottom: the
+whole inference at hpmpc \texttt{92a2c0e} with 16 HE/OT threads and 11 pool workers per party (the configurations' 32
+and 24 oversubscribe a machine both parties share: online 7.0--7.3\s); GPU: the conv triples on the GPU evaluator.}
+\label{tab:gpu}
+\end{table}
+
+\paragraph{CPU against GPU.} \Cref{tab:gpu} compares both on one workstation, the only machine with a GPU, so both
+parties share its CPU. In isolation the GPU evaluator produces the conv triples $2.3\times$ (AB2) and $2.1\times$ (AB)
+faster than the packed CPU pipeline, and $5.6$--$7.0\times$ faster than the old GPU path, with 27\% less traffic. In the
+whole inference the difference mostly disappears. On this machine preprocessing is the OT phase: setting up the 16 ferret
+packs takes 2.4\s, and in the A2bits builds the bake's Boolean addition, 31 dependent COT rounds, another 4.8--5.1\s (1.5\s
+on flare / polynize). The conv triples run alongside the OT phase: 4.6--6.4\s on the CPU, 1.4--2.3\s on the GPU. The GPU
+frees the cores they took, and preprocessing gets 0.6--0.9\s faster where they were longest (UC1, whose AB triples both
+parties evaluate), and stays the same in UC2. The online phase does not change. Its conv layers spend their 0.2\s on the
+per-output mask work and the exchange with the other party, not on the products: moving \flag{GEMM_FAST}'s product to the
+GPU (\flag{GEMM_FAST_GPU}, exact, checked against the CPU on sampled entries) leaves the UC2 online phase at 0.46\s.
+HPMPC's own CUTLASS convolution (\flag{USE_CUDA_GEMM=2}) bypasses the per-output mask step and with it the A2B bake.
+With one party per machine the conv triples would weigh more (each party's CPU would run only its own OT packs), but the
+lever that remains for a GPU is the OT phase itself: ferret's LPN step (a gather of ten AES-indexed blocks per output)
+and the hashing of the COT rounds.
 
 % ------------------------------------------------------------------------------------------------
 \section{Boolean material: OT preprocessing}\label{sec:ot}
@@ -709,7 +775,9 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
   remove that; a BatchNorm bake works mechanically but changed the outputs of an unfused multi-batch check for reasons
   not yet understood, so it is off.
 \item \textbf{OT extension.} Ferret's LPN step and the AES key schedules of the correlation-robust hash
-  are now the largest CPU costs of the Boolean preprocessing; a fixed-key hash is a security decision.
+  are now the largest CPU costs of the Boolean preprocessing; a fixed-key hash is a security decision. On a machine
+  with a GPU, the OT phase is what remains on the CPU's critical path (\cref{sec:gpu}); ferret's LPN step, a gather
+  of ten AES-indexed blocks per output, and the hashing of the COT rounds would be the next work for the GPU.
 \end{itemize}
 
 \section{Conclusion}
