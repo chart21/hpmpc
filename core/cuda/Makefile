@@ -10,7 +10,7 @@ NVCCOPTs= -arch=$(arch) --expt-relaxed-constexpr -std=c++20
 CUDALIB=$(CUDA_PATH)/lib64
 
 BIN_DIR=bin
-TARGETS= $(BIN_DIR)/gemm_cutlass_int.o $(BIN_DIR)/conv_cutlass_int_NCHW.o $(BIN_DIR)/conv_cutlass_int_CHWN.o
+TARGETS= $(BIN_DIR)/gemm_cutlass_int.o $(BIN_DIR)/conv_cutlass_int_NCHW.o $(BIN_DIR)/conv_cutlass_int_CHWN.o $(BIN_DIR)/gemm_fast_gpu.o
 
 CUTLASSINC=$(CUTLASS_PATH)/include
 CUTTOOLINC=$(CUTLASS_PATH)/tools/util/include
@@ -23,6 +23,9 @@ JUNK=$(TARGETS) a.out
 all: $(TARGETS)
 
 $(BIN_DIR)/gemm_cutlass_int.o: gemm_cutlass_int.cu | $(BIN_DIR)
+	$(NVCC) $< $(NVCCOPTs) $(OPTION) -o $@ -c -Xptxas -O3
+
+$(BIN_DIR)/gemm_fast_gpu.o: gemm_fast_gpu.cu gemm_fast_gpu.h | $(BIN_DIR)
 	$(NVCC) $< $(NVCCOPTs) $(OPTION) -o $@ -c -Xptxas -O3
 
 $(BIN_DIR)/conv_cutlass_int_NCHW.o: conv_cutlass_int.cu | $(BIN_DIR)

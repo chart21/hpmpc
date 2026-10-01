@@ -20,6 +20,12 @@
 #ifndef GEMM_FAST
 #define GEMM_FAST 1  // 0: the share-level accumulation (A/B checks)
 #endif
+#ifndef GEMM_FAST_GPU
+#define GEMM_FAST_GPU 0  // 1: GEMM_FAST's product on the GPU (link core/cuda/bin/gemm_fast_gpu.o and cudart)
+#endif
+#if GEMM_FAST_GPU
+#include "../../core/cuda/gemm_fast_gpu.h"
+#endif
 #define GEMM_FAST_ELIGIBLE (GEMM_FAST == 1 && A_KNOWN == 1 && PROTOCOL == 4 && DATTYPE == BITLENGTH && PUBLIC_WEIGHTS == 0 && FUSE_CONV_BN_SIM == 0 && \
                             ADDITIONAL_GEMM_THREADS > 0)
 
@@ -50,23 +56,24 @@ inline void x_row(const U* a, int f, W* x)
     }
 }
 
-// the input-side operand y of one column, written with stride NR into a panel (length K * f)
+// the input-side operand y of one column, written with stride NR into a panel (length K * f), or with stride p into the
+// row-major operand of the GPU product
 template <typename T>
-inline void y_col(const T* b, int f, W* y)
+inline void y_col(const T* b, int f, W* y, size_t stride = NR)
 {
     for (int k = 0; k < f; k++)
     {
 #if A_KNOWN == 0
 #if PARTY == 0
-        y[(size_t) k * NR] = b[k].raw_m() - b[k].raw_l();
+        y[(size_t) k * stride] = b[k].raw_m() - b[k].raw_l();
 #else
-        y[(size_t) k * NR] = W(0) - b[k].raw_l();
+        y[(size_t) k * stride] = W(0) - b[k].raw_l();
 #endif
-        y[(size_t) (f + k) * NR] = W(0) - b[k].raw_m();
+        y[(size_t) (f + k) * stride] = W(0) - b[k].raw_m();
 #elif PARTY == 0
-        y[(size_t) k * NR] = b[k].raw_m() - b[k].raw_l();
+        y[(size_t) k * stride] = b[k].raw_m() - b[k].raw_l();
 #else
-        y[(size_t) k * NR] = W(0) - b[k].raw_l();
+        y[(size_t) k * stride] = W(0) - b[k].raw_l();
 #endif
     }
 }
@@ -115,6 +122,43 @@ inline bool accumulate(const U* A, const T* B, T* C, int m, int p, int f)
         const bool fresh = x_of != (const void*) A || x_m != m || x_f != f;
         if (fresh)
             X.resize((size_t) m * F);
+#if GEMM_FAST_GPU
+        {
+            // the product on the GPU (core/cuda/gemm_fast_gpu.cu): the input operand row-major, F x p, then C.m += the result
+            static_assert(sizeof(W) == sizeof(uint32_t), "GEMM_FAST_GPU: 32-bit ring only");
+            W* bt = gemm_fast_gpu_staging((size_t) F * p, 0);
+            W* res = gemm_fast_gpu_staging((size_t) m * p, 1);
+            GemmPool::get().run([&](int t) {
+                if (fresh)
+                    for (int i = m * t / TT; i < m * (t + 1) / TT; i++)
+                        x_row(A + (size_t) i * f, f, X.data() + (size_t) i * F);
+                for (int j = p * t / TT; j < p * (t + 1) / TT; j++)
+                    y_col(B + (size_t) j * f, f, bt + j, (size_t) p);
+            });
+            x_of = A, x_m = m, x_f = f;
+            gemm_fast_gpu(m, p, F, X.data(), fresh, bt, res);
+            static const bool verify = getenv("GEMM_FAST_GPU_CHECK") && atoi(getenv("GEMM_FAST_GPU_CHECK")) != 0;
+            if (verify)  // 64 sampled entries of every product, recomputed here
+                for (int s = 0; s < 64; s++)
+                {
+                    const size_t i = ((size_t) s * 2654435761u) % m, j = ((size_t) s * 40503u + 7) % p;
+                    W ref = 0;
+                    for (int k = 0; k < F; k++)
+                        ref += X[i * F + k] * bt[(size_t) k * p + j];
+                    if (ref != res[i * p + j])
+                    {
+                        fprintf(stderr, "GEMM_FAST_GPU: C[%zu][%zu] of %d x %d x %d is %u, not %u\n", i, j, m, p, F,
+                                (unsigned) res[i * p + j], (unsigned) ref);
+                        std::abort();
+                    }
+                }
+            GemmPool::get().run([&](int t) {
+                for (size_t e = (size_t) m * p * t / TT; e < (size_t) m * p * (t + 1) / TT; e++)
+                    C[e].raw_m() += res[e];
+            });
+            return true;
+        }
+#endif
         const int npan = (p + NR - 1) / NR;
         yp.resize((size_t) npan * F * NR);
         GemmPool::get().run([&](int t) {
