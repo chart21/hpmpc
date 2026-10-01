@@ -209,6 +209,22 @@ inline DATATYPE prf_value(uint64_t tweak, uint64_t k)
     }
     return buf[k % BUFFER_SIZE];
 }
+// prf_value's values must not repeat: until BUFFER_SIZE was parenthesized, k / BUFFER_SIZE divided by AES_DATTYPE and
+// then by DATTYPE, and each value came back for 32 consecutive k (the committed masks masked many values each)
+inline void prf_value_check()
+{
+    int same = 0;
+    for (uint64_t k = 1; k < 4 * BUFFER_SIZE + 8; k++)
+    {
+        const DATATYPE a = prf_value(0x1234, k - 1), b = prf_value(0x1234, k);
+        same += std::memcmp(&a, &b, sizeof(DATATYPE)) == 0;
+    }
+    if (same > 1)
+    {
+        fprintf(stderr, "prf_value: %d of its neighbouring values are equal\n", same);
+        std::abort();
+    }
+}
 constexpr uint64_t kTweakTrunc = 0x5bd1e995a2b0c0deULL, kTweakRelu = 0x2545f4914f6cdd1dULL,
                    kTweakResidual = 0x7a3d2c1b0f9e8d7cULL, kTweakA2bIa = 0x3c6ef372fe94f82bULL;
 #endif
@@ -858,14 +874,12 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
         orthogonalize_arithmetic(m, lz);
         for (int i = 0; i < K; i++) g_a2b_lz[base + i] = lz[i];
     };
-#ifndef A2B_BAKE_INIT_PRF
-#define A2B_BAKE_INIT_PRF 1
-#endif
-#if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0 && A2B_BAKE_INIT_PRF == 1
+#if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
     // Counter-mode values under this party's key with a tweak of their own (prf_value): independent of the generator
     // stream the passes draw their own masks from (a replay of that stream would make lz a known function of other
     // masks of the same party, whose masked values are public too), and random access, so the groups are derived on
     // several threads (this runs in the OT phase).
+    prf_value_check();
     const uint64_t groups = num_slices / K;
     const uint64_t T = std::max<uint64_t>(1, std::min<uint64_t>(A2B_BAKE_INIT_THREADS, groups));
     std::vector<std::thread> workers;
@@ -876,26 +890,8 @@ inline void init_a2b_bake(uint64_t num_slices, func_sub SUB)
         });
     for (auto& w : workers) w.join();
 #else
-#if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
-    // the generator's own stream from a tweaked state, restored afterwards (PRE and LIVE stay in step, and the
-    // passes do not draw these values again)
-    AES_TYPE saved_counter = aes_counter[PSELF];
-    uint64_t saved_numgen = num_generated[PSELF];
-    {
-        alignas(sizeof(AES_TYPE)) uint64_t tweak[sizeof(AES_TYPE) / 8];
-        for (size_t i = 0; i < sizeof(AES_TYPE) / 8; i++) tweak[i] = 0x9e3779b97f4a7c15ULL ^ (0xa2bULL << 32) ^ i;
-        AES_TYPE tw;
-        std::memcpy(&tw, tweak, sizeof(tw));
-        aes_counter[PSELF] = MM_XOR(saved_counter, tw);
-        num_generated[PSELF] = BUFFER_SIZE;
-    }
-#endif
-    for (uint64_t base = 0; base + K <= num_slices; base += K)
+    for (uint64_t base = 0; base + K <= num_slices; base += K)  // (as before the PRF path)
         group(base, [](uint64_t) { return getRandomVal(PSELF); });
-#if RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0
-    aes_counter[PSELF] = saved_counter;
-    num_generated[PSELF] = saved_numgen;
-#endif
 #endif
 #if A2B_RESIDUAL_COMMIT && PARTY == 1
     // Residual sums with a committed other addend (a2b_residual_committed): lz_1 = m_a + m_b, with m_a the image
@@ -1000,6 +996,7 @@ inline uint64_t g_lin_counter = 0;
 // The committed ReLU output masks, before the preprocessing pass (g_relu_slots from the INIT pass)
 inline void init_relu_out_masks()
 {
+    prf_value_check();
     g_relu_out.resize(g_relu_slots);
     for (uint64_t k = 0; k < g_relu_slots; k++) g_relu_out[k] = prf_value(kTweakRelu, k);
 }

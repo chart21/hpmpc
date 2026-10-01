@@ -15,10 +15,11 @@ alignas(DATTYPE / 8) unsigned char aes_counter[num_players * player_multiplier][
 AES_TYPE key_schedule[num_players * player_multiplier][11];
 AES_TYPE aes_counter[num_players * player_multiplier];
 #endif
+// parenthesized: `k / BUFFER_SIZE` and `k % BUFFER_SIZE` (prf_value) must divide by the quotient
 #if AES_DATTYPE >= DATTYPE
-#define BUFFER_SIZE AES_DATTYPE / DATTYPE
+#define BUFFER_SIZE (AES_DATTYPE / DATTYPE)
 #else
-#define BUFFER_SIZE -DATTYPE / AES_DATTYPE
+#define BUFFER_SIZE (-DATTYPE / AES_DATTYPE)
 #endif
 #endif
 

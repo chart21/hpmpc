@@ -79,6 +79,7 @@ void conv2d_cutlass(const Type* X,
 // UINT8 and UINT16 are not supported by all architectures
 // template void conv2d_cutlass<uint8_t>(const uint8_t* X, const uint8_t* W, uint8_t* Y, int batchSize, int inh, int
 // inw, int din, int dout, int wh, int ww, int padding, int stride, int dilation);
+/* uint16_t: current CUTLASS rejects this instantiation (memory_sm80.h: "Size is not supported")
 template void conv2d_cutlass<uint16_t>(const uint16_t* X,
                                        const uint16_t* W,
                                        uint16_t* Y,
@@ -92,6 +93,7 @@ template void conv2d_cutlass<uint16_t>(const uint16_t* X,
                                        int padding,
                                        int stride,
                                        int dilation);  // INT8 and INT16 are not supported by all architectures
+*/
 template void conv2d_cutlass<uint32_t>(const uint32_t* X,
                                        const uint32_t* W,
                                        uint32_t* Y,
