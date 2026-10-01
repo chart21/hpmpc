@@ -76,66 +76,67 @@ worker threads.
 ## Results
 
 ImageNet ResNet50, one image, dummy weights; fp = flare / polynize (Zen 4), ag = algofi / goracle (Zen 3). Final data
-(2026-09-30): `conf` = the config as given (res_*_final4.csv, 3 runs alternating with the new code), `fin` = the configs
-plus every optimization at hpmpc `1421df0` / ConvTriple `5b568e9`, without `RNG_AHEAD` (res_*_final5.csv, `fin4_`, 3 runs);
-`fin64`: `CHEETAH_THREADS=64` at `ce0608a` (earlier round).
+(2026-10-01): `conf` = the config as given (res_*_final4.csv, 3 runs alternating with the round-3 code), `fin` = the
+configs plus every optimization at the round-6 code, hpmpc `841335d` / ConvTriple `8d8f244` / flexNN `417f12b`, without
+`RNG_AHEAD` (res_*_final8.csv, `fin8_`, 3 runs); `fin64`: `CHEETAH_THREADS=64` at `ce0608a` (earlier round).
 
-* Every build is faster than as given in both phases on both pairs.
-* UC1 and UC2: preprocessing 11.7-17.3 -> 1.9-6.2 s on fp (2.6-6.7x), 15.1-21.9 -> 2.7-7.8 s on ag (2.8-6.0x); online
-  0.77-1.55 -> 0.39-0.70 s on fp (1.8-2.8x), 0.72-1.73 -> 0.27-0.70 s on ag (2.0-3.8x). UC2 online 0.39-0.62 s (fp),
-  0.27-0.54 s (ag).
-* UC3: preprocessing 1.0-1.2x faster, online 1.4-1.9x (ag 1.4-2.1x).
-* `RNG_AHEAD` is no longer in the optimized set: at the final code it saves ~0.04 s online on Zen 4 (median) but costs
+* Every build is faster than as given online on both pairs, and in preprocessing all but UC3 A2bits RCA COMPRESS=0 on
+  ag (3.82 vs 3.75 s: the correct bake's mask-only forward, which the as-given build skips).
+* UC1 and UC2: preprocessing 11.7-17.3 -> 1.6-5.5 s on fp (3.0-7.3x), 15.1-21.9 -> 2.7-7.0 s on ag (3.0-6.0x); online
+  0.77-1.55 -> 0.35-0.70 s on fp (2.0-3.2x), 0.72-1.73 -> 0.26-0.68 s on ag (2.1-4.3x). UC2 online 0.35-0.61 s (fp),
+  0.26-0.53 s (ag).
+* UC3: preprocessing 1.05-1.21x faster (ag 0.98-1.14x), online 1.5-1.9x (ag 1.4-2.2x).
+* `RNG_AHEAD` is no longer in the optimized set: at the round-3 code it saved ~0.04 s online on Zen 4 (median) but cost
   up to 0.17 s on Zen 3 (UC3 COMPRESS=1: 0.51 vs 0.36 s; the online draws wait, most likely for the ring's producer).
 * `CHEETAH_THREADS=64` (earlier round): preprocessing -8% (median, fp) / -4% (ag), up to -20% for PPA4, +19..30% for UC3
   RCA; a per-config choice, not a default.
-* Correctness: all 18 COMPRESS=0 CIFAR builds give the reference hashes at the final code (4-7 of 10 correct).
+* Correctness: all 18 COMPRESS=0 CIFAR builds classify 3-7 of 10 at the final code (`res_fp_pc8.csv`).
 
 ### COMPRESS=0
 
 | use case, config | adder | pre conf fp | pre fin fp | pre fin64 fp | pre conf ag | pre fin ag | pre fin64 ag | online conf fp | online fin fp | online conf ag | online fin ag |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| UC1, A2bits | RCA | 14.84 | 4.16 | 3.92 | 18.88 | 5.03 | 4.90 | 1.179 | 0.648 | 1.256 | 0.601 |
-| UC1, A2bits | PPA | 16.11 | 4.91 | 5.11 | 19.71 | 6.06 | 6.50 | 1.323 | 0.654 | 1.343 | 0.563 |
-| UC1, A2bits | PPA4 | 17.28 | 5.47 | 5.77 | 21.85 | 6.51 | 7.11 | 1.371 | 0.700 | 1.440 | 0.703 |
-| UC1, reshared | RCA | 13.37 | 2.33 | 2.63 | 17.05 | 3.35 | 3.62 | 1.392 | 0.680 | 1.363 | 0.587 |
-| UC1, reshared | PPA | 15.20 | 4.02 | 4.38 | 19.40 | 5.27 | 5.82 | 1.550 | 0.680 | 1.588 | 0.616 |
-| UC1, reshared | PPA4 | 17.06 | 6.19 | 5.96 | 21.69 | 7.82 | 8.06 | 1.550 | 0.680 | 1.726 | 0.615 |
-| UC2, A2bits | RCA | 13.82 | 4.03 | 3.77 | 17.53 | 4.88 | 4.83 | 1.155 | 0.538 | 1.007 | 0.416 |
-| UC2, A2bits | PPA | 15.00 | 4.87 | 5.22 | 18.61 | 5.94 | 6.41 | 1.200 | 0.543 | 1.114 | 0.416 |
-| UC2, A2bits | PPA4 | 16.54 | 5.38 | 5.67 | 20.05 | 6.35 | 7.06 | 1.242 | 0.622 | 1.204 | 0.535 |
-| UC2, reshared | RCA | 11.90 | 2.34 | 2.55 | 16.12 | 3.22 | 3.53 | 1.191 | 0.580 | 1.148 | 0.430 |
-| UC2, reshared | PPA | 14.04 | 4.01 | 4.44 | 18.51 | 5.11 | 5.69 | 1.362 | 0.606 | 1.285 | 0.445 |
-| UC2, reshared | PPA4 | 16.17 | 6.16 | 6.03 | 20.77 | 7.54 | 7.89 | 1.506 | 0.584 | 1.485 | 0.440 |
-| UC3, A2bits | RCA | 3.75 | 3.51 | 3.05 | 3.75 | 3.73 | 3.40 | 0.917 | 0.638 | 0.878 | 0.596 |
-| UC3, A2bits | PPA | 4.70 | 4.41 | 4.34 | 4.92 | 4.80 | 5.12 | 1.028 | 0.630 | 0.968 | 0.552 |
-| UC3, A2bits | PPA4 | 6.15 | 5.99 | 4.96 | 6.62 | 6.35 | 5.69 | 1.064 | 0.693 | 1.024 | 0.668 |
-| UC3, reshared | RCA | 2.05 | 1.69 | 2.32 | 2.31 | 2.05 | 2.76 | 1.071 | 0.604 | 0.918 | 0.532 |
-| UC3, reshared | PPA | 3.69 | 3.20 | 3.32 | 4.34 | 3.80 | 4.07 | 1.128 | 0.585 | 1.093 | 0.527 |
-| UC3, reshared | PPA4 | 5.45 | 4.90 | 4.42 | 6.55 | 5.66 | 5.28 | 0.971 | 0.509 | 0.887 | 0.472 |
+| UC1, A2bits | RCA | 14.84 | 3.71 | 3.92 | 18.88 | 4.51 | 4.90 | 1.179 | 0.590 | 1.256 | 0.564 |
+| UC1, A2bits | PPA | 16.11 | 4.75 | 5.11 | 19.71 | 5.60 | 6.50 | 1.323 | 0.590 | 1.343 | 0.559 |
+| UC1, A2bits | PPA4 | 17.28 | 5.30 | 5.77 | 21.85 | 6.14 | 7.11 | 1.371 | 0.701 | 1.440 | 0.680 |
+| UC1, reshared | RCA | 13.37 | 2.12 | 2.63 | 17.05 | 3.27 | 3.62 | 1.392 | 0.594 | 1.363 | 0.544 |
+| UC1, reshared | PPA | 15.20 | 3.90 | 4.38 | 19.40 | 5.15 | 5.82 | 1.550 | 0.646 | 1.588 | 0.593 |
+| UC1, reshared | PPA4 | 17.06 | 5.43 | 5.96 | 21.69 | 6.96 | 8.06 | 1.550 | 0.598 | 1.726 | 0.565 |
+| UC2, A2bits | RCA | 13.82 | 3.71 | 3.77 | 17.53 | 4.64 | 4.83 | 1.155 | 0.523 | 1.007 | 0.426 |
+| UC2, A2bits | PPA | 15.00 | 4.65 | 5.22 | 18.61 | 5.73 | 6.41 | 1.200 | 0.524 | 1.114 | 0.399 |
+| UC2, A2bits | PPA4 | 16.54 | 5.25 | 5.67 | 20.05 | 6.23 | 7.06 | 1.242 | 0.611 | 1.204 | 0.532 |
+| UC2, reshared | RCA | 11.90 | 2.04 | 2.55 | 16.12 | 3.21 | 3.53 | 1.191 | 0.547 | 1.148 | 0.415 |
+| UC2, reshared | PPA | 14.04 | 3.80 | 4.44 | 18.51 | 5.08 | 5.69 | 1.362 | 0.553 | 1.285 | 0.431 |
+| UC2, reshared | PPA4 | 16.17 | 5.46 | 6.03 | 20.77 | 6.91 | 7.89 | 1.506 | 0.538 | 1.485 | 0.412 |
+| UC3, A2bits | RCA | 3.75 | 3.56 | 3.05 | 3.75 | 3.82 | 3.40 | 0.917 | 0.603 | 0.878 | 0.552 |
+| UC3, A2bits | PPA | 4.70 | 4.44 | 4.34 | 4.92 | 4.89 | 5.12 | 1.028 | 0.561 | 0.968 | 0.502 |
+| UC3, A2bits | PPA4 | 6.15 | 5.71 | 4.96 | 6.62 | 6.32 | 5.69 | 1.064 | 0.649 | 1.024 | 0.650 |
+| UC3, reshared | RCA | 2.05 | 1.70 | 2.32 | 2.31 | 2.03 | 2.76 | 1.071 | 0.619 | 0.918 | 0.500 |
+| UC3, reshared | PPA | 3.69 | 3.20 | 3.32 | 4.34 | 3.93 | 4.07 | 1.128 | 0.583 | 1.093 | 0.509 |
+| UC3, reshared | PPA4 | 5.45 | 4.91 | 4.42 | 6.55 | 5.92 | 5.28 | 0.971 | 0.498 | 0.887 | 0.447 |
 
 ### COMPRESS=1
 
 | use case, config | adder | pre conf fp | pre fin fp | pre fin64 fp | pre conf ag | pre fin ag | pre fin64 ag | online conf fp | online fin fp | online conf ag | online fin ag |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| UC1, A2bits | RCA | 13.20 | 2.30 | 2.58 | 16.99 | 3.17 | 3.38 | 0.845 | 0.447 | 0.924 | 0.422 |
-| UC1, A2bits | PPA | 13.13 | 2.33 | 2.59 | 16.92 | 3.23 | 3.45 | 0.954 | 0.450 | 0.941 | 0.424 |
-| UC1, A2bits | PPA4 | 13.31 | 2.53 | 2.75 | 16.94 | 3.36 | 3.63 | 0.933 | 0.470 | 0.989 | 0.444 |
-| UC1, reshared | RCA | 12.52 | 1.86 | 2.05 | 16.77 | 2.81 | 2.97 | 0.876 | 0.481 | 0.988 | 0.447 |
-| UC1, reshared | PPA | 13.12 | 2.37 | 2.67 | 17.15 | 3.30 | 3.59 | 1.164 | 0.498 | 1.228 | 0.497 |
-| UC1, reshared | PPA4 | 13.81 | 3.05 | 3.44 | 17.77 | 4.10 | 4.66 | 1.295 | 0.506 | 1.497 | 0.534 |
-| UC2, A2bits | RCA | 11.71 | 2.31 | 2.41 | 15.49 | 3.14 | 3.33 | 0.765 | 0.395 | 0.719 | 0.269 |
-| UC2, A2bits | PPA | 11.95 | 2.46 | 2.51 | 15.69 | 3.18 | 3.39 | 0.824 | 0.394 | 0.730 | 0.289 |
-| UC2, A2bits | PPA4 | 12.18 | 2.45 | 2.64 | 15.73 | 3.24 | 3.59 | 0.810 | 0.390 | 0.764 | 0.291 |
-| UC2, reshared | RCA | 11.74 | 1.94 | 2.02 | 15.08 | 2.69 | 2.87 | 0.775 | 0.418 | 0.795 | 0.312 |
-| UC2, reshared | PPA | 11.87 | 2.30 | 2.51 | 15.93 | 3.13 | 3.55 | 0.984 | 0.441 | 0.919 | 0.323 |
-| UC2, reshared | PPA4 | 12.39 | 3.01 | 3.40 | 16.41 | 3.86 | 4.51 | 1.181 | 0.419 | 1.274 | 0.331 |
-| UC3, A2bits | RCA | 1.77 | 1.61 | 1.71 | 1.86 | 1.75 | 1.91 | 0.576 | 0.384 | 0.522 | 0.379 |
-| UC3, A2bits | PPA | 1.82 | 1.67 | 1.74 | 1.86 | 1.75 | 1.97 | 0.608 | 0.380 | 0.549 | 0.372 |
-| UC3, A2bits | PPA4 | 2.04 | 1.77 | 1.87 | 2.05 | 1.86 | 2.11 | 0.638 | 0.405 | 0.565 | 0.399 |
-| UC3, reshared | RCA | 1.36 | 1.16 | 1.25 | 1.40 | 1.20 | 1.31 | 0.616 | 0.390 | 0.524 | 0.358 |
-| UC3, reshared | PPA | 1.68 | 1.56 | 1.61 | 1.97 | 1.80 | 1.74 | 0.658 | 0.408 | 0.577 | 0.392 |
-| UC3, reshared | PPA4 | 1.94 | 1.80 | 1.81 | 2.12 | 1.86 | 1.88 | 0.711 | 0.382 | 0.585 | 0.390 |
+| UC1, A2bits | RCA | 13.20 | 2.13 | 2.58 | 16.99 | 3.22 | 3.38 | 0.845 | 0.433 | 0.924 | 0.427 |
+| UC1, A2bits | PPA | 13.13 | 2.14 | 2.59 | 16.92 | 3.26 | 3.45 | 0.954 | 0.413 | 0.941 | 0.401 |
+| UC1, A2bits | PPA4 | 13.31 | 2.18 | 2.75 | 16.94 | 3.29 | 3.63 | 0.933 | 0.416 | 0.989 | 0.419 |
+| UC1, reshared | RCA | 12.52 | 1.72 | 2.05 | 16.77 | 2.81 | 2.97 | 0.876 | 0.434 | 0.988 | 0.436 |
+| UC1, reshared | PPA | 13.12 | 2.27 | 2.67 | 17.15 | 3.30 | 3.59 | 1.164 | 0.457 | 1.228 | 0.464 |
+| UC1, reshared | PPA4 | 13.81 | 2.28 | 3.44 | 17.77 | 3.28 | 4.66 | 1.295 | 0.445 | 1.497 | 0.483 |
+| UC2, A2bits | RCA | 11.71 | 2.09 | 2.41 | 15.49 | 3.14 | 3.33 | 0.765 | 0.361 | 0.719 | 0.264 |
+| UC2, A2bits | PPA | 11.95 | 2.07 | 2.51 | 15.69 | 3.15 | 3.39 | 0.824 | 0.390 | 0.730 | 0.258 |
+| UC2, A2bits | PPA4 | 12.18 | 2.16 | 2.64 | 15.73 | 3.22 | 3.59 | 0.810 | 0.347 | 0.764 | 0.271 |
+| UC2, reshared | RCA | 11.74 | 1.63 | 2.02 | 15.08 | 2.65 | 2.87 | 0.775 | 0.385 | 0.795 | 0.292 |
+| UC2, reshared | PPA | 11.87 | 2.21 | 2.51 | 15.93 | 3.08 | 3.55 | 0.984 | 0.410 | 0.919 | 0.329 |
+| UC2, reshared | PPA4 | 12.39 | 2.21 | 3.40 | 16.41 | 3.18 | 4.51 | 1.181 | 0.374 | 1.274 | 0.297 |
+| UC3, A2bits | RCA | 1.77 | 1.59 | 1.71 | 1.86 | 1.82 | 1.91 | 0.576 | 0.390 | 0.522 | 0.367 |
+| UC3, A2bits | PPA | 1.82 | 1.71 | 1.74 | 1.86 | 1.85 | 1.97 | 0.608 | 0.390 | 0.549 | 0.368 |
+| UC3, A2bits | PPA4 | 2.04 | 1.79 | 1.87 | 2.05 | 1.98 | 2.11 | 0.638 | 0.401 | 0.565 | 0.368 |
+| UC3, reshared | RCA | 1.36 | 1.16 | 1.25 | 1.40 | 1.32 | 1.31 | 0.616 | 0.388 | 0.524 | 0.347 |
+| UC3, reshared | PPA | 1.68 | 1.54 | 1.61 | 1.97 | 1.94 | 1.74 | 0.658 | 0.400 | 0.577 | 0.383 |
+| UC3, reshared | PPA4 | 1.94 | 1.71 | 1.81 | 2.12 | 1.91 | 1.88 | 0.711 | 0.376 | 0.585 | 0.368 |
 
 ## UC3: as given vs optimized (2026-09-30)
 
@@ -164,7 +165,8 @@ Question: why does the as-given A2bits UC3 build look slightly better in preproc
 
 MiB sent plus received by P0 (both directions; P1's counters mirror P0's), from the fp logs; every value is identical
 in both reruns and on ag. Source `docs/variant_data/triad/comm_fp.csv` (as given), `comm_fp6.csv` (final builds at
-the round-5 code) and `comm_fp7.csv` (UC1 / UC2 A2bits at the round-6 code); triple counters in MiB, network counters
+the round-5 code), `comm_fp7.csv` (UC1 / UC2 A2bits at the round-6 code) and `comm_fp8.csv` (all final builds at
+the round-6 code); triple counters in MiB, network counters
 in 10^6 bytes, converted; plot data `docs/paper/data/triad_comm_c{0,1}.dat` (`make_triad.py`), paper Fig. 17.
 `triples`: HE + OT generation incl. key exchange; `pre`: triples + the network's preprocessing pass.
 
@@ -372,12 +374,27 @@ hpmpc `841335d`, flexNN (PIGEON) `417f12b`; flare / polynize.
 * **UC1 privacy fix:** P1's committed masks were narrowed to the truncation's image with every `TRUNC_DELAYED=0` build.
   In UC1 (`A_KNOWN=0`) the masks are free draws and P1 sends `TRUNC(m_1) + l_1`, which a narrowed `l_1` does not
   fully hide from P0. Now only `A_KNOWN=1` narrows. UC1 outputs bit for bit as before (they do not depend on the masks).
-* **Timing:** UC2 unchanged (A/B against round 5's binaries, 4 runs each, `res_fp_r6ab.csv`: RCA median 3.81 vs
-  3.74 s, BOOL phase equal). UC1 RCA 0.1-0.2 s slower (3.89-3.99 vs 3.67-3.88 s), all in P1's OT pack setup; a
-  control build with only the old narrowing restored is as fast as round 5 (`res_fp_r6n.csv`: 3.71-3.78 s). Not a
-  value effect: the OT packs are set up before `init_a2b_bake` (the only code the macro touches) runs, P0's binaries
-  are byte-identical, and P1's differ by 184 bytes, which moves the inlined ferret LPN code by 192 bytes - the same
-  kind of layout effect as before (`aeab3ae`).
+* **Timing:** an A/B series right after the change (`res_fp_r6ab.csv`, `res_fp_r6n.csv`) had UC2 unchanged but UC1 A2bits
+  RCA 0.1-0.2 s slower than round 5, all in P1's OT pack setup, and a control build with the old narrowing as fast as
+  round 5; since the OT packs are set up before `init_a2b_bake` runs, this looked like a code-layout effect. It was
+  not: in the final rerun below the identical binary (same md5) preprocesses in 3.70-3.73 s, faster than round 5
+  (3.77-3.80 s). Series-to-series variation of P1's OT setup.
+* **Final rerun, both pairs** (hpmpc `e1066ce` = code `841335d`, ConvTriple `8d8f244`, flexNN `417f12b`;
+  `res_*_final8.csv`, 3 runs of all 36 builds per pair; the paper's Table 14 / Fig. 16): against round 5 (final7)
+  preprocessing median +0.01 s on Zen 4 (-0.21..+0.10) and -0.00 s on Zen 3 (-0.12..+0.16), online within 0.04 s.
+  As given -> final: UC1 / UC2 preprocessing 11.7-17.3 -> 1.6-5.5 s (3.0-7.3x) on Zen 4, 15.1-21.9 -> 2.7-7.0 s
+  (3.0-6.0x) on Zen 3; online 2.0-3.2x / 2.1-4.3x; UC3 preprocessing 1.05-1.21x / 0.98-1.14x, online 1.5-1.9x /
+  1.4-2.2x (`docs/paper/triad_ranges.py`). One build is not faster than as given: UC3 A2bits RCA COMPRESS=0 on Zen 3,
+  3.82 vs 3.75 s (round 5: 3.77) - the correct bake's mask-only forward, which the as-given (wrong) build skips.
+  Traffic (`comm_fp8.csv`): every build sends what round 5 sent, except UC2 A2bits COMPRESS=0 (-3.21 MB).
+* **Phases at the final code** (`phases8_fp.log`, 18 instrumented COMPRESS=0 builds x 2, `docs/paper/make_phases.py`,
+  the paper's Table 15; patch `docs/variant_data/triad/phpatch3.py` adds `ot_start` / `ot_end` around the OT phase, which runs inside the pass
+  with secret weights): no conv tail is left in any build (round 3: 0.28-1.1 s); OT setup 0.85-1.04 s (about 0.1 s more
+  with the conv triples alongside), tuples 0.26-0.35 s (RCA) / 1.6-3.5 s (PPA4), the bake's Boolean addition
+  1.42-1.52 s, the pass's own work 0.25-0.75 s (UC3 A2bits 0.55-0.75 with its mask-only forward), online waiting
+  0.06-0.20 s.
+* **CIFAR at the final code** (`res_fp_pc8.csv`, all 18 COMPRESS=0 builds, 10 images): 3-7 of 10 (plaintext 6); every
+  hash as in round 5 except UC2 A2bits (round 6 changed P1's prescribed shares).
 
 ## Output repacking: the estimate before round 4
 

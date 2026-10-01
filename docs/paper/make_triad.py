@@ -31,6 +31,8 @@ for p in ("fp", "ag"):
             res[(p, "fin")] = load_prefix(f"res_{p}_final6.csv", "fin6")
         if (VD / f"res_{p}_final7.csv").exists():  # round-5 code, conv threads following the OT phase (hpmpc 7913adb)
             res[(p, "fin")] = load_prefix(f"res_{p}_final7.csv", "fin7")
+        if (VD / f"res_{p}_final8.csv").exists():  # round-6 code (hpmpc 841335d)
+            res[(p, "fin")] = load_prefix(f"res_{p}_final8.csv", "fin8")
     elif (VD / f"res_{p}_ab.csv").exists():
         res[(p, "conf")].update(load_prefix(f"res_{p}_ab.csv", "conf"))
         res[(p, "fin")].update(load_prefix(f"res_{p}_ab.csv", "fin2"))
@@ -61,6 +63,8 @@ if (VD / "comm_fp6.csv").exists():  # the final builds at the round-5 code
     comm_rows += list(csv.DictReader(open(VD / "comm_fp6.csv")))
 if (VD / "comm_fp7.csv").exists():  # UC1 / UC2 A2bits at the round-6 code (UC2: residual sums without rebase_p1)
     comm_rows += list(csv.DictReader(open(VD / "comm_fp7.csv")))
+if (VD / "comm_fp8.csv").exists():  # all final builds at the round-6 code
+    comm_rows += list(csv.DictReader(open(VD / "comm_fp8.csv")))
 for r in comm_rows:
     v = {k: float(x) for k, x in r.items() if k != "tag"}
     comm[r["tag"].rsplit("_r", 1)[0]] = {
@@ -73,7 +77,8 @@ for c in ("0", "1"):
         for key, name in CONF:
             for a, an in ADD:
                 n = f"{key}_{a}_c{c}"
-                g, o = comm[f"conf_{n}"], comm.get(f"r6_{n}", comm.get(f"fin6_{n}", comm[f"fin2_{n}"]))
+                g = comm[f"conf_{n}"]
+                o = comm.get(f"fin8_{n}", comm.get(f"r6_{n}", comm.get(f"fin6_{n}", comm[f"fin2_{n}"])))
                 f.write(f"{y} {{{name}, {an}}} {g['trip'] + g['pass']:.1f} {o['trip'] + o['pass']:.1f} "
                         f"{g['trip']:.1f} {o['trip']:.1f} {g['online']:.1f} {o['online']:.1f}\n")
                 y += 1

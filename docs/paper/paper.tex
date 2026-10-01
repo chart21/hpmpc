@@ -28,8 +28,9 @@
 \title{Communication and Runtime Engineering\\for Two-Party ResNet Inference in HPMPC\\[4pt]
 \large ABY2 with HE and silent-OT preprocessing}
 \author{Technical report, HPMPC \texttt{dbg} branch\\[2pt]
-\small hpmpc \texttt{97772ef}, ConvTriple \texttt{fa7b952}, flexNN \texttt{b1ce619}}
-\date{September 29, 2026}
+\small hpmpc \texttt{97772ef}, ConvTriple \texttt{fa7b952}, flexNN \texttt{b1ce619};
+ImageNet all\_opt (\cref{sec:triad}): hpmpc \texttt{841335d}, ConvTriple \texttt{8d8f244}, flexNN \texttt{417f12b}}
+\date{October 1, 2026}
 
 \begin{document}
 \maketitle
@@ -54,6 +55,11 @@ With the AdamW-trained ResNet50, every variant classifies 62--72 of 100 images (
 118--131 of 192 (61--68\%; plaintext 71.9\%). Along the way we fixed a thread race, two connection hangs, four protocol
 bugs that broke whole variant families, and the sources of run-to-run nondeterminism: all 60 threaded builds
 reproduced their serial reference bit for bit, and the final single-batch builds still give the same outputs.
+For the artifact's 36 single-batch all\_opt configurations on ImageNet, preprocessing gets $3.0$--$7.3\times$
+faster with secret weights and the online phase $2.0$--$3.2\times$ (EPYC 9354). Their A2bits configurations
+were not correct as given; the A2B bake that fixes them commits every ReLU input's mask before the preprocessing pass,
+for free behind convolutions and residual sums and through a mask-only forward with public weights, and an optional
+output repacking cuts the conv triples' traffic by 40\%.
 \end{abstract}
 
 \section{Introduction}
@@ -84,6 +90,11 @@ and reproducible system. Its focus is communication and runtime; \cref{fig:summa
   BatchNorm of \flag{A_KNOWN=0} and of public weights.
 \item \textbf{Evaluation} (\cref{sec:eval}): 30 variants $\times$ 2 batch modes $\times$ 2 machine pairs,
   with final accuracy on a trained model.
+\item \textbf{The all\_opt configurations on ImageNet} (\cref{sec:triad}): 36 builds over three weight settings, two
+  ReLU protocols and three adders. The A2bits configurations as given compute wrong signs; the A2B bake fixes them
+  by committing every ReLU input's mask before the preprocessing pass, at no traffic behind convolutions and residual
+  sums. The conv triples start alongside the OT phase. Preprocessing $3.0\text{--}7.3\times$ faster with secret weights,
+  online $2.0\text{--}3.2\times$.
 \end{itemize}
 
 \begin{figure}[t]
@@ -690,7 +701,13 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
 \item \textbf{Weights known in preprocessing.} The multi-batch a2b bake still excludes
   \flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING}, whose prescribed shares assume one word per register.
 \item \textbf{Ciphertext occupancy.} At $7\times7$ feature maps, inputs are 5--19\% data and outputs
-  6--24\%. Packing the sparse outputs needs automorphisms and a larger ring ($N = 8192$).
+  6--24\%. Packing the sparse outputs (automorphisms, $N = 8192$ with a special prime) is implemented as the
+  communication-optimized variant \flag{CHEETAH_CONV_REPACK} (round~4 in \cref{sec:triad}): 285 instead of 479\,MiB per HE
+  product for 1.3--1.7\s more preprocessing, worth it below about 1--2\,Gbit/s. Packing the inputs remains open.
+\item \textbf{A2B bake.} UC1 and UC2 still remask the 0.20 million ReLU inputs after the stem's pooling (1.5\,MiB in
+  preprocessing). Committing the pooling's truncation mask, or a BatchNorm's output mask like a convolution's, would
+  remove that; a BatchNorm bake works mechanically but changed the outputs of an unfused multi-batch check for reasons
+  not yet understood, so it is off.
 \item \textbf{OT extension.} Ferret's LPN step and the AES key schedules of the correlation-robust hash
   are now the largest CPU costs of the Boolean preprocessing; a fixed-key hash is a security decision.
 \end{itemize}
@@ -702,6 +719,9 @@ transforms, pipelining). The largest communication gains came from sending only 
 the exact wire format, full BatchNorm ciphertexts, and OTs whose message bits carry several products. In the online phase, latency rather than bandwidth
 dominates, so the gains came from Nagle-free sockets, fewer rounds and parallelizing the per-round work at batch size
 one. Seeded, bit-reproducible runs made every change measurable and exposed the bugs in \cref{sec:correct}.
+Moving the A2B to preprocessing (\cref{sec:triad}) needs every ReLU input's mask fixed before the preprocessing pass;
+most producers can commit their masks for free, and the care it takes is privacy bookkeeping: each committed mask may
+mask one value only, and a mask narrowed for a truncation only where the other party never sees what it hides.
 
 \begin{thebibliography}{9}\small
 \bibitem{aby2} A.~Patra, T.~Schneider, A.~Suresh, H.~Yalame. ABY2.0: Improved mixed-protocol secure
