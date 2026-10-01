@@ -196,7 +196,22 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 #endif
 #if A2B_ROUND_OPT_SIM == 0
     //Skip if we are simulating A2B with round optimization
-#if A2B_CONV_BAKE_ACTIVE
+#ifndef A2B_BAKE_PAR_PREP
+#define A2B_BAKE_PAR_PREP 1
+#endif
+#if A2B_CONV_BAKE_ACTIVE && A2B_BAKE_PAR_PREP == 0
+    for (int i = 0; i < len; i++)
+    {
+        s1[i] = Bitset::prepare_A2B_S1(bm, (S*)val[i].get_share_pointer());
+        s2[i] = Bitset::prepare_A2B_S2(bm, (S*)val[i].get_share_pointer());
+    }
+    Share::communicate();
+    for (int i = 0; i < len; i++)
+    {
+        s1[i].complete_A2B_S1();
+        s2[i].complete_A2B_S2();
+    }
+#elif A2B_CONV_BAKE_ACTIVE
     // [c] is addressed by value: value i reads the BITLENGTH slices from c_base + i * BITLENGTH on (tl_a2b_c), so the
     // values are prepared on the pool like the unbaked A2B's
     const uint64_t c_base = g_a2b_c_cursor;
