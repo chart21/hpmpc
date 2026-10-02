@@ -1229,6 +1229,12 @@ void CheetahDisconnect(std::string ip, int port) {
     Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
 }
 
+// CHEETAH_RELEASE_OT: the OT packs' memory back after the preprocessing (the online phase extends no OTs)
+void CheetahReleaseOT(std::string ip, int port) {
+    port += CHEETAH_PORT_OFFSET;
+    Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).release_ot();
+}
+
 
 #else
 

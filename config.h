@@ -486,6 +486,9 @@ inline int base_port = BASE_PORT;  // temporary solution
 // MODELWEIGHTS_KNOWN_DURING_PREPROCESSING, P1's prescribed shares are put in per layer after the product, as in single batch)
 #define CHEETAH_CONV_LANES_ACTIVE (CHEETAH_CONV_LANES == 1 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_TYPE == 0 && \
     DATTYPE > BITLENGTH && PROTOCOL == 4 && SHARE_PREP == 1 && PUBLIC_WEIGHTS == 0)
+#ifndef CHEETAH_RELEASE_OT
+#define CHEETAH_RELEASE_OT 1  // after the preprocessing the OT packs' memory (ferret's buffers) goes back: the online phase extends no OTs
+#endif
 #ifndef CHEETAH_CONV_SIDE
 #define CHEETAH_CONV_SIDE 1  // multi-batch (CHEETAH_CONV_LANES): after the preprocessing pass the conv triples run on channels of their own, alongside the Boolean addition, COT and multiplexer triples on the regular ones
 #endif

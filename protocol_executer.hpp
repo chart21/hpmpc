@@ -541,6 +541,9 @@ void preprocess_circuit(std::string ips[])
         ips, base_port, process_offset);
     Iface::printTripleStats(CHEETAH_PARTY, process_offset);
     Iface::resetTripleStats();
+#if CHEETAH_RELEASE_OT == 1 && FAKE_TRIPLES == 0
+    CheetahReleaseOT(ips[0], base_port + process_offset);
+#endif
 #else
     communicate_pre();
 #endif
