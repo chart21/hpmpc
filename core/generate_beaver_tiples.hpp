@@ -574,7 +574,7 @@ void generateBooleanAdditionDummyTriples(type a[],
     num_triples = num_triples / (num_bits_per_input * DATTYPE);
 #if A2B_ADDER_BATCH == 1 && ROT_PREPROCESSING_OPT == 1 && CHEETAH_WAN_OPT == 0
     {
-        // (untested) ripple-carry rounds from r = k - 1 (numeric LSB) down to lo; with A2B_ADDER_CUT the top FRACTIONAL
+        // The ripple carry from r = k - 1 (numeric LSB) down to lo; with A2B_ADDER_CUT the top FRACTIONAL
         // sum bits, which every cut consumer replaces by 0, are not computed (k - FRACTIONAL - 1 AND rounds, not k - 1)
         const int k = num_bits_per_input;
         const int lo = a2b_adder_lo(k);
