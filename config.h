@@ -487,10 +487,10 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define CHEETAH_CONV_LANES_ACTIVE (CHEETAH_CONV_LANES == 1 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_TYPE == 0 && \
     DATTYPE > BITLENGTH && PROTOCOL == 4 && SHARE_PREP == 1 && PUBLIC_WEIGHTS == 0)
 #ifndef A2B_ADDER_BATCH
-#define A2B_ADDER_BATCH 0  // (untested) the Boolean addition's random OTs of all rounds first (Iface::boolCOTMultRounds*), each round only exchanges corrections
+#define A2B_ADDER_BATCH 1  // A2B_ONLINE_OPT's Boolean addition: the random OTs of all its rounds first (Iface::boolCOTMultRounds*, with the bake started before init_a2b_bake), each round then only exchanges two correction bits per AND, on bit-position-contiguous arrays
 #endif
 #ifndef A2B_ADDER_CUT
-#define A2B_ADDER_CUT 0  // (untested) CUT_FRACTIONAL_BITS_OPT: the Boolean addition stops at the low BITLENGTH - FRACTIONAL sum bits when every A2B consumer applies the cut (g_a2b_full_width)
+#define A2B_ADDER_CUT 1  // CUT_FRACTIONAL_BITS_OPT: the Boolean addition stops at the low BITLENGTH - FRACTIONAL sum bits (26 instead of 31 AND rounds) when every A2B conversion applies the cut (g_a2b_full_width from the INIT pass)
 #endif
 #ifndef CHEETAH_RELEASE_OT
 #define CHEETAH_RELEASE_OT 1  // after the preprocessing the OT packs' memory (ferret's buffers) goes back: the online phase extends no OTs
