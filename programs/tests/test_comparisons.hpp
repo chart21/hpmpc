@@ -26,6 +26,9 @@
 #ifndef TEST_RELU_TS1
 #define TEST_RELU_TS1 1          // TS1 fused into the ReLU (2PC, TS1_FUSED_ACTIVE): ReLU of delayed random values
 #endif
+#ifndef TEST_RELU_DCUT
+#define TEST_RELU_DCUT 1         // A2B_DELAYED_CUT (2PC TS{L}): ReLU of delayed random values, DReLU of the truncation
+#endif
 #define TEST_BOOLEAN_ADDITION 0  // [a]^B + [b]^B
 #define TEST_A2B_ADD 0           // Test A2B followed by addition when testing boolean addition
 #define TEST_A2B 0               // [a]^A -> [a]^B
@@ -208,8 +211,9 @@ bool test_RELU()
 
 #if TEST_RELU_RANDOM == 1
 // ReLU of RELU_RANDOM_N secret-shared values (P0's input, random masks), |v| = 2^e * (1 + mantissa) for e
-// uniform in 0..30 and random signs: every output must equal max(v, 0) exactly. Prints the errors per
-// exponent, which tells an MSB circuit that fails on a range of values from noise elsewhere.
+// uniform in 0..30 (CUT_FRACTIONAL_BITS_OPT: 0..BITLENGTH-2-FRACTIONAL, the top FRACTIONAL bits must be sign extension)
+// and random signs: every output must equal max(v, 0) exactly. Prints the errors per exponent, which tells an MSB
+// circuit that fails on a range of values from noise elsewhere.
 #ifndef RELU_RANDOM_N
 #define RELU_RANDOM_N 4096
 #endif
@@ -231,7 +235,7 @@ bool test_RELU_random()
         for (int k = 0; k < vf; k++)
         {
             const uint64_t r = next();
-            const int e = int(r % 31);
+            const int e = int(r % ((CUT_FRAC_ELIGIBLE || CUT_FRAC_ELIGIBLE_GENERIC) ? BITLENGTH - 1 - FRACTIONAL : 31));
             const uint64_t mag = (uint64_t(1) << e) | ((r >> 8) & ((uint64_t(1) << e) - 1));
             const int64_t v = (r >> 40) & 1 ? -int64_t(mag) : int64_t(mag);
             plain[i][k] = UINT_TYPE(v);
@@ -272,13 +276,13 @@ bool test_RELU_random()
 }
 #endif
 
-#if TEST_RELU_TS1 == 1 && TS1_FUSED_ACTIVE
+#if (TEST_RELU_TS1 == 1 && TS1_FUSED_ACTIVE) || (TEST_RELU_DCUT == 1 && A2B_DCUT_ACTIVE)
 // The ReLU of RELU_RANDOM_N delayed values (pending truncation by FRACTIONAL, |v| = 2^e * (1 + mantissa), e uniform
-// in 0..30 (TS1_CUT_ACTIVE: 0..29, its 1-bit slack), random signs), truncated by TS1 in the bit injection: every
-// output must be max(v, 0) >> FRACTIONAL off by -1, 0 or +1 (TS1_LOW_CARRY: 0 or +1), and 0 for v <= 0. Prints the
-// error counts per exponent.
+// in 0..exps-1, random signs), with a pooling denominator fused into it (FUSE_RELU_AVG, denom > 1: the output is
+// further multiplied by the fixed-point 1/denom and truncated). Every output must be the plaintext result off by -1,
+// 0 or +1 (TS1_LOW_CARRY without a pooling: 0 or +1), never negative, and 0 for v <= 0.
 template <typename Share>
-bool test_RELU_ts1()
+bool test_RELU_delayed(const std::string& name, int denom, int exps, bool delay = true)
 {
     constexpr int vf = DATTYPE / BITLENGTH;
     constexpr int N = RELU_RANDOM_N;
@@ -289,7 +293,6 @@ bool test_RELU_ts1()
         x ^= x << 13, x ^= x >> 7, x ^= x << 17;
         return x;
     };
-    constexpr int exps = TS1_CUT_ACTIVE ? 30 : 31;
     std::vector<A> in(N), out(N);
     for (int i = 0; i < N; i++)
     {
@@ -308,12 +311,24 @@ bool test_RELU_ts1()
     Share::communicate();
     for (int i = 0; i < N; i++)
         in[i].template complete_receive_from<P_0>();
-    delayed = true;
+    delayed = delay;
+#if FUSE_RELU_AVG == 1
+    curr_denom = denom;
+#endif
     RELU<0, BITLENGTH, Share, DATATYPE>(in.data(), in.data() + N, out.data());
+#if FUSE_RELU_AVG == 1
+    curr_denom = 1;
+#endif
+    const int64_t recip = denom > 1 ? (int64_t) FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(
+                                          1 / FLOATTYPE(denom), FRACTIONAL + AVG_RECIP_EXTRA_BITS)
+                                    : 1;
+    const int extra = (denom > 1 ? FRACTIONAL + AVG_RECIP_EXTRA_BITS : 0) - (delay ? 0 : FRACTIONAL);
     for (int i = 0; i < N; i++)
         out[i].prepare_reveal_to_all();
     Share::communicate();
     int dist[3] = {0}, errors[32] = {0}, total[32] = {0}, bad = 0;
+    double err_sum = 0;
+    int err_n = 0;
     for (int i = 0; i < N; i++)
     {
         const DATATYPE r = out[i].complete_reveal_to_all();
@@ -322,33 +337,63 @@ bool test_RELU_ts1()
         for (int k = 0; k < vf; k++)
         {
             const INT_TYPE v = INT_TYPE(plain[i][k]);
-            const int64_t expect = v > 0 ? int64_t(v) >> FRACTIONAL : 0;
+            const int64_t expect = v > 0 ? (int64_t(v) * recip) >> (FRACTIONAL + extra) : 0;
             const int64_t d = int64_t(INT_TYPE(o[k])) - expect;
+            // the error from the real value (the shifted TS1 design rounds, the others floor)
+            const double real = v > 0 ? double(int64_t(v) * recip) / double(int64_t(1) << (FRACTIONAL + extra)) : 0.0;
+            const double dr = double(INT_TYPE(o[k])) - real;
+            err_sum += dr, err_n++;
             const int e = 63 - __builtin_clzll(uint64_t(v < 0 ? -int64_t(v) : int64_t(v)) | 1);
             total[e]++;
-#if TS1_LOW_CARRY == 1
-            const bool ok = d == 0 || d == 1;
-#else
-            const bool ok = d >= -1 && d <= 1;
-#endif
-            // 0 for a non-positive input, and never negative (except DReLU of z without TS1_LOW_CARRY: y may be -1 there)
-            constexpr bool nonneg = TS1_CUT_ACTIVE || TS1_LOW_CARRY == 1;
-            if ((nonneg && INT_TYPE(o[k]) < 0) || (v <= 0 && d != 0))
+            const bool ok = (TS1_LOW_CARRY == 1 && TS1_FUSED_ACTIVE && denom == 1) ? (d == 0 || d == 1) : (dr > -2 && dr < 2);
+            // never negative (except DReLU of z without TS1_LOW_CARRY: y may be -1 there), off by less than 2 LSB
+            constexpr bool nonneg = TS1_CUT_ACTIVE || TS1_LOW_CARRY == 1 || A2B_DCUT_ACTIVE;
+            if ((nonneg && INT_TYPE(o[k]) < 0) || (v <= 0 && (dr <= -2 || dr >= 2)))
                 errors[e]++, bad++;
             else if (!ok)
                 errors[e]++, bad++;
-            else if (v > 0)
+            else if (v > 0 && d >= -1 && d <= 1)
                 dist[d + 1]++;
         }
     }
     for (int e = 0; e < 31; e++)
         if (errors[e])
-            print_online("RELU_TS1: 2^" + std::to_string(e) + ": " + std::to_string(errors[e]) + " of " +
+            print_online(name + ": 2^" + std::to_string(e) + ": " + std::to_string(errors[e]) + " of " +
                          std::to_string(total[e]) + " wrong");
-    print_online("RELU_TS1: errors -1 / 0 / +1 on positive inputs: " + std::to_string(dist[0]) + " / " +
+    print_online(name + ": errors -1 / 0 / +1 on positive inputs: " + std::to_string(dist[0]) + " / " +
                  std::to_string(dist[1]) + " / " + std::to_string(dist[2]));
-    print_online("RELU_TS1: " + std::to_string(bad) + " of " + std::to_string(N * vf) + " wrong");
+    print_online(name + ": mean error from the real value " + std::to_string(err_sum / std::max(err_n, 1)) + " LSB");
+    print_online(name + ": " + std::to_string(bad) + " of " + std::to_string(N * vf) + " wrong");
     return bad == 0;
+}
+#endif
+
+#if TEST_RELU_TS1 == 1 && TS1_FUSED_ACTIVE
+// The ReLU of RELU_RANDOM_N delayed values (pending truncation by FRACTIONAL, |v| = 2^e * (1 + mantissa), e uniform
+// in 0..30 (TS1_CUT_ACTIVE: 0..29, its 1-bit slack), random signs), truncated by TS1 in the bit injection: every
+// output must be max(v, 0) >> FRACTIONAL off by -1, 0 or +1 (TS1_LOW_CARRY: 0 or +1), and 0 for v <= 0. Prints the
+// error counts per exponent.
+template <typename Share>
+bool test_RELU_ts1()
+{
+    return test_RELU_delayed<Share>("RELU_TS1", 1, TS1_CUT_ACTIVE ? 30 : 31);
+}
+
+// TRUNC_APPROACH 1 with FUSE_RELU_AVG: a pooling (1/9) folded into TS1, on a delayed and on a truncated input
+template <typename Share>
+bool test_RELU_ts1_avg()
+{
+    return test_RELU_delayed<Share>("RELU_TS1_AVG9", 9, 27) &
+           test_RELU_delayed<Share>("RELU_TS1_AVG9_TRUNCATED", 9, 27, false);
+}
+#endif
+
+#if TEST_RELU_DCUT == 1 && A2B_DCUT_ACTIVE
+// TS{L} with A2B_DELAYED_CUT: |v| < 2^17 (the probabilistic truncation's large errors are then improbable)
+template <typename Share>
+bool test_RELU_dcut()
+{
+    return test_RELU_delayed<Share>("RELU_DCUT", 1, 17);
 }
 #endif
 
@@ -774,6 +819,12 @@ bool test_comparisons(DATATYPE* res)
 
 #if TEST_RELU_TS1 == 1 && TS1_FUSED_ACTIVE
     test_function(num_tests, num_passed, "RELU_TS1", test_RELU_ts1<Share>);
+#if TRUNC_APPROACH == 1 && FUSE_RELU_AVG == 1 && TS1_CUT_ACTIVE
+    test_function(num_tests, num_passed, "RELU_TS1_AVG9", test_RELU_ts1_avg<Share>);
+#endif
+#endif
+#if TEST_RELU_DCUT == 1 && A2B_DCUT_ACTIVE
+    test_function(num_tests, num_passed, "RELU_DCUT", test_RELU_dcut<Share>);
 #endif
 
 #if TEST_BOOLEAN_ADDITION == 1

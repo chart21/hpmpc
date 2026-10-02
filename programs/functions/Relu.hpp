@@ -90,11 +90,31 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 #endif
 
     S* y = new S[len];
-#if (CUT_FRAC_ELIGIBLE && TRUNC_DELAYED == 0) || CUT_FRAC_ELIGIBLE_GENERIC  // TD=1: only TS1's ReLUs (truncated inputs)
+#if (CUT_FRAC_ELIGIBLE && TRUNC_DELAYED == 0) || CUT_FRAC_ELIGIBLE_GENERIC
     g_cut_frac_active = true;
+#elif CUT_FRAC_ELIGIBLE  // TD=1 (TS1, A2B_DELAYED_CUT): an input truncated before (by a pooling) is at scale 2^F too
+    g_cut_frac_active = !delayed;
+#endif
+#if A2B_DCUT_ACTIVE
+    // A2B_DELAYED_CUT: a delayed input's A2B converts the locally truncated value (m >> F, and the bake adds the mask
+    // shares >> F), with the cut; the bit injection then takes the untruncated value as before
+    std::unique_ptr<Datatype[]> saved_m(delayed && current_phase == PHASE_LIVE ? new Datatype[(size_t) len * BITLENGTH]
+                                                                                : nullptr);
+    if (delayed)
+    {
+        if (current_phase == PHASE_INIT)
+            a2b_record_shift(num_boolean_addition_triples, (uint64_t) len * BITLENGTH, 1);
+        g_a2b_xform = current_phase == PHASE_LIVE ? A2bXform::DCut : A2bXform::None;
+        g_a2b_xform_m = saved_m.get();
+        g_cut_frac_active = true;
+    }
 #endif
     get_msb_range<m, k, Datatype, Share>(val, y, len);
     g_cut_frac_active = false;
+#if A2B_DCUT_ACTIVE
+    g_a2b_xform = A2bXform::None;
+    g_a2b_xform_m = nullptr;
+#endif
 
     for (int i = 0; i < len; i++)
     {
@@ -129,7 +149,8 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 
 #if TS1_FUSED_ACTIVE
 // TRUNC_APPROACH 1 / 4 (2PC): a delayed input's truncation happens in the bit injection (see g_ts1_la), from the
-// A2B slots' TS1 tuples
+// A2B slots' TS1 tuples. A pooling fused into the ReLU (FUSE_RELU_AVG): TRUNC_APPROACH 1 folds 1/denom into TS1 (the
+// shifted design's factor and lift truncation), 4 truncates the product probabilistically (TS_Mix).
 template <int m, int k, typename Share, typename Datatype>
 void RELU_range_in_place_ts1(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
 {
@@ -137,36 +158,78 @@ void RELU_range_in_place_ts1(sint_t<Additive_Share<Datatype, Share>>* val, const
     using S = XOR_Share<DATATYPE, Share>;
     Share::communicate();
     const uint64_t slots = (uint64_t) len * BITLENGTH;  // the A2B slots get_msb_range takes
+    UINT_TYPE factor = 1;
+    int tp = 0;
+    Datatype trunc_factor = SET_ALL_ZERO();
+    int fb = 0;
+#if FUSE_RELU_AVG == 1
+    if (curr_denom > 1)
+    {
+        const UINT_TYPE reciprocal = FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(
+            1 / FLOATTYPE(curr_denom), FRACTIONAL + AVG_RECIP_EXTRA_BITS);
+#if TS1_FOLD_POOL
+#if !TS1_CUT_ACTIVE
+        fprintf(stderr, "TRUNC_APPROACH 1 (2PC): a pooling fused into a ReLU needs the shifted TS1 design (the cut)\n");
+        std::abort();
+#endif
+        factor = reciprocal;
+        tp = (delayed ? FRACTIONAL : 0) + AVG_RECIP_EXTRA_BITS;  // the lift's part of the truncation (F is local)
+#else
+        trunc_factor = PROMOTE(reciprocal);
+        fb = FRACTIONAL + AVG_RECIP_EXTRA_BITS;  // the value is at scale 2^FRACTIONAL already
+#endif
+    }
+#endif
+#if TS1_CUT_ACTIVE
+    const bool shift = TS1_LOW_CARRY == 0 || factor != 1;
+#else
+    const bool shift = false;
+#endif
     uint64_t ts1 = 0;
     if (current_phase == PHASE_INIT)
-        ts1_record_range(num_boolean_addition_triples, slots);
+    {
+        ts1_record_range(num_boolean_addition_triples, slots, shift, factor, tp);
+        if (shift)
+            a2b_record_shift(num_boolean_addition_triples, slots, factor);
+        else if (TS1_CUT_ACTIVE)
+            g_a2b_full_width = true;  // the full design reads the carries up to the top
+    }
     else
-        ts1 = ts1_compact_base(g_a2b_c_cursor, slots);
+    {
+        const Ts1Range& r = ts1_range(g_a2b_c_cursor, slots);
+        if (r.shift != shift || r.factor != factor || r.tp != tp)
+        {
+            fprintf(stderr, "TS1: a ReLU's design differs from the INIT pass's\n");
+            std::abort();
+        }
+        ts1 = r.compact_base;
+    }
     S* y = new S[len];
 #if TS1_CUT_ACTIVE
-    // DReLU of the truncated value, whose top FRACTIONAL bits are sign extension: the A2B takes its public part (m)
-    // and the bake's [c] shifted by FRACTIONAL slices, with the cut. The Boolean addition then has to give every
-    // slice of [c] (TS1 reads the carries up to the top).
-    if (current_phase == PHASE_INIT)
-        g_a2b_full_width = true;
-    std::vector<Datatype> sk(current_phase == PHASE_LIVE ? slots : 0);
-    g_ts1_cut_sk = sk.data();
-    g_ts1_cut_on = current_phase == PHASE_LIVE;
-    g_a2b_c_shift = FRACTIONAL;
+    // DReLU of the truncated value, whose top FRACTIONAL bits are sign extension: the A2B takes its public part and
+    // the bake's [c] (shifted design: of the shifted shares; full design: shifted by FRACTIONAL slices), with the cut
+    // (the shifted design's lift needs only M0, the full design's M and sK are kept by value)
+    std::vector<Datatype> M(current_phase == PHASE_LIVE && !shift ? slots : 0), sk(M.size());
+    g_a2b_xform = current_phase == PHASE_LIVE ? (shift ? A2bXform::Ts1Shift : A2bXform::Ts1Full) : A2bXform::None;
+    g_a2b_xform_m = M.data();
+    g_a2b_xform_sk = sk.data();
+    g_a2b_xform_factor = factor;
+    g_a2b_c_shift = shift ? 0 : FRACTIONAL;
     g_cut_frac_active = true;
     get_msb_range<m, k, Datatype, Share>(val, y, len);
     g_cut_frac_active = false;
     g_a2b_c_shift = 0;
-    g_ts1_cut_on = false;
-    g_ts1_cut_sk = nullptr;
+    g_a2b_xform = A2bXform::None;
+    g_a2b_xform_m = g_a2b_xform_sk = nullptr;
     for (int i = 0; i < len; i++)
         y[i] = ~y[i];
-    bit_injection_ts1_range<Datatype, Share>(y, val, len, ts1, sk.empty() ? nullptr : sk.data());
+    bit_injection_ts1_range<Datatype, Share>(y, val, len, ts1, M.empty() ? nullptr : M.data(),
+                                             sk.empty() ? nullptr : sk.data(), shift ? tp : -1, trunc_factor, fb);
 #else
     get_msb_range<m, k, Datatype, Share>(val, y, len);
     for (int i = 0; i < len; i++)
         y[i] = ~y[i];
-    bit_injection_ts1_range<Datatype, Share>(y, val, len, ts1);
+    bit_injection_ts1_range<Datatype, Share>(y, val, len, ts1, nullptr, nullptr, -1, trunc_factor, fb);
 #endif
     delete[] y;
     Share::communicate();
@@ -182,8 +245,10 @@ void RELU_range_in_place_optB2A(sint_t<Additive_Share<Datatype, Share>>* val, co
     using sint = sint_t<A>;
 
     S* y = new S[len];
-#if (CUT_FRAC_ELIGIBLE && TRUNC_DELAYED == 0) || CUT_FRAC_ELIGIBLE_GENERIC  // TD=1: only TS1's ReLUs (truncated inputs)
+#if (CUT_FRAC_ELIGIBLE && TRUNC_DELAYED == 0) || CUT_FRAC_ELIGIBLE_GENERIC
     g_cut_frac_active = true;
+#elif CUT_FRAC_ELIGIBLE  // TD=1 (TS1, A2B_DELAYED_CUT): an input truncated before (by a pooling) is at scale 2^F too
+    g_cut_frac_active = !delayed;
 #endif
     get_msb_range<m, k, Datatype, Share>(val, y, len);
     g_cut_frac_active = false;
@@ -300,12 +365,57 @@ void RELU_range_in_place_exact(Additive_Share<Datatype, Share>* val, const int l
 
 #endif
 
+#if PRINT_OUTPUT_HASH == 1
+// Debugging (env DEBUG_RELU0): reveal and print the first values of the first ReLU's input and output (every phase
+// reveals, so the passes stay in step; the online phase prints)
+template <typename A>
+inline void debug_relu0_reveal(const A* v, int n, const char* what, int stride)
+{
+    for (int i = 0; i < n; i++) v[i * stride].prepare_reveal_to_all();
+    A::communicate();
+    std::string s;
+    for (int i = 0; i < n; i++)
+    {
+        auto r = v[i * stride].complete_reveal_to_all();
+        alignas(sizeof(DATATYPE)) UINT_TYPE o[DATTYPE / BITLENGTH];
+        unorthogonalize_arithmetic(&r, o, 1);
+        s += std::to_string((long long) (INT_TYPE) o[0]) + " ";
+    }
+    if (current_phase == PHASE_LIVE)
+        print("DEBUG_RELU0 %s: %s\n", what, s.c_str());
+}
+#endif
+
 template <int rm = 0, int rk = BITLENGTH, typename Share, typename Datatype>
 static void RELU(const Additive_Share<Datatype, Share>* begin,
                  const Additive_Share<Datatype, Share>* end,
                  Additive_Share<Datatype, Share>* output)
 {
     const int len = end - begin;
+#if PRINT_OUTPUT_HASH == 1
+    static int dbg_phase = -1;
+#if MASK_FORWARD_ACTIVE
+    const bool dbg = getenv("DEBUG_RELU0") && dbg_phase != current_phase && len >= 16 && !g_mask_pass;
+#else
+    const bool dbg = getenv("DEBUG_RELU0") && dbg_phase != current_phase && len >= 16;
+#endif
+    if (dbg)
+    {
+        dbg_phase = current_phase;
+        debug_relu0_reveal(begin, 16, "in", len / 16);
+    }
+    struct DbgOut
+    {
+        bool on;
+        Additive_Share<Datatype, Share>* o;
+        int stride;
+        ~DbgOut()
+        {
+            if (on)
+                debug_relu0_reveal(o, 16, "out", stride);
+        }
+    } dbg_out{dbg, output, len / 16};
+#endif
 #if MASK_FORWARD_ACTIVE
     // this ReLU's committed output masks: slots relu_base.. (BITLENGTH per packed sint), counted in the INIT pass
     const uint64_t relu_slots = (uint64_t) ((len + BITLENGTH - 1) / BITLENGTH) * BITLENGTH;
@@ -320,7 +430,7 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
     if (g_mask_pass)
     {
 #if A2B_MASK_PASS_ACTIVE
-        a2b_mask_pass_record<Datatype, Share>(begin, len);
+        a2b_mask_pass_record<Datatype, Share>(begin, len, relu_base == 0);
 #endif
         mask_pass_relu_outputs<Datatype, Share>(len, output, relu_base);
 #if TRUNC_DELAYED == 1
@@ -333,6 +443,13 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
     }
     if (current_phase != PHASE_INIT)
         g_bi_base = relu_base;  // the bit injection gives the outputs these masks
+#if TS1_FUSED_ACTIVE && A2B_MASK_PASS_ACTIVE
+    g_a2b_rebase_now = relu_base == 0;  // see g_a2b_rebase_now
+    struct RebaseOff
+    {
+        ~RebaseOff() { g_a2b_rebase_now = false; }
+    } rebase_off;
+#endif
 #endif
 #if TRUNC_DELAYED == 1 && TRUNC_APPROACH > 0
     if (delayed)
@@ -348,6 +465,10 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
         isReLU = false;
 #endif
     }
+#if TS1_FUSED_ACTIVE && TS1_FOLD_POOL && FUSE_RELU_AVG == 1
+    else if (curr_denom > 1)  // a pooling fused into a ReLU on a truncated value: TS1 divides
+        pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_ts1<rm, rk, Share, Datatype>);
+#endif
     else
         pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place<rm, rk, Share, Datatype>);
 #else
@@ -387,6 +508,10 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>* begin,
         isReLU = false;
 #endif
     }
+#if TS1_FUSED_ACTIVE && TS1_FOLD_POOL && FUSE_RELU_AVG == 1
+    else if (curr_denom > 1)  // a pooling fused into a ReLU on a truncated value: TS1 divides
+        RELU_range_in_place_ts1<m, k, Share, Datatype>(output, len);
+#endif
     else
         RELU_range_in_place<m, k, Share, Datatype>(output, len);
 #else

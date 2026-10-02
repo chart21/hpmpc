@@ -332,7 +332,8 @@ class ABY2_ONLINE_Share
     // prepare_opt_bit_injection with that value, whose mask product is [lambda_b la] + s K [lambda_b r_msb].
     // ts1: the compact index of x[0]. fractional_bits > 0 (FUSE_RELU_AVG): the product times trunc_factor is truncated
     // by fractional_bits as in prepare_opt_bit_injection_with_trunc.
-    void prepare_opt_bit_injection_ts1(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[], uint64_t ts1, const Datatype* sk_in, Datatype trunc_factor,
+    void prepare_opt_bit_injection_ts1(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[], uint64_t ts1, const Datatype* M_in, const Datatype* sk_in,
+                                       int lift_tp, Datatype trunc_factor,
                                        int fractional_bits)
     {
         Datatype b0[BITLENGTH]{0};
@@ -347,15 +348,14 @@ class ABY2_ONLINE_Share
             Datatype lalb = retrieve_output_share_arithmetic();
             Datatype lb1lb2 = retrieve_output_share_arithmetic();
             Datatype lb = OP_SUB(lbi[i], OP_ADD(lb1lb2, lb1lb2));
-            // TS1 on u = -z (offset 2^(l-1): z >= 0, the others are multiplied by DReLU(z) = 0), or M and sK given
-            // (TS1_CUT_ACTIVE: the A2B converted y, its m is M already)
+            // TS1 on u = -z (offset 2^(l-1): z >= 0, the others are multiplied by DReLU(z) = 0); with the cut the A2B
+            // converted the truncated value (a2b_xform_input): the shifted design's lift from its public part M0 (x's
+            // m now), the full design's M and sK given
             Datatype xim, sk;
-            if (sk_in)
-#if TS1_CUT_ACTIVE
-                xim = OP_ADD(x[i].m, PROMOTE(kTs1A2bLow)), sk = sk_in[i];
-#else
-                xim = x[i].m, sk = sk_in[i];
-#endif
+            if (lift_tp >= 0)
+                ts1_lift_shift(x[i].m, lift_tp, xim, sk);
+            else if (sk_in)
+                xim = M_in[i], sk = sk_in[i];
             else
                 ts1_public(x[i].m, (UINT_TYPE) 1 << (BITLENGTH - 1), xim, sk);
             const Datatype xil = OP_ADD(g_ts1_la[ts1 + i], OP_MULT(sk, g_ts1_r[ts1 + i]));

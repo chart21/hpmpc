@@ -845,6 +845,9 @@ Trio 3PC, reduced-slack truncation (\flag{TRUNC_APPROACH=1}) & 100 & 70\\
 2PC ABY2, \flag{A_KNOWN=0}, single / multi-batch & 100 / 192 & 64--72 / 116--133\\
 2PC ABY2, public weights, single / multi-batch & 100 / 192 & 63--73 / 115--131\\
 2PC ABY2, CUT on / off (plain family, 12 runs each) & 1,752 & 1,134 / 1,138\\
+2PC ABY2 A2bits, TS\{L\} / TS\_Mix / TS1, $F = 5$ (\cref{tab:ts1acc}) & 256 & 159--164 / 157--164 / 156--161\\
+2PC ABY2 A2bits, TS\{L\} / TS\_Mix / TS1, $F = 8$ & 256 & 139--169 / 186--190 / 186--187\\
+Plaintext, float (PyTorch), the same 256 images & 256 & 189\\
 \bottomrule
 \end{tabular}
 \caption{Final accuracy with the AdamW-trained ResNet50 on the first CIFAR-10 test images.}
@@ -865,8 +868,9 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
 \section{Limitations and open problems}\label{sec:limits}
 
 \begin{itemize}\itemsep1pt
-\item \textbf{Truncation.} ABY2 has no reduced-slack or exact truncation yet. It is not needed for accuracy with the
-  AdamW model, but it would remove the truncation noise (\cref{sec:eval}).
+\item \textbf{Truncation.} ABY2 runs the reduced-slack TS1 only fused into a ReLU (\cref{sec:triadts1}); a stand-alone
+  TS1 (a pooling without a ReLU after it) would need a message of its own, and the reshared and \flag{COMPRESS=1} builds,
+  which have no A2B bake, a Boolean addition of their own. Exact truncation is still missing.
 \item \textbf{Weights known in preprocessing.} The multi-batch a2b bake still excludes
   \flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING}, whose prescribed shares assume one word per register.
 \item \textbf{Ciphertext occupancy.} At $7\times7$ feature maps, inputs are 5--19\% data and outputs

@@ -992,10 +992,11 @@ class ABY2_PRE_Share
     // TS1 fused into the ReLU (see g_ts1_la): the bit injection's product with the truncated value's mask is the
     // ordinary one for la (in place of x's mask) plus the TS1 product [lambda_b r_msb] (ts1_generate_products), whose
     // choice bits are recorded here. ts1: the compact index of x[0].
-    void prepare_opt_bit_injection_ts1(ABY2_PRE_Share x[], ABY2_PRE_Share out[], uint64_t ts1, const Datatype* sk, Datatype trunc_factor,
+    void prepare_opt_bit_injection_ts1(ABY2_PRE_Share x[], ABY2_PRE_Share out[], uint64_t ts1, const Datatype* M_in, const Datatype* sk, int lift_tp,
+                                       Datatype trunc_factor,
                                        int fractional_bits)
     {
-        (void) sk, (void) trunc_factor, (void) fractional_bits;
+        (void) M_in, (void) sk, (void) lift_tp, (void) trunc_factor, (void) fractional_bits;
         for (int i = 0; i < BITLENGTH; i++)
             x[i].l = g_ts1_la[ts1 + i];
         g_ts1_mux_b[ts1 / BITLENGTH] = multiplexer_bool();

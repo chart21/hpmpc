@@ -742,10 +742,11 @@ class ABY2_init
     }
 
 #if TS1_FUSED_ACTIVE
-    void prepare_opt_bit_injection_ts1(ABY2_init x[], ABY2_init out[], uint64_t ts1, const Datatype* sk, Datatype trunc_factor,
+    void prepare_opt_bit_injection_ts1(ABY2_init x[], ABY2_init out[], uint64_t ts1, const Datatype* M_in, const Datatype* sk, int lift_tp,
+                                       Datatype trunc_factor,
                                        int fractional_bits)
     {
-        (void) ts1, (void) sk, (void) trunc_factor, (void) fractional_bits;
+        (void) ts1, (void) M_in, (void) sk, (void) lift_tp, (void) trunc_factor, (void) fractional_bits;
         prepare_opt_bit_injection(x, out);
     }
 #endif

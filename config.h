@@ -152,10 +152,17 @@
       // probabilistic with 4 and aborts with 1 (a stand-alone TS1 would need a message of its own).
 #endif
 
+#ifndef A2B_DELAYED_CUT
+#define A2B_DELAYED_CUT 1  // 2PC, TRUNC_DELAYED=1, A2B bake: a delayed ReLU input's A2B converts the locally truncated value
+                           // (m >> F plus the bake's Boolean addition of the parties' mask shares >> F), so it takes the
+                           // CUT_FRACTIONAL_BITS_OPT cut (26 instead of 31 RCA rounds online and in the Boolean
+                           // addition). TS{L} only (TS1 always does); DReLU of values in [0, 2^(F+1)) may be 0
+#endif
+
 #ifndef TS1_LOW_CARRY
 #define TS1_LOW_CARRY 0  // 2PC TS1: also convert the carry out of the mask's FRACTIONAL low bits (one more COT of
-                         // BITLENGTH - 1 bits per value): the truncation is then off by 0 or +1 (as in 3PC); without
-                         // it by -1, 0 or +1
+                         // BITLENGTH - 1 bits per value, and the Boolean addition runs full width): the truncation is
+                         // then off by 0 or +1 (as in 3PC); without it by -1, 0 or +1
 #endif
 
 #ifndef TRUNC_DELAYED

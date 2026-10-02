@@ -458,57 +458,132 @@ hpmpc `ddc082f` (ConvTriple `70f3eab`); data `docs/variant_data/triad/round8/` (
 
 ## TS1 / TS_Mix in 2PC (2026-10-02): reduced-slack truncation without online communication
 
-`TRUNC_APPROACH=4` (TS_Mix: TS1 fused into the ReLUs, TS{L} elsewhere) and `=1` now work with PROTOCOL 4
-(`TS1_FUSED_ACTIVE`, needs `TRUNC_DELAYED=1` and the A2B bake, i.e. A2bits with COMPRESS=0; `#error` otherwise).
-Data `docs/variant_data/triad/ts1/`.
+`TRUNC_APPROACH=4` (TS_Mix: TS1 fused into the ReLUs, TS{L} elsewhere) and `=1` (TS1: also the poolings) work with
+PROTOCOL 4 (`TS1_FUSED_ACTIVE`, needs `TRUNC_DELAYED=1` and the A2B bake, i.e. A2bits with COMPRESS=0; `#error`
+otherwise). Data `docs/variant_data/triad/ts1/`.
 
 * **Protocol.** A delayed ReLU input z = m - lambda (scale 2^2F) is truncated by Truncation Untangled's Fig. 9 on
   u = -z: c = -m + offset is public (both parties hold m, so c', MSB(c) and the XOR with r_msb are local), and r =
   nu = -lambda is what the bake's Boolean addition already adds. Its sum-bit shares give the carries (carry share =
   [c] ^ own input): r' = (a_0 >> F) + (a_1 >> F) + w_t - K w and r_msb = MSB(nu), a_i = nu_i mod 2^(l-1),
-  K = 2^(l-1-F). Preprocessing per value: w and r_msb to arithmetic shares by COTs of F = 5 bits (they are only used
-  times K), and the bit injection's extra product [lambda_b r_msb] by a 6-bit multiplexer (ConvTriple `generateCOT` /
-  `do_multiplex` take a bit width now). The truncated value is M - (la + sK r_msb) with M, s public: the bit
-  injection takes it with the products [lambda_b la] (its usual one) + sK [lambda_b r_msb]. No message of its own.
-* **Cut (TS1_CUT_ACTIVE, with CUT_FRACTIONAL_BITS_OPT).** The ReLU's A2B converts trunc(z) instead of z (offset
-  2^(l-2), 1-bit slack): its m is replaced by M and its [c] is the bake's [c] shifted by F slices (the low l - F bits of
-  the mask are nu >> F for both signs s), so the online adder keeps the cut (26 instead of 31 RCA rounds). Without
-  w_t the A2B sees y + w_t, so it takes M - 1: DReLU is then exactly that of y and the ReLU never outputs -1. The
-  Boolean addition runs full width (TS1 needs the carry into bit l-1).
-* **TS1_LOW_CARRY** (default 0): also convert w_t (a 31-bit COT per value): errors 0 / +1 as in 3PC instead of
-  -1 / 0 / +1 (unit test: 0 / 1138 / 926 vs 283 / 1477 / 304 of 4096; +34 MiB).
-* **Elsewhere.** TS_Mix truncates every other site probabilistically (`trunc_2k_in_place` -> `trunc_pr_in_place`);
-  an average pooling on a delayed input divides by its own bits only and leaves the pending truncation to the next
-  ReLU (PIGEON). TRUNC_APPROACH=1 aborts at a truncation outside a ReLU (it would need a stand-alone TS1 with a
-  message of its own), e.g. ResNet's pooling.
-* **Bug fixed on the way (all TD=1 builds, Cheetah_ResNet = functions 87/187/287):** the downsample branch runs at the
+  K = 2^(l-1-F). Preprocessing per value: w and r_msb to arithmetic shares by COTs of F bits (they are only used
+  times K), and the bit injection's extra product [lambda_b r_msb] by an (F+1)-bit multiplexer (ConvTriple
+  `generateCOT` / `do_multiplex` take a bit width). The truncated value is M - (la + sK r_msb) with M, s public: the
+  bit injection takes it with the products [lambda_b la] (its usual one) + sK [lambda_b r_msb]. No message of its own.
+* **Shifted design: the cut in the Boolean addition too** (default with CUT_FRACTIONAL_BITS_OPT; `beaver_triples.hpp`
+  `g_ts1_la`). The full design above needs the carry into bit l-1 of nu_0 + nu_1, so the bake's Boolean addition ran
+  full width (31 AND rounds, all slices) although the ReLU's A2B only reads the low l - F. Instead the Boolean
+  addition adds the locally shifted shares rho_i = (f nu_i mod 2^l) >> F (f a public factor, 1 without a pooling)
+  over l' = l - F bits, i.e. with the cut (26 rounds): (f z) >> F = (f m >> F) + rho + E mod 2^l', E in {0, 1, 2} the
+  dropped low carries. The A2B converts y1 = M0 + rho with the cut, M0 = ((f m + 2^(F-1)) >> F) + 1 (rounded and
+  centred for two random mask shares, so the dropped carries cost no bias), and TS1 runs in the small ring 2^l' on
+  -y1 (offset 2^(l'-2), 1-bit slack) and lifts y1 >> t' to l bits: with t' = 0 the A2B and the bit injection see the
+  same value (DReLU exact for it, the ReLU never outputs -1), off by -1 / 0 / +1 from the floor (27 / 1001 / 991 of
+  the unit test's 2019 positive inputs), mean +0.03 LSB from the real value.
+* **TS1_LOW_CARRY=1** (w_t, default 0) keeps the full design (full-width Boolean addition, [c] shifted by F slices for
+  the cut A2B) and also converts w_t (a COT of l - 1 bits per value): errors 0 / +1 as in 3PC, mean -0.01 LSB.
+* **Pooling (TRUNC_APPROACH=1, `TS1_FOLD_POOL`).** An average pooling fused into a ReLU (FUSE_RELU_AVG), one that
+  runs between a conv and the next ReLU (PIGEON: it only sums and leaves 1/denom to the ReLU, `g_pending_denom`) and a
+  uniform AdaptiveAvgPool after the last ReLU (`fuse_relu_pools`, also in `Cheetah_ResNet::compile` now) are divided
+  by the ReLU's TS1: f = 1/denom (F bits), t' = F (delayed input) and the lift truncates by t' with the exact w_t of
+  those values only (31-bit COT; without it the small averages lose half an LSB on average: CIFAR 69 of 256 at
+  F = 5). The COTs and the multiplexer take F + t' bits per ReLU, not the largest t' for all. TS_Mix keeps TS{L} for
+  the poolings: the pool divides its own bits only, a pending truncation stays pending for the next ReLU's TS1.
+  TRUNC_APPROACH=1 aborts at any other truncation outside a ReLU (a stand-alone TS1 needs a message of its own).
+* **UC3's first ReLU.** Its inputs carry the data owner's input sharing (one mask share 0, the other the value),
+  which the shifted design's centring does not suit (+1 on every zero input). The mask-only forward leaves their
+  committed masks and the ReLU moves the inputs onto them (the rebase message, as without the mask pass).
+* **TS{L} gets the cut for UC3 too: `A2B_DELAYED_CUT=1`** (default; 2PC, TRUNC_APPROACH 0, TRUNC_DELAYED=1, A2B
+  bake). UC3 (public weights) runs TS{L} with TD=1, so its ReLUs converted the untruncated z: no cut. Now a delayed
+  ReLU's A2B converts the locally truncated value (m >> F, and the bake adds rho_i = nu_i >> F, the shifted design
+  with f = 1, t' = 0) with the cut, and the bit injection takes z as before (BIT_INJECTION_TRUNC_SIM folds the
+  truncation there). DReLU of values in [0, 2^(F+1)) (real value below 2^(1-F)) may come out 0. And in TD=1 builds
+  (TS1, TS_Mix, A2B_DELAYED_CUT) a ReLU whose input a pooling has truncated already takes the cut as with TD=0: the
+  stem ReLU of UC3 TS{L} ran full width and forced the whole Boolean addition to full width.
+* **Bug fixes on the way (all TD=1 builds, Cheetah_ResNet = functions 87/187/287):** the downsample branch runs at the
   block's start; the downsample conv took the identity scaled by 2^F and left `delayed` set, so the main branch's
   first conv truncated the block input. Now the downsample conv takes the block input as it is and OP_Finish restores
-  the main branch's state: UC3 TS{L} online -6.1 MiB, -4 rounds, and the values are right.
-* **Tests.** func 59 `RELU_TS1` (random |v| < 2^30, 2^29 with the cut, both signs): 0 wrong of 4096 (single batch,
-  UC1 / UC2 / UC3 flags, cut and no cut, with and without w_t) and of 32768 (DATTYPE 256). Single-batch unit tests
-  need `CHEETAH_CONV_EARLY=0 A2B_BAKE_MASK_PASS=0` (their OT phase runs inside the network's mask-only forward; also
-  for TS{L}). CIFAR, AdamW model, 100 images (plaintext 76%): UC1 TS{L} 63 / TS_Mix 65, UC2 68 / 64 (69 with w_t),
-  UC3 65 / 69: within the noise of 100 images.
-* **ImageNet (flare / polynize, medians of 2 / 1).**
+  the main branch's state (UC3 TS{L} online -6.1 MiB, -4 rounds, and the values are right). `Cheetah_ResNet` had no
+  ReLU/pool fusion of its own compile (no effect so far: its ReLUs are not followed by poolings, but TS1 needs the
+  AdaptiveAvgPool fusion).
+* **Tests** (func 59, flare / polynize): `RELU_TS1` (random |v| < 2^30, 2^29 with the cut, both signs; error per value
+  against the real value), `RELU_TS1_AVG9` (pooling factor 1/9 with t' = F), `RELU_TS1_AVG9_TRUNCATED` (input
+  truncated already), `RELU_DCUT`: 0 wrong of 4096 (DATTYPE 32) and of 32768 (DATTYPE 256); mean errors +0.028 (shifted),
+  -0.007 (w_t), +0.001 / +0.10 (AVG9 / AVG9 truncated), -0.04 LSB (DCUT). `RELU_RANDOM` now draws |v| < 2^(l-1-F)
+  where the cut applies. Single-batch unit tests need `CHEETAH_CONV_EARLY=0 A2B_BAKE_MASK_PASS=0`.
+* **ImageNet, final code** (flare / polynize, dummy weights, `res_im_final.csv` / `comm_im_final.csv`, median of 3; P0's
+  traffic sent + received, MiB; online seconds: `res_online.csv`, median of 4 after the bit-injection change below).
+  TS{L} is the build as given (TD=0 in UC1 / UC2, TD=1 with BIT_INJECTION_TRUNC_SIM in UC3).
 
-| UC, adder | pre s TS{L} -> TS_Mix | online s | rounds | pre MiB | online MiB |
+| UC, adder | pre MiB TS{L} / TS_Mix / +w_t / TS1 | pre s | online MiB (TS1) | rounds (TS1) | online s TS{L} / TS_Mix / TS1 |
 |---|---|---|---|---|---|
-| UC1 RCA | 3.24 -> 3.56 | 0.459 -> 0.462 | 1818 = | 1341 -> 1399 | 210.2 = |
-| UC1 PPA | 4.14 -> 4.44 | 0.466 -> 0.450 | 982 = | 1464 -> 1522 | 321.8 = |
-| UC1 PPA4 | 4.60 -> 4.97 | 0.563 -> 0.557 | 730 = | 1704 -> 1761 | 207.9 = |
-| UC2 RCA | 3.14 -> 3.44 | 0.398 -> 0.422 | 1714 = | 922 -> 979 | 167.8 = |
-| UC2 PPA | 4.08 -> 4.39 | 0.399 -> 0.418 | 878 = | 1045 -> 1102 | 279.3 = |
-| UC2 PPA4 | 4.67 -> 4.76 | 0.485 -> 0.494 | 626 = | 1285 -> 1342 | 165.6 = |
-| UC3 RCA | 2.93 -> 3.04 | 0.492 -> 0.450 | 1963 -> 1714 | 459 -> 479 | 142.2 -> 125.3 |
-| UC3 PPA | 3.90 -> 4.04 | 0.437 -> 0.480 | 891 -> 878 | 571 -> 601 | 260.3 -> 237.0 |
-| UC3 PPA4 | 5.25 -> 4.55 | 0.535 -> 0.558 | 630 -> 626 | 900 -> 841 | 129.3 -> 123.2 |
+| UC1 RCA | 1341/1378/1433/1379 | 3.17/3.38/3.53/3.49 | 210.2 (209.4) | 1818 (1817) | 0.477/0.467/0.457 |
+| UC1 PPA | 1464/1501/1555/1502 | 4.21/4.30/4.43/4.40 | 321.8 (321.0) | 982 (981) | 0.459/0.466/0.455 |
+| UC1 PPA4 | 1704/1741/1824/1742 | 4.63/4.87/5.40/4.84 | 207.9 (207.1) | 730 (729) | 0.573/0.566/0.550 |
+| UC2 RCA | 922/959/1013/960 | 3.10/3.31/3.44/3.49 | 167.8 (167.0) | 1714 (1713) | 0.395/0.395/0.399 |
+| UC2 PPA | 1045/1082/1136/1083 | 4.21/4.34/4.45/4.29 | 279.3 (278.6) | 878 (877) | 0.409/0.396/0.393 |
+| UC2 PPA4 | 1285/1321/1405/1323 | 4.57/4.77/5.42/4.91 | 165.6 (164.8) | 626 (625) | 0.498/0.485/0.476 |
+| UC3 RCA | 421/460/514/461 | 2.96/3.17/3.22/3.23 | 125.3 (124.5) | 1714 (1713) | 0.447/0.437/0.428 |
+| UC3 PPA | 544/582/637/584 | 3.84/4.04/3.96/4.14 | 237.0 (236.1) | 878 (877) | 0.465/0.450/0.436 |
+| UC3 PPA4 | 784/822/906/823 | 4.53/4.64/5.16/4.71 | 123.2 (122.4) | 626 (625) | 0.558/0.560/0.543 |
 
-  UC1 / UC2 (TS{L} with TD=0 and the cut): online traffic and rounds identical, preprocessing +57-58 MiB (+3.3-6.2%:
-  5 more AND rounds of the full-width Boolean addition, the two B2A COTs, the narrow multiplexer), +0.1-0.37 s. UC3
-  (TS{L} with TD=1, no cut): TS_Mix brings the cut, online -6..-17 MiB. Online times within run-to-run noise.
+  TS_Mix costs +36-39 MiB of preprocessing over TS{L} (RCA: +2.8% UC1, +4.0% UC2, +9.3% UC3; the first version with
+  the full-width Boolean addition +57-58), the same online traffic and rounds, and +0.09-0.24 s preprocessing (the four
+  narrow COTs per ReLU value: two B2A, the multiplexer's two). TS1 adds 1-2 MiB (the poolings' w_t; before the
+  per-width COTs +25) and removes the last pooling's message (-0.8 MiB, -1 round). w_t costs another 54-84 MiB and up
+  to 0.65 s. Online the three take the same time (TS{L} 0.395-0.573 s, TS_Mix 0.395-0.566, TS1 0.393-0.550).
+* **UC3 TS{L} with A2B_DELAYED_CUT** (`_xl0` without):
+
+| adder | pre MiB | pre s | online MiB | rounds |
+|---|---|---|---|---|
+| RCA | 452 -> 421 | 3.11 -> 2.96 | 136.1 -> 125.3 | 1959 -> 1714 |
+| PPA | 565 -> 544 | 3.87 -> 3.84 | 254.2 -> 237.0 | 887 -> 878 |
+| PPA4 | 894 -> 784 | 5.29 -> 4.53 | 123.2 = | 626 = |
+
+* **Larger F** (RCA, `res_f.csv` / `comm_f.csv`, median of 3). TS1 has no wrap failures, so F can grow (accuracy
+  below), and the cut adder has l - F bits: per ReLU 31 - F RCA rounds online and in the Boolean addition.
+
+| UC | TS{L} F=5 | TS{L} F=8 | TS_Mix F=5 | TS_Mix F=8 | TS_Mix F=10 |
+|---|---|---|---|---|---|
+| UC1 rounds / online MiB / pre MiB | 1818 / 210.2 / 1341 | 1671 / 203.7 / 1323 | 1818 / 210.2 / 1378 | 1671 / 203.7 / 1376 | 1573 / 199.3 / 1372 |
+| UC2 | 1714 / 167.8 / 922 | 1567 / 161.3 / 903 | 1714 / 167.8 / 959 | 1567 / 161.3 / 956 | 1469 / 157.0 / 952 |
+| UC3 | 1714 / 125.3 / 421 | 1567 / 118.9 / 403 | 1714 / 125.3 / 460 | 1567 / 118.9 / 457 | 1469 / 114.6 / 453 |
+
+  (TS_Mix's preprocessing hardly shrinks: its COTs widen with F.)
+* **Accuracy** (CIFAR-10, AdamW ResNet50, the first 256 test images, plaintext 189; `res_acc256.csv`, seeded runs):
+
+| UC | variant | F = 5 | F = 8 | F = 10 |
+|---|---|---|---|---|
+| UC1 | TS{L} | 164 | 167 |  |
+| UC1 | TS_Mix | 164 | 190 |  |
+| UC1 | TS_Mix + w_t | 158 |  |  |
+| UC1 | TS1 | 161 | 187 |  |
+| UC1 | TS1 + w_t | 165 |  |  |
+| UC2 | TS{L} | 159 | 169 | 44 |
+| UC2 | TS_Mix | 164 | 186 | 188 |
+| UC2 | TS_Mix + w_t | 157 | 186 | 183 |
+| UC2 | TS1 | 161 | 187 | 189 |
+| UC2 | TS1 + w_t | 165 | 186 | 188 |
+| UC3 | TS{L}, no A2B_DELAYED_CUT | 166 |  |  |
+| UC3 | TS{L} | 162 | 139 |  |
+| UC3 | TS_Mix | 157 | 188 |  |
+| UC3 | TS_Mix + w_t | 159 |  |  |
+| UC3 | TS1 | 156 | 186 |  |
+| UC3 | TS1 + w_t | 165 |  |  |
+
+  At F = 5 every variant classifies 156-166 (fixed-point precision, not truncation errors, limits it; the spread is
+  noise: each variant draws different randomness). w_t makes no consistent difference (UC1 / UC2 / UC3 at F = 5: TS1
+  +4 / +4 / +9, TS_Mix -6 / -7 / +2; UC2 at F = 8 / 10: TS1 -1 / -1, TS_Mix 0 / -5). At F = 8 TS_Mix and TS1 reach
+  the plaintext model (186-190) and TS{L} does not (167 / 169 / 139: its wrap probability grows with 2^(2F)); at
+  F = 10 TS{L} collapses (44) and TS1 stays at 188-189.
+* **Online compute.** TS_Mix's online phase took 0.02-0.04 s longer than TS{L}'s in UC1 / UC2 (same waiting): each
+  TS1 ReLU zero-filled two per-value arrays (M and sK) that the A2B transform wrote and the bit injection read. The
+  shifted design's lift needs only M0, which is the A2B's public input and stays in the inputs' m: the bit injection
+  now computes M and sK from it (`ts1_lift_shift`), with outputs identical bit for bit (6 CIFAR builds). Their online
+  compute (online minus waiting) fell by 0.02-0.04 s and is now at or below TS{L}'s (median of 4).
 * Not supported: COMPRESS=1 and reshared builds (no bake: TS1 would need a Boolean addition of its own over the
-  ReLU inputs' masks, ~+157 MiB), TS{L} with TD=1 for UC1 / UC2 still aborts in the bake check (pre-existing).
+  ReLU inputs' masks, ~+157 MiB; A2B_DELAYED_CUT needs the bake too), TS{L} with TD=1 for UC1 / UC2 still aborts in
+  the bake check (pre-existing).
 
 ## GPU (2026-10-01, workstation cmucl771615)
 

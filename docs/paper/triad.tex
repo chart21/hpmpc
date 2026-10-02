@@ -401,6 +401,86 @@ random OTs (one extension round of all 64 ferret instances and the hashing) and 
 still classify 4--7 of 10 CIFAR-10 images, and multi-batch (192 images) 134 (\flag{MODELWEIGHTS_KNOWN=0}) and 124 (=1).
 These are Zen~4 numbers only (algofi / goracle were booked).
 
+\paragraph{Reduced-slack truncation.}\label{sec:triadts1} ABY2 now runs the reduced-slack truncation TS1 of
+Truncation Untangled (its Fig.~9) fused into the ReLU: \flag{TRUNC_APPROACH=4} (TS\_Mix: TS1 in the ReLUs, the
+probabilistic TS\{L\} elsewhere) and \flag{TRUNC_APPROACH=1} (TS1 also for the poolings, whose division joins the next
+ReLU's TS1), both with \flag{TRUNC_DELAYED=1} and the A2B bake. In 3PC the party that holds the mask computes TS1's
+mask-side values; in ABY2 nobody does, but their inputs are the carries of the two mask shares' sum, which the bake's
+Boolean addition already computes. Two narrow COTs per value make the carries arithmetic, and a narrow multiplexer
+gives the bit injection its one extra product; the public side (the masked value's top bits and its MSB) is local, so
+the truncation sends nothing online.
+\begin{enumerate}\itemsep1pt
+\item \textbf{The cut in the Boolean addition.} Literally, TS1 needs the carry into the top bit, so the Boolean addition
+  would run full width. Instead it adds the shares shifted locally by $F$ (a pooling's $1/d$ folded in) over
+  $\ell - F$ bits, which keeps round~8's cut (26 instead of 31 rounds); the A2B converts the truncated value with the
+  cut as well, and TS1 runs in the ring $2^{\ell-F}$. The dropped low carries are compensated by rounding the public
+  side: the result is off by $-1$, 0 or $+1$ from the floor, with mean $+0.03$ LSB from the real value. The exact
+  low carry (\flag{TS1_LOW_CARRY}, 0 or $+1$ as in 3PC) costs a full-width addition and a 31-bit COT per value; only the
+  poolings' ReLUs take it, whose small averages need it.
+\item \textbf{The cut for UC3's TS\{L\}} (\flag{A2B_DELAYED_CUT}). With public weights TS\{L\} delays the
+  truncation to the ReLU, whose A2B therefore converted the untruncated value, without the cut. The same shifted
+  addition gives it the cut: 245 fewer online rounds and 10.8\,MiB less online traffic for RCA, and 21--110\,MiB less
+  preprocessing traffic.
+\end{enumerate}
+\Cref{tab:ts1} shows the ImageNet costs. TS\_Mix sends the same online and 36--39\,MiB more in preprocessing
+(the first version, with a full-width addition, 57--58\,MiB), 0.09--0.24\s more preprocessing time; TS1 removes the
+last pooling's message. Online, all three take the same time over the nine builds of each (TS\{L\} 0.40--0.57\s,
+TS\_Mix 0.40--0.57\s, TS1 0.39--0.55\s, median of 4), once the bit injection computes TS1's public side from the A2B's
+input instead of storing it per value (that cost 0.02--0.04\s). Since TS1 has no
+wrap failures, \flag{FRACTIONAL} can grow, and the cut adder shrinks with it: TS\_Mix with $F = 8$ runs 147 fewer online
+rounds than TS\{L\} with $F = 5$ and classifies like the plaintext model (\cref{tab:ts1acc}), where TS\{L\} loses
+20--50 images of 256 at $F = 8$ and collapses at $F = 10$. At $F = 5$ all variants classify 156--166 of 256, the fixed
+point's precision being the limit.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+UC & variant & pre MiB & pre s & online MiB & rounds\\
+\midrule
+UC1 & TS\{L\} & 1{,}341 & 3.17 & 210.2 & 1818\\
+ & TS\_Mix & 1{,}378 & 3.38 & 210.2 & 1818\\
+ & TS1 & 1{,}379 & 3.49 & 209.4 & 1817\\
+ & TS\_Mix{,} $F = 8$ & 1{,}376 & 3.39 & 203.7 & 1671\\
+ & TS\_Mix{,} $F = 10$ & 1{,}372 & 3.25 & 199.3 & 1573\\
+\addlinespace
+UC2 & TS\{L\} & 922 & 3.10 & 167.8 & 1714\\
+ & TS\_Mix & 959 & 3.31 & 167.8 & 1714\\
+ & TS1 & 960 & 3.49 & 167.0 & 1713\\
+ & TS\_Mix{,} $F = 8$ & 956 & 3.35 & 161.3 & 1567\\
+ & TS\_Mix{,} $F = 10$ & 952 & 3.23 & 157.0 & 1469\\
+\addlinespace
+UC3 & TS\{L\}{,} no \flag{A2B_DELAYED_CUT} & 452 & 3.11 & 136.1 & 1959\\
+ & TS\{L\} & 421 & 2.96 & 125.3 & 1714\\
+ & TS\_Mix & 460 & 3.17 & 125.3 & 1714\\
+ & TS1 & 461 & 3.23 & 124.5 & 1713\\
+ & TS\_Mix{,} $F = 8$ & 457 & 3.12 & 118.9 & 1567\\
+ & TS\_Mix{,} $F = 10$ & 453 & 3.07 & 114.6 & 1469\\
+\bottomrule
+\end{tabular}
+\caption{TS1 on ImageNet (RCA, flare / polynize, dummy weights, median of 3 runs; P0's traffic sent and received). TS\{L\}:
+the builds as given (\flag{TRUNC_DELAYED=0} in UC1 and UC2, \flag{=1} in UC3).}
+\label{tab:ts1}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+& \multicolumn{3}{c}{UC1} & \multicolumn{3}{c}{UC2} & UC3\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+$F$ & TS\{L\} & TS\_Mix & TS1 & TS\{L\} & TS\_Mix & TS1 & TS\{L\} / TS\_Mix / TS1\\
+\midrule
+5 & 164 & 164 & 161 & 159 & 164 & 161 & 162 / 157 / 156\\
+8 & 167 & 190 & 187 & 169 & 186 & 187 & 139 / 188 / 186\\
+10 & & & & 44 & 188 & 189 & \\
+\bottomrule
+\end{tabular}
+\caption{Accuracy with TS1 (CIFAR-10, AdamW ResNet50, the first 256 test images; plaintext 189). With
+\flag{TS1_LOW_CARRY} at $F = 5$: TS1 165 / 165 / 165, TS\_Mix 158 / 157 / 159 (UC1 / UC2 / UC3).}
+\label{tab:ts1acc}
+\end{table}
+
 \paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds at the final code; the ranges below are
 over all 18 builds with \flag{COMPRESS=0}. With secret weights, preprocessing is now the OT phase (1.4--4.7\s, inside
 the pass), the pass's own work (0.33--0.58\s, including its mask-only forward), the steps after it (0.22--0.56\s) and
