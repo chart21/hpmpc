@@ -143,6 +143,12 @@ inline const bool g_conv_repack_set = (Iface::conv_repack() = true, Iface::conv_
 #endif
 #define CHEETAH_CONV_ASYNC_ACTIVE (CHEETAH_CONV_ASYNC == 1 && CHEETAH_WAN_OPT == 0 && PROTOCOL == 4 && DATTYPE == BITLENGTH && \
                                    CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_PIPELINE == 1)
+// CHEETAH_CONV_SIDE: the lanes' conv triples (one pipelined product, CHEETAH_CONV_LANES) on four channels of their own
+// (Keys::get_side_ios), started by complete_preprocessing on a thread of their own (tl_conv_side) while the next
+// generators use the regular channels. Same calls, same PRNG streams: the same triples.
+#define CHEETAH_CONV_SIDE_ACTIVE (CHEETAH_CONV_SIDE == 1 && CHEETAH_CONV_LANES_ACTIVE && CHEETAH_WAN_OPT == 0 && \
+                                  BIT_INJECTION_PREPROCESSING_OPT == 1)
+inline thread_local bool tl_conv_side = false;
 #if CHEETAH_CONV_ASYNC_ACTIVE
 #include <condition_variable>
 #include <mutex>
@@ -771,14 +777,15 @@ void generateMultiplexerDummyTriples(type a[],
 // recorded in GEMM call order: a conv records its output index per batch element (one GEMM per element), an FC
 // records the linear-order sentinel.
 template <typename LayerParams, typename Keys>
-static void mwk_fix_p1_share(Keys& keys, UINT_TYPE* c, uint64_t cnt, [[maybe_unused]] uint64_t per_batch)
+static void mwk_fix_p1_share(Keys& keys, UINT_TYPE* c, uint64_t cnt, [[maybe_unused]] uint64_t per_batch,
+                             IO::NetIO* own_io = nullptr)
 {
     constexpr int factor = DATTYPE / BITLENGTH;
     constexpr bool is_conv = std::is_same_v<LayerParams, ConvolutionParameter>;
     auto& consume = is_conv ? g_mwk_p1_masks_consume : g_mwk_p1_fc_masks_consume;  // separate vectors, see buffers.h
     const uint64_t n = cnt * factor;
     std::vector<UINT_TYPE> delta(n);
-    auto* io = keys.get_ios(CHEETAH_THREADS)[0];
+    auto* io = own_io ? own_io : keys.get_ios(CHEETAH_THREADS)[0];
     constexpr uint64_t CHUNK = (uint64_t) 1 << 28;  // send_data takes an int length
 #if PARTY == 1
     const auto& masks = is_conv ? g_mwk_p1_masks : g_mwk_p1_fc_masks;
@@ -830,6 +837,15 @@ void generateLayerDummyTriples(type** a,
     }
 
 
+#if CHEETAH_CONV_SIDE_ACTIVE
+    // on the side thread the regular channels belong to the generators running meanwhile: leave them alone
+    IO::NetIO** side_ios = nullptr;
+    if (tl_conv_side)
+        side_ios = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).get_side_ios(4);
+    else
+#else
+    IO::NetIO** side_ios = nullptr;
+#endif
     Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
     auto& keys = Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
     const int factor = DATTYPE/BITLENGTH;
@@ -978,7 +994,7 @@ void generateLayerDummyTriples(type** a,
 #endif
     } else {
         uint64_t c_index = 0;
-        struct Deferred { UINT_TYPE *x, *w, *y; uint64_t y_size, c_index; };  // converted back after the call
+        struct Deferred { UINT_TYPE *x, *w, *y; uint64_t y_size, c_index, per_batch = 0; };  // converted back after the call
 #if CHEETAH_BN_BATCHED == 1
         std::vector<Deferred> deferred_bn;
         std::vector<Iface::BNTripleLayer> bn_layers;
@@ -1059,7 +1075,7 @@ void generateLayerDummyTriples(type** a,
                 }
 #endif
                 conv_parms.push_back(conv);
-                conv_layers.push_back({x, w, y, y_size, c_index});
+                conv_layers.push_back({x, w, y, y_size, c_index, p.y_size_per_batch});
                 c_index += y_size;
                 continue;
 #else
@@ -1129,9 +1145,15 @@ void generateLayerDummyTriples(type** a,
             Iface::generateConvTriplesPackedBatch(keys, conv_parms, A_KNOWN == 0 || PARTY == 1 ? xs.data() : nullptr,
                                                   A_KNOWN == 0 || PARTY == 0 ? ws.data() : nullptr, y_all.data(),
                                                   CHEETAH_PARTY, CHEETAH_THREADS,
-                                                  A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB);
+                                                  A_KNOWN == 1 ? Utils::PROTO::AB2 : Utils::PROTO::AB, nullptr, side_ios);
             uint64_t off = 0;
             for (auto& d : conv_layers) {
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1
+                // P1's prescribed shares, layer by layer in the order its masks were recorded (lane-major: lane j's
+                // outputs at j * y_size, as mwk_fix_p1_share takes them)
+                mwk_fix_p1_share<LayerParams>(keys, y_all.data() + off, d.y_size, d.per_batch,
+                                              side_ios ? side_ios[0] : nullptr);
+#endif
                 for (uint64_t i = 0; i < d.y_size; i++) {
                     alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
                     for (int j = 0; j < factor; j++)
@@ -1164,6 +1186,9 @@ void generateLayerDummyTriples(type** a,
 #endif
     }
     #if CHEETAH_DISCONNECT == 1
+#if CHEETAH_CONV_SIDE_ACTIVE
+    if (!tl_conv_side)  // the side thread's generator ends while the others still use the regular channels
+#endif
     keys.disconnect();
     #endif
 }

@@ -482,10 +482,13 @@ inline int base_port = BASE_PORT;  // temporary solution
 #define CHEETAH_CONV_LANES 1  // multi-batch: the lanes' conv triples as one convolution over all images, all layers pipelined
 #endif
 // Only where every lane has the same weight masks by construction (SHARE_PREP: the model owner's share is -w and the
-// other party's 0 in every lane, for A_KNOWN=1 (AB2 triples) and A_KNOWN=0 (AB triples) alike)
+// other party's 0 in every lane, for A_KNOWN=1 (AB2 triples) and A_KNOWN=0 (AB triples) alike; with
+// MODELWEIGHTS_KNOWN_DURING_PREPROCESSING, P1's prescribed shares are put in per layer after the product, as in single batch)
 #define CHEETAH_CONV_LANES_ACTIVE (CHEETAH_CONV_LANES == 1 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_TYPE == 0 && \
-    DATTYPE > BITLENGTH && PROTOCOL == 4 && SHARE_PREP == 1 && PUBLIC_WEIGHTS == 0 && \
-    MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0)
+    DATTYPE > BITLENGTH && PROTOCOL == 4 && SHARE_PREP == 1 && PUBLIC_WEIGHTS == 0)
+#ifndef CHEETAH_CONV_SIDE
+#define CHEETAH_CONV_SIDE 1  // multi-batch (CHEETAH_CONV_LANES): after the preprocessing pass the conv triples run on channels of their own, alongside the Boolean addition, COT and multiplexer triples on the regular ones
+#endif
 #ifndef CHEETAH_BN_BATCHED
 #define CHEETAH_BN_BATCHED 1  // BN triples of all layers in one elementwise HE product instead of one latency-bound call per layer
 #endif

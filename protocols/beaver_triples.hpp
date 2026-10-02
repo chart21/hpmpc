@@ -142,13 +142,12 @@ inline bool reshare_sim_on()
 // addition [c] = ia0 (+) ia1 = bool(-lz) EARLY (same stage as the LXLY triples); and then handing lz to
 // every conv mask/send and [c] to every A2B-S2 slice in BOTH phases. g_a2b_ia -> boolean-adder input;
 // g_a2b_lz -> conv mask; g_a2b_c -> [c] share consumed by prepare_A2B_S2.
-// Multi-batch (DATTYPE > BITLENGTH) is covered except with MODELWEIGHTS_KNOWN_DURING_PREPROCESSING, whose prescribed
-// triple shares (mwk_choose_r1_*) still treat a Datatype as one word.
+// Multi-batch (DATTYPE > BITLENGTH) is covered, MODELWEIGHTS_KNOWN_DURING_PREPROCESSING too (its prescribed triple
+// shares, mwk_choose_r1_*, are computed lane by lane).
 // The bake commits one conv mask per full-width A2B slice group: with a reduced ReLU range (COMPRESS: bits
 // REDUCED_BITLENGTH_m..k only) the boolean addition covers k - m of the 32 slices, so most outputs would have no
 // committed mask. Full-width ReLUs only; COMPRESS runs the A2B unbaked.
 #define A2B_CONV_BAKE_ACTIVE (A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && \
-                              (DATTYPE == BITLENGTH || MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 0) && \
                               REDUCED_BITLENGTH_m == 0 && REDUCED_BITLENGTH_k == BITLENGTH)
 // A BatchNorm with secret parameters re-masks its output (BN triples, SecureML truncation leaves the drawn mask, beta's
 // mask is added afterwards like a conv's bias), so it can take the committed / reshare-baked masks like a conv/FC.
@@ -712,15 +711,16 @@ inline Datatype construct_mwk_r1_baked(Datatype r1_base, Datatype low_rand, int 
 template <typename Datatype, typename func_sub>
 inline Datatype mwk_choose_r1_trunc(int bake_index, func_sub SUB)
 {
-#if A2B_CONV_BAKE_ACTIVE && DATTYPE == BITLENGTH  // one word per Datatype (the bake excludes MWK otherwise)
+#if A2B_CONV_BAKE_ACTIVE
     // A2B bake, TD=0: prescribe r1 so P1's SecureML-truncated mask l1 = TRUNC(-r1) == the committed
     // (sign-extended) mask m1 = a2b_bake_conv_mask. -r1 := (m1 << FRACTIONAL) + low, low < 2^FRACTIONAL
     // fresh: the low bits are truncated away, and m1's top FRACTIONAL bits are sign-extension so
     // (m1 << F) >> F == m1. The `low` PRNG draw is identical in PRE and LIVE (synced PSELF), so r1 (the
     // prescribed triple share) matches. [c] = bool(-(lz0+m1)) was formed from the same m1 in init.
+    // Lane by lane (multi-batch: a Datatype holds DATTYPE / BITLENGTH values); one word: the same values as before.
     const Datatype m1 = a2b_bake_conv_mask<Datatype>((uint64_t)(bake_index < 0 ? 0 : bake_index), SUB);
-    const UINT_TYPE low = (UINT_TYPE) getRandomVal(PSELF) & (((UINT_TYPE) 1 << FRACTIONAL) - (UINT_TYPE) 1);
-    return (Datatype) (UINT_TYPE) (0 - (((UINT_TYPE) m1 << FRACTIONAL) + low));
+    const Datatype low = OP_AND(getRandomVal(PSELF), PROMOTE(((UINT_TYPE) 1 << FRACTIONAL) - (UINT_TYPE) 1));
+    return SUB(SET_ALL_ZERO(), OP_ADD(OP_SHIFT_LEFT<FRACTIONAL>(m1), low));
 #else
     Datatype r1 = getRandomVal(PSELF);
 #if RESHARE_BAKE_ACTIVE  // gated: consumes an extra PRNG draw

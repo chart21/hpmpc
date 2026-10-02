@@ -1,6 +1,7 @@
 #include "../../beaver_triples.hpp"
 #include "../../../core/store_to_file.hpp"
 #include <cstdint>
+#include <thread>
 #include <string>
 template <typename Datatype>
 class ABY2_PRE_Share
@@ -1622,6 +1623,15 @@ static void get_fc_triples_from_file()
 #endif
 
 
+#if CHEETAH_CONV_SIDE_ACTIVE
+        // the conv triples (all lanes, one pipelined product) on channels of their own, alongside the next generators
+        init_ConvC();
+        std::thread conv_side([ips, port, process_offset] {
+            tl_conv_side = true;
+            generateConvTriples(conv_triple_w, conv_triple_x, conv_triple_y, BITLENGTH, conv_triple_params, ips[0],
+                                port + process_offset);
+        });
+#endif
 #if A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE_ACTIVE == 0
         init_booleanAdditionBeaverC();
 #if FAKE_TRIPLES == 1
@@ -1660,6 +1670,9 @@ static void get_fc_triples_from_file()
         deinit_multiplexerBeaverAB();
 
 
+#if CHEETAH_CONV_SIDE_ACTIVE
+        conv_side.join();
+#else
 #if CHEETAH_CONV_ASYNC_ACTIVE
         if (!conv_async::launched)  // else allocated and generated during the pass (conv_async_start)
 #endif
@@ -1671,6 +1684,7 @@ static void get_fc_triples_from_file()
 #else
         generate_beaver_triples(
                 ips, port, process_offset, num_conv_c_triples, 0, "CONV");
+#endif
 #endif
         deinit_ConvAB();
 
