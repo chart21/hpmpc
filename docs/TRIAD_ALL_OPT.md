@@ -425,6 +425,37 @@ hpmpc `b4577f5`, `92a2c0e`; flare / polynize, algofi / goracle.
   Table 15). ConvTriple `6980819` (GPU evaluator, see below) leaves the CPU path bit for bit (all 18 CIFAR hashes as
   `pc10`, `res_fp_pc11.csv`; timing `res_fp_ct11.csv`).
 
+## Round 8 (2026-10-02): the bake's Boolean addition (flare / polynize)
+
+hpmpc `ddc082f` (ConvTriple `70f3eab`); data `docs/variant_data/triad/round8/` (README there).
+
+* **Where the time went** (per-round log, UC2 A2bits RCA): 31 dependent rounds, each generating its own random OTs
+  (cot_multiply_shares: 9M ANDs per round, per OT worker in chunks of 1M / 32 workers / 8 bytes, each chunk with
+  its own ROT calls and round trip), and every few rounds a ferret extension round of all instances inside the chain
+  (workstation: 7 rounds of ~175 ms (GPU) / 2 rounds of 2 s (CPU); flare: 15-22 ms rounds + an extension round).
+* **A2B_ADDER_BATCH** (default on): Iface::boolCOTMultRoundsBegin generates the random OTs of all rounds first, one
+  rot_bits call per pack and direction (cot_multiply_shares' order: reversed instance, then straight), on a thread of its
+  own started next to init_a2b_bake (a2b_adder_prestart, not with the UC3 mask pass); boolCOTMultRound computes the
+  corrections of all ranges on the pool, exchanges them over A2B_ROUND_CHANNELS = 4 channels (1 / 32 measured the
+  same), computes the shares. hpmpc's adder loops run on bit-position-contiguous arrays (transposed once each way): the
+  value-major [i][r] loops with a 32-word stride took 0.14 s, more than the exchanges (0.08 s). Bit-exact with
+  respect to the round function (same CIFAR hashes across these refactorings; the random OTs differ from the old path).
+* **A2B_ADDER_CUT** (default on): under CUT_FRACTIONAL_BITS_OPT every A2B replaces [c]'s top FRACTIONAL slices by 0, so
+  the Boolean addition stops at bit 26: 26 instead of 31 rounds, -16 % OTs. Only if every conversion takes the cut
+  (g_a2b_full_width, set by the INIT pass for any conversion without it). CUT_FRAC_ELIGIBLE and g_a2b_full_width now
+  live in core/generate_beaver_tiples.hpp, which beaver_triples.hpp includes first (the first version saw the macro
+  undefined and never cut).
+* **Results** (same code, flags off / on, median of 2): COMPRESS=0 A2bits pre UC2 RCA 3.70 / 3.19, PPA 4.69 / 4.04, PPA4
+  5.26 / 4.60; UC1 RCA 3.73 / 3.17, PPA 4.68 / 4.18, PPA4 5.33 / 4.58; UC3 RCA 3.46 / 3.01, PPA 4.42 / 3.83, PPA4 5.73 / 5.14
+  s (-0.45..-0.75); COMPRESS=1 -0.05..-0.12 (PPA4 UC2 +0.04, noise); online unchanged. Boolean addition 1.44-1.52 ->
+  1.04-1.21 s: ~1.0 s random OTs (one extension round of all 64 instances: bool triples 450M + adder 468M COTs > the
+  640M left after setup; + hashing), 0.1 s rounds. CIFAR (AdamW, 10 images): all A2bits builds 4-7 / 10;
+  multi-batch 24 x 8: 134 / 192 (MWK=0), 124 / 192 (MWK=1). Zen 4 only (algofi / goracle booked).
+* Not done: B2A of random bits (daBits) would halve the adder's OTs and need one round, but P1's committed UC2 residual
+  masks are prescribed (lz_1 = m_a + m_b), which daBits cannot give; a log-depth adder needs more ANDs (more OTs);
+  routing the adder to fewer packs would save CPU (fewer extensions) but not wall time (each pack's two instances
+  extend one after the other on its single channel).
+
 ## GPU (2026-10-01, workstation cmucl771615)
 
 RTX 4000 Ada (20 GB, sm_89), 2x Xeon Silver 4410Y (24 cores, 48 threads), CUDA 12.6; both parties on the machine

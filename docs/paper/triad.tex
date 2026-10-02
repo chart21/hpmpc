@@ -56,6 +56,10 @@ flag (optimized setting) & effect & where\\
   input is remasked & round~4\\
 \flag{A2B_BAKE_RESIDUAL=1} & residual sums carry the committed mask (in UC2, P1 also commits the other addend's
   mask) & rounds 5, 6\\
+\flag{A2B_ADDER_BATCH=1} & the bake's Boolean addition generates the random OTs of all its rounds first; a round only
+  exchanges corrections & round~8\\
+\flag{A2B_ADDER_CUT=1} & under the cut the Boolean addition stops at bit $\ell - F - 1$: 26 instead of 31 rounds &
+  round~8\\
 \multicolumn{3}{@{}l}{\emph{variants, off}}\\
 \flag{CHEETAH_CONV_REPACK=1} & communication-optimized conv triples (output repacking, $N = 8192$): $-40\%$ conv
   traffic, $+1.3$--$1.7$\s & round~4\\
@@ -373,6 +377,30 @@ A2bits RCA build 0.1--0.2\s behind round~5, all of it in P1's OT setup; in the f
 Against round~6, preprocessing is unchanged (median $\pm 0.00$\s on Zen~4, $-0.01$\s on Zen~3) and the online phase a
 median 0.01\s and up to 0.10\s faster.
 
+\paragraph{Round 8.}\label{sec:triadround8} The bake's Boolean addition, a ripple-carry adder of the two parties'
+private inputs with one AND (two random OTs, one per direction) per bit and value, took 1.44--1.52\s of the A2bits
+builds' preprocessing on flare / polynize. A per-round log showed where: each of its 31 dependent rounds generated its
+own random OTs, split per OT worker into chunks of about 250,000 values, each with its own round trip, and every few
+rounds the ferret instances ran dry and a whole extension round fell into the dependent chain.
+\begin{enumerate}\itemsep1pt
+\item \textbf{Random OTs first} (\flag{A2B_ADDER_BATCH}). The random OTs do not depend on the inputs, so all rounds'
+  OTs are generated before the first round, in one call per OT pack and direction, starting next to the masks'
+  commitment; the extension round then runs at full parallelism and outside the chain. A round only exchanges its two
+  correction bits per AND (in four messages) and computes the shares; the adder's loops run on bit-position-contiguous
+  arrays (the value-major layout had a stride of 32 words and took longer than the exchanges). The 31 rounds now take
+  0.1\s together.
+\item \textbf{The cut in the adder} (\flag{A2B_ADDER_CUT}). Under \flag{CUT_FRACTIONAL_BITS_OPT} every A2B replaces the top
+  \flag{FRACTIONAL} slices of $[c]$ by the constant 0, so the Boolean addition stops after bit $\ell - F - 1$: 26
+  instead of 31 AND rounds and 16\% fewer OTs. It applies only if every conversion of the network takes the cut, which
+  the INIT pass records; in these networks all A2B inputs are ReLU inputs.
+\end{enumerate}
+At the same code with the two flags off and on (median of two runs, Zen~4), the nine \flag{COMPRESS=0} A2bits builds
+preprocess 0.45--0.75\s faster (3.19--5.14 instead of 3.46--5.73\s), the \flag{COMPRESS=1} ones 0.05--0.12\s, and the
+online phase does not change. The Boolean addition is now its OT volume: 1.04--1.21\s, of which about 1.0\s are the
+random OTs (one extension round of all 64 ferret instances and the hashing) and 0.1\s the rounds. All A2bits builds
+still classify 4--7 of 10 CIFAR-10 images, and multi-batch (192 images) 134 (\flag{MODELWEIGHTS_KNOWN=0}) and 124 (=1).
+These are Zen~4 numbers only (algofi / goracle were booked).
+
 \paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds at the final code; the ranges below are
 over all 18 builds with \flag{COMPRESS=0}. With secret weights, preprocessing is now the OT phase (1.4--4.7\s, inside
 the pass), the pass's own work (0.33--0.58\s, including its mask-only forward), the steps after it (0.22--0.56\s) and
@@ -385,8 +413,10 @@ the pass does.
   CPU profile, ferret's LPN step took 33--41\% of all samples, the AES key schedules of the correlation-robust hash
   8--11\%. The last extension round is only partly used, but that wastes at most one round (about 0.3\s for PPA4). A
   fixed-key hash would remove most of the key schedules, but that is a security decision (\cref{sec:limits}).
-\item \textbf{The bake's Boolean addition} costs the A2bits builds 1.41--1.53\s: 31 dependent COT-multiplication rounds
-  of 15--22\ms plus an extension round. A log-depth adder would need 5--6 rounds but more AND gates, and so more OTs.
+\item \textbf{The bake's Boolean addition} cost the A2bits builds 1.41--1.53\s: 31 dependent COT-multiplication rounds
+  of 15--22\ms plus an extension round. Since round~8 it is 1.04--1.21\s, almost all of it the OTs it needs (two per
+  AND); a log-depth adder would need fewer rounds but more AND gates, and so more OTs, and B2A of random bits halves the
+  OTs but cannot give P1 the prescribed masks of UC2's residual sums.
 \item \textbf{The conv triples} no longer show: in round~3 the HE ran 0.28--0.60\s past the pass (reshared PPA4:
   1.0--1.1\s, from P1's serial bake, fixed in round~4). Running alongside the OT phase, they compete with it for cores
   and memory bandwidth, which the longer OT setup shows.
