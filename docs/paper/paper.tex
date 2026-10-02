@@ -28,9 +28,9 @@
 \title{Communication and Runtime Engineering\\for Two-Party ResNet Inference in HPMPC\\[4pt]
 \large ABY2 with HE and silent-OT preprocessing}
 \author{Technical report, HPMPC \texttt{dbg} branch\\[2pt]
-\small hpmpc \texttt{97772ef}, ConvTriple \texttt{fa7b952}, flexNN \texttt{b1ce619};
-ImageNet all\_opt (\cref{sec:triad}): hpmpc \texttt{92a2c0e}, ConvTriple \texttt{8d8f244} (GPU, \cref{sec:gpu}:
-\texttt{111e7be}), flexNN \texttt{417f12b}}
+\small hpmpc \texttt{97772ef}, ConvTriple \texttt{fa7b952}, flexNN \texttt{b1ce619}\\
+ImageNet all\_opt (\cref{sec:triad}): hpmpc \texttt{92a2c0e}, ConvTriple \texttt{8d8f244}, flexNN \texttt{417f12b}\\
+GPU and multi-batch (\cref{sec:gpu}): hpmpc \texttt{88c800b}, ConvTriple \texttt{1f5b71e}, flexNN \texttt{0404226}}
 \date{October 2, 2026}
 
 \begin{document}
@@ -63,7 +63,8 @@ for free behind convolutions and residual sums and through a mask-only forward w
 output repacking cuts the conv triples' traffic by 40\%. On a GPU, the packed pipeline's evaluator produces the conv
 triples $2.1$--$2.3\times$ faster than the CPU and $5.6$--$7.0\times$ faster than the previous GPU path. With ferret's
 extensions and the random OTs' hashing on the GPU as well, bit for bit emp's, preprocessing on one machine shared by
-both parties is $1.7$--$2.2\times$ faster than on its CPU.
+both parties is $1.7$--$2.2\times$ faster than on its CPU in single batch and $2.1$--$2.4\times$ in multi-batch, and the
+online conv products build their column matrix on the GPU.
 \end{abstract}
 
 \section{Introduction}
@@ -101,7 +102,8 @@ and reproducible system. Its focus is communication and runtime; \cref{fig:summa
   online $2.0\text{--}3.0\times$.
 \item \textbf{GPU} (\cref{sec:gpu}): a GPU evaluator inside the packed conv pipeline, and ferret's LPN step, GGM trees
   and the random OTs' hashing on the GPU, all bit-identical to the CPU's. Conv triples $2.1\text{--}2.3\times$ faster;
-  end to end, on one shared machine, preprocessing $1.7\text{--}2.2\times$ faster than on the CPU.
+  end to end, on one shared machine, preprocessing $1.7\text{--}2.2\times$ faster than on the CPU, $2.1\text{--}2.4\times$ in
+  multi-batch; the online conv products on the GPU with the column matrix built there.
 \end{itemize}
 
 \begin{figure}[t]
@@ -478,15 +480,59 @@ on the wire do not change, so either party may run either path. Each ferret inst
 the device; with both parties on one 20\,GB GPU there is room.
 
 \paragraph{End to end.} With conv triples and OT on the GPU, preprocessing is $2.2\times$ faster than on the CPU in the
-A2bits builds and $1.7$--$1.8\times$ in the reshared ones (\cref{tab:gpu}, bottom). The online phase measured 0.02--0.07\s
-higher with the GPU OT path. Pinning, a 5\,s pause before the online phase, OT work during the online phase (there is
-none) and memory pressure are ruled out; on this shared machine the gap is still unexplained. The online conv layers
-spend their 0.2\s on the per-output mask work and the exchange with the other party, not on the products: moving
-\flag{GEMM_FAST}'s product to the GPU (\flag{GEMM_FAST_GPU}, exact, checked against the CPU on sampled entries) leaves the
-UC2 online phase at 0.46\s. HPMPC's own CUTLASS convolution (\flag{USE_CUDA_GEMM=2}) bypasses the per-output mask step
-and with it the A2B bake. What remains of preprocessing on the CPU is the packs' setup (base OTs, IKNP and each pack's
-first extension), the A2bits builds' Boolean addition (latency-bound COT rounds), the 3\% of COTs whose consumers need
-the blocks themselves, and the HE work around the GPU evaluator (encryption, flooding, decryption).
+A2bits builds and $1.7$--$1.8\times$ in the reshared ones (\cref{tab:gpu}, bottom). What remains of preprocessing on the
+CPU is the packs' setup (base OTs, IKNP and each pack's first extension), the A2bits builds' Boolean addition
+(latency-bound COT rounds), the 3\% of COTs whose consumers need the blocks themselves, and the HE work around the GPU
+evaluator (encryption, flooding, decryption). HPMPC's own CUTLASS convolution (\flag{USE_CUDA_GEMM=2}) bypasses the
+per-output mask step and with it the A2B bake.
+
+\paragraph{The online conv layers.} A step timer over the online phase shows where a conv layer's time goes (one
+ImageNet image, P0): 0.08\s of 0.21\s in the products, 0.05\s in the per-output mask and send, 0.03\s zeroing the outputs
+before the products, 0.03\s adding the bias, 0.02\s in im2col and 0.01\s copying the bias masks for the A2B bake to every
+output. The zeroing and the bias add were serial loops and now run on the GEMM threads; the bake takes one bias mask per
+channel. For the products, \flag{GEMM_FAST_GPU} sent the im2col'd operand, nine times the input for a $3\times3$ kernel,
+over PCIe and gained nothing. Now the GPU builds the column matrix itself from the input feature map (only the input
+travels, and the host's im2col is skipped), multiplies with the existing exact CUTLASS uint32 GEMM, and returns the
+result. The output hashes are unchanged. With the parallel loops, the conv layers' online time falls from about 0.21 to
+0.15--0.18\s on the CPU and to 0.13--0.14\s with the GPU product, and the UC2 online phase of the GPU builds matches the
+CPU's (0.425 against 0.426\s, \cref{tab:gpumb}). The UC1 builds (\flag{A_KNOWN=0}) do not use \flag{GEMM_FAST}; their online
+phase measured 0.04--0.05\s higher with the GPU OT path. That gap is still unexplained: pinning, a 5\,s pause before the
+online phase, OT work during the online phase (there is none) and memory pressure are ruled out.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+& \multicolumn{4}{c}{single batch, 1 image} & \multicolumn{4}{c}{multi-batch, 8 images (one process)}\\
+& \multicolumn{2}{c}{preprocessing (s)} & \multicolumn{2}{c}{online (s)} & \multicolumn{2}{c}{preprocessing (s)} & \multicolumn{2}{c}{online (s)}\\
+build & CPU & GPU & CPU & GPU & CPU & GPU & CPU & GPU\\
+\midrule
+UC1, A2bits, RCA & 13.29 & 6.04 & 0.59 & 0.64 & 89.59 & 36.80 & 4.14 & 3.97\\
+UC1, reshared, RCA & 7.73 & 4.33 & 0.64 & 0.68 & 50.92 & 24.69 & 4.32 & 4.40\\
+UC2, A2bits, RCA & 12.33 & 5.74 & 0.43 & 0.43 & 79.31 & 33.04 & 3.19 & 2.97\\
+UC2, reshared, RCA & 7.14 & 3.92 & 0.45 & 0.44 & 43.90 & 20.31 & 3.29 & 3.07\\
+\bottomrule
+\end{tabular}
+\caption{CPU against GPU with the final code (hpmpc \texttt{88c800b}, ConvTriple \texttt{1f5b71e}): GPU
+builds with the conv triples, ferret's extensions and the ROT bits on the GPU and the online conv products there too
+(\flag{GEMM_FAST_GPU}). ImageNet, both parties on the workstation; single batch 16 HE/OT threads and 11 workers per party,
+median of three runs; multi-batch \flag{DATTYPE=256} (8 images per process), one process per party with the same threads,
+median of two runs.}
+\label{tab:gpumb}
+\end{table}
+
+\paragraph{Multi-batch.} In multi-batch mode (\cref{sec:multi}) a process holds 8 images in 256-bit registers. On the
+workstation, both parties' processes share 62\,GB of memory and one GPU, and other users' jobs share them too. One
+ImageNet process per party peaks at 20--26\,GB (GPU builds, both parties) and 26--30\,GB (CPU builds). Two processes per party fit
+only for the GPU build, at 42\,GB, and take 61.5\s for 16 images against 33.0\s for 8. Three do not fit. So
+\cref{tab:gpumb} compares one process per party: preprocessing is $2.1$--$2.4\times$ faster on the GPU, as in single
+batch, at 2.5--4.6\s per image against 3.9--6.0\s for single images (CPU: 5.5--11.2 against 7.1--13.3\s). The GPU is busy 90--100\% of the time during
+the OT phase (Boolean triples and the bake's Boolean addition, 22\s of the 33\s) while the CPU idles at a quarter:
+multi-batch preprocessing on this machine is bound by the OT kernels of two parties on one GPU. The conv triples, now
+one pipelined product over all lanes and running on channels of their own alongside the COT and multiplexer triples
+(\cref{sec:multi}), take 5.3\s on the GPU against 15.4\s on the CPU. The online phase gains less from the lanes: the
+activations scale linearly with the images (1.6--2.0\s for eight), and the UC2 conv layers need 0.77--1.19\s with the
+GPU product against 1.10--1.36\s on the CPU (1.5--1.7\s before the lanes' \flag{GEMM_FAST} and the parallel loops).
 
 % ------------------------------------------------------------------------------------------------
 \section{Boolean material: OT preprocessing}\label{sec:ot}
@@ -633,6 +679,19 @@ conv traffic from 1036 to 540\,MB per direction, and 22 against 23 of 32 images 
 polynize (24 processes, 192 images) the conv phase per process falls from 9.7--10.0 to 4.1--4.4\s and preprocessing by
 a factor of 1.28--1.67 over the 30 variants (\cref{sec:kpw}).
 
+\paragraph{Weights known in preprocessing.} The final ImageNet builds (\cref{sec:triad}) set
+\flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING}, and in multi-batch three of their single-batch optimizations were off. The
+lane batching excluded it: P1's conv-triple shares are prescribed, and the lanes' product now puts them in layer by
+layer after the batched product, as the single-batch pipeline does. Since the prescribed shares fix the triples, the
+outputs equal the per-layer path's bit for bit. The A2B bake excluded it because its prescribed shares treated a
+register as one word; they are now computed lane by lane (\cref{sec:correct}). And the conv triples ran after the
+preprocessing pass, before the next generators. They now run on four channels of their own
+(\flag{CHEETAH_CONV_SIDE}) alongside the Boolean addition, COT and multiplexer triples. The online products take all
+lanes as one GEMM with eight times the columns (\flag{GEMM_FAST} for \flag{DATTYPE} $> 32$: every lane holds the same
+weights, checked per layer). On the workstation (one ImageNet process per party, 8 images, UC2 A2bits RCA) the conv
+phase falls from 16.0 to 5.3\s on the GPU and from 20.7 to 15.4\s on the CPU, and preprocessing from 49.1 to 33.0\s and
+from 86.8 to 79.3\s (\cref{sec:gpu}).
+
 \begin{table}[t]
 \centering\small
 \begin{tabular}{@{}lrrrrr@{}}
@@ -688,6 +747,12 @@ optimizations; this exposed the following bugs.
   which holds only for 32-bit lanes; with 256-bit registers the a2b families classified 13--29 of 192
   images. The mask is now computed value by value with the A2B's own inverse packing, which leaves single-batch
   hashes unchanged, and the multi-batch a2b families classify 99--132 of 192 images, like the plain family.
+\item \textbf{Multi-batch a2b with weights known in preprocessing.} The bake still excluded
+  \flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING} in multi-batch, so these builds ran the A2B without the bake, whose
+  precomputed $[c]$ does not match the online mask: UC2 A2bits classified 2--4 of 32 CIFAR-10 images (the single-batch
+  builds with the bake switched off likewise 0--2 of 10). P1's prescribed share $-r_1 = (m_1 \ll F) + \mathit{low}$ is
+  now computed lane by lane (the same values with one word per register: single-batch hashes unchanged), the bake
+  covers these builds, and they classify 20 of 32 (UC1 reshared 21 of 32).
 \item \textbf{Threaded GEMM with \flag{A_KNOWN=0} or public weights.} The threaded GEMM had diverged from the serial one.
   With \flag{A_KNOWN=0} it sent the outputs without the conv triple's share and left the triple cursor behind, so
   every threaded build classified at chance (1 of 10). With public weights and \flag{TRUNC_DELAYED=0} it truncated the
@@ -815,8 +880,11 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
   are the largest costs of the Boolean preprocessing; a fixed-key hash is a security decision. On a GPU both run there
   (\cref{sec:gpu}); what remains on the CPU is the packs' setup (base OTs, IKNP, first extension), the latency-bound
   Boolean addition of the A2bits builds, and the few consumers that need the COT blocks themselves. The online phase
-  measured 0.02--0.07\s higher with the GPU OT path on the shared workstation, for reasons not yet found; a
-  two-machine GPU setup would settle it.
+  measured 0.04--0.05\s higher with the GPU OT path in the UC1 builds on the shared workstation, for reasons not yet
+  found; a two-machine GPU setup would settle it. In multi-batch the OT kernels of both parties saturate the one GPU.
+\item \textbf{Multi-batch on one workstation.} With both parties on one machine, 62\,GB hold two GPU processes per party
+  (16 ImageNet images) and one CPU process per party, so the 24-process configuration of the artifact cannot run there. The
+  online activations scale linearly with the lanes.
 \end{itemize}
 
 \section{Conclusion}

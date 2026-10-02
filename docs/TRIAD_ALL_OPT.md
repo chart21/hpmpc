@@ -480,6 +480,43 @@ RTX 4000 Ada (20 GB, sm_89), 2x Xeon Silver 4410Y (24 cores, 48 threads), CUDA 1
 * Next: the packs' setup (base OTs, IKNP, first extension: 0.8-1.2 s), the A2bits Boolean addition rounds, the block
   consumers (cam_cc, rm_rc: 3% of COTs) on the GPU.
 
+## Multi-batch and the online conv on the GPU (2026-10-02, workstation)
+
+hpmpc `88c800b` (ConvTriple `1f5b71e`, flexNN `0404226`); data `docs/variant_data/gpu/ws_multibatch.log`.
+
+* **Multi-batch with MODELWEIGHTS_KNOWN** (ImageNet DATTYPE=256, 8 images per process; the final builds set MWK):
+  three single-batch optimizations were off. (1) CHEETAH_CONV_LANES excluded MWK: now P1's prescribed shares are put in
+  per layer after the batched product (bit-exact with the per-layer path: the prescribed shares fix the triples; lane
+  premise check silent; only lane 0's weights are extracted). (2) The A2B bake excluded MWK in multi-batch
+  (mwk_choose_r1_trunc treated a register as one word) -> the non-bake A2B_ONLINE_OPT path ran, which is broken (known:
+  its [c] does not match the online mask; single batch with A2B_CONV_BAKE=0 is broken too, 0-2 / 10): multi-batch UC2
+  A2bits CIFAR-10 (AdamW) 2-4 / 32. Now -r1 = (m1 << F) + low lane by lane (OP_SHIFT_LEFT / OP_AND / PROMOTE; same
+  values for one word: single-batch hash 687e1473bd unchanged): 20 / 32 (UC1 reshared 21 / 32). (3) CHEETAH_CONV_SIDE: the
+  conv triples run after the pass on 4 side channels (Keys::get_side_ios) alongside BOOLEANADDITION / COT / MUX (the side
+  thread must not disconnect the regular channels at the end: CHEETAH_DISCONNECT race, fixed).
+* **GEMM_FAST for lanes**: one GEMM with L = DATTYPE / 32 columns per output (weights the same in every lane, checked per
+  layer, else the share-level loop); GEMM_FAST_GPU likewise. Bit-exact (multi-batch CIFAR hash ef20263b20 = GEMM_FAST=0).
+* **Online conv**: step timers (P0, one ImageNet image) products 0.08 of 0.21 s, mask/send 0.05, output zeroing 0.03,
+  bias add 0.03, im2col 0.02, bake bias-mask expansion 0.01. Zeroing and bias add now on the GEMM threads, one bias mask
+  per channel (g_bake_bias_rep), and GEMM_FAST_GPU builds the column matrix on the GPU (accumulate_conv + conv_fast_gpu:
+  only the input operand travels, the host im2col is skipped; CUTLASS uint32 GEMM). Hashes unchanged. Conv layers online
+  ~0.21 -> 0.15-0.18 s (CPU) / 0.13-0.14 s (GPU product); UC2 online GPU 0.425 vs CPU 0.426 s. Multi-batch UC2 conv layers
+  0.77-1.19 s (GPU product) vs 1.10-1.36 (CPU), before 1.5-1.7 s.
+* **CHEETAH_RELEASE_OT**: the OT packs (ferret's host / device buffers) are released after the preprocessing; no zero
+  fill of ot_data when the outputs stay on the device.
+* **Results** (median; single batch 3 runs, multi-batch P=1 2 runs; CPU / GPU with GEMM_FAST_GPU=1): single batch pre UC1
+  A2bits 13.29 / 6.04, UC1 rs 7.73 / 4.33, UC2 A2bits 12.33 / 5.74, UC2 rs 7.14 / 3.92 s; online 0.59 / 0.64, 0.64 / 0.68,
+  0.43 / 0.43, 0.45 / 0.44. Multi-batch (8 images) pre 89.59 / 36.80, 50.92 / 24.69, 79.31 / 33.04, 43.90 / 20.31 s
+  (2.1-2.4x); online 4.14 / 3.97, 4.32 / 4.40, 3.19 / 2.97, 3.29 / 3.07. Before the multi-batch work: UC2 A2bits 86.8 / 49.1 s.
+* **Scaling on the workstation** (62 GB, both parties, other users): one process per party peaks at 20-26 GB (GPU) /
+  26-30 GB (CPU, both parties); two GPU processes per party fit (42 GB) and take 61.5 s for 16 images (33.0 for 8); two CPU
+  processes per party do not fit. mbw.sh aborts a run when available memory drops below 3 GB (other users' jobs took up to
+  54 GB). Multi-batch preprocessing is GPU-bound: GPU 90-100 % busy in the OT phase (Boolean triples 9.8 s + bake Boolean
+  addition 12.3 s of 33 s), CPU ~27 %.
+* Fixed during this work: download_range used a pooled context without bounce buffers (rare "copy out: invalid
+  argument" abort); Keys triple stats under a mutex (two generator threads).
+* Next: faster GPU AES (OT kernels bound the multi-batch preprocessing), the online activations (linear in the lanes).
+
 ## Output repacking: the estimate before round 4
 
 Needs key switching, hence a special prime; at N = 4096 the 109-bit data modulus (2^32 plaintexts, 64-bit flooding)

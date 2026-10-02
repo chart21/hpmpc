@@ -1,0 +1,123 @@
+# Multi-batch / online-conv sessions on cmucl771615 (2026-10-02). vsum.sh columns: tag,pre_max,online_max,acc_ok,acc_n,hash,procs,pre phases CONV;BN;BOOL;COT;MUX;FC,live ms ACT;CONV;BN,MB pre,MB live,wait_s;rounds,errors; mbw.sh adds minavail / rss0 / rss1 (MB, peak RSS summed over a party's processes; names longer than 15 chars collide in ps -C, then rss0 = rss1 = both parties) / gpu (MB)
+# mb3: ImageNet DATTYPE=256 P=1 after lanes+side+bake (before GEMM_FAST_GPU conv); mb5: GEMM_FAST 0/1/GPU product (im2col on the host); mb7: GEMM_FAST_GPU conv path (im2col on the GPU) single / multi-batch; mb8: OT release, P=2 GPU (P=2 CPU skipped: memory); mbf: final CPU vs GPU (GEMM_FAST_GPU=1), single batch 3 runs, multi-batch P=1 2 runs; mc3/mc5: CIFAR multi-batch MODELWEIGHTS_KNOWN accuracy bisection (non-bake A2B path broken); mc6: bake with MWK in multi-batch + GEMM_FAST lanes (20/32, hash ef20263b20 = GEMM_FAST=0)
+
+### mb3_1.log
+mngpu_a2b_P1_r1,33.9613,3.49108,0,8,c6fe1d3015,1,5.29;0.00;9.81;1.41;4.05;0.43,1831;1415;8,2602,0.350439;1714,0 minavail=22538 rss0=13516 rss1=10643 gpu=7487
+mncpu_a2b_P1_r1,76.186,3.57952,0,8,be97a89ffa,1,14.63;0.00;22.42;0.57;3.77;0.44,1670;1673;3,2622,0.311830;1714,0 minavail=17817 rss0=15290 rss1=13671 gpu=1493
+mngpu_rs_P1_r1,21.0387,3.70813,6,8,c5178d97e9,1,5.35;0.00;9.82;1.19;4.13;0.46,1850;1595;5,1859,0.288347;1763,0 minavail=25186 rss0=12263 rss1=9615 gpu=7071
+mncpu_rs_P1_r1,42.2828,3.74623,8,8,108b85ed00,1,14.57;0.00;22.21;1.45;3.35;0.46,1911;1590;7,1875,0.356709;1763,0 minavail=20109 rss0=14272 rss1=12153 gpu=1493
+MB3_DONE
+### mb5.log
+make gpu 0
+make cpu 0
+-rw-r--r-- 1 q662180 ldcint 651032 Oct  1 08:56 hpmpc/core/cuda/bin/gemm_fast_gpu.o
+mo_gf0_r1 pre 33.2322 onl 3.74875 live 1870;1634;7 0 minavail=24529 rss0=12037 rss1=10472 gpu=7551
+mo_gf1_r1 pre 33.2631 onl 3.74759 live 1921;1593;3 0 minavail=24376 rss0=12218 rss1=10305 gpu=7563
+mo_gfg_r1 pre 33.3121 onl 3.64258 live 1828;1551;13 0 minavail=24280 rss0=12324 rss1=10378 gpu=7275
+mo_cpu_r1 pre 81.2277 onl 3.30327 live 1608;1439;8 0 minavail=18598 rss0=14713 rss1=13959 gpu=1473
+mo_gf0_r2 pre 32.9282 onl 3.62256 live 1726;1676;4 0 minavail=23428 rss0=12744 rss1=10681 gpu=7755
+mo_gf1_r2 pre 33.2452 onl 3.74869 live 1937;1586;5 0 minavail=24741 rss0=11820 rss1=10367 gpu=7561
+mo_gfg_r2 pre 33.3954 onl 3.73562 live 1996;1495;4 0 minavail=22733 rss0=12812 rss1=10760 gpu=7371
+mo_cpu_r2 pre 78.7344 onl 3.53175 live 1751;1514;8 0 minavail=18087 rss0=14632 rss1=13710 gpu=1473
+MB5_DONE
+### mb7.log
+on_sb_cpu_r1 pre 12.1172 onl 0.432149 live 249;160;0
+on_sb_gpu_r1 pre 5.66515 onl 0.456852 live 268;161;0
+on_sb_gfg_r1 pre 5.61881 onl 0.429157 live 260;144;0
+on_sb_cpu_r2 pre 13.0233 onl 0.40025 live 228;145;0
+on_sb_gpu_r2 pre 5.63264 onl 0.44926 live 244;177;1
+on_sb_gfg_r2 pre 5.61411 onl 0.4051 live 253;126;0
+on_sb_cpu_r3 pre 11.8853 onl 0.409835 live 217;167;0
+on_sb_gpu_r3 pre 5.6363 onl 0.490691 live 269;193;0
+on_sb_gfg_r3 pre 5.6388 onl 0.40676 live 239;140;0
+on_mb_cpu_r1 pre 77.718 onl 3.08203 live 1604;1232;3 0 minavail=18112 rss0=14869 rss1=13869 gpu=1473
+on_mb_gpu_r1 pre 32.7813 onl 3.15564 live 1717;1202;4 0 minavail=24458 rss0=12273 rss1=10298 gpu=7465
+on_mb_gfg_r1 pre 34.1535 onl 3.04722 live 1929;873;3 0 minavail=23553 rss0=12775 rss1=10675 gpu=7371
+on_mb_cpu_r2 pre 80.0414 onl 2.95195 live 1642;1067;8 0 minavail=18244 rss0=14935 rss1=13906 gpu=1473
+on_mb_gpu_r2 pre 32.6436 onl 2.99869 live 1572;1165;10 0 minavail=23838 rss0=12635 rss1=10591 gpu=7435
+on_mb_gfg_r2 pre 33.3593 onl 2.84424 live 1635;959;4 0 minavail=24124 rss0=12441 rss1=9835 gpu=7213
+MB7_DONE
+### mb8.log
+make gpu 0
+make cpu 0
+mr_sb_r1,2.09217,0.533618,6,10,687e1473bd,1
+mr_gpu_P1_r1 pre 33.0586 onl 2.84068 acc 0/8 procs 1 live 1712;887;4 0 minavail=23951 rss0=12886 rss1=10411 gpu=7467
+mr_cpu_P1_r1 pre 75.9923 onl 3.24887 acc 8/8 procs 1 live 1728;1303;4 0 minavail=18668 rss0=15283 rss1=13761 gpu=1473
+mr_gpu_P2_r1 pre 61.5129 onl 4.56585 acc 0/16 procs 2 live 2496;1685;4 0 minavail=6941 rss0=23006 rss1=19015 gpu=8827
+cpu P1 peak 29044 MB, available 46530 MB
+cpu P2 skipped (memory)
+MB8_DONE
+### mbf.log
+fs_gpu_a2bk0_rca_c0_m1,6.26872,0.657444,0,1,a5c79aa838,1,2.14;0.00;2.43;0.32;0.41;0.08,248;384;0,674,0.090687;1818,0
+fs_cpu_a2bk0_rca_c0_m1,13.7206,0.569659,0,1,ee91e183e3,1,6.44;0.00;6.52;0.07;0.15;0.08,215;329;0,690,0.077349;1818,0
+fs_gpu_rsk0_rca_c0_m1,4.19101,0.675468,0,1,11a7bddecb,1,2.06;0.00;2.47;0.19;0.38;0.07,260;378;0,580,0.132253;1867,0
+fs_cpu_rsk0_rca_c0_m1,7.72598,0.641277,0,1,7f4d04a238,1,6.54;0.00;5.95;0.06;0.14;0.07,250;361;0,592,0.124415;1867,0
+ws_run.sh: line 7: 3929110 Aborted                 env $E timeout 900 $X/$N.p1 127.0.0.1 > $X/$TAG.out1 2>&1
+fs_gpu_a2b_rca_m1,0,0,0,0,cda5f3b0bf,0,0.00;0.00;0.00;0.00;0.00;0.00,0;0;0,,,0
+fs_cpu_a2b_rca_m1,12.2911,0.450082,0,1,53f19504ae,1,5.32;0.00;5.32;0.30;0.14;0.08,241;179;1,444,0.081230;1714,0
+fs_gpu_rs_rca_c0_m1,3.92135,0.444057,0,1,006a7b4521,1,1.70;0.00;1.97;0.40;0.38;0.05,263;153;0,335,0.107677;1763,0
+fs_cpu_rs_rca_c0_m1,7.14005,0.446936,0,1,25c81e555a,1,5.39;0.00;5.51;0.36;0.14;0.06,244;175;0,347,0.090876;1763,0
+fs_gpu_a2bk0_rca_c0_m2,6.03996,0.629587,0,1,f802ec2b52,1,2.00;0.00;2.45;0.15;0.38;0.08,250;350;0,674,0.067124;1818,0
+fs_cpu_a2bk0_rca_c0_m2,13.2356,0.592645,0,1,0057802f18,1,6.78;0.00;6.14;0.07;0.14;0.07,228;340;0,690,0.094316;1818,0
+fs_gpu_rsk0_rca_c0_m2,4.33006,0.678528,0,1,fc77215105,1,1.88;0.00;2.49;0.21;0.37;0.09,293;355;0,580,0.114349;1867,0
+fs_cpu_rsk0_rca_c0_m2,7.85198,0.629088,0,1,acbfd7c579,1,6.63;0.00;6.36;0.08;0.13;0.07,256;347;0,592,0.121255;1867,0
+fs_gpu_a2b_rca_m2,5.73743,0.425254,0,1,1778abb6f9,1,1.78;0.00;1.93;0.36;0.40;0.06,258;140;0,428,0.078378;1714,0
+fs_cpu_a2b_rca_m2,12.6894,0.411372,0,1,eac0e93975,1,5.52;0.00;5.57;0.11;0.14;0.06,210;175;0,444,0.057077;1714,0
+fs_gpu_rs_rca_c0_m2,3.97854,0.445216,0,1,006a7b4521,1,1.63;0.00;2.00;0.41;0.37;0.06,274;142;0,335,0.106342;1763,0
+fs_cpu_rs_rca_c0_m2,6.78381,0.430402,1,1,cda5f3b0bf,1,5.36;0.00;4.98;0.32;0.16;0.06,236;167;0,347,0.077363;1763,0
+fs_gpu_a2bk0_rca_c0_m3,5.98448,0.644162,0,1,87696d5752,1,2.01;0.00;2.42;0.15;0.37;0.09,247;368;0,674,0.074323;1818,0
+fs_cpu_a2bk0_rca_c0_m3,13.2911,0.616634,0,1,1b8f9526e2,1,6.34;0.00;6.47;0.15;0.18;0.07,227;362;0,690,0.074546;1818,0
+fs_gpu_rsk0_rca_c0_m3,4.35699,0.676664,1,1,3b8e10c62e,1,2.03;0.00;2.50;0.22;0.40;0.07,272;376;0,580,0.112563;1867,0
+fs_cpu_rsk0_rca_c0_m3,7.67034,0.640024,0,1,265e78e2cf,1,6.52;0.00;6.02;0.06;0.14;0.07,255;358;0,592,0.129949;1867,0
+fs_gpu_a2b_rca_m3,5.91043,0.424794,0,1,7959841fa5,1,1.68;0.00;1.98;0.34;0.40;0.08,250;149;0,428,0.077021;1714,0
+fs_cpu_a2b_rca_m3,12.3278,0.425523,0,1,eac0e93975,1,5.32;0.00;5.57;0.22;0.14;0.05,222;177;0,444,0.065425;1714,0
+fs_gpu_rs_rca_c0_m3,3.90814,0.44093,1,1,cda5f3b0bf,1,1.72;0.00;1.97;0.37;0.40;0.05,286;129;0,335,0.117744;1763,0
+fs_cpu_rs_rca_c0_m3,7.21013,0.45952,0,1,25c81e555a,1,5.42;0.00;5.61;0.34;0.14;0.05,256;177;0,347,0.093704;1763,0
+fm_gpu_a2bk0_rca_c0_m1,36.9938,3.81238,0,8,53c0fb05a3,1,8.80;0.00;9.72;1.66;5.44;0.71,1566;2008;9,3921,0.510253;1818,0 minavail=21591 rss0=25471 rss1=25515 gpu=9165
+fm_cpu_a2bk0_rca_c0_m1,87.6213,4.09122,0,8,a61da289ec,1,23.04;0.00;23.24;0.50;5.21;0.65,1705;2125;3,3941,0.415593;1818,0 minavail=16605 rss0=30271 rss1=30325 gpu=1473
+fm_gpu_rsk0_rca_c0_m1,25.0956,4.49984,1,8,422963cabe,1,9.46;0.00;9.67;1.84;5.40;0.55,2004;2198;4,3178,0.384624;1867,0 minavail=23664 rss0=22936 rss1=22617 gpu=8655
+fm_cpu_rsk0_rca_c0_m1,50.6234,4.14233,1,8,1e276c3c2c,1,22.99;0.00;22.49;1.52;6.15;0.60,1777;2107;6,3194,0.262946;1867,0 minavail=19740 rss0=27144 rss1=27189 gpu=1473
+fm_gpu_a2b_rca_m1,32.9152,3.18278,0,8,0d46e2980b,1,5.38;0.00;9.72;1.62;3.50;0.43,1748;1190;4,2602,0.330975;1714,0 minavail=23881 rss0=23323 rss1=23433 gpu=7435
+fm_cpu_a2b_rca_m1,81.0555,3.27172,0,8,b9b2ae081e,1,15.46;0.00;23.89;0.59;3.98;0.50,1714;1356;7,2622,0.258021;1714,0 minavail=18022 rss0=28957 rss1=28792 gpu=1473
+fm_gpu_rs_rca_c0_m1,20.0957,3.02637,8,8,d9bc133eb7,1,5.19;0.00;9.70;1.44;3.46;0.43,1903;846;7,1859,0.320381;1763,0 minavail=26608 rss0=20320 rss1=20355 gpu=7401
+fm_cpu_rs_rca_c0_m1,43.4527,3.37926,0,8,232acc82bc,1,14.80;0.00;23.29;1.27;3.76;0.45,1894;1172;5,1875,0.302657;1763,0 minavail=21460 rss0=25579 rss1=25645 gpu=1473
+fm_gpu_a2bk0_rca_c0_m2,36.6032,4.12171,0,8,bdaedf6754,1,9.21;0.00;9.69;1.60;6.09;0.54,1730;2126;6,3921,0.444209;1818,0 minavail=20659 rss0=26620 rss1=26674 gpu=8621
+fm_cpu_a2bk0_rca_c0_m2,91.5597,4.19495,0,8,5cdb846af4,1,24.17;0.00;23.30;0.58;6.61;0.55,1738;2202;10,3941,0.371779;1818,0 minavail=16694 rss0=30473 rss1=30453 gpu=1473
+fm_gpu_rsk0_rca_c0_m2,24.2821,4.30051,0,8,86b7eaec77,1,8.75;0.00;9.66;1.30;5.51;0.59,1718;2350;4,3178,0.587313;1867,0 minavail=24194 rss0=23032 rss1=23086 gpu=8653
+fm_cpu_rsk0_rca_c0_m2,51.2132,4.49658,0,8,690380a6d1,1,22.67;0.00;23.70;1.48;6.07;0.59,1980;2141;4,3194,0.373993;1867,0 minavail=19499 rss0=27356 rss1=27309 gpu=1473
+fm_gpu_a2b_rca_m2,33.1633,2.74862,0,8,f76e9e073f,1,5.43;0.00;9.68;1.43;3.83;0.50,1743;769;4,2602,0.374064;1714,0 minavail=24534 rss0=22598 rss1=22679 gpu=7467
+fm_cpu_a2b_rca_m2,77.5568,3.10453,0,8,8537730dac,1,14.97;0.00;23.35;0.52;3.54;0.45,1747;1096;7,2622,0.330765;1714,0 minavail=18235 rss0=28620 rss1=28747 gpu=1473
+fm_gpu_rs_rca_c0_m2,20.5149,3.12222,8,8,d9bc133eb7,1,5.27;0.00;9.67;1.39;4.10;0.47,1943;900;4,1859,0.308743;1763,0 minavail=26621 rss0=20484 rss1=20038 gpu=7339
+fm_cpu_rs_rca_c0_m2,44.3418,3.20695,0,8,f7186a625c,1,15.06;0.00;24.36;1.31;3.80;0.46,1798;1141;4,1875,0.336792;1763,0 minavail=21037 rss0=25935 rss1=25972 gpu=1473
+MBF_DONE
+### mc3.log
+mcb_orig_r1,5.99443,1.15374,3,16,38c9543680,2
+mcb_side0_r1,4.04679,1.28488,3,16,38c9543680,2
+mcb_new_r1,3.30921,1.24697,3,16,38c9543680,2
+mcb_a2b0_r1,3.40818,1.17699,12,16,61a53f08c7,2
+mcb_fbn0_r1,4.46472,1.26943,0,16,613a845c2d,2
+mcb_akte0_r1,3.99073,1.2595,1,16,3e1d029bfe,2
+MC3_DONE
+### mc5.log
+mcc_base_r1,6.22193,1.69655,2,32,b5b3de4482,4
+mcc_akte0_r1,5.64516,2.20136,4,32,1b4a5582bb,4
+mcc_cut0_r1,5.7162,1.50058,4,32,56e72a1878,4
+mcc_fra0_r1,5.84319,1.46171,2,32,f12764d39a,4
+mcc_obi0_r1,8.5925,1.80381,6,32,4393c2a8b4,4
+mcc_mwk0bake0_r1,5.9726,1.73465,1,32,1fb8f1c663,4
+### mc6.log
+msd_sb_r1,2.16498,0.548892,6,10,687e1473bd,1,0.84;0.00;0.87;0.04;0.09;0.08
+msd_side0_r1,5.52376,1.446,20,32,ef20263b20,4,0.92;0.00;1.12;0.08;0.20;0.06
+msd_gf0_r1,5.73299,1.68012,20,32,ef20263b20,4,0.90;0.00;1.11;0.09;0.24;0.06
+msd_side1_r1,5.847,1.97495,20,32,ef20263b20,4,0.97;0.00;1.16;0.11;0.31;0.06
+msd_rsk0_r1,5.45578,1.82616,21,32,a5ddf0dc8c,4,1.67;0.00;1.15;0.18;0.23;0.07
+MC6_DONE
+### mb4 (phase + RSS timeline, ImageNet DATTYPE=256 P=1, UC2 A2bits RCA; seconds from the preprocessing start, RSS MB of P0)
+gpu: ot_end 23.61 (rss 3826) pass 23.61-25.89 (6222) cot_start 25.89 mux_start 27.53 (9883) conv_side_joined 32.55 (8233) complete_end 33.75 | CONV 5.32 FC 0.42 MUX 4.17 COT 1.28 BOOL_COT_MULT 12.26 BOOL 9.79
+cpu: ot_end 58.55 (7422) pass 58.56-60.62 (9548) mux_start 61.25 conv_side_joined 77.48 (12499) complete_end 78.81 (13414) | CONV 15.43 FC 0.51 MUX 4.06 COT 0.48 BOOL_COT_MULT 34.43 BOOL 22.93
+before (mb2, no lanes / side / bake with MWK): gpu pre 46.59 (CONV 15.11 BOOL_COT_MULT 11.93 BOOL 9.56), cpu 85.32 (CONV 20.70 BOOL_COT_MULT 33.44 BOOL 22.33)
+### mb6 (online conv steps, totals over the online phase, s; P0 / P1)
+multi-batch P=1, GEMM_FAST (CPU product): P0 comm0+zero 0.272 bias_setup 0.099 im2col 0.131 prepare_GEMM 0.739 (gemm 0.601, mask_send 0.138) bias_add 0.090 total 1.331; P1 total 1.566 (comm wait 0.450)
+multi-batch P=1, GEMM_FAST_GPU (host im2col, GPU product): P0 total 1.114 (gemm 0.414); P1 1.265
+single batch: P0 total 0.213 (gemm 0.079, mask_send 0.045); P1 0.239
+### mb9 (utilization, multi-batch P=1 GPU, 0.5 s samples averaged per 2 s): OT phase 2-24 s GPU 90-100 %, CPU 22-28 % of 48 threads
