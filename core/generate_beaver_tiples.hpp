@@ -119,11 +119,13 @@ struct FullyConnectedParameter
 #define TS1_FUSED_ACTIVE (PROTOCOL == 4 && (TRUNC_APPROACH == 1 || TRUNC_APPROACH == 4))
 // CUT_FRACTIONAL_BITS_OPT eligibility of the 2PC ROT circuits (docs/CUT_FRACTIONAL_BITS_OPT.md; see beaver_triples.hpp).
 // With TS1 (TS1_CUT_ACTIVE) or A2B_DELAYED_CUT a delayed ReLU converts the (locally) truncated value, whose top
-// FRACTIONAL bits are sign extension too. Both need the A2B bake (A2B_CONV_BAKE_ACTIVE in beaver_triples.hpp, spelled
-// out here): reshared TD=1 builds stay without the cut.
+// FRACTIONAL bits are sign extension too. A2B_DELAYED_CUT needs either the A2B bake (A2B_CONV_BAKE_ACTIVE in
+// beaver_triples.hpp, spelled out here) or the A2B of the parties' additive shares (A2B_ONLINE_OPT=0: plain or
+// reshared), and full-width ReLUs (no COMPRESS).
 #define A2B_DCUT_ELIGIBLE \
     (A2B_DELAYED_CUT == 1 && TRUNC_APPROACH == 0 && PROTOCOL == 4 && OPTIMIZED_BIT_INJECTION_RELU == 1 && \
-     A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && REDUCED_BITLENGTH_m == 0 && REDUCED_BITLENGTH_k == BITLENGTH)
+     ((A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1) || A2B_ONLINE_OPT == 0) && REDUCED_BITLENGTH_m == 0 && \
+     REDUCED_BITLENGTH_k == BITLENGTH)
 #define CUT_FRAC_ELIGIBLE \
     (CUT_FRACTIONAL_BITS_OPT == 1 && (TRUNC_DELAYED == 0 || TS1_FUSED_ACTIVE || A2B_DCUT_ELIGIBLE) && \
      FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \

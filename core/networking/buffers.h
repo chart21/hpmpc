@@ -100,6 +100,9 @@ uint64_t send_in_last_round[num_players - 1] = {0};
 // of MODELWEIGHTS_KNOWN_DURING_PREPROCESSING - the bound comes from the truncation invariant, not
 // from any mask-construction trick.
 bool g_cut_frac_active = false;
+// A2B_DELAYED_CUT without the bake (A2B_DCUT_SHARE_ACTIVE): the running A2B converts each party's additive share
+// shifted right by FRACTIONAL (their sum is the truncated value minus 0 or 1)
+bool g_a2b_share_shift = false;
 // Whether the values entering the current MSB extraction carry the mask bake (A2B_CONV_BAKE's committed
 // mask, or RESHARE_OPT_SIM's rt.a bits in P1's mask). Only a conv/FC mask/send bakes, so the network clears
 // this for ReLUs fed by anything else (BatchNorm, residual sums), and max/min clears it for comparisons.

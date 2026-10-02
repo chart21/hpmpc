@@ -153,10 +153,11 @@
 #endif
 
 #ifndef A2B_DELAYED_CUT
-#define A2B_DELAYED_CUT 1  // 2PC, TRUNC_DELAYED=1, A2B bake: a delayed ReLU input's A2B converts the locally truncated value
-                           // (m >> F plus the bake's Boolean addition of the parties' mask shares >> F), so it takes the
-                           // CUT_FRACTIONAL_BITS_OPT cut (26 instead of 31 RCA rounds online and in the Boolean
-                           // addition). TS{L} only (TS1 always does); DReLU of values in [0, 2^(F+1)) may be 0
+#define A2B_DELAYED_CUT 1  // 2PC, TRUNC_DELAYED=1: a delayed ReLU input's A2B converts the locally truncated value, so it
+                           // takes the CUT_FRACTIONAL_BITS_OPT cut (26 instead of 31 RCA rounds). With the A2B bake:
+                           // m >> F plus the bake's Boolean addition of the mask shares >> F (also cut), DReLU of values
+                           // in [0, 2^(F+1)) may be 0; without it (plain / reshared): the parties' additive shares >> F,
+                           // [0, 2^F). TS{L} only (TS1 always does); full-width ReLUs (no COMPRESS)
 #endif
 
 #ifndef TS1_LOW_CARRY

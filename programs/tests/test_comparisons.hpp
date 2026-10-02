@@ -276,7 +276,7 @@ bool test_RELU_random()
 }
 #endif
 
-#if (TEST_RELU_TS1 == 1 && TS1_FUSED_ACTIVE) || (TEST_RELU_DCUT == 1 && A2B_DCUT_ACTIVE)
+#if (TEST_RELU_TS1 == 1 && TS1_FUSED_ACTIVE) || (TEST_RELU_DCUT == 1 && (A2B_DCUT_ACTIVE || A2B_DCUT_SHARE_ACTIVE))
 // The ReLU of RELU_RANDOM_N delayed values (pending truncation by FRACTIONAL, |v| = 2^e * (1 + mantissa), e uniform
 // in 0..exps-1, random signs), with a pooling denominator fused into it (FUSE_RELU_AVG, denom > 1: the output is
 // further multiplied by the fixed-point 1/denom and truncated). Every output must be the plaintext result off by -1,
@@ -347,7 +347,7 @@ bool test_RELU_delayed(const std::string& name, int denom, int exps, bool delay 
             total[e]++;
             const bool ok = (TS1_LOW_CARRY == 1 && TS1_FUSED_ACTIVE && denom == 1) ? (d == 0 || d == 1) : (dr > -2 && dr < 2);
             // never negative (except DReLU of z without TS1_LOW_CARRY: y may be -1 there), off by less than 2 LSB
-            constexpr bool nonneg = TS1_CUT_ACTIVE || TS1_LOW_CARRY == 1 || A2B_DCUT_ACTIVE;
+            constexpr bool nonneg = TS1_CUT_ACTIVE || TS1_LOW_CARRY == 1 || A2B_DCUT_ACTIVE || A2B_DCUT_SHARE_ACTIVE;
             if ((nonneg && INT_TYPE(o[k]) < 0) || (v <= 0 && (dr <= -2 || dr >= 2)))
                 errors[e]++, bad++;
             else if (!ok)
@@ -388,7 +388,7 @@ bool test_RELU_ts1_avg()
 }
 #endif
 
-#if TEST_RELU_DCUT == 1 && A2B_DCUT_ACTIVE
+#if TEST_RELU_DCUT == 1 && (A2B_DCUT_ACTIVE || A2B_DCUT_SHARE_ACTIVE)
 // TS{L} with A2B_DELAYED_CUT: |v| < 2^17 (the probabilistic truncation's large errors are then improbable)
 template <typename Share>
 bool test_RELU_dcut()
@@ -823,7 +823,7 @@ bool test_comparisons(DATATYPE* res)
     test_function(num_tests, num_passed, "RELU_TS1_AVG9", test_RELU_ts1_avg<Share>);
 #endif
 #endif
-#if TEST_RELU_DCUT == 1 && A2B_DCUT_ACTIVE
+#if TEST_RELU_DCUT == 1 && (A2B_DCUT_ACTIVE || A2B_DCUT_SHARE_ACTIVE)
     test_function(num_tests, num_passed, "RELU_DCUT", test_RELU_dcut<Share>);
 #endif
 

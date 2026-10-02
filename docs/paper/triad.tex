@@ -420,46 +420,51 @@ the truncation sends nothing online.
 \item \textbf{The cut for UC3's TS\{L\}} (\flag{A2B_DELAYED_CUT}). With public weights TS\{L\} delays the
   truncation to the ReLU, whose A2B therefore converted the untruncated value, without the cut. The same shifted
   addition gives it the cut: 245 fewer online rounds and 10.8\,MiB less online traffic for RCA, and 21--110\,MiB less
-  preprocessing traffic.
+  preprocessing traffic. The reshared builds have no bake; there each party shifts its own additive share of the
+  A2B input by $F$ (their sum is the truncated value minus 0 or 1): RCA 245 fewer rounds and 16.1\,MiB less online,
+  PPA 24.7\,MiB, PPA4 9.6\,MiB. With the cut PPA4 computes 30--46\,ms longer online in every build, although it sends
+  less; preprocessing and online together are still shorter.
 \end{enumerate}
-\Cref{tab:ts1} shows the ImageNet costs. TS\_Mix sends the same online and 36--39\,MiB more in preprocessing
-(the first version, with a full-width addition, 57--58\,MiB), 0.09--0.24\s more preprocessing time; TS1 removes the
-last pooling's message. Online, all three take the same time over the nine builds of each (TS\{L\} 0.40--0.57\s,
-TS\_Mix 0.40--0.57\s, TS1 0.39--0.55\s, median of 4), once the bit injection computes TS1's public side from the A2B's
-input instead of storing it per value (that cost 0.02--0.04\s). Since TS1 has no
-wrap failures, \flag{FRACTIONAL} can grow, and the cut adder shrinks with it: TS\_Mix with $F = 8$ runs 147 fewer online
-rounds than TS\{L\} with $F = 5$ and classifies like the plaintext model (\cref{tab:ts1acc}), where TS\{L\} loses
-20--50 images of 256 at $F = 8$ and collapses at $F = 10$. At $F = 5$ all variants classify 156--166 of 256, the fixed
-point's precision being the limit.
+\Cref{tab:ts1} shows the ImageNet costs. TS\_Mix and TS1 need the bake, so they apply to the nine A2bits configs
+without \flag{COMPRESS}; the others keep TS\{L\}. TS\_Mix sends the same online and 36--39\,MiB more in preprocessing
+(the first version, with a full-width addition, 57--58\,MiB), 0.07--0.36\s more preprocessing time; TS1 removes the
+last pooling's message. Online, all three take the same time, once the bit injection computes TS1's public side from
+the A2B's input instead of storing it per value (that cost 0.02--0.04\s). Since TS1 has no wrap failures,
+\flag{FRACTIONAL} can grow, and the cut adder shrinks with it: TS1 with $F = 8$ runs 148 fewer online rounds than
+TS\{L\} with $F = 5$ (RCA; PPA 13.6\,MiB less online and 0.5\s less preprocessing) and classifies like the plaintext
+model on CIFAR-10 (\cref{tab:ts1acc}), where TS\{L\} loses 20--50 images of 256 at $F = 8$ and collapses at $F = 10$.
+(TS\_Mix divides a pooling before a ReLU, as in the ImageNet ResNet's stem, probabilistically at scale $2^{3F}$, which
+wraps at $F \ge 8$; TS1 folds it into the ReLU.) At $F = 5$ all variants classify 156--166 of 256, the fixed point's
+precision being the limit.
 
 \begin{table}[t]
 \centering\small
-\begin{tabular}{@{}llrrrr@{}}
+\begin{tabular}{@{}llrrrrr@{}}
 \toprule
-UC & variant & pre MiB & pre s & online MiB & rounds\\
+UC & variant & pre MiB & pre s & online MiB & rounds & online s\\
 \midrule
-UC1 & TS\{L\} & 1{,}341 & 3.17 & 210.2 & 1818\\
- & TS\_Mix & 1{,}378 & 3.38 & 210.2 & 1818\\
- & TS1 & 1{,}379 & 3.49 & 209.4 & 1817\\
- & TS\_Mix{,} $F = 8$ & 1{,}376 & 3.39 & 203.7 & 1671\\
- & TS\_Mix{,} $F = 10$ & 1{,}372 & 3.25 & 199.3 & 1573\\
+UC1 & TS\{L\} & 1{,}341 & 3.18 & 210.2 & 1818 & 0.498\\
+ & TS\_Mix & 1{,}378 & 3.45 & 210.2 & 1818 & 0.453\\
+ & TS1 & 1{,}379 & 3.52 & 209.4 & 1817 & 0.465\\
+ & TS1, $F = 8$ & 1{,}377 & 3.44 & 202.9 & 1670 & 0.452\\
 \addlinespace
-UC2 & TS\{L\} & 922 & 3.10 & 167.8 & 1714\\
- & TS\_Mix & 959 & 3.31 & 167.8 & 1714\\
- & TS1 & 960 & 3.49 & 167.0 & 1713\\
- & TS\_Mix{,} $F = 8$ & 956 & 3.35 & 161.3 & 1567\\
- & TS\_Mix{,} $F = 10$ & 952 & 3.23 & 157.0 & 1469\\
+UC2 & TS\{L\} & 922 & 3.16 & 167.8 & 1714 & 0.421\\
+ & TS\_Mix & 959 & 3.36 & 167.8 & 1714 & 0.405\\
+ & TS1 & 960 & 3.45 & 167.0 & 1713 & 0.397\\
+ & TS1, $F = 8$ & 958 & 3.37 & 160.5 & 1566 & 0.387\\
 \addlinespace
-UC3 & TS\{L\}{,} no \flag{A2B_DELAYED_CUT} & 452 & 3.11 & 136.1 & 1959\\
- & TS\{L\} & 421 & 2.96 & 125.3 & 1714\\
- & TS\_Mix & 460 & 3.17 & 125.3 & 1714\\
- & TS1 & 461 & 3.23 & 124.5 & 1713\\
- & TS\_Mix{,} $F = 8$ & 457 & 3.12 & 118.9 & 1567\\
- & TS\_Mix{,} $F = 10$ & 453 & 3.07 & 114.6 & 1469\\
+UC3 & TS\{L\} & 421 & 2.94 & 125.3 & 1714 & 0.447\\
+ & TS\_Mix & 460 & 3.10 & 125.3 & 1714 & 0.427\\
+ & TS1 & 461 & 3.17 & 124.5 & 1713 & 0.452\\
+ & TS1, $F = 8$ & 459 & 3.15 & 118.1 & 1566 & 0.413\\
+\addlinespace
+UC3 reshared & TS\{L\} & 268 & 1.76 & 170.4 & 2008 & 0.550\\
+ & TS\{L\} + delayed cut & 257 & 1.76 & 154.3 & 1763 & 0.501\\
 \bottomrule
 \end{tabular}
-\caption{TS1 on ImageNet (RCA, flare / polynize, dummy weights, median of 3 runs; P0's traffic sent and received). TS\{L\}:
-the builds as given (\flag{TRUNC_DELAYED=0} in UC1 and UC2, \flag{=1} in UC3).}
+\caption{TS1 on ImageNet (the all\_opt configs with RCA, A2bits unless marked, flare / polynize, dummy weights, median of 3
+runs; P0's traffic sent and received). TS\{L\}: the configs as given (\flag{TRUNC_DELAYED=0} in UC1 and UC2, \flag{=1}
+in UC3, with \flag{A2B_DELAYED_CUT}).}
 \label{tab:ts1}
 \end{table}
 

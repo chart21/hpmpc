@@ -166,6 +166,9 @@ inline bool reshare_sim_on()
 #endif
 // A2B_DELAYED_CUT for TS{L} (config.h): a delayed ReLU input's A2B converts the locally truncated value, with the cut
 #define A2B_DCUT_ACTIVE (TRUNC_DELAYED == 1 && A2B_DCUT_ELIGIBLE && A2B_CONV_BAKE_ACTIVE && CUT_FRAC_ELIGIBLE)
+// ... without the bake (A2B_ONLINE_OPT=0, plain or reshared): the A2B converts the parties' locally shifted additive
+// shares, (m - l_0) >> F and (-l_1) >> F (g_a2b_share_shift, prepare_A2B_S1 / S2 in every pass)
+#define A2B_DCUT_SHARE_ACTIVE (TRUNC_DELAYED == 1 && A2B_DCUT_ELIGIBLE && A2B_ONLINE_OPT == 0 && CUT_FRAC_ELIGIBLE)
 // A BatchNorm with secret parameters re-masks its output (BN triples, SecureML truncation leaves the drawn mask, beta's
 // mask is added afterwards like a conv's bias), so it can take the committed / reshare-baked masks like a conv/FC.
 // Not with FUSE_CONV_BN: then every BatchNorm forward passes its input on (also one that follows a pooling layer).

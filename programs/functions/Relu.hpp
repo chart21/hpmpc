@@ -109,11 +109,24 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
         g_cut_frac_active = true;
     }
 #endif
+#if A2B_DCUT_SHARE_ACTIVE
+    // A2B_DELAYED_CUT without the bake: a delayed input's A2B converts the parties' shares shifted by F (P0's
+    // m - l_0, P1's -l_1), whose sum is trunc(z) - 0 or 1, with the cut; the bit injection takes z as before. Not
+    // where RESHARE_OPT_SIM baked P1's reshare material into the unshifted share.
+    if (delayed && !reshare_sim_on())
+    {
+        g_a2b_share_shift = true;
+        g_cut_frac_active = true;
+    }
+#endif
     get_msb_range<m, k, Datatype, Share>(val, y, len);
     g_cut_frac_active = false;
 #if A2B_DCUT_ACTIVE
     g_a2b_xform = A2bXform::None;
     g_a2b_xform_m = nullptr;
+#endif
+#if A2B_DCUT_SHARE_ACTIVE
+    g_a2b_share_shift = false;
 #endif
 
     for (int i = 0; i < len; i++)

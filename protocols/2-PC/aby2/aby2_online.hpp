@@ -1033,6 +1033,9 @@ class ABY2_ONLINE_Share
         {
             temp_p1[i] = OP_SUB(in[i].m, in[i].l);  // set first share to mv - lv1
         }
+        if (g_a2b_share_shift)  // A2B_DELAYED_CUT without the bake: the share of the locally truncated value
+            for (int i = 0; i < BITLENGTH; i++)
+                temp_p1[i] = OP_SHIFT_LOG_RIGHT<FRACTIONAL>(temp_p1[i]);
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
         unorthogonalize_arithmetic(temp_p1, temp2);
         orthogonalize_boolean(temp2, temp_p1);
@@ -1133,6 +1136,9 @@ class ABY2_ONLINE_Share
         {
             temp_p1[i] = OP_SUB(SET_ALL_ZERO(), in[i].l);  // set second share to -lv2
         }
+        if (g_a2b_share_shift)  // A2B_DELAYED_CUT without the bake: the share of the locally truncated value
+            for (int i = 0; i < BITLENGTH; i++)
+                temp_p1[i] = OP_SHIFT_LOG_RIGHT<FRACTIONAL>(temp_p1[i]);
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
         unorthogonalize_arithmetic(temp_p1, temp2);
         orthogonalize_boolean(temp2, temp_p1);

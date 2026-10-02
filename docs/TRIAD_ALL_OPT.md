@@ -511,7 +511,8 @@ otherwise). Data `docs/variant_data/triad/ts1/`.
   truncated already), `RELU_DCUT`: 0 wrong of 4096 (DATTYPE 32) and of 32768 (DATTYPE 256); mean errors +0.028 (shifted),
   -0.007 (w_t), +0.001 / +0.10 (AVG9 / AVG9 truncated), -0.04 LSB (DCUT). `RELU_RANDOM` now draws |v| < 2^(l-1-F)
   where the cut applies. Single-batch unit tests need `CHEETAH_CONV_EARLY=0 A2B_BAKE_MASK_PASS=0`.
-* **ImageNet, final code** (flare / polynize, dummy weights, `res_im_final.csv` / `comm_im_final.csv`, median of 3; P0's
+* **ImageNet, final code** (these builds lack the configs' `RNG_AHEAD=1`: for the configs as such see the next
+  section; flare / polynize, dummy weights, `res_im_final.csv` / `comm_im_final.csv`, median of 3; P0's
   traffic sent + received, MiB; online seconds: `res_online.csv`, median of 4 after the bit-injection change below).
   TS{L} is the build as given (TD=0 in UC1 / UC2, TD=1 with BIT_INJECTION_TRUNC_SIM in UC3).
 
@@ -582,8 +583,116 @@ otherwise). Data `docs/variant_data/triad/ts1/`.
   now computes M and sK from it (`ts1_lift_shift`), with outputs identical bit for bit (6 CIFAR builds). Their online
   compute (online minus waiting) fell by 0.02-0.04 s and is now at or below TS{L}'s (median of 4).
 * Not supported: COMPRESS=1 and reshared builds (no bake: TS1 would need a Boolean addition of its own over the
-  ReLU inputs' masks, ~+157 MiB; A2B_DELAYED_CUT needs the bake too), TS{L} with TD=1 for UC1 / UC2 still aborts in
+  ReLU inputs' masks, ~+157 MiB; A2B_DELAYED_CUT works there since the next section), TS{L} with TD=1 for UC1 / UC2 still aborts in
   the bake check (pre-existing).
+
+## All 36 all_opt configs with TS1 / TS_Mix (2026-10-03, flare / polynize)
+
+Every config of `list_fin2.txt` at the final code, with each truncation variant that builds (ImageNet, dummy
+weights, 3 interleaved runs; data `docs/variant_data/triad/ts1/allopt/`).
+
+* **Which variants build.** TS_Mix and TS1 take their carries from the A2B bake, so they exist for the nine A2bits
+  COMPRESS=0 configs only. The reshared configs have no bake, and COMPRESS=1 converts bits 12..19 only (no bake, no
+  cut); there TS1 would need a Boolean addition of the mask shares of its own (~1 s and ~150 MiB of preprocessing,
+  the A2bits bake's cost) or an online message, i.e. it would cost more than TS{L} at the same F. They keep TS{L}.
+* **Correction.** The TS1 ImageNet matrix of the previous section came from round 8's build lists, which lack the
+  configs' `RNG_AHEAD=1` (the online phase's RNG thread); its online seconds are not the configs'. The table below is
+  rebuilt from `list_fin2.txt`.
+* **New: the delayed cut for the reshared UC3 configs** (`A2B_DCUT_SHARE_ACTIVE`, part of `A2B_DELAYED_CUT=1`). UC3
+  runs TS{L} with TD=1, so its ReLUs converted the untruncated value without the cut; A2B_DELAYED_CUT needed the bake.
+  Without the bake the A2B converts the parties' additive shares, P0's m - l_0 and P1's -l_1: each party now shifts
+  its own share right by F (`g_a2b_share_shift`, prepare_A2B_S1 / S2 in the preprocessing and online pass), their sum
+  is trunc(z) minus 0 or 1, and the cut applies; the bit injection takes z as before. DReLU of values in [0, 2^F)
+  may be 0. Not where RESHARE_OPT_SIM baked P1's reshare material into the unshifted share (public weights never do).
+  Unit test `RELU_DCUT` (func 59, RCA): 0 wrong of 4096 / 32768 (DATTYPE 256), mean error -0.001 LSB; CIFAR (AdamW,
+  256 images) with / without: RCA 170 / 162, PPA 161 / 155, PPA4 169 / 165. ImageNet: RCA 2008 -> 1763 rounds,
+  online 170.4 -> 154.3 MiB, 0.550 -> 0.501 s, pre 268 -> 257 MiB; PPA online 288.5 -> 263.8 MiB, pre 442 -> 436;
+  PPA4 online 157.5 -> 147.9 MiB, pre 1096 -> 1062 MiB, 5.08 -> 4.93 s, but online 0.423 -> 0.491 s (below).
+* **PPA4's cut costs online compute.** With the cut, PPA4's ReLUs take 30-46 ms more local compute online in every
+  family, although they send less (5 runs, `res_pc.csv`): UC2 reshared (TD=0) 0.454 s with the cut vs 0.407 s without
+  (`CUT_FRACTIONAL_BITS_OPT=0`; pre 5.42 vs 5.63 s, 1639 vs 1718 MiB), UC3 reshared 0.480 vs 0.432 s, UC3 A2bits 0.510
+  vs 0.481 s (pre 4.48 vs 5.23 s, 784 vs 894 MiB). Preprocessing plus online is lower with the cut in all three, so it
+  stays on; where online latency alone counts, PPA4 without the cut is 0.03-0.05 s faster. A whole-run perf profile
+  does not resolve it (the online phase is under 1% of the samples). RCA and PPA do not show it.
+* **Results** (`ao_table.md`; `*`: least traffic of the config):
+
+| config | truncation | pre s | online s | rounds | pre MiB | online MiB |
+|---|---|---|---|---|---|---|
+| UC1 A2bits RCA | TS{L} | 3.18 | 0.498 | 1818 | 1341* | 210.2 |
+|  | TS_Mix | 3.45 | 0.453 | 1818 | 1378 | 210.2 |
+|  | TS1 | 3.52 | 0.465 | 1817 | 1379 | 209.4 |
+|  | TS1, F=8 | 3.44 | 0.452 | 1670 | 1377 | 202.9* |
+| UC1 A2bits RCA COMPRESS=1 | TS{L} | 2.16 | 0.376 | 887 | 1163 | 169.4 |
+| UC1 A2bits PPA | TS{L} | 4.17 | 0.463 | 982 | 1464 | 321.8 |
+|  | TS_Mix | 4.31 | 0.466 | 982 | 1501 | 321.8 |
+|  | TS1 | 4.46 | 0.457 | 981 | 1502 | 321.0 |
+|  | TS1, F=8 | 3.63 | 0.430 | 978 | 1448* | 308.0* |
+| UC1 A2bits PPA COMPRESS=1 | TS{L} | 2.16 | 0.370 | 746 | 1169 | 188.6 |
+| UC1 A2bits PPA4 | TS{L} | 4.70 | 0.520 | 730 | 1704* | 207.9 |
+|  | TS_Mix | 4.88 | 0.511 | 730 | 1741 | 207.9 |
+|  | TS1 | 5.04 | 0.506 | 729 | 1742 | 207.1* |
+|  | TS1, F=8 | 4.86 | 0.494 | 729 | 1730 | 207.1* |
+| UC1 A2bits PPA4 COMPRESS=1 | TS{L} | 2.23 | 0.373 | 642 | 1211 | 162.9 |
+| UC2 A2bits RCA | TS{L} | 3.16 | 0.421 | 1714 | 922* | 167.8 |
+|  | TS_Mix | 3.36 | 0.405 | 1714 | 959 | 167.8 |
+|  | TS1 | 3.45 | 0.397 | 1713 | 960 | 167.0 |
+|  | TS1, F=8 | 3.37 | 0.387 | 1566 | 958 | 160.5* |
+| UC2 A2bits RCA COMPRESS=1 | TS{L} | 2.04 | 0.298 | 783 | 743 | 126.9 |
+| UC2 A2bits PPA | TS{L} | 4.14 | 0.405 | 878 | 1045 | 279.3 |
+|  | TS_Mix | 4.22 | 0.390 | 878 | 1082 | 279.3 |
+|  | TS1 | 4.36 | 0.384 | 877 | 1083 | 278.6 |
+|  | TS1, F=8 | 3.54 | 0.380 | 874 | 1029* | 265.7* |
+| UC2 A2bits PPA COMPRESS=1 | TS{L} | 2.10 | 0.319 | 642 | 750 | 146.2 |
+| UC2 A2bits PPA4 | TS{L} | 4.55 | 0.475 | 626 | 1285* | 165.6 |
+|  | TS_Mix | 4.87 | 0.467 | 626 | 1321 | 165.6 |
+|  | TS1 | 4.91 | 0.459 | 625 | 1323 | 164.8* |
+|  | TS1, F=8 | 4.79 | 0.443 | 625 | 1310 | 164.8* |
+| UC2 A2bits PPA4 COMPRESS=1 | TS{L} | 2.19 | 0.295 | 538 | 792 | 120.4 |
+| UC3 A2bits RCA | TS{L} | 2.94 | 0.447 | 1714 | 421* | 125.3 |
+|  | TS_Mix | 3.10 | 0.427 | 1714 | 460 | 125.3 |
+|  | TS1 | 3.17 | 0.452 | 1713 | 461 | 124.5 |
+|  | TS1, F=8 | 3.15 | 0.413 | 1566 | 459 | 118.1* |
+| UC3 A2bits RCA COMPRESS=1 | TS{L} | 1.59 | 0.336 | 783 | 244 | 84.5 |
+| UC3 A2bits PPA | TS{L} | 3.93 | 0.451 | 878 | 544 | 237.0 |
+|  | TS_Mix | 4.14 | 0.445 | 878 | 582 | 237.0 |
+|  | TS1 | 4.17 | 0.431 | 877 | 584 | 236.1 |
+|  | TS1, F=8 | 3.39 | 0.389 | 874 | 530* | 223.4* |
+| UC3 A2bits PPA COMPRESS=1 | TS{L} | 1.57 | 0.362 | 642 | 251 | 103.9 |
+| UC3 A2bits PPA4 | TS{L} | 4.52 | 0.514 | 626 | 784* | 123.2 |
+|  | TS_Mix | 4.59 | 0.521 | 626 | 822 | 123.2 |
+|  | TS1 | 4.75 | 0.499 | 625 | 823 | 122.4* |
+|  | TS1, F=8 | 4.56 | 0.521 | 625 | 811 | 122.4* |
+| UC3 A2bits PPA4 COMPRESS=1 | TS{L} | 1.75 | 0.344 | 538 | 293 | 78.1 |
+| UC1 reshared RCA | TS{L} | 2.15 | 0.533 | 1867 | 1175 | 239.2 |
+| UC1 reshared RCA COMPRESS=1 | TS{L} | 1.82 | 0.390 | 936 | 1084 | 178.0 |
+| UC1 reshared PPA | TS{L} | 3.91 | 0.585 | 1004 | 1330 | 348.7 |
+| UC1 reshared PPA COMPRESS=1 | TS{L} | 2.37 | 0.435 | 795 | 1141 | 197.2 |
+| UC1 reshared PPA4 | TS{L} | 5.51 | 0.538 | 779 | 2059 | 232.7 |
+| UC1 reshared PPA4 COMPRESS=1 | TS{L} | 2.25 | 0.422 | 691 | 1249 | 171.5 |
+| UC2 reshared RCA | TS{L} | 2.21 | 0.444 | 1763 | 756 | 196.7 |
+| UC2 reshared RCA COMPRESS=1 | TS{L} | 1.63 | 0.326 | 832 | 665 | 135.5 |
+| UC2 reshared PPA | TS{L} | 3.89 | 0.480 | 900 | 911 | 306.2 |
+| UC2 reshared PPA COMPRESS=1 | TS{L} | 2.34 | 0.363 | 691 | 722 | 154.8 |
+| UC2 reshared PPA4 | TS{L} | 5.51 | 0.444 | 675 | 1639 | 190.3 |
+| UC2 reshared PPA4 COMPRESS=1 | TS{L} | 2.27 | 0.323 | 587 | 830 | 129.0 |
+| UC3 reshared RCA | TS{L} as before (no delayed cut) | 1.76 | 0.550 | 2008 | 268 | 170.4 |
+|  | TS{L} + delayed cut | 1.76 | 0.501 | 1763 | 257* | 154.3* |
+| UC3 reshared RCA COMPRESS=1 | TS{L} | 1.21 | 0.341 | 832 | 167 | 93.1 |
+| UC3 reshared PPA | TS{L} as before (no delayed cut) | 3.30 | 0.498 | 903 | 442 | 288.5 |
+|  | TS{L} + delayed cut | 3.16 | 0.512 | 900 | 436* | 263.8* |
+| UC3 reshared PPA COMPRESS=1 | TS{L} | 1.57 | 0.360 | 691 | 230 | 112.4 |
+| UC3 reshared PPA4 | TS{L} as before (no delayed cut) | 5.08 | 0.423 | 675 | 1096 | 157.5 |
+|  | TS{L} + delayed cut | 4.93 | 0.491 | 675 | 1062* | 147.9* |
+| UC3 reshared PPA4 COMPRESS=1 | TS{L} | 1.73 | 0.352 | 587 | 321 | 86.7 |
+
+* **Minimal per config.**
+  * A2bits COMPRESS=0, F = 5: TS{L} has the least preprocessing (TS_Mix / TS1 +36-39 MiB, +0.07-0.36 s); online
+    traffic and rounds are equal (TS1 -0.8 MiB, -1 round), online times within noise (TS_Mix / TS1 at or below TS{L}).
+  * A2bits COMPRESS=0 with TS1 at F = 8 (plaintext accuracy on CIFAR, see above; the ImageNet ResNet's stem pooling
+    before its ReLU needs TS1, not TS_Mix, at F >= 8): the least online traffic in all nine (RCA -148 rounds and
+    -7.2 to -7.3 MiB, PPA -13.6 to -13.8 MiB, PPA4 -0.8 MiB) and the shortest online phase in 8 of 9; PPA also
+    preprocesses 0.54-0.60 s faster with 14-16 MiB less (its 24-bit adder), RCA and PPA4 send 25-38 MiB more.
+  * Reshared and COMPRESS=1: TS{L} (the only variant); reshared UC3 now with the delayed cut.
 
 ## GPU (2026-10-01, workstation cmucl771615)
 
