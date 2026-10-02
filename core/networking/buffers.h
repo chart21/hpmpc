@@ -146,6 +146,7 @@ uint64_t g_bake_batch_offset = 0;
 // (protocols/beaver_triples.hpp).
 const DATATYPE* g_bake_bias_l = nullptr;
 uint64_t g_bake_bias_len = 0;
+uint64_t g_bake_bias_rep = 1;  // consecutive outputs per entry of g_bake_bias_l (a conv: one mask per channel)
 uint64_t num_generated[num_players * player_multiplier] = {0};
 
 // ADDITIONAL_RELU_THREADS (programs/functions/stream_parallel.hpp): while a worker runs elements of a

@@ -261,7 +261,7 @@ inline Datatype a2b_bake_slot_mask(uint64_t e, func_sub SUB)
     // is untouched). Subtract it here so the TOTAL mask after add_bias equals the committed lz that
     // [c] was built for. Same buffer/indexing as the reshare bake (g_bake_bias_l, batch-local e).
     if (g_bake_bias_l != nullptr && g_bake_bias_len > 0)
-        lz = SUB(lz, g_bake_bias_l[(g_bake_batch_offset + e) % g_bake_bias_len]);
+        lz = SUB(lz, g_bake_bias_l[((g_bake_batch_offset + e) % g_bake_bias_len) / g_bake_bias_rep]);
     return lz;
 }
 
@@ -678,7 +678,7 @@ inline void bake_reshare_mask(Datatype& l, int bake_index, func_sub SUB)
 #endif
     Datatype l_new = SUB(SET_ALL_ZERO(), (Datatype) negl);
     if (g_bake_bias_l != nullptr && g_bake_bias_len > 0)  // pre-compensate a shared bias added after the GEMM
-        l_new = SUB(l_new, g_bake_bias_l[e % g_bake_bias_len]);
+        l_new = SUB(l_new, g_bake_bias_l[(e % g_bake_bias_len) / g_bake_bias_rep]);
     l = l_new;  // final ReLU-input mask == -negl => the A2B input -l transposes to rt.a at reshared slices
 #else
     (void) l; (void) bake_index;

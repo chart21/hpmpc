@@ -30,6 +30,7 @@
 // Multi-batch (DATTYPE = L * BITLENGTH, L images in the lanes of a register): every lane holds the same weights, so a
 // product is one GEMM with L times the columns (column j, lane l); the weight operand is taken from lane 0 after
 // checking that all lanes agree (else the share-level loop runs).
+#define GEMM_FAST_CONV_GPU (GEMM_FAST_GPU && GEMM_FAST_ELIGIBLE && FUSE_DOT == 1 && CONV_TRIPLES == 1)  // accumulate_conv
 #define GEMM_FAST_ELIGIBLE (GEMM_FAST == 1 && A_KNOWN == 1 && PROTOCOL == 4 && DATTYPE % BITLENGTH == 0 && PUBLIC_WEIGHTS == 0 && FUSE_CONV_BN_SIM == 0 && \
                             ADDITIONAL_GEMM_THREADS > 0)
 
@@ -137,10 +138,19 @@ inline void kernel(const W* const* x, const W* yp, int F, T* const* c, int ncols
             lanes(c[r][v / L].raw_m())[v % L] += acc[r][v];
 }
 
+// the conv layer's product was done by accumulate_conv: the next accumulate call (prepare_GEMM of that layer) only
+// sends
+inline thread_local bool tl_conv_accumulated = false;
+
 // true: the accumulation was done (or is not needed) here
 template <typename T, typename U>
 inline bool accumulate(const U* A, const T* B, T* C, int m, int p, int f)
 {
+    if (tl_conv_accumulated)
+    {
+        tl_conv_accumulated = false;
+        return true;
+    }
     if constexpr (!std::is_same_v<T, U> || !requires(T& t) { t.raw_m(); })
     {
         // the preprocessing pass: every secret-weight dot kernel returns a zero share
@@ -249,5 +259,93 @@ inline bool accumulate(const U* A, const T* B, T* C, int m, int p, int f)
         return true;
     }
 }
+
+#if GEMM_FAST_GPU
+// The conv layer's product (GEMM_FAST_GPU): the input operand y per input value (ic x ih x iw x L words, not the
+// im2col'd F x p), the column matrix and the product on the GPU (conv_fast_gpu), C.m lanes += the result. With
+// A_KNOWN == 0 the two products are one conv over 2 * ic channels (y's two parts as channels ic .. 2 ic - 1, which is
+// x_row's k-order). False if not applicable (the caller builds the column matrix as before); true: the product is
+// done (tl_conv_accumulated set for the layer's prepare_GEMM) or not needed.
+template <typename T, typename U>
+inline bool accumulate_conv(const U* A, const T* im, T* C, int m, int ic, int ih, int iw, int ksz, int stride, int pad)
+{
+    if constexpr (!std::is_same_v<T, U> || !requires(T& t) { t.raw_m(); })
+        return false;
+    else
+    {
+        static_assert(sizeof(W) == sizeof(uint32_t), "GEMM_FAST_GPU: 32-bit ring only");
+        if (current_phase != PHASE_LIVE)
+            return false;  // the preprocessing passes accumulate nothing (and INIT skips the threaded path)
+        const int f = ic * ksz * ksz, F = K * f;
+        if ((long long) m * f < 4096 || m < ADDITIONAL_GEMM_THREADS + 1)
+            return false;  // prepare_GEMM_CPU would not take the threaded path that calls accumulate
+#if MODELWEIGHTS_KNOWN_DURING_PREPROCESSING == 1 && A_KNOWN == 1 && PARTY == 1
+        tl_conv_accumulated = true;  // nothing to accumulate
+        return true;
+#endif
+        constexpr int TT = WORKER_POOL_THREADS + 1;
+        static std::vector<W> X;
+        static const void* x_of = nullptr;
+        static int x_m = 0, x_f = 0;
+        static bool x_same = true;
+        const bool fresh = x_of != (const void*) A || x_m != m || x_f != f;
+        if (fresh)
+        {
+            X.resize((size_t) m * F);
+            std::atomic<bool> same{true};
+            GemmPool::get().run([&](int t) {
+                bool s = true;
+                for (int i = m * t / TT; i < m * (t + 1) / TT; i++)
+                    s &= x_row(A + (size_t) i * f, f, X.data() + (size_t) i * F);
+                if (!s)
+                    same = false;
+            });
+            x_of = A, x_m = m, x_f = f, x_same = same;
+        }
+        if (!x_same)
+            return false;
+        const int oh = (ih + 2 * pad - ksz) / stride + 1, ow = (iw + 2 * pad - ksz) / stride + 1, p = oh * ow;
+        const size_t hw = (size_t) ih * iw, n_in = (size_t) ic * hw;
+        W* y = gemm_fast_gpu_staging(n_in * K * L, 0);
+        W* res = gemm_fast_gpu_staging((size_t) m * p * L, 1);
+        // y_col's values, one input value at a time: channel block K - 1 holds the second product's part
+        GemmPool::get().run([&](int t) {
+            for (size_t e = n_in * t / TT; e < n_in * (t + 1) / TT; e++)
+            {
+                const W* bm = lanes(im[e].raw_m());
+                const W* bl = lanes(im[e].raw_l());
+                W* y0 = y + e * L;
+                for (int q = 0; q < L; q++)
+                {
+#if A_KNOWN == 0
+#if PARTY == 0
+                    y0[q] = bm[q] - bl[q];
+#else
+                    y0[q] = W(0) - bl[q];
+#endif
+                    y0[n_in * L + q] = W(0) - bm[q];
+#elif PARTY == 0
+                    y0[q] = bm[q] - bl[q];
+#else
+                    y0[q] = W(0) - bl[q];
+#endif
+                }
+            }
+        });
+        conv_fast_gpu(m, K * ic, ih, iw, ksz, stride, pad, L, X.data(), fresh, y, res);
+        GemmPool::get().run([&](int t) {
+            for (size_t e = (size_t) m * p * t / TT; e < (size_t) m * p * (t + 1) / TT; e++)
+            {
+                W* c = lanes(C[e].raw_m());
+                const W* r = res + e * L;
+                for (int q = 0; q < L; q++)
+                    c[q] += r[q];
+            }
+        });
+        tl_conv_accumulated = true;
+        return true;
+    }
+}
+#endif
 }  // namespace gemm_fast
 #endif

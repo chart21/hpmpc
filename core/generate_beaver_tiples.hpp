@@ -146,6 +146,11 @@ inline const bool g_conv_repack_set = (Iface::conv_repack() = true, Iface::conv_
 // CHEETAH_CONV_SIDE: the lanes' conv triples (one pipelined product, CHEETAH_CONV_LANES) on four channels of their own
 // (Keys::get_side_ios), started by complete_preprocessing on a thread of their own (tl_conv_side) while the next
 // generators use the regular channels. Same calls, same PRNG streams: the same triples.
+#if defined(CHEETAH_CONV_LANES_CHECK)
+#define CONV_LANES_CHECK_ON 1
+#else
+#define CONV_LANES_CHECK_ON 0
+#endif
 #define CHEETAH_CONV_SIDE_ACTIVE (CHEETAH_CONV_SIDE == 1 && CHEETAH_CONV_LANES_ACTIVE && CHEETAH_WAN_OPT == 0 && \
                                   BIT_INJECTION_PREPROCESSING_OPT == 1)
 inline thread_local bool tl_conv_side = false;
@@ -1030,10 +1035,13 @@ void generateLayerDummyTriples(type** a,
             }
 #endif
 #if A_KNOWN == 0 || PARTY == 0
+            // the lanes' conv is one convolution with lane 0's weights: the other lanes' copies only for the premise check
+            constexpr bool lane0_w = CHEETAH_CONV_LANES_ACTIVE && !CONV_LANES_CHECK_ON &&
+                                     std::is_same_v<LayerParams, ConvolutionParameter>;
             for (uint64_t i = 0; i < w_size; i++) {
                 alignas(sizeof(DATATYPE)) UINT_TYPE temp[factor];
                 unorthogonalize_arithmetic(&a[n][i], temp, 1);
-                for (int j = 0; j < factor; ++j) {
+                for (int j = 0; j < (lane0_w ? 1 : factor); ++j) {
                     w[j * w_size + i] = temp[j];
                 }
             }

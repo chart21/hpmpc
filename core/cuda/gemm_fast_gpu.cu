@@ -1,6 +1,7 @@
 #include <gemm.cuh>
 #include "gemm_fast_gpu.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 
@@ -61,5 +62,51 @@ void gemm_fast_gpu(int m, int p, int F, const uint32_t* X, bool x_fresh, const u
     gpu::gemm<uint32_t>(m, p, F, dx.p, true, db.p, true, dc.p, true);  // row-major operands and result
     check(cudaDeviceSynchronize(), "gemm");
     check(cudaMemcpyAsync(C, dc.p, size_t(m) * p * sizeof(uint32_t), cudaMemcpyDeviceToHost, stream), "copy C");
+    check(cudaStreamSynchronize(stream), "copy C");
+}
+
+namespace
+{
+// row k = (c, dy, dx) of the column matrix, column n = (pixel, lane): Y[c][iy][ix][lane] or 0 outside the image
+__global__ void im2col_lanes(uint32_t* out, const uint32_t* __restrict__ Y, int ic, int ih, int iw, int ksz, int stride,
+                             int pad, int ow, int p, int L, long long total)
+{
+    for (long long t = (long long) blockIdx.x * blockDim.x + threadIdx.x; t < total; t += (long long) gridDim.x * blockDim.x)
+    {
+        const long long pl = (long long) p * L;
+        const int k = int(t / pl);
+        const long long n = t % pl;
+        const int pix = int(n / L), lane = int(n % L);
+        const int kk = ksz * ksz, c = k / kk, r = k % kk, dy = r / ksz, dx = r % ksz;
+        const int iy = (pix / ow) * stride - pad + dy, ix = (pix % ow) * stride - pad + dx;
+        out[t] = (iy >= 0 && iy < ih && ix >= 0 && ix < iw) ? Y[(((long long) c * ih + iy) * iw + ix) * L + lane] : 0u;
+    }
+}
+}  // namespace
+
+void conv_fast_gpu(int m, int ic, int ih, int iw, int ksz, int stride, int pad, int L, const uint32_t* X, bool x_fresh,
+                   const uint32_t* Y, uint32_t* C)
+{
+    static DevBuf dx, dy, db, dc;
+    static cudaStream_t stream = [] {
+        cudaStream_t s;
+        check(cudaStreamCreateWithFlags(&s, cudaStreamNonBlocking), "stream");
+        return s;
+    }();
+    const int oh = (ih + 2 * pad - ksz) / stride + 1, ow = (iw + 2 * pad - ksz) / stride + 1, p = oh * ow;
+    const int F = ic * ksz * ksz;
+    const size_t pl = size_t(p) * L, ny = size_t(ic) * ih * iw * L;
+    dx.need(size_t(m) * F), dy.need(ny), db.need(size_t(F) * pl), dc.need(size_t(m) * pl);
+    if (x_fresh)
+        check(cudaMemcpyAsync(dx.p, X, size_t(m) * F * sizeof(uint32_t), cudaMemcpyHostToDevice, stream), "copy X");
+    check(cudaMemcpyAsync(dy.p, Y, ny * sizeof(uint32_t), cudaMemcpyHostToDevice, stream), "copy Y");
+    const long long total = (long long) F * (long long) pl;
+    const unsigned blocks = unsigned(std::min<long long>((total + 255) / 256, 65535LL * 8));
+    im2col_lanes<<<blocks, 256, 0, stream>>>(db.p, dy.p, ic, ih, iw, ksz, stride, pad, ow, p, L, total);
+    check(cudaGetLastError(), "im2col");
+    check(cudaStreamSynchronize(stream), "im2col");
+    gpu::gemm<uint32_t>(m, int(pl), F, dx.p, true, db.p, true, dc.p, true);  // row-major operands and result
+    check(cudaDeviceSynchronize(), "gemm");
+    check(cudaMemcpyAsync(C, dc.p, size_t(m) * pl * sizeof(uint32_t), cudaMemcpyDeviceToHost, stream), "copy C");
     check(cudaStreamSynchronize(stream), "copy C");
 }
