@@ -18,8 +18,12 @@ HE_INCLUDE := -I${CHEETAH}/src/include \
 			  -isystem ${CHEETAH}/deps/include/SEAL-4.1 \
 			  -isystem /usr/include/eigen3
 
-HE_PATHS := -Wl,-rpath,${CHEETAH}/build/lib:${CHEETAH}/deps/lib \
-			-L${CHEETAH}/build/lib \
+# The ConvTriple build of the triples' ring (its TRIPLE_BITLEN): build for BITLENGTH 32, build64 for 64
+BITLENGTH_EFF := $(or $(BITLENGTH),$(shell grep -oP '(?<=define BITLENGTH )\d+' config.h | head -1))
+CHEETAH_BUILD ?= $(if $(filter 64,$(BITLENGTH_EFF)),build64,build)
+
+HE_PATHS := -Wl,-rpath,${CHEETAH}/${CHEETAH_BUILD}/lib:${CHEETAH}/deps/lib \
+			-L${CHEETAH}/${CHEETAH_BUILD}/lib \
 			-L${CHEETAH}/deps/lib
 
 HE_LIBS := -lHE -lgemini -lseal-4.1

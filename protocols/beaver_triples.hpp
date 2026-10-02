@@ -64,6 +64,10 @@ constexpr bool is_ppa4_reshared(int k, int i)
         return i == 1 || i == 4 || i == 7 || i == 10 || i == 13
             || i == 16 || i == 19 || i == 22 || i == 23 || i == 26 || i == 29;
     }
+    else if (k == 64) // scripts/circuits/gen_64bit_adders.py: the first slice of each level-0 group of 3
+    {
+        return i >= 1 && i <= 61 && i % 3 == 1;
+    }
     return false;
 }
 
@@ -92,8 +96,9 @@ DATATYPE* random_multiplication_b = nullptr;
 // All reshare-baking machinery below is active only in this configuration; call sites can rely on
 // bake_reshare_mask compiling to a no-op otherwise (construct_mwk_r1_baked call sites must still be
 // gated because they consume an extra PRNG draw).
+// (BITLENGTH 32 only: the slot maps below, reshare_rt_offset etc., are those of the 32-bit circuits)
 #define RESHARE_BAKE_ACTIVE \
-    (RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && \
+    (RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && BITLENGTH == 32 && \
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 
 // CUT_FRACTIONAL_BITS_OPT (docs/CUT_FRACTIONAL_BITS_OPT.md): compile-time eligibility. Under

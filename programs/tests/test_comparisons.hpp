@@ -211,7 +211,8 @@ bool test_RELU()
 
 #if TEST_RELU_RANDOM == 1
 // ReLU of RELU_RANDOM_N secret-shared values (P0's input, random masks), |v| = 2^e * (1 + mantissa) for e
-// uniform in 0..30 (CUT_FRACTIONAL_BITS_OPT: 0..BITLENGTH-2-FRACTIONAL, the top FRACTIONAL bits must be sign extension)
+// uniform in 0..BITLENGTH-2 (CUT_FRACTIONAL_BITS_OPT: 0..BITLENGTH-2-FRACTIONAL, the top FRACTIONAL bits must be sign
+// extension)
 // and random signs: every output must equal max(v, 0) exactly. Prints the errors per exponent, which tells an MSB
 // circuit that fails on a range of values from noise elsewhere.
 #ifndef RELU_RANDOM_N
@@ -235,7 +236,7 @@ bool test_RELU_random()
         for (int k = 0; k < vf; k++)
         {
             const uint64_t r = next();
-            const int e = int(r % ((CUT_FRAC_ELIGIBLE || CUT_FRAC_ELIGIBLE_GENERIC) ? BITLENGTH - 1 - FRACTIONAL : 31));
+            const int e = int(r % ((CUT_FRAC_ELIGIBLE || CUT_FRAC_ELIGIBLE_GENERIC) ? BITLENGTH - 1 - FRACTIONAL : BITLENGTH - 1));
             const uint64_t mag = (uint64_t(1) << e) | ((r >> 8) & ((uint64_t(1) << e) - 1));
             const int64_t v = (r >> 40) & 1 ? -int64_t(mag) : int64_t(mag);
             plain[i][k] = UINT_TYPE(v);
@@ -251,7 +252,7 @@ bool test_RELU_random()
     for (int i = 0; i < N; i++)
         out[i].prepare_reveal_to_all();
     Share::communicate();
-    int errors[32] = {0}, total[32] = {0}, bad = 0;
+    int errors[64] = {0}, total[64] = {0}, bad = 0;
     for (int i = 0; i < N; i++)
     {
         const DATATYPE r = out[i].complete_reveal_to_all();
@@ -267,7 +268,7 @@ bool test_RELU_random()
                 errors[e]++, bad++;
         }
     }
-    for (int e = 0; e < 31; e++)
+    for (int e = 0; e < BITLENGTH - 1; e++)
         if (errors[e])
             print_online("RELU_RANDOM: 2^" + std::to_string(e) + ": " + std::to_string(errors[e]) + " of " +
                          std::to_string(total[e]) + " wrong");
@@ -326,7 +327,7 @@ bool test_RELU_delayed(const std::string& name, int denom, int exps, bool delay 
     for (int i = 0; i < N; i++)
         out[i].prepare_reveal_to_all();
     Share::communicate();
-    int dist[3] = {0}, errors[32] = {0}, total[32] = {0}, bad = 0;
+    int dist[3] = {0}, errors[64] = {0}, total[64] = {0}, bad = 0;
     double err_sum = 0;
     int err_n = 0;
     for (int i = 0; i < N; i++)
@@ -356,7 +357,7 @@ bool test_RELU_delayed(const std::string& name, int denom, int exps, bool delay 
                 dist[d + 1]++;
         }
     }
-    for (int e = 0; e < 31; e++)
+    for (int e = 0; e < BITLENGTH - 1; e++)
         if (errors[e])
             print_online(name + ": 2^" + std::to_string(e) + ": " + std::to_string(errors[e]) + " of " +
                          std::to_string(total[e]) + " wrong");

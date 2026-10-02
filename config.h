@@ -21,6 +21,13 @@
 #define BITLENGTH 32
 #endif
 
+// ConvTriple's ring (BIT_LEN of nn/ConvTriple/src/constants.hpp, whose headers come in through the protocols): the
+// ConvTriple build linked in has to use the same TRIPLE_BITLEN (Makefile: build for BITLENGTH 32, build64 for 64; the
+// interface's UINT_TYPE makes a mismatch a link error)
+#ifndef TRIPLE_BITLEN
+#define TRIPLE_BITLEN BITLENGTH
+#endif
+
 // Fractional bits to use for fixed point arithmetic
 #ifndef FRACTIONAL
 #define FRACTIONAL 5

@@ -88,7 +88,7 @@ Over the 23.45M conv weights and 26,560 BN channels of the CIFAR-10 ResNet50 mod
 
 The fused network therefore needs 10-14 fractional bits, while each product carries `2*FRACTIONAL`
 fractional bits in a 32-bit word and overflows from `FRACTIONAL=10` on. Fused BatchNorm needs
-`BITLENGTH=64`, for which no 2PC msb-adder specializations exist. Unfused BatchNorm at
+`BITLENGTH=64` (2PC: docs/BITLENGTH64.md). Unfused BatchNorm at
 `FRACTIONAL=5` is the 32-bit sweet spot (70% on CIFAR-10, plaintext 74.48%).
 
 ## Fixes this branch made to pre-existing code

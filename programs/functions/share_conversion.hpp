@@ -46,7 +46,9 @@
 #if ROT_PREPROCESSING_OPT == 1
 
 #if PPA4_MSB == 1
-#if A_KNOWN_TO_EVALUATORS_OPT == 1
+// BITLENGTH 64: no a-known four-way circuit (the generated one needs the hand fixes of the 8/16/32-bit ones, see
+// scripts/circuits/gen_64bit_adders.py); the AB circuit takes the public m as a share with mask 0
+#if A_KNOWN_TO_EVALUATORS_OPT == 1 && BITLENGTH != 64
 #if ADDITIONAL_PPA_THREADS > 0
 #include "adders/zero_add_adders/ppa_msb_4way_and_a_ab_split.hpp"
 #else
