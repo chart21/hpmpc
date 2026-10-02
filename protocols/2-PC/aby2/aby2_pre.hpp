@@ -893,16 +893,11 @@ class ABY2_PRE_Share
 
     void complete_opt_bit_injection() {}
 
-    void prepare_opt_bit_injection(ABY2_PRE_Share x[], ABY2_PRE_Share out[])
-    {
 #if BIT_INJECTION_PREPROCESSING_OPT == 1
-        for (int i = 0; i < BITLENGTH; i++)
-        {
-            put_triple_type(0, CaseMultiplexer);
-            put_triple_type(0, CaseCOT);
-            put_multiplexer_arith(x[i].l);
-            out[i].l = bi_output_mask<Datatype>(i);  // committed in a ReLU (A2B_BAKE_MASK_PASS)
-        }
+    // The multiplexer's choice bits: this Boolean share's mask, bit-reversed per lane and the lanes reversed (the
+    // order in which the multiplexer pairs them with its arithmetic inputs)
+    Datatype multiplexer_bool() const
+    {
         // Bit-reverse each lane using SIMD butterfly
         // Two-level indirection to force BITLENGTH expansion before ## token pasting
 #define RSHIFT_BL_INNER(a, b, c) R_SHIFT(a, b, c)
@@ -929,7 +924,21 @@ class ABY2_PRE_Share
             lanes[vectorization_factor - 1 - i] = tmp;
         }
         orthogonalize_arithmetic(lanes, &dlo, 1);
-        put_multiplexer_bool(dlo);
+        return dlo;
+    }
+#endif
+
+    void prepare_opt_bit_injection(ABY2_PRE_Share x[], ABY2_PRE_Share out[])
+    {
+#if BIT_INJECTION_PREPROCESSING_OPT == 1
+        for (int i = 0; i < BITLENGTH; i++)
+        {
+            put_triple_type(0, CaseMultiplexer);
+            put_triple_type(0, CaseCOT);
+            put_multiplexer_arith(x[i].l);
+            out[i].l = bi_output_mask<Datatype>(i);  // committed in a ReLU (A2B_BAKE_MASK_PASS)
+        }
+        put_multiplexer_bool(multiplexer_bool());
 #if PARTY == 0
         alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
         Datatype lb[BITLENGTH]{0};
@@ -978,6 +987,21 @@ class ABY2_PRE_Share
     {
         prepare_opt_bit_injection(x, out);
     }
+
+#if TS1_FUSED_ACTIVE
+    // TS1 fused into the ReLU (see g_ts1_la): the bit injection's product with the truncated value's mask is the
+    // ordinary one for la (in place of x's mask) plus the TS1 product [lambda_b r_msb] (ts1_generate_products), whose
+    // choice bits are recorded here. ts1: the compact index of x[0].
+    void prepare_opt_bit_injection_ts1(ABY2_PRE_Share x[], ABY2_PRE_Share out[], uint64_t ts1, const Datatype* sk, Datatype trunc_factor,
+                                       int fractional_bits)
+    {
+        (void) sk, (void) trunc_factor, (void) fractional_bits;
+        for (int i = 0; i < BITLENGTH; i++)
+            x[i].l = g_ts1_la[ts1 + i];
+        g_ts1_mux_b[ts1 / BITLENGTH] = multiplexer_bool();
+        prepare_opt_bit_injection(x, out);
+    }
+#endif
 
     #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
     static void complete_A2B_S2(int k, ABY2_PRE_Share out[])
@@ -1668,6 +1692,9 @@ static void get_fc_triples_from_file()
                 ips, port, process_offset, num_multiplexer_triples, 0, "MULTIPLEXER");
 #endif
         deinit_multiplexerBeaverAB();
+#if TS1_FUSED_ACTIVE
+        ts1_generate_products(ips[0], port + process_offset);
+#endif
 
 
 #if CHEETAH_CONV_SIDE_ACTIVE

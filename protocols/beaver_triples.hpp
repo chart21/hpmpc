@@ -145,6 +145,21 @@ inline bool reshare_sim_on()
 // committed mask. Full-width ReLUs only; COMPRESS runs the A2B unbaked.
 #define A2B_CONV_BAKE_ACTIVE (A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && \
                               REDUCED_BITLENGTH_m == 0 && REDUCED_BITLENGTH_k == BITLENGTH)
+// TS1 (reduced-slack truncation, TRUNC_APPROACH 1 / 4) in 2PC: a delayed ReLU input is truncated inside the ReLU's bit
+// injection, from a public function of its masked value and preprocessed functions of its mask, which the A2B bake's
+// Boolean addition provides (see g_ts1_la). No online message of its own.
+#if TS1_FUSED_ACTIVE  // (TS1_FUSED_ACTIVE: generate_beaver_tiples.hpp)
+#if TRUNC_DELAYED == 0
+#error "TRUNC_APPROACH 1 / 4 with PROTOCOL 4: the truncation is fused into the ReLUs, set TRUNC_DELAYED=1"
+#endif
+#if !A2B_CONV_BAKE_ACTIVE
+#error "TRUNC_APPROACH 1 / 4 with PROTOCOL 4: TS1 takes its mask carries from the A2B bake (A2B_ONLINE_OPT=1, A2B_CONV_BAKE=1, COMPRESS=0)"
+#endif
+#if OPTIMIZED_BIT_INJECTION_RELU == 0 || BIT_INJECTION_PREPROCESSING_OPT == 0 || ROT_PREPROCESSING_OPT == 0 || \
+    FAKE_TRIPLES == 1 || FRACTIONAL < 1 || FRACTIONAL > BITLENGTH - 3
+#error "TRUNC_APPROACH 1 / 4 with PROTOCOL 4: needs OPTIMIZED_BIT_INJECTION_RELU, BIT_INJECTION_PREPROCESSING_OPT, ROT_PREPROCESSING_OPT, real triples"
+#endif
+#endif
 // A BatchNorm with secret parameters re-masks its output (BN triples, SecureML truncation leaves the drawn mask, beta's
 // mask is added afterwards like a conv's bias), so it can take the committed / reshare-baked masks like a conv/FC.
 // Not with FUSE_CONV_BN: then every BatchNorm forward passes its input on (also one that follows a pooling layer).
@@ -157,15 +172,15 @@ inline bool reshare_sim_on()
 // output committed bit-injection masks (g_relu_out), which the real passes use as well. The Boolean addition then
 // runs on bool(-lambda_v) itself, and no ReLU input needs the rebase message.
 #define A2B_MASK_PASS_ACTIVE (A2B_CONV_BAKE_ACTIVE && A2B_BAKE_MASK_PASS == 1 && PUBLIC_WEIGHTS == 1 && DATTYPE == BITLENGTH && \
-                              OPTIMIZED_BIT_INJECTION_RELU == 1 && TRUNC_APPROACH == 0 && TRUNC_DELAYED == 1 && \
-                              RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0)
+                              OPTIMIZED_BIT_INJECTION_RELU == 1 && (TRUNC_APPROACH == 0 || TS1_FUSED_ACTIVE) && \
+                              TRUNC_DELAYED == 1 && RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0)
 // CHEETAH_CONV_EARLY (secret weights, packed + pipelined convs, single batch): the preprocessing pass first runs the
 // network over the masks alone; the convs record their triples' inputs (every conv input is a ReLU output, whose mask
 // is committed, or the network input), and the conv triples start on channels of their own while the OT phase runs
 // (instead of alongside the pass). The OT phase runs from within the pass, after the mask-only forward.
 #define CHEETAH_CONV_EARLY_ACTIVE (CHEETAH_CONV_ASYNC_ACTIVE && CHEETAH_CONV_EARLY == 1 && PUBLIC_WEIGHTS == 0 && \
                                    CONV_TRIPLES == 1 && ROT_PREPROCESSING_OPT == 1 && OPTIMIZED_BIT_INJECTION_RELU == 1 && \
-                                   TRUNC_APPROACH == 0 && RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0)
+                                   (TRUNC_APPROACH == 0 || TS1_FUSED_ACTIVE) && RANDOM_ALGORITHM == 2 && USE_SSL_AES == 0)
 #define MASK_FORWARD_ACTIVE (A2B_MASK_PASS_ACTIVE || CHEETAH_CONV_EARLY_ACTIVE)
 // The slot of the current bit injection's first output (MASK_FORWARD_ACTIVE, set per element by
 // bit_injection_opt_range inside a ReLU; -1: a fresh mask)
@@ -336,10 +351,22 @@ inline Datatype a2b_bake_conv_mask(uint64_t e, func_sub SUB)
 // The value being prepared reads its slices from tl_a2b_c on (set per value by get_msb_range, so that the values are
 // prepared on the pool); -1: the serial cursor.
 inline thread_local int64_t tl_a2b_c = -1;
+// TS1_CUT_ACTIVE: the ReLU converts trunc(z), whose mask's Boolean form is the bake's [c] of z shifted by FRACTIONAL
+// bits: slice i (i >= shift; 0 = MSB) of the value's group is slice i - shift of [c] (the top `shift` slices are cut)
+inline int g_a2b_c_shift = 0;
 inline DATATYPE a2b_bake_get_c()
 {
     if (tl_a2b_c >= 0)
-        return (uint64_t) tl_a2b_c < g_a2b_c.size() ? g_a2b_c[tl_a2b_c++] : SET_ALL_ZERO();
+    {
+        const uint64_t at = (uint64_t) tl_a2b_c++;
+        if (g_a2b_c_shift > 0)
+        {
+            if ((int) (at % BITLENGTH) < g_a2b_c_shift)
+                return SET_ALL_ZERO();  // a vacant slice (the cut replaces it by 0 anyway)
+            return at - g_a2b_c_shift < g_a2b_c.size() ? g_a2b_c[at - g_a2b_c_shift] : SET_ALL_ZERO();
+        }
+        return at < g_a2b_c.size() ? g_a2b_c[at] : SET_ALL_ZERO();
+    }
     return (g_a2b_c_cursor < g_a2b_c.size()) ? g_a2b_c[g_a2b_c_cursor++] : SET_ALL_ZERO();
 }
 #endif
@@ -981,6 +1008,183 @@ inline void a2b_mask_pass_commit(uint64_t num_slices)
     }
 }
 #endif
+#endif
+
+#if TS1_FUSED_ACTIVE
+// TS1 fused into the ReLU. A delayed ReLU input z = m - lambda (scale 2^(2 FRACTIONAL)) is truncated as u = -z by the
+// reduced-slack truncation (Truncation Untangled, Fig. 9) with c = -m + 2^(l-1), which is public, and r = nu = -lambda,
+// which is what the A2B bake's Boolean addition adds (nu_0 + nu_1, nu_i = -lz_i): its carries come with [c]. Only
+// u in [-2^(l-1), 0], i.e. z >= 0, is truncated correctly; the bit injection multiplies DReLU(z) in, which is 0 for
+// the others. With a_i = nu_i mod 2^(l-1), K = 2^(l-1-F), w and w_t the carries into bits l-1 and F of nu_0 + nu_1:
+//   r' = (a_0 >> F) + (a_1 >> F) + w_t - K w,   r_msb = MSB(nu),
+//   y = -trunc(u) = M - (la + s K r_msb),  M = K - c' - K MSB(c),  s = 1 - 2 MSB(c),  c' = (c >> F) mod 2^(l-1-F),
+//   la = -(a_0 >> F) - (a_1 >> F) + K w [- w_t]
+// M and s are public, la and r_msb preprocessed shares: the truncation needs no message, and y is off by 0 or +1
+// (TS1_LOW_CARRY) or by -1, 0 or +1 (w_t left out). The bit injection needs one more product, [lambda_b r_msb].
+// Indexed by a compact index over the TS1 ReLUs' A2B slots (Datatype words, in forward order).
+struct Ts1Range
+{
+    uint64_t slot_base, slots, compact_base;
+};
+inline std::vector<Ts1Range> g_ts1_ranges;  // recorded by the INIT pass
+inline uint64_t g_ts1_slots = 0;
+inline std::vector<DATATYPE> g_ts1_la;      // this party's share of la
+inline std::vector<DATATYPE> g_ts1_r;       // ... of r_msb (correct mod 2^(F+1): only used times K)
+inline std::vector<DATATYPE> g_ts1_mux_b;   // the bit injection's Boolean mask, per group (preprocessing pass)
+inline std::vector<DATATYPE> g_ts1_mux_c;   // ... of lambda_b * r_msb (mod 2^(F+1))
+constexpr UINT_TYPE kTs1K = (UINT_TYPE) 1 << (BITLENGTH - 1 - FRACTIONAL);
+
+// TS1's public part, from the masked value m of z: c = -m + offset, c' = (c >> F) mod 2^(l-1-F),
+// M = (offset >> F) - c' - K MSB(c), sK = (1 - 2 MSB(c)) K. offset 2^(l-1): exact for z >= 0 only (a ReLU that takes
+// DReLU of z); 2^(l-2): for |z| < 2^(l-2) (TS1_CUT_ACTIVE: DReLU of the truncated value)
+inline void ts1_public(DATATYPE m, UINT_TYPE offset, DATATYPE& M, DATATYPE& sk)
+{
+    const DATATYPE K = PROMOTE(kTs1K);
+    const DATATYPE c = OP_ADD(OP_SUB(SET_ALL_ZERO(), m), PROMOTE(offset));
+    const DATATYPE cm = OP_SHIFT_LOG_RIGHT<BITLENGTH - 1>(c);
+    const DATATYPE cp = FUNC_AND(OP_SHIFT_LOG_RIGHTF(c, FRACTIONAL), PROMOTE(kTs1K - 1));
+    sk = OP_MULT(OP_SUB(PROMOTE(1), OP_ADD(cm, cm)), K);
+    M = OP_SUB(OP_SUB(PROMOTE(offset >> FRACTIONAL), cp), OP_MULT(cm, K));
+}
+
+#if TS1_CUT_ACTIVE
+// The ReLU's A2B converts y = trunc(z) (offset 2^(l-2)): get_msb_range replaces the inputs' m by M - kTs1A2bLow (with
+// the bake the A2B reads only m and [c], shifted, see g_a2b_c_shift) and keeps sK, by value, for the bit injection.
+// The shifted [c] is the exact nu >> F, so without TS1_LOW_CARRY the A2B sees y + w_t: it takes M - 1, so that its
+// DReLU is that of y + w_t - 1, which is 1 exactly where y >= 1 - w_t, and the ReLU outputs max(y, 0) (never -1).
+inline bool g_ts1_cut_on = false;
+inline DATATYPE* g_ts1_cut_sk = nullptr;
+constexpr UINT_TYPE kTs1A2bLow = TS1_LOW_CARRY == 1 ? 0 : 1;
+#endif
+
+inline void ts1_record_range(uint64_t slot_base, uint64_t slots)
+{
+    g_ts1_ranges.push_back({slot_base, slots, g_ts1_slots});
+    g_ts1_slots += slots;
+}
+
+// The compact index of the first value of the TS1 ReLU whose A2B slots start at slot_base
+inline uint64_t ts1_compact_base(uint64_t slot_base, uint64_t slots)
+{
+    auto it = std::lower_bound(g_ts1_ranges.begin(), g_ts1_ranges.end(), slot_base,
+                               [](const Ts1Range& r, uint64_t s) { return r.slot_base < s; });
+    if (it == g_ts1_ranges.end() || it->slot_base != slot_base || it->slots != slots)
+    {
+        fprintf(stderr, "TS1: no tuples for a ReLU at A2B slot %lu (%lu slots)\n", (unsigned long) slot_base,
+                (unsigned long) slots);
+        std::abort();
+    }
+    return it->compact_base;
+}
+
+// The OTs ts1_generate_tuples and ts1_generate_products take (Iface::ot_demand_hint)
+inline uint64_t ts1_ot_demand()
+{
+    return g_ts1_slots * DATTYPE / BITLENGTH * (2 + TS1_LOW_CARRY + 2);
+}
+
+// After the bake's Boolean addition (a2b_bake_store_c): this party's Boolean shares of the carries are [c] ^ (its own
+// input), and w, r_msb (and w_t) become arithmetic shares with one narrow COT each.
+inline void ts1_generate_tuples(const std::string& ip, int port)
+{
+    constexpr int K = BITLENGTH;
+    constexpr int F = FRACTIONAL;
+    if (a2b_adder_lo(BITLENGTH) != 0)
+    {
+        fprintf(stderr, "TS1: the Boolean addition stops below bit %d, TS1 needs its carries up to the top\n", K - 1);
+        std::abort();
+    }
+    const uint64_t groups = g_ts1_slots / K;
+    const uint64_t n = groups * DATTYPE;  // values
+    g_ts1_la.assign(g_ts1_slots, SET_ALL_ZERO());
+    g_ts1_r.assign(g_ts1_slots, SET_ALL_ZERO());
+    g_ts1_mux_b.assign(groups, SET_ALL_ZERO());
+    g_ts1_mux_c.assign(g_ts1_slots, SET_ALL_ZERO());
+    if (n == 0)
+        return;
+    std::vector<std::pair<uint64_t, uint64_t>> grp;  // (compact group, first A2B slot)
+    grp.reserve(groups);
+    for (const Ts1Range& r : g_ts1_ranges)
+        for (uint64_t j = 0; j < r.slots / K; j++)
+            grp.push_back({r.compact_base / K + j, r.slot_base + j * K});
+    std::vector<UINT_TYPE> a_hi(n);          // (nu_i mod 2^(l-1)) >> F, this party's
+    std::vector<uint8_t> u[3];               // this party's share bits of w, r_msb, w_t
+    for (auto& b : u) b.assign(n, 0);
+    {
+        const uint64_t T = std::max<uint64_t>(1, std::min<uint64_t>(A2B_BAKE_INIT_THREADS, groups));
+        std::vector<std::thread> workers;
+        for (uint64_t t = 0; t < T; t++)
+            workers.emplace_back([&, t] {
+                for (uint64_t k = groups * t / T; k < groups * (t + 1) / T; k++)
+                {
+                    const auto [g, slot] = grp[k];
+                    DATATYPE ia[K], cc[K];
+                    for (int i = 0; i < K; i++) ia[i] = g_a2b_ia[slot + i], cc[i] = g_a2b_c[slot + i];
+                    alignas(sizeof(DATATYPE)) UINT_TYPE nu[DATTYPE], cs[DATTYPE];  // nu_i and this party's share of nu
+                    unorthogonalize_boolean(ia, nu);
+                    unorthogonalize_boolean(cc, cs);
+                    for (int j = 0; j < DATTYPE; j++)
+                    {
+                        const uint64_t v = g * DATTYPE + j;
+                        const UINT_TYPE carry = cs[j] ^ nu[j];  // this party's share of the carries into every bit
+                        a_hi[v] = (nu[j] & (((UINT_TYPE) 1 << (K - 1)) - 1)) >> F;
+                        u[0][v] = (carry >> (K - 1)) & 1;
+                        u[1][v] = (cs[j] >> (K - 1)) & 1;
+                        u[2][v] = (carry >> F) & 1;
+                    }
+                }
+            });
+        for (auto& w : workers) w.join();
+    }
+    // arithmetic share of u_0 ^ u_1 = u_0 + u_1 - 2 u_0 u_1, the product by a COT of `width` bits (P0 the correlation
+    // u_0, P1 the choice u_1): correct mod 2^(width + 1)
+    auto b2a = [&](const std::vector<uint8_t>& bit, int width, std::vector<UINT_TYPE>& out) {
+        std::vector<UINT_TYPE> c(n);
+#if PARTY == 0
+        std::vector<UINT_TYPE> corr(bit.begin(), bit.end());
+        Iface::generateCOT(CHEETAH_PARTY, corr.data(), nullptr, c.data(), (unsigned) n, ip, port + CHEETAH_PORT_OFFSET,
+                           CHEETAH_THREADS, CHEETAH_IO_OFFSET, width);
+#else
+        std::vector<uint8_t> packed((n + 7) / 8, 0);
+        for (uint64_t v = 0; v < n; v++) packed[v / 8] |= (uint8_t) (bit[v] << (v % 8));
+        Iface::generateCOT(CHEETAH_PARTY, nullptr, packed.data(), c.data(), (unsigned) n, ip, port + CHEETAH_PORT_OFFSET,
+                           CHEETAH_THREADS, CHEETAH_IO_OFFSET, width);
+#endif
+        out.resize(n);
+        for (uint64_t v = 0; v < n; v++) out[v] = (UINT_TYPE) bit[v] - (UINT_TYPE) 2 * c[v];
+    };
+    std::vector<UINT_TYPE> aw, am, at;
+    b2a(u[0], F, aw);  // K w and K r_msb: mod 2^(F+1) is enough
+    b2a(u[1], F, am);
+#if TS1_LOW_CARRY == 1
+    b2a(u[2], K - 1, at);
+#endif
+    for (uint64_t k = 0; k < groups; k++)
+    {
+        alignas(sizeof(DATATYPE)) UINT_TYPE la[DATTYPE], r[DATTYPE];
+        for (int j = 0; j < DATTYPE; j++)
+        {
+            const uint64_t v = k * DATTYPE + j;
+            la[j] = (UINT_TYPE) 0 - a_hi[v] + kTs1K * aw[v];
+#if TS1_LOW_CARRY == 1
+            la[j] -= at[v];
+#endif
+            r[j] = am[v];
+        }
+        orthogonalize_arithmetic(la, &g_ts1_la[k * K]);
+        orthogonalize_arithmetic(r, &g_ts1_r[k * K]);
+    }
+}
+
+// After the preprocessing pass recorded the bit injections' Boolean masks: [lambda_b r_msb] by a narrow multiplexer
+inline void ts1_generate_products(const std::string& ip, int port)
+{
+    const uint64_t n = g_ts1_slots * DATTYPE / BITLENGTH;
+    if (n == 0)
+        return;
+    generateMultiplexerDummyTriples(g_ts1_r.data(), g_ts1_mux_b.data(), g_ts1_mux_c.data(), BITLENGTH, n, ip, port,
+                                    FRACTIONAL + 1);
+}
 #endif
 
 #if MASK_FORWARD_ACTIVE

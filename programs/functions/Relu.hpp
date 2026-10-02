@@ -90,7 +90,7 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
 #endif
 
     S* y = new S[len];
-#if CUT_FRAC_ELIGIBLE || CUT_FRAC_ELIGIBLE_GENERIC
+#if (CUT_FRAC_ELIGIBLE && TRUNC_DELAYED == 0) || CUT_FRAC_ELIGIBLE_GENERIC  // TD=1: only TS1's ReLUs (truncated inputs)
     g_cut_frac_active = true;
 #endif
     get_msb_range<m, k, Datatype, Share>(val, y, len);
@@ -127,6 +127,52 @@ void RELU_range_in_place_opt(sint_t<Additive_Share<Datatype, Share>>* val, const
     /* } */
 }
 
+#if TS1_FUSED_ACTIVE
+// TRUNC_APPROACH 1 / 4 (2PC): a delayed input's truncation happens in the bit injection (see g_ts1_la), from the
+// A2B slots' TS1 tuples
+template <int m, int k, typename Share, typename Datatype>
+void RELU_range_in_place_ts1(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
+{
+    static_assert(m == 0 && k == BITLENGTH, "TS1: full-width ReLUs only");
+    using S = XOR_Share<DATATYPE, Share>;
+    Share::communicate();
+    const uint64_t slots = (uint64_t) len * BITLENGTH;  // the A2B slots get_msb_range takes
+    uint64_t ts1 = 0;
+    if (current_phase == PHASE_INIT)
+        ts1_record_range(num_boolean_addition_triples, slots);
+    else
+        ts1 = ts1_compact_base(g_a2b_c_cursor, slots);
+    S* y = new S[len];
+#if TS1_CUT_ACTIVE
+    // DReLU of the truncated value, whose top FRACTIONAL bits are sign extension: the A2B takes its public part (m)
+    // and the bake's [c] shifted by FRACTIONAL slices, with the cut. The Boolean addition then has to give every
+    // slice of [c] (TS1 reads the carries up to the top).
+    if (current_phase == PHASE_INIT)
+        g_a2b_full_width = true;
+    std::vector<Datatype> sk(current_phase == PHASE_LIVE ? slots : 0);
+    g_ts1_cut_sk = sk.data();
+    g_ts1_cut_on = current_phase == PHASE_LIVE;
+    g_a2b_c_shift = FRACTIONAL;
+    g_cut_frac_active = true;
+    get_msb_range<m, k, Datatype, Share>(val, y, len);
+    g_cut_frac_active = false;
+    g_a2b_c_shift = 0;
+    g_ts1_cut_on = false;
+    g_ts1_cut_sk = nullptr;
+    for (int i = 0; i < len; i++)
+        y[i] = ~y[i];
+    bit_injection_ts1_range<Datatype, Share>(y, val, len, ts1, sk.empty() ? nullptr : sk.data());
+#else
+    get_msb_range<m, k, Datatype, Share>(val, y, len);
+    for (int i = 0; i < len; i++)
+        y[i] = ~y[i];
+    bit_injection_ts1_range<Datatype, Share>(y, val, len, ts1);
+#endif
+    delete[] y;
+    Share::communicate();
+}
+#endif
+
 template <int m, int k, typename Share, typename Datatype>
 void RELU_range_in_place_optB2A(sint_t<Additive_Share<Datatype, Share>>* val, const int len)
 {
@@ -136,7 +182,7 @@ void RELU_range_in_place_optB2A(sint_t<Additive_Share<Datatype, Share>>* val, co
     using sint = sint_t<A>;
 
     S* y = new S[len];
-#if CUT_FRAC_ELIGIBLE || CUT_FRAC_ELIGIBLE_GENERIC
+#if (CUT_FRAC_ELIGIBLE && TRUNC_DELAYED == 0) || CUT_FRAC_ELIGIBLE_GENERIC  // TD=1: only TS1's ReLUs (truncated inputs)
     g_cut_frac_active = true;
 #endif
     get_msb_range<m, k, Datatype, Share>(val, y, len);
@@ -293,6 +339,8 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
     {
 #if TRUNC_APPROACH == 2
         pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_exact<rm, rk, Share, Datatype>);
+#elif TS1_FUSED_ACTIVE
+        pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_ts1<rm, rk, Share, Datatype>);
 #else
         isReLU = true;
         std::copy(begin, end, output);
@@ -330,6 +378,8 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>* begin,
     {
 #if TRUNC_APPROACH == 2
         RELU_range_in_place_exact<m, k, Share, Datatype>(output, len);
+#elif TS1_FUSED_ACTIVE
+        RELU_range_in_place_ts1<m, k, Share, Datatype>(output, len);
 #else
         isReLU = true;
         RELU_range_in_place<m, k, Share, Datatype>(output, len);

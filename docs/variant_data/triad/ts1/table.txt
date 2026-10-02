@@ -1,0 +1,22 @@
+UC   adder variant     pre s online s rounds  pre MiB online MiB
+UC1  rca   TS{L}        3.24    0.459   1818     1341      210.2
+UC1  rca   TS_Mix       3.56    0.462   1818     1399      210.2
+UC1  ppa   TS{L}        4.14    0.466    982     1464      321.8
+UC1  ppa   TS_Mix       4.44    0.450    982     1522      321.8
+UC1  ppa4  TS{L}        4.60    0.563    730     1704      207.9
+UC1  ppa4  TS_Mix       4.97    0.557    730     1761      207.9
+UC2  rca   TS{L}        3.14    0.398   1714      922      167.8
+UC2  rca   TS_Mix       3.44    0.422   1714      979      167.8
+UC2  ppa   TS{L}        4.08    0.399    878     1045      279.3
+UC2  ppa   TS_Mix       4.39    0.418    878     1102      279.3
+UC2  ppa4  TS{L}        4.67    0.485    626     1285      165.6
+UC2  ppa4  TS_Mix       4.76    0.494    626     1342      165.6
+UC3  rca   TS{L}        2.93    0.492   1963      459      142.2
+UC3  rca   TS{L}+fix    2.93    0.481   1959      452      136.1
+UC3  rca   TS_Mix       3.04    0.450   1714      479      125.3
+UC3  ppa   TS{L}        3.90    0.437    891      571      260.3
+UC3  ppa   TS{L}+fix    3.89    0.440    887      565      254.2
+UC3  ppa   TS_Mix       4.04    0.480    878      601      237.0
+UC3  ppa4  TS{L}        5.25    0.535    630      900      129.3
+UC3  ppa4  TS{L}+fix    5.22    0.551    626      894      123.2
+UC3  ppa4  TS_Mix       4.55    0.558    626      841      123.2

@@ -741,6 +741,15 @@ class ABY2_init
         prepare_opt_bit_injection(x, out);
     }
 
+#if TS1_FUSED_ACTIVE
+    void prepare_opt_bit_injection_ts1(ABY2_init x[], ABY2_init out[], uint64_t ts1, const Datatype* sk, Datatype trunc_factor,
+                                       int fractional_bits)
+    {
+        (void) ts1, (void) sk, (void) trunc_factor, (void) fractional_bits;
+        prepare_opt_bit_injection(x, out);
+    }
+#endif
+
     void complete_opt_bit_injection() { receive_from_(PNEXT); }
 
     template <typename func_add, typename func_sub>

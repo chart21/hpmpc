@@ -359,7 +359,11 @@ void run_ot_phase(std::string ips[])
         Iface::ot_demand_hint() = uint64_t(total_boolean_triples_num + total_ab2_boolean_triples_num +
                                            2 * num_beaver_3_tuples + 3 * num_beaver_4_tuples +
                                            num_boolean_addition_triples + num_random_multiplications) * DATTYPE +
-                                  uint64_t(num_multiplexer_triples + num_cot_triples) * DATTYPE / BITLENGTH;
+                                  uint64_t(num_multiplexer_triples + num_cot_triples) * DATTYPE / BITLENGTH
+#if TS1_FUSED_ACTIVE
+                                  + ts1_ot_demand()
+#endif
+                                  ;
         init_beaverC_boolean(0);
         generate_beaver_triples(
                 ips, base_port, process_offset, 0, num_boolean_triples[0], "LXLY");
@@ -397,6 +401,9 @@ generate_beaver_triples(
                         ips, base_port, process_offset, num_boolean_addition_triples, 0, "BOOLEANADDITION");
                 a2b_bake_store_c(num_boolean_addition_triples);
             }
+#if TS1_FUSED_ACTIVE
+            ts1_generate_tuples(ips[0], base_port + process_offset);
+#endif
         };
 #else
         if (num_boolean_addition_triples > 0)
@@ -406,6 +413,9 @@ generate_beaver_triples(
                     ips, base_port, process_offset, num_boolean_addition_triples, 0, "BOOLEANADDITION");
             a2b_bake_store_c(num_boolean_addition_triples);
         }
+#if TS1_FUSED_ACTIVE
+        ts1_generate_tuples(ips[0], base_port + process_offset);
+#endif
 #endif
         g_a2b_layer_base = 0;  // conv-mask layer base starts at 0 for the PRE pass
         g_a2b_c_cursor = 0;  // A2B-S2 [c] cursor starts at 0 for the PRE pass

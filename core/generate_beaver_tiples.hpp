@@ -115,11 +115,16 @@ struct FullyConnectedParameter
     }
 };
 
-// CUT_FRACTIONAL_BITS_OPT eligibility of the 2PC ROT circuits (docs/CUT_FRACTIONAL_BITS_OPT.md; see beaver_triples.hpp)
+// TS1 (reduced-slack truncation, TRUNC_APPROACH 1 / 4) in 2PC, fused into the ReLUs (see g_ts1_la in beaver_triples.hpp)
+#define TS1_FUSED_ACTIVE (PROTOCOL == 4 && (TRUNC_APPROACH == 1 || TRUNC_APPROACH == 4))
+// CUT_FRACTIONAL_BITS_OPT eligibility of the 2PC ROT circuits (docs/CUT_FRACTIONAL_BITS_OPT.md; see beaver_triples.hpp).
+// With TS1 the ReLUs convert the truncated value (TS1_CUT_ACTIVE), so its top FRACTIONAL bits are sign extension too.
 #define CUT_FRAC_ELIGIBLE \
-    (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && \
-     ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
+    (CUT_FRACTIONAL_BITS_OPT == 1 && (TRUNC_DELAYED == 0 || TS1_FUSED_ACTIVE) && FRACTIONAL >= 1 && \
+     FRACTIONAL <= BITLENGTH - 3 && ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
+// TS1 with the cut: the ReLU's A2B runs on trunc(z) (public part, and the bake's [c] shifted by FRACTIONAL slices)
+#define TS1_CUT_ACTIVE (TS1_FUSED_ACTIVE && CUT_FRAC_ELIGIBLE)
 // Some A2B conversion (INIT pass) runs without CUT_FRACTIONAL_BITS_OPT: the Boolean addition must produce all slices
 inline bool g_a2b_full_width = false;
 
@@ -847,7 +852,8 @@ void generateMultiplexerDummyTriples(type a[],
                                  int bitlength,
                                  uint64_t num_triples,
                                  std::string ip,
-                                 int port)
+                                 int port,
+                                 int width = BITLENGTH)  // narrow: [c] is correct mod 2^width
 {
     if(num_triples == 0) return;
 
@@ -862,7 +868,7 @@ void generateMultiplexerDummyTriples(type a[],
             UINT_TYPE* uint_c = (UINT_TYPE*) c;
 
             Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, CHEETAH_PARTY,
-                    ip, port, CHEETAH_IO_OFFSET, CHEETAH_THREADS);
+                    ip, port, CHEETAH_IO_OFFSET, CHEETAH_THREADS, width);
 
             return;
         }
@@ -873,7 +879,7 @@ void generateMultiplexerDummyTriples(type a[],
     UINT_TYPE* uint_c = NEW(UINT_TYPE[num_triples]);
 
     Iface::do_multiplex(num_triples, uint_a, uint_b, uint_c, CHEETAH_PARTY,
-            ip, port, CHEETAH_IO_OFFSET, CHEETAH_THREADS);
+            ip, port, CHEETAH_IO_OFFSET, CHEETAH_THREADS, width);
 
     // convert UINT triple to SIMD type
     orthogonalize_arithmetic(uint_c, c, num_triples / (vectorization_factor));

@@ -111,6 +111,25 @@ inline bool equal_word(const D& a, const D& b)
     return std::memcmp(&a, &b, sizeof(D)) == 0;
 }
 
+#if TS1_CUT_ACTIVE
+// TS1_CUT_ACTIVE: the A2B of a TS1 ReLU converts trunc(z) (see ts1_public); online only (the other passes have no m)
+template <typename Datatype, typename Share>
+void ts1_cut_input(sint_t<Additive_Share<Datatype, Share>>* val, int len)
+{
+    if constexpr (requires(Share& s) { s.raw_m(); })
+        stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
+            auto* sh = val[i].get_share_pointer();
+            for (int j = 0; j < BITLENGTH; j++)
+            {
+                Datatype& m = sh[j].raw_m();
+                Datatype M;
+                ts1_public(m, (UINT_TYPE) 1 << (BITLENGTH - 2), M, g_ts1_cut_sk[(uint64_t) i * BITLENGTH + j]);
+                m = OP_SUB(M, PROMOTE(kTs1A2bLow));  // the bit injection adds kTs1A2bLow back
+            }
+        });
+}
+#endif
+
 template <int bm, int bk, typename Datatype, typename Share>
 void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int len)
 {
@@ -193,6 +212,10 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
                 sh[j] = sh[j].rebase(a2b_bake_slot_mask<Datatype>((uint64_t) i * BITLENGTH + j, OP_SUB));
         }
 #endif
+#endif
+#if TS1_CUT_ACTIVE
+    if (g_ts1_cut_on)
+        ts1_cut_input(val, len);  // after the rebase: the masks are the committed ones the TS1 tuples were made for
 #endif
 #if A2B_ROUND_OPT_SIM == 0
     //Skip if we are simulating A2B with round optimization
@@ -515,6 +538,44 @@ void bit_injection_opt_range(XOR_Share<Datatype, Share>* y, sint_t<Additive_Shar
     Share::communicate();
     stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { val[i].complete_opt_bit_injection(); });
 }
+
+#if TS1_FUSED_ACTIVE
+// TS1 fused into the ReLU (2PC, see g_ts1_la): val holds the delayed ReLU inputs, which become DReLU * trunc(val);
+// ts1 is the compact index of val[0]'s first value. A fused average pooling (FUSE_RELU_AVG) multiplies by 1/denom
+// and truncates probabilistically (TS_Mix: TRUNC_APPROACH 4).
+template <typename Datatype, typename Share>
+void bit_injection_ts1_range(XOR_Share<Datatype, Share>* y,
+                             sint_t<Additive_Share<Datatype, Share>>* val,
+                             const int len,
+                             uint64_t ts1,
+                             const Datatype* sk = nullptr)  // TS1_CUT_ACTIVE: val's m is M already, sK by value
+{
+    Datatype trunc_factor = SET_ALL_ZERO();
+    int fb = 0;
+#if FUSE_RELU_AVG == 1
+    if (curr_denom > 1)
+    {
+#if TRUNC_APPROACH == 1
+        fprintf(stderr, "TRUNC_APPROACH 1 (2PC): an average pooling fused into a ReLU needs a truncation of its own, "
+                        "use TRUNC_APPROACH 4 or FUSE_RELU_AVG=0\n");
+        std::abort();
+#endif
+        auto reciprocal = FloatFixedConverter<FLOATTYPE, INT_TYPE, UINT_TYPE, FRACTIONAL>::float_to_ufixed(
+            1 / FLOATTYPE(curr_denom), FRACTIONAL + AVG_RECIP_EXTRA_BITS);
+        trunc_factor = PROMOTE(reciprocal);
+        fb = FRACTIONAL + AVG_RECIP_EXTRA_BITS;  // the value is at scale 2^FRACTIONAL already
+    }
+#endif
+    stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
+        BiSlotScope bi(i);
+        y[i].prepare_opt_bit_injection_ts1(val[i].get_share_pointer(), val[i].get_share_pointer(),
+                                           ts1 + (uint64_t) i * BITLENGTH,
+                                           sk ? sk + (uint64_t) i * BITLENGTH : nullptr, trunc_factor, fb);
+    });
+    Share::communicate();
+    stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { val[i].complete_opt_bit_injection(); });
+}
+#endif
 
 #if MASK_FORWARD_ACTIVE
 // The mask-only forward (SimpleNN::evaluate, preprocessing pass, before the real forward, on a copy of the input):

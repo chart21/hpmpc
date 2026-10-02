@@ -326,6 +326,65 @@ class ABY2_ONLINE_Share
         }
     }
 
+#if TS1_FUSED_ACTIVE
+    // TS1 fused into the ReLU (see g_ts1_la): x[i] is the delayed ReLU input z, out[i] (may be x[i]) gets
+    // DReLU(z) * trunc(z). trunc(z) = M - (la + s K r_msb) with M, s public functions of x[i].m: the bit injection of
+    // prepare_opt_bit_injection with that value, whose mask product is [lambda_b la] + s K [lambda_b r_msb].
+    // ts1: the compact index of x[0]. fractional_bits > 0 (FUSE_RELU_AVG): the product times trunc_factor is truncated
+    // by fractional_bits as in prepare_opt_bit_injection_with_trunc.
+    void prepare_opt_bit_injection_ts1(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[], uint64_t ts1, const Datatype* sk_in, Datatype trunc_factor,
+                                       int fractional_bits)
+    {
+        Datatype b0[BITLENGTH]{0};
+        b0[BITLENGTH - 1] = m;  // convert b0 to an arithemtic value
+        alignas(sizeof(Datatype)) UINT_TYPE temp2[DATTYPE];
+        single_row_ortho(b0, temp2);
+        Datatype lbi[BITLENGTH]{0};
+        lbi[BITLENGTH - 1] = l;
+        single_row_ortho(lbi, temp2);
+        for (int i = 0; i < BITLENGTH; i++)
+        {
+            Datatype lalb = retrieve_output_share_arithmetic();
+            Datatype lb1lb2 = retrieve_output_share_arithmetic();
+            Datatype lb = OP_SUB(lbi[i], OP_ADD(lb1lb2, lb1lb2));
+            // TS1 on u = -z (offset 2^(l-1): z >= 0, the others are multiplied by DReLU(z) = 0), or M and sK given
+            // (TS1_CUT_ACTIVE: the A2B converted y, its m is M already)
+            Datatype xim, sk;
+            if (sk_in)
+#if TS1_CUT_ACTIVE
+                xim = OP_ADD(x[i].m, PROMOTE(kTs1A2bLow)), sk = sk_in[i];
+#else
+                xim = x[i].m, sk = sk_in[i];
+#endif
+            else
+                ts1_public(x[i].m, (UINT_TYPE) 1 << (BITLENGTH - 1), xim, sk);
+            const Datatype xil = OP_ADD(g_ts1_la[ts1 + i], OP_MULT(sk, g_ts1_r[ts1 + i]));
+            lalb = OP_ADD(lalb, OP_MULT(sk, g_ts1_mux_c[ts1 + i]));
+#if PARTY == 0
+            out[i].m = OP_MULT(b0[i], xim);
+#else
+            out[i].m = SET_ALL_ZERO();
+#endif
+            out[i].m = OP_ADD(OP_SUB(out[i].m,                                   // mamb
+                                     OP_MULT(b0[i], xil)),                       // - mb [la]
+                              OP_MULT(OP_SUB(OP_ADD(b0[i], b0[i]), PROMOTE(1)),  // + (2mb -1)
+                                      OP_SUB(lalb, OP_MULT(xim, lb))));          // ([lalb] - ma [lb])
+            out[i].l = bi_output_mask<Datatype>(i);  // committed in a ReLU (A2B_BAKE_MASK_PASS)
+            if (fractional_bits > 0)
+            {
+#if PARTY == 0
+                out[i].m = OP_SUB(SET_ALL_ZERO(),
+                                  OP_TRUNCF(OP_MULT(OP_SUB(SET_ALL_ZERO(), out[i].m), trunc_factor), fractional_bits));
+#else
+                out[i].m = OP_TRUNCF(OP_MULT(out[i].m, trunc_factor), fractional_bits);
+#endif
+            }
+            out[i].m = OP_ADD(out[i].m, out[i].l);
+            send_to_live(PNEXT, out[i].m);
+        }
+    }
+#endif
+
     // P_i shares mx - lxi, P_j sets lxj to 0
     template <int id, typename func_add, typename func_sub>
     void prepare_receive_from(Datatype val, func_add ADD, func_sub SUB)

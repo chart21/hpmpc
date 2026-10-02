@@ -146,6 +146,16 @@
 #ifndef TRUNC_APPROACH
 #define TRUNC_APPROACH 0
       // 0: Probabilistic truncation, 1: Reduced Slack Truncation, 2: Exact Truncation //3: Optimized exact truncation
+      // 4: Mixed (reduced slack truncation fused into the ReLUs, probabilistic truncation elsewhere)
+      // 2PC (PROTOCOL 4): 1 and 4 truncate a delayed ReLU input inside the ReLU's bit injection (TS1_FUSED_ACTIVE,
+      // TRUNC_DELAYED=1, A2B_CONV_BAKE): no online communication of its own. A truncation outside a ReLU is
+      // probabilistic with 4 and aborts with 1 (a stand-alone TS1 would need a message of its own).
+#endif
+
+#ifndef TS1_LOW_CARRY
+#define TS1_LOW_CARRY 0  // 2PC TS1: also convert the carry out of the mask's FRACTIONAL low bits (one more COT of
+                         // BITLENGTH - 1 bits per value): the truncation is then off by 0 or +1 (as in 3PC); without
+                         // it by -1, 0 or +1
 #endif
 
 #ifndef TRUNC_DELAYED

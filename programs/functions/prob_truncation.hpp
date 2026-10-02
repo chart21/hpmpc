@@ -1,8 +1,28 @@
 #pragma once
 #include "../../datatypes/Additive_Share.hpp"
 template <typename T>
+static void trunc_pr_in_place(T* val, const int len);
+
+template <typename T>
 static void trunc_2k_in_place(T* val, const int len, bool isPositive = false, int fractional_bits = FRACTIONAL)
 {
+#if TS1_FUSED_ACTIVE
+    // 2PC: TS1 is fused into the ReLUs (RELU_range_in_place_ts1), a stand-alone TS1 would need a message of its own.
+    // TS_Mix (TRUNC_APPROACH 4) truncates everything else probabilistically.
+    (void) isPositive;
+#if TRUNC_APPROACH == 1
+    (void) val, (void) len, (void) fractional_bits;
+    fprintf(stderr, "TRUNC_APPROACH 1 (2PC): a truncation outside a ReLU, use TRUNC_APPROACH 4\n");
+    std::abort();
+#else
+    if (fractional_bits != FRACTIONAL)
+    {
+        fprintf(stderr, "TRUNC_APPROACH 4 (2PC): a truncation by %d bits outside a ReLU\n", fractional_bits);
+        std::abort();
+    }
+    trunc_pr_in_place(val, len);
+#endif
+#else
 
 #if MSB0_OPT == 1
     if (!isPositive)
@@ -53,6 +73,7 @@ static void trunc_2k_in_place(T* val, const int len, bool isPositive = false, in
     delete[] r_msb;
     delete[] c_prime;
     delete[] b;
+#endif
 }
 
 template <typename T>
