@@ -448,7 +448,37 @@ RTX 4000 Ada (20 GB, sm_89), 2x Xeon Silver 4410Y (24 cores, 48 threads), CUDA 1
   either way; the conv layers' 0.2 s are per-output mask work and the exchange. `USE_CUDA_GEMM=2` (CUTLASS conv) bypasses
   the per-output mask step and breaks the A2B bake (check aborts). core/cuda: the uint16_t CUTLASS instantiation does not
   build with current CUTLASS.
-* Next for the GPU: the OT phase (ferret's LPN step: 10 AES-indexed gathers per output; the COT rounds' hashing).
+* **Ferret on the GPU** (ConvTriple `0adcaec`, `55869c1`, `fb812f3`, `111e7be`; `TRIPLE_GPU` builds; data
+  `docs/variant_data/gpu/ws_ot_tuples.txt`, `ws_hpmpc_ot.log`). All bit for bit emp's (`FERRET_GPU_CHECK=1` compares every
+  tree and output with emp's CPU code, `ROT_GPU_CHECK=1` every hashed bit with emp's MITCCRH); the bytes on the wire are
+  unchanged, so either party may run either path. Seeded CIFAR-10 ResNet50 (AdamW model, 10 images) gives the CPU build's
+  output hashes (UC2 A2bits RCA `c50b7335ee17cd7b`, UC1 reshared RCA `58568ef2bef45216`, CPU with `CHEETAH_OT_GROUP=4`).
+  1. LPN step (src/ot/lpn_gpu.cu): one thread per group of 4 outputs, 10 AES blocks (T-table replicated per lane in shared
+     memory, 32 KiB), 40 gathers from the k = 238,000-block table (L2-resident); trailing outputs (`__compute1`) too.
+  2. MPCOT (`FerretCOT<IO::NetIO>::extend` specialization, hpmpc_interface.cpp): emp's objects keep the seeds and the
+     pre-OTs; the GPU builds all 2,507 trees level by level (sender from the seeds, receiver from its messages; per-level
+     even/odd sums by warp shuffles + atomics; punctured pair fixed per level), the LPN step runs on the leaves in place.
+     The tree messages of a channel go out as one message (emp flushes after every tree: 2,507 sends per extension).
+  3. Outputs stay on the device (`FerretCOT<IO::NetIO>::rcot` specialization): a per-instance device buffer (164 MiB)
+     holds each extension into `ot_data`; the host gets the last M outputs (next pre-OTs) at once, other ranges when a host
+     consumer asks (pieces >= 1M COTs). `send/recv_rot_bits` and `_bitplanes` (97% of all COTs: 1.0 G of 1.04 G in UC2
+     A2bits) register a consumer: the GPU computes MITCCRH<8> (key s ^ makeBlock(gid, 0) per OT, schedule on the fly) and
+     returns only the bit planes. `ROT_GPU=0`: outputs to the host (then `ot_data` is pinned; `FERRET_PIN=0/1`).
+  4. OT packs: with cheap extensions the 16 one-channel packs' setup dominated (2.0-2.5 s); GPU builds default to 4 packs
+     of 4 channels (`CHEETAH_OT_GROUP` overrides; 8 / 16 channels: setup 0.6 / 0.5 s but MUX and pre slower).
+  * Tuple test (one pack, 2e8 Boolean triples): CPU 38.6 s; GPU LPN 22.3-24.2; + MPCOT 17.6-20.0; + direct copies, one
+    message per channel 14.4-15.1; + ROT bits on the GPU 6.2-6.6 s.
+  * Whole inference (final session, median of 3; CPU / GPU conv only (`LPN_GPU=0`) / GPU all): UC1 A2bits RCA pre 13.66 /
+    12.26 / 6.21 s, UC1 reshared 7.62 / 6.97 / 4.32, UC2 A2bits 12.56 / 11.86 / 5.73, UC2 reshared 6.73 / 6.58 / 3.89.
+    Online 0.65 / 0.66 / 0.67, 0.69 / 0.68 / 0.76, 0.46 / 0.48 / 0.53, 0.51 / 0.51 / 0.56: 0.02-0.07 s higher with the GPU
+    OT path; not pinning (FERRET_PIN=0 same), not warm-up (5 s pause before online same), no OT work online, no memory
+    pressure; unexplained on the shared machine. Peak device memory 15.0 GB (both parties, 16 packs).
+  * Steps end to end (UC2 A2bits RCA, separate sessions): CPU 11.5-12.6; GPU conv 11.5-11.9; + LPN 9.8; + MPCOT 8.0-8.2;
+    + direct copies / one message 7.5; + ROT bits 7.0; + 4-channel packs 5.7 s.
+  * Instrumentation: OT pack line has ferret setup / first-extension / MPCOT / LPN sums; `OT consumer` lines at
+    disconnect give COTs and time per SilentOT consumer.
+* Next: the packs' setup (base OTs, IKNP, first extension: 0.8-1.2 s), the A2bits Boolean addition rounds, the block
+  consumers (cam_cc, rm_rc: 3% of COTs) on the GPU.
 
 ## Output repacking: the estimate before round 4
 

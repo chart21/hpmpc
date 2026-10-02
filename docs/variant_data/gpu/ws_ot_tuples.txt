@@ -1,0 +1,13 @@
+# cheetah_tuples3_test 200000000 (one OT pack, both parties on cmucl771615), ALICE "seconds passed", two runs each;
+# OT stats of P0: rcot / LPN / MPCOT seconds summed over the pack (78 extensions after setup)
+CPU (LPN_GPU=0)                         38.59 38.53   rcot 25.17 25.36  LPN 18.64 18.64  MPCOT 6.30 6.38
+GPU LPN (MPCOT_GPU=0)                   22.27 24.23   rcot 10.58 11.03  LPN 3.48 3.11    MPCOT 6.17 6.92
++ MPCOT on the GPU (55869c1 first form) 17.60 20.00   rcot 5.48 6.27    LPN 3.05 3.53    MPCOT 1.49 1.53
++ pinned ot_data                        15.21 15.61   rcot 4.41 4.43    LPN 1.99 2.03    MPCOT 1.48 1.49
++ one message per channel (55869c1)     14.43 15.14   rcot 3.58 3.61    LPN 1.95 1.97    MPCOT 0.65 0.64
++ ROT bits on the GPU (fb812f3)          6.58  6.36   rcot 2.43 2.24    LPN 0.94 0.96    MPCOT 0.78 0.68
+  control ROT_GPU=0                     16.38 15.44
+final (111e7be)                          6.23          (ROT_GPU=0: 16.99)
+# rot_bits / rot_bitplanes consumers (P0, 400M COTs each): CPU hashing 5.5-5.7 / 6.1-6.5 s -> GPU 1.0-1.1 / 1.3-1.5 s
+# FERRET_GPU_CHECK=1 / ROT_GPU_CHECK=1: all trees, outputs and bits equal to emp's CPU code (setup b12 pre: 1050 trees of
+# 256 leaves; extensions: 2507 trees of 4096 leaves)

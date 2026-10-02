@@ -30,8 +30,8 @@
 \author{Technical report, HPMPC \texttt{dbg} branch\\[2pt]
 \small hpmpc \texttt{97772ef}, ConvTriple \texttt{fa7b952}, flexNN \texttt{b1ce619};
 ImageNet all\_opt (\cref{sec:triad}): hpmpc \texttt{92a2c0e}, ConvTriple \texttt{8d8f244} (GPU, \cref{sec:gpu}:
-\texttt{6980819}), flexNN \texttt{417f12b}}
-\date{October 1, 2026}
+\texttt{111e7be}), flexNN \texttt{417f12b}}
+\date{October 2, 2026}
 
 \begin{document}
 \maketitle
@@ -61,8 +61,9 @@ faster with secret weights and the online phase $2.0$--$3.0\times$ (EPYC 9354). 
 were not correct as given; the A2B bake that fixes them commits every ReLU input's mask before the preprocessing pass,
 for free behind convolutions and residual sums and through a mask-only forward with public weights, and an optional
 output repacking cuts the conv triples' traffic by 40\%. On a GPU, the packed pipeline's evaluator produces the conv
-triples $2.1$--$2.3\times$ faster than the CPU and $5.6$--$7.0\times$ faster than the previous GPU path; on one machine
-shared by both parties the whole inference stays bound by the OT phase.
+triples $2.1$--$2.3\times$ faster than the CPU and $5.6$--$7.0\times$ faster than the previous GPU path. With ferret's
+extensions and the random OTs' hashing on the GPU as well, bit for bit emp's, preprocessing on one machine shared by
+both parties is $1.7$--$2.2\times$ faster than on its CPU.
 \end{abstract}
 
 \section{Introduction}
@@ -98,8 +99,9 @@ and reproducible system. Its focus is communication and runtime; \cref{fig:summa
   by committing every ReLU input's mask before the preprocessing pass, at no traffic behind convolutions and residual
   sums. The conv triples start alongside the OT phase. Preprocessing $2.9\text{--}7.1\times$ faster with secret weights,
   online $2.0\text{--}3.0\times$.
-\item \textbf{GPU} (\cref{sec:gpu}): a GPU evaluator inside the packed conv pipeline, bit-identical to the CPU's.
-  Conv triples $2.1\text{--}2.3\times$ faster than on the CPU; end to end, on one shared machine, the OT phase dominates.
+\item \textbf{GPU} (\cref{sec:gpu}): a GPU evaluator inside the packed conv pipeline, and ferret's LPN step, GGM trees
+  and the random OTs' hashing on the GPU, all bit-identical to the CPU's. Conv triples $2.1\text{--}2.3\times$ faster;
+  end to end, on one shared machine, preprocessing $1.7\text{--}2.2\times$ faster than on the CPU.
 \end{itemize}
 
 \begin{figure}[t]
@@ -390,7 +392,7 @@ versions of the packed evaluator skipped zero weights, so their benchmark times 
 faster. With weights known in preprocessing, a zero-skipping evaluator would also leak the number of zero weights through its
 timing. All evaluators now do the same work for any weight values, and all numbers in this report are value-independent.
 
-\subsection{The conv triples on a GPU}\label{sec:gpu}
+\subsection{Conv triples and OT on a GPU}\label{sec:gpu}
 
 ConvTriple's GPU path (\texttt{TRIPLE\_GPU}, troy-nova) evaluates each convolution with troy's \texttt{Conv2dHelper}, one
 round trip per layer, full ciphertexts on the wire. The packed CPU evaluator started from its tiling (s1) and then went
@@ -418,38 +420,73 @@ GPU evaluator in the packed pipeline & 0.94 & 1.45 & 479 / 958\\
 \end{tabular}
 
 \vspace{6pt}
-\begin{tabular}{@{}lrrrr@{}}
+\begin{tabular}{@{}lr@{}}
 \toprule
-ImageNet, final flags & \multicolumn{2}{c}{preprocessing (s)} & \multicolumn{2}{c}{online (s)}\\
-build & CPU & GPU & CPU & GPU\\
+ferret on the GPU: one OT pack, $2\cdot 10^8$ Boolean triples & time (s)\\
 \midrule
-UC1, A2bits, RCA & 12.38 & 11.53 & 0.65 & 0.63\\
-UC2, A2bits, RCA & 11.61 & 11.48 & 0.47 & 0.47\\
-UC1, reshared, RCA & 7.43 & 6.82 & 0.68 & 0.67\\
-UC2, reshared, RCA & 6.46 & 6.56 & 0.48 & 0.49\\
+CPU (emp-ot) & 38.5--38.6\\
+LPN step on the GPU & 22.3--24.2\\
+\quad + MPCOT's trees on the GPU, LPN on the leaves in place & 17.6--20.0\\
+\quad + outputs copied straight into ferret's buffer, one message per channel & 14.4--15.1\\
+\quad + outputs stay on the GPU, ROT bits hashed there & 6.2--6.6\\
+\bottomrule
+\end{tabular}
+
+\vspace{6pt}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+ImageNet, final flags & \multicolumn{3}{c}{preprocessing (s)} & \multicolumn{3}{c}{online (s)}\\
+build & CPU & GPU conv & GPU all & CPU & GPU conv & GPU all\\
+\midrule
+UC1, A2bits, RCA & 13.66 & 12.26 & 6.21 & 0.65 & 0.66 & 0.67\\
+UC1, reshared, RCA & 7.62 & 6.97 & 4.32 & 0.69 & 0.68 & 0.76\\
+UC2, A2bits, RCA & 12.56 & 11.86 & 5.73 & 0.46 & 0.48 & 0.53\\
+UC2, reshared, RCA & 6.73 & 6.58 & 3.89 & 0.51 & 0.51 & 0.56\\
 \bottomrule
 \end{tabular}
 \caption{CPU against GPU on one workstation (RTX 4000 Ada, two Xeon Silver 4410Y with 24 cores, both parties on it,
-loopback; median of three runs). Top: the conv triples in isolation (16 threads per party), exact in every run. Bottom: the
-whole inference at hpmpc \texttt{92a2c0e} with 16 HE/OT threads and 11 pool workers per party (the configurations' 32
-and 24 oversubscribe a machine both parties share: online 7.0--7.3\s); GPU: the conv triples on the GPU evaluator.}
+loopback). Top: the conv triples in isolation (16 threads per party, median of three runs), exact in every run. Middle:
+ferret's extensions step by step (ConvTriple's tuple test, both parties, two runs each). Bottom: the whole inference
+(hpmpc \texttt{92a2c0e}, ConvTriple \texttt{111e7be}; 16 HE/OT threads and 11 pool workers per party, as the
+configurations' 32 and 24 oversubscribe a machine both parties share; median of three runs). GPU conv: the conv triples on
+the GPU evaluator (\texttt{LPN\_GPU=0}); GPU all: also ferret's extensions and the ROT bits.}
 \label{tab:gpu}
 \end{table}
 
-\paragraph{CPU against GPU.} \Cref{tab:gpu} compares both on one workstation, the only machine with a GPU, so both
-parties share its CPU. In isolation the GPU evaluator produces the conv triples $2.3\times$ (AB2) and $2.1\times$ (AB)
-faster than the packed CPU pipeline, and $5.6$--$7.0\times$ faster than the old GPU path, with 27\% less traffic. In the
-whole inference the difference mostly disappears. On this machine preprocessing is the OT phase: setting up the 16 ferret
-packs takes 2.4\s, and in the A2bits builds the bake's Boolean addition, 31 dependent COT rounds, another 4.8--5.1\s (1.5\s
-on flare / polynize). The conv triples run alongside the OT phase: 4.6--6.4\s on the CPU, 1.4--2.3\s on the GPU. The GPU
-frees the cores they took, and preprocessing gets 0.6--0.9\s faster where they were longest (UC1, whose AB triples both
-parties evaluate), and stays the same in UC2. The online phase does not change. Its conv layers spend their 0.2\s on the
-per-output mask work and the exchange with the other party, not on the products: moving \flag{GEMM_FAST}'s product to the
-GPU (\flag{GEMM_FAST_GPU}, exact, checked against the CPU on sampled entries) leaves the UC2 online phase at 0.46\s.
-HPMPC's own CUTLASS convolution (\flag{USE_CUDA_GEMM=2}) bypasses the per-output mask step and with it the A2B bake.
-With one party per machine the conv triples would weigh more (each party's CPU would run only its own OT packs), but the
-lever that remains for a GPU is the OT phase itself: ferret's LPN step (a gather of ten AES-indexed blocks per output)
-and the hashing of the COT rounds.
+\paragraph{The conv triples alone.} \Cref{tab:gpu} compares CPU and GPU on one workstation, the only machine with a GPU,
+so both parties share its CPU. In isolation the GPU evaluator produces the conv triples $2.3\times$ (AB2) and $2.1\times$
+(AB) faster than the packed CPU pipeline, and $5.6$--$7.0\times$ faster than the old GPU path, with 27\% less traffic. In
+the whole inference that alone changes little (0.15--1.40\s): on this machine preprocessing is the OT phase. With 16
+one-channel OT packs per party, setting them up takes 2.0--2.5\s, the A2bits builds' Boolean addition (31 dependent COT
+rounds) another 4.8--5.1\s, and the conv triples (4.6--6.4\s on the CPU, 1.4--2.3\s on the GPU) run alongside.
+
+\paragraph{The OT phase on the GPU.} Ferret's extensions now run on the GPU as well, in four steps
+(\cref{tab:gpu}, middle). (1) The LPN step: ten AES-indexed gathers per output, from a table of
+$k = 238{,}000$ blocks that stays in the GPU's L2 cache; each lane keeps its own copy of the AES T-table in shared memory,
+so the table lookups never conflict. (2) MPCOT: all 2{,}507 GGM trees of an extension are built level by level, the
+sender's from emp's seeds, the receiver's from its OT messages, with the per-level XOR sums reduced across warps. The LPN
+step then runs on the leaves in place, and one copy returns the outputs. Each channel's tree messages leave as one
+message, the same bytes as emp's 2{,}507 separate flushes. (3) The outputs stay on the GPU. In the ImageNet runs, 97\% of
+all COTs go to random OTs with 1-bit messages (or $k$ bit planes), which hash each COT with emp's MITCCRH (a fresh AES
+key per OT) and keep one bit or a few. The GPU hashes them in place, scheduling each key on the fly, and returns only the
+bit planes: two to six bits per OT cross PCIe instead of 128, and the CPU does no hashing. The other consumers get host copies of their
+range on demand. (4) With extensions this cheap, setting up the packs dominated, so a GPU build uses 4 packs of 4
+channels instead of 16 of 1: setup 0.8--1.2\s, preprocessing 0.6--1.3\s lower. Every step yields emp's values bit for
+bit. Check modes compare every tree, output and hashed bit with emp's CPU code. The Boolean triples pass the two-party
+tuple test, and seeded CIFAR-10 ResNet50 runs give the CPU build's output hashes (with the same pack layout). The bytes
+on the wire do not change, so either party may run either path. Each ferret instance keeps its 164\,MiB of outputs on
+the device; with both parties on one 20\,GB GPU there is room.
+
+\paragraph{End to end.} With conv triples and OT on the GPU, preprocessing is $2.2\times$ faster than on the CPU in the
+A2bits builds and $1.7$--$1.8\times$ in the reshared ones (\cref{tab:gpu}, bottom). The online phase measured 0.02--0.07\s
+higher with the GPU OT path. Pinning, a 5\,s pause before the online phase, OT work during the online phase (there is
+none) and memory pressure are ruled out; on this shared machine the gap is still unexplained. The online conv layers
+spend their 0.2\s on the per-output mask work and the exchange with the other party, not on the products: moving
+\flag{GEMM_FAST}'s product to the GPU (\flag{GEMM_FAST_GPU}, exact, checked against the CPU on sampled entries) leaves the
+UC2 online phase at 0.46\s. HPMPC's own CUTLASS convolution (\flag{USE_CUDA_GEMM=2}) bypasses the per-output mask step
+and with it the A2B bake. What remains of preprocessing on the CPU is the packs' setup (base OTs, IKNP and each pack's
+first extension), the A2bits builds' Boolean addition (latency-bound COT rounds), the 3\% of COTs whose consumers need
+the blocks themselves, and the HE work around the GPU evaluator (encryption, flooding, decryption).
 
 % ------------------------------------------------------------------------------------------------
 \section{Boolean material: OT preprocessing}\label{sec:ot}
@@ -774,10 +811,12 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
   preprocessing). Committing the pooling's truncation mask, or a BatchNorm's output mask like a convolution's, would
   remove that; a BatchNorm bake works mechanically but changed the outputs of an unfused multi-batch check for reasons
   not yet understood, so it is off.
-\item \textbf{OT extension.} Ferret's LPN step and the AES key schedules of the correlation-robust hash
-  are now the largest CPU costs of the Boolean preprocessing; a fixed-key hash is a security decision. On a machine
-  with a GPU, the OT phase is what remains on the CPU's critical path (\cref{sec:gpu}); ferret's LPN step, a gather
-  of ten AES-indexed blocks per output, and the hashing of the COT rounds would be the next work for the GPU.
+\item \textbf{OT extension.} On the CPU, ferret's LPN step and the AES key schedules of the correlation-robust hash
+  are the largest costs of the Boolean preprocessing; a fixed-key hash is a security decision. On a GPU both run there
+  (\cref{sec:gpu}); what remains on the CPU is the packs' setup (base OTs, IKNP, first extension), the latency-bound
+  Boolean addition of the A2bits builds, and the few consumers that need the COT blocks themselves. The online phase
+  measured 0.02--0.07\s higher with the GPU OT path on the shared workstation, for reasons not yet found; a
+  two-machine GPU setup would settle it.
 \end{itemize}
 
 \section{Conclusion}
