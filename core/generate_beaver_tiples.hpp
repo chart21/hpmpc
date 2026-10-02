@@ -1,5 +1,7 @@
 #pragma once
 #include "include/pch.h"
+#include <thread>
+#include <vector>
 
 // Port stride between the CHEETAH channels of one process. Process p's CHEETAH base port is
 // base_port + process_offset = BASE_PORT + num_players * (num_players - 1) * p + p (+ CHEETAH_PORT_OFFSET),
@@ -577,37 +579,74 @@ void generateBooleanAdditionDummyTriples(type a[],
         const int k = num_bits_per_input;
         const int lo = a2b_adder_lo(k);
         const uint64_t n = num_triples;
-        std::vector<type> carry(n), ot_a(n), ot_b(n), prod(n);
         auto* rounds = g_adder_rounds ? g_adder_rounds
                                       : Iface::boolCOTMultRoundsBegin(n * DATTYPE, k - 1 - lo, ip, port + CHEETAH_PORT_OFFSET,
                                                                       CHEETAH_PARTY, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
         g_adder_rounds = nullptr;
+        // this party's input and sum bits by bit position, contiguous (the value-major [i][r] layout has a stride of k
+        // words: the round loops over it took longer than the rounds' exchanges); transposed once each way
+        std::vector<type> xs((size_t) k * n), ss((size_t) k * n);
+        {
+            const unsigned T = std::max(1u, std::min(16u, std::thread::hardware_concurrency()));
+            std::vector<std::thread> th;
+            for (unsigned t = 0; t < T; t++)
+                th.emplace_back([&, t] {
+                    for (uint64_t i = n * t / T; i < n * (t + 1) / T; i++)
+                        for (int r = lo; r < k; r++)
+#if PARTY == 0
+                            xs[(size_t) r * n + i] = av[i][r];
+#else
+                            xs[(size_t) r * n + i] = bv[i][r];
+#endif
+                });
+            for (auto& x : th) x.join();
+        }
+        std::vector<type> carry(n), ot_a(n), ot_b(n), prod(n);
         for (int r = k - 1, round = 0; r >= lo; --r)
         {
-            for (uint64_t i = 0; i < n; i++)
-            {
+            const type* x = xs.data() + (size_t) r * n;
+            type* sum = ss.data() + (size_t) r * n;
+            if (r == k - 1)
+                for (uint64_t i = 0; i < n; i++)
+                {
+                    sum[i] = x[i];  // the LSB: no carry in
 #if PARTY == 0
-                const type x = av[i][r];
+                    ot_a[i] = x[i], ot_b[i] = SET_ALL_ZERO();  // the AND a & b
 #else
-                const type x = bv[i][r];
+                    ot_b[i] = x[i], ot_a[i] = SET_ALL_ZERO();
 #endif
-                const type cr = (r == k - 1) ? SET_ALL_ZERO() : carry[i];
-                cv[i][r] = x ^ cr;  // sum share
+                }
+            else
+                for (uint64_t i = 0; i < n; i++)
+                {
+                    const type cr = carry[i];
+                    sum[i] = x[i] ^ cr;
 #if PARTY == 0
-                ot_a[i] = x ^ cr, ot_b[i] = cr;  // the AND (a ^ c)(b ^ c) of the carry trick (LSB: a & b, c = 0)
+                    ot_a[i] = x[i] ^ cr, ot_b[i] = cr;  // the AND (a ^ c)(b ^ c) of the carry trick
 #else
-                ot_b[i] = x ^ cr, ot_a[i] = cr;
+                    ot_b[i] = x[i] ^ cr, ot_a[i] = cr;
 #endif
-            }
+                }
             if (r == lo)
                 break;
             Iface::boolCOTMultRound(rounds, round++, (const uint8_t*) ot_a.data(), (const uint8_t*) ot_b.data(),
                                     (uint8_t*) prod.data());
-            for (uint64_t i = 0; i < n; i++)
-                carry[i] = (r == k - 1) ? prod[i] : (prod[i] ^ carry[i]);  // c' = c ^ (a ^ c)(b ^ c)
+            if (r == k - 1)
+                for (uint64_t i = 0; i < n; i++) carry[i] = prod[i];
+            else
+                for (uint64_t i = 0; i < n; i++) carry[i] = prod[i] ^ carry[i];  // c' = c ^ (a ^ c)(b ^ c)
         }
-        for (int r = 0; r < lo; r++)
-            for (uint64_t i = 0; i < n; i++) cv[i][r] = SET_ALL_ZERO();  // cut slices: never read
+        {
+            const unsigned T = std::max(1u, std::min(16u, std::thread::hardware_concurrency()));
+            std::vector<std::thread> th;
+            for (unsigned t = 0; t < T; t++)
+                th.emplace_back([&, t] {
+                    for (uint64_t i = n * t / T; i < n * (t + 1) / T; i++)
+                        for (int r = 0; r < k; r++)
+                            cv[i][r] = r < lo ? SET_ALL_ZERO() : ss[(size_t) r * n + i];  // cut slices: never read
+                });
+            for (auto& x : th) x.join();
+        }
         Iface::boolCOTMultRoundsEnd(rounds);
 #if CHEETAH_DISCONNECT == 1
         Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port + CHEETAH_PORT_OFFSET, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
