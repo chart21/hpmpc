@@ -522,6 +522,30 @@ void generateBooleanAB2DummyTriples(type a[],
 // Input: array of boolean triple shares [a], [b], [c] with size num_triples
 // Input: ip and port of the other party to connect to
 // Output: [c] will be filled with shares of a + b
+#if A2B_ADDER_BATCH == 1 && ROT_PREPROCESSING_OPT == 1 && CHEETAH_WAN_OPT == 0
+// The Boolean addition's shape: sum bits r = k - 1 (numeric LSB) down to lo, k - 1 - lo AND rounds. With A2B_ADDER_CUT the
+// top FRACTIONAL sum bits, which every cut consumer replaces by 0, are not computed.
+inline int a2b_adder_lo(int k)
+{
+#if A2B_ADDER_CUT == 1 && CUT_FRAC_ELIGIBLE
+    if (!g_a2b_full_width && k == BITLENGTH)
+        return FRACTIONAL;
+#endif
+    return 0;
+}
+// the rounds' random OTs, started early (run_ot_phase, before init_a2b_bake) and picked up by the Boolean addition
+inline Iface::BoolMultRounds* g_adder_rounds = nullptr;
+inline void a2b_adder_prestart(const std::string& ip, int port, uint64_t num_bits)
+{
+    constexpr int k = REDUCED_BITLENGTH_k - REDUCED_BITLENGTH_m;
+    if (num_bits == 0 || k <= 1 || g_adder_rounds)
+        return;
+    const uint64_t n = num_bits / ((uint64_t) k * DATTYPE);
+    g_adder_rounds = Iface::boolCOTMultRoundsBegin(n * DATTYPE, k - 1 - a2b_adder_lo(k), ip, port + CHEETAH_PORT_OFFSET,
+                                                   CHEETAH_PARTY, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
+}
+#endif
+
 template <typename type>
 void generateBooleanAdditionDummyTriples(type a[],
                                  type b[],
@@ -551,16 +575,13 @@ void generateBooleanAdditionDummyTriples(type a[],
         // (untested) ripple-carry rounds from r = k - 1 (numeric LSB) down to lo; with A2B_ADDER_CUT the top FRACTIONAL
         // sum bits, which every cut consumer replaces by 0, are not computed (k - FRACTIONAL - 1 AND rounds, not k - 1)
         const int k = num_bits_per_input;
-        int lo = 0;
-#if A2B_ADDER_CUT == 1 && CUT_FRAC_ELIGIBLE
-        if (!g_a2b_full_width && k == BITLENGTH)
-            lo = FRACTIONAL;
-#endif
-        const int and_rounds = k - 1 - lo;
+        const int lo = a2b_adder_lo(k);
         const uint64_t n = num_triples;
         std::vector<type> carry(n), ot_a(n), ot_b(n), prod(n);
-        auto* rounds = Iface::boolCOTMultRoundsBegin(n * DATTYPE, and_rounds, ip, port + CHEETAH_PORT_OFFSET, CHEETAH_PARTY,
-                                                     CHEETAH_THREADS, CHEETAH_IO_OFFSET);
+        auto* rounds = g_adder_rounds ? g_adder_rounds
+                                      : Iface::boolCOTMultRoundsBegin(n * DATTYPE, k - 1 - lo, ip, port + CHEETAH_PORT_OFFSET,
+                                                                      CHEETAH_PARTY, CHEETAH_THREADS, CHEETAH_IO_OFFSET);
+        g_adder_rounds = nullptr;
         for (int r = k - 1, round = 0; r >= lo; --r)
         {
             for (uint64_t i = 0; i < n; i++)

@@ -377,6 +377,10 @@ init_random_multiplications();
 generate_beaver_triples(
                 ips, base_port, process_offset, 0, 0, "RANDOM_MULTIPLICATION");
 #endif
+#if A2B_CONV_BAKE_ACTIVE && !A2B_MASK_PASS_ACTIVE && A2B_ADDER_BATCH == 1 && ROT_PREPROCESSING_OPT == 1 && CHEETAH_WAN_OPT == 0 && FAKE_TRIPLES == 0
+        // the Boolean addition's random OTs alongside init_a2b_bake (they do not depend on its masks)
+        a2b_adder_prestart(ips[0], base_port + process_offset, uint64_t(num_boolean_addition_triples) * DATTYPE);
+#endif
 #if A2B_CONV_BAKE_ACTIVE
         // Commit ia/lz and load the boolean-addition inputs, then run the boolean addition EARLY (here,
         // not in complete_preprocessing) so [c] is available to prepare_A2B_S2 in BOTH the PRE and LIVE
