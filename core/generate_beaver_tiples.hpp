@@ -538,6 +538,54 @@ void generateBooleanAdditionDummyTriples(type a[],
 #endif
     auto cv = reinterpret_cast<type (*)[num_bits_per_input]> (c);
     num_triples = num_triples / (num_bits_per_input * DATTYPE);
+#if A2B_ADDER_BATCH == 1 && ROT_PREPROCESSING_OPT == 1 && CHEETAH_WAN_OPT == 0
+    {
+        // (untested) ripple-carry rounds from r = k - 1 (numeric LSB) down to lo; with A2B_ADDER_CUT the top FRACTIONAL
+        // sum bits, which every cut consumer replaces by 0, are not computed (k - FRACTIONAL - 1 AND rounds, not k - 1)
+        const int k = num_bits_per_input;
+        int lo = 0;
+#if A2B_ADDER_CUT == 1 && CUT_FRAC_ELIGIBLE
+        if (!g_a2b_full_width && k == BITLENGTH)
+            lo = FRACTIONAL;
+#endif
+        const int and_rounds = k - 1 - lo;
+        const uint64_t n = num_triples;
+        std::vector<type> carry(n), ot_a(n), ot_b(n), prod(n);
+        auto* rounds = Iface::boolCOTMultRoundsBegin(n * DATTYPE, and_rounds, ip, port + CHEETAH_PORT_OFFSET, CHEETAH_PARTY,
+                                                     CHEETAH_THREADS, CHEETAH_IO_OFFSET);
+        for (int r = k - 1, round = 0; r >= lo; --r)
+        {
+            for (uint64_t i = 0; i < n; i++)
+            {
+#if PARTY == 0
+                const type x = av[i][r];
+#else
+                const type x = bv[i][r];
+#endif
+                const type cr = (r == k - 1) ? SET_ALL_ZERO() : carry[i];
+                cv[i][r] = x ^ cr;  // sum share
+#if PARTY == 0
+                ot_a[i] = x ^ cr, ot_b[i] = cr;  // the AND (a ^ c)(b ^ c) of the carry trick (LSB: a & b, c = 0)
+#else
+                ot_b[i] = x ^ cr, ot_a[i] = cr;
+#endif
+            }
+            if (r == lo)
+                break;
+            Iface::boolCOTMultRound(rounds, round++, (const uint8_t*) ot_a.data(), (const uint8_t*) ot_b.data(),
+                                    (uint8_t*) prod.data());
+            for (uint64_t i = 0; i < n; i++)
+                carry[i] = (r == k - 1) ? prod[i] : (prod[i] ^ carry[i]);  // c' = c ^ (a ^ c)(b ^ c)
+        }
+        for (int r = 0; r < lo; r++)
+            for (uint64_t i = 0; i < n; i++) cv[i][r] = SET_ALL_ZERO();  // cut slices: never read
+        Iface::boolCOTMultRoundsEnd(rounds);
+#if CHEETAH_DISCONNECT == 1
+        Iface::Keys<IO::NetIO>::instance(CHEETAH_PARTY, ip, port + CHEETAH_PORT_OFFSET, CHEETAH_THREADS, CHEETAH_IO_OFFSET).disconnect();
+#endif
+        return;
+    }
+#endif
     type* carry_last = new type[num_triples];
     type* carry_this = new type[num_triples];
     type* ot_a = new type[num_triples];

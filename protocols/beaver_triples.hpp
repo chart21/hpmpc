@@ -108,6 +108,9 @@ DATATYPE* random_multiplication_b = nullptr;
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 #define CUT_FRAC_ELIGIBLE_PPA4 (CUT_FRAC_ELIGIBLE && PPA4_MSB == 1)
 
+// Some A2B conversion (INIT pass) runs without CUT_FRACTIONAL_BITS_OPT: the Boolean addition must produce all slices
+inline bool g_a2b_full_width = false;
+
 // Public-weight layers multiply locally and never bake a mask.
 inline bool msb_input_baked() { return g_msb_input_baked && PUBLIC_WEIGHTS == 0; }
 // The same for a residual sum's partner (A2B_BAKE_RESIDUAL): a conv with public weights is local and draws no mask, so

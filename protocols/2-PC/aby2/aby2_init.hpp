@@ -660,6 +660,8 @@ class ABY2_init
         {
             num_boolean_addition_triples++;
         }
+        if (!cut_frac_prep_vacant(m, k, m))
+            g_a2b_full_width = true;  // a conversion without the cut reads every [c] slice
 #endif
     }
     #if A_KNOWN_FOR_L0_OPT == 1 && A_KNOWN_TO_EVALUATORS_OPT == 0
