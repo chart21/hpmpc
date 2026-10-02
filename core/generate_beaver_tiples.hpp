@@ -113,6 +113,14 @@ struct FullyConnectedParameter
     }
 };
 
+// CUT_FRACTIONAL_BITS_OPT eligibility of the 2PC ROT circuits (docs/CUT_FRACTIONAL_BITS_OPT.md; see beaver_triples.hpp)
+#define CUT_FRAC_ELIGIBLE \
+    (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && \
+     ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
+     (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
+// Some A2B conversion (INIT pass) runs without CUT_FRACTIONAL_BITS_OPT: the Boolean addition must produce all slices
+inline bool g_a2b_full_width = false;
+
 #if FAKE_TRIPLES == 0
 #define generateArithmeticTriples generateArithmeticDummyTriples
 #define generateBooleanTriples generateBooleanDummyTriples

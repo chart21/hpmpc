@@ -102,14 +102,7 @@ DATATYPE* random_multiplication_b = nullptr;
 // the cut, so eligibility depends only on that value-level precondition and the width. Whether a given
 // adder instance applies it is the RUNTIME flag g_cut_frac_active: set by RELU, and by the comparison
 // adders only under the SIM bake (max_min.hpp); other max/min adders run the full circuit.
-#define CUT_FRAC_ELIGIBLE \
-    (CUT_FRACTIONAL_BITS_OPT == 1 && TRUNC_DELAYED == 0 && FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && \
-     ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
-     (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 #define CUT_FRAC_ELIGIBLE_PPA4 (CUT_FRAC_ELIGIBLE && PPA4_MSB == 1)
-
-// Some A2B conversion (INIT pass) runs without CUT_FRACTIONAL_BITS_OPT: the Boolean addition must produce all slices
-inline bool g_a2b_full_width = false;
 
 // Public-weight layers multiply locally and never bake a mask.
 inline bool msb_input_baked() { return g_msb_input_baked && PUBLIC_WEIGHTS == 0; }
