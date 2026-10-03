@@ -36,7 +36,7 @@ NARROW_F = [8, 10, 12, 14, 16, 18, 20, 24]  # CUT_FRACTIONAL_BITS_OPT at 64 bits
 # ... at 32 bits under the A2B bake for the prefix adders (their identity-substituted cut fails there, see
 # docs/BITLENGTH64.md): width 32 - F, a-known / AB PPA and the AB four-way circuit (the a-known one is hand-fixed)
 NARROW32_F = list(range(2, 13))
-NARROW32 = ["ppa_msb_unsafe_and_a_ab", "ppa_msb_unsafe_and_ab", "ppa_msb_4way_and_ab"]
+NARROW32 = ["ppa_msb_unsafe_and_a_ab", "ppa_msb_unsafe_and_ab", "ppa_msb_4way_and_ab", "rca_msb_and_a_ab"]  # + TE1's DReLU
 NARROW32_DIR = os.path.join(ADDERS, "narrow32")
 # TE (TRUNC_APPROACH 2 / 3, 2PC): the low carry by an a-known MSB adder of width F + 1 (8 and 16 exist already)
 LOW_F = [f for f in range(3, 25) if f + 1 not in (8, 16)]

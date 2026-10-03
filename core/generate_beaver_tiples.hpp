@@ -145,6 +145,10 @@ struct FullyConnectedParameter
     (CUT_NARROW_32 == 1 && BITLENGTH == 32 && (PPA_MSB == 1 || PPA4_MSB == 1) && A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && \
      REDUCED_BITLENGTH_m == 0 && REDUCED_BITLENGTH_k == BITLENGTH && CUT_FRAC_NARROW32_HAVE(FRACTIONAL))
 #define CUT_FRAC_NARROW (CUT_FRAC_ELIGIBLE && (BITLENGTH == 64 || CUT_FRAC_NARROW32))
+// TE1 (Ts1Range::te): a narrow adder of BITLENGTH - FRACTIONAL bits for the DReLU of A = (m >> F) + (nu >> F), on the top
+// slices of the full-width conversion
+#define TE_NARROW_OK (TE_FUSED_ACTIVE && ((BITLENGTH == 64 && CUT_FRAC_NARROW64_HAVE(FRACTIONAL)) || \
+                                          (BITLENGTH == 32 && CUT_FRAC_NARROW32_HAVE(FRACTIONAL))) && ADDITIONAL_PPA_THREADS == 0)
 // TS1 with the cut: the ReLU's A2B converts the truncated value (the two designs: see g_ts1_la in beaver_triples.hpp)
 #define TS1_CUT_ACTIVE (TS1_FUSED_ACTIVE && CUT_FRAC_ELIGIBLE)
 // Some A2B conversion (INIT pass) runs without CUT_FRACTIONAL_BITS_OPT: the Boolean addition must produce all slices

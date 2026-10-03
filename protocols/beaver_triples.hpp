@@ -1243,6 +1243,11 @@ inline void ts1_record_range(uint64_t slot_base, uint64_t slots, bool shift, UIN
 // A = (m >> F) + (nu >> F) = trunc(z) - c_t with the cut (TeCut; A and trunc(z) differ only where the output is 0 either
 // way), TE0 of z at full width (exact for every z).
 inline void* g_te_low_out = nullptr;     // get_msb_range: the low adders' outputs (S*), null: none
+// get_msb_range with g_te_low_out: the low adders' inputs are slices l - F .. l - 1 of the conversion itself (TE0, and
+// TE1 with TE_NARROW_OK, whose conversion is not transformed: one A2B instead of two); TE1 then takes the DReLU of
+// A = (m >> F) + (nu >> F) by the narrow adder on the top l - F slices (g_te_narrow_top)
+inline bool g_te_from_main = false;
+inline bool g_te_narrow_top = false;
 inline std::vector<uint8_t> g_te_lcb;    // this party's share bit of lambda_c, per value (preprocessing pass)
 inline std::vector<DATATYPE> g_te_lc;    // ... [lambda_c] (arithmetic), per compact slot
 inline std::vector<DATATYPE> g_te_mux_c; // ... [lambda_b lambda_c], per compact slot

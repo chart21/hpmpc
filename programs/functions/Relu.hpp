@@ -227,10 +227,13 @@ void RELU_range_in_place_ts1(sint_t<Additive_Share<Datatype, Share>>* val, const
 #if TE_FUSED_ACTIVE
     if (te)
     {
-        // TE (see Ts1Range::te): DReLU by the ReLU's adder (TE1: of A = (m >> F) + (nu >> F) with the cut, TE0: of z at
-        // full width), c_t by the low adders next to it; the bit injection takes TS1's full-design value (from m, which
-        // the A2B restores) corrected by c_t
-        constexpr bool te_cut = TRUNC_APPROACH == 3 && TS1_CUT_ACTIVE;
+        // TE (see Ts1Range::te): DReLU by the ReLU's adder, c_t by the low adders next to it; the bit injection takes
+        // TS1's full-design value (from m) corrected by c_t. TE1: DReLU of A = (m >> F) + (nu >> F) by the narrow adder
+        // on the top l - F slices of the untransformed conversion (TE_NARROW_OK), else with the cut on the transformed
+        // one (TeCut: m >> F, [c] shifted; a second conversion for the low adders); TE0: of z at full width. The low
+        // adders take the conversion's own low slices unless TeCut transformed it.
+        constexpr bool te_top = TRUNC_APPROACH == 3 && TE_NARROW_OK;
+        constexpr bool te_cut = TRUNC_APPROACH == 3 && !TE_NARROW_OK && TS1_CUT_ACTIVE;
         S* c = new S[len];
         std::vector<Datatype> m_saved(current_phase == PHASE_LIVE && te_cut ? slots : 0);
         g_a2b_xform = current_phase == PHASE_LIVE && te_cut ? A2bXform::TeCut : A2bXform::None;
@@ -238,8 +241,11 @@ void RELU_range_in_place_ts1(sint_t<Additive_Share<Datatype, Share>>* val, const
         g_a2b_c_shift = te_cut ? FRACTIONAL : 0;
         g_cut_frac_active = te_cut;
         g_te_low_out = c;
+        g_te_from_main = !te_cut;
+        g_te_narrow_top = te_top;
         get_msb_range<m, k, Datatype, Share>(val, y, len);
         g_te_low_out = nullptr;
+        g_te_from_main = g_te_narrow_top = false;
         g_cut_frac_active = false;
         g_a2b_c_shift = 0;
         g_a2b_xform = A2bXform::None;

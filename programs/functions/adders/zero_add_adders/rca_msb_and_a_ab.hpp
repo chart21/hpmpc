@@ -1998,3 +1998,4 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 64)>::type>
 };
 
 #include "narrow64/rca_msb_and_a_ab.hpp"  // CUT_FRACTIONAL_BITS_OPT at 64 bits
+#include "narrow32/rca_msb_and_a_ab.hpp"  // ... at 32 bits under the A2B bake

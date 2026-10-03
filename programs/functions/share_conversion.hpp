@@ -406,7 +406,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
     TeBitset* te2 = nullptr;
     S* te_out = static_cast<S*>(g_te_low_out);
     if constexpr (bm == 0 && bk == BITLENGTH)
-        if (te_out)
+        if (te_out && !g_te_from_main)
         {
             te1 = new TeBitset[len];
             te2 = new TeBitset[len];
@@ -469,10 +469,43 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
     g_a2b_s1_pending = 0;
 #endif
 
+#if TE_FUSED_ACTIVE
+    if constexpr (bm == 0 && bk == BITLENGTH)
+        if (te_out && g_te_from_main)
+        {
+            // TE's low adders: (0, slices l - F .. l - 1) of the conversion
+            te1 = new TeBitset[len];
+            te2 = new TeBitset[len];
+            stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
+                te1[i][0] = S(SET_ALL_ZERO());
+                te2[i][0] = S(SET_ALL_ZERO());
+                for (int j = 1; j < te_w; j++)
+                {
+                    te1[i][j] = s1[i][te_lo + j];
+                    te2[i][j] = s2[i][te_lo + j];
+                }
+            });
+        }
+#if TE_NARROW_OK
+    if constexpr (bm == 0 && bk == BITLENGTH)
+        if (te_out && g_te_narrow_top)
+        {
+            // TE1: DReLU of A = (m >> F) + (nu >> F), the narrow adder on slices 0 .. l - F - 1 (in place)
+            constexpr int w = BITLENGTH - FRACTIONAL;
+            using NB = sbitset_t<w, S>;
+            auto n1 = [&](int i) -> NB& { return *reinterpret_cast<NB*>(s1[i].get_share_pointer()); };
+            auto n2 = [&](int i) -> NB& { return *reinterpret_cast<NB*>(s2[i].get_share_pointer()); };
+            run_msb_adders<NARROW_ADDER_TYPE<w, S>, Share, TE_LOW_ADDER_TYPE<te_w, S>>(n1, n2, msb, len, te1, te2, te_out);
+            delete[] s1;
+            delete[] s2;
+            s1 = s2 = nullptr;
+        }
+#endif
+#endif
 
 #if CUT_FRAC_NARROW
     if constexpr (bm == 0 && bk == BITLENGTH)
-        if (cut_frac_narrow_on(bm, bk))
+        if (s1 && cut_frac_narrow_on(bm, bk))
         {
             // the cut at 64 bits: the narrow adder on slices FRACTIONAL..BITLENGTH-1 (see cut_frac_narrow_on)
             // views of slices FRACTIONAL.. of the full bitsets (sbitset_t is an array of shares)
@@ -490,8 +523,8 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
             delete[] s2;
             s1 = s2 = nullptr;
         }
-    if (s1)
 #endif
+    if (s1)  // not taken by a narrow adder above
     {
         auto f1 = [&](int i) -> Bitset& { return s1[i]; };
         auto f2 = [&](int i) -> Bitset& { return s2[i]; };
