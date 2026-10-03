@@ -231,14 +231,35 @@ std::vector<Adder> adders;
         void step() {}
     };
     using Low = std::conditional_t<std::is_void_v<LowAdder>, NoLow, LowAdder>;
-    std::vector<Low> low;
+    struct LowArray  // placement-constructed (on the pool, like the ReLU's adders)
+    {
+        Low* p = nullptr;
+        int n = 0;
+        explicit LowArray(int len)
+        {
+            if (len > 0)
+                p = static_cast<Low*>(::operator new[](sizeof(Low) * len, std::align_val_t(alignof(Low))));
+        }
+        ~LowArray()
+        {
+            for (int i = 0; i < n; i++)
+                p[i].~Low();
+            if (p)
+                ::operator delete[](p, std::align_val_t(alignof(Low)));
+        }
+        Low& operator[](int i) { return p[i]; }
+    } low(std::is_void_v<LowAdder> || !l1 ? 0 : len);
     if constexpr (!std::is_void_v<LowAdder>)
         if (l1)
         {
-            low.reserve(len);
-            for (int i = 0; i < len; i++) low.emplace_back(l1[i], l2[i], lout[i]);
+#if ADDITIONAL_RELU_THREADS > 0
+            stream_parallel_for<STREAM_PARALLEL_CTOR, true>(len, [&](int i) { new (&low.p[i]) Low(l1[i], l2[i], lout[i]); });
+#else
+            for (int i = 0; i < len; i++) new (&low.p[i]) Low(l1[i], l2[i], lout[i]);
+#endif
+            low.n = len;
         }
-    auto low_done = [&]() { return low.empty() || low[0].is_done(); };
+    auto low_done = [&]() { return low.n == 0 || low[0].is_done(); };
 #if RESHARE_OPT == 1
 Share::communicate(); // For resharings
 #endif 
