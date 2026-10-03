@@ -1,0 +1,95 @@
+% ------------------------------------------------------------------------------------------------
+\section{64-bit rings}\label{sec:bit64}
+
+With $\ell = 64$ the fixed-point slack is no concern (at $F = 12$ to $16$ the truncations never wrap in practice), but
+the 2PC configurations did not run: the preprocessing had no 64-bit linear-layer triples, the ROT-preprocessing adders
+existed for $k = 8, 16, 32$ only, and every optimization of the A2B was written for 32 bits. All of it now works at
+$\ell = 64$ (hpmpc \texttt{acc5728}, ConvTriple \texttt{2d0b448}; \texttt{docs/BITLENGTH64.md}).
+
+\paragraph{HE with $t = 2^{64}$.} SEAL's plaintext moduli have at most 60 bits, so the packed evaluator does BFV with
+$t = 2^{64}$ itself: encoding $\lfloor q m / 2^{64} \rceil$ exactly as $D m + \lfloor r m / 2^{64} \rceil$ for
+$q = D \cdot 2^{64} + r$ (which removes BFV's $(q \bmod t)$ error term), centered 64-bit weight shares, outputs switched
+to two primes, composed by CRT and truncated, and an own decryption $\lfloor x \cdot 2^{64} / q' \rceil$. A product's
+noise is a sum of $(e + \rho) w$ over up to $2^{19.4}$ weight terms per output coefficient (ResNet50's widest layers),
+below $2^{78}$ except with probability $2^{-40}$. The flooding ($\Delta/16 = 2^{96}$) keeps the 32-bit parameters'
+margin of 19 bits above it, so $q$ needs 165 bits (three 55-bit primes, $N = 8192$; the first version took 180 bits).
+An ImageNet HE product then sends 1{,}013\,MiB, $2.1\times$ the 32-bit 479\,MiB: the query has $1.5\times$ the bits
+per coefficient, the response about $1.9\times$, and $N = 8192$ costs the sparse output layout its $\sqrt{N}$ factor
+(\cref{tab:polyn}). Output repacking works at 64 bits as well (a 53-bit special prime, 218 bits in all, the limit for
+128-bit security): 464\,MiB, below the 32-bit default, for $2.8\times$ the HE time.
+
+\paragraph{The adders.} The circuit generator's RCA and PPA builders produce any width; for the four-way PPA, which it
+builds by hand per width, a width-generic tree (groups of three slices, blocks of up to four per level) reproduces
+the 64-bit circuit and produces every other width. The a-known four-way circuit is the exception: its generated form
+needs hand fixes, so A2bits PPA4 takes the AB circuit at 64 bits, with the public $m$ as a share of mask zero.
+
+\paragraph{The cut as a narrow adder.} At 32 bits the cut of the redundant top $F$ slices identity-substitutes the
+full-width circuits by hand: public constants on the vacant slices, gate skipping with mask retargeting, and triple
+bookkeeping that the bake maps must mirror. At 64 bits the MSB adder is simply narrower: the A2B prepares the full width
+as before and an adder of width $64 - F$ runs on slices $F, \dots, 63$; its MSB is the sign of the value, correct by
+construction. The narrow adders of all eight MSB families are generated for $F \in \{8, 10, \dots, 20, 24\}$. At
+$F = 12$ the RCA needs 51 instead of 63 AND gates per value (52 instead of 64 rounds), PPA and PPA4 19--20\% fewer
+triples, and the bake's Boolean addition 51 instead of 63 rounds; \flag{A2B_DELAYED_CUT} and TS1's cut design follow unchanged.
+
+The same construction exposed a 32-bit bug: under the A2B bake, the identity-substituted PPA and PPA4 circuits (AB
+and a-known alike) flip DReLU for inputs near the cut's limit $2^{31-F}$, at a rate that grows with $|v|$ (40--45\% in
+the top octave; 114 of 4,096 random inputs at $F = 5$, all above $2^{16}$), while RCA and the builds without the bake
+are correct. With \flag{CUT_NARROW_32} the 32-bit PPA and PPA4 under the bake now take narrow adders too, which fixes it.
+On ImageNet (A2bits, interleaved with \flag{CUT_NARROW_32=0}) the narrow PPA needs 33 fewer rounds and 15\,MiB less
+online traffic (online 0.39 against 0.41\s in UC2) for 0.1--0.25\s more preprocessing; PPA4 trades the a-known circuit
+for the AB one, whose online phase is 0.11--0.14\s faster (0.34 against 0.47\s in UC2) but whose Beaver 3- and 4-tuples
+take 323\,MiB more OT material and 0.8--1.0\s more preprocessing.
+
+\paragraph{The reshare bake and the arithmetic triples.} The reshare bake's maps (which slice consumes which random
+multiplication and which 3-tuple) are read off the generated 64-bit and narrow circuits and checked by the generator
+script; the generator's skipped input re-maskings become \texttt{zero\_add\_local}, which falls back to the real
+re-masking for inputs whose mask is not baked, as in the 32-bit files. At two narrow widths the generator skips
+re-maskings with 4-tuple fields that the bake cannot serve; there they stay. P1's ReLU preprocessing traffic drops by
+15\% for PPA on CIFAR-10. One more 64-bit defect was silent: the elementwise arithmetic triples behind every
+secret-by-secret product (max pooling) came from gemini's HE in SEAL's plaintext space, and its bit-length assertion
+is compiled out in release builds, so with 64 bits they were random. They now come from Gilboa multiplication over the
+silent COTs: for bit $j$ of one factor, one COT of width $64 - j$ with the other factor as the correlation.
+
+\paragraph{Results.} \Cref{tab:bit64} compares the 18 all\_opt builds with \flag{COMPRESS=0} at 64 bits ($F = 12$) with
+the same builds at 32 bits ($F = 5$), interleaved on flare / polynize. Preprocessing traffic grows by
+$1.7$--$2.1\times$ (the HE products $2.1\times$, the OT material $1.7$--$2.1\times$: the Boolean triples and tuples scale
+with the slices, the COTs' messages with $\ell$) and online traffic by $2.0\times$; preprocessing takes $1.5$--$2.0\times$ as
+long (PPA4 the most, whose tuples dominate), the online phase $1.6$--$1.9\times$. RCA pays the most rounds, 51 instead of 26
+AND levels per ReLU (2{,}939 against 1{,}714 rounds in UC2); the prefix adders add one level (49 more rounds). Repacking takes
+the HE products of UC2 A2bits RCA from 1{,}050 to 524\,MiB (1{,}265 instead of 1{,}789\,MiB in all, $1.37\times$ the 32-bit
+traffic) for 1.8\s more preprocessing. On CIFAR-10 (AdamW ResNet50, 256 images, UC2 A2bits RCA) the 64-bit builds classify
+like the plaintext model: TS\{L\} 188 at $F = 12$ and 189 at $F = 16$, TE0 and TE1 the same (32 bits: TS\{L\} 159 / 169 at
+$F = 5$ / 8; plaintext 189).
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+build & pre MiB & pre s & online MiB & online s & rounds\\
+\midrule
+UC1 A2bits RCA & 1{,}341 / 2{,}679 & 3.29 / 4.93 & 210 / 418 & 0.50 / 0.87 & 1818 / 3043\\
+UC1 A2bits PPA & 1{,}443 / 2{,}891 & 4.39 / 6.69 & 307 / 620 & 0.47 / 0.78 & 949 / 998\\
+UC1 A2bits PPA4 & 2{,}068 / 4{,}317 & 5.75 / 11.50 & 202 / 403 & 0.39 / 0.66 & 730 / 779\\
+UC2 A2bits RCA & 922 / 1{,}789 & 3.29 / 4.82 & 168 / 333 & 0.43 / 0.79 & 1714 / 2939\\
+UC2 A2bits PPA & 1{,}023 / 2{,}000 & 4.57 / 6.62 & 264 / 535 & 0.38 / 0.67 & 845 / 894\\
+UC2 A2bits PPA4 & 1{,}648 / 3{,}426 & 5.64 / 11.11 & 159 / 318 & 0.34 / 0.58 & 626 / 675\\
+UC3 A2bits RCA & 421 / 735 & 2.88 / 4.35 & 125 / 249 & 0.49 / 0.81 & 1714 / 2939\\
+UC3 A2bits PPA & 523 / 946 & 4.06 / 6.04 & 222 / 450 & 0.41 / 0.78 & 845 / 894\\
+UC3 A2bits PPA4 & 1{,}147 / 2{,}372 & 5.47 / 10.77 & 117 / 233 & 0.41 / 0.69 & 626 / 675\\
+\addlinespace
+UC1 reshared RCA & 1{,}175 / 2{,}409 & 2.13 / 3.65 & 239 / 474 & 0.52 / 1.00 & 1867 / 3092\\
+UC1 reshared PPA & 1{,}330 / 2{,}627 & 3.97 / 6.04 & 349 / 676 & 0.59 / 0.95 & 1004 / 1047\\
+UC1 reshared PPA4 & 2{,}059 / 4{,}047 & 5.57 / 9.16 & 233 / 459 & 0.54 / 0.88 & 779 / 828\\
+UC2 reshared RCA & 756 / 1{,}518 & 2.13 / 3.30 & 197 / 389 & 0.46 / 0.88 & 1763 / 2988\\
+UC2 reshared PPA & 911 / 1{,}735 & 3.99 / 5.94 & 306 / 591 & 0.49 / 0.78 & 900 / 943\\
+UC2 reshared PPA4 & 1{,}639 / 3{,}156 & 5.50 / 9.14 & 190 / 374 & 0.45 / 0.74 & 675 / 724\\
+UC3 reshared RCA & 257 / 469 & 1.71 / 2.81 & 154 / 304 & 0.51 / 0.92 & 1763 / 2988\\
+UC3 reshared PPA & 436 / 734 & 3.24 / 4.87 & 264 / 506 & 0.49 / 0.86 & 900 / 943\\
+UC3 reshared PPA4 & 1{,}062 / 1{,}992 & 4.91 / 8.22 & 148 / 289 & 0.48 / 0.83 & 675 / 724\\
+\bottomrule
+\end{tabular}
+\caption{The all\_opt builds at 32 / 64 bits ($F = 5$ / 12; ImageNet, dummy weights, flare / polynize, median of 3
+interleaved runs; P0's traffic sent and received). \flag{COMPRESS=0}; 32-bit A2bits PPA / PPA4 with the narrow cut adders.}
+\label{tab:bit64}
+\end{table}
+

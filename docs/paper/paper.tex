@@ -31,8 +31,10 @@
 \small hpmpc \texttt{97772ef}, ConvTriple \texttt{fa7b952}, flexNN \texttt{b1ce619}\\
 ImageNet all\_opt (\cref{sec:triad}): hpmpc \texttt{92a2c0e}, ConvTriple \texttt{8d8f244}, flexNN \texttt{417f12b};
 round~8: hpmpc \texttt{ddc082f}, ConvTriple \texttt{70f3eab}\\
-GPU and multi-batch (\cref{sec:gpu}): hpmpc \texttt{88c800b}, ConvTriple \texttt{1f5b71e}, flexNN \texttt{0404226}}
-\date{October 2, 2026}
+GPU and multi-batch (\cref{sec:gpu}): hpmpc \texttt{88c800b}, ConvTriple \texttt{1f5b71e}, flexNN \texttt{0404226}\\
+TE0 / TE1, 64-bit rings (\cref{sec:triadte,sec:bit64}): hpmpc \texttt{ef298d1}, ConvTriple \texttt{2d0b448}, flexNN
+\texttt{77b0644}}
+\date{October 3, 2026}
 
 \begin{document}
 \maketitle
@@ -65,7 +67,11 @@ output repacking cuts the conv triples' traffic by 40\%. On a GPU, the packed pi
 triples $2.1$--$2.3\times$ faster than the CPU and $5.6$--$7.0\times$ faster than the previous GPU path. With ferret's
 extensions and the random OTs' hashing on the GPU as well, bit for bit emp's, preprocessing on one machine shared by
 both parties is $1.7$--$2.2\times$ faster than on its CPU in single batch and $2.1$--$2.4\times$ in multi-batch, and the
-online conv products build their column matrix on the GPU.
+online conv products build their column matrix on the GPU. Exact truncation (TE0, TE1) now runs in 2PC, fused into the
+ReLU without a message of its own, and classifies like the reduced-slack TS1. The 2PC configurations also run with 64-bit
+rings: BFV with $t = 2^{64}$ outside SEAL, the cut as narrow adders, the reshare bake, and OT-based arithmetic triples, at
+$1.7$--$2.1\times$ the traffic and the plaintext model's accuracy at $F = 12$; the narrow adders also fixed a 32-bit DReLU
+bug of the prefix adders under the A2B bake.
 \end{abstract}
 
 \section{Introduction}
@@ -101,6 +107,11 @@ and reproducible system. Its focus is communication and runtime; \cref{fig:summa
   by committing every ReLU input's mask before the preprocessing pass, at no traffic behind convolutions and residual
   sums. The conv triples start alongside the OT phase. Preprocessing $2.9\text{--}7.1\times$ faster with secret weights,
   online $2.0\text{--}3.0\times$.
+\item \textbf{Exact truncation} (\cref{sec:triadte}): TE0 and TE1 fused into the ReLU on TS1's machinery, exact without
+  slack; the low carry comes from a small adder in the ReLU's rounds.
+\item \textbf{64-bit rings} (\cref{sec:bit64}): HE triples modulo $2^{64}$, generated 64-bit and narrow adders, the cut
+  and the reshare bake at 64 bits, arithmetic triples by Gilboa multiplication; $N = 4096$ against $8192$ in LAN and WAN
+  (\cref{tab:polyn}).
 \item \textbf{GPU} (\cref{sec:gpu}): a GPU evaluator inside the packed conv pipeline, and ferret's LPN step, GGM trees
   and the random OTs' hashing on the GPU, all bit-identical to the CPU's. Conv triples $2.1\text{--}2.3\times$ faster;
   end to end, on one shared machine, preprocessing $1.7\text{--}2.2\times$ faster than on the CPU, $2.1\text{--}2.4\times$ in
@@ -862,15 +873,20 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
 
 \FloatBarrier
 \input{triad}
+\input{bit64}
 
 % ------------------------------------------------------------------------------------------------
 \FloatBarrier
 \section{Limitations and open problems}\label{sec:limits}
 
 \begin{itemize}\itemsep1pt
-\item \textbf{Truncation.} ABY2 runs the reduced-slack TS1 only fused into a ReLU (\cref{sec:triadts1}); a stand-alone
-  TS1 (a pooling without a ReLU after it) would need a message of its own, and the reshared and \flag{COMPRESS=1} builds,
-  which have no A2B bake, a Boolean addition of their own. Exact truncation is still missing.
+\item \textbf{Truncation.} ABY2 runs TS1, TE0 and TE1 only fused into a ReLU (\cref{sec:triadts1,sec:triadte}); a
+  stand-alone one (a pooling without a ReLU after it) would need a message of its own, and the reshared and
+  \flag{COMPRESS=1} builds, which have no A2B bake, a Boolean addition of their own. A pooling's division folded into a
+  ReLU takes TS1's shifted design, also under TE.
+\item \textbf{64-bit rings.} The a-known four-way adder has no generated 64-bit or narrow form, so A2bits PPA4 takes the
+  AB circuit there (and, with \flag{CUT_NARROW_32}, for the 32-bit cut under the bake); the narrow cut adders exist for
+  the listed values of $F$ only (\cref{sec:bit64}). An HE product costs $2.1\times$ the 32-bit traffic without repacking.
 \item \textbf{Weights known in preprocessing.} The multi-batch a2b bake still excludes
   \flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING}, whose prescribed shares assume one word per register.
 \item \textbf{Ciphertext occupancy.} At $7\times7$ feature maps, inputs are 5--19\% data and outputs

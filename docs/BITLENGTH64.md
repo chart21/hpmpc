@@ -125,6 +125,43 @@ reshare bug fixed by hand in ac3440c and the a-known PPA4 order defects of 4ec92
   FRACTIONAL 5 (A2bits UC2 RCA): 21 of 32. Preprocessing 43-88 s and online 9-22 s at 64 bits against 23 s and 14 s.
   With the cut: A2bits UC2 RCA, reshared UC1 RCA, A2bits UC2 PPA4, reshared UC3 RCA, reshared UC2 PPA: 25 of 32 each.
 
+## ImageNet: 64 against 32 bits
+
+The 18 all_opt builds with COMPRESS=0 (list_fin2) at 64 bits (F = 12) and 32 bits (F = 5), interleaved on flare / polynize
+(hpmpc 4c2e446, dummy weights, median of 3; P0's traffic sent + received, MiB; `docs/variant_data/triad/te_bit64/res3_x64.csv`,
+`comm3_x64.csv`, `tables.py x64`). Preprocessing traffic 1.7-2.1x (HE 2.1x, OT 1.7-2.1x), online traffic 2.0x,
+preprocessing time 1.5-2.0x, online time 1.6-1.9x; RCA 51 instead of 26 AND levels per ReLU. With repacking
+(`CHEETAH_CONV_REPACK=1`) UC2 A2bits RCA sends 1265 instead of 1789 MiB (HE 524 instead of 1050), 1.37x the 32-bit
+traffic, for 6.60 instead of 4.82 s of preprocessing (UC1: 1631 MiB, 6.76 s).
+
+| build | pre MiB 32 / 64 | pre s | online MiB | online s | rounds |
+|---|---|---|---|---|---|
+| UC1 A2bits RCA | 1,341 / 2,679 | 3.29 / 4.93 | 210 / 418 | 0.50 / 0.87 | 1818 / 3043 |
+| UC1 A2bits PPA | 1,443 / 2,891 | 4.39 / 6.69 | 307 / 620 | 0.47 / 0.78 | 949 / 998 |
+| UC1 A2bits PPA4 | 2,068 / 4,317 | 5.75 / 11.50 | 202 / 403 | 0.39 / 0.66 | 730 / 779 |
+| UC2 A2bits RCA | 922 / 1,789 | 3.29 / 4.82 | 168 / 333 | 0.43 / 0.79 | 1714 / 2939 |
+| UC2 A2bits PPA | 1,023 / 2,000 | 4.57 / 6.62 | 264 / 535 | 0.38 / 0.67 | 845 / 894 |
+| UC2 A2bits PPA4 | 1,648 / 3,426 | 5.64 / 11.11 | 159 / 318 | 0.34 / 0.58 | 626 / 675 |
+| UC3 A2bits RCA | 421 / 735 | 2.88 / 4.35 | 125 / 249 | 0.49 / 0.81 | 1714 / 2939 |
+| UC3 A2bits PPA | 523 / 946 | 4.06 / 6.04 | 222 / 450 | 0.41 / 0.78 | 845 / 894 |
+| UC3 A2bits PPA4 | 1,147 / 2,372 | 5.47 / 10.77 | 117 / 233 | 0.41 / 0.69 | 626 / 675 |
+| UC1 reshared RCA | 1,175 / 2,409 | 2.13 / 3.65 | 239 / 474 | 0.52 / 1.00 | 1867 / 3092 |
+| UC1 reshared PPA | 1,330 / 2,627 | 3.97 / 6.04 | 349 / 676 | 0.59 / 0.95 | 1004 / 1047 |
+| UC1 reshared PPA4 | 2,059 / 4,047 | 5.57 / 9.16 | 233 / 459 | 0.54 / 0.88 | 779 / 828 |
+| UC2 reshared RCA | 756 / 1,518 | 2.13 / 3.30 | 197 / 389 | 0.46 / 0.88 | 1763 / 2988 |
+| UC2 reshared PPA | 911 / 1,735 | 3.99 / 5.94 | 306 / 591 | 0.49 / 0.78 | 900 / 943 |
+| UC2 reshared PPA4 | 1,639 / 3,156 | 5.50 / 9.14 | 190 / 374 | 0.45 / 0.74 | 675 / 724 |
+| UC3 reshared RCA | 257 / 469 | 1.71 / 2.81 | 154 / 304 | 0.51 / 0.92 | 1763 / 2988 |
+| UC3 reshared PPA | 436 / 734 | 3.24 / 4.87 | 264 / 506 | 0.49 / 0.86 | 900 / 943 |
+| UC3 reshared PPA4 | 1,062 / 1,992 | 4.91 / 8.22 | 148 / 289 | 0.48 / 0.83 | 675 / 724 |
+
+## Truncation at 64 bits
+
+TS1 / TS_Mix and the new TE0 / TE1 (`docs/TRIAD_ALL_OPT.md`) run at 64 bits: func 59 `RELU_TE0` / `RELU_TE1` exact
+for RCA, PPA and PPA4 (TE1 with the narrow cut adders), TS1's pooling tests pass. CIFAR-10 (AdamW ResNet50, the first
+256 test images, UC2 A2bits RCA, flare / polynize): TS{L} as given 188 at F = 12 and 189 at F = 16, TE1 and TE0 188 / 189:
+the plaintext model's 189 (32 bits: TS{L} 159 / 169 at F = 5 / 8, TE 158 / 185).
+
 ## Found on the way (32 bits): the identity-substituted cut under the A2B bake
 
 `RELU_RANDOM` with the 32-bit PPA and PPA4 adders under the A2B bake with the cut (A2bits, `CUT_FRACTIONAL_BITS_OPT=1`,

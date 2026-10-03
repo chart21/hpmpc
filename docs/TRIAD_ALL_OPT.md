@@ -694,6 +694,82 @@ weights, 3 interleaved runs; data `docs/variant_data/triad/ts1/allopt/`).
     preprocesses 0.54-0.60 s faster with 14-16 MiB less (its 24-bit adder), RCA and PPA4 send 25-38 MiB more.
   * Reshared and COMPRESS=1: TS{L} (the only variant); reshared UC3 now with the delayed cut.
 
+## TE0 / TE1 in 2PC (2026-10-03): exact truncation fused into the ReLU
+
+`TRUNC_APPROACH=2` (TE0) and `=3` (TE1) did not compile for PROTOCOL 4 (the generic forms need `prepare_B2A`,
+`prepare_trunc_exact_xmod2t`, which ABY2 does not implement). Now both run in TS1's framework (`TE_FUSED_ACTIVE`;
+`TRUNC_DELAYED=1`, the A2B bake, i.e. A2bits with COMPRESS=0, `A_KNOWN_TO_EVALUATORS_OPT=1`), exact, with no online
+message of their own (hpmpc 31c5270, PIGEON 77b0644; `Ts1Range::te` in `protocols/beaver_triples.hpp`).
+
+* **Value.** z = m + nu (scale 2^2F), a = m mod 2^F. TS1's full design (offset 2^(l-1), with w_t) gives
+  y = floor(z / 2^F) + [a != 0] - c_t for z >= 0, c_t = [a + (nu mod 2^F) >= 2^F] the carry into bit F of m + nu.
+  Only z >= 0 matters (DReLU zeroes the rest), so the wrap of m + nu is linear (MSB(m) or MSB(nu)) and no slack is
+  needed. The bit injection takes y - [a != 0] + c_t; [a != 0] = (a + 2^F - 1) >> F is public.
+* **c_t online, no extra rounds.** The MSB of an (F + 1)-bit a-known adder of (0, a) and (0, nu mod 2^F): Bool(m) and
+  the bake's [c], low slices, prepared from the untransformed m and the unshifted [c] (not counted again in INIT,
+  `g_a2b_no_count`), stepped in the same rounds as the ReLU's adder (`run_msb_adders`, `g_te_low_out`; RCA builds take
+  RCA, the others the a-known PPA, `zero_add_adders/low/`). c_t = m_c ^ lambda_c enters the bit injection linearly:
+  public part + m_c, mask part - (1 - 2 m_c) [lambda_c], product - (1 - 2 m_c) [lambda_b lambda_c]; preprocessing per
+  value: [lambda_c] by a COT of l - 1 bits, [lambda_b lambda_c] by a full-width multiplexer (`te_generate_products`).
+* **DReLU.** TE1 of A = (m >> F) + (nu >> F) = trunc(z) - c_t with the cut (A2B xform `TeCut`: m >> F, [c] shifted by F
+  slices): A and trunc(z) differ only where the output is 0 either way. TE0 of z at full width (no cut), exact for
+  every z. Poolings fold into TS1's shifted design (as TRUNC_APPROACH 1; PIGEON's pooling folds extended).
+* **Online cost over TS1:** TE1 the low adder's F ANDs per value; TE0 additionally the rounds of the full-width adder.
+* **Tests** (func 59 `RELU_TE0` / `RELU_TE1`, 4096 random values, TE0 |v| < 2^(l-1), TE1 < 2^(l-2)): 0 wrong and every
+  positive input exact, RCA / PPA / PPA4 at 32 bits (PPA / PPA4 with the narrow cut adders, below) and at 64 bits.
+* **Accuracy** (CIFAR-10, AdamW ResNet50, the first 256 test images, plaintext 189; `res_acc.csv`): TE0 and TE1 give
+  bit-identical outputs (both exact) and the same in UC1-3: 158 at F = 5, 185 at F = 8. Same run: TS{L} UC2 159 / 169,
+  TS1 UC2 161 / 187 (as in the TS1 table). Exact truncation floors (mean error -0.23 LSB from the real value against
+  TS1's rounding): no loss at F = 8.
+* **ImageNet** (A2bits, F = 5, flare / polynize, dummy weights, median of 3 interleaved runs, hpmpc 8c0ff0f; P0's traffic
+  sent + received, MiB; `docs/variant_data/triad/te_bit64/res5_imte.csv`, `comm5_imte.csv`, `tables.py te`). TE1's online
+  phase takes as long as TS1's (0.34-0.50 vs 0.33-0.49 s) for +10.5 MiB (RCA) / +21 MiB (PPA, PPA4) online traffic and the
+  same RCA rounds; preprocessing +0.1-0.8 s and +160-190 MiB (full-width Boolean addition, the (l - 1)-bit COTs of w_t
+  and lambda_c, the multiplexer; PPA4: the AB four-way narrow adder). TE0: +240 rounds with RCA, up to +0.13 s online.
+  Earlier versions (round 3 / 4 CSVs) converted twice for TE1 and built the low adders serially: +0.06 s online.
+
+| build | variant | pre MiB | pre s | online MiB | online s | rounds |
+|---|---|---|---|---|---|---|
+| UC1 RCA | TS{L} | 1,341 | 3.30 | 210.2 | 0.472 | 1818 |
+|  | TS1 | 1,379 | 3.50 | 209.4 | 0.490 | 1817 |
+|  | TE1 | 1,540 | 3.83 | 219.9 | 0.500 | 1817 |
+|  | TE0 | 1,579 | 4.25 | 230.4 | 0.490 | 2057 |
+| UC1 PPA | TS{L} | 1,443 | 4.30 | 306.7 | 0.458 | 949 |
+|  | TS1 | 1,481 | 4.58 | 305.9 | 0.454 | 948 |
+|  | TE1 | 1,643 | 4.68 | 326.9 | 0.447 | 983 |
+|  | TE0 | 1,664 | 4.73 | 358.4 | 0.461 | 1029 |
+| UC1 PPA4 | TS{L} | 2,068 | 5.66 | 201.6 | 0.397 | 730 |
+|  | TS1 | 2,135 | 6.31 | 200.8 | 0.431 | 729 |
+|  | TE1 | 2,327 | 7.08 | 221.8 | 0.396 | 788 |
+|  | TE0 | 2,001 | 6.12 | 228.1 | 0.505 | 788 |
+| UC2 RCA | TS{L} | 922 | 3.16 | 167.8 | 0.402 | 1714 |
+|  | TS1 | 960 | 3.39 | 167.0 | 0.406 | 1713 |
+|  | TE1 | 1,120 | 3.76 | 177.5 | 0.390 | 1713 |
+|  | TE0 | 1,160 | 4.19 | 188.0 | 0.447 | 1953 |
+| UC2 PPA | TS{L} | 1,023 | 4.21 | 264.4 | 0.399 | 845 |
+|  | TS1 | 1,061 | 4.49 | 263.6 | 0.380 | 844 |
+|  | TE1 | 1,224 | 4.70 | 284.6 | 0.399 | 879 |
+|  | TE0 | 1,245 | 4.81 | 316.0 | 0.402 | 925 |
+| UC2 PPA4 | TS{L} | 1,648 | 5.95 | 159.2 | 0.323 | 626 |
+|  | TS1 | 1,715 | 6.26 | 158.4 | 0.332 | 625 |
+|  | TE1 | 1,907 | 6.93 | 179.4 | 0.344 | 684 |
+|  | TE0 | 1,581 | 6.11 | 185.7 | 0.471 | 684 |
+| UC3 RCA | TS{L} | 421 | 2.95 | 125.3 | 0.476 | 1714 |
+|  | TS1 | 461 | 3.19 | 124.5 | 0.433 | 1713 |
+|  | TE1 | 621 | 3.42 | 135.0 | 0.457 | 1713 |
+|  | TE0 | 661 | 3.84 | 145.5 | 0.467 | 1953 |
+| UC3 PPA | TS{L} | 523 | 4.05 | 222.0 | 0.430 | 845 |
+|  | TS1 | 562 | 4.28 | 221.3 | 0.400 | 844 |
+|  | TE1 | 725 | 4.34 | 242.2 | 0.383 | 879 |
+|  | TE0 | 746 | 4.48 | 273.7 | 0.415 | 925 |
+| UC3 PPA4 | TS{L} | 1,147 | 5.36 | 116.7 | 0.376 | 626 |
+|  | TS1 | 1,216 | 5.95 | 116.0 | 0.376 | 625 |
+|  | TE1 | 1,408 | 6.53 | 136.9 | 0.367 | 684 |
+|  | TE0 | 1,082 | 5.78 | 143.2 | 0.489 | 684 |
+
+* **The 32-bit PPA / PPA4 cut under the bake was wrong** for inputs near the cut's limit (114 of 4096; TE1 and TS1
+  with these adders inherited it): fixed by narrow adders (`CUT_NARROW_32`, `docs/BITLENGTH64.md`).
+
 ## GPU (2026-10-01, workstation cmucl771615)
 
 RTX 4000 Ada (20 GB, sm_89), 2x Xeon Silver 4410Y (24 cores, 48 threads), CUDA 12.6; both parties on the machine

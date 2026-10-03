@@ -215,3 +215,32 @@ against 479\,MiB in 0.71\s without repacking. The model's 243\,MiB assumed dense
 the $49 \cdot 2^k$ positions of the feature maps fill only 77\% of a polynomial. End to end, preprocessing traffic
 falls by 18--31\% in UC1 and 11--24\% in UC2, for 1.3--1.7\s more preprocessing on Zen~4 (break-even about
 1.2\,Gbit/s for UC2, 2.1\,Gbit/s for UC1); the online phase is unchanged.
+
+\paragraph{Ring dimension.} Without repacking, the packed evaluator can also run in an $N = 8192$ ring with the same
+109-bit modulus (\flag{CHEETAH_CONV_POLY_N=8192}): twice the slots per ciphertext, so fewer and larger ciphertexts.
+The responses do not shrink with it: an output element's share of a sparse output ciphertext costs about $c_i$ times
+the coefficient width, and the tiling's $c_i$ grows with $\sqrt{N}$, so an ImageNet HE product sends 629 instead of
+479\,MiB ($1.31\times$). We measured it on flare / polynize in the LAN and with a WAN shaped on both hosts
+(\texttt{shape\_network\_alt.sh}, 20\ms per direction and 200\,Mbit/s on every interface, reset afterwards;
+\cref{tab:polyn}). $N = 8192$ loses in both: by 0.07--0.12\s in the LAN, and by 3.1--6.4\s in the WAN, where the conv
+phase is bandwidth-bound and takes $1.24\times$ as long. The online phase does not depend on $N$; in the WAN it is
+round-bound (1,714--1,818 rounds of about 19\ms). $N = 4096$ stays the default.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+build & $N$ & LAN pre s & WAN pre s & WAN conv s & WAN online s & conv MiB\\
+\midrule
+UC1 A2bits RCA & 4096 & 3.20 & 36.98 & 26.74 & 32.30 & 958\\
+ & 8192 & 3.28 & 43.33 & 33.25 & 32.40 & 1{,}258\\
+UC2 A2bits RCA & 4096 & 3.17 & 30.39 & 16.87 & 32.12 & 479\\
+ & 8192 & 3.29 & 33.52 & 20.91 & 32.19 & 629\\
+UC2 reshared RCA & 4096 & 2.05 & 25.02 & 15.79 & 33.54 & 479\\
+ & 8192 & 2.12 & 28.99 & 19.53 & 33.52 & 629\\
+\bottomrule
+\end{tabular}
+\caption{Ring dimension of the packed conv triples (ImageNet, dummy weights, flare / polynize; WAN: 20\ms per
+direction, 200\,Mbit/s; median of 3 WAN runs, one LAN run; conv traffic sent and received by P0).}
+\label{tab:polyn}
+\end{table}

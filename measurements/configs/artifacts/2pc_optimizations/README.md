@@ -48,7 +48,6 @@ multi-batch), `RNG_AHEAD`, 24 GEMM / ReLU threads, 32 Cheetah threads, 100 kB se
 * `multi_batch/`: 24 processes x `DATTYPE=256` (8 images per process, ImageNet RCA), one Cheetah thread per process.
 * `truncation/`: the truncation approaches fused into the ReLUs (A2bits only: they need the A2B bake;
   `TRUNC_DELAYED=1`, `COMPRESS=0`): `TRUNC_APPROACH` 4 (TS_Mix), 1 (TS1), 3 (TE1), 2 (TE0), at 32 bits with
-  `FRACTIONAL=5,8` and at 64 bits with `FRACTIONAL=12,16`. TE0 / TE1 are exact (`docs/TRIAD_ALL_OPT.md`). At 32 bits
-  the cut of the PPA / PPA4 adders under the A2B bake has a known bug for ReLU inputs of 2^16 and more in fixed point
-  (real 2^(16-F)), which TE1 and TS1 inherit with these adders (`docs/BITLENGTH64.md`, "Found on the way"); RCA and every
-  64-bit adder are unaffected.
+  `FRACTIONAL=5,8` and at 64 bits with `FRACTIONAL=12,16`. TE0 / TE1 are exact (`docs/TRIAD_ALL_OPT.md`). The 32-bit
+  PPA / PPA4 cut under the A2B bake runs narrow adders (`CUT_NARROW_32=1`): the identity-substituted circuits it replaced
+  DReLU wrongly for some inputs near the cut's limit (`docs/BITLENGTH64.md`, "Found on the way").
