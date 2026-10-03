@@ -23,7 +23,7 @@ COMMON = [
     ("CHEETAH_DISCONNECT", "1"), ("CHEETAH_RELEASE_OT", "1"), ("CHEETAH_WAN_OPT", "0"),
     # the MSB adders
     ("CUT_FRACTIONAL_BITS_OPT", "1"), ("CUT_NARROW_32", "1"), ("A2B_ADDER_BATCH", "1"), ("A2B_ADDER_CUT", "1"),
-    ("A2B_DELAYED_CUT", "1"),
+    ("A2B_DELAYED_CUT", "1"), ("A2BITS_PPA4_AB", "0"), ("TE_LOW_ADDER", "-1"),
     ("COMPRESS", "0,1"),
     # threads, buffers
     ("ADDITIONAL_GEMM_THREADS", "24"), ("ADDITIONAL_RELU_THREADS", "24"), ("RNG_AHEAD", "1"),
@@ -60,8 +60,10 @@ def main():
         for mode, mflags in (("A2bits", A2BITS), ("reshared", RESHARED)):
             base = (COMMON, mflags, flags)
             write("single_batch", f"2PC_all_opt_{mode}_{uc}", *base)
-            # WAN: the same builds; shape the links with measurements/network_shaping/shape_network_alt.sh
-            write("single_batch_WAN", f"2PC_WAN_all_opt_{mode}_{uc}", *base)
+            # WAN: the same builds with output repacking (N = 8192 with a special prime: 40% less conv-triple traffic,
+            # 14-20% faster preprocessing at 20 ms / 200 Mbit/s, 1.0-1.5 s slower in the LAN; N = 4096 cannot repack at
+            # 128-bit security); shape the links with measurements/network_shaping/shape_network_alt.sh
+            write("single_batch_WAN", f"2PC_WAN_all_opt_{mode}_{uc}", *base, CHEETAH_CONV_REPACK="1")
             # 64 bits: the narrow cut adders exist for FRACTIONAL 8, 10, 12, 14, 16, 18, 20, 24; no COMPRESS
             write("bitlength64", f"2PC_64bit_all_opt_{mode}_{uc}", *base, BITLENGTH="64", DATTYPE="64",
                   FRACTIONAL="12,16", COMPRESS="0")

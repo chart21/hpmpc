@@ -36,12 +36,15 @@ multi-batch), `RNG_AHEAD`, 24 GEMM / ReLU threads, 32 Cheetah threads, 100 kB se
 ## Folders
 
 * `single_batch/`: the six all_opt configurations (A2bits / reshared x UC1-3), 32 bits, `FRACTIONAL=5`, `COMPRESS=0,1`.
-* `single_batch_WAN/`: the same builds for WAN runs. Shape both hosts with
+* `single_batch_WAN/`: the same builds for WAN runs, with output repacking (`CHEETAH_CONV_REPACK=1`: N = 8192 with a
+  special prime, 285 instead of 479 MiB per HE product). Shape both hosts with
   `LATENCY_MS=20 BANDWIDTH_MBIT=200 bash measurements/network_shaping/shape_network_alt.sh` (all non-loopback
-  interfaces) and reset afterwards with `LATENCY_MS=-1 BANDWIDTH_MBIT=-1`. `CHEETAH_CONV_POLY_N=4096` is the faster
-  ring in the WAN as well (flare / polynize, 20 ms / 200 Mbit/s: preprocessing 30.4 s against 33.5 s with N = 8192 in
-  UC2 A2bits RCA, 37.0 against 43.3 s in UC1; `docs/variant_data/triad/conv_poly_n/`). Output repacking
-  (`CHEETAH_CONV_REPACK=1`) halves the conv-triple traffic for more HE time and may pay off on slower links.
+  interfaces) and reset afterwards with `LATENCY_MS=-1 BANDWIDTH_MBIT=-1`. At 20 ms / 200 Mbit/s (flare / polynize)
+  repacking shortens preprocessing by 14-20% (UC2 A2bits RCA 25.9 against 30.2 / 32.9 s with N = 4096 / plain
+  N = 8192, UC1 31.0 against 37.6 / 43.3 s, UC2 reshared 20.5 against 25.7 / 28.5 s;
+  `docs/variant_data/triad/conv_poly_n/wan2_*`) and costs 1.0-1.5 s in the LAN, which is why `single_batch/` keeps
+  N = 4096. N = 4096 cannot repack: the key switching needs a special prime, and its 109-bit data modulus already uses
+  128-bit security's whole budget at N = 4096.
 * `bitlength64/`: `BITLENGTH=DATTYPE=64`, `FRACTIONAL=12,16` (the cut's narrow adders exist for F in
   {8, 10, 12, 14, 16, 18, 20, 24}), `COMPRESS=0`. ConvTriple must be built with `TRIPLE_BITLEN=64`
   (`./build_cpu.sh` in `build64`); see `docs/BITLENGTH64.md`.
