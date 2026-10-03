@@ -2,6 +2,8 @@
 // BITLENGTH 64 (narrow64/*.hpp), which CUT_FRACTIONAL_BITS_OPT needs there
 #pragma once
 #define CUT_FRAC_NARROW64_HAVE(F) ((F) == 8 || (F) == 10 || (F) == 12 || (F) == 14 || (F) == 16 || (F) == 18 || (F) == 20 || (F) == 24)
+// ... at BITLENGTH 32 (narrow32/: the prefix adders under the A2B bake)
+#define CUT_FRAC_NARROW32_HAVE(F) ((F) >= 2 && (F) <= 12)
 // Beaver3TupleCount of the reshared four-way circuits of 64 and 64 - F bits (the reshare bake's tuple stride)
 constexpr int ppa4_reshared_b3_count_wide(int k)
 {

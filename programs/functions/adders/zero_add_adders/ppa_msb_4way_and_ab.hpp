@@ -2993,3 +2993,4 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 64)>::type>
 };
 
 #include "narrow64/ppa_msb_4way_and_ab.hpp"  // CUT_FRACTIONAL_BITS_OPT at 64 bits
+#include "narrow32/ppa_msb_4way_and_ab.hpp"  // ... at 32 bits under the A2B bake

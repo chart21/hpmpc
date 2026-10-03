@@ -355,6 +355,10 @@ inline int base_port = BASE_PORT;  // temporary solution
 // and the generic 3PC/4PC adders; BITLENGTH == 32 only. See docs/CUT_FRACTIONAL_BITS_OPT.md.
 #endif
 
+#ifndef CUT_NARROW_32
+#define CUT_NARROW_32 1  // CUT_FRACTIONAL_BITS_OPT, 32 bits, PPA / PPA4 under the A2B bake: narrow adders of 32 - FRACTIONAL bits (FRACTIONAL 2..12; A2bits PPA4: the AB four-way circuit). 0: the identity-substituted full-width circuits, which DReLU wrongly for some inputs near the cut's limit 2^(31-F) (docs/BITLENGTH64.md); for PPA4 they take fewer Beaver 3- / 4-tuples
+#endif
+
 #ifndef A2B_ROUND_OPT_SIM
 #define A2B_ROUND_OPT_SIM 0  // Simulate round-optimized A2B, by reconstructing both ab + lc and ab xor lc in the Online Phase
 #endif

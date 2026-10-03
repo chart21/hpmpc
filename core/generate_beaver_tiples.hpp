@@ -138,7 +138,13 @@ struct FullyConnectedParameter
     (CUT_FRACTIONAL_BITS_OPT == 1 && (TRUNC_DELAYED == 0 || TS1_FUSED_ACTIVE || A2B_DCUT_ELIGIBLE) && \
      FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && ROT_PREPROCESSING_OPT == 1 && CUT_FRAC_WIDTH_OK && \
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
-#define CUT_FRAC_NARROW (CUT_FRAC_ELIGIBLE && BITLENGTH == 64)
+// BITLENGTH 32: the prefix adders (PPA, PPA4) under the A2B bake take narrow adders too (narrow32/): their
+// identity-substituted cut goes wrong with the bake's [c] (docs/BITLENGTH64.md), the narrow adders are correct by
+// construction (A2bits PPA4: the AB four-way circuit with the public m as a share of mask 0, as at 64 bits)
+#define CUT_FRAC_NARROW32 \
+    (CUT_NARROW_32 == 1 && BITLENGTH == 32 && (PPA_MSB == 1 || PPA4_MSB == 1) && A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && \
+     REDUCED_BITLENGTH_m == 0 && REDUCED_BITLENGTH_k == BITLENGTH && CUT_FRAC_NARROW32_HAVE(FRACTIONAL))
+#define CUT_FRAC_NARROW (CUT_FRAC_ELIGIBLE && (BITLENGTH == 64 || CUT_FRAC_NARROW32))
 // TS1 with the cut: the ReLU's A2B converts the truncated value (the two designs: see g_ts1_la in beaver_triples.hpp)
 #define TS1_CUT_ACTIVE (TS1_FUSED_ACTIVE && CUT_FRAC_ELIGIBLE)
 // Some A2B conversion (INIT pass) runs without CUT_FRACTIONAL_BITS_OPT: the Boolean addition must produce all slices

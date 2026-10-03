@@ -106,6 +106,14 @@
 #include "adders/ppa_msb_unsafe.hpp"
 #endif
 #endif
+// The cut's narrow adders (CUT_FRAC_NARROW): the a-known four-way circuit has no narrow form (the generator's needs the
+// hand fixes of the 8/16/32-bit ones), so A2bits PPA4 takes the AB circuit, the public m as a share of mask 0
+#if PPA4_MSB == 1 && A_KNOWN_TO_EVALUATORS_OPT == 1 && ROT_PREPROCESSING_OPT == 1
+#include "adders/zero_add_adders/ppa_msb_4way_and_ab.hpp"
+#define NARROW_ADDER_TYPE PPA_MSB_4Way_AB
+#else
+#define NARROW_ADDER_TYPE ADDER_TYPE
+#endif
 #if TE_FUSED_ACTIVE
 // TE's low adders (Ts1Range::te): the carry into bit FRACTIONAL, the MSB of an (F + 1)-bit a-known adder (RCA for RCA
 // builds, else the prefix adder: no more rounds than the ReLU's); widths 8 and 16 are in the families' files, the
@@ -478,10 +486,10 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
             delete[] s1;
             delete[] s2;
 #if TE_FUSED_ACTIVE
-            run_msb_adders<ADDER_TYPE<w, S>, Share, NB, S, TE_LOW_ADDER_TYPE<te_w, S>, TeBitset>(n1, n2, msb, len, te1, te2,
+            run_msb_adders<NARROW_ADDER_TYPE<w, S>, Share, NB, S, TE_LOW_ADDER_TYPE<te_w, S>, TeBitset>(n1, n2, msb, len, te1, te2,
                                                                                                te_out);
 #else
-            run_msb_adders<ADDER_TYPE<w, S>, Share>(n1, n2, msb, len);
+            run_msb_adders<NARROW_ADDER_TYPE<w, S>, Share>(n1, n2, msb, len);
 #endif
             delete[] n1;
             delete[] n2;

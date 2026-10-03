@@ -125,9 +125,20 @@ reshare bug fixed by hand in ac3440c and the a-known PPA4 order defects of 4ec92
   FRACTIONAL 5 (A2bits UC2 RCA): 21 of 32. Preprocessing 43-88 s and online 9-22 s at 64 bits against 23 s and 14 s.
   With the cut: A2bits UC2 RCA, reshared UC1 RCA, A2bits UC2 PPA4, reshared UC3 RCA, reshared UC2 PPA: 25 of 32 each.
 
-## Found on the way (32 bits, not changed)
+## Found on the way (32 bits): the identity-substituted cut under the A2B bake
 
-`RELU_RANDOM` with the 32-bit A2bits PPA and PPA4 adders (UC2, CUT_FRACTIONAL_BITS_OPT, TRUNC_DELAYED=0) gets 114 of
-4096 wrong, all with |v| between 2^16 and 2^25 (more towards 2^25), identically at hpmpc 810ebc8; RCA gets 0. The
-a-known PPA / PPA4 cut paths mis-handle large values below the cut's limit 2^26 (activations of 2^11 and more at
-FRACTIONAL 5, rare in the networks). Open.
+`RELU_RANDOM` with the 32-bit PPA and PPA4 adders under the A2B bake with the cut (A2bits, `CUT_FRACTIONAL_BITS_OPT=1`,
+`TRUNC_DELAYED=0`) got 114 of 4096 wrong, DReLU flipped (positive inputs gave 0, negative ones passed), identically at
+hpmpc 810ebc8. The failures sit below the cut's limit 2^(31-F) and their rate grows with |v| (F = 2: 2^22..2^28, F = 5:
+2^16..2^25, F = 8: 2^14..2^22; 40-45% in the top octave). Narrowed down (func 59, UC2 A2bits PPA): the same 114 with the
+AB circuit (`A_KNOWN_TO_EVALUATORS_OPT=0`), with `A2B_ADDER_CUT=0` and with `A2B_ADDER_BATCH=0`; 0 wrong with
+`A2B_CONV_BAKE=0` or `CUT_FRACTIONAL_BITS_OPT=0`; RCA (which never reads the vacant slices) and the 64-bit narrow
+adders get 0 under the bake with the cut. So the identity-substituted 32-bit prefix circuits (PPA and PPA4 alike) go
+wrong with the bake's [c]; TE1 and TS1 with these adders inherited it (TE1 PPA: 49 of 4096).
+
+**Fix (`CUT_NARROW_32=1`, default):** under the bake, the 32-bit PPA / PPA4 cut runs narrow adders of 32 - F bits as at
+64 bits (`narrow32/`, F = 2..12: the a-known and AB PPA, and for PPA4 the AB four-way circuit, since the a-known one
+has no generated form; the public m as a share of mask 0). func 59: 0 of 4096 wrong for A2bits PPA / PPA4 in UC1-3,
+TE1 and TS1. Cost (4096 values, UC2 A2bits): PPA 4% fewer AND triples, 6% less online traffic; PPA4 5% less online
+traffic but more tuples (Beaver triples 120k -> 50k, 3-tuples 54k -> 83k, 4-tuples 12k -> 50k: about 15 bytes of OT
+material more per value). The reshared and plain builds (no bake) keep the identity circuits, which pass.
