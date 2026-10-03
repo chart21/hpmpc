@@ -189,10 +189,11 @@ void a2b_xform_restore(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 }
 #endif
 
-// The MSB adders of a converted range: constructed (each retrieves its triples), then run level by level
-template <typename Adder, typename Share, typename Bitset, typename S, typename LowAdder = void, typename LowBitset = Bitset>
-void run_msb_adders(Bitset* s1, Bitset* s2, S* msb, int len, LowBitset* l1 = nullptr, LowBitset* l2 = nullptr,
-                    S* lout = nullptr)
+// The MSB adders of a converted range: constructed (each retrieves its triples), then run level by level. b1 / b2:
+// value i's operand bitsets (references: the narrow cut adders view slices FRACTIONAL.. of the full ones in place)
+template <typename Adder, typename Share, typename LowAdder = void, typename B1, typename B2, typename S,
+          typename LowBitset = int>
+void run_msb_adders(B1 b1, B2 b2, S* msb, int len, LowBitset* l1 = nullptr, LowBitset* l2 = nullptr, S* lout = nullptr)
 {
 #if ADDITIONAL_RELU_THREADS > 0 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0)
     // constructed in parallel: each adder retrieves its triples and one random mask (stream cursors)
@@ -212,15 +213,14 @@ void run_msb_adders(Bitset* s1, Bitset* s2, S* msb, int len, LowBitset* l1 = nul
         }
         Adder& operator[](int i) { return p[i]; }
     } adders(len);
-    stream_parallel_for<STREAM_PARALLEL_CTOR, true>(len, [&](int i) { new (&adders.p[i]) Adder(s1[i], s2[i], msb[i]); });
+    stream_parallel_for<STREAM_PARALLEL_CTOR, true>(len, [&](int i) { new (&adders.p[i]) Adder(b1(i), b2(i), msb[i]); });
     adders.n = len;
 #else
 std::vector<Adder> adders;
     adders.reserve(len);
     for (int i = 0; i < len; i++)
     {
-        /* adder[i].set_values(s1[i], s2[i], y[i]); */
-        adders.emplace_back(s1[i], s2[i], msb[i]);
+        adders.emplace_back(b1(i), b2(i), msb[i]);
     }
 #endif
    
@@ -286,10 +286,13 @@ Share::communicate(); // For resharings
 #else
     while (!adders[0].is_done() || !low_done())
     {
-        if (!adders[0].is_done())
-            stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { adders[i].step(); });
-        if (!low_done())
-            stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { low[i].step(); });
+        const bool main_done = adders[0].is_done(), lows_done = low_done();
+        stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
+            if (!main_done)
+                adders[i].step();
+            if (!lows_done)
+                low[i].step();
+        });
         Share::communicate();
     }
 #endif
@@ -411,8 +414,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
             const int c_shift = g_a2b_c_shift;
             g_a2b_c_shift = 0;
             g_a2b_no_count = true;
-            for (int i = 0; i < len; i++)
-            {
+            stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
                 te1[i] = TeBitset::prepare_A2B_S1(te_lo, (S*) val[i].get_share_pointer());
                 tl_a2b_c = (int64_t) (c_base + (uint64_t) i * BITLENGTH + te_lo);
                 te2[i] = TeBitset::prepare_A2B_S2(te_lo, (S*) val[i].get_share_pointer());
@@ -421,7 +423,7 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
                 te2[i].complete_A2B_S2();
                 te1[i][0] = S(SET_ALL_ZERO());
                 te2[i][0] = S(SET_ALL_ZERO());
-            }
+            });
             g_a2b_no_count = false;
             g_a2b_c_shift = c_shift;
         }
@@ -473,36 +475,32 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
         if (cut_frac_narrow_on(bm, bk))
         {
             // the cut at 64 bits: the narrow adder on slices FRACTIONAL..BITLENGTH-1 (see cut_frac_narrow_on)
+            // views of slices FRACTIONAL.. of the full bitsets (sbitset_t is an array of shares)
             constexpr int w = BITLENGTH - FRACTIONAL;
             using NB = sbitset_t<w, S>;
-            NB* n1 = new NB[len];
-            NB* n2 = new NB[len];
-            for (int i = 0; i < len; i++)
-                for (int j = 0; j < w; j++)
-                {
-                    n1[i][j] = s1[i][FRACTIONAL + j];
-                    n2[i][j] = s2[i][FRACTIONAL + j];
-                }
-            delete[] s1;
-            delete[] s2;
+            static_assert(sizeof(NB) == sizeof(S) * w && sizeof(Bitset) == sizeof(S) * BITLENGTH, "sbitset_t layout");
+            auto n1 = [&](int i) -> NB& { return *reinterpret_cast<NB*>(s1[i].get_share_pointer() + FRACTIONAL); };
+            auto n2 = [&](int i) -> NB& { return *reinterpret_cast<NB*>(s2[i].get_share_pointer() + FRACTIONAL); };
 #if TE_FUSED_ACTIVE
-            run_msb_adders<NARROW_ADDER_TYPE<w, S>, Share, NB, S, TE_LOW_ADDER_TYPE<te_w, S>, TeBitset>(n1, n2, msb, len, te1, te2,
-                                                                                               te_out);
+            run_msb_adders<NARROW_ADDER_TYPE<w, S>, Share, TE_LOW_ADDER_TYPE<te_w, S>>(n1, n2, msb, len, te1, te2, te_out);
 #else
             run_msb_adders<NARROW_ADDER_TYPE<w, S>, Share>(n1, n2, msb, len);
 #endif
-            delete[] n1;
-            delete[] n2;
+            delete[] s1;
+            delete[] s2;
             s1 = s2 = nullptr;
         }
     if (s1)
 #endif
+    {
+        auto f1 = [&](int i) -> Bitset& { return s1[i]; };
+        auto f2 = [&](int i) -> Bitset& { return s2[i]; };
 #if TE_FUSED_ACTIVE
-    run_msb_adders<ADDER_TYPE<bk - bm, S>, Share, Bitset, S, TE_LOW_ADDER_TYPE<te_w, S>, TeBitset>(s1, s2, msb, len, te1, te2,
-                                                                                                  te_out);
+        run_msb_adders<ADDER_TYPE<bk - bm, S>, Share, TE_LOW_ADDER_TYPE<te_w, S>>(f1, f2, msb, len, te1, te2, te_out);
 #else
-    run_msb_adders<ADDER_TYPE<bk - bm, S>, Share>(s1, s2, msb, len);
+        run_msb_adders<ADDER_TYPE<bk - bm, S>, Share>(f1, f2, msb, len);
 #endif
+    }
     delete[] s1;
     delete[] s2;
 #if TE_FUSED_ACTIVE
