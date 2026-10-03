@@ -724,56 +724,66 @@ message of their own (hpmpc 31c5270, PIGEON 77b0644; `Ts1Range::te` in `protocol
   bit-identical outputs (both exact) and the same in UC1-3: 158 at F = 5, 185 at F = 8. Same run: TS{L} UC2 159 / 169,
   TS1 UC2 161 / 187 (as in the TS1 table). Exact truncation floors (mean error -0.23 LSB from the real value against
   TS1's rounding): no loss at F = 8.
-* **ImageNet** (A2bits, F = 5, flare / polynize, dummy weights, median of 3 interleaved runs; RCA / PPA hpmpc 8c2adac,
-  PPA4 a058c36; P0's traffic sent + received, MiB; `docs/variant_data/triad/te_bit64/res6.csv`, `comm6.csv`,
-  `res7.csv`, `comm7.csv`). TE1's online phase takes about as long as TS1's (0.36-0.46 vs 0.35-0.49 s) for +8.4 MiB
-  online traffic with every adder and the same RCA rounds (PPA4 +3, PPA +35); preprocessing +0.1-1.2 s and +140 MiB
-  (RCA), +158 (PPA), +216 (PPA4, whose low adder takes a 3-tuple): the full-width Boolean addition, the (l - 1)-bit COTs
-  of w_t, lambda_c and lambda_b lambda_c, the low adder. TE0: +288 rounds with RCA, up to +0.12 s online (PPA4).
+* **ImageNet** (A2bits all_opt configurations, F = 5, flare / polynize, dummy weights, median of 3 interleaved runs,
+  hpmpc 4b43984, `docs/variant_data/triad/campaign10/`; P0's traffic sent + received, MiB: ConvTriple's counters are
+  MiB, hpmpc's 10^6 bytes; the tables before this one divided both by 1.048576, which put the HE / OT part 4.6% low).
+  The table has all five schemes (TS{L} = the configuration as given). TE1's online phase takes about as long as TS1's (0.37-0.46 vs 0.35-0.44 s) for +8.4 MiB
+  online traffic with every adder and the same RCA rounds (PPA4 +3, PPA +35); preprocessing +0.2-1.2 s and +146 MiB
+  (RCA), +165 (PPA), +226 (PPA4, whose low adder takes a 3-tuple): the full-width Boolean addition, the (l - 1)-bit COTs
+  of w_t, lambda_c and lambda_b lambda_c, the low adder. TE0: +288 rounds with RCA, up to +0.09 s online (PPA4).
   Against the previous version (hpmpc 8c0ff0f, `res5_imte.csv`): TE1 -4.3 MiB (RCA) / -12.6 MiB (PPA, PPA4) online,
-  PPA4 -56 rounds; preprocessing -18 MiB (RCA, the B2A products) / -373 MiB (PPA4, the a-known narrow adder). The
+  PPA4 -56 rounds; preprocessing -20 MiB (RCA, the B2A products) / -389 MiB (PPA4, the a-known narrow adder). The
   earlier table (8c0ff0f) is in git history.
 * **Formal protocols:** `docs/paper/trunc_formal.tex` (TS1, TE1, TE0 as protocols, Lemma 1-3 with proofs, Theorem 2;
   Lemma 2 and TE1's output checked exhaustively at l = 8, F = 2, 3).
 
-| build | variant | pre MiB | pre s | online MiB | online s | rounds |
+| build | scheme | pre MiB | pre s | online MiB | online s | rounds |
 |---|---|---|---|---|---|---|
-| UC1 RCA | TS{L} | 1,344 | 3.16 | 207.9 | 0.468 | 1769 |
-|  | TS1 | 1,382 | 3.55 | 207.1 | 0.488 | 1768 |
-|  | TE1 | 1,521 | 3.84 | 215.5 | 0.463 | 1768 |
-|  | TE0 | 1,559 | 4.30 | 228.1 | 0.514 | 2056 |
-| UC1 PPA | TS{L} | 1,443 | 4.28 | 306.7 | 0.471 | 949 |
-|  | TS1 | 1,481 | 4.61 | 305.9 | 0.453 | 948 |
-|  | TE1 | 1,639 | 4.93 | 314.3 | 0.443 | 983 |
-|  | TE0 | 1,660 | 5.01 | 345.8 | 0.495 | 1021 |
-| UC1 PPA4 | TS{L} | 1,699 | 4.50 | 201.6 | 0.438 | 730 |
-|  | TS1 | 1,737 | 4.74 | 200.8 | 0.417 | 729 |
-|  | TE1 | 1,954 | 5.89 | 209.2 | 0.426 | 732 |
-|  | TE0 | 1,989 | 6.23 | 215.5 | 0.528 | 732 |
-| UC2 RCA | TS{L} | 924 | 3.16 | 165.6 | 0.390 | 1665 |
-|  | TS1 | 962 | 3.42 | 164.8 | 0.404 | 1664 |
-|  | TE1 | 1,102 | 3.78 | 173.2 | 0.412 | 1664 |
-|  | TE0 | 1,139 | 4.24 | 185.8 | 0.426 | 1952 |
-| UC2 PPA | TS{L} | 1,023 | 4.16 | 264.4 | 0.375 | 845 |
-|  | TS1 | 1,061 | 4.51 | 263.6 | 0.360 | 844 |
-|  | TE1 | 1,219 | 4.69 | 272.0 | 0.422 | 879 |
-|  | TE0 | 1,240 | 4.87 | 303.5 | 0.433 | 917 |
-| UC2 PPA4 | TS{L} | 1,280 | 4.49 | 159.2 | 0.361 | 626 |
-|  | TS1 | 1,318 | 4.73 | 158.4 | 0.353 | 625 |
-|  | TE1 | 1,534 | 5.86 | 166.8 | 0.358 | 628 |
-|  | TE0 | 1,570 | 6.10 | 173.1 | 0.477 | 628 |
-| UC3 RCA | TS{L} | 423 | 2.97 | 123.2 | 0.436 | 1665 |
-|  | TS1 | 463 | 3.23 | 122.4 | 0.423 | 1664 |
-|  | TE1 | 602 | 3.47 | 130.7 | 0.464 | 1664 |
-|  | TE0 | 640 | 3.89 | 143.4 | 0.483 | 1952 |
-| UC3 PPA | TS{L} | 523 | 3.93 | 222.0 | 0.425 | 845 |
-|  | TS1 | 562 | 4.36 | 221.3 | 0.400 | 844 |
-|  | TE1 | 720 | 4.43 | 229.6 | 0.424 | 879 |
-|  | TE0 | 741 | 4.55 | 261.1 | 0.474 | 917 |
-| UC3 PPA4 | TS{L} | 779 | 4.31 | 116.7 | 0.417 | 626 |
-|  | TS1 | 818 | 4.71 | 116.0 | 0.376 | 625 |
-|  | TE1 | 1,035 | 5.55 | 124.4 | 0.410 | 628 |
-|  | TE0 | 1,071 | 5.86 | 130.7 | 0.499 | 628 |
+| UC1 RCA | TS{L} | 1,406 | 3.26 | 207.9 | 0.477 | 1769 |
+|  | TS_Mix | 1,445 | 3.43 | 207.9 | 0.460 | 1769 |
+|  | TS1 | 1,446 | 3.50 | 207.1 | 0.442 | 1768 |
+|  | TE1 | 1,592 | 3.85 | 215.5 | 0.462 | 1768 |
+|  | TE0 | 1,631 | 4.33 | 228.1 | 0.501 | 2056 |
+| UC1 PPA | TS{L} | 1,508 | 4.25 | 306.7 | 0.451 | 949 |
+|  | TS_Mix | 1,547 | 4.43 | 306.7 | 0.437 | 949 |
+|  | TS1 | 1,548 | 4.60 | 305.9 | 0.427 | 948 |
+|  | TE1 | 1,713 | 4.84 | 314.3 | 0.436 | 983 |
+|  | TE0 | 1,734 | 4.90 | 345.8 | 0.480 | 1021 |
+| UC1 PPA4 | TS{L} | 1,772 | 4.51 | 201.6 | 0.426 | 730 |
+|  | TS_Mix | 1,811 | 4.69 | 201.6 | 0.440 | 730 |
+|  | TS1 | 1,812 | 4.87 | 200.8 | 0.428 | 729 |
+|  | TE1 | 2,038 | 6.01 | 209.2 | 0.439 | 732 |
+|  | TE0 | 2,074 | 6.11 | 215.5 | 0.517 | 732 |
+| UC2 RCA | TS{L} | 966 | 3.26 | 165.6 | 0.397 | 1665 |
+|  | TS_Mix | 1,005 | 3.35 | 165.6 | 0.410 | 1665 |
+|  | TS1 | 1,006 | 3.45 | 164.8 | 0.401 | 1664 |
+|  | TE1 | 1,152 | 3.74 | 173.2 | 0.411 | 1664 |
+|  | TE0 | 1,191 | 4.21 | 185.8 | 0.420 | 1952 |
+| UC2 PPA | TS{L} | 1,068 | 4.24 | 264.4 | 0.384 | 845 |
+|  | TS_Mix | 1,107 | 4.43 | 264.4 | 0.383 | 845 |
+|  | TS1 | 1,108 | 4.42 | 263.6 | 0.385 | 844 |
+|  | TE1 | 1,273 | 4.86 | 272.0 | 0.391 | 879 |
+|  | TE0 | 1,294 | 4.89 | 303.5 | 0.409 | 917 |
+| UC2 PPA4 | TS{L} | 1,333 | 4.42 | 159.2 | 0.361 | 626 |
+|  | TS_Mix | 1,371 | 4.60 | 159.2 | 0.351 | 626 |
+|  | TS1 | 1,372 | 4.75 | 158.4 | 0.347 | 625 |
+|  | TE1 | 1,598 | 5.97 | 166.8 | 0.374 | 628 |
+|  | TE0 | 1,634 | 6.26 | 173.1 | 0.455 | 628 |
+| UC3 RCA | TS{L} | 441 | 2.94 | 123.2 | 0.455 | 1665 |
+|  | TS_Mix | 481 | 3.06 | 123.2 | 0.460 | 1665 |
+|  | TS1 | 483 | 3.28 | 122.4 | 0.414 | 1664 |
+|  | TE1 | 628 | 3.46 | 130.7 | 0.436 | 1664 |
+|  | TE0 | 667 | 3.95 | 143.4 | 0.462 | 1952 |
+| UC3 PPA | TS{L} | 543 | 3.94 | 222.0 | 0.407 | 845 |
+|  | TS_Mix | 583 | 4.13 | 222.0 | 0.426 | 845 |
+|  | TS1 | 585 | 4.24 | 221.3 | 0.413 | 844 |
+|  | TE1 | 749 | 4.50 | 229.6 | 0.423 | 879 |
+|  | TE0 | 770 | 4.54 | 261.1 | 0.461 | 917 |
+| UC3 PPA4 | TS{L} | 808 | 4.37 | 116.7 | 0.434 | 626 |
+|  | TS_Mix | 848 | 4.56 | 116.7 | 0.386 | 626 |
+|  | TS1 | 849 | 4.62 | 116.0 | 0.387 | 625 |
+|  | TE1 | 1,075 | 5.67 | 124.4 | 0.413 | 628 |
+|  | TE0 | 1,111 | 5.80 | 130.7 | 0.507 | 628 |
 
 * **The 32-bit PPA / PPA4 cut under the bake was wrong** for inputs near the cut's limit (114 of 4096; TE1 and TS1
   with these adders inherited it): fixed by narrow adders (`CUT_NARROW_32`, `docs/BITLENGTH64.md`).
@@ -790,10 +800,70 @@ PPA4 takes it again at the cut (it had taken the AB circuit since `CUT_NARROW_32
   carry (one round and message per adder, the same triples); 32-bit A2bits RCA under the bake takes the narrow cut adder
   (`CUT_FRAC_NARROW32`): 49 fewer rounds (UC2 1,665 instead of 1,714; 64 bits 2,890 instead of 2,939), -2.2 MiB online;
   online 0.468 / 0.390 / 0.436 against 0.481 / 0.423 / 0.506 s with `CUT_NARROW_32=0` (UC1-3, same run).
-* **ImageNet, A2bits PPA4, a-known vs AB** (same run, `res7.csv`): preprocessing 1,699 / 1,280 / 779 vs 2,068 / 1,648 /
-  1,147 MiB and 4.50 / 4.49 / 4.31 vs 5.69 / 5.53 / 5.34 s; online 0.438 / 0.361 / 0.417 vs 0.412 / 0.339 / 0.389 s, same
-  traffic and rounds. 64 bits: 3,522 / 2,631 / 1,578 vs 4,317 / 3,426 / 2,373 MiB, 8.24 / 8.31 / 7.68 vs 11.26 / 11.08 /
+* **ImageNet, A2bits PPA4, a-known vs AB** (same run, `res7.csv`): preprocessing 1,772 / 1,333 / 808 vs 2,156 / 1,716 /
+  1,191 MiB and 4.50 / 4.49 / 4.31 vs 5.69 / 5.53 / 5.34 s; online 0.438 / 0.361 / 0.417 vs 0.412 / 0.339 / 0.389 s, same
+  traffic and rounds. 64 bits: 3,674 / 2,740 / 1,635 vs 4,502 / 3,568 / 2,464 MiB, 8.24 / 8.31 / 7.68 vs 11.26 / 11.08 /
   10.80 s, online 0.695 / 0.610 / 0.695 vs 0.648 / 0.585 / 0.695 s.
+
+## Campaign at the round-9 code (2026-10-03): the artifact configurations, truncation schemes, cut variants
+
+hpmpc 4b43984 (ConvTriple 82b1400, PIGEON 77b0644), flare / polynize, 100 builds from
+`measurements/configs/artifacts/2pc_optimizations/gen_configs.py` (`docs/variant_data/triad/campaign10/`: `list_c8.txt`,
+`run8.sh`, `res8.csv`, `comm8.csv`, `ana10.py`), three interleaved runs each. The 36 all_opt builds give the Zen 4
+columns of the paper's Table / Figure (`res_fp_final10.csv`, `comm_fp10.csv`, `make_triad.py`): UC1 / UC2 preprocessing
+1.7-5.5 s (3.0-7.1x faster than as given), online 0.30-0.57 s (2.2-3.6x); UC3 1.05-1.4x / 1.7-2.5x. A reference build
+from the old lists (`ref_it_a2b_rca_xl`) sends exactly what the config build sends.
+
+**The cut** (MiB; none: `CUT_FRACTIONAL_BITS_OPT=0`; identity: `CUT_NARROW_32=0`; narrow: the default; reshared: no bake,
+identity cut):
+
+| build | cut | pre MiB | OT MiB | pre s | online MiB | online s | rounds |
+|---|---|---|---|---|---|---|---|
+| UC1 A2bits RCA | none | 1,436 | 406 | 3.28 | 220.9 | 0.490 | 2063 |
+|  | identity | 1,404 | 384 | 3.22 | 210.2 | 0.479 | 1818 |
+|  | narrow | 1,406 | 384 | 3.26 | 207.9 | 0.477 | 1769 |
+| UC1 A2bits PPA | none | 1,551 | 467 | 4.31 | 338.9 | 0.450 | 991 |
+|  | identity | 1,529 | 445 | 4.29 | 321.8 | 0.471 | 982 |
+|  | narrow | 1,508 | 445 | 4.25 | 306.7 | 0.451 | 949 |
+| UC1 A2bits PPA4 | none | 1,892 | 702 | 5.56 | 207.9 | 0.520 | 730 |
+|  | identity | 1,777 | 607 | 4.72 | 207.9 | 0.525 | 730 |
+|  | narrow | 1,772 | 619 | 4.51 | 201.6 | 0.426 | 730 |
+| UC2 A2bits RCA | none | 996 | 406 | 3.25 | 178.4 | 0.446 | 1959 |
+|  | identity | 964 | 384 | 3.15 | 167.8 | 0.403 | 1714 |
+|  | narrow | 966 | 384 | 3.26 | 165.6 | 0.397 | 1665 |
+| UC2 A2bits PPA | none | 1,111 | 467 | 4.19 | 296.5 | 0.402 | 887 |
+|  | identity | 1,090 | 445 | 4.12 | 279.3 | 0.394 | 878 |
+|  | narrow | 1,068 | 445 | 4.24 | 264.4 | 0.384 | 845 |
+| UC2 A2bits PPA4 | none | 1,452 | 702 | 5.48 | 165.6 | 0.462 | 626 |
+|  | identity | 1,337 | 607 | 4.51 | 165.6 | 0.454 | 626 |
+|  | narrow | 1,333 | 619 | 4.42 | 159.2 | 0.361 | 626 |
+| UC3 A2bits RCA | none | 471 | 406 | 2.97 | 136.1 | 0.503 | 1959 |
+|  | identity | 439 | 384 | 2.98 | 125.3 | 0.452 | 1714 |
+|  | narrow | 441 | 384 | 2.94 | 123.2 | 0.455 | 1665 |
+| UC3 A2bits PPA | none | 586 | 467 | 3.86 | 254.2 | 0.427 | 887 |
+|  | identity | 565 | 445 | 3.81 | 237.0 | 0.449 | 878 |
+|  | narrow | 543 | 445 | 3.94 | 222.0 | 0.407 | 845 |
+| UC3 A2bits PPA4 | none | 927 | 702 | 5.15 | 123.2 | 0.486 | 626 |
+|  | identity | 812 | 607 | 4.45 | 123.2 | 0.483 | 626 |
+|  | narrow | 808 | 619 | 4.37 | 116.7 | 0.434 | 626 |
+| UC1 reshared RCA | none | 1,240 | 211 | 2.23 | 255.2 | 0.577 | 2112 |
+|  | identity | 1,229 | 211 | 2.14 | 239.2 | 0.541 | 1867 |
+| UC1 reshared PPA | none | 1,389 | 303 | 4.11 | 373.3 | 0.593 | 1007 |
+|  | identity | 1,389 | 303 | 3.97 | 348.7 | 0.570 | 1004 |
+| UC1 reshared PPA4 | none | 2,180 | 1,014 | 5.74 | 242.3 | 0.536 | 779 |
+|  | identity | 2,150 | 1,002 | 5.54 | 232.7 | 0.525 | 779 |
+| UC2 reshared RCA | none | 800 | 211 | 2.17 | 212.8 | 0.511 | 2008 |
+|  | identity | 790 | 211 | 2.10 | 196.7 | 0.466 | 1763 |
+| UC2 reshared PPA | none | 979 | 303 | 4.08 | 330.8 | 0.479 | 903 |
+|  | identity | 949 | 303 | 3.97 | 306.2 | 0.488 | 900 |
+| UC2 reshared PPA4 | none | 1,789 | 1,014 | 5.57 | 200.0 | 0.419 | 675 |
+|  | identity | 1,710 | 1,002 | 5.45 | 190.3 | 0.463 | 675 |
+| UC3 reshared RCA | none | 278 | 211 | 1.78 | 170.4 | 0.529 | 2008 |
+|  | identity | 267 | 211 | 1.68 | 154.3 | 0.514 | 1763 |
+| UC3 reshared PPA | none | 456 | 303 | 3.34 | 288.5 | 0.506 | 903 |
+|  | identity | 450 | 303 | 3.21 | 263.8 | 0.499 | 900 |
+| UC3 reshared PPA4 | none | 1,137 | 885 | 4.92 | 157.5 | 0.428 | 675 |
+|  | identity | 1,102 | 879 | 5.00 | 147.9 | 0.488 | 675 |
 
 ## GPU (2026-10-01, workstation cmucl771615)
 

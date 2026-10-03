@@ -22,7 +22,7 @@ per coefficient, the response about $1.9\times$, and $N = 8192$ costs the sparse
 builds by hand per width, a width-generic tree (groups of three slices, blocks of up to four per level) reproduces
 the 64-bit circuit and produces every other width. The a-known four-way circuit needed hand fixes at 32 bits (operand
 order, a-known products in dot chains that must stay pending with their own mask shares); the generator now emits
-them itself, and A2bits PPA4 takes the generated a-known circuit at 64 bits as well (\cref{sec:triadround9}): 795\,MiB
+them itself, and A2bits PPA4 takes the generated a-known circuit at 64 bits as well (\cref{sec:triadround9}): 828\,MiB
 and 2.8--3.1\s less preprocessing than the AB circuit it took before, for 0--0.05\s more online time.
 
 \paragraph{The cut as a narrow adder.} At 32 bits the cut of the redundant top $F$ slices identity-substitutes the
@@ -59,14 +59,14 @@ AB2 triples the HE product takes 0.23\s and 57\,MB against Gilboa's 1.42\s and 1
 2.05\s, 248\,MB); \flag{ARITH_OT=1} keeps Gilboa.
 
 \paragraph{Results.} \Cref{tab:bit64} compares the 18 all\_opt builds with \flag{COMPRESS=0} at 64 bits ($F = 12$) with
-the same builds at 32 bits ($F = 5$), interleaved on flare / polynize. Preprocessing traffic grows by
+the same builds at 32 bits ($F = 5$), on flare / polynize at the round-9 code. Preprocessing traffic grows by
 $1.7$--$2.1\times$ (the HE products $2.1\times$, the OT material $1.7$--$2.1\times$: the Boolean triples and tuples scale
-with the slices, the COTs' messages with $\ell$) and online traffic by $2.0\times$; preprocessing takes $1.5$--$2.0\times$ as
-long (PPA4 the most, whose tuples dominate), the online phase $1.6$--$2.0\times$. RCA pays the most rounds, 50 instead of 25
+with the slices, the COTs' messages with $\ell$) and online traffic by $2.0\times$; preprocessing takes $1.5$--$1.8\times$ as
+long (PPA4 the most, whose tuples dominate), the online phase $1.5$--$1.9\times$. RCA pays the most rounds, 50 instead of 25
 AND levels per ReLU (2{,}890 against 1{,}665 rounds in UC2, with the folded a-known RCA); the prefix adders add one level
 (49 more rounds). Repacking takes
-the HE products of UC2 A2bits RCA from 1{,}050 to 524\,MiB (1{,}265 instead of 1{,}789\,MiB in all, $1.37\times$ the 32-bit
-traffic) for 1.8\s more preprocessing. On CIFAR-10 (AdamW ResNet50, 256 images, UC2 A2bits RCA) the 64-bit builds classify
+the HE products of UC2 A2bits RCA from 1{,}050 to 524\,MiB (1{,}320 instead of 1{,}870\,MiB in all, $1.37\times$ the 32-bit
+traffic; hpmpc \texttt{4c2e446}) for 1.8\s more preprocessing. On CIFAR-10 (AdamW ResNet50, 256 images, UC2 A2bits RCA) the 64-bit builds classify
 like the plaintext model: TS\{L\} 188 at $F = 12$ and 189 at $F = 16$, TE0 and TE1 the same (32 bits: TS\{L\} 159 / 169 at
 $F = 5$ / 8; plaintext 189).
 
@@ -76,31 +76,30 @@ $F = 5$ / 8; plaintext 189).
 \toprule
 build & pre MiB & pre s & online MiB & online s & rounds\\
 \midrule
-UC1 A2bits RCA & 1{,}344 / 2{,}682 & 3.16 / 4.89 & 208 / 416 & 0.47 / 0.87 & 1769 / 2994\\
-UC1 A2bits PPA & 1{,}443 / 2{,}891 & 4.28 / 6.64 & 307 / 620 & 0.47 / 0.78 & 949 / 998\\
-UC1 A2bits PPA4 & 1{,}699 / 3{,}522 & 4.50 / 8.24 & 202 / 403 & 0.44 / 0.70 & 730 / 779\\
-UC2 A2bits RCA & 924 / 1{,}791 & 3.16 / 4.87 & 166 / 331 & 0.39 / 0.78 & 1665 / 2890\\
-UC2 A2bits PPA & 1{,}023 / 2{,}000 & 4.16 / 6.66 & 264 / 535 & 0.38 / 0.68 & 845 / 894\\
-UC2 A2bits PPA4 & 1{,}280 / 2{,}631 & 4.49 / 8.31 & 159 / 318 & 0.36 / 0.61 & 626 / 675\\
-UC3 A2bits RCA & 423 / 738 & 2.97 / 4.49 & 123 / 246 & 0.44 / 0.81 & 1665 / 2890\\
-UC3 A2bits PPA & 523 / 947 & 3.93 / 6.06 & 222 / 450 & 0.43 / 0.72 & 845 / 894\\
-UC3 A2bits PPA4 & 779 / 1{,}578 & 4.31 / 7.68 & 117 / 234 & 0.42 / 0.70 & 626 / 675\\
+UC1 A2bits RCA & 1{,}406 / 2{,}807 & 3.26 / 4.98 & 208 / 416 & 0.48 / 0.85 & 1769 / 2994\\
+UC1 A2bits PPA & 1{,}508 / 3{,}021 & 4.25 / 6.66 & 307 / 620 & 0.45 / 0.79 & 949 / 998\\
+UC1 A2bits PPA4 & 1{,}772 / 3{,}674 & 4.51 / 8.30 & 202 / 403 & 0.43 / 0.70 & 730 / 779\\
+UC2 A2bits RCA & 966 / 1{,}873 & 3.26 / 4.93 & 166 / 331 & 0.40 / 0.74 & 1665 / 2890\\
+UC2 A2bits PPA & 1{,}068 / 2{,}087 & 4.24 / 6.74 & 264 / 535 & 0.38 / 0.68 & 845 / 894\\
+UC2 A2bits PPA4 & 1{,}333 / 2{,}740 & 4.42 / 7.98 & 159 / 318 & 0.36 / 0.62 & 626 / 675\\
+UC3 A2bits RCA & 441 / 768 & 2.94 / 4.46 & 123 / 246 & 0.46 / 0.74 & 1665 / 2890\\
+UC3 A2bits PPA & 543 / 983 & 3.94 / 6.04 & 222 / 450 & 0.41 / 0.73 & 845 / 894\\
+UC3 A2bits PPA4 & 808 / 1{,}635 & 4.37 / 7.66 & 117 / 233 & 0.43 / 0.70 & 626 / 675\\
 \addlinespace
-UC1 reshared RCA & 1{,}175 / 2{,}409 & 2.13 / 3.65 & 239 / 474 & 0.52 / 1.00 & 1867 / 3092\\
-UC1 reshared PPA & 1{,}330 / 2{,}627 & 3.97 / 6.04 & 349 / 676 & 0.59 / 0.95 & 1004 / 1047\\
-UC1 reshared PPA4 & 2{,}059 / 4{,}047 & 5.57 / 9.16 & 233 / 459 & 0.54 / 0.88 & 779 / 828\\
-UC2 reshared RCA & 756 / 1{,}518 & 2.13 / 3.30 & 197 / 389 & 0.46 / 0.88 & 1763 / 2988\\
-UC2 reshared PPA & 911 / 1{,}735 & 3.99 / 5.94 & 306 / 591 & 0.49 / 0.78 & 900 / 943\\
-UC2 reshared PPA4 & 1{,}639 / 3{,}156 & 5.50 / 9.14 & 190 / 374 & 0.45 / 0.74 & 675 / 724\\
-UC3 reshared RCA & 257 / 469 & 1.71 / 2.81 & 154 / 304 & 0.51 / 0.92 & 1763 / 2988\\
-UC3 reshared PPA & 436 / 734 & 3.24 / 4.87 & 264 / 506 & 0.49 / 0.86 & 900 / 943\\
-UC3 reshared PPA4 & 1{,}062 / 1{,}992 & 4.91 / 8.22 & 148 / 289 & 0.48 / 0.83 & 675 / 724\\
+UC1 reshared RCA & 1{,}229 / 2{,}521 & 2.14 / 3.51 & 239 / 474 & 0.54 / 0.95 & 1867 / 3092\\
+UC1 reshared PPA & 1{,}389 / 2{,}744 & 3.97 / 6.06 & 349 / 676 & 0.57 / 0.96 & 1004 / 1047\\
+UC1 reshared PPA4 & 2{,}150 / 4{,}226 & 5.54 / 9.24 & 233 / 459 & 0.52 / 0.91 & 779 / 828\\
+UC2 reshared RCA & 790 / 1{,}587 & 2.10 / 3.43 & 197 / 389 & 0.47 / 0.82 & 1763 / 2988\\
+UC2 reshared PPA & 949 / 1{,}810 & 3.97 / 6.06 & 306 / 591 & 0.49 / 0.82 & 900 / 943\\
+UC2 reshared PPA4 & 1{,}710 / 3{,}292 & 5.45 / 9.20 & 190 / 374 & 0.46 / 0.71 & 675 / 724\\
+UC3 reshared RCA & 267 / 487 & 1.68 / 2.80 & 154 / 304 & 0.51 / 0.91 & 1763 / 2988\\
+UC3 reshared PPA & 450 / 758 & 3.21 / 5.01 & 264 / 506 & 0.50 / 0.83 & 900 / 943\\
+UC3 reshared PPA4 & 1{,}102 / 2{,}068 & 5.00 / 8.31 & 148 / 289 & 0.49 / 0.79 & 675 / 724\\
 \bottomrule
 \end{tabular}
-\caption{The all\_opt builds at 32 / 64 bits ($F = 5$ / 12; ImageNet, dummy weights, flare / polynize, median of 3
-interleaved runs; P0's traffic sent and received). \flag{COMPRESS=0}. A2bits rows: hpmpc \texttt{8c2adac} (RCA, PPA) and
-\texttt{a058c36} (PPA4), with the narrow cut adders (32-bit RCA too) and the generated a-known PPA4 at both widths; reshared
-rows: \texttt{4c2e446}.}
+\caption{The all\_opt builds at 32 / 64 bits ($F = 5$ / 12; ImageNet, dummy weights, flare / polynize, hpmpc \texttt{4b43984},
+the artifact configurations, median of 3 runs; P0's traffic sent and received). \flag{COMPRESS=0}; the cut as narrow adders
+where the A2B bake runs (A2bits) and at 64 bits, the generated a-known PPA4 at both widths.}
 \label{tab:bit64}
 \end{table}
 

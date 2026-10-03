@@ -11,15 +11,17 @@ the image are dummies (\flag{MODELOWNER=-1}, \flag{DATAOWNER=-1}); the runtime d
 
 \paragraph{Builds.} \emph{As given}: the configuration unchanged (hpmpc \texttt{161cf1d}); its conv triples use
 CHEETAH's \texttt{HomConv2DSS}. \emph{Optimized}: the configuration plus every optimization of this report
-(final code: hpmpc \texttt{92a2c0e}, ConvTriple \texttt{8d8f244}, flexNN \texttt{417f12b}; rounds 1--3 at hpmpc
-\texttt{1421df0}): \flag{CHEETAH_CONV_PACKED=1} with the pipeline, \flag{CUT_FRACTIONAL_BITS_OPT=1},
+(final code: the artifact configurations of \texttt{measurements/configs/artifacts/2pc\_optimizations}, hpmpc
+\texttt{4b43984}, ConvTriple \texttt{82b1400}, flexNN \texttt{77b0644}, measured on the Zen~4 pair; the Zen~3 pair's
+optimized builds are those of round~7, hpmpc \texttt{92a2c0e}, ConvTriple \texttt{8d8f244}, flexNN \texttt{417f12b}; rounds
+1--3 at hpmpc \texttt{1421df0}): \flag{CHEETAH_CONV_PACKED=1} with the pipeline, \flag{CUT_FRACTIONAL_BITS_OPT=1},
 \flag{ADDITIONAL_RELU_THREADS=24} (equal to the configuration's \flag{ADDITIONAL_GEMM_THREADS}, as the two share one
 pool), 100,000-word buffers, and \flag{A2B_CONV_BAKE=1} for the A2bits configurations; everything
 else of \cref{sec:he,sec:ot,sec:online} and of the rounds below is on by default (the communication-optimized output
-repacking of round~4 is a separate variant); \cref{tab:triadflags} lists every switch. \flag{RNG_AHEAD=1}, part of the optimized set until this
-last round, is left out: at the final code it saves the Zen~4 hosts about 0.04\s of online time (median over the 36
-builds) but costs the Zen~3 hosts up to 0.17\s (UC3, \flag{COMPRESS=1}: 0.51 against 0.36\s); a profile puts that in
-the online draws, most likely waiting for the ring's producer thread. Each
+repacking of round~4 is a separate variant); \cref{tab:triadflags} lists every switch. \flag{RNG_AHEAD=1} is on in the artifact
+configurations and so in the Zen~4 builds, where it saves about 0.04\s of online time (median over the 36 builds); the
+round-7 Zen~3 builds leave it out, since it costs those hosts up to 0.17\s (UC3, \flag{COMPRESS=1}: 0.51 against
+0.36\s); a profile puts that in the online draws, most likely waiting for the ring's producer thread. Each
 build runs three times per machine pair (median): the as-given builds alternating with the final code, the optimized
 builds in a separate series.
 
@@ -60,9 +62,14 @@ flag (optimized setting) & effect & where\\
   exchanges corrections & round~8\\
 \flag{A2B_ADDER_CUT=1} & under the cut the Boolean addition stops at bit $\ell - F - 1$: 26 instead of 31 rounds &
   round~8\\
+\flag{CUT_NARROW_32=1} & the cut as narrow generated adders of $\ell - F$ bits under the A2B bake (RCA a-known, PPA, PPA4),
+  instead of the identity-substituted full-width circuits & round~9, \cref{sec:bit64}\\
+\flag{A2BITS_PPA4_AB=0} & A2bits PPA4 takes the generated a-known four-way circuit (with one mask share per dot group) &
+  round~9\\
 \multicolumn{3}{@{}l}{\emph{variants, off}}\\
 \flag{CHEETAH_CONV_REPACK=1} & communication-optimized conv triples (output repacking, $N = 8192$): $-40\%$ conv
-  traffic, $+1.3$--$1.7$\s & round~4\\
+  traffic, $+1.0$--$1.7$\s in the LAN, 14--20\% faster preprocessing at 20\ms / 200\,Mbit/s; on in the WAN configs &
+  round~4, \cref{tab:polyn}\\
 \flag{A2B_BAKE_BN=1} & a BatchNorm before a ReLU takes the committed masks (unfused BatchNorm only) & round~5\\
 \flag{RNG_AHEAD=1} & the party's own random stream produced ahead by a thread: $-0.04$\s online on Zen~4, up to
   $+0.17$\s on Zen~3 & Builds\\
@@ -205,7 +212,7 @@ busy-polling the receive path and 31 instead of 24 workers did not help.
 \begin{figure}[t]
   \centering\input{figures/triad}
   \caption{The 36 all\_opt builds on ImageNet (dummy weights) by use case, as given and optimized, on both machine pairs
-  (log scale; median of three runs).}
+  (log scale; median of three runs; optimized: round~9 on Zen~4, round~7 on Zen~3).}
   \label{fig:triad}
 \end{figure}
 
@@ -213,13 +220,13 @@ busy-polling the receive path and 31 instead of 24 workers did not help.
 build is faster than as given online, on both pairs, and in preprocessing all but two UC3 builds with
 \flag{COMPRESS=1} on Zen~3, which take 1--2\% longer (1.88 against 1.86\s and 2.01 against 1.97\s): rounds 4--7 did not
 change their code, and the difference is within the run-to-run spread of these 2-second runs. In UC1 and UC2 the packed, pipelined and concurrent
-conv triples with the exact wire format (since round~5 alongside the OT phase) cut preprocessing from 11.7--17.3\s to 1.7--5.5\s on the Zen~4 pair ($2.9$--$7.1\times$) and from
+conv triples with the exact wire format (since round~5 alongside the OT phase) cut preprocessing from 11.7--17.3\s to 1.7--5.5\s on the Zen~4 pair ($3.0$--$7.1\times$) and from
 15.1--21.9\s to 2.7--6.9\s on the Zen~3 pair ($3.0$--$6.0\times$). The online phase falls from 0.77--1.55\s to
-0.34--0.63\s ($2.0$--$3.0\times$; Zen~3: 0.72--1.73 to 0.24--0.63\s, $2.2$--$4.2\times$). In UC2, with the weights
-known in preprocessing, the online phase takes 0.34--0.56\s on Zen~4 and 0.24--0.48\s on Zen~3.
+0.30--0.57\s ($2.2$--$3.6\times$; Zen~3, round~7: 0.72--1.73 to 0.24--0.63\s, $2.2$--$4.1\times$). In UC2, with the weights
+known in preprocessing, the online phase takes 0.30--0.49\s on Zen~4 and 0.24--0.48\s on Zen~3.
 
-UC3 needs no linear-layer triples, so its preprocessing is OT-bound and changes least: $1.1$--$1.2\times$ faster
-($0.98$--$1.1\times$ on Zen~3), with the online phase $1.5$--$2.2\times$ faster ($1.4$--$2.2\times$ on Zen~3). Before the parallel
+UC3 needs no linear-layer triples, so its preprocessing is OT-bound and changes least: $1.05$--$1.4\times$ faster
+($0.98$--$1.1\times$ on Zen~3), with the online phase $1.7$--$2.5\times$ faster ($1.4$--$2.2\times$ on Zen~3). Before the parallel
 preprocessing levels, the Zen~3 hosts' A2bits builds with \flag{COMPRESS=1} preprocessed 0.11--0.14\s \emph{slower} than
 as given (five interleaved runs each). A one-flag-off ablation placed all of it in \flag{ADDITIONAL_RELU_THREADS}, whose
 per-call stream-cursor checks slowed P0's last preprocessing step from 0.32--0.34 to 0.44--0.49\s. Unchecked versions
@@ -236,7 +243,8 @@ builds & pair & as given & optimized & as given & optimized\\
 \input{data/triad_tab}
 \end{tabular}
 \caption{The all\_opt builds on ImageNet by use case (A2bits and reshared, three adders each), as given and optimized
-at the final code (round~7; median of three runs). Per-build values: \texttt{docs/TRIAD\_ALL\_OPT.md}.}
+at the final code (Zen~4: round~9, the artifact configurations; Zen~3: round~7; median of three runs). Per-build values:
+\texttt{docs/TRIAD\_ALL\_OPT.md}.}
 \label{tab:triad}
 \end{table}
 
@@ -244,7 +252,7 @@ at the final code (round~7; median of three runs). Per-build values: \texttt{doc
   \centering\input{figures/triad_comm}
   \caption{Traffic of the 36 all\_opt builds on ImageNet (dummy weights) by use case, as given and optimized: MiB sent plus
   received by P0, i.e.\ in both directions (log scale). Preprocessing counts the triple generation (HE, OT, key
-  exchange) and the network's preprocessing pass. Every run and both machine pairs send the same bytes.}
+  exchange) and the network's preprocessing pass. Every run sends the same bytes; optimized: round~9.}
   \label{fig:triadcomm}
 \end{figure}
 
@@ -255,16 +263,17 @@ $1.61$--$1.92\times$ less with \flag{COMPRESS=1} (1,219--2,353 to 696--1,308\,Mi
 nearly all of it: in UC2 they fall from about 1,000 to 479\,MiB (\cref{tab:heformal}), in UC1, whose AB triples need
 both cross products, from 2,003 to 958\,MiB. With the weights known in preprocessing, both UC2 builds also send P1's
 share corrections, 4 bytes per conv output (42\,MiB). The OT-based tuples are unchanged, except that with
-\flag{CUT_FRACTIONAL_BITS_OPT} PPA4 needs fewer multi-input AND tuples: 12\,MiB less for reshared and 74\,MiB less
-for A2bits, where the bake lets the cut skip the $b$-product gates. The network's preprocessing pass changes by
+\flag{CUT_FRACTIONAL_BITS_OPT} PPA4 needs fewer multi-input AND tuples: 12\,MiB less for reshared and 83\,MiB less
+for A2bits, whose narrow a-known adder (round~9) has fewer gates than the full-width one (\cref{tab:cutin}). The network's preprocessing pass changes by
 $-67$ to $+2$\,MiB in UC1 and UC2 (of the bake's remask only the stem's ReLU inputs are left, 1.5\,MiB: the residual
 sum's 6.1\,MiB are baked since rounds 5 and 6). UC3 needs no linear-layer triples, and its traffic is unchanged. In round~3 its A2bits
 builds with \flag{COMPRESS=0} sent 69\,MiB more than as given: no ReLU input comes straight from a masked conv layer,
 so the bake rebased every one of the 9.0 million inputs onto its committed mask, which the as-given builds skip (and
 compute wrong signs, see Correctness). The mask-only forward of round~4 bakes them without that message, so the
-final builds send exactly what the as-given ones do, and compute correctly. Online, \flag{CUT_FRACTIONAL_BITS_OPT} removes 4--8\% of the traffic of the
-UC1 and UC2 builds with \flag{COMPRESS=0} (A2bits PPA4: none). The cut needs \flag{TRUNC_DELAYED=0}, so it does not
-apply to UC3; with \flag{COMPRESS=1} the online traffic does not change.
+final builds send exactly what the as-given ones do, and compute correctly. Online, \flag{CUT_FRACTIONAL_BITS_OPT} removes 3--11\% of the traffic of the
+builds with \flag{COMPRESS=0} (\cref{tab:cutin}); UC3, with \flag{TRUNC_DELAYED=1}, takes it through
+\flag{A2B_DELAYED_CUT} (UC3 A2bits RCA: 136.1 against 123.2\,MiB); with \flag{COMPRESS=1} the online traffic does not
+change.
 
 \begin{table}[t]
 \centering\small
@@ -288,8 +297,9 @@ starting the conv triples, and gaps. Wait: online time spent waiting for the oth
 \end{table}
 
 \paragraph{Round 4.}\label{sec:triadround4} Four further changes; the measurements in rounds 4--6 are from flare /
-polynize, the rerun of all 36 builds at the final code (\cref{tab:triad,tab:triadphases}, \cref{fig:triad,fig:triadcomm})
-from both pairs.
+polynize, the rerun of all 36 builds at the round-7 code (\cref{tab:triadphases}, and the Zen~3 columns of
+\cref{tab:triad,fig:triad}) from both pairs, and the final rerun at the round-9 code (\cref{tab:triad,fig:triad,fig:triadcomm})
+from the Zen~4 pair.
 \begin{enumerate}\itemsep1pt
 \item \textbf{P1's bake in the pass.} The conv triples of reshared PPA4 did not run at half speed next to the pass:
   they waited for P1, whose pass took 1.28--1.43\s against P0's 0.38--0.50\s. P1 bakes the reshare bits into every
@@ -419,10 +429,10 @@ generated a-known circuits cheaper online.
   instead of 1{,}714; 64 bits 2{,}890 instead of 2{,}939) and 2.2\,MiB less online traffic.
 \end{enumerate}
 On ImageNet (interleaved, median of 3), A2bits PPA4 with the a-known narrow adder against the AB one in the same run
-preprocesses 368\,MiB less (UC1--UC3: 1{,}699 / 1{,}280 / 779 against 2{,}068 / 1{,}648 / 1{,}147\,MiB) in 1.0--1.2\s
+preprocesses 384\,MiB less (UC1--UC3: 1{,}772 / 1{,}333 / 808 against 2{,}156 / 1{,}716 / 1{,}191\,MiB) in 1.0--1.2\s
 less time (4.50 / 4.49 / 4.31 against 5.69 / 5.53 / 5.34\s), for 0.02--0.03\s more online time (0.438 / 0.361 / 0.417
-against 0.412 / 0.339 / 0.389\s) with the same online traffic and rounds; at 64 bits 795\,MiB and 2.8--3.1\s less
-(UC2 2{,}631 against 3{,}426\,MiB, 8.31 against 11.08\s; online 0.610 against 0.585\s). The A2bits RCA builds against
+against 0.412 / 0.339 / 0.389\s) with the same online traffic and rounds; at 64 bits 828\,MiB and 2.8--3.1\s less
+(UC2 2{,}740 against 3{,}568\,MiB, 8.31 against 11.08\s; online 0.610 against 0.585\s). The A2bits RCA builds against
 \flag{CUT_NARROW_32=0} (the old identity cut) in the same run: online 0.468 / 0.390 / 0.436 against 0.481 / 0.423 /
 0.506\s, preprocessing unchanged (+2\,MiB).
 
@@ -450,48 +460,17 @@ the truncation sends nothing online.
   PPA 24.7\,MiB, PPA4 9.6\,MiB. With the cut PPA4 computes 30--46\,ms longer online in every build, although it sends
   less; preprocessing and online together are still shorter.
 \end{enumerate}
-\Cref{tab:ts1} shows the ImageNet costs. TS\_Mix and TS1 need the bake, so they apply to the nine A2bits configs
-without \flag{COMPRESS}; the others keep TS\{L\}. TS\_Mix sends the same online and 36--39\,MiB more in preprocessing
-(the first version, with a full-width addition, 57--58\,MiB), 0.07--0.36\s more preprocessing time; TS1 removes the
-last pooling's message. Online, all three take the same time, once the bit injection computes TS1's public side from
+\Cref{tab:trunc} (with TE1 and TE0, below) shows the ImageNet costs at the final code. TS\_Mix and TS1 need the
+bake, so they apply to the nine A2bits configs without \flag{COMPRESS}; the others keep TS\{L\}. TS\_Mix sends the same
+online and 38--40\,MiB more in preprocessing (the first version, with a full-width addition, about 60\,MiB), 0.09--0.19\s
+more preprocessing time; TS1 removes the last pooling's message (0.8\,MiB, one round) for 1\,MiB more preprocessing. Online, all three take the same time, once the bit injection computes TS1's public side from
 the A2B's input instead of storing it per value (that cost 0.02--0.04\s). Since TS1 has no wrap failures,
 \flag{FRACTIONAL} can grow, and the cut adder shrinks with it: TS1 with $F = 8$ runs 148 fewer online rounds than
-TS\{L\} with $F = 5$ (RCA; PPA 13.6\,MiB less online and 0.5\s less preprocessing) and classifies like the plaintext
+TS\{L\} with $F = 5$ (RCA; PPA 13.6\,MiB less online and 0.5\s less preprocessing; hpmpc \texttt{4c2e446}) and classifies like the plaintext
 model on CIFAR-10 (\cref{tab:ts1acc}), where TS\{L\} loses 20--50 images of 256 at $F = 8$ and collapses at $F = 10$.
 (TS\_Mix divides a pooling before a ReLU, as in the ImageNet ResNet's stem, probabilistically at scale $2^{3F}$, which
 wraps at $F \ge 8$; TS1 folds it into the ReLU.) At $F = 5$ all variants classify 156--166 of 256, the fixed point's
 precision being the limit.
-
-\begin{table}[t]
-\centering\small
-\begin{tabular}{@{}llrrrrr@{}}
-\toprule
-UC & variant & pre MiB & pre s & online MiB & rounds & online s\\
-\midrule
-UC1 & TS\{L\} & 1{,}341 & 3.18 & 210.2 & 1818 & 0.498\\
- & TS\_Mix & 1{,}378 & 3.45 & 210.2 & 1818 & 0.453\\
- & TS1 & 1{,}379 & 3.52 & 209.4 & 1817 & 0.465\\
- & TS1, $F = 8$ & 1{,}377 & 3.44 & 202.9 & 1670 & 0.452\\
-\addlinespace
-UC2 & TS\{L\} & 922 & 3.16 & 167.8 & 1714 & 0.421\\
- & TS\_Mix & 959 & 3.36 & 167.8 & 1714 & 0.405\\
- & TS1 & 960 & 3.45 & 167.0 & 1713 & 0.397\\
- & TS1, $F = 8$ & 958 & 3.37 & 160.5 & 1566 & 0.387\\
-\addlinespace
-UC3 & TS\{L\} & 421 & 2.94 & 125.3 & 1714 & 0.447\\
- & TS\_Mix & 460 & 3.10 & 125.3 & 1714 & 0.427\\
- & TS1 & 461 & 3.17 & 124.5 & 1713 & 0.452\\
- & TS1, $F = 8$ & 459 & 3.15 & 118.1 & 1566 & 0.413\\
-\addlinespace
-UC3 reshared & TS\{L\} & 268 & 1.76 & 170.4 & 2008 & 0.550\\
- & TS\{L\} + delayed cut & 257 & 1.76 & 154.3 & 1763 & 0.501\\
-\bottomrule
-\end{tabular}
-\caption{TS1 on ImageNet (the all\_opt configs with RCA, A2bits unless marked, flare / polynize, dummy weights, median of 3
-runs; P0's traffic sent and received). TS\{L\}: the configs as given (\flag{TRUNC_DELAYED=0} in UC1 and UC2, \flag{=1}
-in UC3, with \flag{A2B_DELAYED_CUT}).}
-\label{tab:ts1}
-\end{table}
 
 \begin{table}[t]
 \centering\small
@@ -533,70 +512,85 @@ adders at 32 and 64 bits. On CIFAR-10, TE0 and TE1 compute the same values and c
 of the 256 images in all three use cases; exact truncation floors (mean error $-0.23$ LSB), which costs nothing at
 $F = 8$ (TS1 187, plaintext 189).
 
-\Cref{tab:te} shows the ImageNet costs at the final code. TE1's online phase takes about as long as TS1's (0.36--0.46
-against 0.35--0.49\s) for 8.4\,MiB more online traffic with every adder (the low adder's messages; 10.5 / 21\,MiB with
+\Cref{tab:trunc} shows the ImageNet costs at the final code. TE1's online phase takes about as long as TS1's (0.37--0.46
+against 0.35--0.44\s) for 8.4\,MiB more online traffic with every adder (the low adder's messages; 10.5 / 21\,MiB with
 the earlier RCA and Sklansky low adders) and the same rounds with RCA (PPA4 +3, PPA +35); its preprocessing grows by
-0.1--1.2\s and 140\,MiB (RCA), 158\,MiB (PPA) or 216\,MiB (PPA4, whose low adder takes a Beaver 3-tuple): the
+0.2--1.2\s and 146\,MiB (RCA), 165\,MiB (PPA) or 226\,MiB (PPA4, whose low adder takes a Beaver 3-tuple): the
 full-width Boolean addition, the $(\ell - 1)$-bit COTs of $w_t$, $\lambda_c$ and $\lambda_b \lambda_c$, the low adder.
-Against the previous version (four-way low adder, B2A products, a-known narrow PPA4, folded RCA) TE1 sends 4.3\,MiB
-(RCA) to 12.6\,MiB (PPA, PPA4) less online, PPA4 56 rounds fewer, and preprocesses 18\,MiB (RCA) and 373\,MiB (PPA4)
-less. TE0's full-width DReLU costs 288 more rounds with RCA and up to 0.12\s of online time (PPA4).
+Against the previous version (hpmpc \texttt{8c0ff0f}; now the four-way low adder, the B2A products, the a-known
+narrow PPA4 and the folded RCA) TE1 sends 4.3\,MiB (RCA) to 12.6\,MiB (PPA, PPA4) less online, PPA4 56 rounds fewer,
+and preprocesses 20\,MiB (RCA) and 389\,MiB (PPA4) less. TE0's full-width DReLU costs 288 more rounds with RCA,
+21--39\,MiB more preprocessing and 6.3--31.5\,MiB more online traffic than TE1, and up to 0.09\s of online time (PPA4).
+In order of cost (UC2): TS\{L\} is free; TS\_Mix and TS1 add 39\,MiB of preprocessing and nothing online (TS1 even
+0.8\,MiB less); TE1 adds 146--226\,MiB and 8.4\,MiB online; TE0 adds TE1's cost plus the cut's. Only TS\{L\} needs
+slack, only TE0 and TE1 are exact, and online time differs by less than the run-to-run spread except for TE0.
 
 \begin{table}[t]
 \centering\small
 \begin{tabular}{@{}llrrrrr@{}}
 \toprule
-build & variant & pre MiB & pre s & online MiB & online s & rounds\\
+build & scheme & pre MiB & pre s & online MiB & online s & rounds\\
 \midrule
-UC1 RCA & TS\{L\} & 1{,}344 & 3.16 & 207.9 & 0.468 & 1769\\
- & TS1 & 1{,}382 & 3.55 & 207.1 & 0.488 & 1768\\
- & TE1 & 1{,}521 & 3.84 & 215.5 & 0.463 & 1768\\
- & TE0 & 1{,}559 & 4.30 & 228.1 & 0.514 & 2056\\
-UC1 PPA & TS\{L\} & 1{,}443 & 4.28 & 306.7 & 0.471 & 949\\
- & TS1 & 1{,}481 & 4.61 & 305.9 & 0.453 & 948\\
- & TE1 & 1{,}639 & 4.93 & 314.3 & 0.443 & 983\\
- & TE0 & 1{,}660 & 5.01 & 345.8 & 0.495 & 1021\\
-UC1 PPA4 & TS\{L\} & 1{,}699 & 4.50 & 201.6 & 0.438 & 730\\
- & TS1 & 1{,}737 & 4.74 & 200.8 & 0.417 & 729\\
- & TE1 & 1{,}954 & 5.89 & 209.2 & 0.426 & 732\\
- & TE0 & 1{,}989 & 6.23 & 215.5 & 0.528 & 732\\
+UC1 RCA & TS\{L\} & 1{,}406 & 3.26 & 207.9 & 0.477 & 1769\\
+ & TS\_Mix & 1{,}445 & 3.43 & 207.9 & 0.460 & 1769\\
+ & TS1 & 1{,}446 & 3.50 & 207.1 & 0.442 & 1768\\
+ & TE1 & 1{,}592 & 3.85 & 215.5 & 0.462 & 1768\\
+ & TE0 & 1{,}631 & 4.33 & 228.1 & 0.501 & 2056\\
+UC1 PPA & TS\{L\} & 1{,}508 & 4.25 & 306.7 & 0.451 & 949\\
+ & TS\_Mix & 1{,}547 & 4.43 & 306.7 & 0.437 & 949\\
+ & TS1 & 1{,}548 & 4.60 & 305.9 & 0.427 & 948\\
+ & TE1 & 1{,}713 & 4.84 & 314.3 & 0.436 & 983\\
+ & TE0 & 1{,}734 & 4.90 & 345.8 & 0.480 & 1021\\
+UC1 PPA4 & TS\{L\} & 1{,}772 & 4.51 & 201.6 & 0.426 & 730\\
+ & TS\_Mix & 1{,}811 & 4.69 & 201.6 & 0.440 & 730\\
+ & TS1 & 1{,}812 & 4.87 & 200.8 & 0.428 & 729\\
+ & TE1 & 2{,}038 & 6.01 & 209.2 & 0.439 & 732\\
+ & TE0 & 2{,}074 & 6.11 & 215.5 & 0.517 & 732\\
 \addlinespace
-UC2 RCA & TS\{L\} & 924 & 3.16 & 165.6 & 0.390 & 1665\\
- & TS1 & 962 & 3.42 & 164.8 & 0.404 & 1664\\
- & TE1 & 1{,}102 & 3.78 & 173.2 & 0.412 & 1664\\
- & TE0 & 1{,}139 & 4.24 & 185.8 & 0.426 & 1952\\
-UC2 PPA & TS\{L\} & 1{,}023 & 4.16 & 264.4 & 0.375 & 845\\
- & TS1 & 1{,}061 & 4.51 & 263.6 & 0.360 & 844\\
- & TE1 & 1{,}219 & 4.69 & 272.0 & 0.422 & 879\\
- & TE0 & 1{,}240 & 4.87 & 303.5 & 0.433 & 917\\
-UC2 PPA4 & TS\{L\} & 1{,}280 & 4.49 & 159.2 & 0.361 & 626\\
- & TS1 & 1{,}318 & 4.73 & 158.4 & 0.353 & 625\\
- & TE1 & 1{,}534 & 5.86 & 166.8 & 0.358 & 628\\
- & TE0 & 1{,}570 & 6.10 & 173.1 & 0.477 & 628\\
+UC2 RCA & TS\{L\} & 966 & 3.26 & 165.6 & 0.397 & 1665\\
+ & TS\_Mix & 1{,}005 & 3.35 & 165.6 & 0.410 & 1665\\
+ & TS1 & 1{,}006 & 3.45 & 164.8 & 0.401 & 1664\\
+ & TE1 & 1{,}152 & 3.74 & 173.2 & 0.411 & 1664\\
+ & TE0 & 1{,}191 & 4.21 & 185.8 & 0.420 & 1952\\
+UC2 PPA & TS\{L\} & 1{,}068 & 4.24 & 264.4 & 0.384 & 845\\
+ & TS\_Mix & 1{,}107 & 4.43 & 264.4 & 0.383 & 845\\
+ & TS1 & 1{,}108 & 4.42 & 263.6 & 0.385 & 844\\
+ & TE1 & 1{,}273 & 4.86 & 272.0 & 0.391 & 879\\
+ & TE0 & 1{,}294 & 4.89 & 303.5 & 0.409 & 917\\
+UC2 PPA4 & TS\{L\} & 1{,}333 & 4.42 & 159.2 & 0.361 & 626\\
+ & TS\_Mix & 1{,}371 & 4.60 & 159.2 & 0.351 & 626\\
+ & TS1 & 1{,}372 & 4.75 & 158.4 & 0.347 & 625\\
+ & TE1 & 1{,}598 & 5.97 & 166.8 & 0.374 & 628\\
+ & TE0 & 1{,}634 & 6.26 & 173.1 & 0.455 & 628\\
 \addlinespace
-UC3 RCA & TS\{L\} & 423 & 2.97 & 123.2 & 0.436 & 1665\\
- & TS1 & 463 & 3.23 & 122.4 & 0.423 & 1664\\
- & TE1 & 602 & 3.47 & 130.7 & 0.464 & 1664\\
- & TE0 & 640 & 3.89 & 143.4 & 0.483 & 1952\\
-UC3 PPA & TS\{L\} & 523 & 3.93 & 222.0 & 0.425 & 845\\
- & TS1 & 562 & 4.36 & 221.3 & 0.400 & 844\\
- & TE1 & 720 & 4.43 & 229.6 & 0.424 & 879\\
- & TE0 & 741 & 4.55 & 261.1 & 0.474 & 917\\
-UC3 PPA4 & TS\{L\} & 779 & 4.31 & 116.7 & 0.417 & 626\\
- & TS1 & 818 & 4.71 & 116.0 & 0.376 & 625\\
- & TE1 & 1{,}035 & 5.55 & 124.4 & 0.410 & 628\\
- & TE0 & 1{,}071 & 5.86 & 130.7 & 0.499 & 628\\
+UC3 RCA & TS\{L\} & 441 & 2.94 & 123.2 & 0.455 & 1665\\
+ & TS\_Mix & 481 & 3.06 & 123.2 & 0.460 & 1665\\
+ & TS1 & 483 & 3.28 & 122.4 & 0.414 & 1664\\
+ & TE1 & 628 & 3.46 & 130.7 & 0.436 & 1664\\
+ & TE0 & 667 & 3.95 & 143.4 & 0.462 & 1952\\
+UC3 PPA & TS\{L\} & 543 & 3.94 & 222.0 & 0.407 & 845\\
+ & TS\_Mix & 583 & 4.13 & 222.0 & 0.426 & 845\\
+ & TS1 & 585 & 4.24 & 221.3 & 0.413 & 844\\
+ & TE1 & 749 & 4.50 & 229.6 & 0.423 & 879\\
+ & TE0 & 770 & 4.54 & 261.1 & 0.461 & 917\\
+UC3 PPA4 & TS\{L\} & 808 & 4.37 & 116.7 & 0.434 & 626\\
+ & TS\_Mix & 848 & 4.56 & 116.7 & 0.386 & 626\\
+ & TS1 & 849 & 4.62 & 116.0 & 0.387 & 625\\
+ & TE1 & 1{,}075 & 5.67 & 124.4 & 0.413 & 628\\
+ & TE0 & 1{,}111 & 5.80 & 130.7 & 0.507 & 628\\
 \bottomrule
 \end{tabular}
-\caption{Exact truncation on ImageNet (A2bits, $F = 5$, flare / polynize, dummy weights, median of 3 interleaved runs;
-P0's traffic sent and received; RCA / PPA hpmpc \texttt{8c2adac}, PPA4 \texttt{a058c36}). TS\{L\}: the builds as given
-(\flag{TRUNC_DELAYED=0} in UC1 and UC2, \flag{=1} in UC3); all with the narrow cut adders.}
-\label{tab:te}
+\caption{All truncation schemes on ImageNet with all optimizations (the A2bits all\_opt configurations, $F = 5$,
+\flag{COMPRESS=0}; flare / polynize, dummy weights, hpmpc \texttt{4b43984}, median of 3 interleaved runs; P0's traffic
+sent and received, MiB with ConvTriple's MiB and hpmpc's $10^6$-byte counters converted). TS\{L\}: the builds as given
+(\flag{TRUNC_DELAYED=0} in UC1 and UC2, \flag{=1} in UC3); the others \flag{TRUNC_DELAYED=1}
+(\flag{TRUNC_APPROACH} 4, 1, 3, 2); all with the narrow cut adders.}
+\label{tab:trunc}
 \end{table}
 
 \input{trunc_formal}
 
-\paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds at the final code; the ranges below are
+\paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds at the round-7 code; the ranges below are
 over all 18 builds with \flag{COMPRESS=0}. With secret weights, preprocessing is now the OT phase (1.4--4.7\s, inside
 the pass), the pass's own work (0.33--0.58\s, including its mask-only forward), the steps after it (0.22--0.56\s) and
 0.1--0.3\s of key exchange, input preparation and gaps; the conv triples run alongside the OT phase and finish before
@@ -618,7 +612,7 @@ the pass does.
 \item \textbf{Serial work} in the pass: the GEMM levels (the weights-known-in-preprocessing path pushes into vectors
   there) and the bake's input preparation still run on one thread; with public weights the mask-only forward adds
   0.3\s to the A2bits pass (0.55--0.74 against 0.24--0.30\s).
-\item \textbf{Online}, RCA's 1,714--2,012 rounds cost 0.16--0.19\s of waiting. Of the rest, the main thread spent
+\item \textbf{Online}, RCA's 1,665--1,867 rounds (\flag{COMPRESS=0}; round~7: 1,714--2,012) cost 0.16--0.19\s of waiting. Of the rest, the main thread spent
   0.11\s handing levels to the pool, 0.05\s transposing bits for the A2B serially, and 0.06\s in layer glue (copies,
   residual additions, freeing buffers) in the round-3 profile.
 \item \textbf{Communication:} output repacking (round~4) removes 40\% of the conv-triple traffic at 1.3--1.7\s of

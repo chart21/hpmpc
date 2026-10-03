@@ -79,7 +79,7 @@ now writes their 64-bit specializations through `scripts/circuits/gen_64bit_adde
   form a dot chain) gives the 64-bit circuit and the narrow ones. Since llm_test a3c8176 all members of a dot group but
   one take mask 0 (only their XOR, the root's mask, is used): 56 instead of 197 random draws per 27-bit adder.
   `A2BITS_PPA4_AB=1` keeps the AB circuit (the public m as a share of mask 0). ImageNet 64-bit A2bits PPA4 (F = 12,
-  `docs/variant_data/triad/te_bit64/res7.csv`), a-known vs AB: 3,522 / 2,631 / 1,578 vs 4,317 / 3,426 / 2,373 MiB
+  `docs/variant_data/triad/te_bit64/res7.csv`), a-known vs AB: 3,674 / 2,740 / 1,635 vs 4,502 / 3,568 / 2,464 MiB
   preprocessing (UC1-3), 8.24 / 8.31 / 7.68 vs 11.26 / 11.08 / 10.80 s; online 0.695 / 0.610 / 0.695 vs 0.648 / 0.585 /
   0.695 s, same traffic and rounds.
 * The a-known RCA folds the a-known LSB carry into the next carry's dot group (carry[k-2] = x1 y1 ^ x1 x2 y2 ^

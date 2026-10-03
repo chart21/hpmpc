@@ -33,7 +33,9 @@ ImageNet all\_opt (\cref{sec:triad}): hpmpc \texttt{92a2c0e}, ConvTriple \texttt
 round~8: hpmpc \texttt{ddc082f}, ConvTriple \texttt{70f3eab}\\
 GPU and multi-batch (\cref{sec:gpu}): hpmpc \texttt{88c800b}, ConvTriple \texttt{1f5b71e}, flexNN \texttt{0404226}\\
 TE0 / TE1, 64-bit rings (\cref{sec:triadte,sec:bit64}): hpmpc \texttt{ef298d1}, ConvTriple \texttt{2d0b448}, flexNN
-\texttt{77b0644}}
+\texttt{77b0644}\\
+round~9, the final all\_opt rerun, truncation and cut comparisons, 64-bit rerun (\cref{sec:triadround9,tab:trunc,tab:cutin}):
+hpmpc \texttt{4b43984}, ConvTriple \texttt{82b1400}, flexNN \texttt{77b0644}; circuit generator \texttt{a3c8176}}
 \date{October 3, 2026}
 
 \begin{document}
@@ -59,8 +61,8 @@ With the AdamW-trained ResNet50, every variant classifies 62--72 of 100 images (
 118--131 of 192 (61--68\%; plaintext 71.9\%). Along the way we fixed a thread race, two connection hangs, four protocol
 bugs that broke whole variant families, and the sources of run-to-run nondeterminism: all 60 threaded builds
 reproduced their serial reference bit for bit, and the final single-batch builds still give the same outputs.
-For the artifact's 36 single-batch all\_opt configurations on ImageNet, preprocessing gets $2.9$--$7.1\times$
-faster with secret weights and the online phase $2.0$--$3.0\times$ (EPYC 9354). Their A2bits configurations
+For the artifact's 36 single-batch all\_opt configurations on ImageNet, preprocessing gets $3.0$--$7.1\times$
+faster with secret weights and the online phase $2.2$--$3.6\times$ (EPYC 9354). Their A2bits configurations
 were not correct as given; the A2B bake that fixes them commits every ReLU input's mask before the preprocessing pass,
 for free behind convolutions and residual sums and through a mask-only forward with public weights, and an optional
 output repacking cuts the conv triples' traffic by 40\%. On a GPU, the packed pipeline's evaluator produces the conv
@@ -69,9 +71,12 @@ extensions and the random OTs' hashing on the GPU as well, bit for bit emp's, pr
 both parties is $1.7$--$2.2\times$ faster than on its CPU in single batch and $2.1$--$2.4\times$ in multi-batch, and the
 online conv products build their column matrix on the GPU. Exact truncation (TE0, TE1) now runs in 2PC, fused into the
 ReLU without a message of its own, and classifies like the reduced-slack TS1. The 2PC configurations also run with 64-bit
-rings: BFV with $t = 2^{64}$ outside SEAL, the cut as narrow adders, the reshare bake, and OT-based arithmetic triples, at
-$1.7$--$2.1\times$ the traffic and the plaintext model's accuracy at $F = 12$; the narrow adders also fixed a 32-bit DReLU
-bug of the prefix adders under the A2B bake.
+rings: BFV with $t = 2^{64}$ outside SEAL, the cut as narrow adders, the reshare bake, and HE arithmetic triples with
+64-bit shares, at $1.7$--$2.1\times$ the traffic and the plaintext model's accuracy at $F = 12$; the narrow adders also
+fixed a 32-bit DReLU bug of the prefix adders under the A2B bake. TS1, TE1 and TE0 are stated as protocols with proofs
+and a communication analysis. The number of zero-addition gates of function-dependent preprocessing is the rank
+deficiency of a GF(2) matrix; an elimination algorithm attains it, and the circuit generator is at that minimum for
+every adder. With output repacking, preprocessing in a 20\ms / 200\,Mbit/s WAN is 14--20\% faster.
 \end{abstract}
 
 \section{Introduction}
@@ -105,16 +110,20 @@ and reproducible system. Its focus is communication and runtime; \cref{fig:summa
 \item \textbf{The all\_opt configurations on ImageNet} (\cref{sec:triad}): 36 builds over three weight settings, two
   ReLU protocols and three adders. The A2bits configurations as given compute wrong signs; the A2B bake fixes them
   by committing every ReLU input's mask before the preprocessing pass, at no traffic behind convolutions and residual
-  sums. The conv triples start alongside the OT phase. Preprocessing $2.9\text{--}7.1\times$ faster with secret weights,
-  online $2.0\text{--}3.0\times$.
+  sums. The conv triples start alongside the OT phase. Preprocessing $3.0\text{--}7.1\times$ faster with secret weights,
+  online $2.2\text{--}3.6\times$; the cut as narrow adders (\cref{tab:cutin}); all truncation schemes compared
+  (\cref{tab:trunc}).
 \item \textbf{Exact truncation} (\cref{sec:triadte}): TE0 and TE1 fused into the ReLU on TS1's machinery, exact without
   slack; the low carry comes from a small adder in the ReLU's rounds (a four-way PPA of 2 rounds for prefix builds), its
   mask products from B2As instead of a multiplexer. TS1, TE1 and TE0 stated as protocols with proofs of the identities
   they compute and of their security (\cref{sec:truncformal}).
 \item \textbf{Generated a-known circuits} (\cref{sec:triadround9}): the circuit generator emits the a-known four-way PPA
   correctly at any width (pending a-known products in dot chains), gives a dot group's members one mask share, and folds
-  the a-known RCA's first carry; A2bits PPA4 keeps the a-known circuit at the cut (368\,MiB and 1.0--1.2\s less
+  the a-known RCA's first carry; A2bits PPA4 keeps the a-known circuit at the cut (384\,MiB and 1.0--1.2\s less
   preprocessing on ImageNet), A2bits RCA saves 49 rounds.
+\item \textbf{Zero-addition gates} (\cref{sec:zeroadd}): their minimum is $m - \operatorname{rank}\Lambda$ over
+  $\mathbb{F}_2$ (Theorem~3, with proof), attained by an elimination algorithm (RankFDP); the generator's adders are all
+  at the minimum.
 \item \textbf{64-bit rings} (\cref{sec:bit64}): HE triples modulo $2^{64}$, generated 64-bit and narrow adders, the cut
   and the reshare bake at 64 bits, arithmetic triples by HE with 64-bit shares ($6\times$ faster than Gilboa
   multiplication); $N = 4096$, $8192$ and output repacking in LAN and WAN (\cref{tab:polyn}: repacking 14--20\% faster
@@ -557,6 +566,7 @@ GPU product against 1.10--1.36\s on the CPU (1.5--1.7\s before the lanes' \flag{
 \section{Boolean material: OT preprocessing}\label{sec:ot}
 
 \input{ot_formal}
+\input{zeroadd_formal}
 
 \subsection{Engineering the OT preprocessing}
 
@@ -670,6 +680,51 @@ PPA4 & 625 & 625 & 20.1 & 21.8 & 0.42 & 0.42\\
 \caption{Online rounds, P0's ReLU traffic and online time for 10 CIFAR-10 images on flare / polynize,
 with and without \flag{CUT_FRACTIONAL_BITS_OPT}. The time differences are within run-to-run noise.}
 \label{tab:cut}
+\end{table}
+
+\paragraph{The cut on ImageNet.} \Cref{tab:cutin} compares the three implementations of the cut in the all\_opt
+builds (UC2; UC1 and UC3 behave alike): none (\flag{CUT_FRACTIONAL_BITS_OPT=0}), the identity-substituted full-width
+circuits (\flag{CUT_NARROW_32=0}) and the narrow generated adders of $\ell - F$ bits (\flag{CUT_NARROW_32=1}, the
+default; \cref{sec:bit64,sec:triadround9}). Both cuts keep the A2B's full-width preparation (vacant slices public
+constants) and let the bake's Boolean addition stop at bit $\ell - F - 1$ (\flag{A2B_ADDER_CUT}). Against no cut, the
+narrow adders send 7\% (RCA), 11\% (PPA) and 4\% (PPA4) less online traffic and need 294 (RCA) and 42 (PPA) fewer
+rounds; preprocessing traffic falls by 30, 43 and 119\,MiB (PPA4: 83 fewer Boolean OT MiB for its multi-input tuples,
+and fewer zero-add openings). Against the identity cut, the narrow adders save 2.2, 14.9 and 6.4\,MiB online and 49
+(RCA, the folded first carry) and 33 (PPA) rounds; the identity cut saves nothing online for A2bits PPA4, whose
+a-known full-width circuit sends the same as without the cut. In preprocessing they are within 4\,MiB for RCA and PPA4
+(PPA4: 12\,MiB more OT, 16\,MiB fewer zero-add openings) and 22\,MiB lower for PPA. The identity-substituted PPA and
+PPA4 circuits are moreover wrong under the bake for some inputs near the cut's limit (\cref{sec:bit64}); the reshared
+builds, which have no bake, keep them (16.1, 24.6 and 9.7\,MiB less online than without the cut).
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+build (UC2) & cut & pre MiB & OT MiB & pre s & online MiB & online s & rounds\\
+\midrule
+A2bits RCA & none & 996 & 406 & 3.25 & 178.4 & 0.446 & 1959\\
+ & identity & 964 & 384 & 3.15 & 167.8 & 0.403 & 1714\\
+ & narrow & 966 & 384 & 3.26 & 165.6 & 0.397 & 1665\\
+A2bits PPA & none & 1{,}111 & 467 & 4.19 & 296.5 & 0.402 & 887\\
+ & identity & 1{,}090 & 445 & 4.12 & 279.3 & 0.394 & 878\\
+ & narrow & 1{,}068 & 445 & 4.24 & 264.4 & 0.384 & 845\\
+A2bits PPA4 & none & 1{,}452 & 702 & 5.48 & 165.6 & 0.462 & 626\\
+ & identity & 1{,}337 & 607 & 4.51 & 165.6 & 0.454 & 626\\
+ & narrow & 1{,}333 & 619 & 4.42 & 159.2 & 0.361 & 626\\
+\addlinespace
+reshared RCA & none & 800 & 211 & 2.17 & 212.8 & 0.511 & 2008\\
+ & identity & 790 & 211 & 2.10 & 196.7 & 0.466 & 1763\\
+reshared PPA & none & 979 & 303 & 4.08 & 330.8 & 0.479 & 903\\
+ & identity & 949 & 303 & 3.97 & 306.2 & 0.488 & 900\\
+reshared PPA4 & none & 1{,}789 & 1{,}014 & 5.57 & 200.0 & 0.419 & 675\\
+ & identity & 1{,}710 & 1{,}002 & 5.45 & 190.3 & 0.463 & 675\\
+\bottomrule
+\end{tabular}
+\caption{The cut in the ImageNet all\_opt builds (UC2, \flag{COMPRESS=0}, flare / polynize, hpmpc \texttt{4b43984},
+median of 3 interleaved runs; P0's traffic sent and received; OT: the Boolean material). None:
+\flag{CUT_FRACTIONAL_BITS_OPT=0}; identity: \flag{CUT_NARROW_32=0}; narrow: the default. The identity-substituted
+A2bits PPA / PPA4 circuits DReLU wrongly for some inputs (\cref{sec:bit64}).}
+\label{tab:cutin}
 \end{table}
 
 % ------------------------------------------------------------------------------------------------
@@ -891,9 +946,11 @@ points (Trio 56\% against 73\% in plaintext; 73\% with a 64-bit ring). The AdamW
   stand-alone one (a pooling without a ReLU after it) would need a message of its own, and the reshared and
   \flag{COMPRESS=1} builds, which have no A2B bake, a Boolean addition of their own. A pooling's division folded into a
   ReLU takes TS1's shifted design, also under TE.
-\item \textbf{64-bit rings.} The a-known four-way adder has no generated 64-bit or narrow form, so A2bits PPA4 takes the
-  AB circuit there (and, with \flag{CUT_NARROW_32}, for the 32-bit cut under the bake); the narrow cut adders exist for
-  the listed values of $F$ only (\cref{sec:bit64}). An HE product costs $2.1\times$ the 32-bit traffic without repacking.
+\item \textbf{64-bit rings.} The narrow cut adders exist for the listed values of $F$ only (\cref{sec:bit64}), and the
+  split four-way circuits (\flag{ADDITIONAL_PPA_THREADS}) have no 64-bit or narrow form. An HE product costs $2.1\times$ the
+  32-bit traffic without repacking.
+\item \textbf{Zero-addition gates.} The adders are at the minimum of Theorem~3 (\cref{sec:zeroadd}); fewer need a different
+  tuple model (fan-out tuples, 21--70\% fewer zero-adds), which no layer of the stack implements yet.
 \item \textbf{Weights known in preprocessing.} The multi-batch a2b bake still excludes
   \flag{MODELWEIGHTS_KNOWN_DURING_PREPROCESSING}, whose prescribed shares assume one word per register.
 \item \textbf{Ciphertext occupancy.} At $7\times7$ feature maps, inputs are 5--19\% data and outputs
@@ -925,6 +982,9 @@ one. Seeded, bit-reproducible runs made every change measurable and exposed the 
 Moving the A2B to preprocessing (\cref{sec:triad}) needs every ReLU input's mask fixed before the preprocessing pass;
 most producers can commit their masks for free, and the care it takes is privacy bookkeeping: each committed mask may
 mask one value only, and a mask narrowed for a truncation only where the other party never sees what it hides.
+Two parts now rest on proofs rather than measurements alone: the truncations fused into the ReLU (TS1, and the exact
+TE1 and TE0, whose identities hold for every input in range) and the number of zero-addition gates, which is a matrix
+rank that the generated adders attain; what remains there is a choice of model (fan-out tuples), not of placement.
 
 \begin{thebibliography}{9}\small
 \bibitem{aby2} A.~Patra, T.~Schneider, A.~Suresh, H.~Yalame. ABY2.0: Improved mixed-protocol secure
@@ -933,6 +993,8 @@ mask one value only, and a mask narrowed for a truncation only where the other p
   network inference. USENIX Security 2022.
 \bibitem{tu} C.~Harth-Kitzerow, A.~Suresh, G.~Carle. Truncation untangled: scaling fixed-point arithmetic for
 privacy-preserving machine learning to large models and datasets. 2024.
+
+\bibitem{edmonds71} J.~Edmonds. Matroids and the greedy algorithm. Mathematical Programming 1, 127--136, 1971.
 
 \bibitem{ferret} K.~Yang, C.~Weng, X.~Lan, J.~Zhang, X.~Wang. Ferret: Fast extension for correlated OT
   with small communication. ACM CCS 2020.

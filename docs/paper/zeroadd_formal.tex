@@ -1,0 +1,109 @@
+\subsection{Zero-addition gates: the minimum and an algorithm that attains it}\label{sec:zeroadd}
+
+The ROT-preprocessing adders (\flag{ROT_PREPROCESSING_OPT}) use Triad Suite's function-dependent preprocessing: every
+input of a multiplication gate takes a field of the gate's random Beaver tuple as its mask, so the tuple needs no
+correction, and a wire whose mask would have to equal two different fields (fan-out into two multiplication gates, or
+an XOR of masks that are fixed elsewhere) gets a \emph{zero-addition gate} on one of its edges: a new wire of value 0
+whose mask, published in preprocessing, re-masks that edge. Each zero-add costs one opening in preprocessing
+(\texttt{zero\_add}) and nothing online. Triad's Alg.~1/2 place them by propagating masks through the XOR gates and
+resolving conflicts as they appear; this subsection gives the exact minimum, an algorithm that attains it by
+construction, and the proof.
+
+\paragraph{The linear model.} Let the circuit have XOR gates and multiplication gates (AND, AND3, AND4, dot terms; an
+a-known product counts as a gate whose output carries a fresh mask, its remask or its dot chain's root). Call
+\emph{sources} the masks of the circuit inputs that are not fixed (a fixed mask, such as the bake's prescribed masks
+in the AB circuits, is a constant) and of the multiplication outputs, and let $s \in \mathbb{F}_2^n$ collect them.
+Every wire's mask is then affine in $s$: an XOR gate adds its input masks. A \emph{constraint} is an edge into a
+multiplication gate (the input pairs a reshared circuit reshares have none); with $m$ constraints, their masks are
+$\Lambda s + d$ for an $m \times n$ matrix $\Lambda$ over $\mathbb{F}_2$ and a constant $d$. The tuple fields are
+independent and uniform, so preprocessing must be able to make the constrained masks equal any vector $t$ of fields:
+the affine map $s \mapsto \Lambda s + d$ must be onto, i.e.\ $\operatorname{rank}\Lambda = m$. A zero-add on
+constraint $c$ replaces its mask by a new source of its own: it appends the unit column $e_c$ to $\Lambda$.
+
+\textbf{Theorem 3.} The minimum number of zero-addition gates of a circuit is $m - \operatorname{rank}_{\mathbb{F}_2}\Lambda$.
+A set $Z$ of constraints suffices if and only if the rows of $\Lambda$ outside $Z$ are linearly independent; with
+such a $Z$ the masks of all opened wires are uniform and independent.
+
+\emph{Proof.} \emph{Lower bound.} Appending a column raises the rank by at most one, so
+$\operatorname{rank}[\Lambda \mid e_Z] \le \operatorname{rank}\Lambda + |Z|$, and full rank $m$ needs
+$|Z| \ge m - \operatorname{rank}\Lambda$. \emph{Characterization.} If the rows outside $Z$ are independent, take a
+linear combination of the rows of $[\Lambda \mid e_Z]$ that vanishes: each row $c \in Z$ is the only one with a 1 in
+column $e_c$, so its coefficient is 0, and the remaining rows are independent, so all coefficients are 0; the rank is
+$m$. Conversely, if the rows outside $Z$ are dependent, the same combination vanishes on $[\Lambda \mid e_Z]$ as well
+(those rows are 0 in the columns $e_Z$), so the rank is below $m$. Rows outside a row basis of $\Lambda$ are such a set
+of size $m - \operatorname{rank}\Lambda$, so the bound is attained. \emph{Masks.} Preprocessing draws the tuple fields
+$t$ uniformly, chooses $s$ uniformly among the solutions of $\Lambda_{\bar Z} s + d_{\bar Z} = t_{\bar Z}$ (they exist
+since $\Lambda_{\bar Z}$ has full row rank) and publishes $t_c - (\Lambda_c s + d_c)$ for $c \in Z$. As $t_{\bar Z}$ is
+uniform and the map onto, $s$ is uniform on $\mathbb{F}_2^n$, so the masks of all multiplication outputs (the opened
+wires) are jointly uniform; each published value contains its own fresh field $t_c$ and is uniform and independent of
+the rest. This is the distribution of the protocol with fresh masks everywhere. \hfill$\square$
+
+Over $\mathbb{Z}_{2^\ell}$ (arithmetic circuits) the masks are integer combinations with coefficients $\pm1$, and an
+integer matrix is onto modulo $2^\ell$ exactly when some $m \times m$ minor is odd, i.e.\ when its reduction modulo 2
+has rank $m$: Theorem~3 holds with the rank over $\mathbb{F}_2$ of $\Lambda \bmod 2$.
+
+\begin{figure}[t]
+\centering\small
+\fbox{\begin{minipage}{0.95\linewidth}
+\textbf{Algorithm RankFDP} (minimal zero-addition gates)\\[2pt]
+\emph{Input:} a circuit; the fixed-mask inputs; the reshared gates; optionally a cost per constraint.
+\emph{Output:} the zero-add edges $Z$ and every wire's mask.
+\begin{enumerate}\itemsep1pt
+\item \textbf{Forms.} In topological order: a non-fixed input or a multiplication output gets a new source (a unit
+  bitset), a fixed input the constant 0, an XOR output the XOR of its inputs' forms. Each edge into a multiplication
+  gate (not reshared) appends its form to the constraint list.
+\item \textbf{Elimination.} Sort the constraints by decreasing cost (default: circuit order). Keep a basis indexed by
+  pivot (the highest source of a row). For each constraint, reduce its form by the basis; if a non-zero remainder is
+  left, it enters the basis with that pivot; otherwise put the edge into $Z$.
+\item \textbf{Masks.} Draw the tuple fields; assign the sources that are pivots from the basis rows (each basis row
+  fixes its pivot given the sources below it, solved from the lowest pivot up) and draw the others uniformly; every
+  wire's mask is its form evaluated; an edge in $Z$ gets its tuple field and a zero-add publishing the difference.
+\end{enumerate}
+\end{minipage}}
+\caption{RankFDP. With $n$ sources and $m$ constraints it takes $O(m \cdot \operatorname{rank}\Lambda \cdot n / w)$ word
+operations ($w$-bit words), milliseconds for the 64-bit adders (\texttt{zero\_add\_bound.py} in the circuit generator).}
+\label{fig:rankfdp}
+\end{figure}
+
+\paragraph{Optimality of RankFDP.} The sets of independent rows of $\Lambda$ form a matroid (linear independence), and
+by Theorem~3 the complements of its bases are exactly the minimum zero-add sets. Step~2 builds a basis greedily, so
+$|Z| = m - \operatorname{rank}\Lambda$ in every order. With costs it is the matroid greedy algorithm, which yields a
+basis of maximum total cost~\cite{edmonds71}: its complement $Z$ has minimum total cost among all minimum zero-add sets
+(and among all valid sets, since every valid set contains the complement of a basis). This matters where zero-adds
+differ in price: under the reshare bake the zero-adds on input slices that P1 bakes are local
+(\texttt{zero\_add\_local}), so they should be preferred to the ones that send their difference.
+
+\paragraph{The generator is at the minimum.} \Cref{tab:zeroadd} compares the bound with the zero-adds the circuit
+generator places with Alg.~1/2 for all twelve families the adders use, at 8, 16, 32 and 64 bits and the narrow widths:
+it is at $m - \operatorname{rank}\Lambda$ everywhere, so these circuits cannot do with fewer zero-adds under
+this model. (Its mask propagation never creates an avoidable dependency on them; RankFDP guarantees it for any
+circuit.) The minimum is a property of the circuit's logic and of the tuple model, not of the placement. What remains
+is the model: if the multiplication gates reading one wire shared that wire's tuple field (\emph{fan-out tuples}: one
+constraint per wire instead of per edge), the minimum would fall by 21\% (PPA), 31\% (four-way PPA) and 70\% (a-known
+four-way PPA, 104 to 31 at 32 bits), RCA unchanged. Such tuples are cheaper to generate as well (a shared factor's
+share bits are the choice bits of one ROT with a multi-bit correlation instead of one ROT per product), but they need
+a new tuple type in the generator, the OT preprocessing and the adder classes.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+circuit & $k$ & $m$ & rank & min & generator & fan-out min\\
+\midrule
+RCA MSB, AB & 32 / 64 & 62 / 126 & 30 / 62 & 32 / 64 & 32 / 64 & 32 / 64\\
+RCA MSB, AB reshared & 32 / 64 & 60 / 124 & 30 / 62 & 30 / 62 & 30 / 62 & 30 / 62\\
+RCA MSB, a-known & 32 / 64 & 60 / 124 & 29 / 61 & 31 / 63 & 31 / 63 & 31 / 63\\
+PPA MSB, AB & 32 / 64 & 172 / 362 & 55 / 118 & 117 / 244 & 117 / 244 & 92 / 188\\
+PPA MSB, AB reshared & 32 / 64 & 110 / 236 & 55 / 118 & 55 / 118 & 55 / 118 & 30 / 62\\
+PPA MSB, a-known & 32 / 64 & 110 / 236 & 55 / 118 & 55 / 118 & 55 / 118 & 30 / 62\\
+PPA4 MSB, AB & 32 / 64 & 154 / 331 & 21 / 46 & 133 / 285 & 133 / 285 & 92 / 188\\
+PPA4 MSB, AB reshared & 32 / 64 & 132 / 289 & 21 / 46 & 111 / 243 & 111 / 243 & 70 / 146\\
+PPA4 MSB, a-known & 32 / 64 & 125 / 271 & 21 / 46 & 104 / 225 & 104 / 225 & 31 / 63\\
+PPA4 MSB, a-known (cut) & 27 / 52 & 105 / 220 & 18 / 37 & 87 / 183 & 87 / 183 & 26 / 51\\
+\bottomrule
+\end{tabular}
+\caption{Zero-addition gates per adder: constraints $m$, $\operatorname{rank}\Lambda$, the minimum of Theorem~3, the
+generator's count (Alg.~1/2) and the minimum with fan-out tuples (\texttt{zero\_add\_bound.py}; all widths 8--64 in
+the script's output agree as well).}
+\label{tab:zeroadd}
+\end{table}

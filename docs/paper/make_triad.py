@@ -35,6 +35,8 @@ for p in ("fp", "ag"):
             res[(p, "fin")] = load_prefix(f"res_{p}_final8.csv", "fin8")
         if (VD / f"res_{p}_final9.csv").exists():  # round-7 code (hpmpc 92a2c0e)
             res[(p, "fin")] = load_prefix(f"res_{p}_final9.csv", "fin9")
+        if (VD / f"res_{p}_final10.csv").exists():  # round-9 code, the artifact configs (hpmpc 4b43984; Zen 4 only)
+            res[(p, "fin")] = load_prefix(f"res_{p}_final10.csv", "fin10")
     elif (VD / f"res_{p}_ab.csv").exists():
         res[(p, "conf")].update(load_prefix(f"res_{p}_ab.csv", "conf"))
         res[(p, "fin")].update(load_prefix(f"res_{p}_ab.csv", "fin2"))
@@ -69,6 +71,8 @@ if (VD / "comm_fp8.csv").exists():  # all final builds at the round-6 code
     comm_rows += list(csv.DictReader(open(VD / "comm_fp8.csv")))
 if (VD / "comm_fp9.csv").exists():  # all final builds at the round-7 code
     comm_rows += list(csv.DictReader(open(VD / "comm_fp9.csv")))
+if (VD / "comm_fp10.csv").exists():  # the round-9 code (campaign10/ana10.py final: sums in the *_sent columns)
+    comm_rows += list(csv.DictReader(open(VD / "comm_fp10.csv")))
 for r in comm_rows:
     v = {k: float(x) for k, x in r.items() if k != "tag"}
     comm[r["tag"].rsplit("_r", 1)[0]] = {
@@ -82,7 +86,7 @@ for c in ("0", "1"):
             for a, an in ADD:
                 n = f"{key}_{a}_c{c}"
                 g = comm[f"conf_{n}"]
-                o = comm.get(f"fin9_{n}", comm.get(f"fin8_{n}", comm.get(f"r6_{n}", comm.get(f"fin6_{n}", comm[f"fin2_{n}"]))))
+                o = comm.get(f"fin10_{n}", comm.get(f"fin9_{n}", comm.get(f"fin8_{n}", comm.get(f"r6_{n}", comm.get(f"fin6_{n}", comm[f"fin2_{n}"])))))
                 f.write(f"{y} {{{name}, {an}}} {g['trip'] + g['pass']:.1f} {o['trip'] + o['pass']:.1f} "
                         f"{g['trip']:.1f} {o['trip']:.1f} {g['online']:.1f} {o['online']:.1f}\n")
                 y += 1

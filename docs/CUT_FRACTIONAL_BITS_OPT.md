@@ -19,6 +19,16 @@ Whether a given adder instance applies the cut is the runtime flag `g_cut_frac_a
 it, and the max/min comparison adders always run the full circuit - a difference of two bounded
 values needs one bit more than either.
 
+**Two implementations.** The identity substitution below (the full-width circuits with public constants on the vacant
+slices, hand-edited gate skipping and mask retargeting) was the first one. The *narrow cut* (`CUT_FRAC_NARROW`:
+`BITLENGTH 64` always, and at 32 bits `CUT_NARROW_32=1`, the default, for PPA / PPA4 / a-known RCA under the A2B bake)
+instead runs a generated adder of width `BITLENGTH - F` on slices `F..BITLENGTH-1` of the full bitsets, viewed in place
+(`narrow32/`, `narrow64/`; `cut_frac_narrow_on`): the A2B still prepares the full width (vacant slices public constants,
+the boundary slice masked and sent), only the MSB adder is narrower. It is correct by construction (the
+identity-substituted PPA / PPA4 circuits DReLU wrongly under the bake for some inputs near 2^(31-F), see
+`docs/BITLENGTH64.md`), and the a-known RCA's narrow circuit is folded (one round per ReLU fewer). The reshared and plain
+32-bit builds, which have no bake, keep the identity substitution.
+
 ## Slice roles (protocols/beaver_triples.hpp)
 
 With the cut active (slice 0 = numeric MSB, `F = FRACTIONAL`):

@@ -177,6 +177,36 @@ Lemma~2 was also checked exhaustively for $\ell = 8$, $F \in \{2, 3\}$ (all $z \
 simulation for $\ell \in \{16, 32, 64\}$; the unit tests \texttt{RELU\_TE1} / \texttt{RELU\_TE0} find every positive
 input exact with all three adders at 32 and 64 bits.
 
+\paragraph{Communication.} \Cref{tab:trunccost} counts what each scheme adds per ReLU value to the plain fused
+ReLU (the MSB adder of the A2B and the bit injection's one $\ell$-bit message per party, the same in all of them).
+Messages are those of the protocols above; an AND gate opens one bit per party, a COT of $k$ bits sends $k$ bits after
+its random OT, a multiplexer of $k$ bits is two such COTs. TS\{L\} truncates the two parties' shares locally (SecureML), folded into
+the multiplication's output exchange, and costs nothing in either phase; but it is probabilistic and needs slack:
+for $|x| < 2^e$ the shares' truncation fails with probability up to $2^{e+1-\ell}$, an error of about $2^{\ell-F}$. TS1 removes the wraps for 22 bits of COT material per value
+and nothing online. TE1 makes the result exact for about 5 times that in preprocessing (the full-width Boolean
+addition, three COTs of $\ell - 1$ bits) and the low adder's 4 messages online, which run inside the DReLU adder's
+rounds; TE0 additionally pays the cut. Measured on ImageNet, $8.8$ million values take the TE schemes' online
+messages: 4 per value, 8.4\,MiB, as \cref{tab:trunc} shows.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lp{3.0cm}p{1.6cm}p{5.6cm}l@{}}
+\toprule
+scheme & online (bits per value, both parties) & extra rounds per ReLU & preprocessing per value & result\\
+\midrule
+TS\{L\} & 0 & 0 & 0 & $\pm 1$, wraps (slack)\\
+TS\_Mix & 0 & 0 & as TS1 in the ReLUs; poolings as TS\{L\} & $-1$..$+1$; poolings wrap\\
+TS1 & 0 & 0 & $2\,\mathrm{COT}_F + \mathrm{MUX}_{F+1}$ ($4F + 2 = 22$ bits, 4 ROTs); poolings ($t' > 0$) $+\mathrm{COT}_{\ell-1}$ & $-1$..$+1$, 1 bit slack\\
+TE1 & low adder: $2(F - 1)$ (RCA), 8 (four-way, $F = 5$) & 0 & Boolean addition $+F$ ANDs; $2\,\mathrm{COT}_F + 3\,\mathrm{COT}_{\ell-1} + 2\,\mathrm{COT}_1 + \mathrm{MUX}_{F+1}$ ($4F + 3\ell + 1 = 117$ bits, 9 ROTs); low adder: $F - 1$ triples (RCA) or 5 triples and a 3-tuple (four-way) & exact\\
+TE0 & TE1 $+$ full-width DReLU: RCA $+12$, PPA $+30$, PPA4 $+6$ & RCA $+6$ & TE1 $+$ the full-width adder's tuples & exact, every $z$\\
+\bottomrule
+\end{tabular}
+\caption{What the truncation schemes add per ReLU value ($\ell = 32$, $F = 5$ where numbers are given). The plain
+ReLU's DReLU adder (narrow, the cut) sends 25 (RCA), 71 (PPA) or 22 (PPA4) one-bit messages per party in 25, 6 or 3
+rounds; at full width 31, 86 or 25.}
+\label{tab:trunccost}
+\end{table}
+
 \paragraph{Security.} \textbf{Theorem 2.} $\Pi_{\mathrm{TS1}}$, $\Pi_{\mathrm{TE1}}$ and $\Pi_{\mathrm{TE0}}$ securely
 compute their outputs against a semi-honest adversary corrupting one party, in the hybrid model with
 $\mathcal{F}_{\mathrm{COT}}$, $\mathcal{F}_{\mathrm{MUX}}$, $\mathcal{F}^{B}_{\mathrm{ADD}}$ and the preprocessing of
