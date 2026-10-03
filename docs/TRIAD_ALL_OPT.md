@@ -866,6 +866,26 @@ identity cut):
 | UC3 reshared PPA4 | none | 1,137 | 885 | 4.92 | 157.5 | 0.428 | 675 |
 |  | identity | 1,102 | 879 | 5.00 | 147.9 | 0.488 | 675 |
 
+**WAN** (20 ms per direction, 200 Mbit/s on both hosts, reset afterwards: 0 netem qdiscs; `res10.csv`, two runs), the 12
+UC1 / UC2 COMPRESS=0 builds without / with output repacking (pre MiB, WAN pre s, WAN online s). Repacking: -192 (UC2) /
+-384 MiB (UC1), preprocessing -3.3..-8.3 s (6-24%); online unchanged (RCA 30-34 s, PPA 14-16 s, PPA4 9-12 s). Shortest
+with secret weights: UC2 reshared PPA with repacking, 26.3 + 15.9 s. The artifact's WAN configs take repacking.
+
+| build | pre MiB | WAN pre s | WAN online s |
+|---|---|---|---|
+| UC1 A2bits RCA | 1,406 / 1,022 | 36.87 / 30.10 | 31.68 / 31.82 |
+| UC1 A2bits PPA | 1,508 / 1,124 | 42.18 / 35.42 | 14.74 / 14.83 |
+| UC1 A2bits PPA4 | 1,772 / 1,388 | 55.21 / 49.90 | 10.11 / 10.25 |
+| UC2 A2bits RCA | 966 / 774 | 30.58 / 26.10 | 30.07 / 30.10 |
+| UC2 A2bits PPA | 1,068 / 876 | 34.24 / 30.11 | 14.27 / 14.24 |
+| UC2 A2bits PPA4 | 1,333 / 1,141 | 48.84 / 44.46 | 8.78 / 8.75 |
+| UC1 reshared RCA | 1,229 / 845 | 32.49 / 24.75 | 33.95 / 33.76 |
+| UC1 reshared PPA | 1,389 / 1,005 | 35.86 / 29.79 | 16.46 / 16.50 |
+| UC1 reshared PPA4 | 2,150 / 1,766 | 72.46 / 64.18 | 12.14 / 12.15 |
+| UC2 reshared RCA | 790 / 598 | 24.63 / 20.28 | 33.50 / 33.47 |
+| UC2 reshared PPA | 949 / 757 | 29.63 / 26.30 | 15.95 / 15.90 |
+| UC2 reshared PPA4 | 1,710 / 1,518 | 64.40 / 60.28 | 10.43 / 10.37 |
+
 ## GPU (2026-10-01, workstation cmucl771615)
 
 RTX 4000 Ada (20 GB, sm_89), 2x Xeon Silver 4410Y (24 cores, 48 threads), CUDA 12.6; both parties on the machine

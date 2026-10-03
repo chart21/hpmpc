@@ -278,7 +278,14 @@ change.
 \paragraph{LAN and WAN.} The 25\,Gbit/s testbed favors computation; in a WAN the conv triples' traffic and the online
 rounds dominate. \Cref{tab:wan} runs the twelve all\_opt builds with linear-layer triples (UC1, UC2) at 20\ms per
 direction and 200\,Mbit/s, without and with output repacking (\flag{CHEETAH_CONV_REPACK=1}, $N = 8192$ with a special
-prime; \cref{tab:polyn}): %WANTEXT%
+prime; \cref{tab:polyn}): repacking sends 192 (UC2) or 384\,MiB (UC1) less in preprocessing and
+shortens it by 3.3--8.3\s (6--24\%), most for RCA and the reshared builds, whose OT material is smallest. The online
+phase does not change and is round-bound: RCA's 1,665--1,867 rounds take 30--34\s, PPA's 845--1,004 rounds 14--16\s and
+PPA4's 626--779 rounds 9--12\s, so in the WAN the prefix adders pay off. The shortest inference with secret weights is UC2
+reshared PPA with repacking (26.3\s of preprocessing and 15.9\s online, against 20.3 and 33.5\s for RCA); PPA4's Beaver
+tuples make its preprocessing bandwidth-bound (44--64\s). The WAN configurations of the artifact therefore take
+repacking (\texttt{single\_batch\_WAN}); $N = 4096$ cannot repack, since the key switching's special prime does not fit
+next to its 109-bit data modulus at 128-bit security.
 
 \begin{table}[t]
 \centering\small
@@ -286,7 +293,19 @@ prime; \cref{tab:polyn}): %WANTEXT%
 \toprule
 build & pre MiB & WAN pre s & WAN online s\\
 \midrule
-%WANROWS%
+UC1 A2bits RCA & 1{,}406 / 1{,}022 & 36.87 / 30.10 & 31.68 / 31.82\\
+UC1 A2bits PPA & 1{,}508 / 1{,}124 & 42.18 / 35.42 & 14.74 / 14.83\\
+UC1 A2bits PPA4 & 1{,}772 / 1{,}388 & 55.21 / 49.90 & 10.11 / 10.25\\
+UC2 A2bits RCA & 966 / 774 & 30.58 / 26.10 & 30.07 / 30.10\\
+UC2 A2bits PPA & 1{,}068 / 876 & 34.24 / 30.11 & 14.27 / 14.24\\
+UC2 A2bits PPA4 & 1{,}333 / 1{,}141 & 48.84 / 44.46 & 8.78 / 8.75\\
+\addlinespace
+UC1 reshared RCA & 1{,}229 / 845 & 32.49 / 24.75 & 33.95 / 33.76\\
+UC1 reshared PPA & 1{,}389 / 1{,}005 & 35.86 / 29.79 & 16.46 / 16.50\\
+UC1 reshared PPA4 & 2{,}150 / 1{,}766 & 72.46 / 64.18 & 12.14 / 12.15\\
+UC2 reshared RCA & 790 / 598 & 24.63 / 20.28 & 33.50 / 33.47\\
+UC2 reshared PPA & 949 / 757 & 29.63 / 26.30 & 15.95 / 15.90\\
+UC2 reshared PPA4 & 1{,}710 / 1{,}518 & 64.40 / 60.28 & 10.43 / 10.37\\
 \bottomrule
 \end{tabular}
 \caption{The all\_opt builds with linear-layer triples in a WAN (20\ms per direction, 200\,Mbit/s on both hosts;
