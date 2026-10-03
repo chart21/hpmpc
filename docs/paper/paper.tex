@@ -108,10 +108,17 @@ and reproducible system. Its focus is communication and runtime; \cref{fig:summa
   sums. The conv triples start alongside the OT phase. Preprocessing $2.9\text{--}7.1\times$ faster with secret weights,
   online $2.0\text{--}3.0\times$.
 \item \textbf{Exact truncation} (\cref{sec:triadte}): TE0 and TE1 fused into the ReLU on TS1's machinery, exact without
-  slack; the low carry comes from a small adder in the ReLU's rounds.
+  slack; the low carry comes from a small adder in the ReLU's rounds (a four-way PPA of 2 rounds for prefix builds), its
+  mask products from B2As instead of a multiplexer. TS1, TE1 and TE0 stated as protocols with proofs of the identities
+  they compute and of their security (\cref{sec:truncformal}).
+\item \textbf{Generated a-known circuits} (\cref{sec:triadround9}): the circuit generator emits the a-known four-way PPA
+  correctly at any width (pending a-known products in dot chains), gives a dot group's members one mask share, and folds
+  the a-known RCA's first carry; A2bits PPA4 keeps the a-known circuit at the cut (368\,MiB and 1.0--1.2\s less
+  preprocessing on ImageNet), A2bits RCA saves 49 rounds.
 \item \textbf{64-bit rings} (\cref{sec:bit64}): HE triples modulo $2^{64}$, generated 64-bit and narrow adders, the cut
-  and the reshare bake at 64 bits, arithmetic triples by Gilboa multiplication; $N = 4096$ against $8192$ in LAN and WAN
-  (\cref{tab:polyn}).
+  and the reshare bake at 64 bits, arithmetic triples by HE with 64-bit shares ($6\times$ faster than Gilboa
+  multiplication); $N = 4096$, $8192$ and output repacking in LAN and WAN (\cref{tab:polyn}: repacking 14--20\% faster
+  preprocessing in the WAN).
 \item \textbf{GPU} (\cref{sec:gpu}): a GPU evaluator inside the packed conv pipeline, and ferret's LPN step, GGM trees
   and the random OTs' hashing on the GPU, all bit-identical to the CPU's. Conv triples $2.1\text{--}2.3\times$ faster;
   end to end, on one shared machine, preprocessing $1.7\text{--}2.2\times$ faster than on the CPU, $2.1\text{--}2.4\times$ in
@@ -924,6 +931,9 @@ mask one value only, and a mask narrowed for a truncation only where the other p
   two-party computation. USENIX Security 2021.
 \bibitem{cheetah} Z.~Huang, W.~Lu, C.~Hong, J.~Ding. Cheetah: Lean and fast secure two-party deep neural
   network inference. USENIX Security 2022.
+\bibitem{tu} C.~Harth-Kitzerow, A.~Suresh, G.~Carle. Truncation untangled: scaling fixed-point arithmetic for
+privacy-preserving machine learning to large models and datasets. 2024.
+
 \bibitem{ferret} K.~Yang, C.~Weng, X.~Lan, J.~Zhang, X.~Wang. Ferret: Fast extension for correlated OT
   with small communication. ACM CCS 2020.
 \end{thebibliography}

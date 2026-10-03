@@ -222,25 +222,34 @@ The responses do not shrink with it: an output element's share of a sparse outpu
 the coefficient width, and the tiling's $c_i$ grows with $\sqrt{N}$, so an ImageNet HE product sends 629 instead of
 479\,MiB ($1.31\times$). We measured it on flare / polynize in the LAN and with a WAN shaped on both hosts
 (\texttt{shape\_network\_alt.sh}, 20\ms per direction and 200\,Mbit/s on every interface, reset afterwards;
-\cref{tab:polyn}). $N = 8192$ loses in both: by 0.07--0.12\s in the LAN, and by 3.1--6.4\s in the WAN, where the conv
-phase is bandwidth-bound and takes $1.24\times$ as long. The online phase does not depend on $N$; in the WAN it is
-round-bound (1,714--1,818 rounds of about 19\ms). $N = 4096$ stays the default.
+\cref{tab:polyn}). Plain $N = 8192$ loses in both: by up to 0.08\s in the LAN, and by 2.7--5.8\s in the WAN, where the
+conv phase is bandwidth-bound and takes $1.16$--$1.25\times$ as long. The ring that saves traffic is $N = 8192$ with output
+repacking (\flag{CHEETAH_CONV_REPACK=1}, above): 285 instead of 479\,MiB per HE product. In the WAN it shortens
+preprocessing by 14--20\% (UC2 A2bits RCA 30.2 to 25.9\s, UC1 37.6 to 31.0\s, UC2 reshared 25.7 to 20.5\s), the conv
+phase by 32--36\%, while the LAN pays 1.0--1.5\s for its automorphisms. The online phase does not depend on the packing;
+in the WAN it is round-bound (1,714--1,818 rounds of about 19\ms; the folded a-known RCA of \cref{sec:bit64} saves 49 of
+them). $N = 4096$ stays the LAN default; with links below the break-even of about 1.2\,Gbit/s (UC2) repacking is the
+better choice.
 
 \begin{table}[t]
 \centering\small
 \begin{tabular}{@{}llrrrrr@{}}
 \toprule
-build & $N$ & LAN pre s & WAN pre s & WAN conv s & WAN online s & conv MiB\\
+build & packing & LAN pre s & WAN pre s & WAN conv s & WAN online s & conv MiB\\
 \midrule
-UC1 A2bits RCA & 4096 & 3.20 & 36.98 & 26.74 & 32.30 & 958\\
- & 8192 & 3.28 & 43.33 & 33.25 & 32.40 & 1{,}258\\
-UC2 A2bits RCA & 4096 & 3.17 & 30.39 & 16.87 & 32.12 & 479\\
- & 8192 & 3.29 & 33.52 & 20.91 & 32.19 & 629\\
-UC2 reshared RCA & 4096 & 2.05 & 25.02 & 15.79 & 33.54 & 479\\
- & 8192 & 2.12 & 28.99 & 19.53 & 33.52 & 629\\
+UC1 A2bits RCA & $N = 4096$ & 3.38 & 37.57 & 27.00 & 32.44 & 958\\
+ & $N = 8192$ & 3.34 & 43.34 & 33.81 & 32.55 & 1{,}258\\
+ & repacked & 4.42 & 31.01 & 17.32 & 32.69 & 570\\
+UC2 A2bits RCA & $N = 4096$ & 3.20 & 30.16 & 16.87 & 32.24 & 479\\
+ & $N = 8192$ & 3.17 & 32.88 & 20.50 & 32.16 & 629\\
+ & repacked & 4.19 & 25.93 & 11.52 & 32.16 & 285\\
+UC2 reshared RCA & $N = 4096$ & 2.07 & 25.67 & 16.58 & 33.49 & 479\\
+ & $N = 8192$ & 2.15 & 28.54 & 19.27 & 33.45 & 629\\
+ & repacked & 3.61 & 20.51 & 11.02 & 33.49 & 285\\
 \bottomrule
 \end{tabular}
-\caption{Ring dimension of the packed conv triples (ImageNet, dummy weights, flare / polynize; WAN: 20\ms per
-direction, 200\,Mbit/s; median of 3 WAN runs, one LAN run; conv traffic sent and received by P0).}
+\caption{Packing of the conv triples (ImageNet, dummy weights, flare / polynize, hpmpc 8c0ff0f; WAN: 20\ms per direction,
+200\,Mbit/s; the three packings interleaved, median of 3 WAN runs, one LAN run; conv traffic sent and received by P0).
+Plain $N = 8192$: \flag{CHEETAH_CONV_POLY_N=8192}; repacked: $N = 8192$ with a special prime, \flag{CHEETAH_CONV_REPACK=1}.}
 \label{tab:polyn}
 \end{table}

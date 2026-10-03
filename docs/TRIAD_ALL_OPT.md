@@ -707,10 +707,13 @@ message of their own (hpmpc 31c5270, PIGEON 77b0644; `Ts1Range::te` in `protocol
   needed. The bit injection takes y - [a != 0] + c_t; [a != 0] = (a + 2^F - 1) >> F is public.
 * **c_t online, no extra rounds.** The MSB of an (F + 1)-bit a-known adder of (0, a) and (0, nu mod 2^F): Bool(m) and
   the bake's [c], low slices, prepared from the untransformed m and the unshifted [c] (not counted again in INIT,
-  `g_a2b_no_count`), stepped in the same rounds as the ReLU's adder (`run_msb_adders`, `g_te_low_out`; RCA builds take
-  RCA, the others the a-known PPA, `zero_add_adders/low/`). c_t = m_c ^ lambda_c enters the bit injection linearly:
-  public part + m_c, mask part - (1 - 2 m_c) [lambda_c], product - (1 - 2 m_c) [lambda_b lambda_c]; preprocessing per
-  value: [lambda_c] by a COT of l - 1 bits, [lambda_b lambda_c] by a full-width multiplexer (`te_generate_products`).
+  `g_a2b_no_count`), stepped in the same rounds as the ReLU's adder (`run_msb_adders`, `g_te_low_out`; `TE_LOW_ADDER`:
+  RCA builds take the folded a-known RCA (F - 1 messages), PPA / PPA4 builds since hpmpc 8c2adac the a-known four-way
+  PPA (4 / 6 messages at F = 5 / 8 in 2 rounds, against the Sklansky PPA's 10 / 19 in 5), `zero_add_adders/low/`).
+  c_t = m_c ^ lambda_c enters the bit injection linearly: public part + m_c, mask part - (1 - 2 m_c) [lambda_c], product
+  - (1 - 2 m_c) [lambda_b lambda_c]; preprocessing per value (`te_generate_products`): [lambda_c] and [lambda_b
+  lambda_c] as B2As (COTs of l - 1 bits) of lambda_c and of d = lambda_b lambda_c, whose cross terms take two 1-bit
+  COTs: 2 l bits instead of 3 l - 1 (a full-width multiplexer, 2 l, for the product).
 * **DReLU.** TE1 of A = (m >> F) + (nu >> F) = trunc(z) - c_t with the cut (A2B xform `TeCut`: m >> F, [c] shifted by F
   slices): A and trunc(z) differ only where the output is 0 either way. TE0 of z at full width (no cut), exact for
   every z. Poolings fold into TS1's shifted design (as TRUNC_APPROACH 1; PIGEON's pooling folds extended).
@@ -721,54 +724,76 @@ message of their own (hpmpc 31c5270, PIGEON 77b0644; `Ts1Range::te` in `protocol
   bit-identical outputs (both exact) and the same in UC1-3: 158 at F = 5, 185 at F = 8. Same run: TS{L} UC2 159 / 169,
   TS1 UC2 161 / 187 (as in the TS1 table). Exact truncation floors (mean error -0.23 LSB from the real value against
   TS1's rounding): no loss at F = 8.
-* **ImageNet** (A2bits, F = 5, flare / polynize, dummy weights, median of 3 interleaved runs, hpmpc 8c0ff0f; P0's traffic
-  sent + received, MiB; `docs/variant_data/triad/te_bit64/res5_imte.csv`, `comm5_imte.csv`, `tables.py te`). TE1's online
-  phase takes as long as TS1's (0.34-0.50 vs 0.33-0.49 s) for +10.5 MiB (RCA) / +21 MiB (PPA, PPA4) online traffic and the
-  same RCA rounds; preprocessing +0.1-0.8 s and +160-190 MiB (full-width Boolean addition, the (l - 1)-bit COTs of w_t
-  and lambda_c, the multiplexer; PPA4: the AB four-way narrow adder). TE0: +240 rounds with RCA, up to +0.13 s online.
-  Earlier versions (round 3 / 4 CSVs) converted twice for TE1 and built the low adders serially: +0.06 s online.
+* **ImageNet** (A2bits, F = 5, flare / polynize, dummy weights, median of 3 interleaved runs; RCA / PPA hpmpc 8c2adac,
+  PPA4 a058c36; P0's traffic sent + received, MiB; `docs/variant_data/triad/te_bit64/res6.csv`, `comm6.csv`,
+  `res7.csv`, `comm7.csv`). TE1's online phase takes about as long as TS1's (0.36-0.46 vs 0.35-0.49 s) for +8.4 MiB
+  online traffic with every adder and the same RCA rounds (PPA4 +3, PPA +35); preprocessing +0.1-1.2 s and +140 MiB
+  (RCA), +158 (PPA), +216 (PPA4, whose low adder takes a 3-tuple): the full-width Boolean addition, the (l - 1)-bit COTs
+  of w_t, lambda_c and lambda_b lambda_c, the low adder. TE0: +288 rounds with RCA, up to +0.12 s online (PPA4).
+  Against the previous version (hpmpc 8c0ff0f, `res5_imte.csv`): TE1 -4.3 MiB (RCA) / -12.6 MiB (PPA, PPA4) online,
+  PPA4 -56 rounds; preprocessing -18 MiB (RCA, the B2A products) / -373 MiB (PPA4, the a-known narrow adder). The
+  earlier table (8c0ff0f) is in git history.
+* **Formal protocols:** `docs/paper/trunc_formal.tex` (TS1, TE1, TE0 as protocols, Lemma 1-3 with proofs, Theorem 2;
+  Lemma 2 and TE1's output checked exhaustively at l = 8, F = 2, 3).
 
 | build | variant | pre MiB | pre s | online MiB | online s | rounds |
 |---|---|---|---|---|---|---|
-| UC1 RCA | TS{L} | 1,341 | 3.30 | 210.2 | 0.472 | 1818 |
-|  | TS1 | 1,379 | 3.50 | 209.4 | 0.490 | 1817 |
-|  | TE1 | 1,540 | 3.83 | 219.9 | 0.500 | 1817 |
-|  | TE0 | 1,579 | 4.25 | 230.4 | 0.490 | 2057 |
-| UC1 PPA | TS{L} | 1,443 | 4.30 | 306.7 | 0.458 | 949 |
-|  | TS1 | 1,481 | 4.58 | 305.9 | 0.454 | 948 |
-|  | TE1 | 1,643 | 4.68 | 326.9 | 0.447 | 983 |
-|  | TE0 | 1,664 | 4.73 | 358.4 | 0.461 | 1029 |
-| UC1 PPA4 | TS{L} | 2,068 | 5.66 | 201.6 | 0.397 | 730 |
-|  | TS1 | 2,135 | 6.31 | 200.8 | 0.431 | 729 |
-|  | TE1 | 2,327 | 7.08 | 221.8 | 0.396 | 788 |
-|  | TE0 | 2,001 | 6.12 | 228.1 | 0.505 | 788 |
-| UC2 RCA | TS{L} | 922 | 3.16 | 167.8 | 0.402 | 1714 |
-|  | TS1 | 960 | 3.39 | 167.0 | 0.406 | 1713 |
-|  | TE1 | 1,120 | 3.76 | 177.5 | 0.390 | 1713 |
-|  | TE0 | 1,160 | 4.19 | 188.0 | 0.447 | 1953 |
-| UC2 PPA | TS{L} | 1,023 | 4.21 | 264.4 | 0.399 | 845 |
-|  | TS1 | 1,061 | 4.49 | 263.6 | 0.380 | 844 |
-|  | TE1 | 1,224 | 4.70 | 284.6 | 0.399 | 879 |
-|  | TE0 | 1,245 | 4.81 | 316.0 | 0.402 | 925 |
-| UC2 PPA4 | TS{L} | 1,648 | 5.95 | 159.2 | 0.323 | 626 |
-|  | TS1 | 1,715 | 6.26 | 158.4 | 0.332 | 625 |
-|  | TE1 | 1,907 | 6.93 | 179.4 | 0.344 | 684 |
-|  | TE0 | 1,581 | 6.11 | 185.7 | 0.471 | 684 |
-| UC3 RCA | TS{L} | 421 | 2.95 | 125.3 | 0.476 | 1714 |
-|  | TS1 | 461 | 3.19 | 124.5 | 0.433 | 1713 |
-|  | TE1 | 621 | 3.42 | 135.0 | 0.457 | 1713 |
-|  | TE0 | 661 | 3.84 | 145.5 | 0.467 | 1953 |
-| UC3 PPA | TS{L} | 523 | 4.05 | 222.0 | 0.430 | 845 |
-|  | TS1 | 562 | 4.28 | 221.3 | 0.400 | 844 |
-|  | TE1 | 725 | 4.34 | 242.2 | 0.383 | 879 |
-|  | TE0 | 746 | 4.48 | 273.7 | 0.415 | 925 |
-| UC3 PPA4 | TS{L} | 1,147 | 5.36 | 116.7 | 0.376 | 626 |
-|  | TS1 | 1,216 | 5.95 | 116.0 | 0.376 | 625 |
-|  | TE1 | 1,408 | 6.53 | 136.9 | 0.367 | 684 |
-|  | TE0 | 1,082 | 5.78 | 143.2 | 0.489 | 684 |
+| UC1 RCA | TS{L} | 1,344 | 3.16 | 207.9 | 0.468 | 1769 |
+|  | TS1 | 1,382 | 3.55 | 207.1 | 0.488 | 1768 |
+|  | TE1 | 1,521 | 3.84 | 215.5 | 0.463 | 1768 |
+|  | TE0 | 1,559 | 4.30 | 228.1 | 0.514 | 2056 |
+| UC1 PPA | TS{L} | 1,443 | 4.28 | 306.7 | 0.471 | 949 |
+|  | TS1 | 1,481 | 4.61 | 305.9 | 0.453 | 948 |
+|  | TE1 | 1,639 | 4.93 | 314.3 | 0.443 | 983 |
+|  | TE0 | 1,660 | 5.01 | 345.8 | 0.495 | 1021 |
+| UC1 PPA4 | TS{L} | 1,699 | 4.50 | 201.6 | 0.438 | 730 |
+|  | TS1 | 1,737 | 4.74 | 200.8 | 0.417 | 729 |
+|  | TE1 | 1,954 | 5.89 | 209.2 | 0.426 | 732 |
+|  | TE0 | 1,989 | 6.23 | 215.5 | 0.528 | 732 |
+| UC2 RCA | TS{L} | 924 | 3.16 | 165.6 | 0.390 | 1665 |
+|  | TS1 | 962 | 3.42 | 164.8 | 0.404 | 1664 |
+|  | TE1 | 1,102 | 3.78 | 173.2 | 0.412 | 1664 |
+|  | TE0 | 1,139 | 4.24 | 185.8 | 0.426 | 1952 |
+| UC2 PPA | TS{L} | 1,023 | 4.16 | 264.4 | 0.375 | 845 |
+|  | TS1 | 1,061 | 4.51 | 263.6 | 0.360 | 844 |
+|  | TE1 | 1,219 | 4.69 | 272.0 | 0.422 | 879 |
+|  | TE0 | 1,240 | 4.87 | 303.5 | 0.433 | 917 |
+| UC2 PPA4 | TS{L} | 1,280 | 4.49 | 159.2 | 0.361 | 626 |
+|  | TS1 | 1,318 | 4.73 | 158.4 | 0.353 | 625 |
+|  | TE1 | 1,534 | 5.86 | 166.8 | 0.358 | 628 |
+|  | TE0 | 1,570 | 6.10 | 173.1 | 0.477 | 628 |
+| UC3 RCA | TS{L} | 423 | 2.97 | 123.2 | 0.436 | 1665 |
+|  | TS1 | 463 | 3.23 | 122.4 | 0.423 | 1664 |
+|  | TE1 | 602 | 3.47 | 130.7 | 0.464 | 1664 |
+|  | TE0 | 640 | 3.89 | 143.4 | 0.483 | 1952 |
+| UC3 PPA | TS{L} | 523 | 3.93 | 222.0 | 0.425 | 845 |
+|  | TS1 | 562 | 4.36 | 221.3 | 0.400 | 844 |
+|  | TE1 | 720 | 4.43 | 229.6 | 0.424 | 879 |
+|  | TE0 | 741 | 4.55 | 261.1 | 0.474 | 917 |
+| UC3 PPA4 | TS{L} | 779 | 4.31 | 116.7 | 0.417 | 626 |
+|  | TS1 | 818 | 4.71 | 116.0 | 0.376 | 625 |
+|  | TE1 | 1,035 | 5.55 | 124.4 | 0.410 | 628 |
+|  | TE0 | 1,071 | 5.86 | 130.7 | 0.499 | 628 |
 
 * **The 32-bit PPA / PPA4 cut under the bake was wrong** for inputs near the cut's limit (114 of 4096; TE1 and TS1
   with these adders inherited it): fixed by narrow adders (`CUT_NARROW_32`, `docs/BITLENGTH64.md`).
+
+## Round 9 (2026-10-03): the generated a-known circuits
+
+The circuit generator (llm_test 54d7446, a3c8176) now emits the a-known four-way PPA correctly at any width, so A2bits
+PPA4 takes it again at the cut (it had taken the AB circuit since `CUT_NARROW_32`; `A2BITS_PPA4_AB=1` keeps that):
+
+* **One mask share per dot group** (llm_test a3c8176): a dot group's pending members take mask 0 except one leaf of the
+  root's XOR chain, which carries the root's mask; the 27-bit a-known four-way adder draws 56 instead of 197 random values
+  (the parallel ReLU constructors take them from a serially filled stream). Online gap to the AB circuit 0.1 -> 0.02-0.03 s.
+* **Folded a-known RCA:** carry[k-2] = x1 y1 ^ x1 x2 y2 ^ x2 (y1 y2) in one dot group instead of remasking the a-known LSB
+  carry (one round and message per adder, the same triples); 32-bit A2bits RCA under the bake takes the narrow cut adder
+  (`CUT_FRAC_NARROW32`): 49 fewer rounds (UC2 1,665 instead of 1,714; 64 bits 2,890 instead of 2,939), -2.2 MiB online;
+  online 0.468 / 0.390 / 0.436 against 0.481 / 0.423 / 0.506 s with `CUT_NARROW_32=0` (UC1-3, same run).
+* **ImageNet, A2bits PPA4, a-known vs AB** (same run, `res7.csv`): preprocessing 1,699 / 1,280 / 779 vs 2,068 / 1,648 /
+  1,147 MiB and 4.50 / 4.49 / 4.31 vs 5.69 / 5.53 / 5.34 s; online 0.438 / 0.361 / 0.417 vs 0.412 / 0.339 / 0.389 s, same
+  traffic and rounds. 64 bits: 3,522 / 2,631 / 1,578 vs 4,317 / 3,426 / 2,373 MiB, 8.24 / 8.31 / 7.68 vs 11.26 / 11.08 /
+  10.80 s, online 0.695 / 0.610 / 0.695 vs 0.648 / 0.585 / 0.695 s.
 
 ## GPU (2026-10-01, workstation cmucl771615)
 

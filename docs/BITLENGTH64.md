@@ -71,9 +71,20 @@ now writes their 64-bit specializations through `scripts/circuits/gen_64bit_adde
 * The 4-way PPA (PPA4), which the generator builds by hand per width: 64-bit trees in the script, 4 AND levels
   (21 groups of 3 slices, blocks of 4 groups, a superblock of 4 blocks plus the tail, one dot gate; 3 levels of these
   gates cover at most 48 slices). `is_ppa4_reshared(64, i)`: the first slice of each group.
-* The a-known PPA4 (`PPA_MSB_4Way_A_AB`, A2bits) is left out: the generator's form needs the hand fixes of hpmpc
-  4ec9292 (operand order, dot-pending products, chain masks). With 64 bits the A2bits builds take the AB circuit, with
-  the public m as a share of mask 0 (`share_conversion.hpp`).
+* The a-known PPA4 (`PPA_MSB_4Way_A_AB`, A2bits): the generator now emits the fixes that hpmpc 4ec9292 made by hand
+  (llm_test 54d7446): an a-known product XORed into a dot chain is pending (`mult_a_known_to_evaluators_dot`, or
+  `_dot_pending` when its secret operand is itself a pending dot product) with its own output-mask share, the dot
+  groups of a round are emitted in one topological order. Its generated 32-bit circuit passes func 53 / 59; the
+  width-generic a-known tree (remainders: one 2-slice group, or two for k - 1 = 1 mod 3: a lone a-known product cannot
+  form a dot chain) gives the 64-bit circuit and the narrow ones. Since llm_test a3c8176 all members of a dot group but
+  one take mask 0 (only their XOR, the root's mask, is used): 56 instead of 197 random draws per 27-bit adder.
+  `A2BITS_PPA4_AB=1` keeps the AB circuit (the public m as a share of mask 0). ImageNet 64-bit A2bits PPA4 (F = 12,
+  `docs/variant_data/triad/te_bit64/res7.csv`), a-known vs AB: 3,522 / 2,631 / 1,578 vs 4,317 / 3,426 / 2,373 MiB
+  preprocessing (UC1-3), 8.24 / 8.31 / 7.68 vs 11.26 / 11.08 / 10.80 s; online 0.695 / 0.610 / 0.695 vs 0.648 / 0.585 /
+  0.695 s, same traffic and rounds.
+* The a-known RCA folds the a-known LSB carry into the next carry's dot group (carry[k-2] = x1 y1 ^ x1 x2 y2 ^
+  x2 (y1 y2)): one message and one round per adder fewer, the same triples (64-bit, narrow and low files; the imported
+  32-bit file keeps its identity-substituted cut for `CUT_NARROW_32=0`).
 * The reshare bake (`RESHARE_OPT_SIM`) at 64 bits: RESHARE_BAKE_ACTIVE and the party-local 3-tuples for BITLENGTH 64
   too; the bake's maps for the 64-bit circuits and, with the cut, the narrow ones (`wide_ppa4_width`,
   `ppa4_reshared_b3_count_wide`; RCA and PPA take the 32-bit formulas). The generator's SIM branches of the reshared
@@ -84,10 +95,16 @@ now writes their 64-bit specializations through `scripts/circuits/gen_64bit_adde
   (`ppa4_reshared_sim_za_wide`), the reshares stay baked. func 53 (P1's reshare check): 51 / 51 (RCA, PPA), 17 / 17
   (PPA4) matched; CIFAR 25 of 32; P1's ReLU preprocessing traffic -15% for PPA (CIFAR, 32 images).
 * `single_row_ortho` (the bit injection's one-word transpose) for DATTYPE = BITLENGTH = 64 too.
-* Arithmetic triples (secret-by-secret products: max pooling, ...): gemini's elementwise product is limited to SEAL's
+* Arithmetic triples (secret-by-secret products: max pooling, ...): gemini's elementwise product was limited to SEAL's
   plaintext space, so with 64 bits every such product came out random (func 53 MaxPool and func 54 Multiplication
-  failed; the CIFAR ResNet50 has no max pooling, ImageNet's has one). ConvTriple now multiplies by Gilboa over the
-  silent COTs (one COT of width 64 - j per bit j).
+  failed; the CIFAR ResNet50 has no max pooling, ImageNet's has one). ConvTriple 2d0b448 multiplied by Gilboa over the
+  silent COTs (one COT of width 64 - j per bit j); ConvTriple 82b1400 extends gemini's CRT-batched HE product to 64-bit
+  shares (`HomBNSS::setUp(..., n_base_bits = 64)`: the product of two 64-bit shares plus a 2^-40-hiding mask needs
+  2 * 64 + 1 + 40 = 169 bits of CRT plaintext, five 34-bit primes, which keeps the scaling 2^15 after the switch to the
+  49-bit prime; residues by `barrett_reduce_64` / `modulo_uint`) and fixes its mask width (the top limb kept the
+  complement bits: 87-bit masks at 32 bits). `cheetah_arith_test` (409,600 triples, both parties local, verified):
+  AB2 0.23 s / 57 MB by HE against 1.42 s / 129 MB by Gilboa, AB 0.30 s / 114 MB against 2.05 s / 248 MB. HE is the
+  default; `ARITH_OT=1` (environment) takes Gilboa.
 
 ## 3. CUT_FRACTIONAL_BITS_OPT at 64 bits: narrow adders
 
@@ -98,8 +115,8 @@ and sent like slice 0), and the generated adder of width 64 - F runs on slices F
 `cut_frac_narrow_on`): the MSB of the low 64 - F bits of the sum, which is the sign of a value with F bits of sign
 extension. Correct by construction, no per-gate edits.
 
-* `gen_64bit_adders.py` writes the narrow adders of all eight MSB families (RCA, PPA, PPA4; plain / reshared / a-known,
-  the a-known PPA4 again taking the AB circuit) for F in {8, 10, 12, 14, 16, 18, 20, 24} to
+* `gen_64bit_adders.py` writes the narrow adders of all nine MSB families (RCA, PPA, PPA4; plain / reshared / a-known)
+  for F in {8, 10, 12, 14, 16, 18, 20, 24} to
   `zero_add_adders/narrow64/<family>.hpp` (one `#if FRACTIONAL == F` block per width) and `narrow64/widths.h`
   (`CUT_FRAC_NARROW64_HAVE`, which `CUT_FRAC_ELIGIBLE` checks: other F run the full width). The 4-way tree is now
   width-generic (groups of 3, blocks of up to 4 per level; reproduces the committed 64-bit tree exactly), and the script
@@ -174,8 +191,9 @@ adders get 0 under the bake with the cut. So the identity-substituted 32-bit pre
 wrong with the bake's [c]; TE1 and TS1 with these adders inherited it (TE1 PPA: 49 of 4096).
 
 **Fix (`CUT_NARROW_32=1`, default):** under the bake, the 32-bit PPA / PPA4 cut runs narrow adders of 32 - F bits as at
-64 bits (`narrow32/`, F = 2..12: the a-known and AB PPA, and for PPA4 the AB four-way circuit, since the a-known one
-has no generated form; the public m as a share of mask 0). func 59: 0 of 4096 wrong for A2bits PPA / PPA4 in UC1-3,
+64 bits (`narrow32/`, F = 2..12: the a-known and AB PPA, and for PPA4 first the AB four-way circuit, since the a-known
+one had no generated form; since hpmpc 8c2adac the generated a-known one, and the a-known RCA too, whose folded narrow
+circuit saves one round per ReLU against the identity-substituted cut). func 59: 0 of 4096 wrong for A2bits PPA / PPA4 in UC1-3,
 TE1 and TS1. Cost (4096 values, UC2 A2bits): PPA 4% fewer AND triples, 6% less online traffic; PPA4 5% less online
 traffic but more tuples (Beaver triples 120k -> 50k, 3-tuples 54k -> 83k, 4-tuples 12k -> 50k: about 15 bytes of OT
 material more per value). The reshared and plain builds (no bake) keep the identity circuits, which pass.

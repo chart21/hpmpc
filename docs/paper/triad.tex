@@ -401,8 +401,33 @@ random OTs (one extension round of all 64 ferret instances and the hashing) and 
 still classify 4--7 of 10 CIFAR-10 images, and multi-batch (192 images) 134 (\flag{MODELWEIGHTS_KNOWN=0}) and 124 (=1).
 These are Zen~4 numbers only (algofi / goracle were booked).
 
+\paragraph{Round 9.}\label{sec:triadround9} The generated a-known circuits. The circuit generator now emits the
+a-known four-way circuit correctly at any width (\cref{sec:bit64}), so A2bits PPA4 takes it again at the cut, where it
+had taken the AB circuit since \flag{CUT_NARROW_32} (\flag{A2BITS_PPA4_AB=1} keeps that), and two changes make the
+generated a-known circuits cheaper online.
+\begin{enumerate}\itemsep1pt
+\item \textbf{One mask share per dot group.} The members of a dot group are pending: only the XOR of their output-mask
+  shares, the root's mask, is ever used. All members but one leaf of the root's XOR chain now take mask 0 and that leaf
+  the root's mask. The 27-bit a-known four-way adder draws 56 instead of 197 random values, which the parallel ReLU
+  constructors take from a stream filled serially; the a-known circuit's online phase was about 0.1\s slower than the
+  AB circuit's, now 0.02--0.03\s (0.05\s at 64 bits in UC1).
+\item \textbf{The folded LSB of the a-known RCA.} Its first carry, the a-known product $x_{k-1} y_{k-1}$, had to be
+  remasked before the next AND (one round and one message). Now
+  $c_{k-2} = x_{k-2} y_{k-2} \oplus x_{k-2} x_{k-1} y_{k-1} \oplus x_{k-1} (y_{k-2} y_{k-1})$ is one dot group with the
+  same triple. At 32 bits the A2bits RCA under the bake therefore takes the narrow cut adder as well (the
+  identity-substituted circuit would need its hand edits redone): 49 fewer rounds in every use case (UC2 1{,}665
+  instead of 1{,}714; 64 bits 2{,}890 instead of 2{,}939) and 2.2\,MiB less online traffic.
+\end{enumerate}
+On ImageNet (interleaved, median of 3), A2bits PPA4 with the a-known narrow adder against the AB one in the same run
+preprocesses 368\,MiB less (UC1--UC3: 1{,}699 / 1{,}280 / 779 against 2{,}068 / 1{,}648 / 1{,}147\,MiB) in 1.0--1.2\s
+less time (4.50 / 4.49 / 4.31 against 5.69 / 5.53 / 5.34\s), for 0.02--0.03\s more online time (0.438 / 0.361 / 0.417
+against 0.412 / 0.339 / 0.389\s) with the same online traffic and rounds; at 64 bits 795\,MiB and 2.8--3.1\s less
+(UC2 2{,}631 against 3{,}426\,MiB, 8.31 against 11.08\s; online 0.610 against 0.585\s). The A2bits RCA builds against
+\flag{CUT_NARROW_32=0} (the old identity cut) in the same run: online 0.468 / 0.390 / 0.436 against 0.481 / 0.423 /
+0.506\s, preprocessing unchanged (+2\,MiB).
+
 \paragraph{Reduced-slack truncation.}\label{sec:triadts1} ABY2 now runs the reduced-slack truncation TS1 of
-Truncation Untangled (its Fig.~9) fused into the ReLU: \flag{TRUNC_APPROACH=4} (TS\_Mix: TS1 in the ReLUs, the
+Truncation Untangled~\cite{tu} (its Fig.~9; \cref{fig:ts1proto}) fused into the ReLU: \flag{TRUNC_APPROACH=4} (TS\_Mix: TS1 in the ReLUs, the
 probabilistic TS\{L\} elsewhere) and \flag{TRUNC_APPROACH=1} (TS1 also for the poolings, whose division joins the next
 ReLU's TS1), both with \flag{TRUNC_DELAYED=1} and the A2B bake. In 3PC the party that holds the mask computes TS1's
 mask-side values; in ABY2 nobody does, but their inputs are the carries of the two mask shares' sum, which the bake's
@@ -494,21 +519,28 @@ $w_t$ of the mask shares and the offset $2^{\ell-1}$) yields $\lfloor z / 2^F \r
 where $c_t$ is the carry into bit $F$ of $m + \nu$ and $[a \neq 0]$ is public. Only $z \geq 0$ matters, since DReLU
 zeroes the rest, so the wrap of $m + \nu$ is linear there and, unlike in 3PC, no slack is needed. $c_t$ is the MSB of an
 $(F + 1)$-bit a-known adder of $(0, a)$ and $(0, \nu \bmod 2^F)$, that is of $\mathrm{bool}(m)$ and the bake's $[c]$,
-which runs in the same rounds as the ReLU's adder; with $c_t = m_c \oplus \lambda_c$ it enters the bit injection
-linearly, from $[\lambda_c]$ (one COT) and $[\lambda_b \lambda_c]$ (one multiplexer) per value. The two differ in
+which runs in the same rounds as the ReLU's adder (\flag{TE_LOW_ADDER}: the folded RCA for RCA builds, $F - 1$ messages;
+the a-known four-way PPA for PPA and PPA4 builds, 4 messages in 2 rounds at $F = 5$, against the Sklansky PPA's 10 in
+5); with $c_t = m_c \oplus \lambda_c$ it enters the bit injection linearly, from $[\lambda_c]$ and
+$[\lambda_b \lambda_c]$, the B2As of $\lambda_c$ and of the Boolean product $\lambda_b \lambda_c$ (whose two cross terms
+take a COT of one bit each): $2\ell$ bits per value instead of $3\ell - 1$ with a full-width multiplexer for the
+product. \Cref{fig:ts1proto,fig:te1proto,fig:te0proto} state the three protocols. The two differ in
 DReLU: TE1 takes it of $A = \lfloor m/2^F \rfloor + \lfloor \nu/2^F \rfloor = \lfloor z/2^F \rfloor - c_t$ with the
 cut (the two values differ only where the output is 0 either way), TE0 of $z$ at full width, exact for every $z$. Online,
-TE1 costs TS1 plus the low adder's $F$ AND gates per value; TE0 adds the rounds the cut saves. Every positive input of
+TE1 costs TS1 plus the low adder's messages; TE0 adds the rounds the cut saves. Every positive input of
 the unit test (4,096 random values, $|v|$ up to $2^{31}$ for TE0 and $2^{30}$ for TE1) comes out exact, with all three
 adders at 32 and 64 bits. On CIFAR-10, TE0 and TE1 compute the same values and classify 158 ($F = 5$) and 185 ($F = 8$)
 of the 256 images in all three use cases; exact truncation floors (mean error $-0.23$ LSB), which costs nothing at
 $F = 8$ (TS1 187, plaintext 189).
 
-\Cref{tab:te} shows the ImageNet costs at the final code. TE1's online phase takes as long as TS1's (0.34--0.50 against
-0.33--0.49\s) for 10.5\,MiB (RCA) or 21\,MiB (PPA, PPA4) more online traffic, the low adder's AND gates, and the same
-rounds with RCA; its preprocessing grows by 0.1--0.8\s and 160--190\,MiB (the full-width Boolean addition, the COTs of
-$\ell - 1$ bits for $w_t$ and $\lambda_c$, the multiplexer, and for PPA4 the AB four-way circuit of the narrow adder).
-TE0's full-width DReLU costs 240 more rounds with RCA and up to 0.13\s of online time (PPA4).
+\Cref{tab:te} shows the ImageNet costs at the final code. TE1's online phase takes about as long as TS1's (0.36--0.46
+against 0.35--0.49\s) for 8.4\,MiB more online traffic with every adder (the low adder's messages; 10.5 / 21\,MiB with
+the earlier RCA and Sklansky low adders) and the same rounds with RCA (PPA4 +3, PPA +35); its preprocessing grows by
+0.1--1.2\s and 140\,MiB (RCA), 158\,MiB (PPA) or 216\,MiB (PPA4, whose low adder takes a Beaver 3-tuple): the
+full-width Boolean addition, the $(\ell - 1)$-bit COTs of $w_t$, $\lambda_c$ and $\lambda_b \lambda_c$, the low adder.
+Against the previous version (four-way low adder, B2A products, a-known narrow PPA4, folded RCA) TE1 sends 4.3\,MiB
+(RCA) to 12.6\,MiB (PPA, PPA4) less online, PPA4 56 rounds fewer, and preprocesses 18\,MiB (RCA) and 373\,MiB (PPA4)
+less. TE0's full-width DReLU costs 288 more rounds with RCA and up to 0.12\s of online time (PPA4).
 
 \begin{table}[t]
 \centering\small
@@ -516,51 +548,53 @@ TE0's full-width DReLU costs 240 more rounds with RCA and up to 0.13\s of online
 \toprule
 build & variant & pre MiB & pre s & online MiB & online s & rounds\\
 \midrule
-UC1 RCA & TS\{L\} & 1{,}341 & 3.30 & 210.2 & 0.472 & 1818\\
- & TS1 & 1{,}379 & 3.50 & 209.4 & 0.490 & 1817\\
- & TE1 & 1{,}540 & 3.83 & 219.9 & 0.500 & 1817\\
- & TE0 & 1{,}579 & 4.25 & 230.4 & 0.490 & 2057\\
-UC1 PPA & TS\{L\} & 1{,}443 & 4.30 & 306.7 & 0.458 & 949\\
- & TS1 & 1{,}481 & 4.58 & 305.9 & 0.454 & 948\\
- & TE1 & 1{,}643 & 4.68 & 326.9 & 0.447 & 983\\
- & TE0 & 1{,}664 & 4.73 & 358.4 & 0.461 & 1029\\
-UC1 PPA4 & TS\{L\} & 2{,}068 & 5.66 & 201.6 & 0.397 & 730\\
- & TS1 & 2{,}135 & 6.31 & 200.8 & 0.431 & 729\\
- & TE1 & 2{,}327 & 7.08 & 221.8 & 0.396 & 788\\
- & TE0 & 2{,}001 & 6.12 & 228.1 & 0.505 & 788\\
+UC1 RCA & TS\{L\} & 1{,}344 & 3.16 & 207.9 & 0.468 & 1769\\
+ & TS1 & 1{,}382 & 3.55 & 207.1 & 0.488 & 1768\\
+ & TE1 & 1{,}521 & 3.84 & 215.5 & 0.463 & 1768\\
+ & TE0 & 1{,}559 & 4.30 & 228.1 & 0.514 & 2056\\
+UC1 PPA & TS\{L\} & 1{,}443 & 4.28 & 306.7 & 0.471 & 949\\
+ & TS1 & 1{,}481 & 4.61 & 305.9 & 0.453 & 948\\
+ & TE1 & 1{,}639 & 4.93 & 314.3 & 0.443 & 983\\
+ & TE0 & 1{,}660 & 5.01 & 345.8 & 0.495 & 1021\\
+UC1 PPA4 & TS\{L\} & 1{,}699 & 4.50 & 201.6 & 0.438 & 730\\
+ & TS1 & 1{,}737 & 4.74 & 200.8 & 0.417 & 729\\
+ & TE1 & 1{,}954 & 5.89 & 209.2 & 0.426 & 732\\
+ & TE0 & 1{,}989 & 6.23 & 215.5 & 0.528 & 732\\
 \addlinespace
-UC2 RCA & TS\{L\} & 922 & 3.16 & 167.8 & 0.402 & 1714\\
- & TS1 & 960 & 3.39 & 167.0 & 0.406 & 1713\\
- & TE1 & 1{,}120 & 3.76 & 177.5 & 0.390 & 1713\\
- & TE0 & 1{,}160 & 4.19 & 188.0 & 0.447 & 1953\\
-UC2 PPA & TS\{L\} & 1{,}023 & 4.21 & 264.4 & 0.399 & 845\\
- & TS1 & 1{,}061 & 4.49 & 263.6 & 0.380 & 844\\
- & TE1 & 1{,}224 & 4.70 & 284.6 & 0.399 & 879\\
- & TE0 & 1{,}245 & 4.81 & 316.0 & 0.402 & 925\\
-UC2 PPA4 & TS\{L\} & 1{,}648 & 5.95 & 159.2 & 0.323 & 626\\
- & TS1 & 1{,}715 & 6.26 & 158.4 & 0.332 & 625\\
- & TE1 & 1{,}907 & 6.93 & 179.4 & 0.344 & 684\\
- & TE0 & 1{,}581 & 6.11 & 185.7 & 0.471 & 684\\
+UC2 RCA & TS\{L\} & 924 & 3.16 & 165.6 & 0.390 & 1665\\
+ & TS1 & 962 & 3.42 & 164.8 & 0.404 & 1664\\
+ & TE1 & 1{,}102 & 3.78 & 173.2 & 0.412 & 1664\\
+ & TE0 & 1{,}139 & 4.24 & 185.8 & 0.426 & 1952\\
+UC2 PPA & TS\{L\} & 1{,}023 & 4.16 & 264.4 & 0.375 & 845\\
+ & TS1 & 1{,}061 & 4.51 & 263.6 & 0.360 & 844\\
+ & TE1 & 1{,}219 & 4.69 & 272.0 & 0.422 & 879\\
+ & TE0 & 1{,}240 & 4.87 & 303.5 & 0.433 & 917\\
+UC2 PPA4 & TS\{L\} & 1{,}280 & 4.49 & 159.2 & 0.361 & 626\\
+ & TS1 & 1{,}318 & 4.73 & 158.4 & 0.353 & 625\\
+ & TE1 & 1{,}534 & 5.86 & 166.8 & 0.358 & 628\\
+ & TE0 & 1{,}570 & 6.10 & 173.1 & 0.477 & 628\\
 \addlinespace
-UC3 RCA & TS\{L\} & 421 & 2.95 & 125.3 & 0.476 & 1714\\
- & TS1 & 461 & 3.19 & 124.5 & 0.433 & 1713\\
- & TE1 & 621 & 3.42 & 135.0 & 0.457 & 1713\\
- & TE0 & 661 & 3.84 & 145.5 & 0.467 & 1953\\
-UC3 PPA & TS\{L\} & 523 & 4.05 & 222.0 & 0.430 & 845\\
- & TS1 & 562 & 4.28 & 221.3 & 0.400 & 844\\
- & TE1 & 725 & 4.34 & 242.2 & 0.383 & 879\\
- & TE0 & 746 & 4.48 & 273.7 & 0.415 & 925\\
-UC3 PPA4 & TS\{L\} & 1{,}147 & 5.36 & 116.7 & 0.376 & 626\\
- & TS1 & 1{,}216 & 5.95 & 116.0 & 0.376 & 625\\
- & TE1 & 1{,}408 & 6.53 & 136.9 & 0.367 & 684\\
- & TE0 & 1{,}082 & 5.78 & 143.2 & 0.489 & 684\\
+UC3 RCA & TS\{L\} & 423 & 2.97 & 123.2 & 0.436 & 1665\\
+ & TS1 & 463 & 3.23 & 122.4 & 0.423 & 1664\\
+ & TE1 & 602 & 3.47 & 130.7 & 0.464 & 1664\\
+ & TE0 & 640 & 3.89 & 143.4 & 0.483 & 1952\\
+UC3 PPA & TS\{L\} & 523 & 3.93 & 222.0 & 0.425 & 845\\
+ & TS1 & 562 & 4.36 & 221.3 & 0.400 & 844\\
+ & TE1 & 720 & 4.43 & 229.6 & 0.424 & 879\\
+ & TE0 & 741 & 4.55 & 261.1 & 0.474 & 917\\
+UC3 PPA4 & TS\{L\} & 779 & 4.31 & 116.7 & 0.417 & 626\\
+ & TS1 & 818 & 4.71 & 116.0 & 0.376 & 625\\
+ & TE1 & 1{,}035 & 5.55 & 124.4 & 0.410 & 628\\
+ & TE0 & 1{,}071 & 5.86 & 130.7 & 0.499 & 628\\
 \bottomrule
 \end{tabular}
 \caption{Exact truncation on ImageNet (A2bits, $F = 5$, flare / polynize, dummy weights, median of 3 interleaved runs;
-P0's traffic sent and received). TS\{L\}: the builds as given (\flag{TRUNC_DELAYED=0} in UC1 and UC2, \flag{=1} in
-UC3); PPA / PPA4 with the narrow cut adders.}
+P0's traffic sent and received; RCA / PPA hpmpc \texttt{8c2adac}, PPA4 \texttt{a058c36}). TS\{L\}: the builds as given
+(\flag{TRUNC_DELAYED=0} in UC1 and UC2, \flag{=1} in UC3); all with the narrow cut adders.}
 \label{tab:te}
 \end{table}
+
+\input{trunc_formal}
 
 \paragraph{What is left.} \Cref{tab:triadphases} splits the time of six builds at the final code; the ranges below are
 over all 18 builds with \flag{COMPRESS=0}. With secret weights, preprocessing is now the OT phase (1.4--4.7\s, inside

@@ -13,3 +13,8 @@ received). `ana.py RES COMM`: medians; `tables.py te|x64 RES COMM`: the paper's 
   UC1-3 x RCA / PPA / PPA4, and `_xln` = `CUT_NARROW_32=0` (the old identity-substituted 32-bit PPA / PPA4 cut).
   TE1 there still converted twice; `res4_imte.csv` (ef298d1) converts once; `res5_imte.csv` (8c0ff0f, the final code)
   also builds the low adders on the pool.
+* `res6.csv`, `comm6.csv` (hpmpc 8c2adac, `terun6.sh`, `list_all6.txt`): the TE / TS table again (a-known narrow PPA4,
+  TE's four-way low adder and B2A products, the folded a-known RCA with the narrow cut), `_xln0` = `CUT_NARROW_32=0` (the
+  old identity-substituted RCA), and the nine 64-bit A2bits builds (`x64_*`; a-known PPA4, folded RCA).
+* `res7.csv`, `comm7.csv` (hpmpc a058c36, `terun7.sh`, `list_all7.txt`, names `m7_*`): the PPA4 builds with one mask share
+  per dot-group root, against `A2BITS_PPA4_AB=1` (`*ab`), 32 and 64 bits.

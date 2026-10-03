@@ -1,0 +1,196 @@
+\subsection{TS1, TE1 and TE0 in ABY2: protocols and security}\label{sec:truncformal}
+
+This subsection states the truncations of \cref{sec:triadts1,sec:triadte} as protocols in the style of Truncation
+Untangled~\cite{tu}, proves the identities they compute and argues their security. All three run fused into a ReLU:
+the input is a delayed convolution output $z$ at scale $2^{2F}$, the output $\mathrm{DReLU}(z)$ times the truncated
+value, and neither sends a message beyond those of the ReLU's MSB adders and its bit injection.
+
+\paragraph{Notation.} Values live in $\mathbb{Z}_{2^\ell}$ with $F$ fractional bits; $K = 2^{\ell-1-F}$. An ABY2 share
+of $x$ is $\langle x \rangle = (m_x, [\lambda_x])$: the masked value $m_x$ is public to both parties, the mask
+$\lambda_x = \lambda_x^0 + \lambda_x^1$ is additively shared (P$_i$ holds $\lambda_x^i$), and $x = m_x - \lambda_x$. For
+the ReLU input we write $\nu = -\lambda_z = \nu_0 + \nu_1$ ($\nu_i = -\lambda_z^i$, the shares of the code's
+\texttt{nu}), so $z = m + \nu$. A Boolean share is $\langle b \rangle^B = (m_b, [\lambda_b]^B)$ with
+$b = m_b \oplus \lambda_b$; $[u]$ denotes additive shares of a bit $u$ in $\mathbb{Z}_{2^\ell}$, $[u]^B$ XOR shares,
+$x[j]$ bit $j$ of $x$, $x \gg j$ the logical shift and $[\![P]\!] \in \{0, 1\}$ the indicator of $P$. The protocols call
+\begin{itemize}\itemsep1pt
+\item $\mathcal{F}^{k}_{\mathrm{COT}}$: P0 inputs $x_0 \in \mathbb{Z}_{2^k}$, P1 a bit $x_1$; the outputs satisfy
+  $c_0 + c_1 = x_0 x_1 \bmod 2^k$ (ferret's silent COT, \cref{sec:otformal}). $\mathrm{B2A}_k(u)$ turns $[u]^B$ into
+  $[u] \bmod 2^{k+1}$ with one call: P$_i$ outputs $u_i - 2 c_i$, since $u_0 \oplus u_1 = u_0 + u_1 - 2 u_0 u_1$.
+\item $\mathcal{F}^{k}_{\mathrm{MUX}}$: from $[b]^B$ and $[r]$, outputs $[b\,r] \bmod 2^k$ (two COTs, one per
+  direction).
+\item $\mathcal{F}^{B}_{\mathrm{ADD}}$ (the A2B bake's Boolean addition): P0 inputs $x_0$, P1 inputs $x_1$, both of
+  $k$ bits; outputs XOR shares of every bit of $x_0 + x_1 \bmod 2^k$. Since bit $j$ of the sum is
+  $x_0[j] \oplus x_1[j] \oplus \gamma_j$, each party's share of the carry $\gamma_j$ into bit $j$ is its share of the
+  sum bit XOR its own input bit, without communication. The implementation is an RCA with one COT multiplication per
+  AND gate.
+\item $\Pi^{k}_{\mathrm{MSB}}(p, [x]^B)$: the a-known ROT-preprocessed MSB adder of width $k$ (RCA, PPA or four-way PPA,
+  \cref{sec:otformal}) with a public summand $p$ and a Boolean-shared one; outputs
+  $\langle \mathrm{MSB}(p + x \bmod 2^k) \rangle^B$. Its preprocessing (triples, tuples, output masks) does not depend on
+  the inputs; online it opens the masked value of every gate output, each under a fresh mask.
+\item $\Pi_{\mathrm{BI}}(\langle b \rangle^B, T)$: the bit injection of a bit into a value $T = M_T - \lambda_T$ given as
+  a public part $M_T$ and $[\lambda_T]$, with $[\lambda_b]$ and $[\lambda_b \lambda_T]$ preprocessed. Locally
+  $[b\,T] = m_b M_T - m_b [\lambda_T] + (2 m_b - 1)([\lambda_b \lambda_T] - M_T [\lambda_b])$ (from
+  $b = m_b + (1 - 2 m_b)\lambda_b$); then each party adds its share of a fresh output mask and sends the sum, so both
+  learn $m_{bT}$: one $\ell$-bit message per party, the ReLU's own message.
+\end{itemize}
+
+\begin{figure}[t]
+\centering\small
+\fbox{\begin{minipage}{0.95\linewidth}
+\textbf{Protocol $\Pi_{\mathrm{TS1}}$} (shifted design, fused into the ReLU)\\[2pt]
+\emph{Input:} $\langle z \rangle = (m, [-\nu])$; a public factor $f$ with $t' \ge 0$ extra fractional bits ($f = 1$,
+$t' = 0$ for a plain ReLU, $f \approx 2^{F + t'}/d$ for a folded $d$-element average). $\ell' = \ell - F$,
+$K' = 2^{\ell'-1-t'}$.\\
+\emph{Output:} $\langle \mathrm{DReLU}(y_1) \cdot y \rangle$ with $y = \mathrm{round}(f z / 2^{F+t'}) + e$, $e \in \{-1, 0, 1\}$.\\[2pt]
+\emph{Offline:}
+\begin{enumerate}\itemsep1pt
+\item P$_i$: $\rho_i = ((f \nu_i) \bmod 2^\ell) \gg F$, reduced mod $2^{\ell'}$.
+\item $\mathcal{F}^{B}_{\mathrm{ADD}}(\rho_0, \rho_1)$ over $\ell'$ bits: $[\rho[j]]^B$ for all $j$ (the A2B's Boolean mask
+  input), the carry $w = \gamma_{\ell'-1}$, $r_{\mathrm{msb}} = \rho[\ell'-1]$ and, if $t' > 0$, $w_t = \gamma_{t'}$.
+\item $\mathrm{B2A}_{F+1+t'}(w)$, $\mathrm{B2A}_{F+1+t'}(r_{\mathrm{msb}})$ (both only enter times $K'$), and if $t' > 0$
+  $\mathrm{B2A}_{\ell-1}(w_t)$; P$_i$ sets
+  $[l_a]_i = -((\rho_i \bmod 2^{\ell'-1}) \gg t') + K'[w]_i - [w_t]_i$ ($[w_t] = 0$ for $t' = 0$).
+\item The preprocessing of $\Pi^{\ell'}_{\mathrm{MSB}}$; with the DReLU output mask $\lambda_b$: $[\lambda_b]$,
+  $[\lambda_b l_a]$ (the bit injection's usual product) and $[\lambda_b r_{\mathrm{msb}}]$ by
+  $\mathcal{F}^{F+1+t'}_{\mathrm{MUX}}$.
+\end{enumerate}
+\emph{Online} (no message of its own):
+\begin{enumerate}\itemsep1pt
+\item $M_0 = ((f m + 2^{F-1}) \gg F) + 1 \bmod 2^{\ell'}$; $\langle b \rangle^B = \neg\,\Pi^{\ell'}_{\mathrm{MSB}}(M_0, [\rho]^B)$,
+  the DReLU of $y_1 = M_0 + \rho \bmod 2^{\ell'}$ (the cut adder).
+\item $c = -M_0 + 2^{\ell'-2} \bmod 2^{\ell'}$, $s = 1 - 2 c[\ell'-1]$, $c' = (c \bmod 2^{\ell'-1}) \gg t'$,
+  $M = (2^{\ell'-2} \gg t') - c' - K' c[\ell'-1]$.
+\item $T = M - \lambda_T$ with $[\lambda_T] = [l_a] + s K' [r_{\mathrm{msb}}]$ and
+  $[\lambda_b \lambda_T] = [\lambda_b l_a] + s K' [\lambda_b r_{\mathrm{msb}}]$; output $\Pi_{\mathrm{BI}}(\langle b \rangle^B, T)$.
+\end{enumerate}
+\end{minipage}}
+\caption{TS1 in ABY2 (\flag{TRUNC_APPROACH=1} / \flag{=4}, \texttt{ts1\_generate\_tuples}, \texttt{ts1\_lift\_shift},
+\texttt{prepare\_opt\_bit\_injection\_ts1}). The full design (\flag{TS1_LOW_CARRY}) runs the same steps in the full ring:
+$\rho = \nu$ over $\ell$ bits, $M_0 = m$, offset $2^{\ell-1}$, $t' = F$ and $w_t = \gamma_F$; it is the first half of
+$\Pi_{\mathrm{TE1}}$.}
+\label{fig:ts1proto}
+\end{figure}
+
+\paragraph{Correctness of $\Pi_{\mathrm{TS1}}$.} \textbf{Lemma 1.} If $y_1$, read as a signed $\ell'$-bit value, lies in
+$[-2^{\ell'-2}, 2^{\ell'-2})$, then $T = \lfloor y_1 / 2^{t'} \rfloor$ for $t' = 0$ and
+$T - \lfloor y_1 / 2^{t'} \rfloor \in \{0, 1\}$ for $t' > 0$; and $y_1 = \mathrm{round}(f z / 2^F) + 1 - E$ with
+$E \in \{0, 1, 2\}$.
+
+\emph{Proof.} The second claim: $f z = f m + f \nu_0 + f \nu_1 \bmod 2^\ell$, and shifting the three summands by $F$
+separately loses the carries out of their low $F$ bits, $E \in \{0, 1, 2\}$ in all (the rounding constant moves
+into $M_0$, the $+1$ centres the error). The first is TS1's identity~\cite[Fig.~9]{tu} in the ring $2^{\ell'}$ on
+$x' = 2^{\ell'-2} - y_1 \in (0, 2^{\ell'-1}]$, whose masked value is $c = x' + \rho$ and whose mask $\rho$ has the
+two shares $\rho_0, \rho_1$; it is the computation of Lemma~2 below with $\ell'$ for $\ell$, $t'$ for $F$ and offset
+$2^{\ell'-2}$. Without $w_t$ the lift is exact for $t' = 0$ because $\lfloor y_1 / 2^0 \rfloor = y_1$ has no low bits
+to carry out of. \hfill$\square$
+
+A simulation of the formulas over $10^6$ random inputs ($\ell = 32$, $F = 5$, $f \in \{1, 4\}$; $f = 28$, $t' = 3$;
+$\ell = 64$, $F = 12$) finds the lift exact (or $\{0, 1\}$) everywhere and $y - \mathrm{round}(f z / 2^{F+t'})$ in
+$\{-1, 0, 1\}$; the unit test \texttt{RELU\_TS1} (4,096 inputs, all adders, 32 and 64 bits) agrees.
+
+\begin{figure}[t]
+\centering\small
+\fbox{\begin{minipage}{0.95\linewidth}
+\textbf{Protocol $\Pi_{\mathrm{TE1}}$} (exact truncation fused into the ReLU)\\[2pt]
+\emph{Input:} $\langle z \rangle = (m, [-\nu])$ with $z \in [-2^{\ell-1} + 2^F, 2^{\ell-1})$.
+\emph{Output:} $\langle \mathrm{DReLU}(z) \cdot \lfloor z / 2^F \rfloor \rangle$, exact.\\[2pt]
+\emph{Offline:}
+\begin{enumerate}\itemsep1pt
+\item $\mathcal{F}^{B}_{\mathrm{ADD}}(\nu_0, \nu_1)$ over all $\ell$ bits: $[\nu[j]]^B$ and the carries; $w = \gamma_{\ell-1}$,
+  $w_t = \gamma_F$, $r_{\mathrm{msb}} = \nu[\ell-1]$.
+\item $\mathrm{B2A}_{F+1}(w)$, $\mathrm{B2A}_{F+1}(r_{\mathrm{msb}})$, $\mathrm{B2A}_{\ell-1}(w_t)$; P$_i$ sets
+  $[l_a]_i = -(a_i \gg F) + K[w]_i - [w_t]_i$ with $a_i = \nu_i \bmod 2^{\ell-1}$.
+\item The preprocessing of $\Pi^{\ell-F}_{\mathrm{MSB}}$ (the DReLU, output mask $\lambda_b$) and of the low adder
+  $\Pi^{F+1}_{\mathrm{MSB}}$ (output mask $\lambda_c$).
+\item $[\lambda_c] = \mathrm{B2A}_{\ell-1}(\lambda_c)$. $d = \lambda_b \lambda_c$: two $\mathcal{F}^{1}_{\mathrm{COT}}$ calls
+  give XOR shares of the cross terms $\lambda_b^0 \lambda_c^1$ (P0 inputs $\lambda_b^0$, P1 $\lambda_c^1$) and
+  $\lambda_c^0 \lambda_b^1$; P$_i$ XORs them with $\lambda_b^i \lambda_c^i$; $[\lambda_b \lambda_c] = \mathrm{B2A}_{\ell-1}(d)$.
+\item $[\lambda_b]$, $[\lambda_b l_a]$ as for every ReLU; $[\lambda_b r_{\mathrm{msb}}]$ by $\mathcal{F}^{F+1}_{\mathrm{MUX}}$.
+\end{enumerate}
+\emph{Online:}
+\begin{enumerate}\itemsep1pt
+\item $a = m \bmod 2^F$. In the same rounds:
+  $\langle b \rangle^B = \neg\,\Pi^{\ell-F}_{\mathrm{MSB}}(m \gg F, [\nu[F..\ell{-}1]]^B)$, the DReLU of
+  $A = (m \gg F) + (\nu \gg F) \bmod 2^{\ell-F}$ (the narrow adder on the top slices of the conversion), and
+  $\langle c_t \rangle^B = (m_c, [\lambda_c]^B) = \Pi^{F+1}_{\mathrm{MSB}}(0 \| a, 0 \| [\nu[0..F{-}1]]^B)$, the carry into
+  bit $F$ of $m + \nu$.
+\item $c = -m + 2^{\ell-1}$, $s = 1 - 2 c[\ell-1]$, $c' = (c \gg F) \bmod 2^{\ell-1-F}$, $M = K - c' - K c[\ell-1]$;
+  $[\![a \neq 0]\!] = (a + 2^F - 1) \gg F$; $s_c = 1 - 2 m_c$.
+\item $T = M_T - \lambda_T$ with $M_T = M - [\![a \neq 0]\!] + m_c$,
+  $[\lambda_T] = [l_a] + s K [r_{\mathrm{msb}}] - s_c [\lambda_c]$ and
+  $[\lambda_b \lambda_T] = [\lambda_b l_a] + s K [\lambda_b r_{\mathrm{msb}}] - s_c [\lambda_b \lambda_c]$;
+  output $\Pi_{\mathrm{BI}}(\langle b \rangle^B, T)$.
+\end{enumerate}
+\end{minipage}}
+\caption{TE1 in ABY2 (\flag{TRUNC_APPROACH=3}; \texttt{ts1\_generate\_tuples}, \texttt{te\_generate\_products},
+\texttt{get\_msb\_range} with \texttt{g\_te\_narrow\_top}, \texttt{prepare\_opt\_bit\_injection\_ts1}). The low adder
+is the a-known RCA for RCA builds and the a-known four-way PPA otherwise (\flag{TE_LOW_ADDER}).}
+\label{fig:te1proto}
+\end{figure}
+
+\begin{figure}[t]
+\centering\small
+\fbox{\begin{minipage}{0.95\linewidth}
+\textbf{Protocol $\Pi_{\mathrm{TE0}}$} (exact truncation fused into the ReLU, exact DReLU)\\[2pt]
+\emph{Input:} $\langle z \rangle = (m, [-\nu])$, any $z$. \emph{Output:}
+$\langle \mathrm{DReLU}(z) \cdot \lfloor z / 2^F \rfloor \rangle$, exact. As $\Pi_{\mathrm{TE1}}$, except:
+\begin{itemize}\itemsep1pt
+\item Offline 3: the preprocessing of the full-width $\Pi^{\ell}_{\mathrm{MSB}}$ instead of $\Pi^{\ell-F}_{\mathrm{MSB}}$.
+\item Online 1: $\langle b \rangle^B = \neg\,\Pi^{\ell}_{\mathrm{MSB}}(m, [\nu]^B)$, the DReLU of $z$ itself; the low adder
+  reads the low $F$ slices of the same conversion and runs in its first rounds.
+\end{itemize}
+\end{minipage}}
+\caption{TE0 in ABY2 (\flag{TRUNC_APPROACH=2}). It pays the rounds and gates the cut saves (RCA: $F$ more AND levels).}
+\label{fig:te0proto}
+\end{figure}
+
+\paragraph{Correctness of $\Pi_{\mathrm{TE1}}$ and $\Pi_{\mathrm{TE0}}$.} \textbf{Lemma 2.} For $z \in [0, 2^{\ell-1})$
+and $\lambda_y = l_a + s K r_{\mathrm{msb}}$: $M - \lambda_y = \lfloor z / 2^F \rfloor + [\![a \neq 0]\!] - c_t$.
+Hence $T = M_T - \lambda_T = \lfloor z / 2^F \rfloor$.
+
+\emph{Proof.} Let $x' = 2^{\ell-1} - z \in (0, 2^{\ell-1}]$; then $c = -m + 2^{\ell-1} = x' + \nu \bmod 2^\ell$. Split
+$c = 2^{\ell-1} c_h + c_l$ and $\nu = 2^{\ell-1} r_{\mathrm{msb}} + \nu_l$ with $c_l, \nu_l < 2^{\ell-1}$. As
+$x' + \nu_l < 2^\ell$, its bit $\ell - 1$ is $c_h \oplus r_{\mathrm{msb}}$, so over the integers
+$x' = c_l - \nu_l + 2^{\ell-1} (c_h + r_{\mathrm{msb}} - 2 c_h r_{\mathrm{msb}}) = c_l - \nu_l + 2^{\ell-1} c_h + 2^{\ell-1} s\,r_{\mathrm{msb}}$.
+Dividing by $2^F$, $\lfloor x'/2^F \rfloor = \lfloor c_l/2^F \rfloor - \lfloor \nu_l/2^F \rfloor - \beta + K c_h + s K r_{\mathrm{msb}}$
+with the borrow $\beta = [\![c \bmod 2^F < \nu \bmod 2^F]\!]$. The mask's low part is
+$\nu_l = a_0 + a_1 - 2^{\ell-1} w$, so $\lfloor \nu_l / 2^F \rfloor = (a_0 \gg F) + (a_1 \gg F) + w_t - K w$. Substituting
+$M = K - \lfloor c_l/2^F \rfloor - K c_h$ and $l_a$ gives $M - \lambda_y = K - \lfloor x'/2^F \rfloor - \beta$, and since
+$\lfloor z / 2^F \rfloor = K - \lceil x'/2^F \rceil$,
+$M - \lambda_y = \lfloor z / 2^F \rfloor + [\![x' \bmod 2^F \neq 0]\!] - \beta$. Finally let $\zeta = z \bmod 2^F$ and
+$n = \nu \bmod 2^F$: $x' \bmod 2^F \neq 0$ iff $\zeta \neq 0$; $c \bmod 2^F = (n - \zeta) \bmod 2^F$, so
+$\beta = [\![\zeta \neq 0 \wedge n \geq \zeta]\!]$; and $a = (\zeta - n) \bmod 2^F$ with $a + n = \zeta + 2^F c_t$. The
+cases $\zeta = 0$, $n < \zeta$, $n = \zeta$ and $n > \zeta$ show that $[\![a \neq 0]\!] - c_t$ is 1 exactly when
+$\zeta \neq 0$ and $n < \zeta$, and 0 otherwise, as is $[\![\zeta \neq 0]\!] - \beta$. With $c_t = m_c + s_c \lambda_c$, $M_T - \lambda_T = M - \lambda_y - [\![a \neq 0]\!] + c_t$.
+\hfill$\square$
+
+\textbf{Lemma 3.} With $b = \neg\,\mathrm{MSB}_{\ell-F}(A)$ as in $\Pi_{\mathrm{TE1}}$,
+$b \cdot T = \mathrm{DReLU}(z) \lfloor z / 2^F \rfloor$ for $z \in [-2^{\ell-1} + 2^F, 2^{\ell-1})$.
+
+\emph{Proof.} $m + \nu = z$ gives $A = \lfloor z / 2^F \rfloor - c_t \bmod 2^{\ell-F}$, and $K$ is half that ring. For
+$z \geq 0$, $\lfloor z/2^F \rfloor \in [0, K)$, so $A \in [-1, K)$: $A = -1$ only if $\lfloor z/2^F \rfloor = 0$, where
+$T = 0$ (Lemma~2) and the product is 0 for either bit; otherwise $b = 1$. For $z < 0$ in the range,
+$\lfloor z/2^F \rfloor \in [-K + 1, -1]$, so $A \in [-K, -1]$ and $b = 0$, whatever $T$ is. In $\Pi_{\mathrm{TE0}}$,
+$b = \mathrm{DReLU}(z)$ exactly. \hfill$\square$
+
+Lemma~2 was also checked exhaustively for $\ell = 8$, $F \in \{2, 3\}$ (all $z \ge 0$ and all $\nu_0, \nu_1$) and by
+simulation for $\ell \in \{16, 32, 64\}$; the unit tests \texttt{RELU\_TE1} / \texttt{RELU\_TE0} find every positive
+input exact with all three adders at 32 and 64 bits.
+
+\paragraph{Security.} \textbf{Theorem 2.} $\Pi_{\mathrm{TS1}}$, $\Pi_{\mathrm{TE1}}$ and $\Pi_{\mathrm{TE0}}$ securely
+compute their outputs against a semi-honest adversary corrupting one party, in the hybrid model with
+$\mathcal{F}_{\mathrm{COT}}$, $\mathcal{F}_{\mathrm{MUX}}$, $\mathcal{F}^{B}_{\mathrm{ADD}}$ and the preprocessing of
+$\Pi_{\mathrm{MSB}}$.
+
+\emph{Proof sketch.} \emph{Offline.} Every value a party receives is an output of an ideal functionality, which
+hands it a share that is uniform on its own (the other party's share completes it); the local steps (shifts,
+$l_a$, the carries' shares) are functions of its view. The simulator draws these shares uniformly. \emph{Online.}
+The messages are the opened masked values of the gates of the MSB adders (one adder in $\Pi_{\mathrm{TS1}}$, two in
+$\Pi_{\mathrm{TE1}}$ and $\Pi_{\mathrm{TE0}}$) and the bit injection's $m_{bT}$. Each is the sum of a value and a fresh
+mask of which the corrupted party holds one share and the other share is uniform and used nowhere else: the gates'
+output masks are drawn independently in preprocessing, $\lambda_c$ and $\lambda_b$ are independent of each other and
+of $\nu$ (the cross terms of $d$ go through $\mathcal{F}_{\mathrm{COT}}$), and the bit injection's output mask is fresh.
+So every opened value is uniform given the rest of the view, and the simulator sends uniform values (for $m_{bT}$, the
+masked output it derives from the corrupted party's output share and mask share). The public quantities $M_0$, $c$,
+$s$, $M$, $a$, $[\![a \neq 0]\!]$ and $m_c$ are functions of opened values. The bake's committed masks are as in the
+rest of the A2bits protocol (one value per slot, \cref{sec:triad}). \hfill$\square$

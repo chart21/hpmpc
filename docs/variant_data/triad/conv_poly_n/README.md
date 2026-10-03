@@ -18,3 +18,10 @@ vsum.sh columns, plus the CONV triple line: s, MB sent / received by P0). Median
 N = 8192 sends 1.31x the conv-triple traffic (the sparse output layout costs ~sqrt(N) per output element) and is
 slower in both settings; in the WAN the conv phase is bandwidth-bound (1.24x the time). The online phase does not
 depend on N (in the WAN it is round-bound: 1714-1818 rounds at 20 ms).
+
+Second run (`wan2_*`, 2026-10-03, hpmpc 8c0ff0f, coinbase `/tmp/wan2`): `wan2.sh` interleaves N = 4096, plain N = 8192
+(`CONV_POLY_N=8192`) and output repacking (`_rp` builds, `CHEETAH_CONV_REPACK=1`: N = 8192 with a special prime) for UC1 /
+UC2 A2bits RCA and UC2 reshared RCA; `wan2_lan.csv` one LAN run, `wan2_wan.csv` three WAN runs (20 ms per direction,
+200 Mbit/s; shaping reset in a trap). The last columns hold the packing and P0's CONV line (s;MB sent;MB received, the
+CSV header is one column short). Medians, WAN pre s: UC2 A2bits 30.16 / 32.88 / 25.93, UC1 37.57 / 43.34 / 31.01, UC2
+reshared 25.67 / 28.54 / 20.51; conv MB 479 / 629 / 285 (UC1: 958 / 1,258 / 570).
