@@ -799,7 +799,8 @@ PPA4 takes it again at the cut (it had taken the AB circuit since `CUT_NARROW_32
 * **Folded a-known RCA:** carry[k-2] = x1 y1 ^ x1 x2 y2 ^ x2 (y1 y2) in one dot group instead of remasking the a-known LSB
   carry (one round and message per adder, the same triples); 32-bit A2bits RCA under the bake takes the narrow cut adder
   (`CUT_FRAC_NARROW32`): 49 fewer rounds (UC2 1,665 instead of 1,714; 64 bits 2,890 instead of 2,939), -2.2 MiB online;
-  online 0.468 / 0.390 / 0.436 against 0.481 / 0.423 / 0.506 s with `CUT_NARROW_32=0` (UC1-3, same run).
+  online the same within the spread in the LAN (campaign10: 0.477 / 0.397 / 0.455 against 0.479 / 0.403 / 0.452 s with
+  `CUT_NARROW_32=0`, UC1-3; an earlier single comparison, res6.csv, had shown 0.01-0.07 s): 49 rounds are about 15 ms here.
 * **ImageNet, A2bits PPA4, a-known vs AB** (same run, `res7.csv`): preprocessing 1,772 / 1,333 / 808 vs 2,156 / 1,716 /
   1,191 MiB and 4.50 / 4.49 / 4.31 vs 5.69 / 5.53 / 5.34 s; online 0.438 / 0.361 / 0.417 vs 0.412 / 0.339 / 0.389 s, same
   traffic and rounds. 64 bits: 3,674 / 2,740 / 1,635 vs 4,502 / 3,568 / 2,464 MiB, 8.24 / 8.31 / 7.68 vs 11.26 / 11.08 /

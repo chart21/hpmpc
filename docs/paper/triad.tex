@@ -275,6 +275,26 @@ builds with \flag{COMPRESS=0} (\cref{tab:cutin}); UC3, with \flag{TRUNC_DELAYED=
 \flag{A2B_DELAYED_CUT} (UC3 A2bits RCA: 136.1 against 123.2\,MiB); with \flag{COMPRESS=1} the online traffic does not
 change.
 
+\paragraph{LAN and WAN.} The 25\,Gbit/s testbed favors computation; in a WAN the conv triples' traffic and the online
+rounds dominate. \Cref{tab:wan} runs the twelve all\_opt builds with linear-layer triples (UC1, UC2) at 20\ms per
+direction and 200\,Mbit/s, without and with output repacking (\flag{CHEETAH_CONV_REPACK=1}, $N = 8192$ with a special
+prime; \cref{tab:polyn}): %WANTEXT%
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+build & pre MiB & WAN pre s & WAN online s\\
+\midrule
+%WANROWS%
+\bottomrule
+\end{tabular}
+\caption{The all\_opt builds with linear-layer triples in a WAN (20\ms per direction, 200\,Mbit/s on both hosts;
+flare / polynize, hpmpc \texttt{4b43984}, the artifact configurations, median of 2 runs), without / with output
+repacking (P0's traffic sent and received). In the LAN repacking costs 1.0--1.5\s (\cref{tab:polyn}).}
+\label{tab:wan}
+\end{table}
+
 \begin{table}[t]
 \centering\small
 \setlength{\tabcolsep}{3.5pt}
@@ -433,8 +453,9 @@ preprocesses 384\,MiB less (UC1--UC3: 1{,}772 / 1{,}333 / 808 against 2{,}156 / 
 less time (4.50 / 4.49 / 4.31 against 5.69 / 5.53 / 5.34\s), for 0.02--0.03\s more online time (0.438 / 0.361 / 0.417
 against 0.412 / 0.339 / 0.389\s) with the same online traffic and rounds; at 64 bits 828\,MiB and 2.8--3.1\s less
 (UC2 2{,}740 against 3{,}568\,MiB, 8.31 against 11.08\s; online 0.610 against 0.585\s). The A2bits RCA builds against
-\flag{CUT_NARROW_32=0} (the old identity cut) in the same run: online 0.468 / 0.390 / 0.436 against 0.481 / 0.423 /
-0.506\s, preprocessing unchanged (+2\,MiB).
+\flag{CUT_NARROW_32=0} (the old identity cut; \cref{tab:cutin}): online the same within the spread in the LAN (0.477 /
+0.397 / 0.455 against 0.479 / 0.403 / 0.452\s; 49 rounds are about 15\ms on the testbed, about 0.9\s at 19\ms per round
+in the WAN), preprocessing unchanged (+2\,MiB).
 
 \paragraph{Reduced-slack truncation.}\label{sec:triadts1} ABY2 now runs the reduced-slack truncation TS1 of
 Truncation Untangled~\cite{tu} (its Fig.~9; \cref{fig:ts1proto}) fused into the ReLU: \flag{TRUNC_APPROACH=4} (TS\_Mix: TS1 in the ReLUs, the
