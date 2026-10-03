@@ -74,8 +74,20 @@ now writes their 64-bit specializations through `scripts/circuits/gen_64bit_adde
 * The a-known PPA4 (`PPA_MSB_4Way_A_AB`, A2bits) is left out: the generator's form needs the hand fixes of hpmpc
   4ec9292 (operand order, dot-pending products, chain masks). With 64 bits the A2bits builds take the AB circuit, with
   the public m as a share of mask 0 (`share_conversion.hpp`).
-* The reshare bake (`RESHARE_OPT_SIM`) is still 32-bit only (RESHARE_BAKE_ACTIVE, the party-local 3-tuples, the
-  generator's SIM branches of the reshared PPA4, keyed on RESHARE_BAKE_ACTIVE).
+* The reshare bake (`RESHARE_OPT_SIM`) at 64 bits: RESHARE_BAKE_ACTIVE and the party-local 3-tuples for BITLENGTH 64
+  too; the bake's maps for the 64-bit circuits and, with the cut, the narrow ones (`wide_ppa4_width`,
+  `ppa4_reshared_b3_count_wide`; RCA and PPA take the 32-bit formulas). The generator's SIM branches of the reshared
+  PPA4 re-mask with `zero_add_local` (as the 8/16/32-bit files: the ordinary zero_add for inputs whose mask is not
+  baked); the script checks them against the bake's maps (reshared slices j % 3 == 1 with rt[(j - 1) / 3], skipped
+  zero_adds at j % 3 == 2 with 3-tuple 2 (j - 2) / 3). At 54 and 48 bits (F = 10, 16) the generator skips other
+  zero_adds (4-tuple .d fields, which the bake cannot serve): there they zero_add normally
+  (`ppa4_reshared_sim_za_wide`), the reshares stay baked. func 53 (P1's reshare check): 51 / 51 (RCA, PPA), 17 / 17
+  (PPA4) matched; CIFAR 25 of 32; P1's ReLU preprocessing traffic -15% for PPA (CIFAR, 32 images).
+* `single_row_ortho` (the bit injection's one-word transpose) for DATTYPE = BITLENGTH = 64 too.
+* Arithmetic triples (secret-by-secret products: max pooling, ...): gemini's elementwise product is limited to SEAL's
+  plaintext space, so with 64 bits every such product came out random (func 53 MaxPool and func 54 Multiplication
+  failed; the CIFAR ResNet50 has no max pooling, ImageNet's has one). ConvTriple now multiplies by Gilboa over the
+  silent COTs (one COT of width 64 - j per bit j).
 
 ## 3. CUT_FRACTIONAL_BITS_OPT at 64 bits: narrow adders
 

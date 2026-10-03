@@ -683,217 +683,217 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 56)>::type>
                 p_54 = a[54] ^ b[54];  // p[54]
                 p0 = a[0] ^ b[0];  // p0
 #if RESHARE_BAKE_ACTIVE
-                a_2_p = a[2];  // a[2]' (reshare opt sim)
+                a_2_p = a[2].zero_add_local(beaver3_tuples[0].b);  // mask pre-baked; no communication
 #else
                 a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
 #endif
                 a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
 #if RESHARE_BAKE_ACTIVE
-                a_5_p = a[5];  // a[5]' (reshare opt sim)
+                a_5_p = a[5].zero_add_local(beaver3_tuples[2].b);  // mask pre-baked; no communication
 #else
                 a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
 #endif
                 a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
 #if RESHARE_BAKE_ACTIVE
-                a_8_p = a[8];  // a[8]' (reshare opt sim)
+                a_8_p = a[8].zero_add_local(beaver3_tuples[4].b);  // mask pre-baked; no communication
 #else
                 a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
 #endif
                 a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
 #if RESHARE_BAKE_ACTIVE
-                a_11_p = a[11];  // a[11]' (reshare opt sim)
+                a_11_p = a[11].zero_add_local(beaver3_tuples[6].b);  // mask pre-baked; no communication
 #else
                 a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
 #endif
                 a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
 #if RESHARE_BAKE_ACTIVE
-                a_14_p = a[14];  // a[14]' (reshare opt sim)
+                a_14_p = a[14].zero_add_local(beaver3_tuples[8].b);  // mask pre-baked; no communication
 #else
                 a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
 #endif
                 a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
 #if RESHARE_BAKE_ACTIVE
-                a_17_p = a[17];  // a[17]' (reshare opt sim)
+                a_17_p = a[17].zero_add_local(beaver3_tuples[10].b);  // mask pre-baked; no communication
 #else
                 a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
 #endif
                 a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
 #if RESHARE_BAKE_ACTIVE
-                a_20_p = a[20];  // a[20]' (reshare opt sim)
+                a_20_p = a[20].zero_add_local(beaver3_tuples[12].b);  // mask pre-baked; no communication
 #else
                 a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
 #endif
                 a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
 #if RESHARE_BAKE_ACTIVE
-                a_23_p = a[23];  // a[23]' (reshare opt sim)
+                a_23_p = a[23].zero_add_local(beaver3_tuples[14].b);  // mask pre-baked; no communication
 #else
                 a_23_p = a[23].zero_add(beaver3_tuples[14].b);  // a[23]', mask=b29
 #endif
                 a_24_p = a[24].zero_add(beaver4_tuples[7].c);  // a[24]', mask=c30
 #if RESHARE_BAKE_ACTIVE
-                a_26_p = a[26];  // a[26]' (reshare opt sim)
+                a_26_p = a[26].zero_add_local(beaver3_tuples[16].b);  // mask pre-baked; no communication
 #else
                 a_26_p = a[26].zero_add(beaver3_tuples[16].b);  // a[26]', mask=b33
 #endif
                 a_27_p = a[27].zero_add(beaver4_tuples[8].c);  // a[27]', mask=c34
 #if RESHARE_BAKE_ACTIVE
-                a_29_p = a[29];  // a[29]' (reshare opt sim)
+                a_29_p = a[29].zero_add_local(beaver3_tuples[18].b);  // mask pre-baked; no communication
 #else
                 a_29_p = a[29].zero_add(beaver3_tuples[18].b);  // a[29]', mask=b37
 #endif
                 a_30_p = a[30].zero_add(beaver4_tuples[9].c);  // a[30]', mask=c38
 #if RESHARE_BAKE_ACTIVE
-                a_32_p = a[32];  // a[32]' (reshare opt sim)
+                a_32_p = a[32].zero_add_local(beaver3_tuples[20].b);  // mask pre-baked; no communication
 #else
                 a_32_p = a[32].zero_add(beaver3_tuples[20].b);  // a[32]', mask=b41
 #endif
                 a_33_p = a[33].zero_add(beaver4_tuples[10].c);  // a[33]', mask=c42
 #if RESHARE_BAKE_ACTIVE
-                a_35_p = a[35];  // a[35]' (reshare opt sim)
+                a_35_p = a[35].zero_add_local(beaver3_tuples[22].b);  // mask pre-baked; no communication
 #else
                 a_35_p = a[35].zero_add(beaver3_tuples[22].b);  // a[35]', mask=b45
 #endif
                 a_36_p = a[36].zero_add(beaver4_tuples[11].c);  // a[36]', mask=c46
 #if RESHARE_BAKE_ACTIVE
-                a_38_p = a[38];  // a[38]' (reshare opt sim)
+                a_38_p = a[38].zero_add_local(beaver3_tuples[24].b);  // mask pre-baked; no communication
 #else
                 a_38_p = a[38].zero_add(beaver3_tuples[24].b);  // a[38]', mask=b49
 #endif
                 a_39_p = a[39].zero_add(beaver4_tuples[12].c);  // a[39]', mask=c50
 #if RESHARE_BAKE_ACTIVE
-                a_41_p = a[41];  // a[41]' (reshare opt sim)
+                a_41_p = a[41].zero_add_local(beaver3_tuples[26].b);  // mask pre-baked; no communication
 #else
                 a_41_p = a[41].zero_add(beaver3_tuples[26].b);  // a[41]', mask=b53
 #endif
                 a_42_p = a[42].zero_add(beaver4_tuples[13].c);  // a[42]', mask=c54
 #if RESHARE_BAKE_ACTIVE
-                a_44_p = a[44];  // a[44]' (reshare opt sim)
+                a_44_p = a[44].zero_add_local(beaver3_tuples[28].b);  // mask pre-baked; no communication
 #else
                 a_44_p = a[44].zero_add(beaver3_tuples[28].b);  // a[44]', mask=b57
 #endif
                 a_45_p = a[45].zero_add(beaver4_tuples[14].c);  // a[45]', mask=c58
 #if RESHARE_BAKE_ACTIVE
-                a_47_p = a[47];  // a[47]' (reshare opt sim)
+                a_47_p = a[47].zero_add_local(beaver3_tuples[30].b);  // mask pre-baked; no communication
 #else
                 a_47_p = a[47].zero_add(beaver3_tuples[30].b);  // a[47]', mask=b61
 #endif
                 a_48_p = a[48].zero_add(beaver4_tuples[15].c);  // a[48]', mask=c62
 #if RESHARE_BAKE_ACTIVE
-                a_50_p = a[50];  // a[50]' (reshare opt sim)
+                a_50_p = a[50].zero_add_local(beaver3_tuples[32].b);  // mask pre-baked; no communication
 #else
                 a_50_p = a[50].zero_add(beaver3_tuples[32].b);  // a[50]', mask=b65
 #endif
                 a_51_p = a[51].zero_add(beaver4_tuples[16].c);  // a[51]', mask=c66
 #if RESHARE_BAKE_ACTIVE
-                a_53_p = a[53];  // a[53]' (reshare opt sim)
+                a_53_p = a[53].zero_add_local(beaver3_tuples[34].b);  // mask pre-baked; no communication
 #else
                 a_53_p = a[53].zero_add(beaver3_tuples[34].b);  // a[53]', mask=b69
 #endif
                 a_54_p = a[54].zero_add(beaver4_tuples[17].c);  // a[54]', mask=c70
 #if RESHARE_BAKE_ACTIVE
-                b_2_p = b[2];  // b[2]' (reshare opt sim)
+                b_2_p = b[2].zero_add_local(beaver3_tuples[0].c);  // mask pre-baked; no communication
 #else
                 b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
 #endif
                 b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
 #if RESHARE_BAKE_ACTIVE
-                b_5_p = b[5];  // b[5]' (reshare opt sim)
+                b_5_p = b[5].zero_add_local(beaver3_tuples[2].c);  // mask pre-baked; no communication
 #else
                 b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
 #endif
                 b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
 #if RESHARE_BAKE_ACTIVE
-                b_8_p = b[8];  // b[8]' (reshare opt sim)
+                b_8_p = b[8].zero_add_local(beaver3_tuples[4].c);  // mask pre-baked; no communication
 #else
                 b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
 #endif
                 b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
 #if RESHARE_BAKE_ACTIVE
-                b_11_p = b[11];  // b[11]' (reshare opt sim)
+                b_11_p = b[11].zero_add_local(beaver3_tuples[6].c);  // mask pre-baked; no communication
 #else
                 b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
 #endif
                 b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
 #if RESHARE_BAKE_ACTIVE
-                b_14_p = b[14];  // b[14]' (reshare opt sim)
+                b_14_p = b[14].zero_add_local(beaver3_tuples[8].c);  // mask pre-baked; no communication
 #else
                 b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
 #endif
                 b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
 #if RESHARE_BAKE_ACTIVE
-                b_17_p = b[17];  // b[17]' (reshare opt sim)
+                b_17_p = b[17].zero_add_local(beaver3_tuples[10].c);  // mask pre-baked; no communication
 #else
                 b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
 #endif
                 b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
 #if RESHARE_BAKE_ACTIVE
-                b_20_p = b[20];  // b[20]' (reshare opt sim)
+                b_20_p = b[20].zero_add_local(beaver3_tuples[12].c);  // mask pre-baked; no communication
 #else
                 b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
 #endif
                 b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
 #if RESHARE_BAKE_ACTIVE
-                b_23_p = b[23];  // b[23]' (reshare opt sim)
+                b_23_p = b[23].zero_add_local(beaver3_tuples[14].c);  // mask pre-baked; no communication
 #else
                 b_23_p = b[23].zero_add(beaver3_tuples[14].c);  // b[23]', mask=c29
 #endif
                 b_24_p = b[24].zero_add(beaver4_tuples[7].d);  // b[24]', mask=d30
 #if RESHARE_BAKE_ACTIVE
-                b_26_p = b[26];  // b[26]' (reshare opt sim)
+                b_26_p = b[26].zero_add_local(beaver3_tuples[16].c);  // mask pre-baked; no communication
 #else
                 b_26_p = b[26].zero_add(beaver3_tuples[16].c);  // b[26]', mask=c33
 #endif
                 b_27_p = b[27].zero_add(beaver4_tuples[8].d);  // b[27]', mask=d34
 #if RESHARE_BAKE_ACTIVE
-                b_29_p = b[29];  // b[29]' (reshare opt sim)
+                b_29_p = b[29].zero_add_local(beaver3_tuples[18].c);  // mask pre-baked; no communication
 #else
                 b_29_p = b[29].zero_add(beaver3_tuples[18].c);  // b[29]', mask=c37
 #endif
                 b_30_p = b[30].zero_add(beaver4_tuples[9].d);  // b[30]', mask=d38
 #if RESHARE_BAKE_ACTIVE
-                b_32_p = b[32];  // b[32]' (reshare opt sim)
+                b_32_p = b[32].zero_add_local(beaver3_tuples[20].c);  // mask pre-baked; no communication
 #else
                 b_32_p = b[32].zero_add(beaver3_tuples[20].c);  // b[32]', mask=c41
 #endif
                 b_33_p = b[33].zero_add(beaver4_tuples[10].d);  // b[33]', mask=d42
 #if RESHARE_BAKE_ACTIVE
-                b_35_p = b[35];  // b[35]' (reshare opt sim)
+                b_35_p = b[35].zero_add_local(beaver3_tuples[22].c);  // mask pre-baked; no communication
 #else
                 b_35_p = b[35].zero_add(beaver3_tuples[22].c);  // b[35]', mask=c45
 #endif
                 b_36_p = b[36].zero_add(beaver4_tuples[11].d);  // b[36]', mask=d46
 #if RESHARE_BAKE_ACTIVE
-                b_38_p = b[38];  // b[38]' (reshare opt sim)
+                b_38_p = b[38].zero_add_local(beaver3_tuples[24].c);  // mask pre-baked; no communication
 #else
                 b_38_p = b[38].zero_add(beaver3_tuples[24].c);  // b[38]', mask=c49
 #endif
                 b_39_p = b[39].zero_add(beaver4_tuples[12].d);  // b[39]', mask=d50
 #if RESHARE_BAKE_ACTIVE
-                b_41_p = b[41];  // b[41]' (reshare opt sim)
+                b_41_p = b[41].zero_add_local(beaver3_tuples[26].c);  // mask pre-baked; no communication
 #else
                 b_41_p = b[41].zero_add(beaver3_tuples[26].c);  // b[41]', mask=c53
 #endif
                 b_42_p = b[42].zero_add(beaver4_tuples[13].d);  // b[42]', mask=d54
 #if RESHARE_BAKE_ACTIVE
-                b_44_p = b[44];  // b[44]' (reshare opt sim)
+                b_44_p = b[44].zero_add_local(beaver3_tuples[28].c);  // mask pre-baked; no communication
 #else
                 b_44_p = b[44].zero_add(beaver3_tuples[28].c);  // b[44]', mask=c57
 #endif
                 b_45_p = b[45].zero_add(beaver4_tuples[14].d);  // b[45]', mask=d58
 #if RESHARE_BAKE_ACTIVE
-                b_47_p = b[47];  // b[47]' (reshare opt sim)
+                b_47_p = b[47].zero_add_local(beaver3_tuples[30].c);  // mask pre-baked; no communication
 #else
                 b_47_p = b[47].zero_add(beaver3_tuples[30].c);  // b[47]', mask=c61
 #endif
                 b_48_p = b[48].zero_add(beaver4_tuples[15].d);  // b[48]', mask=d62
 #if RESHARE_BAKE_ACTIVE
-                b_50_p = b[50];  // b[50]' (reshare opt sim)
+                b_50_p = b[50].zero_add_local(beaver3_tuples[32].c);  // mask pre-baked; no communication
 #else
                 b_50_p = b[50].zero_add(beaver3_tuples[32].c);  // b[50]', mask=c65
 #endif
                 b_51_p = b[51].zero_add(beaver4_tuples[16].d);  // b[51]', mask=d66
 #if RESHARE_BAKE_ACTIVE
-                b_53_p = b[53];  // b[53]' (reshare opt sim)
+                b_53_p = b[53].zero_add_local(beaver3_tuples[34].c);  // mask pre-baked; no communication
 #else
                 b_53_p = b[53].zero_add(beaver3_tuples[34].c);  // b[53]', mask=c69
 #endif
@@ -2026,215 +2026,75 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 54)>::type>
                 p_51 = a[51] ^ b[51];  // p[51]
                 p_52 = a[52] ^ b[52];  // p[52]
                 p0 = a[0] ^ b[0];  // p0
-#if RESHARE_BAKE_ACTIVE
-                a_2_p = a[2];  // a[2]' (reshare opt sim)
-#else
                 a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
-#endif
                 a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
-#if RESHARE_BAKE_ACTIVE
-                a_5_p = a[5];  // a[5]' (reshare opt sim)
-#else
                 a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
-#endif
                 a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
-#if RESHARE_BAKE_ACTIVE
-                a_8_p = a[8];  // a[8]' (reshare opt sim)
-#else
                 a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
-#endif
                 a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
-#if RESHARE_BAKE_ACTIVE
-                a_11_p = a[11];  // a[11]' (reshare opt sim)
-#else
                 a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
-#endif
                 a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
-#if RESHARE_BAKE_ACTIVE
-                a_14_p = a[14];  // a[14]' (reshare opt sim)
-#else
                 a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
-#endif
                 a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
-#if RESHARE_BAKE_ACTIVE
-                a_17_p = a[17];  // a[17]' (reshare opt sim)
-#else
                 a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
-#endif
                 a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
-#if RESHARE_BAKE_ACTIVE
-                a_20_p = a[20];  // a[20]' (reshare opt sim)
-#else
                 a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
-#endif
                 a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
-#if RESHARE_BAKE_ACTIVE
-                a_23_p = a[23];  // a[23]' (reshare opt sim)
-#else
                 a_23_p = a[23].zero_add(beaver3_tuples[14].b);  // a[23]', mask=b29
-#endif
                 a_24_p = a[24].zero_add(beaver4_tuples[7].c);  // a[24]', mask=c30
-#if RESHARE_BAKE_ACTIVE
-                a_26_p = a[26];  // a[26]' (reshare opt sim)
-#else
                 a_26_p = a[26].zero_add(beaver3_tuples[16].b);  // a[26]', mask=b33
-#endif
                 a_27_p = a[27].zero_add(beaver4_tuples[8].c);  // a[27]', mask=c34
-#if RESHARE_BAKE_ACTIVE
-                a_29_p = a[29];  // a[29]' (reshare opt sim)
-#else
                 a_29_p = a[29].zero_add(beaver3_tuples[18].b);  // a[29]', mask=b37
-#endif
                 a_30_p = a[30].zero_add(beaver4_tuples[9].c);  // a[30]', mask=c38
-#if RESHARE_BAKE_ACTIVE
-                a_32_p = a[32];  // a[32]' (reshare opt sim)
-#else
                 a_32_p = a[32].zero_add(beaver3_tuples[20].b);  // a[32]', mask=b41
-#endif
                 a_33_p = a[33].zero_add(beaver4_tuples[10].c);  // a[33]', mask=c42
-#if RESHARE_BAKE_ACTIVE
-                a_35_p = a[35];  // a[35]' (reshare opt sim)
-#else
                 a_35_p = a[35].zero_add(beaver3_tuples[22].b);  // a[35]', mask=b45
-#endif
                 a_36_p = a[36].zero_add(beaver4_tuples[11].c);  // a[36]', mask=c46
-#if RESHARE_BAKE_ACTIVE
-                a_38_p = a[38];  // a[38]' (reshare opt sim)
-#else
                 a_38_p = a[38].zero_add(beaver3_tuples[24].b);  // a[38]', mask=b49
-#endif
                 a_39_p = a[39].zero_add(beaver4_tuples[12].c);  // a[39]', mask=c50
-#if RESHARE_BAKE_ACTIVE
-                a_41_p = a[41];  // a[41]' (reshare opt sim)
-#else
                 a_41_p = a[41].zero_add(beaver3_tuples[26].b);  // a[41]', mask=b53
-#endif
                 a_42_p = a[42].zero_add(beaver4_tuples[13].c);  // a[42]', mask=c54
-#if RESHARE_BAKE_ACTIVE
-                a_44_p = a[44];  // a[44]' (reshare opt sim)
-#else
                 a_44_p = a[44].zero_add(beaver3_tuples[28].b);  // a[44]', mask=b57
-#endif
                 a_45_p = a[45].zero_add(beaver4_tuples[14].c);  // a[45]', mask=c58
-#if RESHARE_BAKE_ACTIVE
-                a_47_p = a[47];  // a[47]' (reshare opt sim)
-#else
                 a_47_p = a[47].zero_add(beaver3_tuples[30].b);  // a[47]', mask=b61
-#endif
                 a_48_p = a[48].zero_add(beaver4_tuples[15].c);  // a[48]', mask=c62
-#if RESHARE_BAKE_ACTIVE
-                a_50_p = a[50];  // a[50]' (reshare opt sim)
-#else
                 a_50_p = a[50].zero_add(beaver3_tuples[32].b);  // a[50]', mask=b65
-#endif
                 a_51_p = a[51].zero_add(beaver4_tuples[16].c);  // a[51]', mask=c66
-#if RESHARE_BAKE_ACTIVE
-                a_53_p = a[53];  // a[53]' (reshare opt sim)
-#else
                 a_53_p = a[53].zero_add(beaver3_tuples[34].b);  // a[53]', mask=b69
-#endif
                 b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
-#if RESHARE_BAKE_ACTIVE
-                b_3_p = b[3];  // b[3]' (reshare opt sim)
-#else
                 b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
-#endif
                 b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
-#if RESHARE_BAKE_ACTIVE
-                b_6_p = b[6];  // b[6]' (reshare opt sim)
-#else
                 b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
-#endif
                 b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
-#if RESHARE_BAKE_ACTIVE
-                b_9_p = b[9];  // b[9]' (reshare opt sim)
-#else
                 b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
-#endif
                 b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
-#if RESHARE_BAKE_ACTIVE
-                b_12_p = b[12];  // b[12]' (reshare opt sim)
-#else
                 b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
-#endif
                 b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
-#if RESHARE_BAKE_ACTIVE
-                b_15_p = b[15];  // b[15]' (reshare opt sim)
-#else
                 b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
-#endif
                 b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
-#if RESHARE_BAKE_ACTIVE
-                b_18_p = b[18];  // b[18]' (reshare opt sim)
-#else
                 b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
-#endif
                 b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
-#if RESHARE_BAKE_ACTIVE
-                b_21_p = b[21];  // b[21]' (reshare opt sim)
-#else
                 b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
-#endif
                 b_23_p = b[23].zero_add(beaver3_tuples[14].c);  // b[23]', mask=c29
-#if RESHARE_BAKE_ACTIVE
-                b_24_p = b[24];  // b[24]' (reshare opt sim)
-#else
                 b_24_p = b[24].zero_add(beaver4_tuples[7].d);  // b[24]', mask=d30
-#endif
                 b_26_p = b[26].zero_add(beaver3_tuples[16].c);  // b[26]', mask=c33
-#if RESHARE_BAKE_ACTIVE
-                b_27_p = b[27];  // b[27]' (reshare opt sim)
-#else
                 b_27_p = b[27].zero_add(beaver4_tuples[8].d);  // b[27]', mask=d34
-#endif
                 b_29_p = b[29].zero_add(beaver3_tuples[18].c);  // b[29]', mask=c37
-#if RESHARE_BAKE_ACTIVE
-                b_30_p = b[30];  // b[30]' (reshare opt sim)
-#else
                 b_30_p = b[30].zero_add(beaver4_tuples[9].d);  // b[30]', mask=d38
-#endif
                 b_32_p = b[32].zero_add(beaver3_tuples[20].c);  // b[32]', mask=c41
-#if RESHARE_BAKE_ACTIVE
-                b_33_p = b[33];  // b[33]' (reshare opt sim)
-#else
                 b_33_p = b[33].zero_add(beaver4_tuples[10].d);  // b[33]', mask=d42
-#endif
                 b_35_p = b[35].zero_add(beaver3_tuples[22].c);  // b[35]', mask=c45
-#if RESHARE_BAKE_ACTIVE
-                b_36_p = b[36];  // b[36]' (reshare opt sim)
-#else
                 b_36_p = b[36].zero_add(beaver4_tuples[11].d);  // b[36]', mask=d46
-#endif
                 b_38_p = b[38].zero_add(beaver3_tuples[24].c);  // b[38]', mask=c49
-#if RESHARE_BAKE_ACTIVE
-                b_39_p = b[39];  // b[39]' (reshare opt sim)
-#else
                 b_39_p = b[39].zero_add(beaver4_tuples[12].d);  // b[39]', mask=d50
-#endif
                 b_41_p = b[41].zero_add(beaver3_tuples[26].c);  // b[41]', mask=c53
-#if RESHARE_BAKE_ACTIVE
-                b_42_p = b[42];  // b[42]' (reshare opt sim)
-#else
                 b_42_p = b[42].zero_add(beaver4_tuples[13].d);  // b[42]', mask=d54
-#endif
                 b_44_p = b[44].zero_add(beaver3_tuples[28].c);  // b[44]', mask=c57
-#if RESHARE_BAKE_ACTIVE
-                b_45_p = b[45];  // b[45]' (reshare opt sim)
-#else
                 b_45_p = b[45].zero_add(beaver4_tuples[14].d);  // b[45]', mask=d58
-#endif
                 b_47_p = b[47].zero_add(beaver3_tuples[30].c);  // b[47]', mask=c61
-#if RESHARE_BAKE_ACTIVE
-                b_48_p = b[48];  // b[48]' (reshare opt sim)
-#else
                 b_48_p = b[48].zero_add(beaver4_tuples[15].d);  // b[48]', mask=d62
-#endif
                 b_50_p = b[50].zero_add(beaver3_tuples[32].c);  // b[50]', mask=c65
-#if RESHARE_BAKE_ACTIVE
-                b_51_p = b[51];  // b[51]' (reshare opt sim)
-#else
                 b_51_p = b[51].zero_add(beaver4_tuples[16].d);  // b[51]', mask=d66
-#endif
                 b_53_p = b[53].zero_add(beaver3_tuples[34].c);  // b[53]', mask=c69
                 p_1_p = p_1.zero_add(beaver3_tuples[0].a);  // p[1]', mask=a1
                 p_1_p_1 = p_1.zero_add(beaver4_tuples[0].a);  // p[1]'_1, mask=a2
@@ -3324,205 +3184,205 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 52)>::type>
                 p_50 = a[50] ^ b[50];  // p[50]
                 p0 = a[0] ^ b[0];  // p0
 #if RESHARE_BAKE_ACTIVE
-                a_2_p = a[2];  // a[2]' (reshare opt sim)
+                a_2_p = a[2].zero_add_local(beaver3_tuples[0].b);  // mask pre-baked; no communication
 #else
                 a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
 #endif
                 a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
 #if RESHARE_BAKE_ACTIVE
-                a_5_p = a[5];  // a[5]' (reshare opt sim)
+                a_5_p = a[5].zero_add_local(beaver3_tuples[2].b);  // mask pre-baked; no communication
 #else
                 a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
 #endif
                 a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
 #if RESHARE_BAKE_ACTIVE
-                a_8_p = a[8];  // a[8]' (reshare opt sim)
+                a_8_p = a[8].zero_add_local(beaver3_tuples[4].b);  // mask pre-baked; no communication
 #else
                 a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
 #endif
                 a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
 #if RESHARE_BAKE_ACTIVE
-                a_11_p = a[11];  // a[11]' (reshare opt sim)
+                a_11_p = a[11].zero_add_local(beaver3_tuples[6].b);  // mask pre-baked; no communication
 #else
                 a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
 #endif
                 a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
 #if RESHARE_BAKE_ACTIVE
-                a_14_p = a[14];  // a[14]' (reshare opt sim)
+                a_14_p = a[14].zero_add_local(beaver3_tuples[8].b);  // mask pre-baked; no communication
 #else
                 a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
 #endif
                 a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
 #if RESHARE_BAKE_ACTIVE
-                a_17_p = a[17];  // a[17]' (reshare opt sim)
+                a_17_p = a[17].zero_add_local(beaver3_tuples[10].b);  // mask pre-baked; no communication
 #else
                 a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
 #endif
                 a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
 #if RESHARE_BAKE_ACTIVE
-                a_20_p = a[20];  // a[20]' (reshare opt sim)
+                a_20_p = a[20].zero_add_local(beaver3_tuples[12].b);  // mask pre-baked; no communication
 #else
                 a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
 #endif
                 a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
 #if RESHARE_BAKE_ACTIVE
-                a_23_p = a[23];  // a[23]' (reshare opt sim)
+                a_23_p = a[23].zero_add_local(beaver3_tuples[14].b);  // mask pre-baked; no communication
 #else
                 a_23_p = a[23].zero_add(beaver3_tuples[14].b);  // a[23]', mask=b29
 #endif
                 a_24_p = a[24].zero_add(beaver4_tuples[7].c);  // a[24]', mask=c30
 #if RESHARE_BAKE_ACTIVE
-                a_26_p = a[26];  // a[26]' (reshare opt sim)
+                a_26_p = a[26].zero_add_local(beaver3_tuples[16].b);  // mask pre-baked; no communication
 #else
                 a_26_p = a[26].zero_add(beaver3_tuples[16].b);  // a[26]', mask=b33
 #endif
                 a_27_p = a[27].zero_add(beaver4_tuples[8].c);  // a[27]', mask=c34
 #if RESHARE_BAKE_ACTIVE
-                a_29_p = a[29];  // a[29]' (reshare opt sim)
+                a_29_p = a[29].zero_add_local(beaver3_tuples[18].b);  // mask pre-baked; no communication
 #else
                 a_29_p = a[29].zero_add(beaver3_tuples[18].b);  // a[29]', mask=b37
 #endif
                 a_30_p = a[30].zero_add(beaver4_tuples[9].c);  // a[30]', mask=c38
 #if RESHARE_BAKE_ACTIVE
-                a_32_p = a[32];  // a[32]' (reshare opt sim)
+                a_32_p = a[32].zero_add_local(beaver3_tuples[20].b);  // mask pre-baked; no communication
 #else
                 a_32_p = a[32].zero_add(beaver3_tuples[20].b);  // a[32]', mask=b41
 #endif
                 a_33_p = a[33].zero_add(beaver4_tuples[10].c);  // a[33]', mask=c42
 #if RESHARE_BAKE_ACTIVE
-                a_35_p = a[35];  // a[35]' (reshare opt sim)
+                a_35_p = a[35].zero_add_local(beaver3_tuples[22].b);  // mask pre-baked; no communication
 #else
                 a_35_p = a[35].zero_add(beaver3_tuples[22].b);  // a[35]', mask=b45
 #endif
                 a_36_p = a[36].zero_add(beaver4_tuples[11].c);  // a[36]', mask=c46
 #if RESHARE_BAKE_ACTIVE
-                a_38_p = a[38];  // a[38]' (reshare opt sim)
+                a_38_p = a[38].zero_add_local(beaver3_tuples[24].b);  // mask pre-baked; no communication
 #else
                 a_38_p = a[38].zero_add(beaver3_tuples[24].b);  // a[38]', mask=b49
 #endif
                 a_39_p = a[39].zero_add(beaver4_tuples[12].c);  // a[39]', mask=c50
 #if RESHARE_BAKE_ACTIVE
-                a_41_p = a[41];  // a[41]' (reshare opt sim)
+                a_41_p = a[41].zero_add_local(beaver3_tuples[26].b);  // mask pre-baked; no communication
 #else
                 a_41_p = a[41].zero_add(beaver3_tuples[26].b);  // a[41]', mask=b53
 #endif
                 a_42_p = a[42].zero_add(beaver4_tuples[13].c);  // a[42]', mask=c54
 #if RESHARE_BAKE_ACTIVE
-                a_44_p = a[44];  // a[44]' (reshare opt sim)
+                a_44_p = a[44].zero_add_local(beaver3_tuples[28].b);  // mask pre-baked; no communication
 #else
                 a_44_p = a[44].zero_add(beaver3_tuples[28].b);  // a[44]', mask=b57
 #endif
                 a_45_p = a[45].zero_add(beaver4_tuples[14].c);  // a[45]', mask=c58
 #if RESHARE_BAKE_ACTIVE
-                a_47_p = a[47];  // a[47]' (reshare opt sim)
+                a_47_p = a[47].zero_add_local(beaver3_tuples[30].b);  // mask pre-baked; no communication
 #else
                 a_47_p = a[47].zero_add(beaver3_tuples[30].b);  // a[47]', mask=b61
 #endif
                 a_48_p = a[48].zero_add(beaver4_tuples[15].c);  // a[48]', mask=c62
 #if RESHARE_BAKE_ACTIVE
-                a_50_p = a[50];  // a[50]' (reshare opt sim)
+                a_50_p = a[50].zero_add_local(beaver3_tuples[32].b);  // mask pre-baked; no communication
 #else
                 a_50_p = a[50].zero_add(beaver3_tuples[32].b);  // a[50]', mask=b65
 #endif
                 a_51_p = a[51].zero_add(beaver4_tuples[16].c);  // a[51]', mask=c66
 #if RESHARE_BAKE_ACTIVE
-                b_2_p = b[2];  // b[2]' (reshare opt sim)
+                b_2_p = b[2].zero_add_local(beaver3_tuples[0].c);  // mask pre-baked; no communication
 #else
                 b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
 #endif
                 b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
 #if RESHARE_BAKE_ACTIVE
-                b_5_p = b[5];  // b[5]' (reshare opt sim)
+                b_5_p = b[5].zero_add_local(beaver3_tuples[2].c);  // mask pre-baked; no communication
 #else
                 b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
 #endif
                 b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
 #if RESHARE_BAKE_ACTIVE
-                b_8_p = b[8];  // b[8]' (reshare opt sim)
+                b_8_p = b[8].zero_add_local(beaver3_tuples[4].c);  // mask pre-baked; no communication
 #else
                 b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
 #endif
                 b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
 #if RESHARE_BAKE_ACTIVE
-                b_11_p = b[11];  // b[11]' (reshare opt sim)
+                b_11_p = b[11].zero_add_local(beaver3_tuples[6].c);  // mask pre-baked; no communication
 #else
                 b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
 #endif
                 b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
 #if RESHARE_BAKE_ACTIVE
-                b_14_p = b[14];  // b[14]' (reshare opt sim)
+                b_14_p = b[14].zero_add_local(beaver3_tuples[8].c);  // mask pre-baked; no communication
 #else
                 b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
 #endif
                 b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
 #if RESHARE_BAKE_ACTIVE
-                b_17_p = b[17];  // b[17]' (reshare opt sim)
+                b_17_p = b[17].zero_add_local(beaver3_tuples[10].c);  // mask pre-baked; no communication
 #else
                 b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
 #endif
                 b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
 #if RESHARE_BAKE_ACTIVE
-                b_20_p = b[20];  // b[20]' (reshare opt sim)
+                b_20_p = b[20].zero_add_local(beaver3_tuples[12].c);  // mask pre-baked; no communication
 #else
                 b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
 #endif
                 b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
 #if RESHARE_BAKE_ACTIVE
-                b_23_p = b[23];  // b[23]' (reshare opt sim)
+                b_23_p = b[23].zero_add_local(beaver3_tuples[14].c);  // mask pre-baked; no communication
 #else
                 b_23_p = b[23].zero_add(beaver3_tuples[14].c);  // b[23]', mask=c29
 #endif
                 b_24_p = b[24].zero_add(beaver4_tuples[7].d);  // b[24]', mask=d30
 #if RESHARE_BAKE_ACTIVE
-                b_26_p = b[26];  // b[26]' (reshare opt sim)
+                b_26_p = b[26].zero_add_local(beaver3_tuples[16].c);  // mask pre-baked; no communication
 #else
                 b_26_p = b[26].zero_add(beaver3_tuples[16].c);  // b[26]', mask=c33
 #endif
                 b_27_p = b[27].zero_add(beaver4_tuples[8].d);  // b[27]', mask=d34
 #if RESHARE_BAKE_ACTIVE
-                b_29_p = b[29];  // b[29]' (reshare opt sim)
+                b_29_p = b[29].zero_add_local(beaver3_tuples[18].c);  // mask pre-baked; no communication
 #else
                 b_29_p = b[29].zero_add(beaver3_tuples[18].c);  // b[29]', mask=c37
 #endif
                 b_30_p = b[30].zero_add(beaver4_tuples[9].d);  // b[30]', mask=d38
 #if RESHARE_BAKE_ACTIVE
-                b_32_p = b[32];  // b[32]' (reshare opt sim)
+                b_32_p = b[32].zero_add_local(beaver3_tuples[20].c);  // mask pre-baked; no communication
 #else
                 b_32_p = b[32].zero_add(beaver3_tuples[20].c);  // b[32]', mask=c41
 #endif
                 b_33_p = b[33].zero_add(beaver4_tuples[10].d);  // b[33]', mask=d42
 #if RESHARE_BAKE_ACTIVE
-                b_35_p = b[35];  // b[35]' (reshare opt sim)
+                b_35_p = b[35].zero_add_local(beaver3_tuples[22].c);  // mask pre-baked; no communication
 #else
                 b_35_p = b[35].zero_add(beaver3_tuples[22].c);  // b[35]', mask=c45
 #endif
                 b_36_p = b[36].zero_add(beaver4_tuples[11].d);  // b[36]', mask=d46
 #if RESHARE_BAKE_ACTIVE
-                b_38_p = b[38];  // b[38]' (reshare opt sim)
+                b_38_p = b[38].zero_add_local(beaver3_tuples[24].c);  // mask pre-baked; no communication
 #else
                 b_38_p = b[38].zero_add(beaver3_tuples[24].c);  // b[38]', mask=c49
 #endif
                 b_39_p = b[39].zero_add(beaver4_tuples[12].d);  // b[39]', mask=d50
 #if RESHARE_BAKE_ACTIVE
-                b_41_p = b[41];  // b[41]' (reshare opt sim)
+                b_41_p = b[41].zero_add_local(beaver3_tuples[26].c);  // mask pre-baked; no communication
 #else
                 b_41_p = b[41].zero_add(beaver3_tuples[26].c);  // b[41]', mask=c53
 #endif
                 b_42_p = b[42].zero_add(beaver4_tuples[13].d);  // b[42]', mask=d54
 #if RESHARE_BAKE_ACTIVE
-                b_44_p = b[44];  // b[44]' (reshare opt sim)
+                b_44_p = b[44].zero_add_local(beaver3_tuples[28].c);  // mask pre-baked; no communication
 #else
                 b_44_p = b[44].zero_add(beaver3_tuples[28].c);  // b[44]', mask=c57
 #endif
                 b_45_p = b[45].zero_add(beaver4_tuples[14].d);  // b[45]', mask=d58
 #if RESHARE_BAKE_ACTIVE
-                b_47_p = b[47];  // b[47]' (reshare opt sim)
+                b_47_p = b[47].zero_add_local(beaver3_tuples[30].c);  // mask pre-baked; no communication
 #else
                 b_47_p = b[47].zero_add(beaver3_tuples[30].c);  // b[47]', mask=c61
 #endif
                 b_48_p = b[48].zero_add(beaver4_tuples[15].d);  // b[48]', mask=d62
 #if RESHARE_BAKE_ACTIVE
-                b_50_p = b[50];  // b[50]' (reshare opt sim)
+                b_50_p = b[50].zero_add_local(beaver3_tuples[32].c);  // mask pre-baked; no communication
 #else
                 b_50_p = b[50].zero_add(beaver3_tuples[32].c);  // b[50]', mask=c65
 #endif
@@ -4578,193 +4438,193 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 50)>::type>
                 p_48 = a[48] ^ b[48];  // p[48]
                 p0 = a[0] ^ b[0];  // p0
 #if RESHARE_BAKE_ACTIVE
-                a_2_p = a[2];  // a[2]' (reshare opt sim)
+                a_2_p = a[2].zero_add_local(beaver3_tuples[0].b);  // mask pre-baked; no communication
 #else
                 a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
 #endif
                 a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
 #if RESHARE_BAKE_ACTIVE
-                a_5_p = a[5];  // a[5]' (reshare opt sim)
+                a_5_p = a[5].zero_add_local(beaver3_tuples[2].b);  // mask pre-baked; no communication
 #else
                 a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
 #endif
                 a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
 #if RESHARE_BAKE_ACTIVE
-                a_8_p = a[8];  // a[8]' (reshare opt sim)
+                a_8_p = a[8].zero_add_local(beaver3_tuples[4].b);  // mask pre-baked; no communication
 #else
                 a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
 #endif
                 a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
 #if RESHARE_BAKE_ACTIVE
-                a_11_p = a[11];  // a[11]' (reshare opt sim)
+                a_11_p = a[11].zero_add_local(beaver3_tuples[6].b);  // mask pre-baked; no communication
 #else
                 a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
 #endif
                 a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
 #if RESHARE_BAKE_ACTIVE
-                a_14_p = a[14];  // a[14]' (reshare opt sim)
+                a_14_p = a[14].zero_add_local(beaver3_tuples[8].b);  // mask pre-baked; no communication
 #else
                 a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
 #endif
                 a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
 #if RESHARE_BAKE_ACTIVE
-                a_17_p = a[17];  // a[17]' (reshare opt sim)
+                a_17_p = a[17].zero_add_local(beaver3_tuples[10].b);  // mask pre-baked; no communication
 #else
                 a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
 #endif
                 a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
 #if RESHARE_BAKE_ACTIVE
-                a_20_p = a[20];  // a[20]' (reshare opt sim)
+                a_20_p = a[20].zero_add_local(beaver3_tuples[12].b);  // mask pre-baked; no communication
 #else
                 a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
 #endif
                 a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
 #if RESHARE_BAKE_ACTIVE
-                a_23_p = a[23];  // a[23]' (reshare opt sim)
+                a_23_p = a[23].zero_add_local(beaver3_tuples[14].b);  // mask pre-baked; no communication
 #else
                 a_23_p = a[23].zero_add(beaver3_tuples[14].b);  // a[23]', mask=b29
 #endif
                 a_24_p = a[24].zero_add(beaver4_tuples[7].c);  // a[24]', mask=c30
 #if RESHARE_BAKE_ACTIVE
-                a_26_p = a[26];  // a[26]' (reshare opt sim)
+                a_26_p = a[26].zero_add_local(beaver3_tuples[16].b);  // mask pre-baked; no communication
 #else
                 a_26_p = a[26].zero_add(beaver3_tuples[16].b);  // a[26]', mask=b33
 #endif
                 a_27_p = a[27].zero_add(beaver4_tuples[8].c);  // a[27]', mask=c34
 #if RESHARE_BAKE_ACTIVE
-                a_29_p = a[29];  // a[29]' (reshare opt sim)
+                a_29_p = a[29].zero_add_local(beaver3_tuples[18].b);  // mask pre-baked; no communication
 #else
                 a_29_p = a[29].zero_add(beaver3_tuples[18].b);  // a[29]', mask=b37
 #endif
                 a_30_p = a[30].zero_add(beaver4_tuples[9].c);  // a[30]', mask=c38
 #if RESHARE_BAKE_ACTIVE
-                a_32_p = a[32];  // a[32]' (reshare opt sim)
+                a_32_p = a[32].zero_add_local(beaver3_tuples[20].b);  // mask pre-baked; no communication
 #else
                 a_32_p = a[32].zero_add(beaver3_tuples[20].b);  // a[32]', mask=b41
 #endif
                 a_33_p = a[33].zero_add(beaver4_tuples[10].c);  // a[33]', mask=c42
 #if RESHARE_BAKE_ACTIVE
-                a_35_p = a[35];  // a[35]' (reshare opt sim)
+                a_35_p = a[35].zero_add_local(beaver3_tuples[22].b);  // mask pre-baked; no communication
 #else
                 a_35_p = a[35].zero_add(beaver3_tuples[22].b);  // a[35]', mask=b45
 #endif
                 a_36_p = a[36].zero_add(beaver4_tuples[11].c);  // a[36]', mask=c46
 #if RESHARE_BAKE_ACTIVE
-                a_38_p = a[38];  // a[38]' (reshare opt sim)
+                a_38_p = a[38].zero_add_local(beaver3_tuples[24].b);  // mask pre-baked; no communication
 #else
                 a_38_p = a[38].zero_add(beaver3_tuples[24].b);  // a[38]', mask=b49
 #endif
                 a_39_p = a[39].zero_add(beaver4_tuples[12].c);  // a[39]', mask=c50
 #if RESHARE_BAKE_ACTIVE
-                a_41_p = a[41];  // a[41]' (reshare opt sim)
+                a_41_p = a[41].zero_add_local(beaver3_tuples[26].b);  // mask pre-baked; no communication
 #else
                 a_41_p = a[41].zero_add(beaver3_tuples[26].b);  // a[41]', mask=b53
 #endif
                 a_42_p = a[42].zero_add(beaver4_tuples[13].c);  // a[42]', mask=c54
 #if RESHARE_BAKE_ACTIVE
-                a_44_p = a[44];  // a[44]' (reshare opt sim)
+                a_44_p = a[44].zero_add_local(beaver3_tuples[28].b);  // mask pre-baked; no communication
 #else
                 a_44_p = a[44].zero_add(beaver3_tuples[28].b);  // a[44]', mask=b57
 #endif
                 a_45_p = a[45].zero_add(beaver4_tuples[14].c);  // a[45]', mask=c58
 #if RESHARE_BAKE_ACTIVE
-                a_47_p = a[47];  // a[47]' (reshare opt sim)
+                a_47_p = a[47].zero_add_local(beaver3_tuples[30].b);  // mask pre-baked; no communication
 #else
                 a_47_p = a[47].zero_add(beaver3_tuples[30].b);  // a[47]', mask=b61
 #endif
                 a_48_p = a[48].zero_add(beaver4_tuples[15].c);  // a[48]', mask=c62
 #if RESHARE_BAKE_ACTIVE
-                b_2_p = b[2];  // b[2]' (reshare opt sim)
+                b_2_p = b[2].zero_add_local(beaver3_tuples[0].c);  // mask pre-baked; no communication
 #else
                 b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
 #endif
                 b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
 #if RESHARE_BAKE_ACTIVE
-                b_5_p = b[5];  // b[5]' (reshare opt sim)
+                b_5_p = b[5].zero_add_local(beaver3_tuples[2].c);  // mask pre-baked; no communication
 #else
                 b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
 #endif
                 b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
 #if RESHARE_BAKE_ACTIVE
-                b_8_p = b[8];  // b[8]' (reshare opt sim)
+                b_8_p = b[8].zero_add_local(beaver3_tuples[4].c);  // mask pre-baked; no communication
 #else
                 b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
 #endif
                 b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
 #if RESHARE_BAKE_ACTIVE
-                b_11_p = b[11];  // b[11]' (reshare opt sim)
+                b_11_p = b[11].zero_add_local(beaver3_tuples[6].c);  // mask pre-baked; no communication
 #else
                 b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
 #endif
                 b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
 #if RESHARE_BAKE_ACTIVE
-                b_14_p = b[14];  // b[14]' (reshare opt sim)
+                b_14_p = b[14].zero_add_local(beaver3_tuples[8].c);  // mask pre-baked; no communication
 #else
                 b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
 #endif
                 b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
 #if RESHARE_BAKE_ACTIVE
-                b_17_p = b[17];  // b[17]' (reshare opt sim)
+                b_17_p = b[17].zero_add_local(beaver3_tuples[10].c);  // mask pre-baked; no communication
 #else
                 b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
 #endif
                 b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
 #if RESHARE_BAKE_ACTIVE
-                b_20_p = b[20];  // b[20]' (reshare opt sim)
+                b_20_p = b[20].zero_add_local(beaver3_tuples[12].c);  // mask pre-baked; no communication
 #else
                 b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
 #endif
                 b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
 #if RESHARE_BAKE_ACTIVE
-                b_23_p = b[23];  // b[23]' (reshare opt sim)
+                b_23_p = b[23].zero_add_local(beaver3_tuples[14].c);  // mask pre-baked; no communication
 #else
                 b_23_p = b[23].zero_add(beaver3_tuples[14].c);  // b[23]', mask=c29
 #endif
                 b_24_p = b[24].zero_add(beaver4_tuples[7].d);  // b[24]', mask=d30
 #if RESHARE_BAKE_ACTIVE
-                b_26_p = b[26];  // b[26]' (reshare opt sim)
+                b_26_p = b[26].zero_add_local(beaver3_tuples[16].c);  // mask pre-baked; no communication
 #else
                 b_26_p = b[26].zero_add(beaver3_tuples[16].c);  // b[26]', mask=c33
 #endif
                 b_27_p = b[27].zero_add(beaver4_tuples[8].d);  // b[27]', mask=d34
 #if RESHARE_BAKE_ACTIVE
-                b_29_p = b[29];  // b[29]' (reshare opt sim)
+                b_29_p = b[29].zero_add_local(beaver3_tuples[18].c);  // mask pre-baked; no communication
 #else
                 b_29_p = b[29].zero_add(beaver3_tuples[18].c);  // b[29]', mask=c37
 #endif
                 b_30_p = b[30].zero_add(beaver4_tuples[9].d);  // b[30]', mask=d38
 #if RESHARE_BAKE_ACTIVE
-                b_32_p = b[32];  // b[32]' (reshare opt sim)
+                b_32_p = b[32].zero_add_local(beaver3_tuples[20].c);  // mask pre-baked; no communication
 #else
                 b_32_p = b[32].zero_add(beaver3_tuples[20].c);  // b[32]', mask=c41
 #endif
                 b_33_p = b[33].zero_add(beaver4_tuples[10].d);  // b[33]', mask=d42
 #if RESHARE_BAKE_ACTIVE
-                b_35_p = b[35];  // b[35]' (reshare opt sim)
+                b_35_p = b[35].zero_add_local(beaver3_tuples[22].c);  // mask pre-baked; no communication
 #else
                 b_35_p = b[35].zero_add(beaver3_tuples[22].c);  // b[35]', mask=c45
 #endif
                 b_36_p = b[36].zero_add(beaver4_tuples[11].d);  // b[36]', mask=d46
 #if RESHARE_BAKE_ACTIVE
-                b_38_p = b[38];  // b[38]' (reshare opt sim)
+                b_38_p = b[38].zero_add_local(beaver3_tuples[24].c);  // mask pre-baked; no communication
 #else
                 b_38_p = b[38].zero_add(beaver3_tuples[24].c);  // b[38]', mask=c49
 #endif
                 b_39_p = b[39].zero_add(beaver4_tuples[12].d);  // b[39]', mask=d50
 #if RESHARE_BAKE_ACTIVE
-                b_41_p = b[41];  // b[41]' (reshare opt sim)
+                b_41_p = b[41].zero_add_local(beaver3_tuples[26].c);  // mask pre-baked; no communication
 #else
                 b_41_p = b[41].zero_add(beaver3_tuples[26].c);  // b[41]', mask=c53
 #endif
                 b_42_p = b[42].zero_add(beaver4_tuples[13].d);  // b[42]', mask=d54
 #if RESHARE_BAKE_ACTIVE
-                b_44_p = b[44];  // b[44]' (reshare opt sim)
+                b_44_p = b[44].zero_add_local(beaver3_tuples[28].c);  // mask pre-baked; no communication
 #else
                 b_44_p = b[44].zero_add(beaver3_tuples[28].c);  // b[44]', mask=c57
 #endif
                 b_45_p = b[45].zero_add(beaver4_tuples[14].d);  // b[45]', mask=d58
 #if RESHARE_BAKE_ACTIVE
-                b_47_p = b[47];  // b[47]' (reshare opt sim)
+                b_47_p = b[47].zero_add_local(beaver3_tuples[30].c);  // mask pre-baked; no communication
 #else
                 b_47_p = b[47].zero_add(beaver3_tuples[30].c);  // b[47]', mask=c61
 #endif
@@ -5778,191 +5638,67 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 48)>::type>
                 p_45 = a[45] ^ b[45];  // p[45]
                 p_46 = a[46] ^ b[46];  // p[46]
                 p0 = a[0] ^ b[0];  // p0
-#if RESHARE_BAKE_ACTIVE
-                a_2_p = a[2];  // a[2]' (reshare opt sim)
-#else
                 a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
-#endif
                 a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
-#if RESHARE_BAKE_ACTIVE
-                a_5_p = a[5];  // a[5]' (reshare opt sim)
-#else
                 a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
-#endif
                 a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
-#if RESHARE_BAKE_ACTIVE
-                a_8_p = a[8];  // a[8]' (reshare opt sim)
-#else
                 a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
-#endif
                 a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
-#if RESHARE_BAKE_ACTIVE
-                a_11_p = a[11];  // a[11]' (reshare opt sim)
-#else
                 a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
-#endif
                 a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
-#if RESHARE_BAKE_ACTIVE
-                a_14_p = a[14];  // a[14]' (reshare opt sim)
-#else
                 a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
-#endif
                 a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
-#if RESHARE_BAKE_ACTIVE
-                a_17_p = a[17];  // a[17]' (reshare opt sim)
-#else
                 a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
-#endif
                 a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
-#if RESHARE_BAKE_ACTIVE
-                a_20_p = a[20];  // a[20]' (reshare opt sim)
-#else
                 a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
-#endif
                 a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
-#if RESHARE_BAKE_ACTIVE
-                a_23_p = a[23];  // a[23]' (reshare opt sim)
-#else
                 a_23_p = a[23].zero_add(beaver3_tuples[14].b);  // a[23]', mask=b29
-#endif
                 a_24_p = a[24].zero_add(beaver4_tuples[7].c);  // a[24]', mask=c30
-#if RESHARE_BAKE_ACTIVE
-                a_26_p = a[26];  // a[26]' (reshare opt sim)
-#else
                 a_26_p = a[26].zero_add(beaver3_tuples[16].b);  // a[26]', mask=b33
-#endif
                 a_27_p = a[27].zero_add(beaver4_tuples[8].c);  // a[27]', mask=c34
-#if RESHARE_BAKE_ACTIVE
-                a_29_p = a[29];  // a[29]' (reshare opt sim)
-#else
                 a_29_p = a[29].zero_add(beaver3_tuples[18].b);  // a[29]', mask=b37
-#endif
                 a_30_p = a[30].zero_add(beaver4_tuples[9].c);  // a[30]', mask=c38
-#if RESHARE_BAKE_ACTIVE
-                a_32_p = a[32];  // a[32]' (reshare opt sim)
-#else
                 a_32_p = a[32].zero_add(beaver3_tuples[20].b);  // a[32]', mask=b41
-#endif
                 a_33_p = a[33].zero_add(beaver4_tuples[10].c);  // a[33]', mask=c42
-#if RESHARE_BAKE_ACTIVE
-                a_35_p = a[35];  // a[35]' (reshare opt sim)
-#else
                 a_35_p = a[35].zero_add(beaver3_tuples[22].b);  // a[35]', mask=b45
-#endif
                 a_36_p = a[36].zero_add(beaver4_tuples[11].c);  // a[36]', mask=c46
-#if RESHARE_BAKE_ACTIVE
-                a_38_p = a[38];  // a[38]' (reshare opt sim)
-#else
                 a_38_p = a[38].zero_add(beaver3_tuples[24].b);  // a[38]', mask=b49
-#endif
                 a_39_p = a[39].zero_add(beaver4_tuples[12].c);  // a[39]', mask=c50
-#if RESHARE_BAKE_ACTIVE
-                a_41_p = a[41];  // a[41]' (reshare opt sim)
-#else
                 a_41_p = a[41].zero_add(beaver3_tuples[26].b);  // a[41]', mask=b53
-#endif
                 a_42_p = a[42].zero_add(beaver4_tuples[13].c);  // a[42]', mask=c54
-#if RESHARE_BAKE_ACTIVE
-                a_44_p = a[44];  // a[44]' (reshare opt sim)
-#else
                 a_44_p = a[44].zero_add(beaver3_tuples[28].b);  // a[44]', mask=b57
-#endif
                 a_45_p = a[45].zero_add(beaver4_tuples[14].c);  // a[45]', mask=c58
-#if RESHARE_BAKE_ACTIVE
-                a_47_p = a[47];  // a[47]' (reshare opt sim)
-#else
                 a_47_p = a[47].zero_add(beaver3_tuples[30].b);  // a[47]', mask=b61
-#endif
                 b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
-#if RESHARE_BAKE_ACTIVE
-                b_3_p = b[3];  // b[3]' (reshare opt sim)
-#else
                 b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
-#endif
                 b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
-#if RESHARE_BAKE_ACTIVE
-                b_6_p = b[6];  // b[6]' (reshare opt sim)
-#else
                 b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
-#endif
                 b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
-#if RESHARE_BAKE_ACTIVE
-                b_9_p = b[9];  // b[9]' (reshare opt sim)
-#else
                 b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
-#endif
                 b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
-#if RESHARE_BAKE_ACTIVE
-                b_12_p = b[12];  // b[12]' (reshare opt sim)
-#else
                 b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
-#endif
                 b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
-#if RESHARE_BAKE_ACTIVE
-                b_15_p = b[15];  // b[15]' (reshare opt sim)
-#else
                 b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
-#endif
                 b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
-#if RESHARE_BAKE_ACTIVE
-                b_18_p = b[18];  // b[18]' (reshare opt sim)
-#else
                 b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
-#endif
                 b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
-#if RESHARE_BAKE_ACTIVE
-                b_21_p = b[21];  // b[21]' (reshare opt sim)
-#else
                 b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
-#endif
                 b_23_p = b[23].zero_add(beaver3_tuples[14].c);  // b[23]', mask=c29
-#if RESHARE_BAKE_ACTIVE
-                b_24_p = b[24];  // b[24]' (reshare opt sim)
-#else
                 b_24_p = b[24].zero_add(beaver4_tuples[7].d);  // b[24]', mask=d30
-#endif
                 b_26_p = b[26].zero_add(beaver3_tuples[16].c);  // b[26]', mask=c33
-#if RESHARE_BAKE_ACTIVE
-                b_27_p = b[27];  // b[27]' (reshare opt sim)
-#else
                 b_27_p = b[27].zero_add(beaver4_tuples[8].d);  // b[27]', mask=d34
-#endif
                 b_29_p = b[29].zero_add(beaver3_tuples[18].c);  // b[29]', mask=c37
-#if RESHARE_BAKE_ACTIVE
-                b_30_p = b[30];  // b[30]' (reshare opt sim)
-#else
                 b_30_p = b[30].zero_add(beaver4_tuples[9].d);  // b[30]', mask=d38
-#endif
                 b_32_p = b[32].zero_add(beaver3_tuples[20].c);  // b[32]', mask=c41
-#if RESHARE_BAKE_ACTIVE
-                b_33_p = b[33];  // b[33]' (reshare opt sim)
-#else
                 b_33_p = b[33].zero_add(beaver4_tuples[10].d);  // b[33]', mask=d42
-#endif
                 b_35_p = b[35].zero_add(beaver3_tuples[22].c);  // b[35]', mask=c45
-#if RESHARE_BAKE_ACTIVE
-                b_36_p = b[36];  // b[36]' (reshare opt sim)
-#else
                 b_36_p = b[36].zero_add(beaver4_tuples[11].d);  // b[36]', mask=d46
-#endif
                 b_38_p = b[38].zero_add(beaver3_tuples[24].c);  // b[38]', mask=c49
-#if RESHARE_BAKE_ACTIVE
-                b_39_p = b[39];  // b[39]' (reshare opt sim)
-#else
                 b_39_p = b[39].zero_add(beaver4_tuples[12].d);  // b[39]', mask=d50
-#endif
                 b_41_p = b[41].zero_add(beaver3_tuples[26].c);  // b[41]', mask=c53
-#if RESHARE_BAKE_ACTIVE
-                b_42_p = b[42];  // b[42]' (reshare opt sim)
-#else
                 b_42_p = b[42].zero_add(beaver4_tuples[13].d);  // b[42]', mask=d54
-#endif
                 b_44_p = b[44].zero_add(beaver3_tuples[28].c);  // b[44]', mask=c57
-#if RESHARE_BAKE_ACTIVE
-                b_45_p = b[45];  // b[45]' (reshare opt sim)
-#else
                 b_45_p = b[45].zero_add(beaver4_tuples[14].d);  // b[45]', mask=d58
-#endif
                 b_47_p = b[47].zero_add(beaver3_tuples[30].c);  // b[47]', mask=c61
                 p_1_p = p_1.zero_add(beaver3_tuples[0].a);  // p[1]', mask=a1
                 p_1_p_1 = p_1.zero_add(beaver4_tuples[0].a);  // p[1]'_1, mask=a2
@@ -6918,181 +6654,181 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 46)>::type>
                 p_44 = a[44] ^ b[44];  // p[44]
                 p0 = a[0] ^ b[0];  // p0
 #if RESHARE_BAKE_ACTIVE
-                a_2_p = a[2];  // a[2]' (reshare opt sim)
+                a_2_p = a[2].zero_add_local(beaver3_tuples[0].b);  // mask pre-baked; no communication
 #else
                 a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
 #endif
                 a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
 #if RESHARE_BAKE_ACTIVE
-                a_5_p = a[5];  // a[5]' (reshare opt sim)
+                a_5_p = a[5].zero_add_local(beaver3_tuples[2].b);  // mask pre-baked; no communication
 #else
                 a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
 #endif
                 a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
 #if RESHARE_BAKE_ACTIVE
-                a_8_p = a[8];  // a[8]' (reshare opt sim)
+                a_8_p = a[8].zero_add_local(beaver3_tuples[4].b);  // mask pre-baked; no communication
 #else
                 a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
 #endif
                 a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
 #if RESHARE_BAKE_ACTIVE
-                a_11_p = a[11];  // a[11]' (reshare opt sim)
+                a_11_p = a[11].zero_add_local(beaver3_tuples[6].b);  // mask pre-baked; no communication
 #else
                 a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
 #endif
                 a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
 #if RESHARE_BAKE_ACTIVE
-                a_14_p = a[14];  // a[14]' (reshare opt sim)
+                a_14_p = a[14].zero_add_local(beaver3_tuples[8].b);  // mask pre-baked; no communication
 #else
                 a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
 #endif
                 a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
 #if RESHARE_BAKE_ACTIVE
-                a_17_p = a[17];  // a[17]' (reshare opt sim)
+                a_17_p = a[17].zero_add_local(beaver3_tuples[10].b);  // mask pre-baked; no communication
 #else
                 a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
 #endif
                 a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
 #if RESHARE_BAKE_ACTIVE
-                a_20_p = a[20];  // a[20]' (reshare opt sim)
+                a_20_p = a[20].zero_add_local(beaver3_tuples[12].b);  // mask pre-baked; no communication
 #else
                 a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
 #endif
                 a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
 #if RESHARE_BAKE_ACTIVE
-                a_23_p = a[23];  // a[23]' (reshare opt sim)
+                a_23_p = a[23].zero_add_local(beaver3_tuples[14].b);  // mask pre-baked; no communication
 #else
                 a_23_p = a[23].zero_add(beaver3_tuples[14].b);  // a[23]', mask=b29
 #endif
                 a_24_p = a[24].zero_add(beaver4_tuples[7].c);  // a[24]', mask=c30
 #if RESHARE_BAKE_ACTIVE
-                a_26_p = a[26];  // a[26]' (reshare opt sim)
+                a_26_p = a[26].zero_add_local(beaver3_tuples[16].b);  // mask pre-baked; no communication
 #else
                 a_26_p = a[26].zero_add(beaver3_tuples[16].b);  // a[26]', mask=b33
 #endif
                 a_27_p = a[27].zero_add(beaver4_tuples[8].c);  // a[27]', mask=c34
 #if RESHARE_BAKE_ACTIVE
-                a_29_p = a[29];  // a[29]' (reshare opt sim)
+                a_29_p = a[29].zero_add_local(beaver3_tuples[18].b);  // mask pre-baked; no communication
 #else
                 a_29_p = a[29].zero_add(beaver3_tuples[18].b);  // a[29]', mask=b37
 #endif
                 a_30_p = a[30].zero_add(beaver4_tuples[9].c);  // a[30]', mask=c38
 #if RESHARE_BAKE_ACTIVE
-                a_32_p = a[32];  // a[32]' (reshare opt sim)
+                a_32_p = a[32].zero_add_local(beaver3_tuples[20].b);  // mask pre-baked; no communication
 #else
                 a_32_p = a[32].zero_add(beaver3_tuples[20].b);  // a[32]', mask=b41
 #endif
                 a_33_p = a[33].zero_add(beaver4_tuples[10].c);  // a[33]', mask=c42
 #if RESHARE_BAKE_ACTIVE
-                a_35_p = a[35];  // a[35]' (reshare opt sim)
+                a_35_p = a[35].zero_add_local(beaver3_tuples[22].b);  // mask pre-baked; no communication
 #else
                 a_35_p = a[35].zero_add(beaver3_tuples[22].b);  // a[35]', mask=b45
 #endif
                 a_36_p = a[36].zero_add(beaver4_tuples[11].c);  // a[36]', mask=c46
 #if RESHARE_BAKE_ACTIVE
-                a_38_p = a[38];  // a[38]' (reshare opt sim)
+                a_38_p = a[38].zero_add_local(beaver3_tuples[24].b);  // mask pre-baked; no communication
 #else
                 a_38_p = a[38].zero_add(beaver3_tuples[24].b);  // a[38]', mask=b49
 #endif
                 a_39_p = a[39].zero_add(beaver4_tuples[12].c);  // a[39]', mask=c50
 #if RESHARE_BAKE_ACTIVE
-                a_41_p = a[41];  // a[41]' (reshare opt sim)
+                a_41_p = a[41].zero_add_local(beaver3_tuples[26].b);  // mask pre-baked; no communication
 #else
                 a_41_p = a[41].zero_add(beaver3_tuples[26].b);  // a[41]', mask=b53
 #endif
                 a_42_p = a[42].zero_add(beaver4_tuples[13].c);  // a[42]', mask=c54
 #if RESHARE_BAKE_ACTIVE
-                a_44_p = a[44];  // a[44]' (reshare opt sim)
+                a_44_p = a[44].zero_add_local(beaver3_tuples[28].b);  // mask pre-baked; no communication
 #else
                 a_44_p = a[44].zero_add(beaver3_tuples[28].b);  // a[44]', mask=b57
 #endif
                 a_45_p = a[45].zero_add(beaver4_tuples[14].c);  // a[45]', mask=c58
 #if RESHARE_BAKE_ACTIVE
-                b_2_p = b[2];  // b[2]' (reshare opt sim)
+                b_2_p = b[2].zero_add_local(beaver3_tuples[0].c);  // mask pre-baked; no communication
 #else
                 b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
 #endif
                 b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
 #if RESHARE_BAKE_ACTIVE
-                b_5_p = b[5];  // b[5]' (reshare opt sim)
+                b_5_p = b[5].zero_add_local(beaver3_tuples[2].c);  // mask pre-baked; no communication
 #else
                 b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
 #endif
                 b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
 #if RESHARE_BAKE_ACTIVE
-                b_8_p = b[8];  // b[8]' (reshare opt sim)
+                b_8_p = b[8].zero_add_local(beaver3_tuples[4].c);  // mask pre-baked; no communication
 #else
                 b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
 #endif
                 b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
 #if RESHARE_BAKE_ACTIVE
-                b_11_p = b[11];  // b[11]' (reshare opt sim)
+                b_11_p = b[11].zero_add_local(beaver3_tuples[6].c);  // mask pre-baked; no communication
 #else
                 b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
 #endif
                 b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
 #if RESHARE_BAKE_ACTIVE
-                b_14_p = b[14];  // b[14]' (reshare opt sim)
+                b_14_p = b[14].zero_add_local(beaver3_tuples[8].c);  // mask pre-baked; no communication
 #else
                 b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
 #endif
                 b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
 #if RESHARE_BAKE_ACTIVE
-                b_17_p = b[17];  // b[17]' (reshare opt sim)
+                b_17_p = b[17].zero_add_local(beaver3_tuples[10].c);  // mask pre-baked; no communication
 #else
                 b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
 #endif
                 b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
 #if RESHARE_BAKE_ACTIVE
-                b_20_p = b[20];  // b[20]' (reshare opt sim)
+                b_20_p = b[20].zero_add_local(beaver3_tuples[12].c);  // mask pre-baked; no communication
 #else
                 b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
 #endif
                 b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
 #if RESHARE_BAKE_ACTIVE
-                b_23_p = b[23];  // b[23]' (reshare opt sim)
+                b_23_p = b[23].zero_add_local(beaver3_tuples[14].c);  // mask pre-baked; no communication
 #else
                 b_23_p = b[23].zero_add(beaver3_tuples[14].c);  // b[23]', mask=c29
 #endif
                 b_24_p = b[24].zero_add(beaver4_tuples[7].d);  // b[24]', mask=d30
 #if RESHARE_BAKE_ACTIVE
-                b_26_p = b[26];  // b[26]' (reshare opt sim)
+                b_26_p = b[26].zero_add_local(beaver3_tuples[16].c);  // mask pre-baked; no communication
 #else
                 b_26_p = b[26].zero_add(beaver3_tuples[16].c);  // b[26]', mask=c33
 #endif
                 b_27_p = b[27].zero_add(beaver4_tuples[8].d);  // b[27]', mask=d34
 #if RESHARE_BAKE_ACTIVE
-                b_29_p = b[29];  // b[29]' (reshare opt sim)
+                b_29_p = b[29].zero_add_local(beaver3_tuples[18].c);  // mask pre-baked; no communication
 #else
                 b_29_p = b[29].zero_add(beaver3_tuples[18].c);  // b[29]', mask=c37
 #endif
                 b_30_p = b[30].zero_add(beaver4_tuples[9].d);  // b[30]', mask=d38
 #if RESHARE_BAKE_ACTIVE
-                b_32_p = b[32];  // b[32]' (reshare opt sim)
+                b_32_p = b[32].zero_add_local(beaver3_tuples[20].c);  // mask pre-baked; no communication
 #else
                 b_32_p = b[32].zero_add(beaver3_tuples[20].c);  // b[32]', mask=c41
 #endif
                 b_33_p = b[33].zero_add(beaver4_tuples[10].d);  // b[33]', mask=d42
 #if RESHARE_BAKE_ACTIVE
-                b_35_p = b[35];  // b[35]' (reshare opt sim)
+                b_35_p = b[35].zero_add_local(beaver3_tuples[22].c);  // mask pre-baked; no communication
 #else
                 b_35_p = b[35].zero_add(beaver3_tuples[22].c);  // b[35]', mask=c45
 #endif
                 b_36_p = b[36].zero_add(beaver4_tuples[11].d);  // b[36]', mask=d46
 #if RESHARE_BAKE_ACTIVE
-                b_38_p = b[38];  // b[38]' (reshare opt sim)
+                b_38_p = b[38].zero_add_local(beaver3_tuples[24].c);  // mask pre-baked; no communication
 #else
                 b_38_p = b[38].zero_add(beaver3_tuples[24].c);  // b[38]', mask=c49
 #endif
                 b_39_p = b[39].zero_add(beaver4_tuples[12].d);  // b[39]', mask=d50
 #if RESHARE_BAKE_ACTIVE
-                b_41_p = b[41];  // b[41]' (reshare opt sim)
+                b_41_p = b[41].zero_add_local(beaver3_tuples[26].c);  // mask pre-baked; no communication
 #else
                 b_41_p = b[41].zero_add(beaver3_tuples[26].c);  // b[41]', mask=c53
 #endif
                 b_42_p = b[42].zero_add(beaver4_tuples[13].d);  // b[42]', mask=d54
 #if RESHARE_BAKE_ACTIVE
-                b_44_p = b[44];  // b[44]' (reshare opt sim)
+                b_44_p = b[44].zero_add_local(beaver3_tuples[28].c);  // mask pre-baked; no communication
 #else
                 b_44_p = b[44].zero_add(beaver3_tuples[28].c);  // b[44]', mask=c57
 #endif
@@ -8013,169 +7749,169 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 44)>::type>
                 p_42 = a[42] ^ b[42];  // p[42]
                 p0 = a[0] ^ b[0];  // p0
 #if RESHARE_BAKE_ACTIVE
-                a_2_p = a[2];  // a[2]' (reshare opt sim)
+                a_2_p = a[2].zero_add_local(beaver3_tuples[0].b);  // mask pre-baked; no communication
 #else
                 a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
 #endif
                 a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
 #if RESHARE_BAKE_ACTIVE
-                a_5_p = a[5];  // a[5]' (reshare opt sim)
+                a_5_p = a[5].zero_add_local(beaver3_tuples[2].b);  // mask pre-baked; no communication
 #else
                 a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
 #endif
                 a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
 #if RESHARE_BAKE_ACTIVE
-                a_8_p = a[8];  // a[8]' (reshare opt sim)
+                a_8_p = a[8].zero_add_local(beaver3_tuples[4].b);  // mask pre-baked; no communication
 #else
                 a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
 #endif
                 a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
 #if RESHARE_BAKE_ACTIVE
-                a_11_p = a[11];  // a[11]' (reshare opt sim)
+                a_11_p = a[11].zero_add_local(beaver3_tuples[6].b);  // mask pre-baked; no communication
 #else
                 a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
 #endif
                 a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
 #if RESHARE_BAKE_ACTIVE
-                a_14_p = a[14];  // a[14]' (reshare opt sim)
+                a_14_p = a[14].zero_add_local(beaver3_tuples[8].b);  // mask pre-baked; no communication
 #else
                 a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
 #endif
                 a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
 #if RESHARE_BAKE_ACTIVE
-                a_17_p = a[17];  // a[17]' (reshare opt sim)
+                a_17_p = a[17].zero_add_local(beaver3_tuples[10].b);  // mask pre-baked; no communication
 #else
                 a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
 #endif
                 a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
 #if RESHARE_BAKE_ACTIVE
-                a_20_p = a[20];  // a[20]' (reshare opt sim)
+                a_20_p = a[20].zero_add_local(beaver3_tuples[12].b);  // mask pre-baked; no communication
 #else
                 a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
 #endif
                 a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
 #if RESHARE_BAKE_ACTIVE
-                a_23_p = a[23];  // a[23]' (reshare opt sim)
+                a_23_p = a[23].zero_add_local(beaver3_tuples[14].b);  // mask pre-baked; no communication
 #else
                 a_23_p = a[23].zero_add(beaver3_tuples[14].b);  // a[23]', mask=b29
 #endif
                 a_24_p = a[24].zero_add(beaver4_tuples[7].c);  // a[24]', mask=c30
 #if RESHARE_BAKE_ACTIVE
-                a_26_p = a[26];  // a[26]' (reshare opt sim)
+                a_26_p = a[26].zero_add_local(beaver3_tuples[16].b);  // mask pre-baked; no communication
 #else
                 a_26_p = a[26].zero_add(beaver3_tuples[16].b);  // a[26]', mask=b33
 #endif
                 a_27_p = a[27].zero_add(beaver4_tuples[8].c);  // a[27]', mask=c34
 #if RESHARE_BAKE_ACTIVE
-                a_29_p = a[29];  // a[29]' (reshare opt sim)
+                a_29_p = a[29].zero_add_local(beaver3_tuples[18].b);  // mask pre-baked; no communication
 #else
                 a_29_p = a[29].zero_add(beaver3_tuples[18].b);  // a[29]', mask=b37
 #endif
                 a_30_p = a[30].zero_add(beaver4_tuples[9].c);  // a[30]', mask=c38
 #if RESHARE_BAKE_ACTIVE
-                a_32_p = a[32];  // a[32]' (reshare opt sim)
+                a_32_p = a[32].zero_add_local(beaver3_tuples[20].b);  // mask pre-baked; no communication
 #else
                 a_32_p = a[32].zero_add(beaver3_tuples[20].b);  // a[32]', mask=b41
 #endif
                 a_33_p = a[33].zero_add(beaver4_tuples[10].c);  // a[33]', mask=c42
 #if RESHARE_BAKE_ACTIVE
-                a_35_p = a[35];  // a[35]' (reshare opt sim)
+                a_35_p = a[35].zero_add_local(beaver3_tuples[22].b);  // mask pre-baked; no communication
 #else
                 a_35_p = a[35].zero_add(beaver3_tuples[22].b);  // a[35]', mask=b45
 #endif
                 a_36_p = a[36].zero_add(beaver4_tuples[11].c);  // a[36]', mask=c46
 #if RESHARE_BAKE_ACTIVE
-                a_38_p = a[38];  // a[38]' (reshare opt sim)
+                a_38_p = a[38].zero_add_local(beaver3_tuples[24].b);  // mask pre-baked; no communication
 #else
                 a_38_p = a[38].zero_add(beaver3_tuples[24].b);  // a[38]', mask=b49
 #endif
                 a_39_p = a[39].zero_add(beaver4_tuples[12].c);  // a[39]', mask=c50
 #if RESHARE_BAKE_ACTIVE
-                a_41_p = a[41];  // a[41]' (reshare opt sim)
+                a_41_p = a[41].zero_add_local(beaver3_tuples[26].b);  // mask pre-baked; no communication
 #else
                 a_41_p = a[41].zero_add(beaver3_tuples[26].b);  // a[41]', mask=b53
 #endif
                 a_42_p = a[42].zero_add(beaver4_tuples[13].c);  // a[42]', mask=c54
 #if RESHARE_BAKE_ACTIVE
-                b_2_p = b[2];  // b[2]' (reshare opt sim)
+                b_2_p = b[2].zero_add_local(beaver3_tuples[0].c);  // mask pre-baked; no communication
 #else
                 b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
 #endif
                 b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
 #if RESHARE_BAKE_ACTIVE
-                b_5_p = b[5];  // b[5]' (reshare opt sim)
+                b_5_p = b[5].zero_add_local(beaver3_tuples[2].c);  // mask pre-baked; no communication
 #else
                 b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
 #endif
                 b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
 #if RESHARE_BAKE_ACTIVE
-                b_8_p = b[8];  // b[8]' (reshare opt sim)
+                b_8_p = b[8].zero_add_local(beaver3_tuples[4].c);  // mask pre-baked; no communication
 #else
                 b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
 #endif
                 b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
 #if RESHARE_BAKE_ACTIVE
-                b_11_p = b[11];  // b[11]' (reshare opt sim)
+                b_11_p = b[11].zero_add_local(beaver3_tuples[6].c);  // mask pre-baked; no communication
 #else
                 b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
 #endif
                 b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
 #if RESHARE_BAKE_ACTIVE
-                b_14_p = b[14];  // b[14]' (reshare opt sim)
+                b_14_p = b[14].zero_add_local(beaver3_tuples[8].c);  // mask pre-baked; no communication
 #else
                 b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
 #endif
                 b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
 #if RESHARE_BAKE_ACTIVE
-                b_17_p = b[17];  // b[17]' (reshare opt sim)
+                b_17_p = b[17].zero_add_local(beaver3_tuples[10].c);  // mask pre-baked; no communication
 #else
                 b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
 #endif
                 b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
 #if RESHARE_BAKE_ACTIVE
-                b_20_p = b[20];  // b[20]' (reshare opt sim)
+                b_20_p = b[20].zero_add_local(beaver3_tuples[12].c);  // mask pre-baked; no communication
 #else
                 b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
 #endif
                 b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
 #if RESHARE_BAKE_ACTIVE
-                b_23_p = b[23];  // b[23]' (reshare opt sim)
+                b_23_p = b[23].zero_add_local(beaver3_tuples[14].c);  // mask pre-baked; no communication
 #else
                 b_23_p = b[23].zero_add(beaver3_tuples[14].c);  // b[23]', mask=c29
 #endif
                 b_24_p = b[24].zero_add(beaver4_tuples[7].d);  // b[24]', mask=d30
 #if RESHARE_BAKE_ACTIVE
-                b_26_p = b[26];  // b[26]' (reshare opt sim)
+                b_26_p = b[26].zero_add_local(beaver3_tuples[16].c);  // mask pre-baked; no communication
 #else
                 b_26_p = b[26].zero_add(beaver3_tuples[16].c);  // b[26]', mask=c33
 #endif
                 b_27_p = b[27].zero_add(beaver4_tuples[8].d);  // b[27]', mask=d34
 #if RESHARE_BAKE_ACTIVE
-                b_29_p = b[29];  // b[29]' (reshare opt sim)
+                b_29_p = b[29].zero_add_local(beaver3_tuples[18].c);  // mask pre-baked; no communication
 #else
                 b_29_p = b[29].zero_add(beaver3_tuples[18].c);  // b[29]', mask=c37
 #endif
                 b_30_p = b[30].zero_add(beaver4_tuples[9].d);  // b[30]', mask=d38
 #if RESHARE_BAKE_ACTIVE
-                b_32_p = b[32];  // b[32]' (reshare opt sim)
+                b_32_p = b[32].zero_add_local(beaver3_tuples[20].c);  // mask pre-baked; no communication
 #else
                 b_32_p = b[32].zero_add(beaver3_tuples[20].c);  // b[32]', mask=c41
 #endif
                 b_33_p = b[33].zero_add(beaver4_tuples[10].d);  // b[33]', mask=d42
 #if RESHARE_BAKE_ACTIVE
-                b_35_p = b[35];  // b[35]' (reshare opt sim)
+                b_35_p = b[35].zero_add_local(beaver3_tuples[22].c);  // mask pre-baked; no communication
 #else
                 b_35_p = b[35].zero_add(beaver3_tuples[22].c);  // b[35]', mask=c45
 #endif
                 b_36_p = b[36].zero_add(beaver4_tuples[11].d);  // b[36]', mask=d46
 #if RESHARE_BAKE_ACTIVE
-                b_38_p = b[38];  // b[38]' (reshare opt sim)
+                b_38_p = b[38].zero_add_local(beaver3_tuples[24].c);  // mask pre-baked; no communication
 #else
                 b_38_p = b[38].zero_add(beaver3_tuples[24].c);  // b[38]', mask=c49
 #endif
                 b_39_p = b[39].zero_add(beaver4_tuples[12].d);  // b[39]', mask=d50
 #if RESHARE_BAKE_ACTIVE
-                b_41_p = b[41];  // b[41]' (reshare opt sim)
+                b_41_p = b[41].zero_add_local(beaver3_tuples[26].c);  // mask pre-baked; no communication
 #else
                 b_41_p = b[41].zero_add(beaver3_tuples[26].c);  // b[41]', mask=c53
 #endif
@@ -9040,157 +8776,157 @@ class PPA_MSB_4Way_AB<k, Share, typename std::enable_if<(k == 40)>::type>
                 p_38 = a[38] ^ b[38];  // p[38]
                 p0 = a[0] ^ b[0];  // p0
 #if RESHARE_BAKE_ACTIVE
-                a_2_p = a[2];  // a[2]' (reshare opt sim)
+                a_2_p = a[2].zero_add_local(beaver3_tuples[0].b);  // mask pre-baked; no communication
 #else
                 a_2_p = a[2].zero_add(beaver3_tuples[0].b);  // a[2]', mask=b1
 #endif
                 a_3_p = a[3].zero_add(beaver4_tuples[0].c);  // a[3]', mask=c2
 #if RESHARE_BAKE_ACTIVE
-                a_5_p = a[5];  // a[5]' (reshare opt sim)
+                a_5_p = a[5].zero_add_local(beaver3_tuples[2].b);  // mask pre-baked; no communication
 #else
                 a_5_p = a[5].zero_add(beaver3_tuples[2].b);  // a[5]', mask=b5
 #endif
                 a_6_p = a[6].zero_add(beaver4_tuples[1].c);  // a[6]', mask=c6
 #if RESHARE_BAKE_ACTIVE
-                a_8_p = a[8];  // a[8]' (reshare opt sim)
+                a_8_p = a[8].zero_add_local(beaver3_tuples[4].b);  // mask pre-baked; no communication
 #else
                 a_8_p = a[8].zero_add(beaver3_tuples[4].b);  // a[8]', mask=b9
 #endif
                 a_9_p = a[9].zero_add(beaver4_tuples[2].c);  // a[9]', mask=c10
 #if RESHARE_BAKE_ACTIVE
-                a_11_p = a[11];  // a[11]' (reshare opt sim)
+                a_11_p = a[11].zero_add_local(beaver3_tuples[6].b);  // mask pre-baked; no communication
 #else
                 a_11_p = a[11].zero_add(beaver3_tuples[6].b);  // a[11]', mask=b13
 #endif
                 a_12_p = a[12].zero_add(beaver4_tuples[3].c);  // a[12]', mask=c14
 #if RESHARE_BAKE_ACTIVE
-                a_14_p = a[14];  // a[14]' (reshare opt sim)
+                a_14_p = a[14].zero_add_local(beaver3_tuples[8].b);  // mask pre-baked; no communication
 #else
                 a_14_p = a[14].zero_add(beaver3_tuples[8].b);  // a[14]', mask=b17
 #endif
                 a_15_p = a[15].zero_add(beaver4_tuples[4].c);  // a[15]', mask=c18
 #if RESHARE_BAKE_ACTIVE
-                a_17_p = a[17];  // a[17]' (reshare opt sim)
+                a_17_p = a[17].zero_add_local(beaver3_tuples[10].b);  // mask pre-baked; no communication
 #else
                 a_17_p = a[17].zero_add(beaver3_tuples[10].b);  // a[17]', mask=b21
 #endif
                 a_18_p = a[18].zero_add(beaver4_tuples[5].c);  // a[18]', mask=c22
 #if RESHARE_BAKE_ACTIVE
-                a_20_p = a[20];  // a[20]' (reshare opt sim)
+                a_20_p = a[20].zero_add_local(beaver3_tuples[12].b);  // mask pre-baked; no communication
 #else
                 a_20_p = a[20].zero_add(beaver3_tuples[12].b);  // a[20]', mask=b25
 #endif
                 a_21_p = a[21].zero_add(beaver4_tuples[6].c);  // a[21]', mask=c26
 #if RESHARE_BAKE_ACTIVE
-                a_23_p = a[23];  // a[23]' (reshare opt sim)
+                a_23_p = a[23].zero_add_local(beaver3_tuples[14].b);  // mask pre-baked; no communication
 #else
                 a_23_p = a[23].zero_add(beaver3_tuples[14].b);  // a[23]', mask=b29
 #endif
                 a_24_p = a[24].zero_add(beaver4_tuples[7].c);  // a[24]', mask=c30
 #if RESHARE_BAKE_ACTIVE
-                a_26_p = a[26];  // a[26]' (reshare opt sim)
+                a_26_p = a[26].zero_add_local(beaver3_tuples[16].b);  // mask pre-baked; no communication
 #else
                 a_26_p = a[26].zero_add(beaver3_tuples[16].b);  // a[26]', mask=b33
 #endif
                 a_27_p = a[27].zero_add(beaver4_tuples[8].c);  // a[27]', mask=c34
 #if RESHARE_BAKE_ACTIVE
-                a_29_p = a[29];  // a[29]' (reshare opt sim)
+                a_29_p = a[29].zero_add_local(beaver3_tuples[18].b);  // mask pre-baked; no communication
 #else
                 a_29_p = a[29].zero_add(beaver3_tuples[18].b);  // a[29]', mask=b37
 #endif
                 a_30_p = a[30].zero_add(beaver4_tuples[9].c);  // a[30]', mask=c38
 #if RESHARE_BAKE_ACTIVE
-                a_32_p = a[32];  // a[32]' (reshare opt sim)
+                a_32_p = a[32].zero_add_local(beaver3_tuples[20].b);  // mask pre-baked; no communication
 #else
                 a_32_p = a[32].zero_add(beaver3_tuples[20].b);  // a[32]', mask=b41
 #endif
                 a_33_p = a[33].zero_add(beaver4_tuples[10].c);  // a[33]', mask=c42
 #if RESHARE_BAKE_ACTIVE
-                a_35_p = a[35];  // a[35]' (reshare opt sim)
+                a_35_p = a[35].zero_add_local(beaver3_tuples[22].b);  // mask pre-baked; no communication
 #else
                 a_35_p = a[35].zero_add(beaver3_tuples[22].b);  // a[35]', mask=b45
 #endif
                 a_36_p = a[36].zero_add(beaver4_tuples[11].c);  // a[36]', mask=c46
 #if RESHARE_BAKE_ACTIVE
-                a_38_p = a[38];  // a[38]' (reshare opt sim)
+                a_38_p = a[38].zero_add_local(beaver3_tuples[24].b);  // mask pre-baked; no communication
 #else
                 a_38_p = a[38].zero_add(beaver3_tuples[24].b);  // a[38]', mask=b49
 #endif
                 a_39_p = a[39].zero_add(beaver4_tuples[12].c);  // a[39]', mask=c50
 #if RESHARE_BAKE_ACTIVE
-                b_2_p = b[2];  // b[2]' (reshare opt sim)
+                b_2_p = b[2].zero_add_local(beaver3_tuples[0].c);  // mask pre-baked; no communication
 #else
                 b_2_p = b[2].zero_add(beaver3_tuples[0].c);  // b[2]', mask=c1
 #endif
                 b_3_p = b[3].zero_add(beaver4_tuples[0].d);  // b[3]', mask=d2
 #if RESHARE_BAKE_ACTIVE
-                b_5_p = b[5];  // b[5]' (reshare opt sim)
+                b_5_p = b[5].zero_add_local(beaver3_tuples[2].c);  // mask pre-baked; no communication
 #else
                 b_5_p = b[5].zero_add(beaver3_tuples[2].c);  // b[5]', mask=c5
 #endif
                 b_6_p = b[6].zero_add(beaver4_tuples[1].d);  // b[6]', mask=d6
 #if RESHARE_BAKE_ACTIVE
-                b_8_p = b[8];  // b[8]' (reshare opt sim)
+                b_8_p = b[8].zero_add_local(beaver3_tuples[4].c);  // mask pre-baked; no communication
 #else
                 b_8_p = b[8].zero_add(beaver3_tuples[4].c);  // b[8]', mask=c9
 #endif
                 b_9_p = b[9].zero_add(beaver4_tuples[2].d);  // b[9]', mask=d10
 #if RESHARE_BAKE_ACTIVE
-                b_11_p = b[11];  // b[11]' (reshare opt sim)
+                b_11_p = b[11].zero_add_local(beaver3_tuples[6].c);  // mask pre-baked; no communication
 #else
                 b_11_p = b[11].zero_add(beaver3_tuples[6].c);  // b[11]', mask=c13
 #endif
                 b_12_p = b[12].zero_add(beaver4_tuples[3].d);  // b[12]', mask=d14
 #if RESHARE_BAKE_ACTIVE
-                b_14_p = b[14];  // b[14]' (reshare opt sim)
+                b_14_p = b[14].zero_add_local(beaver3_tuples[8].c);  // mask pre-baked; no communication
 #else
                 b_14_p = b[14].zero_add(beaver3_tuples[8].c);  // b[14]', mask=c17
 #endif
                 b_15_p = b[15].zero_add(beaver4_tuples[4].d);  // b[15]', mask=d18
 #if RESHARE_BAKE_ACTIVE
-                b_17_p = b[17];  // b[17]' (reshare opt sim)
+                b_17_p = b[17].zero_add_local(beaver3_tuples[10].c);  // mask pre-baked; no communication
 #else
                 b_17_p = b[17].zero_add(beaver3_tuples[10].c);  // b[17]', mask=c21
 #endif
                 b_18_p = b[18].zero_add(beaver4_tuples[5].d);  // b[18]', mask=d22
 #if RESHARE_BAKE_ACTIVE
-                b_20_p = b[20];  // b[20]' (reshare opt sim)
+                b_20_p = b[20].zero_add_local(beaver3_tuples[12].c);  // mask pre-baked; no communication
 #else
                 b_20_p = b[20].zero_add(beaver3_tuples[12].c);  // b[20]', mask=c25
 #endif
                 b_21_p = b[21].zero_add(beaver4_tuples[6].d);  // b[21]', mask=d26
 #if RESHARE_BAKE_ACTIVE
-                b_23_p = b[23];  // b[23]' (reshare opt sim)
+                b_23_p = b[23].zero_add_local(beaver3_tuples[14].c);  // mask pre-baked; no communication
 #else
                 b_23_p = b[23].zero_add(beaver3_tuples[14].c);  // b[23]', mask=c29
 #endif
                 b_24_p = b[24].zero_add(beaver4_tuples[7].d);  // b[24]', mask=d30
 #if RESHARE_BAKE_ACTIVE
-                b_26_p = b[26];  // b[26]' (reshare opt sim)
+                b_26_p = b[26].zero_add_local(beaver3_tuples[16].c);  // mask pre-baked; no communication
 #else
                 b_26_p = b[26].zero_add(beaver3_tuples[16].c);  // b[26]', mask=c33
 #endif
                 b_27_p = b[27].zero_add(beaver4_tuples[8].d);  // b[27]', mask=d34
 #if RESHARE_BAKE_ACTIVE
-                b_29_p = b[29];  // b[29]' (reshare opt sim)
+                b_29_p = b[29].zero_add_local(beaver3_tuples[18].c);  // mask pre-baked; no communication
 #else
                 b_29_p = b[29].zero_add(beaver3_tuples[18].c);  // b[29]', mask=c37
 #endif
                 b_30_p = b[30].zero_add(beaver4_tuples[9].d);  // b[30]', mask=d38
 #if RESHARE_BAKE_ACTIVE
-                b_32_p = b[32];  // b[32]' (reshare opt sim)
+                b_32_p = b[32].zero_add_local(beaver3_tuples[20].c);  // mask pre-baked; no communication
 #else
                 b_32_p = b[32].zero_add(beaver3_tuples[20].c);  // b[32]', mask=c41
 #endif
                 b_33_p = b[33].zero_add(beaver4_tuples[10].d);  // b[33]', mask=d42
 #if RESHARE_BAKE_ACTIVE
-                b_35_p = b[35];  // b[35]' (reshare opt sim)
+                b_35_p = b[35].zero_add_local(beaver3_tuples[22].c);  // mask pre-baked; no communication
 #else
                 b_35_p = b[35].zero_add(beaver3_tuples[22].c);  // b[35]', mask=c45
 #endif
                 b_36_p = b[36].zero_add(beaver4_tuples[11].d);  // b[36]', mask=d46
 #if RESHARE_BAKE_ACTIVE
-                b_38_p = b[38];  // b[38]' (reshare opt sim)
+                b_38_p = b[38].zero_add_local(beaver3_tuples[24].c);  // mask pre-baked; no communication
 #else
                 b_38_p = b[38].zero_add(beaver3_tuples[24].c);  // b[38]', mask=c49
 #endif

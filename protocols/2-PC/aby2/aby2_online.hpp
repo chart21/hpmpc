@@ -231,10 +231,10 @@ class ABY2_ONLINE_Share
 
     // unorthogonalize_boolean + orthogonalize_arithmetic of slices whose only non-zero entry is the
     // last one (a bit per value to inject): with one value per word (DATTYPE == BITLENGTH), the
-    // 32 x 32 bit transpose reduces to scattering the bits of that word
+    // 32 x 32 (64 x 64) bit transpose reduces to scattering the bits of that word
     static void single_row_ortho(Datatype v[BITLENGTH], UINT_TYPE* temp2 [[maybe_unused]])
     {
-#if DATTYPE == BITLENGTH && BITLENGTH == 32
+#if DATTYPE == BITLENGTH && (BITLENGTH == 32 || BITLENGTH == 64)
         const Datatype w = v[BITLENGTH - 1];
         for (int i = 0; i < BITLENGTH; i++)
             v[i] = (w >> (BITLENGTH - 1 - i)) & 1;

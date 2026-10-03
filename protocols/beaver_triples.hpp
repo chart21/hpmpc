@@ -96,7 +96,7 @@ DATATYPE* random_multiplication_b = nullptr;
 // gated because they consume an extra PRNG draw).
 // (BITLENGTH 32 only: the slot maps below, reshare_rt_offset etc., are those of the 32-bit circuits)
 #define RESHARE_BAKE_ACTIVE \
-    (RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && BITLENGTH == 32 && \
+    (RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && DATTYPE == BITLENGTH && (BITLENGTH == 32 || BITLENGTH == 64) && \
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 
 // CUT_FRACTIONAL_BITS_OPT (docs/CUT_FRACTIONAL_BITS_OPT.md): compile-time eligibility. Under
@@ -546,6 +546,13 @@ inline bool ppa4_reshared_at(int m, int k, int i)
     return is_ppa4_reshared(k - m, i - m);
 }
 
+// BITLENGTH 64: the reshared four-way circuit the bake serves is the full-width one, or with the narrow cut the one of
+// 64 - FRACTIONAL bits on slices FRACTIONAL.. (slice i -> i - FRACTIONAL); its maps (gen_64bit_adders.py checks them
+// against the generated circuits): reshared slices j % 3 == 1 with rt[(j - 1) / 3], SIM-skipped zero_adds at
+// j % 3 == 2 with 3-tuple 2 (j - 2) / 3 where ppa4_reshared_sim_za_wide (narrow64/widths.h)
+constexpr int wide_ppa4_width() { return CUT_FRAC_NARROW ? BITLENGTH - FRACTIONAL : BITLENGTH; }
+constexpr int wide_ppa4_slice(int i) { return CUT_FRAC_NARROW ? i - FRACTIONAL : i; }
+
 // Reshare wiring of the *_and_ab_reshared adders: which bit-slice (adder wire index i, 0 = numeric MSB,
 // k-1 = numeric LSB) is reshared with which random_triples[] offset within one adder. -1 = not reshared.
 // Must mirror the generated circuit constructors (rca_msb / ppa_msb_unsafe / ppa_msb_4way _and_ab_reshared.hpp).
@@ -563,6 +570,11 @@ constexpr int reshare_rt_offset(int k, int i)
 #endif
 #elif PPA4_MSB == 1
     // PPA4 reshares the AND2 "generate" wires; retrieval order is circuit-specific (k=32: wire 22 is LAST).
+    if (k == 64)
+    {
+        const int w = wide_ppa4_width(), j = wide_ppa4_slice(i);
+        return (j >= 1 && j < w && j % 3 == 1) ? (j - 1) / 3 : -1;
+    }
     if (k == 32)
     {
 #if CUT_FRAC_ELIGIBLE_PPA4
@@ -625,6 +637,8 @@ constexpr uint64_t reshares_per_adder(int k)
     return (uint64_t)(k - 1);
 #endif
 #elif PPA4_MSB == 1
+    if (k == 64)
+        return (uint64_t) ((wide_ppa4_width() - 2) / 3 + 1);
 #if CUT_FRAC_ELIGIBLE_PPA4
     if (k == 32)
     {
@@ -649,6 +663,11 @@ constexpr uint64_t reshares_per_adder(int k)
 // Extracted from ppa_msb_4way_and_ab_reshared.hpp (the RESHARE_OPT_SIM == 1 branches).
 constexpr int ppa4_zero_add_t3(int k, int i)
 {
+    if (k == 64)
+    {
+        const int w = wide_ppa4_width(), j = wide_ppa4_slice(i);
+        return (ppa4_reshared_sim_za_wide(w) && j >= 2 && j < w && j % 3 == 2) ? 2 * (j - 2) / 3 : -1;
+    }
     if (k == 32)
     {
         int slot = -1;
@@ -686,6 +705,8 @@ constexpr int ppa4_zero_add_t3(int k, int i)
 // Under the cut, skipped P-gate slots consume nothing (retrieval and INIT allocation both skip).
 constexpr uint64_t b3_tuples_per_adder(int k)
 {
+    if (k == 64)
+        return (uint64_t) ppa4_reshared_b3_count_wide(wide_ppa4_width());
     if (k == 32)
         return (uint64_t)(24 - cut_frac_ppa4_b3_skipped_below(24));
     return k == 16 ? 9 : 4;

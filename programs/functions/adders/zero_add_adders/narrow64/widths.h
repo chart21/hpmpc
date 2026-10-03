@@ -2,3 +2,18 @@
 // BITLENGTH 64 (narrow64/*.hpp), which CUT_FRACTIONAL_BITS_OPT needs there
 #pragma once
 #define CUT_FRAC_NARROW64_HAVE(F) ((F) == 8 || (F) == 10 || (F) == 12 || (F) == 14 || (F) == 16 || (F) == 18 || (F) == 20 || (F) == 24)
+// Beaver3TupleCount of the reshared four-way circuits of 64 and 64 - F bits (the reshare bake's tuple stride)
+constexpr int ppa4_reshared_b3_count_wide(int k)
+{
+    switch (k)
+    {
+        case 64: return 47; case 56: return 42; case 54: return 40; case 52: return 38; case 50: return 37; case 48: return 36; case 46: return 34; case 44: return 33; case 40: return 29;
+        default: return -1;
+    }
+}
+// ... and whether their RESHARE_OPT_SIM branches skip the input zero_adds of slices i % 3 == 2 (3-tuple
+// 2 (i - 2) / 3); the others zero_add normally (gen_64bit_adders.py: check_ppa4_sim)
+constexpr bool ppa4_reshared_sim_za_wide(int k)
+{
+    return k == 64 || k == 56 || k == 52 || k == 50 || k == 46 || k == 44 || k == 40;
+}

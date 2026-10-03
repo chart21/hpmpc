@@ -392,10 +392,9 @@ void generateBeaverNDummyTuples(Beaver3TuplesD<Datatype> &beaver_3_tuples, Beave
         (uint8_t*) beaver_4_tuples.abcd
     };
 
-#if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && PPA4_MSB == 1 && BITLENGTH == 32
+#if RESHARE_OPT == 1 && RESHARE_OPT_SIM == 1 && PPA4_MSB == 1 && (BITLENGTH == 32 || BITLENGTH == 64)
     // PPA4 SIM=1 skips the input-wire zero_adds, which is exact only if the 3-tuple mask fields are
-    // party-local: .b P0-only (masks the P0-known s1 slices), .c P1-only (masks P1's s2 slices). The 32-bit circuits
-    // only (RESHARE_BAKE_ACTIVE; the generated 64-bit ones take ordinary tuples).
+    // party-local: .b P0-only (masks the P0-known s1 slices), .c P1-only (masks P1's s2 slices).
     constexpr bool b3_party_local_bc = true;
 #else
     constexpr bool b3_party_local_bc = false;
