@@ -637,7 +637,7 @@ class ABY2_init
             if(i == k - 1)
                 continue; // will be reshared in circuit
             #elif RESHARE_OPT == 1 && PPA4_MSB == 1
-            if(is_ppa4_reshared(k - m, i - m))
+            if(ppa4_reshared_at(m, k, i))
                 continue; // will be reshared in circuit
             #elif RESHARE_OPT == 1 && RCA_MSB != 1
             if(i != m)
@@ -685,7 +685,7 @@ class ABY2_init
             if(i == k - 1)
                 continue; // will be reshared in circuit
             #elif RESHARE_OPT == 1 && PPA4_MSB == 1
-            if(is_ppa4_reshared(k, i))
+            if(ppa4_reshared_at(0, k, i))
                 continue; // will be reshared in circuit
             #elif RESHARE_OPT == 1 && RCA_MSB != 1
             if(i != 0)

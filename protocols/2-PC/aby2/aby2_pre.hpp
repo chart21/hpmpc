@@ -740,7 +740,7 @@ class ABY2_PRE_Share
             if(i == k - 1)
                 continue; // will be reshared in circuit
             #elif RESHARE_OPT == 1 && PPA4_MSB == 1
-            if(is_ppa4_reshared(k - m, i - m))
+            if(ppa4_reshared_at(m, k, i))
                 continue; // will be reshared in circuit
 #if RESHARE_BAKE_ACTIVE
             {

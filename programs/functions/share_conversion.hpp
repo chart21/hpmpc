@@ -163,6 +163,97 @@ void a2b_xform_restore(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 }
 #endif
 
+// The MSB adders of a converted range: constructed (each retrieves its triples), then run level by level
+template <typename Adder, typename Share, typename Bitset, typename S>
+void run_msb_adders(Bitset* s1, Bitset* s2, S* msb, int len)
+{
+#if ADDITIONAL_RELU_THREADS > 0 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0)
+    // constructed in parallel: each adder retrieves its triples and one random mask (stream cursors)
+    struct AdderArray
+    {
+        Adder* p;
+        int n = 0;
+        explicit AdderArray(int len)
+            : p(static_cast<Adder*>(::operator new[](sizeof(Adder) * len, std::align_val_t(alignof(Adder)))))
+        {
+        }
+        ~AdderArray()
+        {
+            for (int i = 0; i < n; i++)
+                p[i].~Adder();
+            ::operator delete[](p, std::align_val_t(alignof(Adder)));
+        }
+        Adder& operator[](int i) { return p[i]; }
+    } adders(len);
+    stream_parallel_for<STREAM_PARALLEL_CTOR, true>(len, [&](int i) { new (&adders.p[i]) Adder(s1[i], s2[i], msb[i]); });
+    adders.n = len;
+#else
+std::vector<Adder> adders;
+    adders.reserve(len);
+    for (int i = 0; i < len; i++)
+    {
+        /* adder[i].set_values(s1[i], s2[i], y[i]); */
+        adders.emplace_back(s1[i], s2[i], msb[i]);
+    }
+#endif
+   
+#if RESHARE_OPT == 1
+Share::communicate(); // For resharings
+#endif 
+#if PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0
+    while (!adders[0].is_done())
+    {
+        if(current_phase == PHASE_LIVE)
+        // Spawn threads for compute_step (Live Phase has heavy computation)
+       { 
+        {
+            std::vector<std::thread> threads;
+            int chunk_size = (len + ADDITIONAL_PPA_THREADS - 1) / ADDITIONAL_PPA_THREADS;
+            for (int t = 0; t < ADDITIONAL_PPA_THREADS && t * chunk_size < len; t++)
+            {
+                int start = t * chunk_size;
+                int end = std::min(start + chunk_size, len);
+                threads.emplace_back([&adders, start, end]() {
+                    for (int i = start; i < end; i++)
+                    {
+                        adders[i].compute_step();
+                    }
+                });
+            }
+            for (auto& th : threads) th.join();
+        }
+    }
+        else
+        {
+            for (int i = 0; i < len; i++)
+            {
+                adders[i].compute_step();
+            }
+        }
+        // Aggregate step (single thread)
+        for (int i = 0; i < len; i++)
+        {
+            adders[i].aggregate_step();
+        }
+        Share::communicate();
+        for (int i = 0; i < len; i++)
+        {
+            adders[i].collect_step();
+        }
+    }
+#else
+    while (!adders[0].is_done())
+    {
+        stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { adders[i].step(); });
+        Share::communicate();
+    }
+#endif
+#if !(ADDITIONAL_RELU_THREADS > 0 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0))
+    adders.clear();
+    adders.shrink_to_fit();
+#endif
+}
+
 template <int bm, int bk, typename Datatype, typename Share>
 void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datatype, Share>* msb, int len)
 {
@@ -299,94 +390,33 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
 #endif
 
 
-#if ADDITIONAL_RELU_THREADS > 0 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0)
-    // constructed in parallel: each adder retrieves its triples and one random mask (stream cursors)
-    using Adder = ADDER_TYPE<bk - bm, S>;
-    struct AdderArray
-    {
-        Adder* p;
-        int n = 0;
-        explicit AdderArray(int len)
-            : p(static_cast<Adder*>(::operator new[](sizeof(Adder) * len, std::align_val_t(alignof(Adder)))))
+#if CUT_FRAC_NARROW
+    if constexpr (bm == 0 && bk == BITLENGTH)
+        if (cut_frac_narrow_on(bm, bk))
         {
-        }
-        ~AdderArray()
-        {
-            for (int i = 0; i < n; i++)
-                p[i].~Adder();
-            ::operator delete[](p, std::align_val_t(alignof(Adder)));
-        }
-        Adder& operator[](int i) { return p[i]; }
-    } adders(len);
-    stream_parallel_for<STREAM_PARALLEL_CTOR, true>(len, [&](int i) { new (&adders.p[i]) Adder(s1[i], s2[i], msb[i]); });
-    adders.n = len;
-#else
-std::vector<ADDER_TYPE<bk - bm, S>> adders;
-    adders.reserve(len);
-    for (int i = 0; i < len; i++)
-    {
-        /* adder[i].set_values(s1[i], s2[i], y[i]); */
-        adders.emplace_back(s1[i], s2[i], msb[i]);
-    }
-#endif
-   
-#if RESHARE_OPT == 1
-Share::communicate(); // For resharings
-#endif 
-#if PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0
-    while (!adders[0].is_done())
-    {
-        if(current_phase == PHASE_LIVE)
-        // Spawn threads for compute_step (Live Phase has heavy computation)
-       { 
-        {
-            std::vector<std::thread> threads;
-            int chunk_size = (len + ADDITIONAL_PPA_THREADS - 1) / ADDITIONAL_PPA_THREADS;
-            for (int t = 0; t < ADDITIONAL_PPA_THREADS && t * chunk_size < len; t++)
-            {
-                int start = t * chunk_size;
-                int end = std::min(start + chunk_size, len);
-                threads.emplace_back([&adders, start, end]() {
-                    for (int i = start; i < end; i++)
-                    {
-                        adders[i].compute_step();
-                    }
-                });
-            }
-            for (auto& th : threads) th.join();
-        }
-    }
-        else
-        {
+            // the cut at 64 bits: the narrow adder on slices FRACTIONAL..BITLENGTH-1 (see cut_frac_narrow_on)
+            constexpr int w = BITLENGTH - FRACTIONAL;
+            using NB = sbitset_t<w, S>;
+            NB* n1 = new NB[len];
+            NB* n2 = new NB[len];
             for (int i = 0; i < len; i++)
-            {
-                adders[i].compute_step();
-            }
+                for (int j = 0; j < w; j++)
+                {
+                    n1[i][j] = s1[i][FRACTIONAL + j];
+                    n2[i][j] = s2[i][FRACTIONAL + j];
+                }
+            delete[] s1;
+            delete[] s2;
+            run_msb_adders<ADDER_TYPE<w, S>, Share>(n1, n2, msb, len);
+            delete[] n1;
+            delete[] n2;
+            s1 = s2 = nullptr;
         }
-        // Aggregate step (single thread)
-        for (int i = 0; i < len; i++)
-        {
-            adders[i].aggregate_step();
-        }
-        Share::communicate();
-        for (int i = 0; i < len; i++)
-        {
-            adders[i].collect_step();
-        }
-    }
-#else
-    while (!adders[0].is_done())
-    {
-        stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { adders[i].step(); });
-        Share::communicate();
-    }
+    if (s1)
 #endif
+    run_msb_adders<ADDER_TYPE<bk - bm, S>, Share>(s1, s2, msb, len);
     delete[] s1;
     delete[] s2;
-#if !(ADDITIONAL_RELU_THREADS > 0 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0))
-    adders.clear();
-    adders.shrink_to_fit();
-#endif
 #if TS1_FUSED_ACTIVE || A2B_DCUT_ACTIVE
     a2b_xform_restore(val, len);
 #endif

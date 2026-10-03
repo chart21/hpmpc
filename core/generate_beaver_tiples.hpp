@@ -126,10 +126,16 @@ struct FullyConnectedParameter
     (A2B_DELAYED_CUT == 1 && TRUNC_APPROACH == 0 && PROTOCOL == 4 && OPTIMIZED_BIT_INJECTION_RELU == 1 && \
      ((A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1) || A2B_ONLINE_OPT == 0) && REDUCED_BITLENGTH_m == 0 && \
      REDUCED_BITLENGTH_k == BITLENGTH)
+// BITLENGTH 64: the narrow MSB adders of width 64 - FRACTIONAL (narrow64/, generated for some FRACTIONAL only:
+// CUT_FRAC_NARROW64_HAVE), not with the split four-way circuits (ADDITIONAL_PPA_THREADS)
+#include "../programs/functions/adders/zero_add_adders/narrow64/widths.h"
+#define CUT_FRAC_WIDTH_OK (BITLENGTH == 32 || (BITLENGTH == 64 && CUT_FRAC_NARROW64_HAVE(FRACTIONAL) && \
+                                              ADDITIONAL_PPA_THREADS == 0))
 #define CUT_FRAC_ELIGIBLE \
     (CUT_FRACTIONAL_BITS_OPT == 1 && (TRUNC_DELAYED == 0 || TS1_FUSED_ACTIVE || A2B_DCUT_ELIGIBLE) && \
-     FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && ROT_PREPROCESSING_OPT == 1 && BITLENGTH == 32 && \
+     FRACTIONAL >= 1 && FRACTIONAL <= BITLENGTH - 3 && ROT_PREPROCESSING_OPT == 1 && CUT_FRAC_WIDTH_OK && \
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
+#define CUT_FRAC_NARROW (CUT_FRAC_ELIGIBLE && BITLENGTH == 64)
 // TS1 with the cut: the ReLU's A2B converts the truncated value (the two designs: see g_ts1_la in beaver_triples.hpp)
 #define TS1_CUT_ACTIVE (TS1_FUSED_ACTIVE && CUT_FRAC_ELIGIBLE)
 // Some A2B conversion (INIT pass) runs without CUT_FRACTIONAL_BITS_OPT: the Boolean addition must produce all slices

@@ -64,11 +64,9 @@ constexpr bool is_ppa4_reshared(int k, int i)
         return i == 1 || i == 4 || i == 7 || i == 10 || i == 13
             || i == 16 || i == 19 || i == 22 || i == 23 || i == 26 || i == 29;
     }
-    else if (k == 64) // scripts/circuits/gen_64bit_adders.py: the first slice of each level-0 group of 3
-    {
-        return i >= 1 && i <= 61 && i % 3 == 1;
-    }
-    return false;
+    // k = 64 and the narrow cut adders of 64 - FRACTIONAL bits (scripts/circuits/gen_64bit_adders.py, which checks the
+    // generated circuits against this): the first slice of each level-0 group of 3
+    return k > 32 && i >= 1 && i < k && i % 3 == 1;
 }
 
 // std::vector<uint64_t> arithmetic_triple_index;
@@ -475,7 +473,7 @@ constexpr bool cut_frac_ppa4_skip(int thresholdF)
 // elements drop out of every prefix combine (verified by exhaustive simulation).
 constexpr bool cut_frac_vacant(int k, int i)  // fully-skipped slice?
 {
-#if CUT_FRAC_ELIGIBLE
+#if CUT_FRAC_ELIGIBLE && !CUT_FRAC_NARROW
     return k == BITLENGTH && i < FRACTIONAL;
 #else
     (void) k; (void) i;
@@ -485,7 +483,7 @@ constexpr bool cut_frac_vacant(int k, int i)  // fully-skipped slice?
 
 constexpr bool cut_frac_identity(int k, int i)  // leaf (g,p) := (0,1) substituted slice?
 {
-#if CUT_FRAC_ELIGIBLE
+#if CUT_FRAC_ELIGIBLE && !CUT_FRAC_NARROW
     return k == BITLENGTH && i >= 1 && i <= FRACTIONAL;
 #else
     (void) k; (void) i;
@@ -524,6 +522,28 @@ inline bool cut_frac_prep_boundary(int m, int k, int i)
     (void) m; (void) k; (void) i;
     return false;
 #endif
+}
+
+// BITLENGTH 64 (CUT_FRAC_NARROW): the A2B prepares the full width as above (vacant slices public constants, the
+// boundary slice masked and sent), and the MSB adder of width BITLENGTH - FRACTIONAL (narrow64/) runs on slices
+// FRACTIONAL..BITLENGTH-1 (get_msb_range): the MSB of the low BITLENGTH - FRACTIONAL bits of the sum, the sign of the
+// value. The full-width circuit is not identity-substituted (cut_frac_vacant / cut_frac_identity stay false).
+inline bool cut_frac_narrow_on(int m, int k)
+{
+#if CUT_FRAC_NARROW
+    return g_cut_frac_active && m == 0 && k == BITLENGTH;
+#else
+    (void) m; (void) k;
+    return false;
+#endif
+}
+// The reshared four-way circuit's input slices, by position in the prepared range [m, k): with the narrow cut, those
+// of the narrow adder (i >= FRACTIONAL; the vacant and boundary slices are handled first)
+inline bool ppa4_reshared_at(int m, int k, int i)
+{
+    if (cut_frac_narrow_on(m, k))
+        return i > FRACTIONAL && is_ppa4_reshared(k - FRACTIONAL, i - FRACTIONAL);
+    return is_ppa4_reshared(k - m, i - m);
 }
 
 // Reshare wiring of the *_and_ab_reshared adders: which bit-slice (adder wire index i, 0 = numeric MSB,
