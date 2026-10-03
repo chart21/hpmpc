@@ -2,12 +2,15 @@
 """BITLENGTH = 64 specializations of the 2PC ROT-preprocessing adders (programs/functions/adders/zero_add_adders).
 
 The circuits come from the circuit generator (generate_hpp.py; LLM_TEST=<its checkout>, default ~/workspace/llm_test,
-reproduces the imported 8/16/32-bit files bit for bit with the flags below). RCA and PPA (Sklansky) take its generic
-builders; for the 4-way PPA, which it builds by hand per width, this script adds a width-generic tree: slices 1..k-1
-(slice 1 the most significant below the MSB slice 0) in groups of 3 (level 0; the last group may have 1 or 2 slices),
-then blocks of up to 4 items per level until one is left, the carry into slice 0. At k = 64: 21 groups, blocks of 4
-groups (level 1), a superblock of the first 4 blocks and the tail (block 4 + group 20, level 2), one dot gate (level 3)
--- 4 AND levels (the 4-way trees of 32 bits take 3; 3 levels of these gates cover at most 48 slices).
+reproduces the imported 8/16/32-bit files bit for bit with the flags below, except the hand-fixed a-known four-way
+ones and the a-known RCA, whose generated circuits now fold the a-known LSB carry into the next carry's dot group: one
+round and one message fewer; the imported 32-bit RCA keeps the identity-substituted cut for CUT_NARROW_32=0). RCA and PPA (Sklansky) take its generic builders, the 4-way PPA its width-generic tree for widths other than 8,
+16, 32 (build_ppa_msb_4way_generic[_and_a]): slices 1..k-1 (slice 1 the most significant below the MSB slice 0) in
+groups of 3 (level 0), then blocks of up to 4 items per level until one is left, the carry into slice 0. At k = 64:
+21 groups, blocks of 4 groups (level 1), a superblock of the first 4 blocks and the tail (block 4 + group 20, level 2),
+one dot gate (level 3) -- 4 AND levels (the 4-way trees of 32 bits take 3; 3 levels of these gates cover at most 48
+slices). A remainder of 1 or 2 slices is a last group of that size (AB) or the last two groups 2 + 2 / one group of 2
+(a-known: a lone a-known product cannot form a dot chain).
 
 CUT_FRACTIONAL_BITS_OPT at 64 bits (narrow adders): the MSB adder of width 64 - F over slices F..63, for the values of
 F in NARROW_F, written to zero_add_adders/narrow64/<family>.hpp (each width under #if FRACTIONAL == F) and
@@ -26,162 +29,26 @@ ADDERS = os.path.join(REPO, "programs", "functions", "adders", "zero_add_adders"
 sys.path.insert(0, GEN)
 os.chdir(GEN)
 
-import circuit_builder as cb  # noqa: E402
 import generate_hpp as gh  # noqa: E402
-from circuit_core import Circuit  # noqa: E402
 
 K = 64
-GROUPS = [(3 * j + 1, 3 * j + 2, 3 * j + 3) for j in range(21)]  # slices 1..63 (the a-known 64-bit circuit)
 NARROW_F = [8, 10, 12, 14, 16, 18, 20, 24]  # CUT_FRACTIONAL_BITS_OPT at 64 bits: adders of width 64 - F
 # ... at 32 bits under the A2B bake for the prefix adders (their identity-substituted cut fails there, see
-# docs/BITLENGTH64.md): width 32 - F, a-known / AB PPA and the AB four-way circuit (the a-known one is hand-fixed)
+# docs/BITLENGTH64.md): width 32 - F, a-known / AB PPA and four-way circuits
 NARROW32_F = list(range(2, 13))
-NARROW32 = ["ppa_msb_unsafe_and_a_ab", "ppa_msb_unsafe_and_ab", "ppa_msb_4way_and_ab", "rca_msb_and_a_ab"]  # + TE1's DReLU
+NARROW32 = ["ppa_msb_unsafe_and_a_ab", "ppa_msb_unsafe_and_ab", "ppa_msb_4way_and_ab", "ppa_msb_4way_and_a_ab",
+            "rca_msb_and_a_ab"]  # + TE1's DReLU
 NARROW32_DIR = os.path.join(ADDERS, "narrow32")
 # TE (TRUNC_APPROACH 2 / 3, 2PC): the low carry by an a-known MSB adder of width F + 1 (8 and 16 exist already)
 LOW_F = [f for f in range(3, 25) if f + 1 not in (8, 16)]
-LOW = {"rca_msb_and_a_ab": "rca_msb_and_a_ab", "ppa_msb_unsafe_and_a_ab": "ppa_msb_unsafe_and_a_ab"}
-
-
-def _block(ctx, name, items):  # G = G0 ^ P0 G1 ^ P0 P1 G2 ^ P0 P1 P2 G3, P = P0 P1 P2 P3
-    g = [x[0] for x in items]
-    p = [x[1] for x in items]
-    terms = []
-    if len(items) > 1:
-        terms.append(ctx.dot2(p[0], g[1], f"{name}_t1"))
-    if len(items) > 2:
-        terms.append(ctx.dot3(p[0], p[1], g[2], f"{name}_t2"))
-    if len(items) > 3:
-        terms.append(ctx.dot4(p[0], p[1], p[2], g[3], f"{name}_t3"))
-    # the dot gates XORed first, then the non-dot G0 (the generator's grouping of dot chains)
-    acc = terms[0]
-    for i, t in enumerate(terms[1:], 1):
-        acc = ctx.xor(acc, t, f"{name}_s{i}")
-    gout = ctx.xor(acc, g[0], f"{name}_G")
-    pout = None
-    if all(x is not None for x in p):
-        if len(items) == 4:
-            pout = ctx.and4(p[0], p[1], p[2], p[3], f"{name}_P")
-        elif len(items) == 3:
-            pout = ctx.and3(p[0], p[1], p[2], f"{name}_P")
-        else:
-            pout = ctx.and2(p[0], p[1], f"{name}_P")
-    return gout, pout
-
-
-def _tree(ctx, gp):
-    """Blocks of up to 4 items per level over the level-0 groups gp[j] = (G_j, P_j), ordered from the most significant
-    (the last group's P is None, never needed); a single item passes through. Returns the carry into slice 0."""
-    level = 1
-    while len(gp) > 1:
-        nb = (len(gp) + 3) // 4
-        out = []
-        for i in range(nb):
-            items = gp[4 * i:4 * i + 4]
-            if len(items) == 1:
-                out.append(items[0])
-                continue
-            name = f"L{level}_B{i}" if level == 1 else f"L{level}_S{i}" if level == 2 else \
-                f"L{level}" if nb == 1 else f"L{level}_B{i}"
-            out.append(_block(ctx, name, items))
-        gp = out
-        level += 1
-    return gp[0][0]
-
-
-def build_ppa_msb_4way_generic(k=K):
-    c = Circuit("PPA_MSB_4Way", k)
-    c.a_known_pairs = True
-    c.input_wires = [f"a[{i}]" for i in range(k)] + [f"b[{i}]" for i in range(k)]
-    c.output_wires = ["msb"]
-    for w in c.input_wires + c.output_wires:
-        c.get_or_create_wire(w)
-    ctx = cb._4WayCtx(c)
-
-    def gk(prefix, sl):  # B3L1_G: a1 b1 ^ p1 a2 b2 ^ p1 p2 a3 b3 (1 to 3 slices)
-        t = [ctx.dot2(f"a[{sl[0]}]", f"b[{sl[0]}]", f"{prefix}_g1")]
-        if len(sl) > 1:
-            p1 = ctx.make_p(sl[0])
-            t.append(ctx.dot3(p1, f"a[{sl[1]}]", f"b[{sl[1]}]", f"{prefix}_t1"))
-        if len(sl) > 2:
-            p2 = ctx.make_p(sl[1])
-            t.append(ctx.dot4(p1, p2, f"a[{sl[2]}]", f"b[{sl[2]}]", f"{prefix}_t2"))
-        if len(t) == 1:
-            return t[0]
-        acc = ctx.xor(t[0], t[1], f"{prefix}_s1" if len(t) > 2 else f"{prefix}_out")
-        return ctx.xor(acc, t[2], f"{prefix}_out") if len(t) > 2 else acc
-
-    def pk(prefix, sl):  # B3L1_P
-        ps = [ctx.make_p(i) for i in sl]
-        if len(ps) == 3:
-            return ctx.and3(ps[0], ps[1], ps[2], f"{prefix}_out")
-        return ctx.and2(ps[0], ps[1], f"{prefix}_out") if len(ps) == 2 else ps[0]
-
-    slices = list(range(1, k))
-    groups = [slices[i:i + 3] for i in range(0, len(slices), 3)]
-    gp = []
-    for j, sl in enumerate(groups):
-        last = j == len(groups) - 1
-        tag = f"{sl[0]}_{sl[-1]}"
-        g = gk(f"W{len(sl)}L1_{tag}" if last else f"B3G_{tag}", sl)
-        gp.append((g, None if last else pk(f"B3P_{tag}", sl)))
-    carry = _tree(ctx, gp)
-    p0 = ctx.xor("a[0]", "b[0]", "p0")
-    ctx.xor(carry, p0, "msb")
-    return c
+LOW = {"rca_msb_and_a_ab": "rca_msb_and_a_ab", "ppa_msb_unsafe_and_a_ab": "ppa_msb_unsafe_and_a_ab",
+       "ppa_msb_4way_and_a_ab": "ppa_msb_4way_and_a_ab"}
 
 
 def ppa4_reshared_slices(k):
     """The slices whose input pair the reshared generic 4-way circuit reshares: the first of each group."""
     return [i for i in range(1, k) if i % 3 == 1]
 
-
-def build_ppa_msb_4way_64_and_a(k=K):
-    c = Circuit("PPA_MSB_4Way_A", k)
-    c.input_wires = [f"a[{i}]" for i in range(k)] + [f"b[{i}]" for i in range(k)]
-    c.output_wires = ["msb"]
-    for w in c.input_wires + c.output_wires:
-        c.get_or_create_wire(w)
-    c.fixed_mask_wires = {f"b[{i}]" for i in range(k)}
-    ctx = cb._4WayCtx(c)
-    gp = []
-    for j, (i1, i2, i3) in enumerate(GROUPS):
-        if j < 20:
-            g, sh = ctx.b3l1_g_and_a(f"B3G_{i1}_{i3}", i1, i2, i3)
-            gp.append((g, ctx.b3l1_p_and_a(f"B3P_{i1}_{i3}", i1, i2, i3, shared=sh)))
-        else:
-            gp.append((ctx.w3l1_and_a(f"W3L1_{i1}_{i3}", i1, i2, i3), None))
-    carry = _tree(ctx, gp)
-    p0 = ctx.xor("a[0]", "b[0]", "p0")
-    ctx.xor(carry, p0, "msb")
-    return c
-
-
-_base_build = cb.build_circuit
-
-
-def build_circuit(circuit_type, k):
-    if k not in (8, 16, 32) and circuit_type.startswith("ppa_msb_4way"):
-        both = {f"a[{i}]" for i in range(k)} | {f"b[{i}]" for i in range(k)}
-        if circuit_type == "ppa_msb_4way":
-            c = build_ppa_msb_4way_generic(k)
-        elif circuit_type == "ppa_msb_4way_and_ab":
-            c = build_ppa_msb_4way_generic(k)
-            c.name, c.fixed_mask_wires = "PPA_MSB_4Way_AB", both
-        elif circuit_type == "ppa_msb_4way_and_a" and k == K:
-            c = build_ppa_msb_4way_64_and_a()
-        elif circuit_type == "ppa_msb_4way_and_a_ab" and k == K:
-            c = build_ppa_msb_4way_64_and_a()
-            c.name, c.fixed_mask_wires = "PPA_MSB_4Way_A_AB", both
-        else:
-            raise ValueError(circuit_type)
-        c.explicit_prepare_dot = True  # as the generator's 4-way builders
-        return c
-    return _base_build(circuit_type, k)
-
-
-cb.build_circuit = build_circuit
-gh.build_circuit = build_circuit
 
 # repo file -> (generator circuit type, reshare mode); the flags reproduce the imported 8/16/32-bit files
 FAMILIES = {
@@ -196,8 +63,9 @@ FAMILIES = {
     "ppa_msb_unsafe_and_a_ab": ("ppa_msb_unsafe_and_a_ab", "off"),
     "ppa_msb_4way_and_ab": ("ppa_msb_4way_and_ab", "off"),
     "ppa_msb_4way_and_ab_reshared": ("ppa_msb_4way_and_ab", "all"),
-    # ppa_msb_4way_and_a_ab: the generator's a-known four-way circuits need the hand fixes of hpmpc 4ec9292 (operand
-    # order, dot-pending products, chain masks); BITLENGTH 64 takes the AB circuit instead (share_conversion.hpp)
+    # the 8/16/32-bit blocks are the hand-fixed ones of hpmpc 4ec9292; the generator now emits the same fixes (dot /
+    # dot-pending a-known products with their own mask shares, operand order), its 32-bit block passes func 53 / 59
+    "ppa_msb_4way_and_a_ab": ("ppa_msb_4way_and_a_ab", "off"),
 }
 MARK = "// 64-bit: generated by scripts/circuits/gen_64bit_adders.py"
 # the MSB adders, with narrow (64 - F)-bit versions for the cut, and the slices their reshared circuits reshare
@@ -210,6 +78,7 @@ NARROW = {
     "ppa_msb_unsafe_and_a_ab": None,
     "ppa_msb_4way_and_ab": None,
     "ppa_msb_4way_and_ab_reshared": ppa4_reshared_slices,
+    "ppa_msb_4way_and_a_ab": None,
 }
 NARROW_DIR = os.path.join(ADDERS, "narrow64")
 

@@ -46,9 +46,9 @@
 #if ROT_PREPROCESSING_OPT == 1
 
 #if PPA4_MSB == 1
-// BITLENGTH 64: no a-known four-way circuit (the generated one needs the hand fixes of the 8/16/32-bit ones, see
-// scripts/circuits/gen_64bit_adders.py); the AB circuit takes the public m as a share with mask 0
-#if A_KNOWN_TO_EVALUATORS_OPT == 1 && BITLENGTH != 64
+// the a-known circuit at 64 bits and its narrow forms are generated (scripts/circuits/gen_64bit_adders.py); the split
+// variant exists for 8/16/32 bits only, at 64 bits the AB circuit takes the public m as a share with mask 0
+#if A_KNOWN_TO_EVALUATORS_OPT == 1 && (BITLENGTH != 64 || ADDITIONAL_PPA_THREADS == 0)
 #if ADDITIONAL_PPA_THREADS > 0
 #include "adders/zero_add_adders/ppa_msb_4way_and_a_ab_split.hpp"
 #else
@@ -106,29 +106,33 @@
 #include "adders/ppa_msb_unsafe.hpp"
 #endif
 #endif
-// The cut's narrow adders (CUT_FRAC_NARROW): the a-known four-way circuit has no narrow form (the generator's needs the
-// hand fixes of the 8/16/32-bit ones), so A2bits PPA4 takes the AB circuit, the public m as a share of mask 0
-#if PPA4_MSB == 1 && A_KNOWN_TO_EVALUATORS_OPT == 1 && ROT_PREPROCESSING_OPT == 1
+// The cut's narrow adders (CUT_FRAC_NARROW): those of the ADDER_TYPE family (narrow32/, narrow64/); the split a-known
+// four-way circuit has none, A2bits PPA4 then takes the AB one, the public m as a share of mask 0
+#if PPA4_MSB == 1 && A_KNOWN_TO_EVALUATORS_OPT == 1 && ROT_PREPROCESSING_OPT == 1 && ADDITIONAL_PPA_THREADS > 0
 #include "adders/zero_add_adders/ppa_msb_4way_and_ab.hpp"
 #define NARROW_ADDER_TYPE PPA_MSB_4Way_AB
 #else
 #define NARROW_ADDER_TYPE ADDER_TYPE
 #endif
 #if TE_FUSED_ACTIVE
-// TE's low adders (Ts1Range::te): the carry into bit FRACTIONAL, the MSB of an (F + 1)-bit a-known adder (RCA for RCA
-// builds, else the prefix adder: no more rounds than the ReLU's); widths 8 and 16 are in the families' files, the
-// others in low/ (scripts/circuits/gen_64bit_adders.py)
+// TE's low adders (Ts1Range::te): the carry into bit FRACTIONAL, the MSB of an (F + 1)-bit a-known adder (TE_LOW_ADDER:
+// RCA for RCA builds, else the four-way PPA: no more rounds than the ReLU's, the fewest messages); widths 8 and 16 are
+// in the families' files, the others in low/ (scripts/circuits/gen_64bit_adders.py)
 #if A_KNOWN_TO_EVALUATORS_OPT == 0 || ADDITIONAL_PPA_THREADS > 0
 #error "TRUNC_APPROACH 2 / 3 with PROTOCOL 4: TE takes the a-known adders (A2bits: A_KNOWN_TO_EVALUATORS_OPT=1), not the split four-way ones"
 #endif
-#if RCA_MSB == 1
+#if TE_LOW_ADDER == 0 || (TE_LOW_ADDER == -1 && RCA_MSB == 1)
 #include "adders/zero_add_adders/rca_msb_and_a_ab.hpp"
 #include "adders/zero_add_adders/low/rca_msb_and_a_ab.hpp"
 #define TE_LOW_ADDER_TYPE RCA_MSB_A_AB
-#else
+#elif TE_LOW_ADDER == 1
 #include "adders/zero_add_adders/ppa_msb_unsafe_and_a_ab.hpp"
 #include "adders/zero_add_adders/low/ppa_msb_unsafe_and_a_ab.hpp"
 #define TE_LOW_ADDER_TYPE PPA_MSB_Unsafe_A_AB
+#else
+#include "adders/zero_add_adders/ppa_msb_4way_and_a_ab.hpp"
+#include "adders/zero_add_adders/low/ppa_msb_4way_and_a_ab.hpp"
+#define TE_LOW_ADDER_TYPE PPA_MSB_4Way_A_AB
 #endif
 #endif
 // compute msbs of a range of arithemtic shares

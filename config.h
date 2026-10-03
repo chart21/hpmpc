@@ -356,7 +356,13 @@ inline int base_port = BASE_PORT;  // temporary solution
 #endif
 
 #ifndef CUT_NARROW_32
-#define CUT_NARROW_32 1  // CUT_FRACTIONAL_BITS_OPT, 32 bits, PPA / PPA4 under the A2B bake: narrow adders of 32 - FRACTIONAL bits (FRACTIONAL 2..12; A2bits PPA4: the AB four-way circuit). 0: the identity-substituted full-width circuits, which DReLU wrongly for some inputs near the cut's limit 2^(31-F) (docs/BITLENGTH64.md); for PPA4 they take fewer Beaver 3- / 4-tuples
+#define CUT_NARROW_32 1  // CUT_FRACTIONAL_BITS_OPT, 32 bits, PPA / PPA4 / a-known RCA under the A2B bake: narrow adders of 32 - FRACTIONAL bits (FRACTIONAL 2..12) of the build's family. 0: the identity-substituted full-width circuits, which DReLU wrongly for some inputs near the cut's limit 2^(31-F) (docs/BITLENGTH64.md)
+#endif
+
+#ifndef TE_LOW_ADDER
+#define TE_LOW_ADDER -1  // 2PC TE0 / TE1: the low carry's (F + 1)-bit a-known adder, 0 RCA, 1 PPA (Sklansky), 2 four-way PPA
+                         // (2 rounds up to F = 11 and the fewest messages: 4 / 6 per value at F = 5 / 8, against
+                         // RCA's 5 / 8 in F rounds and PPA's 10 / 19); -1: RCA for RCA builds, else the four-way PPA
 #endif
 
 #ifndef A2B_ROUND_OPT_SIM

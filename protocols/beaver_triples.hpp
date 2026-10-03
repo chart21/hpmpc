@@ -1269,7 +1269,7 @@ inline const Ts1Range& ts1_range(uint64_t slot_base, uint64_t slots)
 // The OTs ts1_generate_tuples and ts1_generate_products take (Iface::ot_demand_hint)
 inline uint64_t ts1_ot_demand()
 {
-    return g_ts1_slots * DATTYPE / BITLENGTH * (2 + TS1_LOW_CARRY + 2 + (TE_FUSED_ACTIVE ? 1 + 3 : 0));
+    return g_ts1_slots * DATTYPE / BITLENGTH * (2 + TS1_LOW_CARRY + 2 + (TE_FUSED_ACTIVE ? 1 + 4 : 0));
 }
 
 // The TS1 groups (BITLENGTH compact slots each) by width base + t' (t' = 0 for the full design), ascending
@@ -1414,9 +1414,11 @@ inline void ts1_generate_tuples(const std::string& ip, int port)
 }
 
 #if TE_FUSED_ACTIVE
-// After the preprocessing pass recorded lambda_c (g_te_lcb, the low adders' output masks) and lambda_b: [lambda_c] by a
-// COT of l - 1 bits (correct mod 2^l: it enters the value with the factor 1 - 2 m_c) and [lambda_b lambda_c] by a
-// full-width multiplexer, for the TE groups
+// After the preprocessing pass recorded lambda_c (g_te_lcb, the low adders' output masks) and lambda_b (g_ts1_mux_b),
+// for the TE groups: [lambda_c] and [lambda_b lambda_c] as B2As of lambda_c and of d = lambda_b lambda_c. d's cross
+// terms lambda_b^0 lambda_c^1 and lambda_c^0 lambda_b^1 take a COT of 1 bit each, each B2A a COT of l - 1 bits
+// (u_0 + u_1 - 2 u_0 u_1, correct mod 2^l): 2 l bits per value, against 3 l - 1 with a full-width multiplexer for the
+// product (2 l) next to the COT for [lambda_c]
 inline void te_generate_products(const std::string& ip, int port)
 {
     constexpr int K = BITLENGTH;
@@ -1427,34 +1429,54 @@ inline void te_generate_products(const std::string& ip, int port)
     if (gs.empty())
         return;
     const uint64_t cnt = gs.size() * DATTYPE;
-    std::vector<UINT_TYPE> c(cnt);
-#if PARTY == 0
-    std::vector<UINT_TYPE> corr(cnt);
-    for (uint64_t k = 0; k < cnt; k++) corr[k] = g_te_lcb[gs[k / DATTYPE] * DATTYPE + k % DATTYPE];
-    Iface::generateCOT(CHEETAH_PARTY, corr.data(), nullptr, c.data(), (unsigned) cnt, ip, port + CHEETAH_PORT_OFFSET,
-                       CHEETAH_THREADS, CHEETAH_IO_OFFSET, K - 1);
-#else
-    std::vector<uint8_t> packed((cnt + 7) / 8, 0);
+    std::vector<uint8_t> lb(cnt), lc(cnt);  // this party's share bits of lambda_b and lambda_c, per value
     for (uint64_t k = 0; k < cnt; k++)
-        packed[k / 8] |= (uint8_t) (g_te_lcb[gs[k / DATTYPE] * DATTYPE + k % DATTYPE] << (k % 8));
-    Iface::generateCOT(CHEETAH_PARTY, nullptr, packed.data(), c.data(), (unsigned) cnt, ip, port + CHEETAH_PORT_OFFSET,
-                       CHEETAH_THREADS, CHEETAH_IO_OFFSET, K - 1);
+    {
+        const auto* mb = reinterpret_cast<const uint8_t*>(&g_ts1_mux_b[gs[k / DATTYPE]]);
+        const int j = int(k % DATTYPE);
+        lb[k] = (mb[j / 8] >> (j % 8)) & 1;
+        lc[k] = g_te_lcb[gs[k / DATTYPE] * DATTYPE + j];
+    }
+    // COTs of `width` bits, P0 the correlations x, P1 the choices x (each party its own bits): c_0 + c_1 = x_0 x_1
+    auto cot = [&](const std::vector<uint8_t>& x, int width) {
+        const uint64_t n = x.size();
+        std::vector<UINT_TYPE> c(n);
+#if PARTY == 0
+        std::vector<UINT_TYPE> corr(x.begin(), x.end());
+        Iface::generateCOT(CHEETAH_PARTY, corr.data(), nullptr, c.data(), (unsigned) n, ip, port + CHEETAH_PORT_OFFSET,
+                           CHEETAH_THREADS, CHEETAH_IO_OFFSET, width);
+#else
+        std::vector<uint8_t> packed((n + 7) / 8, 0);
+        for (uint64_t k = 0; k < n; k++) packed[k / 8] |= (uint8_t) (x[k] << (k % 8));
+        Iface::generateCOT(CHEETAH_PARTY, nullptr, packed.data(), c.data(), (unsigned) n, ip, port + CHEETAH_PORT_OFFSET,
+                           CHEETAH_THREADS, CHEETAH_IO_OFFSET, width);
 #endif
-    std::vector<DATATYPE> r(gs.size() * K), b(gs.size()), out(gs.size() * K);
+        return c;
+    };
+    // d = lambda_b lambda_c = b_0 c_0 ^ b_1 c_1 ^ b_0 c_1 ^ c_0 b_1: P0 correlates (b_0, c_0), P1 chooses (c_1, b_1)
+    std::vector<uint8_t> x(2 * cnt);
+    for (uint64_t k = 0; k < cnt; k++)
+#if PARTY == 0
+        x[k] = lb[k], x[cnt + k] = lc[k];
+#else
+        x[k] = lc[k], x[cnt + k] = lb[k];
+#endif
+    const std::vector<UINT_TYPE> cross = cot(x, 1);
+    for (uint64_t k = 0; k < cnt; k++)
+        x[k] = lc[k], x[cnt + k] = (uint8_t) ((lb[k] & lc[k]) ^ (cross[k] & 1) ^ (cross[cnt + k] & 1));
+    const std::vector<UINT_TYPE> c = cot(x, K - 1);  // B2A of lambda_c and d
     for (uint64_t k = 0; k < gs.size(); k++)
     {
-        alignas(sizeof(DATATYPE)) UINT_TYPE lc[DATTYPE];
+        alignas(sizeof(DATATYPE)) UINT_TYPE vc[DATTYPE], vd[DATTYPE];
         for (int j = 0; j < DATTYPE; j++)
         {
-            const UINT_TYPE bit = g_te_lcb[gs[k] * DATTYPE + j];
-            lc[j] = bit - (UINT_TYPE) 2 * c[k * DATTYPE + j];  // u_0 + u_1 - 2 u_0 u_1, this party's part
+            const uint64_t v = k * DATTYPE + j;
+            vc[j] = (UINT_TYPE) x[v] - (UINT_TYPE) 2 * c[v];
+            vd[j] = (UINT_TYPE) x[cnt + v] - (UINT_TYPE) 2 * c[cnt + v];
         }
-        orthogonalize_arithmetic(lc, &r[k * K]);
-        std::copy_n(&r[k * K], K, &g_te_lc[gs[k] * K]);
-        b[k] = g_ts1_mux_b[gs[k]];
+        orthogonalize_arithmetic(vc, &g_te_lc[gs[k] * K]);
+        orthogonalize_arithmetic(vd, &g_te_mux_c[gs[k] * K]);
     }
-    generateMultiplexerDummyTriples(r.data(), b.data(), out.data(), BITLENGTH, gs.size() * DATTYPE, ip, port, BITLENGTH);
-    for (uint64_t k = 0; k < gs.size(); k++) std::copy_n(&out[k * K], K, &g_te_mux_c[gs[k] * K]);
 }
 #endif
 

@@ -140,9 +140,11 @@ struct FullyConnectedParameter
      (RCA_MSB == 1 || PPA_MSB == 1 || PPA4_MSB == 1))
 // BITLENGTH 32: the prefix adders (PPA, PPA4) under the A2B bake take narrow adders too (narrow32/): their
 // identity-substituted cut goes wrong with the bake's [c] (docs/BITLENGTH64.md), the narrow adders are correct by
-// construction (A2bits PPA4: the AB four-way circuit with the public m as a share of mask 0, as at 64 bits)
+// construction. So does the a-known RCA (A2bits), whose generated circuits fold the a-known LSB carry into the next
+// carry's dot group: one round per ReLU fewer than the identity-substituted full-width circuit
 #define CUT_FRAC_NARROW32 \
-    (CUT_NARROW_32 == 1 && BITLENGTH == 32 && (PPA_MSB == 1 || PPA4_MSB == 1) && A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && \
+    (CUT_NARROW_32 == 1 && BITLENGTH == 32 && (PPA_MSB == 1 || PPA4_MSB == 1 || (RCA_MSB == 1 && A_KNOWN_TO_EVALUATORS_OPT == 1)) && \
+     A2B_ONLINE_OPT == 1 && A2B_CONV_BAKE == 1 && \
      REDUCED_BITLENGTH_m == 0 && REDUCED_BITLENGTH_k == BITLENGTH && CUT_FRAC_NARROW32_HAVE(FRACTIONAL))
 #define CUT_FRAC_NARROW (CUT_FRAC_ELIGIBLE && (BITLENGTH == 64 || CUT_FRAC_NARROW32))
 // TE1 (Ts1Range::te): a narrow adder of BITLENGTH - FRACTIONAL bits for the DReLU of A = (m >> F) + (nu >> F), on the top
