@@ -3,9 +3,21 @@
 #include "share_conversion.hpp"
 /* static void trunc_exact_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len) */
 /*     template<int m, int k,typename Share, typename Datatype> */
+// 2PC (TE_FUSED_ACTIVE): TE0 / TE1 are fused into the ReLUs (RELU_range_in_place_ts1); a stand-alone exact truncation
+// would need messages of its own and the generic A2B / B2A, which ABY2 does not implement
+inline void te_standalone_abort()
+{
+    fprintf(stderr, "TRUNC_APPROACH %d (2PC): a truncation outside a ReLU (TE is fused into the ReLUs)\n", TRUNC_APPROACH);
+    std::abort();
+}
+
 template <typename Datatype, typename Share, typename dummy>
 void trunc_exact_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const int len, int fractional_bits = FRACTIONAL)
 {
+#if TE_FUSED_ACTIVE
+    (void) val, (void) len, (void) fractional_bits;
+    te_standalone_abort();
+#else
     using S = XOR_Share<Datatype, Share>;
     using A = Additive_Share<Datatype, Share>;
     const int bm = 0;
@@ -28,12 +40,18 @@ void trunc_exact_in_place(sint_t<Additive_Share<Datatype, Share>>* val, const in
         }
     }
     B2A_range<bm, bk, Datatype, Share>(y, val, len);
+#endif
 }
 
 template <typename Datatype, typename Share>
 void trunc_exact_in_place(Additive_Share<Datatype, Share>* val, const int len, int fractional_bits = FRACTIONAL)
 {
+#if TE_FUSED_ACTIVE
+    (void) val, (void) len, (void) fractional_bits;
+    te_standalone_abort();
+#else
     pack_additive_inplace<0, BITLENGTH>(val, len, fractional_bits, trunc_exact_in_place<Datatype, Share, void>);
+#endif
 }
 
 template <typename Datatype, typename Share, typename dummy>
@@ -41,6 +59,10 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val,
                               const int len,
                               int fractional_bits = FRACTIONAL)
 {
+#if TE_FUSED_ACTIVE
+    (void) val, (void) len, (void) fractional_bits;
+    te_standalone_abort();
+#else
     assert(fractional_bits == FRACTIONAL);
     using S = XOR_Share<Datatype, Share>;
     using A = Additive_Share<Datatype, Share>;
@@ -221,6 +243,7 @@ void trunc_exact_opt_in_place(sint_t<Additive_Share<Datatype, Share>>* val,
     delete[] x2t;
     delete[] b2c;
     delete[] c2A;
+#endif
 }
 
 template <typename Datatype, typename Share>
@@ -229,6 +252,10 @@ void trunc_exact_opt_in_place(Additive_Share<Datatype, Share>* val,
                               bool isPositive = false,
                               int fractional_bits = FRACTIONAL)
 {
+#if TE_FUSED_ACTIVE
+    (void) val, (void) len, (void) isPositive, (void) fractional_bits;
+    te_standalone_abort();
+#else
     using A = Additive_Share<Datatype, Share>;
 #if MSB0_OPT == 1  // if optimization is deactivaated, always add 2^l-1 to gurantee positive number
     if (!isPositive)
@@ -244,6 +271,7 @@ void trunc_exact_opt_in_place(Additive_Share<Datatype, Share>* val,
         for (int i = 0; i < len; i++)
             val[i] = val[i] - A((UINT_TYPE(1) << (BITLENGTH - fractional_bits -
                                                   1)));  // substract 2^l-1 to reverse previous addition ..
+#endif
 }
 
 /* template<typename Datatype, typename Share, typename dummy> */

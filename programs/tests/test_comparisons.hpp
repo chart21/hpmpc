@@ -265,7 +265,12 @@ bool test_RELU_random()
             const int e = 63 - __builtin_clzll(uint64_t(v < 0 ? -int64_t(v) : int64_t(v)) | 1);
             total[e]++;
             if (o[k] != expect)
+            {
                 errors[e]++, bad++;
+                if (std::getenv("RELU_DUMP") && bad <= 40)
+                    print_online("RELU_RANDOM wrong: v " + std::to_string((long long) v) + " got " +
+                                 std::to_string((long long) INT_TYPE(o[k])) + " lane " + std::to_string(i % BITLENGTH));
+            }
         }
     }
     for (int e = 0; e < BITLENGTH - 1; e++)
@@ -346,7 +351,10 @@ bool test_RELU_delayed(const std::string& name, int denom, int exps, bool delay 
             err_sum += dr, err_n++;
             const int e = 63 - __builtin_clzll(uint64_t(v < 0 ? -int64_t(v) : int64_t(v)) | 1);
             total[e]++;
-            const bool ok = (TS1_LOW_CARRY == 1 && TS1_FUSED_ACTIVE && denom == 1) ? (d == 0 || d == 1) : (dr > -2 && dr < 2);
+            // TE (TRUNC_APPROACH 2 / 3) without a pooling: exact
+            const bool ok = (TE_FUSED_ACTIVE && denom == 1 && delay) ? d == 0
+                            : (TS1_LOW_CARRY == 1 && TS1_FUSED_ACTIVE && denom == 1) ? (d == 0 || d == 1)
+                                                                                    : (dr > -2 && dr < 2);
             // never negative (except DReLU of z without TS1_LOW_CARRY: y may be -1 there), off by less than 2 LSB
             constexpr bool nonneg = TS1_CUT_ACTIVE || TS1_LOW_CARRY == 1 || A2B_DCUT_ACTIVE || A2B_DCUT_SHARE_ACTIVE;
             if ((nonneg && INT_TYPE(o[k]) < 0) || (v <= 0 && (dr <= -2 || dr >= 2)))
@@ -377,7 +385,13 @@ bool test_RELU_delayed(const std::string& name, int denom, int exps, bool delay 
 template <typename Share>
 bool test_RELU_ts1()
 {
-    return test_RELU_delayed<Share>("RELU_TS1", 1, TS1_CUT_ACTIVE ? 30 : 31);
+#if TE_FUSED_ACTIVE
+    // TE0: every value (|v| < 2^(l-1)); TE1 with the cut: 1-bit slack
+    return test_RELU_delayed<Share>(TRUNC_APPROACH == 2 ? "RELU_TE0" : "RELU_TE1", 1,
+                                    TRUNC_APPROACH == 3 && TS1_CUT_ACTIVE ? BITLENGTH - 2 : BITLENGTH - 1);
+#else
+    return test_RELU_delayed<Share>("RELU_TS1", 1, TS1_CUT_ACTIVE ? BITLENGTH - 2 : BITLENGTH - 1);
+#endif
 }
 
 // TRUNC_APPROACH 1 with FUSE_RELU_AVG: a pooling (1/9) folded into TS1, on a delayed and on a truncated input
@@ -820,7 +834,7 @@ bool test_comparisons(DATATYPE* res)
 
 #if TEST_RELU_TS1 == 1 && TS1_FUSED_ACTIVE
     test_function(num_tests, num_passed, "RELU_TS1", test_RELU_ts1<Share>);
-#if TRUNC_APPROACH == 1 && FUSE_RELU_AVG == 1 && TS1_CUT_ACTIVE
+#if (TRUNC_APPROACH == 1 || TE_FUSED_ACTIVE) && FUSE_RELU_AVG == 1 && TS1_CUT_ACTIVE
     test_function(num_tests, num_passed, "RELU_TS1_AVG9", test_RELU_ts1_avg<Share>);
 #endif
 #endif

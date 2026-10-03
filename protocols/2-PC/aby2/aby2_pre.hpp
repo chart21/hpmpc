@@ -997,12 +997,24 @@ class ABY2_PRE_Share
     // choice bits are recorded here. ts1: the compact index of x[0].
     void prepare_opt_bit_injection_ts1(ABY2_PRE_Share x[], ABY2_PRE_Share out[], uint64_t ts1, const Datatype* M_in, const Datatype* sk, int lift_tp,
                                        Datatype trunc_factor,
-                                       int fractional_bits)
+                                       int fractional_bits, const ABY2_PRE_Share* te_c = nullptr)
     {
         (void) M_in, (void) sk, (void) lift_tp, (void) trunc_factor, (void) fractional_bits;
         for (int i = 0; i < BITLENGTH; i++)
             x[i].l = g_ts1_la[ts1 + i];
         g_ts1_mux_b[ts1 / BITLENGTH] = multiplexer_bool();
+#if TE_FUSED_ACTIVE
+        if (te_c)  // TE: this party's share bits of the low carries' masks, per value (te_generate_products)
+        {
+            alignas(sizeof(Datatype)) UINT_TYPE t2[DATTYPE];
+            Datatype lc[BITLENGTH]{0};
+            lc[BITLENGTH - 1] = te_c->l;
+            unorthogonalize_boolean(lc, t2);
+            for (int j = 0; j < DATTYPE; j++) g_te_lcb[(ts1 / BITLENGTH) * DATTYPE + j] = (uint8_t) (t2[j] & 1);
+        }
+#else
+        (void) te_c;
+#endif
         prepare_opt_bit_injection(x, out);
     }
 #endif

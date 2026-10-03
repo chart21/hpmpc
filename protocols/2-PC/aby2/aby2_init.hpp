@@ -656,10 +656,11 @@ class ABY2_init
     #endif
     {
 #if A2B_ONLINE_OPT == 1
-        for (int i = m; i < k; i++)
-        {
-            num_boolean_addition_triples++;
-        }
+        if (!g_a2b_no_count)  // the TE low adders' inputs: slots of a conversion counted already
+            for (int i = m; i < k; i++)
+            {
+                num_boolean_addition_triples++;
+            }
         if (!cut_frac_prep_vacant(m, k, m))
             g_a2b_full_width = true;  // a conversion without the cut reads every [c] slice
 #endif
@@ -744,9 +745,9 @@ class ABY2_init
 #if TS1_FUSED_ACTIVE
     void prepare_opt_bit_injection_ts1(ABY2_init x[], ABY2_init out[], uint64_t ts1, const Datatype* M_in, const Datatype* sk, int lift_tp,
                                        Datatype trunc_factor,
-                                       int fractional_bits)
+                                       int fractional_bits, const ABY2_init* te_c = nullptr)
     {
-        (void) ts1, (void) M_in, (void) sk, (void) lift_tp, (void) trunc_factor, (void) fractional_bits;
+        (void) ts1, (void) M_in, (void) sk, (void) lift_tp, (void) trunc_factor, (void) fractional_bits, (void) te_c;
         prepare_opt_bit_injection(x, out);
     }
 #endif

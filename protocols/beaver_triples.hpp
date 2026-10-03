@@ -153,7 +153,7 @@ inline bool reshare_sim_on()
 // injection, from a public function of its masked value and preprocessed functions of its mask, which the A2B bake's
 // Boolean addition provides (see g_ts1_la). No online message of its own.
 #ifndef TS1_FOLD_POOL
-#define TS1_FOLD_POOL (TRUNC_APPROACH == 1)  // a pooling fused into a TS1 ReLU divides in the TS1 lift (else TS{L})
+#define TS1_FOLD_POOL (TRUNC_APPROACH == 1 || TE_FUSED_ACTIVE)  // a pooling fused into a TS1 ReLU divides in the TS1 lift (else TS{L})
 #endif
 #if TS1_FUSED_ACTIVE  // (TS1_FUSED_ACTIVE: generate_beaver_tiples.hpp)
 #if TRUNC_DELAYED == 0
@@ -1137,7 +1137,8 @@ enum class A2bXform
     None,
     Ts1Full,   // TS1, full design with the cut: m := M (offset 2^(l-2)) - kTs1A2bLow, [c] shifted (g_a2b_c_shift)
     Ts1Shift,  // TS1, shifted design: m := the shifted value's public part M0 (ts1_shift_m0)
-    DCut       // A2B_DCUT_ACTIVE: m := m >> F, restored after the A2B
+    DCut,      // A2B_DCUT_ACTIVE: m := m >> F, restored after the A2B
+    TeCut      // TE1: m := m >> F with [c] shifted by F slices (A = (m >> F) + (nu >> F)), restored after the A2B
 };
 inline A2bXform g_a2b_xform = A2bXform::None;
 inline DATATYPE* g_a2b_xform_m = nullptr;   // by value: Ts1Full the truncated value's public part M, DCut the saved m
@@ -1181,6 +1182,7 @@ struct Ts1Range
     bool shift;        // the shifted design
     UINT_TYPE factor;  // shifted design: the public factor (1: none)
     int tp;            // shifted design: the lift's truncation t'
+    bool te;           // TE0 / TE1 (full design, exact): see below
 };
 inline std::vector<Ts1Range> g_ts1_ranges;  // recorded by the INIT pass
 inline uint64_t g_ts1_slots = 0;
@@ -1225,11 +1227,25 @@ inline void ts1_lift_shift(DATATYPE M0, int tp, DATATYPE& M, DATATYPE& sk)
     M = OP_SUB(OP_SUB(PROMOTE(off >> tp), cp), OP_MULT(cm, PROMOTE(K)));
 }
 
-inline void ts1_record_range(uint64_t slot_base, uint64_t slots, bool shift, UINT_TYPE factor, int tp)
+inline void ts1_record_range(uint64_t slot_base, uint64_t slots, bool shift, UINT_TYPE factor, int tp, bool te = false)
 {
-    g_ts1_ranges.push_back({slot_base, slots, g_ts1_slots, shift, factor, tp});
+    g_ts1_ranges.push_back({slot_base, slots, g_ts1_slots, shift, factor, tp, te});
     g_ts1_slots += slots;
 }
+
+// TE0 / TE1 (TRUNC_APPROACH 2 / 3, TE_FUSED_ACTIVE): exact truncation fused into the ReLU. With z = m + nu (as above)
+// and a = m mod 2^F, the full design's y (offset 2^(l-1), with w_t) is floor(z / 2^F) + [a != 0] - c_t for z >= 0,
+// c_t = [a + (nu mod 2^F) >= 2^F] the carry into bit F of m + nu. Only z >= 0 matters (DReLU(z) = 0 otherwise), so the
+// wrap of m + nu is linear there and no slack is needed. The bit injection takes y - [a != 0] + c_t: [a != 0] is
+// public, c_t comes from an (F + 1)-bit MSB adder of (0, a) and (0, nu mod 2^F) (Bool(m) and the bake's [c], low
+// slices) that runs next to the ReLU's adder (get_msb_range, g_te_low_out): with c_t = m_c ^ lambda_c the bit
+// injection's extra terms are linear in [lambda_c] and [lambda_b lambda_c] (te_generate_products). DReLU: TE1 of
+// A = (m >> F) + (nu >> F) = trunc(z) - c_t with the cut (TeCut; A and trunc(z) differ only where the output is 0 either
+// way), TE0 of z at full width (exact for every z).
+inline void* g_te_low_out = nullptr;     // get_msb_range: the low adders' outputs (S*), null: none
+inline std::vector<uint8_t> g_te_lcb;    // this party's share bit of lambda_c, per value (preprocessing pass)
+inline std::vector<DATATYPE> g_te_lc;    // ... [lambda_c] (arithmetic), per compact slot
+inline std::vector<DATATYPE> g_te_mux_c; // ... [lambda_b lambda_c], per compact slot
 
 // The TS1 ReLU whose A2B slots start at slot_base (PRE and LIVE pass)
 inline const Ts1Range& ts1_range(uint64_t slot_base, uint64_t slots)
@@ -1248,7 +1264,7 @@ inline const Ts1Range& ts1_range(uint64_t slot_base, uint64_t slots)
 // The OTs ts1_generate_tuples and ts1_generate_products take (Iface::ot_demand_hint)
 inline uint64_t ts1_ot_demand()
 {
-    return g_ts1_slots * DATTYPE / BITLENGTH * (2 + TS1_LOW_CARRY + 2);
+    return g_ts1_slots * DATTYPE / BITLENGTH * (2 + TS1_LOW_CARRY + 2 + (TE_FUSED_ACTIVE ? 1 + 3 : 0));
 }
 
 // The TS1 groups (BITLENGTH compact slots each) by width base + t' (t' = 0 for the full design), ascending
@@ -1284,6 +1300,11 @@ inline void ts1_generate_tuples(const std::string& ip, int port)
     g_ts1_r.assign(g_ts1_slots, SET_ALL_ZERO());
     g_ts1_mux_b.assign(groups, SET_ALL_ZERO());
     g_ts1_mux_c.assign(g_ts1_slots, SET_ALL_ZERO());
+#if TE_FUSED_ACTIVE
+    g_te_lcb.assign(n, 0);
+    g_te_lc.assign(g_ts1_slots, SET_ALL_ZERO());
+    g_te_mux_c.assign(g_ts1_slots, SET_ALL_ZERO());
+#endif
     if (n == 0)
         return;
     std::vector<const Ts1Range*> grp_range(groups);
@@ -1367,7 +1388,7 @@ inline void ts1_generate_tuples(const std::string& ip, int port)
     }
     std::vector<uint64_t> low;  // the values that take w_t: full design with TS1_LOW_CARRY, shifted design with t' > 0
     for (uint64_t g = 0; g < groups; g++)
-        if ((grp_range[g]->shift && grp_range[g]->tp > 0) || (!grp_range[g]->shift && TS1_LOW_CARRY == 1))
+        if ((grp_range[g]->shift && grp_range[g]->tp > 0) || (!grp_range[g]->shift && (TS1_LOW_CARRY == 1 || grp_range[g]->te)))
             for (int j = 0; j < DATTYPE; j++) low.push_back(g * DATTYPE + j);
     if (!low.empty())
         b2a(u[2], K - 1, at, low);
@@ -1386,6 +1407,51 @@ inline void ts1_generate_tuples(const std::string& ip, int port)
         orthogonalize_arithmetic(rr, &g_ts1_r[g * K]);
     }
 }
+
+#if TE_FUSED_ACTIVE
+// After the preprocessing pass recorded lambda_c (g_te_lcb, the low adders' output masks) and lambda_b: [lambda_c] by a
+// COT of l - 1 bits (correct mod 2^l: it enters the value with the factor 1 - 2 m_c) and [lambda_b lambda_c] by a
+// full-width multiplexer, for the TE groups
+inline void te_generate_products(const std::string& ip, int port)
+{
+    constexpr int K = BITLENGTH;
+    std::vector<uint64_t> gs;  // the TE groups
+    for (const Ts1Range& r : g_ts1_ranges)
+        if (r.te)
+            for (uint64_t j = 0; j < r.slots / K; j++) gs.push_back(r.compact_base / K + j);
+    if (gs.empty())
+        return;
+    const uint64_t cnt = gs.size() * DATTYPE;
+    std::vector<UINT_TYPE> c(cnt);
+#if PARTY == 0
+    std::vector<UINT_TYPE> corr(cnt);
+    for (uint64_t k = 0; k < cnt; k++) corr[k] = g_te_lcb[gs[k / DATTYPE] * DATTYPE + k % DATTYPE];
+    Iface::generateCOT(CHEETAH_PARTY, corr.data(), nullptr, c.data(), (unsigned) cnt, ip, port + CHEETAH_PORT_OFFSET,
+                       CHEETAH_THREADS, CHEETAH_IO_OFFSET, K - 1);
+#else
+    std::vector<uint8_t> packed((cnt + 7) / 8, 0);
+    for (uint64_t k = 0; k < cnt; k++)
+        packed[k / 8] |= (uint8_t) (g_te_lcb[gs[k / DATTYPE] * DATTYPE + k % DATTYPE] << (k % 8));
+    Iface::generateCOT(CHEETAH_PARTY, nullptr, packed.data(), c.data(), (unsigned) cnt, ip, port + CHEETAH_PORT_OFFSET,
+                       CHEETAH_THREADS, CHEETAH_IO_OFFSET, K - 1);
+#endif
+    std::vector<DATATYPE> r(gs.size() * K), b(gs.size()), out(gs.size() * K);
+    for (uint64_t k = 0; k < gs.size(); k++)
+    {
+        alignas(sizeof(DATATYPE)) UINT_TYPE lc[DATTYPE];
+        for (int j = 0; j < DATTYPE; j++)
+        {
+            const UINT_TYPE bit = g_te_lcb[gs[k] * DATTYPE + j];
+            lc[j] = bit - (UINT_TYPE) 2 * c[k * DATTYPE + j];  // u_0 + u_1 - 2 u_0 u_1, this party's part
+        }
+        orthogonalize_arithmetic(lc, &r[k * K]);
+        std::copy_n(&r[k * K], K, &g_te_lc[gs[k] * K]);
+        b[k] = g_ts1_mux_b[gs[k]];
+    }
+    generateMultiplexerDummyTriples(r.data(), b.data(), out.data(), BITLENGTH, gs.size() * DATTYPE, ip, port, BITLENGTH);
+    for (uint64_t k = 0; k < gs.size(); k++) std::copy_n(&out[k * K], K, &g_te_mux_c[gs[k] * K]);
+}
+#endif
 
 // After the preprocessing pass recorded the bit injections' Boolean masks: [lambda_b r_msb] by a narrow multiplexer
 // (mod 2^(F+1+t'), one call per t')
@@ -1413,6 +1479,9 @@ inline void ts1_generate_products(const std::string& ip, int port)
         generateMultiplexerDummyTriples(r.data(), b.data(), c.data(), BITLENGTH, gs.size() * DATTYPE, ip, port, width);
         for (uint64_t k = 0; k < gs.size(); k++) std::copy_n(&c[k * K], K, &g_ts1_mux_c[gs[k] * K]);
     }
+#if TE_FUSED_ACTIVE
+    te_generate_products(ip, port);
+#endif
 }
 #endif
 

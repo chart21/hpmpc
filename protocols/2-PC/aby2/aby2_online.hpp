@@ -334,7 +334,7 @@ class ABY2_ONLINE_Share
     // by fractional_bits as in prepare_opt_bit_injection_with_trunc.
     void prepare_opt_bit_injection_ts1(ABY2_ONLINE_Share x[], ABY2_ONLINE_Share out[], uint64_t ts1, const Datatype* M_in, const Datatype* sk_in,
                                        int lift_tp, Datatype trunc_factor,
-                                       int fractional_bits)
+                                       int fractional_bits, const ABY2_ONLINE_Share* te_c = nullptr)
     {
         Datatype b0[BITLENGTH]{0};
         b0[BITLENGTH - 1] = m;  // convert b0 to an arithemtic value
@@ -343,6 +343,17 @@ class ABY2_ONLINE_Share
         Datatype lbi[BITLENGTH]{0};
         lbi[BITLENGTH - 1] = l;
         single_row_ortho(lbi, temp2);
+#if TE_FUSED_ACTIVE
+        // TE (see Ts1Range::te): the low carries' public parts m_c per value
+        Datatype mc[BITLENGTH]{0};
+        if (te_c)
+        {
+            mc[BITLENGTH - 1] = te_c->m;
+            single_row_ortho(mc, temp2);
+        }
+#else
+        (void) te_c;
+#endif
         for (int i = 0; i < BITLENGTH; i++)
         {
             Datatype lalb = retrieve_output_share_arithmetic();
@@ -358,8 +369,22 @@ class ABY2_ONLINE_Share
                 xim = M_in[i], sk = sk_in[i];
             else
                 ts1_public(x[i].m, (UINT_TYPE) 1 << (BITLENGTH - 1), xim, sk);
-            const Datatype xil = OP_ADD(g_ts1_la[ts1 + i], OP_MULT(sk, g_ts1_r[ts1 + i]));
+            Datatype xil = OP_ADD(g_ts1_la[ts1 + i], OP_MULT(sk, g_ts1_r[ts1 + i]));
             lalb = OP_ADD(lalb, OP_MULT(sk, g_ts1_mux_c[ts1 + i]));
+#if TE_FUSED_ACTIVE
+            if (te_c)
+            {
+                // trunc(z) = y - [a != 0] + c_t, a = m mod 2^F ([a != 0] = (a + 2^F - 1) >> F), c_t = m_c + (1 - 2 m_c)
+                // [lambda_c]: public part + m_c - [a != 0], mask part - (1 - 2 m_c) [lambda_c], its product with lambda_b
+                // - (1 - 2 m_c) [lambda_b lambda_c]
+                const Datatype a = FUNC_AND(x[i].m, PROMOTE((((UINT_TYPE) 1) << FRACTIONAL) - 1));
+                const Datatype nz = OP_SHIFT_LOG_RIGHT<FRACTIONAL>(OP_ADD(a, PROMOTE((((UINT_TYPE) 1) << FRACTIONAL) - 1)));
+                const Datatype s_c = OP_SUB(PROMOTE(1), OP_ADD(mc[i], mc[i]));
+                xim = OP_ADD(OP_SUB(xim, nz), mc[i]);
+                xil = OP_SUB(xil, OP_MULT(s_c, g_te_lc[ts1 + i]));
+                lalb = OP_SUB(lalb, OP_MULT(s_c, g_te_mux_c[ts1 + i]));
+            }
+#endif
 #if PARTY == 0
             out[i].m = OP_MULT(b0[i], xim);
 #else

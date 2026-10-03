@@ -106,6 +106,23 @@
 #include "adders/ppa_msb_unsafe.hpp"
 #endif
 #endif
+#if TE_FUSED_ACTIVE
+// TE's low adders (Ts1Range::te): the carry into bit FRACTIONAL, the MSB of an (F + 1)-bit a-known adder (RCA for RCA
+// builds, else the prefix adder: no more rounds than the ReLU's); widths 8 and 16 are in the families' files, the
+// others in low/ (scripts/circuits/gen_64bit_adders.py)
+#if A_KNOWN_TO_EVALUATORS_OPT == 0 || ADDITIONAL_PPA_THREADS > 0
+#error "TRUNC_APPROACH 2 / 3 with PROTOCOL 4: TE takes the a-known adders (A2bits: A_KNOWN_TO_EVALUATORS_OPT=1), not the split four-way ones"
+#endif
+#if RCA_MSB == 1
+#include "adders/zero_add_adders/rca_msb_and_a_ab.hpp"
+#include "adders/zero_add_adders/low/rca_msb_and_a_ab.hpp"
+#define TE_LOW_ADDER_TYPE RCA_MSB_A_AB
+#else
+#include "adders/zero_add_adders/ppa_msb_unsafe_and_a_ab.hpp"
+#include "adders/zero_add_adders/low/ppa_msb_unsafe_and_a_ab.hpp"
+#define TE_LOW_ADDER_TYPE PPA_MSB_Unsafe_A_AB
+#endif
+#endif
 // compute msbs of a range of arithemtic shares
 template <typename D>
 inline bool equal_word(const D& a, const D& b)
@@ -139,6 +156,7 @@ void a2b_xform_input(sint_t<Additive_Share<Datatype, Share>>* val, int len)
                         break;
 #endif
                     case A2bXform::DCut:
+                    case A2bXform::TeCut:
                         g_a2b_xform_m[v] = m;
                         m = OP_SHIFT_LOG_RIGHT<FRACTIONAL>(m);
                         break;
@@ -154,7 +172,7 @@ template <typename Datatype, typename Share>
 void a2b_xform_restore(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 {
     if constexpr (requires(Share& s) { s.raw_m(); })
-        if (g_a2b_xform == A2bXform::DCut)
+        if (g_a2b_xform == A2bXform::DCut || g_a2b_xform == A2bXform::TeCut)
             for (int i = 0; i < len; i++)
             {
                 auto* sh = val[i].get_share_pointer();
@@ -164,8 +182,9 @@ void a2b_xform_restore(sint_t<Additive_Share<Datatype, Share>>* val, int len)
 #endif
 
 // The MSB adders of a converted range: constructed (each retrieves its triples), then run level by level
-template <typename Adder, typename Share, typename Bitset, typename S>
-void run_msb_adders(Bitset* s1, Bitset* s2, S* msb, int len)
+template <typename Adder, typename Share, typename Bitset, typename S, typename LowAdder = void, typename LowBitset = Bitset>
+void run_msb_adders(Bitset* s1, Bitset* s2, S* msb, int len, LowBitset* l1 = nullptr, LowBitset* l2 = nullptr,
+                    S* lout = nullptr)
 {
 #if ADDITIONAL_RELU_THREADS > 0 && !(PPA4_MSB == 1 && ADDITIONAL_PPA_THREADS > 0)
     // constructed in parallel: each adder retrieves its triples and one random mask (stream cursors)
@@ -197,6 +216,21 @@ std::vector<Adder> adders;
     }
 #endif
    
+    // TE's low adders (see Ts1Range::te), constructed after the ReLU's and run in the same rounds
+    struct NoLow
+    {
+        bool is_done() const { return true; }
+        void step() {}
+    };
+    using Low = std::conditional_t<std::is_void_v<LowAdder>, NoLow, LowAdder>;
+    std::vector<Low> low;
+    if constexpr (!std::is_void_v<LowAdder>)
+        if (l1)
+        {
+            low.reserve(len);
+            for (int i = 0; i < len; i++) low.emplace_back(l1[i], l2[i], lout[i]);
+        }
+    auto low_done = [&]() { return low.empty() || low[0].is_done(); };
 #if RESHARE_OPT == 1
 Share::communicate(); // For resharings
 #endif 
@@ -242,9 +276,12 @@ Share::communicate(); // For resharings
         }
     }
 #else
-    while (!adders[0].is_done())
+    while (!adders[0].is_done() || !low_done())
     {
-        stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { adders[i].step(); });
+        if (!adders[0].is_done())
+            stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { adders[i].step(); });
+        if (!low_done())
+            stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { low[i].step(); });
         Share::communicate();
     }
 #endif
@@ -348,6 +385,39 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
         }
 #endif
 #endif
+#if TE_FUSED_ACTIVE
+    // TE's low adders' inputs (see Ts1Range::te): (0, m mod 2^F) and (0, nu mod 2^F), slices l - F - 1 .. l - 1 of the
+    // untransformed m and of the unshifted [c] (the slots the A2B below reads; not counted again in INIT), the top slice
+    // replaced by a public 0
+    constexpr int te_w = FRACTIONAL + 1, te_lo = BITLENGTH - FRACTIONAL - 1;
+    using TeBitset = sbitset_t<te_w, S>;
+    TeBitset* te1 = nullptr;
+    TeBitset* te2 = nullptr;
+    S* te_out = static_cast<S*>(g_te_low_out);
+    if constexpr (bm == 0 && bk == BITLENGTH)
+        if (te_out)
+        {
+            te1 = new TeBitset[len];
+            te2 = new TeBitset[len];
+            const uint64_t c_base = g_a2b_c_cursor;
+            const int c_shift = g_a2b_c_shift;
+            g_a2b_c_shift = 0;
+            g_a2b_no_count = true;
+            for (int i = 0; i < len; i++)
+            {
+                te1[i] = TeBitset::prepare_A2B_S1(te_lo, (S*) val[i].get_share_pointer());
+                tl_a2b_c = (int64_t) (c_base + (uint64_t) i * BITLENGTH + te_lo);
+                te2[i] = TeBitset::prepare_A2B_S2(te_lo, (S*) val[i].get_share_pointer());
+                tl_a2b_c = -1;
+                te1[i].complete_A2B_S1();
+                te2[i].complete_A2B_S2();
+                te1[i][0] = S(SET_ALL_ZERO());
+                te2[i][0] = S(SET_ALL_ZERO());
+            }
+            g_a2b_no_count = false;
+            g_a2b_c_shift = c_shift;
+        }
+#endif
 #if TS1_FUSED_ACTIVE || A2B_DCUT_ACTIVE
     if (g_a2b_xform != A2bXform::None)
         a2b_xform_input(val, len);  // after the rebase: the masks are the committed ones the tuples were made for
@@ -407,16 +477,30 @@ void get_msb_range(sint_t<Additive_Share<Datatype, Share>>* val, XOR_Share<Datat
                 }
             delete[] s1;
             delete[] s2;
+#if TE_FUSED_ACTIVE
+            run_msb_adders<ADDER_TYPE<w, S>, Share, NB, S, TE_LOW_ADDER_TYPE<te_w, S>, TeBitset>(n1, n2, msb, len, te1, te2,
+                                                                                               te_out);
+#else
             run_msb_adders<ADDER_TYPE<w, S>, Share>(n1, n2, msb, len);
+#endif
             delete[] n1;
             delete[] n2;
             s1 = s2 = nullptr;
         }
     if (s1)
 #endif
+#if TE_FUSED_ACTIVE
+    run_msb_adders<ADDER_TYPE<bk - bm, S>, Share, Bitset, S, TE_LOW_ADDER_TYPE<te_w, S>, TeBitset>(s1, s2, msb, len, te1, te2,
+                                                                                                  te_out);
+#else
     run_msb_adders<ADDER_TYPE<bk - bm, S>, Share>(s1, s2, msb, len);
+#endif
     delete[] s1;
     delete[] s2;
+#if TE_FUSED_ACTIVE
+    delete[] te1;
+    delete[] te2;
+#endif
 #if TS1_FUSED_ACTIVE || A2B_DCUT_ACTIVE
     a2b_xform_restore(val, len);
 #endif
@@ -631,13 +715,15 @@ void bit_injection_ts1_range(XOR_Share<Datatype, Share>* y,
                              const Datatype* sk,
                              int lift_tp,
                              Datatype trunc_factor,
-                             int fb)
+                             int fb,
+                             const XOR_Share<Datatype, Share>* te_c = nullptr)
 {
     stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) {
         BiSlotScope bi(i);
         const uint64_t o = (uint64_t) i * BITLENGTH;
         y[i].prepare_opt_bit_injection_ts1(val[i].get_share_pointer(), val[i].get_share_pointer(), ts1 + o,
-                                           M ? M + o : nullptr, sk ? sk + o : nullptr, lift_tp, trunc_factor, fb);
+                                           M ? M + o : nullptr, sk ? sk + o : nullptr, lift_tp, trunc_factor, fb,
+                                           te_c ? static_cast<const Share*>(&te_c[i]) : nullptr);
     });
     Share::communicate();
     stream_parallel_for<STREAM_PARALLEL_RELU, true>(len, [&](int i) { val[i].complete_opt_bit_injection(); });

@@ -116,7 +116,10 @@ struct FullyConnectedParameter
 };
 
 // TS1 (reduced-slack truncation, TRUNC_APPROACH 1 / 4) in 2PC, fused into the ReLUs (see g_ts1_la in beaver_triples.hpp)
-#define TS1_FUSED_ACTIVE (PROTOCOL == 4 && (TRUNC_APPROACH == 1 || TRUNC_APPROACH == 4))
+// TE0 / TE1 (exact truncation, TRUNC_APPROACH 2 / 3) in 2PC: fused into the ReLUs with TS1's machinery, exact (see
+// Ts1Range::te): TS1's full design plus the online low carry of an (F + 1)-bit adder next to the ReLU's
+#define TE_FUSED_ACTIVE (PROTOCOL == 4 && (TRUNC_APPROACH == 2 || TRUNC_APPROACH == 3))
+#define TS1_FUSED_ACTIVE (PROTOCOL == 4 && (TRUNC_APPROACH == 1 || TRUNC_APPROACH == 4 || TE_FUSED_ACTIVE))
 // CUT_FRACTIONAL_BITS_OPT eligibility of the 2PC ROT circuits (docs/CUT_FRACTIONAL_BITS_OPT.md; see beaver_triples.hpp).
 // With TS1 (TS1_CUT_ACTIVE) or A2B_DELAYED_CUT a delayed ReLU converts the (locally) truncated value, whose top
 // FRACTIONAL bits are sign extension too. A2B_DELAYED_CUT needs either the A2B bake (A2B_CONV_BAKE_ACTIVE in
@@ -140,6 +143,8 @@ struct FullyConnectedParameter
 #define TS1_CUT_ACTIVE (TS1_FUSED_ACTIVE && CUT_FRAC_ELIGIBLE)
 // Some A2B conversion (INIT pass) runs without CUT_FRACTIONAL_BITS_OPT: the Boolean addition must produce all slices
 inline bool g_a2b_full_width = false;
+// INIT: an A2B prepare of slots counted already (TE's low adders' inputs, see Ts1Range::te)
+inline bool g_a2b_no_count = false;
 
 #if FAKE_TRIPLES == 0
 #define generateArithmeticTriples generateArithmeticDummyTriples

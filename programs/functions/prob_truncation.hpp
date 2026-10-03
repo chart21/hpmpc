@@ -10,9 +10,9 @@ static void trunc_2k_in_place(T* val, const int len, bool isPositive = false, in
     // 2PC: TS1 is fused into the ReLUs (RELU_range_in_place_ts1), a stand-alone TS1 would need a message of its own.
     // TS_Mix (TRUNC_APPROACH 4) truncates everything else probabilistically.
     (void) isPositive;
-#if TRUNC_APPROACH == 1
+#if TRUNC_APPROACH != 4
     (void) val, (void) len, (void) fractional_bits;
-    fprintf(stderr, "TRUNC_APPROACH 1 (2PC): a truncation outside a ReLU, use TRUNC_APPROACH 4\n");
+    fprintf(stderr, "TRUNC_APPROACH %d (2PC): a truncation outside a ReLU, use TRUNC_APPROACH 4\n", TRUNC_APPROACH);
     std::abort();
 #else
     if (fractional_bits != FRACTIONAL)

@@ -193,18 +193,24 @@ void RELU_range_in_place_ts1(sint_t<Additive_Share<Datatype, Share>>* val, const
 #endif
     }
 #endif
-#if TS1_CUT_ACTIVE
+#if TE_FUSED_ACTIVE
+    const bool te = factor == 1;  // TE0 / TE1 (Ts1Range::te); a ReLU with a pooling folded in keeps TS1's shifted design
+    const bool shift = !te;
+#elif TS1_CUT_ACTIVE
     const bool shift = TS1_LOW_CARRY == 0 || factor != 1;
 #else
     const bool shift = false;
 #endif
+#if !TE_FUSED_ACTIVE
+    constexpr bool te = false;
+#endif
     uint64_t ts1 = 0;
     if (current_phase == PHASE_INIT)
     {
-        ts1_record_range(num_boolean_addition_triples, slots, shift, factor, tp);
+        ts1_record_range(num_boolean_addition_triples, slots, shift, factor, tp, te);
         if (shift)
             a2b_record_shift(num_boolean_addition_triples, slots, factor);
-        else if (TS1_CUT_ACTIVE)
+        else if (TS1_CUT_ACTIVE || te)
             g_a2b_full_width = true;  // the full design reads the carries up to the top
     }
     else
@@ -218,6 +224,35 @@ void RELU_range_in_place_ts1(sint_t<Additive_Share<Datatype, Share>>* val, const
         ts1 = r.compact_base;
     }
     S* y = new S[len];
+#if TE_FUSED_ACTIVE
+    if (te)
+    {
+        // TE (see Ts1Range::te): DReLU by the ReLU's adder (TE1: of A = (m >> F) + (nu >> F) with the cut, TE0: of z at
+        // full width), c_t by the low adders next to it; the bit injection takes TS1's full-design value (from m, which
+        // the A2B restores) corrected by c_t
+        constexpr bool te_cut = TRUNC_APPROACH == 3 && TS1_CUT_ACTIVE;
+        S* c = new S[len];
+        std::vector<Datatype> m_saved(current_phase == PHASE_LIVE && te_cut ? slots : 0);
+        g_a2b_xform = current_phase == PHASE_LIVE && te_cut ? A2bXform::TeCut : A2bXform::None;
+        g_a2b_xform_m = m_saved.data();
+        g_a2b_c_shift = te_cut ? FRACTIONAL : 0;
+        g_cut_frac_active = te_cut;
+        g_te_low_out = c;
+        get_msb_range<m, k, Datatype, Share>(val, y, len);
+        g_te_low_out = nullptr;
+        g_cut_frac_active = false;
+        g_a2b_c_shift = 0;
+        g_a2b_xform = A2bXform::None;
+        g_a2b_xform_m = nullptr;
+        for (int i = 0; i < len; i++)
+            y[i] = ~y[i];
+        bit_injection_ts1_range<Datatype, Share>(y, val, len, ts1, nullptr, nullptr, -1, trunc_factor, fb, c);
+        delete[] c;
+        delete[] y;
+        Share::communicate();
+        return;
+    }
+#endif
 #if TS1_CUT_ACTIVE
     // DReLU of the truncated value, whose top FRACTIONAL bits are sign extension: the A2B takes its public part and
     // the bake's [c] (shifted design: of the shifted shares; full design: shifted by FRACTIONAL slices), with the cut
@@ -467,7 +502,7 @@ static void RELU(const Additive_Share<Datatype, Share>* begin,
 #if TRUNC_DELAYED == 1 && TRUNC_APPROACH > 0
     if (delayed)
     {
-#if TRUNC_APPROACH == 2
+#if TRUNC_APPROACH == 2 && !TS1_FUSED_ACTIVE
         pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_exact<rm, rk, Share, Datatype>);
 #elif TS1_FUSED_ACTIVE
         pack_additive_inplace<rm, rk>(begin, output, len, RELU_range_in_place_ts1<rm, rk, Share, Datatype>);
@@ -510,7 +545,7 @@ static void RELU(const sint_t<Additive_Share<Datatype, Share>>* begin,
 #if TRUNC_DELAYED == 1 && TRUNC_APPROACH > 0
     if (delayed)
     {
-#if TRUNC_APPROACH == 2
+#if TRUNC_APPROACH == 2 && !TS1_FUSED_ACTIVE
         RELU_range_in_place_exact<m, k, Share, Datatype>(output, len);
 #elif TS1_FUSED_ACTIVE
         RELU_range_in_place_ts1<m, k, Share, Datatype>(output, len);
