@@ -23,8 +23,8 @@ uint64_t total_recv_pre[num_players - 1] = {0};
 // truncation) when a delayed truncation is folded into the bit injection (BIT_INJECTION_TRUNC_SIM == 1).
 int curr_denom = 1;
 #endif
-#if FUSE_RELU_AVG == 1 && PROTOCOL == 4 && TRUNC_APPROACH == 1
-// TS1 (2PC): an average pooling before a ReLU on a delayed input only sums; its 1/denom goes into the ReLU's TS1
+#if FUSE_RELU_AVG == 1 && PROTOCOL == 4 && (TRUNC_APPROACH == 1 || TRUNC_APPROACH == 2 || TRUNC_APPROACH == 3)
+// TS1 / TE (2PC): an average pooling before a ReLU on a delayed input only sums; its 1/denom goes into the ReLU's TS1
 int g_pending_denom = 1;
 #endif
 
