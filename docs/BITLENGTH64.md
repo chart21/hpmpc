@@ -12,20 +12,41 @@ and SEAL's plaintext moduli have at most 60 bits: there were no 64-bit conv trip
 `PackedConv2D::setUpWide` (`nn/ConvTriple/src/core/conv_packed.cpp`, called by `Keys` when `BIT_LEN == 64`) gives the
 packed convolutions their own context and does t = 2^64 outside SEAL:
 
-* N = 8192, q = three 60-bit primes (180 bits; 128-bit security allows 218), own keys, public keys exchanged.
+* N = 8192, q = three 55-bit primes (165 bits; 128-bit security allows 218), own keys, public keys exchanged.
   SEAL's context gets a placeholder plaintext modulus.
 * Encoding round(q m / 2^64) exactly (`add_scaled`: q = D 2^64 + r, so round(q m / 2^64) = D m + round(r m / 2^64)),
   for the inputs, the evaluator's own share and the masks. Exact scaling removes BFV's (q mod t) K error term, so the
-  product's noise is (e + 1/2) |w|_1 <= 2^81 for 64-bit weight shares (centered lift, `Ntt::lift`).
-* The evaluator floods at the input level with up to 2^112 (31 bits above the products' noise; Cheetah's 32-bit
-  flooding has 16), switches to two primes (q' < 2^120), adds a public-key encryption of zero there, subtracts its
-  mask, composes the coefficients (CRT) and keeps their high bits: c0's used coefficients 68 bits, c1 83 bits. Noise
-  budget at q': flooding below 2^53 after the switch, the truncations of c0 and of c1 s below 2^52 each, Delta'/2 = 2^55.
+  product's noise is sum (e + rho) w over up to 2^19.4 weight terms per output coefficient (ResNet50's widest layers),
+  with centered 64-bit weight shares (`Ntt::lift`): below 2^78 except with probability 2^-40 (13 sigma), 2^86 worst case.
+* The evaluator floods at the input level with up to Delta / 16 = 2^96 (18-19 bits above the products' noise, as
+  Cheetah's 32-bit parameters: 2^64 against 2^45.4), switches to two primes (q' < 2^110), adds a public-key encryption
+  of zero there, subtracts its mask, composes the coefficients (CRT) and keeps their high bits (c0 truncated below
+  Delta' / 8; c1 so that c1's truncation times the ternary secret stays below Delta' / 8 at 14 sigma). Total noise under
+  5/16 Delta'.
 * The decryptor reassembles the residues, computes c0 + c1 s per prime, composes, and m = round(x 2^64 / q')
   (a long double estimate corrected with the exact remainder).
 * FC layers go through the same evaluator as 1x1 convolutions of 1x1 images. gemini's FC, conv and BN stay in SEAL's
-  plaintext space: with 64 bits they throw (BN: use `FUSE_CONV_BN=1`; convs: `CHEETAH_CONV_PACKED=1`). No repacking
-  (`CHEETAH_CONV_REPACK`), no GPU evaluator (N = 4096 only).
+  plaintext space: with 64 bits they throw (BN: use `FUSE_CONV_BN=1`; convs: `CHEETAH_CONV_PACKED=1`). No GPU
+  evaluator (N = 4096 only).
+* Repacking (`CHEETAH_CONV_REPACK=1`): the same data modulus plus a 53-bit special prime (218 bits, the limit), the
+  outputs packed densely with Galois automorphisms.
+
+### Traffic
+
+A product's query has 1.5x the bits per coefficient of the 32-bit one (165 against 109 bits), its response ~1.9x
+(two primes kept, 64-bit plaintext), and N = 8192 doubles the slots per ciphertext; with the sparse output layout the
+response cost per output element grows with sqrt(N) (32-bit triples at N = 8192: 1.31x the traffic of N = 4096, 629
+against 479 MiB on ImageNet, `CHEETAH_CONV_POLY_N=8192`). ImageNet conv triples (AB2, dummy weights, laptop, 8 threads):
+
+| | traffic | HE time |
+|---|---|---|
+| 32 bits, N = 4096 (default) | 479 MiB | 5.4 s |
+| 32 bits, N = 8192 | 629 MiB | 6.2 s |
+| 32 bits, repacking | 285 MiB | 18.0 s |
+| 64 bits, 180-bit q (first version) | 1073 MiB | |
+| 64 bits, 165-bit q | 1013 MiB | 10.2 s |
+| 64 bits, repacking | 464 MiB | 28.9 s |
+
 
 Build: `TRIPLE_BITLEN=64 ./build_cpu.sh` in nn/ConvTriple (build dir `build64`); hpmpc's Makefile and
 `scripts/variants/vb.sh` link `build64` for `BITLENGTH=64`, and config.h sets `TRIPLE_BITLEN` from `BITLENGTH` (the

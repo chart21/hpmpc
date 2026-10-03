@@ -163,6 +163,10 @@ inline bool g_a2b_full_width = false;
 // exchanges the Galois keys: both parties' for AB triples, A_KNOWN = 0)
 inline const bool g_conv_repack_set = (Iface::conv_repack() = true, Iface::conv_repack_ab() = (A_KNOWN == 0), true);
 #endif
+#if CHEETAH_CONV_POLY_N != 4096 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_TYPE == 0
+// the packed convs with 32-bit triples in an N = 8192 ring of their own (set up by the first Keys::instance)
+inline const bool g_conv_poly_n_set = (Iface::conv_poly_n() = CHEETAH_CONV_POLY_N, true);
+#endif
 #define CHEETAH_CONV_ASYNC_ACTIVE (CHEETAH_CONV_ASYNC == 1 && CHEETAH_WAN_OPT == 0 && PROTOCOL == 4 && DATTYPE == BITLENGTH && \
                                    CHEETAH_CONV_TYPE == 0 && CHEETAH_CONV_PACKED == 1 && CHEETAH_CONV_PIPELINE == 1)
 // CHEETAH_CONV_SIDE: the lanes' conv triples (one pipelined product, CHEETAH_CONV_LANES) on four channels of their own

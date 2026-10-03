@@ -494,6 +494,9 @@ inline int base_port = BASE_PORT;  // temporary solution
 #ifndef CHEETAH_CONV_REPACK
 #define CHEETAH_CONV_REPACK 0  // with CHEETAH_CONV_PACKED 1: communication-optimized conv triples (ConvTriple conv_repack): ring N = 8192 with a special prime, dense inputs, the evaluator packs the outputs with Galois automorphisms (Galois keys once); about half the conv-triple traffic, slower HE
 #endif
+#ifndef CHEETAH_CONV_POLY_N
+#define CHEETAH_CONV_POLY_N 4096  // with CHEETAH_CONV_PACKED 1, 32-bit triples, no CHEETAH_CONV_REPACK: ring dimension of the packed convs (ConvTriple conv_poly_n; CONV_POLY_N overrides). 8192 doubles the slots per ciphertext with the same 109-bit modulus: fewer, larger ciphertexts, but the sparse output layout costs about 1.3x the traffic (ImageNet LAN: 629 instead of 479 MiB, 6.2 instead of 5.4 s). 64-bit triples take 8192 anyway
+#endif
 #ifndef CHEETAH_CONV_EARLY
 #define CHEETAH_CONV_EARLY 1  // with CHEETAH_CONV_ASYNC and secret weights: a mask-only forward at the start of the preprocessing pass records every conv's triple inputs (ReLU outputs get committed masks), and the conv triples run on channels of their own alongside the OT phase, which moves into the pass
 #endif
