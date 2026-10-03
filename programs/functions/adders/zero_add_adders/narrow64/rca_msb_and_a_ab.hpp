@@ -21,11 +21,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 56)>::type>
     static constexpr int BeaverTripleCount = 54;
     triple<DATATYPE> triples[BeaverTripleCount];
 
-    DATATYPE r109;
-    DATATYPE r110;
     DATATYPE r111;
     DATATYPE r112;
-    DATATYPE r113;
 
     Share carry_10;
     Share carry_11;
@@ -313,11 +310,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 56)>::type>
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
-            r109 = getRandomVal(PSELF);
-            r110 = getRandomVal(PSELF);
             r111 = getRandomVal(PSELF);
             r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
 
         }
     }
@@ -334,12 +328,12 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 56)>::type>
                 y_54_p = y[54].zero_add(triples[0].a);  // y[54]', mask=a0
                 y_55_p = y[55].zero_add(triples[0].b);  // y[55]', mask=b0
                 x1x2_lsb = x[54].mult_a_known_to_evaluators(x[55]);  // and_a_1
-                t1_lsb = x[54].mult_a_known_to_evaluators_dot(y[54], r110);  // and_a_2
-                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[55], FUNC_XOR(r109, r110));  // and_a_3
+                t1_lsb = x[54].mult_a_known_to_evaluators_dot(y[54], SET_ALL_ZERO());  // and_a_2
+                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[55], SET_ALL_ZERO());  // and_a_3
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r112
-                y1y2_lsb = y_54_p.prepare_dot_and_assign(y_55_p, r112, triples[0].c);  // and_0
+                y1y2_lsb = y_54_p.prepare_dot_and_assign(y_55_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 s1_lsb = t1_lsb ^ t2_lsb;  // s1_lsb
-                t3_lsb = x[55].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(FUNC_XOR(triples[1].a, x[53].get_mask()), r109));  // and_a_4
+                t3_lsb = x[55].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(triples[1].a, x[53].get_mask()));  // and_a_4
                 carry_54 = s1_lsb ^ t3_lsb;  // carry[54]
                 carry_54.mask_and_send_dot_without_remask();
                 break;
@@ -847,11 +841,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 54)>::type>
     static constexpr int BeaverTripleCount = 52;
     triple<DATATYPE> triples[BeaverTripleCount];
 
-    DATATYPE r105;
-    DATATYPE r106;
     DATATYPE r107;
     DATATYPE r108;
-    DATATYPE r109;
 
     Share carry_10;
     Share carry_11;
@@ -1129,11 +1120,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 54)>::type>
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
             r107 = getRandomVal(PSELF);
             r108 = getRandomVal(PSELF);
-            r109 = getRandomVal(PSELF);
 
         }
     }
@@ -1150,12 +1138,12 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 54)>::type>
                 y_52_p = y[52].zero_add(triples[0].a);  // y[52]', mask=a0
                 y_53_p = y[53].zero_add(triples[0].b);  // y[53]', mask=b0
                 x1x2_lsb = x[52].mult_a_known_to_evaluators(x[53]);  // and_a_1
-                t1_lsb = x[52].mult_a_known_to_evaluators_dot(y[52], r106);  // and_a_2
-                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[53], FUNC_XOR(r105, r106));  // and_a_3
+                t1_lsb = x[52].mult_a_known_to_evaluators_dot(y[52], SET_ALL_ZERO());  // and_a_2
+                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[53], SET_ALL_ZERO());  // and_a_3
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r108
-                y1y2_lsb = y_52_p.prepare_dot_and_assign(y_53_p, r108, triples[0].c);  // and_0
+                y1y2_lsb = y_52_p.prepare_dot_and_assign(y_53_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 s1_lsb = t1_lsb ^ t2_lsb;  // s1_lsb
-                t3_lsb = x[53].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(FUNC_XOR(triples[1].a, x[51].get_mask()), r105));  // and_a_4
+                t3_lsb = x[53].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(triples[1].a, x[51].get_mask()));  // and_a_4
                 carry_52 = s1_lsb ^ t3_lsb;  // carry[52]
                 carry_52.mask_and_send_dot_without_remask();
                 break;
@@ -1645,11 +1633,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 52)>::type>
     static constexpr int BeaverTripleCount = 50;
     triple<DATATYPE> triples[BeaverTripleCount];
 
-    DATATYPE r101;
-    DATATYPE r102;
     DATATYPE r103;
     DATATYPE r104;
-    DATATYPE r105;
 
     Share carry_10;
     Share carry_11;
@@ -1917,11 +1902,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 52)>::type>
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
             r103 = getRandomVal(PSELF);
             r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
 
         }
     }
@@ -1938,12 +1920,12 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 52)>::type>
                 y_50_p = y[50].zero_add(triples[0].a);  // y[50]', mask=a0
                 y_51_p = y[51].zero_add(triples[0].b);  // y[51]', mask=b0
                 x1x2_lsb = x[50].mult_a_known_to_evaluators(x[51]);  // and_a_1
-                t1_lsb = x[50].mult_a_known_to_evaluators_dot(y[50], r102);  // and_a_2
-                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[51], FUNC_XOR(r101, r102));  // and_a_3
+                t1_lsb = x[50].mult_a_known_to_evaluators_dot(y[50], SET_ALL_ZERO());  // and_a_2
+                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[51], SET_ALL_ZERO());  // and_a_3
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r104
-                y1y2_lsb = y_50_p.prepare_dot_and_assign(y_51_p, r104, triples[0].c);  // and_0
+                y1y2_lsb = y_50_p.prepare_dot_and_assign(y_51_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 s1_lsb = t1_lsb ^ t2_lsb;  // s1_lsb
-                t3_lsb = x[51].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(FUNC_XOR(triples[1].a, x[49].get_mask()), r101));  // and_a_4
+                t3_lsb = x[51].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(triples[1].a, x[49].get_mask()));  // and_a_4
                 carry_50 = s1_lsb ^ t3_lsb;  // carry[50]
                 carry_50.mask_and_send_dot_without_remask();
                 break;
@@ -2415,11 +2397,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 50)>::type>
     static constexpr int BeaverTripleCount = 48;
     triple<DATATYPE> triples[BeaverTripleCount];
 
-    DATATYPE r97;
-    DATATYPE r98;
     DATATYPE r99;
     DATATYPE r100;
-    DATATYPE r101;
 
     Share carry_10;
     Share carry_11;
@@ -2677,11 +2656,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 50)>::type>
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
-            r97 = getRandomVal(PSELF);
-            r98 = getRandomVal(PSELF);
             r99 = getRandomVal(PSELF);
             r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
 
         }
     }
@@ -2698,12 +2674,12 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 50)>::type>
                 y_48_p = y[48].zero_add(triples[0].a);  // y[48]', mask=a0
                 y_49_p = y[49].zero_add(triples[0].b);  // y[49]', mask=b0
                 x1x2_lsb = x[48].mult_a_known_to_evaluators(x[49]);  // and_a_1
-                t1_lsb = x[48].mult_a_known_to_evaluators_dot(y[48], r98);  // and_a_2
-                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[49], FUNC_XOR(r97, r98));  // and_a_3
+                t1_lsb = x[48].mult_a_known_to_evaluators_dot(y[48], SET_ALL_ZERO());  // and_a_2
+                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[49], SET_ALL_ZERO());  // and_a_3
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r100
-                y1y2_lsb = y_48_p.prepare_dot_and_assign(y_49_p, r100, triples[0].c);  // and_0
+                y1y2_lsb = y_48_p.prepare_dot_and_assign(y_49_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 s1_lsb = t1_lsb ^ t2_lsb;  // s1_lsb
-                t3_lsb = x[49].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(FUNC_XOR(triples[1].a, x[47].get_mask()), r97));  // and_a_4
+                t3_lsb = x[49].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(triples[1].a, x[47].get_mask()));  // and_a_4
                 carry_48 = s1_lsb ^ t3_lsb;  // carry[48]
                 carry_48.mask_and_send_dot_without_remask();
                 break;
@@ -3157,11 +3133,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 48)>::type>
     static constexpr int BeaverTripleCount = 46;
     triple<DATATYPE> triples[BeaverTripleCount];
 
-    DATATYPE r93;
-    DATATYPE r94;
     DATATYPE r95;
     DATATYPE r96;
-    DATATYPE r97;
 
     Share carry_10;
     Share carry_11;
@@ -3409,11 +3382,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 48)>::type>
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
             r95 = getRandomVal(PSELF);
             r96 = getRandomVal(PSELF);
-            r97 = getRandomVal(PSELF);
 
         }
     }
@@ -3430,12 +3400,12 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 48)>::type>
                 y_46_p = y[46].zero_add(triples[0].a);  // y[46]', mask=a0
                 y_47_p = y[47].zero_add(triples[0].b);  // y[47]', mask=b0
                 x1x2_lsb = x[46].mult_a_known_to_evaluators(x[47]);  // and_a_1
-                t1_lsb = x[46].mult_a_known_to_evaluators_dot(y[46], r94);  // and_a_2
-                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[47], FUNC_XOR(r93, r94));  // and_a_3
+                t1_lsb = x[46].mult_a_known_to_evaluators_dot(y[46], SET_ALL_ZERO());  // and_a_2
+                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[47], SET_ALL_ZERO());  // and_a_3
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r96
-                y1y2_lsb = y_46_p.prepare_dot_and_assign(y_47_p, r96, triples[0].c);  // and_0
+                y1y2_lsb = y_46_p.prepare_dot_and_assign(y_47_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 s1_lsb = t1_lsb ^ t2_lsb;  // s1_lsb
-                t3_lsb = x[47].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(FUNC_XOR(triples[1].a, x[45].get_mask()), r93));  // and_a_4
+                t3_lsb = x[47].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(triples[1].a, x[45].get_mask()));  // and_a_4
                 carry_46 = s1_lsb ^ t3_lsb;  // carry[46]
                 carry_46.mask_and_send_dot_without_remask();
                 break;
@@ -3871,11 +3841,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 46)>::type>
     static constexpr int BeaverTripleCount = 44;
     triple<DATATYPE> triples[BeaverTripleCount];
 
-    DATATYPE r89;
-    DATATYPE r90;
     DATATYPE r91;
     DATATYPE r92;
-    DATATYPE r93;
 
     Share carry_10;
     Share carry_11;
@@ -4113,11 +4080,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 46)>::type>
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
-            r89 = getRandomVal(PSELF);
-            r90 = getRandomVal(PSELF);
             r91 = getRandomVal(PSELF);
             r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
 
         }
     }
@@ -4134,12 +4098,12 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 46)>::type>
                 y_44_p = y[44].zero_add(triples[0].a);  // y[44]', mask=a0
                 y_45_p = y[45].zero_add(triples[0].b);  // y[45]', mask=b0
                 x1x2_lsb = x[44].mult_a_known_to_evaluators(x[45]);  // and_a_1
-                t1_lsb = x[44].mult_a_known_to_evaluators_dot(y[44], r90);  // and_a_2
-                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[45], FUNC_XOR(r89, r90));  // and_a_3
+                t1_lsb = x[44].mult_a_known_to_evaluators_dot(y[44], SET_ALL_ZERO());  // and_a_2
+                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[45], SET_ALL_ZERO());  // and_a_3
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r92
-                y1y2_lsb = y_44_p.prepare_dot_and_assign(y_45_p, r92, triples[0].c);  // and_0
+                y1y2_lsb = y_44_p.prepare_dot_and_assign(y_45_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 s1_lsb = t1_lsb ^ t2_lsb;  // s1_lsb
-                t3_lsb = x[45].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(FUNC_XOR(triples[1].a, x[43].get_mask()), r89));  // and_a_4
+                t3_lsb = x[45].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(triples[1].a, x[43].get_mask()));  // and_a_4
                 carry_44 = s1_lsb ^ t3_lsb;  // carry[44]
                 carry_44.mask_and_send_dot_without_remask();
                 break;
@@ -4557,11 +4521,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 44)>::type>
     static constexpr int BeaverTripleCount = 42;
     triple<DATATYPE> triples[BeaverTripleCount];
 
-    DATATYPE r85;
-    DATATYPE r86;
     DATATYPE r87;
     DATATYPE r88;
-    DATATYPE r89;
 
     Share carry_10;
     Share carry_11;
@@ -4789,11 +4750,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 44)>::type>
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
-            r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
             r87 = getRandomVal(PSELF);
             r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
 
         }
     }
@@ -4810,12 +4768,12 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 44)>::type>
                 y_42_p = y[42].zero_add(triples[0].a);  // y[42]', mask=a0
                 y_43_p = y[43].zero_add(triples[0].b);  // y[43]', mask=b0
                 x1x2_lsb = x[42].mult_a_known_to_evaluators(x[43]);  // and_a_1
-                t1_lsb = x[42].mult_a_known_to_evaluators_dot(y[42], r86);  // and_a_2
-                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[43], FUNC_XOR(r85, r86));  // and_a_3
+                t1_lsb = x[42].mult_a_known_to_evaluators_dot(y[42], SET_ALL_ZERO());  // and_a_2
+                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[43], SET_ALL_ZERO());  // and_a_3
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r88
-                y1y2_lsb = y_42_p.prepare_dot_and_assign(y_43_p, r88, triples[0].c);  // and_0
+                y1y2_lsb = y_42_p.prepare_dot_and_assign(y_43_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 s1_lsb = t1_lsb ^ t2_lsb;  // s1_lsb
-                t3_lsb = x[43].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(FUNC_XOR(triples[1].a, x[41].get_mask()), r85));  // and_a_4
+                t3_lsb = x[43].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(triples[1].a, x[41].get_mask()));  // and_a_4
                 carry_42 = s1_lsb ^ t3_lsb;  // carry[42]
                 carry_42.mask_and_send_dot_without_remask();
                 break;
@@ -5215,11 +5173,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 40)>::type>
     static constexpr int BeaverTripleCount = 38;
     triple<DATATYPE> triples[BeaverTripleCount];
 
-    DATATYPE r77;
-    DATATYPE r78;
     DATATYPE r79;
     DATATYPE r80;
-    DATATYPE r81;
 
     Share carry_10;
     Share carry_11;
@@ -5427,11 +5382,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 40)>::type>
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
-            r77 = getRandomVal(PSELF);
-            r78 = getRandomVal(PSELF);
             r79 = getRandomVal(PSELF);
             r80 = getRandomVal(PSELF);
-            r81 = getRandomVal(PSELF);
 
         }
     }
@@ -5448,12 +5400,12 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 40)>::type>
                 y_38_p = y[38].zero_add(triples[0].a);  // y[38]', mask=a0
                 y_39_p = y[39].zero_add(triples[0].b);  // y[39]', mask=b0
                 x1x2_lsb = x[38].mult_a_known_to_evaluators(x[39]);  // and_a_1
-                t1_lsb = x[38].mult_a_known_to_evaluators_dot(y[38], r78);  // and_a_2
-                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[39], FUNC_XOR(r77, r78));  // and_a_3
+                t1_lsb = x[38].mult_a_known_to_evaluators_dot(y[38], SET_ALL_ZERO());  // and_a_2
+                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[39], SET_ALL_ZERO());  // and_a_3
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r80
-                y1y2_lsb = y_38_p.prepare_dot_and_assign(y_39_p, r80, triples[0].c);  // and_0
+                y1y2_lsb = y_38_p.prepare_dot_and_assign(y_39_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 s1_lsb = t1_lsb ^ t2_lsb;  // s1_lsb
-                t3_lsb = x[39].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(FUNC_XOR(triples[1].a, x[37].get_mask()), r77));  // and_a_4
+                t3_lsb = x[39].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(triples[1].a, x[37].get_mask()));  // and_a_4
                 carry_38 = s1_lsb ^ t3_lsb;  // carry[38]
                 carry_38.mask_and_send_dot_without_remask();
                 break;

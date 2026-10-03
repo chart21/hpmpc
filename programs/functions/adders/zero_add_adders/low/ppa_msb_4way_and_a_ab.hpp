@@ -33,10 +33,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 4)>::type>
     DATATYPE r18;
     DATATYPE r19;
     DATATYPE r20;
-    DATATYPE r21;
-    DATATYPE r22;
-    DATATYPE r23;
-    DATATYPE r24;
 
     Share W3L1_1_3_out;
     Share W3L1_1_3_out_s1;
@@ -95,10 +91,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 4)>::type>
             r18 = getRandomVal(PSELF);
             r19 = getRandomVal(PSELF);
             r20 = getRandomVal(PSELF);
-            r21 = getRandomVal(PSELF);
-            r22 = getRandomVal(PSELF);
-            r23 = getRandomVal(PSELF);
-            r24 = getRandomVal(PSELF);
 
         }
     }
@@ -124,23 +116,23 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 4)>::type>
                 W3L1_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 W3L1_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 W3L1_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                W3L1_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r10);  // and_a_8
+                W3L1_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 W3L1_1_3_x1x2x3 = W3L1_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                W3L1_1_3_t2_1 = W3L1_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r11);  // and_a_9
+                W3L1_1_3_t2_1 = W3L1_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r17
-                W3L1_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r17, triples[0].c);  // and_0
+                W3L1_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=r18
-                W3L1_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, r18, beaver3_tuples[0]);  // and3_1
+                W3L1_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r19
-                W3L1_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r19, triples[1].c);  // and_2
+                W3L1_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r20
-                W3L1_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r20, triples[2].c);  // and_3
-                W3L1_1_3_t3_1 = W3L1_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r13);  // and_a_11
+                W3L1_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
+                W3L1_1_3_t3_1 = W3L1_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 W3L1_1_3_out_s1 = W3L1_1_3_t1 ^ W3L1_1_3_t2_1;  // W3L1_1_3_out_s1
-                W3L1_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(W3L1_1_3_y1y2, r12);  // and_a_10
-                W3L1_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(W3L1_1_3_y1y2y3, r16);  // and_a_14
-                W3L1_1_3_t3_2 = W3L1_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_1_3_y2y3, r14);  // and_a_12
-                W3L1_1_3_t3_3 = W3L1_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_1_3_y1y3, r15);  // and_a_13
+                W3L1_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(W3L1_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                W3L1_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(W3L1_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                W3L1_1_3_t3_2 = W3L1_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                W3L1_1_3_t3_3 = W3L1_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r10, r11), r12), r13), r14), r15), r16));  // and_a_13
                 W3L1_1_3_out_s2 = W3L1_1_3_out_s1 ^ W3L1_1_3_t2_2;  // W3L1_1_3_out_s2
                 W3L1_1_3_out_s3 = W3L1_1_3_out_s2 ^ W3L1_1_3_t3_1;  // W3L1_1_3_out_s3
                 W3L1_1_3_out_s4 = W3L1_1_3_out_s3 ^ W3L1_1_3_t3_2;  // W3L1_1_3_out_s4
@@ -176,17 +168,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 5)>::type>
     triple<DATATYPE> triples[BeaverTripleCount];
 
     DATATYPE r7;
-    DATATYPE r8;
-    DATATYPE r9;
-    DATATYPE r10;
-    DATATYPE r11;
     DATATYPE r12;
     DATATYPE r13;
     DATATYPE r14;
     DATATYPE r15;
-    DATATYPE r16;
     DATATYPE r17;
-    DATATYPE r18;
 
     Share B2G_1_2_out;
     Share B2G_1_2_out_s1;
@@ -227,17 +213,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 5)>::type>
             }
             // Random mask values (shared across mask expressions)
             r7 = getRandomVal(PSELF);
-            r8 = getRandomVal(PSELF);
-            r9 = getRandomVal(PSELF);
-            r10 = getRandomVal(PSELF);
-            r11 = getRandomVal(PSELF);
             r12 = getRandomVal(PSELF);
             r13 = getRandomVal(PSELF);
             r14 = getRandomVal(PSELF);
             r15 = getRandomVal(PSELF);
-            r16 = getRandomVal(PSELF);
             r17 = getRandomVal(PSELF);
-            r18 = getRandomVal(PSELF);
 
         }
     }
@@ -255,9 +235,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 5)>::type>
                 b_2_p = b[2].zero_add(triples[0].b);  // b[2]', mask=b0
                 b_3_p = b[3].zero_add(triples[1].a);  // b[3]', mask=a1
                 b_4_p = b[4].zero_add(triples[1].b);  // b[4]', mask=b1
-                B2P_1_2_t1 = a[1].mult_a_known_to_evaluators_dot(a[2], r9);  // and_a_7
-                B2P_1_2_t2 = a[1].mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r8, r9));  // and_a_8
-                B2P_1_2_t3 = a[2].mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r7, r8));  // and_a_9
+                B2P_1_2_t1 = a[1].mult_a_known_to_evaluators_dot(a[2], SET_ALL_ZERO());  // and_a_7
+                B2P_1_2_t2 = a[1].mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_8
+                B2P_1_2_t3 = a[2].mult_a_known_to_evaluators_dot(b[1], r7);  // and_a_9
                 B2P_1_2_out_s1 = B2P_1_2_t1 ^ B2P_1_2_t2;  // B2P_1_2_out_s1
                 B2P_1_2_out_s2 = B2P_1_2_out_s1 ^ B2P_1_2_t3;  // B2P_1_2_out_s2
                 B2P_1_2_out_s2.mask_and_send_dot_without_remask();
@@ -265,12 +245,12 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 5)>::type>
             case 1:
                 B2P_1_2_out_s2.complete_and();
                 W2G_3_4_x1x2 = a[3].mult_a_known_to_evaluators(a[4]);  // and_a_14
-                W2G_3_4_t1 = a[3].mult_a_known_to_evaluators_dot(b[3], r11);  // and_a_15
-                W2G_3_4_t2 = W2G_3_4_x1x2.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r10, r11));  // and_a_16
+                W2G_3_4_t1 = a[3].mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_15
+                W2G_3_4_t2 = W2G_3_4_x1x2.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_16
                 // and_13: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r17
-                W2G_3_4_y1y2 = b_3_p.prepare_dot_and_assign(b_4_p, r17, triples[1].c);  // and_13
+                W2G_3_4_y1y2 = b_3_p.prepare_dot_and_assign(b_4_p, SET_ALL_ZERO(), triples[1].c);  // and_13
                 W2G_3_4_out_s1 = W2G_3_4_t1 ^ W2G_3_4_t2;  // W2G_3_4_out_s1
-                W2G_3_4_t3 = a[4].mult_a_known_to_evaluators_dot_pending(W2G_3_4_y1y2, FUNC_XOR(triples[2].b, r10));  // and_a_17
+                W2G_3_4_t3 = a[4].mult_a_known_to_evaluators_dot_pending(W2G_3_4_y1y2, triples[2].b);  // and_a_17
                 W2G_3_4_out = W2G_3_4_out_s1 ^ W2G_3_4_t3;  // W2G_3_4_out
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=(a2-r7)
                 B2G_1_2_y1y2 = b_1_p.prepare_and(b_2_p, FUNC_XOR(triples[2].a, r7), triples[0].c);  // and_0
@@ -281,10 +261,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 5)>::type>
                 W2G_3_4_out.complete_and();
                 B2P_1_2_out = B2P_1_2_out_s2 ^ B2G_1_2_y1y2;  // B2P_1_2_out
                 B2G_1_2_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_1
-                B2G_1_2_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r12);  // and_a_2
-                B2G_1_2_t2 = B2G_1_2_x1x2.mult_a_known_to_evaluators_dot(b[2], r13);  // and_a_3
+                B2G_1_2_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_2
+                B2G_1_2_t2 = B2G_1_2_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_3
                 B2G_1_2_out_s1 = B2G_1_2_t1 ^ B2G_1_2_t2;  // B2G_1_2_out_s1
-                B2G_1_2_t3 = a[2].mult_a_known_to_evaluators_dot(B2G_1_2_y1y2, r14);  // and_a_4
+                B2G_1_2_t3 = a[2].mult_a_known_to_evaluators_dot(B2G_1_2_y1y2, FUNC_XOR(FUNC_XOR(r12, r13), r14));  // and_a_4
                 B2G_1_2_out = B2G_1_2_out_s1 ^ B2G_1_2_t3;  // B2G_1_2_out
                 B2G_1_2_out.mask_and_send_dot_without_remask();
                 break;
@@ -325,13 +305,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 6)>::type>
 
     DATATYPE r14;
     DATATYPE r15;
-    DATATYPE r16;
-    DATATYPE r17;
-    DATATYPE r18;
-    DATATYPE r19;
-    DATATYPE r20;
-    DATATYPE r21;
-    DATATYPE r22;
     DATATYPE r23;
     DATATYPE r24;
     DATATYPE r25;
@@ -343,15 +316,7 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 6)>::type>
     DATATYPE r31;
     DATATYPE r32;
     DATATYPE r33;
-    DATATYPE r34;
-    DATATYPE r35;
-    DATATYPE r36;
-    DATATYPE r37;
-    DATATYPE r38;
-    DATATYPE r39;
-    DATATYPE r40;
     DATATYPE r41;
-    DATATYPE r42;
 
     Share B3G_1_3_out;
     Share B3G_1_3_out_s1;
@@ -429,13 +394,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 6)>::type>
             // Random mask values (shared across mask expressions)
             r14 = getRandomVal(PSELF);
             r15 = getRandomVal(PSELF);
-            r16 = getRandomVal(PSELF);
-            r17 = getRandomVal(PSELF);
-            r18 = getRandomVal(PSELF);
-            r19 = getRandomVal(PSELF);
-            r20 = getRandomVal(PSELF);
-            r21 = getRandomVal(PSELF);
-            r22 = getRandomVal(PSELF);
             r23 = getRandomVal(PSELF);
             r24 = getRandomVal(PSELF);
             r25 = getRandomVal(PSELF);
@@ -447,15 +405,7 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 6)>::type>
             r31 = getRandomVal(PSELF);
             r32 = getRandomVal(PSELF);
             r33 = getRandomVal(PSELF);
-            r34 = getRandomVal(PSELF);
-            r35 = getRandomVal(PSELF);
-            r36 = getRandomVal(PSELF);
-            r37 = getRandomVal(PSELF);
-            r38 = getRandomVal(PSELF);
-            r39 = getRandomVal(PSELF);
-            r40 = getRandomVal(PSELF);
             r41 = getRandomVal(PSELF);
-            r42 = getRandomVal(PSELF);
 
         }
     }
@@ -483,41 +433,41 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 6)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r23);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 W2G_4_5_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_39
-                W2G_4_5_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r22);  // and_a_40
+                W2G_4_5_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_40
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r24);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r20);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r19, r20));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r17, r18));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r18, r19));  // and_a_26
-                W2G_4_5_t2 = W2G_4_5_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r21, r22));  // and_a_41
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
+                W2G_4_5_t2 = W2G_4_5_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_41
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r31
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r31, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r14-r15)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r14, r15), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r32
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r32, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r33
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r33, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r41
-                W2G_4_5_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r41, triples[3].c);  // and_38
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r26);  // and_a_11
+                W2G_4_5_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
                 W2G_4_5_out_s1 = W2G_4_5_t1 ^ W2G_4_5_t2;  // W2G_4_5_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r25);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r15, r16));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r29);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r27);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(triples[4].a, r14));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r28);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r16, r17));  // and_a_28
-                W2G_4_5_t3 = a[5].mult_a_known_to_evaluators_dot_pending(W2G_4_5_y1y2, FUNC_XOR(triples[4].b, r21));  // and_a_42
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r23, r24), r25), r26), r27), r28), r29));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, triples[4].a);  // and_a_28
+                W2G_4_5_t3 = a[5].mult_a_known_to_evaluators_dot_pending(W2G_4_5_y1y2, triples[4].b);  // and_a_42
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3G_1_3_out_s2 = B3G_1_3_out_s1 ^ B3G_1_3_t2_2;  // B3G_1_3_out_s2
                 W2G_4_5_out = W2G_4_5_out_s1 ^ W2G_4_5_t3;  // W2G_4_5_out
@@ -573,17 +523,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 7)>::type>
 
     DATATYPE r21;
     DATATYPE r22;
-    DATATYPE r23;
-    DATATYPE r24;
-    DATATYPE r25;
-    DATATYPE r26;
-    DATATYPE r27;
-    DATATYPE r28;
-    DATATYPE r29;
-    DATATYPE r30;
-    DATATYPE r31;
-    DATATYPE r32;
-    DATATYPE r33;
     DATATYPE r34;
     DATATYPE r35;
     DATATYPE r36;
@@ -595,21 +534,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 7)>::type>
     DATATYPE r42;
     DATATYPE r43;
     DATATYPE r44;
-    DATATYPE r45;
-    DATATYPE r46;
-    DATATYPE r47;
-    DATATYPE r48;
-    DATATYPE r49;
-    DATATYPE r50;
-    DATATYPE r51;
     DATATYPE r52;
     DATATYPE r53;
     DATATYPE r54;
     DATATYPE r55;
-    DATATYPE r56;
-    DATATYPE r57;
-    DATATYPE r58;
-    DATATYPE r59;
 
     Share B3G_1_3_out;
     Share B3G_1_3_out_s1;
@@ -708,17 +636,6 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 7)>::type>
             // Random mask values (shared across mask expressions)
             r21 = getRandomVal(PSELF);
             r22 = getRandomVal(PSELF);
-            r23 = getRandomVal(PSELF);
-            r24 = getRandomVal(PSELF);
-            r25 = getRandomVal(PSELF);
-            r26 = getRandomVal(PSELF);
-            r27 = getRandomVal(PSELF);
-            r28 = getRandomVal(PSELF);
-            r29 = getRandomVal(PSELF);
-            r30 = getRandomVal(PSELF);
-            r31 = getRandomVal(PSELF);
-            r32 = getRandomVal(PSELF);
-            r33 = getRandomVal(PSELF);
             r34 = getRandomVal(PSELF);
             r35 = getRandomVal(PSELF);
             r36 = getRandomVal(PSELF);
@@ -730,21 +647,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 7)>::type>
             r42 = getRandomVal(PSELF);
             r43 = getRandomVal(PSELF);
             r44 = getRandomVal(PSELF);
-            r45 = getRandomVal(PSELF);
-            r46 = getRandomVal(PSELF);
-            r47 = getRandomVal(PSELF);
-            r48 = getRandomVal(PSELF);
-            r49 = getRandomVal(PSELF);
-            r50 = getRandomVal(PSELF);
-            r51 = getRandomVal(PSELF);
             r52 = getRandomVal(PSELF);
             r53 = getRandomVal(PSELF);
             r54 = getRandomVal(PSELF);
             r55 = getRandomVal(PSELF);
-            r56 = getRandomVal(PSELF);
-            r57 = getRandomVal(PSELF);
-            r58 = getRandomVal(PSELF);
-            r59 = getRandomVal(PSELF);
 
         }
     }
@@ -779,54 +685,54 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 7)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r34);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 W3L1_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 W3L1_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 W3L1_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                W3L1_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r33);  // and_a_46
+                W3L1_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r35);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r27);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r26, r27));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r24, r25));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r25, r26));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 W3L1_4_6_x1x2x3 = W3L1_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                W3L1_4_6_t2_1 = W3L1_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r32, r33));  // and_a_47
+                W3L1_4_6_t2_1 = W3L1_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r42
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r42, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r21-r22)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r21, r22), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r43
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r43, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r44
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r44, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r52
-                W3L1_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r52, triples[3].c);  // and_38
+                W3L1_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=r53
-                W3L1_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, r53, beaver3_tuples[1]);  // and3_39
+                W3L1_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r54
-                W3L1_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r54, triples[4].c);  // and_40
+                W3L1_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r55
-                W3L1_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r55, triples[5].c);  // and_41
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r37);  // and_a_11
+                W3L1_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                W3L1_4_6_t3_1 = W3L1_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r30, r31));  // and_a_49
+                W3L1_4_6_t3_1 = W3L1_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 W3L1_4_6_out_s1 = W3L1_4_6_t1 ^ W3L1_4_6_t2_1;  // W3L1_4_6_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r36);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r22, r23));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r40);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r38);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(triples[6].a, r21));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r39);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r23, r24));  // and_a_28
-                W3L1_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(W3L1_4_6_y1y2, FUNC_XOR(r31, r32));  // and_a_48
-                W3L1_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(W3L1_4_6_y1y2y3, FUNC_XOR(triples[6].b, r28));  // and_a_52
-                W3L1_4_6_t3_2 = W3L1_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_4_6_y2y3, FUNC_XOR(r29, r30));  // and_a_50
-                W3L1_4_6_t3_3 = W3L1_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_4_6_y1y3, FUNC_XOR(r28, r29));  // and_a_51
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r34, r35), r36), r37), r38), r39), r40));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, triples[6].a);  // and_a_28
+                W3L1_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(W3L1_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                W3L1_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(W3L1_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                W3L1_4_6_t3_2 = W3L1_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                W3L1_4_6_t3_3 = W3L1_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_4_6_y1y3, triples[6].b);  // and_a_51
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3G_1_3_out_s2 = B3G_1_3_out_s1 ^ B3G_1_3_t2_2;  // B3G_1_3_out_s2
                 W3L1_4_6_out_s2 = W3L1_4_6_out_s1 ^ W3L1_4_6_t2_2;  // W3L1_4_6_out_s2
@@ -886,26 +792,8 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 9)>::type>
 
     DATATYPE r26;
     DATATYPE r27;
-    DATATYPE r28;
-    DATATYPE r29;
-    DATATYPE r30;
-    DATATYPE r31;
-    DATATYPE r32;
-    DATATYPE r33;
-    DATATYPE r34;
-    DATATYPE r35;
-    DATATYPE r36;
-    DATATYPE r37;
-    DATATYPE r38;
     DATATYPE r39;
     DATATYPE r40;
-    DATATYPE r41;
-    DATATYPE r42;
-    DATATYPE r43;
-    DATATYPE r44;
-    DATATYPE r45;
-    DATATYPE r46;
-    DATATYPE r47;
     DATATYPE r48;
     DATATYPE r49;
     DATATYPE r50;
@@ -918,25 +806,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 9)>::type>
     DATATYPE r57;
     DATATYPE r58;
     DATATYPE r59;
-    DATATYPE r60;
-    DATATYPE r61;
-    DATATYPE r62;
-    DATATYPE r63;
-    DATATYPE r64;
-    DATATYPE r65;
-    DATATYPE r66;
     DATATYPE r67;
     DATATYPE r68;
     DATATYPE r69;
-    DATATYPE r70;
-    DATATYPE r71;
-    DATATYPE r72;
-    DATATYPE r73;
-    DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
     DATATYPE r77;
-    DATATYPE r78;
 
     Share B3G_1_3_out;
     Share B3G_1_3_out_s1;
@@ -1064,26 +937,8 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 9)>::type>
             // Random mask values (shared across mask expressions)
             r26 = getRandomVal(PSELF);
             r27 = getRandomVal(PSELF);
-            r28 = getRandomVal(PSELF);
-            r29 = getRandomVal(PSELF);
-            r30 = getRandomVal(PSELF);
-            r31 = getRandomVal(PSELF);
-            r32 = getRandomVal(PSELF);
-            r33 = getRandomVal(PSELF);
-            r34 = getRandomVal(PSELF);
-            r35 = getRandomVal(PSELF);
-            r36 = getRandomVal(PSELF);
-            r37 = getRandomVal(PSELF);
-            r38 = getRandomVal(PSELF);
             r39 = getRandomVal(PSELF);
             r40 = getRandomVal(PSELF);
-            r41 = getRandomVal(PSELF);
-            r42 = getRandomVal(PSELF);
-            r43 = getRandomVal(PSELF);
-            r44 = getRandomVal(PSELF);
-            r45 = getRandomVal(PSELF);
-            r46 = getRandomVal(PSELF);
-            r47 = getRandomVal(PSELF);
             r48 = getRandomVal(PSELF);
             r49 = getRandomVal(PSELF);
             r50 = getRandomVal(PSELF);
@@ -1096,25 +951,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 9)>::type>
             r57 = getRandomVal(PSELF);
             r58 = getRandomVal(PSELF);
             r59 = getRandomVal(PSELF);
-            r60 = getRandomVal(PSELF);
-            r61 = getRandomVal(PSELF);
-            r62 = getRandomVal(PSELF);
-            r63 = getRandomVal(PSELF);
-            r64 = getRandomVal(PSELF);
-            r65 = getRandomVal(PSELF);
-            r66 = getRandomVal(PSELF);
             r67 = getRandomVal(PSELF);
             r68 = getRandomVal(PSELF);
             r69 = getRandomVal(PSELF);
-            r70 = getRandomVal(PSELF);
-            r71 = getRandomVal(PSELF);
-            r72 = getRandomVal(PSELF);
-            r73 = getRandomVal(PSELF);
-            r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
             r77 = getRandomVal(PSELF);
-            r78 = getRandomVal(PSELF);
 
         }
     }
@@ -1151,72 +991,72 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 9)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r48);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r38);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 W2G_7_8_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_77
-                W2G_7_8_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r47);  // and_a_78
+                W2G_7_8_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_78
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r49);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r32);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r31, r32));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r29, r30));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r30, r31));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r37, r38));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r45);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r44, r45));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r42, r43));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r43, r44));  // and_a_64
-                W2G_7_8_t2 = W2G_7_8_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r46, r47));  // and_a_79
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
+                W2G_7_8_t2 = W2G_7_8_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_79
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r57
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r57, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r26-r27)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r26, r27), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r58
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r58, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r59
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r59, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r67
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r67, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r39-r40)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r39, r40), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r68
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r68, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r69
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r69, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r77
-                W2G_7_8_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r77, triples[6].c);  // and_76
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r51);  // and_a_11
+                W2G_7_8_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r35, r36));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
                 W2G_7_8_out_s1 = W2G_7_8_t1 ^ W2G_7_8_t2;  // W2G_7_8_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r50);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r27, r28));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r54);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r52);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver3_tuples[2].a, r26));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r53);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r28, r29));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r36, r37));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r40, r41));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[7].b, r33));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r34, r35));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver3_tuples[2].b, r39));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r33, r34));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r41, r42));  // and_a_66
-                W2G_7_8_t3 = a[8].mult_a_known_to_evaluators_dot_pending(W2G_7_8_y1y2, FUNC_XOR(beaver3_tuples[2].c, r46));  // and_a_80
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r48, r49), r50), r51), r52), r53), r54));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver3_tuples[2].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[7].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver3_tuples[2].b);  // and_a_66
+                W2G_7_8_t3 = a[8].mult_a_known_to_evaluators_dot_pending(W2G_7_8_y1y2, beaver3_tuples[2].c);  // and_a_80
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3G_1_3_out_s2 = B3G_1_3_out_s1 ^ B3G_1_3_t2_2;  // B3G_1_3_out_s2
@@ -1254,9 +1094,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 9)>::type>
                 W2G_7_8_out.complete_and();
                 B3P_1_3_out_p = B3P_1_3_out.zero_add(triples[7].a);  // B3P_1_3_out', mask=a9
                 // and3_84: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=r56
-                L1_B0_t2 = B3P_1_3_out.prepare_dot3_and_assign(B3P_4_6_out, W2G_7_8_out, r56, beaver3_tuples[2]);  // and3_84
+                L1_B0_t2 = B3P_1_3_out.prepare_dot3_and_assign(B3P_4_6_out, W2G_7_8_out, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_84
                 // and_83: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r55
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r55, triples[7].c);  // and_83
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, FUNC_XOR(r55, r56), triples[7].c);  // and_83
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s1.mask_and_send_dot_without_remask();
                 break;
@@ -1292,30 +1132,8 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 10)>::type>
 
     DATATYPE r33;
     DATATYPE r34;
-    DATATYPE r35;
-    DATATYPE r36;
-    DATATYPE r37;
-    DATATYPE r38;
-    DATATYPE r39;
-    DATATYPE r40;
-    DATATYPE r41;
-    DATATYPE r42;
-    DATATYPE r43;
-    DATATYPE r44;
-    DATATYPE r45;
     DATATYPE r46;
     DATATYPE r47;
-    DATATYPE r48;
-    DATATYPE r49;
-    DATATYPE r50;
-    DATATYPE r51;
-    DATATYPE r52;
-    DATATYPE r53;
-    DATATYPE r54;
-    DATATYPE r55;
-    DATATYPE r56;
-    DATATYPE r57;
-    DATATYPE r58;
     DATATYPE r59;
     DATATYPE r60;
     DATATYPE r61;
@@ -1328,31 +1146,13 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 10)>::type>
     DATATYPE r68;
     DATATYPE r69;
     DATATYPE r70;
-    DATATYPE r71;
-    DATATYPE r72;
-    DATATYPE r73;
-    DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
-    DATATYPE r77;
     DATATYPE r78;
     DATATYPE r79;
     DATATYPE r80;
-    DATATYPE r81;
-    DATATYPE r82;
-    DATATYPE r83;
-    DATATYPE r84;
-    DATATYPE r85;
-    DATATYPE r86;
-    DATATYPE r87;
     DATATYPE r88;
     DATATYPE r89;
     DATATYPE r90;
     DATATYPE r91;
-    DATATYPE r92;
-    DATATYPE r93;
-    DATATYPE r94;
-    DATATYPE r95;
 
     Share B3G_1_3_out;
     Share B3G_1_3_out_s1;
@@ -1501,30 +1301,8 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 10)>::type>
             // Random mask values (shared across mask expressions)
             r33 = getRandomVal(PSELF);
             r34 = getRandomVal(PSELF);
-            r35 = getRandomVal(PSELF);
-            r36 = getRandomVal(PSELF);
-            r37 = getRandomVal(PSELF);
-            r38 = getRandomVal(PSELF);
-            r39 = getRandomVal(PSELF);
-            r40 = getRandomVal(PSELF);
-            r41 = getRandomVal(PSELF);
-            r42 = getRandomVal(PSELF);
-            r43 = getRandomVal(PSELF);
-            r44 = getRandomVal(PSELF);
-            r45 = getRandomVal(PSELF);
             r46 = getRandomVal(PSELF);
             r47 = getRandomVal(PSELF);
-            r48 = getRandomVal(PSELF);
-            r49 = getRandomVal(PSELF);
-            r50 = getRandomVal(PSELF);
-            r51 = getRandomVal(PSELF);
-            r52 = getRandomVal(PSELF);
-            r53 = getRandomVal(PSELF);
-            r54 = getRandomVal(PSELF);
-            r55 = getRandomVal(PSELF);
-            r56 = getRandomVal(PSELF);
-            r57 = getRandomVal(PSELF);
-            r58 = getRandomVal(PSELF);
             r59 = getRandomVal(PSELF);
             r60 = getRandomVal(PSELF);
             r61 = getRandomVal(PSELF);
@@ -1537,31 +1315,13 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 10)>::type>
             r68 = getRandomVal(PSELF);
             r69 = getRandomVal(PSELF);
             r70 = getRandomVal(PSELF);
-            r71 = getRandomVal(PSELF);
-            r72 = getRandomVal(PSELF);
-            r73 = getRandomVal(PSELF);
-            r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
-            r77 = getRandomVal(PSELF);
             r78 = getRandomVal(PSELF);
             r79 = getRandomVal(PSELF);
             r80 = getRandomVal(PSELF);
-            r81 = getRandomVal(PSELF);
-            r82 = getRandomVal(PSELF);
-            r83 = getRandomVal(PSELF);
-            r84 = getRandomVal(PSELF);
-            r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
             r88 = getRandomVal(PSELF);
             r89 = getRandomVal(PSELF);
             r90 = getRandomVal(PSELF);
             r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
 
         }
     }
@@ -1605,85 +1365,85 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 10)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r59);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r45);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 W3L1_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 W3L1_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 W3L1_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                W3L1_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r58);  // and_a_84
+                W3L1_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r60);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r39);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r38, r39));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r36, r37));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r37, r38));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r44, r45));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r52);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r51, r52));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r49, r50));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r50, r51));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 W3L1_7_9_x1x2x3 = W3L1_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                W3L1_7_9_t2_1 = W3L1_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r57, r58));  // and_a_85
+                W3L1_7_9_t2_1 = W3L1_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r68
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r68, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r33-r34)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r33, r34), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r69
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r69, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r70
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r70, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r78
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r78, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r46-r47)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r46, r47), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r79
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r79, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r80
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r80, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r88
-                W3L1_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r88, triples[6].c);  // and_76
+                W3L1_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=r89
-                W3L1_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, r89, beaver3_tuples[2]);  // and3_77
+                W3L1_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r90
-                W3L1_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r90, triples[7].c);  // and_78
+                W3L1_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r91
-                W3L1_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r91, triples[8].c);  // and_79
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r62);  // and_a_11
+                W3L1_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r42, r43));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                W3L1_7_9_t3_1 = W3L1_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r55, r56));  // and_a_87
+                W3L1_7_9_t3_1 = W3L1_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 W3L1_7_9_out_s1 = W3L1_7_9_t1 ^ W3L1_7_9_t2_1;  // W3L1_7_9_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r61);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r34, r35));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r65);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r63);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver3_tuples[3].a, r33));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r64);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r35, r36));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r43, r44));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r47, r48));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[9].b, r40));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r41, r42));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver3_tuples[3].b, r46));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r40, r41));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r48, r49));  // and_a_66
-                W3L1_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(W3L1_7_9_y1y2, FUNC_XOR(r56, r57));  // and_a_86
-                W3L1_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(W3L1_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[3].c, r53));  // and_a_90
-                W3L1_7_9_t3_2 = W3L1_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_7_9_y2y3, FUNC_XOR(r54, r55));  // and_a_88
-                W3L1_7_9_t3_3 = W3L1_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_7_9_y1y3, FUNC_XOR(r53, r54));  // and_a_89
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r59, r60), r61), r62), r63), r64), r65));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver3_tuples[3].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[9].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver3_tuples[3].b);  // and_a_66
+                W3L1_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(W3L1_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                W3L1_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(W3L1_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                W3L1_7_9_t3_2 = W3L1_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                W3L1_7_9_t3_3 = W3L1_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_7_9_y1y3, beaver3_tuples[3].c);  // and_a_89
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3G_1_3_out_s2 = B3G_1_3_out_s1 ^ B3G_1_3_t2_2;  // B3G_1_3_out_s2
@@ -1725,9 +1485,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 10)>::type>
                 W3L1_7_9_out.complete_and();
                 B3P_1_3_out_p = B3P_1_3_out.zero_add(triples[9].a);  // B3P_1_3_out', mask=a12
                 // and3_98: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=r67
-                L1_B0_t2 = B3P_1_3_out.prepare_dot3_and_assign(B3P_4_6_out, W3L1_7_9_out, r67, beaver3_tuples[3]);  // and3_98
+                L1_B0_t2 = B3P_1_3_out.prepare_dot3_and_assign(B3P_4_6_out, W3L1_7_9_out, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_98
                 // and_97: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r66
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r66, triples[9].c);  // and_97
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, FUNC_XOR(r66, r67), triples[9].c);  // and_97
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s1.mask_and_send_dot_without_remask();
                 break;
@@ -1765,31 +1525,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 11)>::type>
 
     DATATYPE r32;
     DATATYPE r33;
-    DATATYPE r34;
-    DATATYPE r35;
-    DATATYPE r36;
-    DATATYPE r37;
-    DATATYPE r38;
-    DATATYPE r39;
-    DATATYPE r40;
-    DATATYPE r41;
-    DATATYPE r42;
-    DATATYPE r43;
-    DATATYPE r44;
     DATATYPE r45;
     DATATYPE r46;
-    DATATYPE r47;
-    DATATYPE r48;
-    DATATYPE r49;
-    DATATYPE r50;
-    DATATYPE r51;
-    DATATYPE r52;
-    DATATYPE r53;
     DATATYPE r54;
-    DATATYPE r55;
-    DATATYPE r56;
-    DATATYPE r57;
-    DATATYPE r58;
     DATATYPE r59;
     DATATYPE r60;
     DATATYPE r61;
@@ -1803,26 +1541,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 11)>::type>
     DATATYPE r69;
     DATATYPE r70;
     DATATYPE r71;
-    DATATYPE r72;
-    DATATYPE r73;
-    DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
-    DATATYPE r77;
-    DATATYPE r78;
     DATATYPE r79;
     DATATYPE r80;
     DATATYPE r81;
-    DATATYPE r82;
-    DATATYPE r83;
-    DATATYPE r84;
-    DATATYPE r85;
-    DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
     DATATYPE r90;
-    DATATYPE r91;
 
     Share B2G_7_8_out;
     Share B2G_7_8_out_s1;
@@ -1973,31 +1695,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 11)>::type>
             // Random mask values (shared across mask expressions)
             r32 = getRandomVal(PSELF);
             r33 = getRandomVal(PSELF);
-            r34 = getRandomVal(PSELF);
-            r35 = getRandomVal(PSELF);
-            r36 = getRandomVal(PSELF);
-            r37 = getRandomVal(PSELF);
-            r38 = getRandomVal(PSELF);
-            r39 = getRandomVal(PSELF);
-            r40 = getRandomVal(PSELF);
-            r41 = getRandomVal(PSELF);
-            r42 = getRandomVal(PSELF);
-            r43 = getRandomVal(PSELF);
-            r44 = getRandomVal(PSELF);
             r45 = getRandomVal(PSELF);
             r46 = getRandomVal(PSELF);
-            r47 = getRandomVal(PSELF);
-            r48 = getRandomVal(PSELF);
-            r49 = getRandomVal(PSELF);
-            r50 = getRandomVal(PSELF);
-            r51 = getRandomVal(PSELF);
-            r52 = getRandomVal(PSELF);
-            r53 = getRandomVal(PSELF);
             r54 = getRandomVal(PSELF);
-            r55 = getRandomVal(PSELF);
-            r56 = getRandomVal(PSELF);
-            r57 = getRandomVal(PSELF);
-            r58 = getRandomVal(PSELF);
             r59 = getRandomVal(PSELF);
             r60 = getRandomVal(PSELF);
             r61 = getRandomVal(PSELF);
@@ -2011,26 +1711,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 11)>::type>
             r69 = getRandomVal(PSELF);
             r70 = getRandomVal(PSELF);
             r71 = getRandomVal(PSELF);
-            r72 = getRandomVal(PSELF);
-            r73 = getRandomVal(PSELF);
-            r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
-            r77 = getRandomVal(PSELF);
-            r78 = getRandomVal(PSELF);
             r79 = getRandomVal(PSELF);
             r80 = getRandomVal(PSELF);
             r81 = getRandomVal(PSELF);
-            r82 = getRandomVal(PSELF);
-            r83 = getRandomVal(PSELF);
-            r84 = getRandomVal(PSELF);
-            r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
             r90 = getRandomVal(PSELF);
-            r91 = getRandomVal(PSELF);
 
         }
     }
@@ -2066,9 +1750,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 11)>::type>
                 b_8_p = b[8].zero_add(triples[6].b);  // b[8]', mask=b8
                 b_9_p = b[9].zero_add(triples[7].a);  // b[9]', mask=a9
                 b_10_p = b[10].zero_add(triples[7].b);  // b[10]', mask=b9
-                B2P_7_8_t1 = a[7].mult_a_known_to_evaluators_dot(a[8], r56);  // and_a_83
-                B2P_7_8_t2 = a[7].mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r55, r56));  // and_a_84
-                B2P_7_8_t3 = a[8].mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r54, r55));  // and_a_85
+                B2P_7_8_t1 = a[7].mult_a_known_to_evaluators_dot(a[8], SET_ALL_ZERO());  // and_a_83
+                B2P_7_8_t2 = a[7].mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_84
+                B2P_7_8_t3 = a[8].mult_a_known_to_evaluators_dot(b[7], r54);  // and_a_85
                 B2P_7_8_out_s1 = B2P_7_8_t1 ^ B2P_7_8_t2;  // B2P_7_8_out_s1
                 B2P_7_8_out_s2 = B2P_7_8_out_s1 ^ B2P_7_8_t3;  // B2P_7_8_out_s2
                 B2P_7_8_out_s2.mask_and_send_dot_without_remask();
@@ -2078,72 +1762,72 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 11)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r59);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r44);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 W2G_9_10_x1x2 = a[9].mult_a_known_to_evaluators(a[10]);  // and_a_90
-                W2G_9_10_t1 = a[9].mult_a_known_to_evaluators_dot(b[9], r58);  // and_a_91
+                W2G_9_10_t1 = a[9].mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_91
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r60);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r38);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r37, r38));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r35, r36));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r36, r37));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r43, r44));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r51);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r50, r51));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r48, r49));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r49, r50));  // and_a_64
-                W2G_9_10_t2 = W2G_9_10_x1x2.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r57, r58));  // and_a_92
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
+                W2G_9_10_t2 = W2G_9_10_x1x2.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_92
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r69
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r69, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r32-r33)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r32, r33), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r70
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r70, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r71
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r71, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r79
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r79, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r45-r46)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r45, r46), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r80
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r80, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r81
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r81, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_89: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r90
-                W2G_9_10_y1y2 = b_9_p.prepare_dot_and_assign(b_10_p, r90, triples[7].c);  // and_89
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r62);  // and_a_11
+                W2G_9_10_y1y2 = b_9_p.prepare_dot_and_assign(b_10_p, SET_ALL_ZERO(), triples[7].c);  // and_89
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r41, r42));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
                 W2G_9_10_out_s1 = W2G_9_10_t1 ^ W2G_9_10_t2;  // W2G_9_10_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r61);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r33, r34));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r65);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r63);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[0].a, r32));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r64);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r34, r35));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r42, r43));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r46, r47));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[8].b, r39));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r40, r41));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[0].b, r45));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r39, r40));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r47, r48));  // and_a_66
-                W2G_9_10_t3 = a[10].mult_a_known_to_evaluators_dot_pending(W2G_9_10_y1y2, FUNC_XOR(beaver4_tuples[0].d, r57));  // and_a_93
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r59, r60), r61), r62), r63), r64), r65));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[0].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[8].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[0].b);  // and_a_66
+                W2G_9_10_t3 = a[10].mult_a_known_to_evaluators_dot_pending(W2G_9_10_y1y2, beaver4_tuples[0].d);  // and_a_93
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3G_1_3_out_s2 = B3G_1_3_out_s1 ^ B3G_1_3_t2_2;  // B3G_1_3_out_s2
@@ -2184,10 +1868,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 11)>::type>
                 W2G_9_10_out.complete_and();
                 B2P_7_8_out = B2P_7_8_out_s2 ^ B2G_7_8_y1y2;  // B2P_7_8_out
                 B2G_7_8_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_77
-                B2G_7_8_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r53);  // and_a_78
-                B2G_7_8_t2 = B2G_7_8_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r52, r53));  // and_a_79
+                B2G_7_8_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_78
+                B2G_7_8_t2 = B2G_7_8_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_79
                 B2G_7_8_out_s1 = B2G_7_8_t1 ^ B2G_7_8_t2;  // B2G_7_8_out_s1
-                B2G_7_8_t3 = a[8].mult_a_known_to_evaluators_dot(B2G_7_8_y1y2, FUNC_XOR(beaver3_tuples[2].c, r52));  // and_a_80
+                B2G_7_8_t3 = a[8].mult_a_known_to_evaluators_dot(B2G_7_8_y1y2, beaver3_tuples[2].c);  // and_a_80
                 B2G_7_8_out = B2G_7_8_out_s1 ^ B2G_7_8_t3;  // B2G_7_8_out
                 B2G_7_8_out.mask_and_send_dot_without_remask();
                 break;
@@ -2197,11 +1881,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 11)>::type>
                 B3P_1_3_out_p_1 = B3P_1_3_out.zero_add(beaver3_tuples[2].a);  // B3P_1_3_out'_1, mask=a11
                 B3P_4_6_out_p = B3P_4_6_out.zero_add(beaver3_tuples[2].b);  // B3P_4_6_out', mask=b11
                 // and4_98: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r68
-                L1_B0_t3 = B3P_1_3_out.prepare_dot4_and_assign(B3P_4_6_out, B2P_7_8_out, W2G_9_10_out, r68, beaver4_tuples[0]);  // and4_98
+                L1_B0_t3 = B3P_1_3_out.prepare_dot4_and_assign(B3P_4_6_out, B2P_7_8_out, W2G_9_10_out, SET_ALL_ZERO(), beaver4_tuples[0]);  // and4_98
                 // and_96: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r66
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r66, triples[8].c);  // and_96
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[8].c);  // and_96
                 // and3_97: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=r67
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B2G_7_8_out, r67, beaver3_tuples[2]);  // and3_97
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B2G_7_8_out, FUNC_XOR(FUNC_XOR(r66, r67), r68), beaver3_tuples[2]);  // and3_97
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
@@ -2240,39 +1924,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 12)>::type>
 
     DATATYPE r39;
     DATATYPE r40;
-    DATATYPE r41;
-    DATATYPE r42;
-    DATATYPE r43;
-    DATATYPE r44;
-    DATATYPE r45;
-    DATATYPE r46;
-    DATATYPE r47;
-    DATATYPE r48;
-    DATATYPE r49;
-    DATATYPE r50;
-    DATATYPE r51;
     DATATYPE r52;
     DATATYPE r53;
-    DATATYPE r54;
-    DATATYPE r55;
-    DATATYPE r56;
-    DATATYPE r57;
-    DATATYPE r58;
-    DATATYPE r59;
-    DATATYPE r60;
-    DATATYPE r61;
-    DATATYPE r62;
-    DATATYPE r63;
-    DATATYPE r64;
     DATATYPE r65;
     DATATYPE r66;
-    DATATYPE r67;
-    DATATYPE r68;
-    DATATYPE r69;
-    DATATYPE r70;
-    DATATYPE r71;
-    DATATYPE r72;
-    DATATYPE r73;
     DATATYPE r74;
     DATATYPE r75;
     DATATYPE r76;
@@ -2286,35 +1941,13 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 12)>::type>
     DATATYPE r84;
     DATATYPE r85;
     DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
-    DATATYPE r90;
-    DATATYPE r91;
-    DATATYPE r92;
-    DATATYPE r93;
     DATATYPE r94;
     DATATYPE r95;
     DATATYPE r96;
-    DATATYPE r97;
-    DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
     DATATYPE r104;
     DATATYPE r105;
     DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
-    DATATYPE r109;
-    DATATYPE r110;
-    DATATYPE r111;
-    DATATYPE r112;
-    DATATYPE r113;
     DATATYPE r114;
-    DATATYPE r115;
 
     Share B3G_1_3_out;
     Share B3G_1_3_out_s1;
@@ -2497,39 +2130,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 12)>::type>
             // Random mask values (shared across mask expressions)
             r39 = getRandomVal(PSELF);
             r40 = getRandomVal(PSELF);
-            r41 = getRandomVal(PSELF);
-            r42 = getRandomVal(PSELF);
-            r43 = getRandomVal(PSELF);
-            r44 = getRandomVal(PSELF);
-            r45 = getRandomVal(PSELF);
-            r46 = getRandomVal(PSELF);
-            r47 = getRandomVal(PSELF);
-            r48 = getRandomVal(PSELF);
-            r49 = getRandomVal(PSELF);
-            r50 = getRandomVal(PSELF);
-            r51 = getRandomVal(PSELF);
             r52 = getRandomVal(PSELF);
             r53 = getRandomVal(PSELF);
-            r54 = getRandomVal(PSELF);
-            r55 = getRandomVal(PSELF);
-            r56 = getRandomVal(PSELF);
-            r57 = getRandomVal(PSELF);
-            r58 = getRandomVal(PSELF);
-            r59 = getRandomVal(PSELF);
-            r60 = getRandomVal(PSELF);
-            r61 = getRandomVal(PSELF);
-            r62 = getRandomVal(PSELF);
-            r63 = getRandomVal(PSELF);
-            r64 = getRandomVal(PSELF);
             r65 = getRandomVal(PSELF);
             r66 = getRandomVal(PSELF);
-            r67 = getRandomVal(PSELF);
-            r68 = getRandomVal(PSELF);
-            r69 = getRandomVal(PSELF);
-            r70 = getRandomVal(PSELF);
-            r71 = getRandomVal(PSELF);
-            r72 = getRandomVal(PSELF);
-            r73 = getRandomVal(PSELF);
             r74 = getRandomVal(PSELF);
             r75 = getRandomVal(PSELF);
             r76 = getRandomVal(PSELF);
@@ -2543,35 +2147,13 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 12)>::type>
             r84 = getRandomVal(PSELF);
             r85 = getRandomVal(PSELF);
             r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
-            r90 = getRandomVal(PSELF);
-            r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
             r94 = getRandomVal(PSELF);
             r95 = getRandomVal(PSELF);
             r96 = getRandomVal(PSELF);
-            r97 = getRandomVal(PSELF);
-            r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
             r104 = getRandomVal(PSELF);
             r105 = getRandomVal(PSELF);
             r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
-            r109 = getRandomVal(PSELF);
-            r110 = getRandomVal(PSELF);
-            r111 = getRandomVal(PSELF);
-            r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
             r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
 
         }
     }
@@ -2617,103 +2199,103 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 12)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r74);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r51);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r64);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 W2G_10_11_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_115
-                W2G_10_11_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r73);  // and_a_116
+                W2G_10_11_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_116
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r75);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r45);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r44, r45));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r42, r43));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r43, r44));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r50, r51));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r58);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r57, r58));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r55, r56));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r56, r57));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r63, r64));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r71);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r70, r71));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r68, r69));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r69, r70));  // and_a_102
-                W2G_10_11_t2 = W2G_10_11_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r72, r73));  // and_a_117
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
+                W2G_10_11_t2 = W2G_10_11_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_117
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r84
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r84, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r39-r40)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r39, r40), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r85
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r85, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r86
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r86, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r94
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r94, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r52-r53)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r52, r53), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r95
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r95, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r96
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r96, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r104
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r104, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r65-r66)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r65, r66), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r105
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r105, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r106
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r106, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r114
-                W2G_10_11_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r114, triples[9].c);  // and_114
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r77);  // and_a_11
+                W2G_10_11_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r48, r49));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r61, r62));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
                 W2G_10_11_out_s1 = W2G_10_11_t1 ^ W2G_10_11_t2;  // W2G_10_11_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r76);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r40, r41));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r80);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r78);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[0].a, r39));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r79);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r41, r42));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r49, r50));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r53, r54));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[10].b, r46));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r47, r48));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[0].b, r52));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r46, r47));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r54, r55));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r62, r63));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r66, r67));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[3].c, r59));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r60, r61));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[0].c, r65));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r59, r60));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r67, r68));  // and_a_104
-                W2G_10_11_t3 = a[11].mult_a_known_to_evaluators_dot_pending(W2G_10_11_y1y2, FUNC_XOR(beaver4_tuples[0].d, r72));  // and_a_118
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r74, r75), r76), r77), r78), r79), r80));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[0].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[10].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[0].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[3].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[0].c);  // and_a_104
+                W2G_10_11_t3 = a[11].mult_a_known_to_evaluators_dot_pending(W2G_10_11_y1y2, beaver4_tuples[0].d);  // and_a_118
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -2768,11 +2350,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 12)>::type>
                 B3P_1_3_out_p_1 = B3P_1_3_out.zero_add(beaver3_tuples[3].a);  // B3P_1_3_out'_1, mask=a14
                 B3P_4_6_out_p = B3P_4_6_out.zero_add(beaver3_tuples[3].b);  // B3P_4_6_out', mask=b14
                 // and4_123: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r83
-                L1_B0_t3 = B3P_1_3_out.prepare_dot4_and_assign(B3P_4_6_out, B3P_7_9_out, W2G_10_11_out, r83, beaver4_tuples[0]);  // and4_123
+                L1_B0_t3 = B3P_1_3_out.prepare_dot4_and_assign(B3P_4_6_out, B3P_7_9_out, W2G_10_11_out, SET_ALL_ZERO(), beaver4_tuples[0]);  // and4_123
                 // and_121: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r81
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r81, triples[10].c);  // and_121
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[10].c);  // and_121
                 // and3_122: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=r82
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r82, beaver3_tuples[3]);  // and3_122
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, FUNC_XOR(FUNC_XOR(r81, r82), r83), beaver3_tuples[3]);  // and3_122
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
@@ -2811,43 +2393,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 13)>::type>
 
     DATATYPE r46;
     DATATYPE r47;
-    DATATYPE r48;
-    DATATYPE r49;
-    DATATYPE r50;
-    DATATYPE r51;
-    DATATYPE r52;
-    DATATYPE r53;
-    DATATYPE r54;
-    DATATYPE r55;
-    DATATYPE r56;
-    DATATYPE r57;
-    DATATYPE r58;
     DATATYPE r59;
     DATATYPE r60;
-    DATATYPE r61;
-    DATATYPE r62;
-    DATATYPE r63;
-    DATATYPE r64;
-    DATATYPE r65;
-    DATATYPE r66;
-    DATATYPE r67;
-    DATATYPE r68;
-    DATATYPE r69;
-    DATATYPE r70;
-    DATATYPE r71;
     DATATYPE r72;
     DATATYPE r73;
-    DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
-    DATATYPE r77;
-    DATATYPE r78;
-    DATATYPE r79;
-    DATATYPE r80;
-    DATATYPE r81;
-    DATATYPE r82;
-    DATATYPE r83;
-    DATATYPE r84;
     DATATYPE r85;
     DATATYPE r86;
     DATATYPE r87;
@@ -2861,41 +2410,16 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 13)>::type>
     DATATYPE r95;
     DATATYPE r96;
     DATATYPE r97;
-    DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
-    DATATYPE r104;
     DATATYPE r105;
     DATATYPE r106;
     DATATYPE r107;
-    DATATYPE r108;
-    DATATYPE r109;
-    DATATYPE r110;
-    DATATYPE r111;
-    DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
     DATATYPE r115;
     DATATYPE r116;
     DATATYPE r117;
-    DATATYPE r118;
-    DATATYPE r119;
-    DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
-    DATATYPE r123;
-    DATATYPE r124;
     DATATYPE r125;
     DATATYPE r126;
     DATATYPE r127;
     DATATYPE r128;
-    DATATYPE r129;
-    DATATYPE r130;
-    DATATYPE r131;
-    DATATYPE r132;
 
     Share B3G_1_3_out;
     Share B3G_1_3_out_s1;
@@ -3099,43 +2623,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 13)>::type>
             // Random mask values (shared across mask expressions)
             r46 = getRandomVal(PSELF);
             r47 = getRandomVal(PSELF);
-            r48 = getRandomVal(PSELF);
-            r49 = getRandomVal(PSELF);
-            r50 = getRandomVal(PSELF);
-            r51 = getRandomVal(PSELF);
-            r52 = getRandomVal(PSELF);
-            r53 = getRandomVal(PSELF);
-            r54 = getRandomVal(PSELF);
-            r55 = getRandomVal(PSELF);
-            r56 = getRandomVal(PSELF);
-            r57 = getRandomVal(PSELF);
-            r58 = getRandomVal(PSELF);
             r59 = getRandomVal(PSELF);
             r60 = getRandomVal(PSELF);
-            r61 = getRandomVal(PSELF);
-            r62 = getRandomVal(PSELF);
-            r63 = getRandomVal(PSELF);
-            r64 = getRandomVal(PSELF);
-            r65 = getRandomVal(PSELF);
-            r66 = getRandomVal(PSELF);
-            r67 = getRandomVal(PSELF);
-            r68 = getRandomVal(PSELF);
-            r69 = getRandomVal(PSELF);
-            r70 = getRandomVal(PSELF);
-            r71 = getRandomVal(PSELF);
             r72 = getRandomVal(PSELF);
             r73 = getRandomVal(PSELF);
-            r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
-            r77 = getRandomVal(PSELF);
-            r78 = getRandomVal(PSELF);
-            r79 = getRandomVal(PSELF);
-            r80 = getRandomVal(PSELF);
-            r81 = getRandomVal(PSELF);
-            r82 = getRandomVal(PSELF);
-            r83 = getRandomVal(PSELF);
-            r84 = getRandomVal(PSELF);
             r85 = getRandomVal(PSELF);
             r86 = getRandomVal(PSELF);
             r87 = getRandomVal(PSELF);
@@ -3149,41 +2640,16 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 13)>::type>
             r95 = getRandomVal(PSELF);
             r96 = getRandomVal(PSELF);
             r97 = getRandomVal(PSELF);
-            r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
-            r104 = getRandomVal(PSELF);
             r105 = getRandomVal(PSELF);
             r106 = getRandomVal(PSELF);
             r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
-            r109 = getRandomVal(PSELF);
-            r110 = getRandomVal(PSELF);
-            r111 = getRandomVal(PSELF);
-            r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
             r115 = getRandomVal(PSELF);
             r116 = getRandomVal(PSELF);
             r117 = getRandomVal(PSELF);
-            r118 = getRandomVal(PSELF);
-            r119 = getRandomVal(PSELF);
-            r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
-            r123 = getRandomVal(PSELF);
-            r124 = getRandomVal(PSELF);
             r125 = getRandomVal(PSELF);
             r126 = getRandomVal(PSELF);
             r127 = getRandomVal(PSELF);
             r128 = getRandomVal(PSELF);
-            r129 = getRandomVal(PSELF);
-            r130 = getRandomVal(PSELF);
-            r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
 
         }
     }
@@ -3236,116 +2702,116 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 13)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r85);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r58);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r71);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 W3L1_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 W3L1_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 W3L1_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                W3L1_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r84);  // and_a_122
+                W3L1_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r86);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r52);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r51, r52));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r49, r50));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r50, r51));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r57, r58));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r65);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r64, r65));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r62, r63));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r63, r64));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r70, r71));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r78);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r77, r78));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r75, r76));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r76, r77));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 W3L1_10_12_x1x2x3 = W3L1_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                W3L1_10_12_t2_1 = W3L1_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r83, r84));  // and_a_123
+                W3L1_10_12_t2_1 = W3L1_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r95
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r95, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r46-r47)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r46, r47), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r96
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r96, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r97
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r97, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r105
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r105, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r59-r60)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r59, r60), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r106
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r106, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r107
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r107, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r115
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r115, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r72-r73)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r72, r73), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r116
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r116, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r117
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r117, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r125
-                W3L1_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r125, triples[9].c);  // and_114
+                W3L1_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=r126
-                W3L1_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, r126, beaver3_tuples[3]);  // and3_115
+                W3L1_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r127
-                W3L1_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r127, triples[10].c);  // and_116
+                W3L1_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r128
-                W3L1_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r128, triples[11].c);  // and_117
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r88);  // and_a_11
+                W3L1_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r55, r56));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r68, r69));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                W3L1_10_12_t3_1 = W3L1_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r81, r82));  // and_a_125
+                W3L1_10_12_t3_1 = W3L1_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 W3L1_10_12_out_s1 = W3L1_10_12_t1 ^ W3L1_10_12_t2_1;  // W3L1_10_12_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r87);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r47, r48));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r91);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r89);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[0].a, r46));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r90);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r48, r49));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r56, r57));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r60, r61));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[12].b, r53));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r54, r55));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[0].b, r59));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r53, r54));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r61, r62));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r69, r70));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r73, r74));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[4].c, r66));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r67, r68));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[0].c, r72));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r66, r67));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r74, r75));  // and_a_104
-                W3L1_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(W3L1_10_12_y1y2, FUNC_XOR(r82, r83));  // and_a_124
-                W3L1_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(W3L1_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r79));  // and_a_128
-                W3L1_10_12_t3_2 = W3L1_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_10_12_y2y3, FUNC_XOR(r80, r81));  // and_a_126
-                W3L1_10_12_t3_3 = W3L1_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_10_12_y1y3, FUNC_XOR(r79, r80));  // and_a_127
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r85, r86), r87), r88), r89), r90), r91));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[0].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[12].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[0].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[4].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[0].c);  // and_a_104
+                W3L1_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(W3L1_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                W3L1_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(W3L1_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                W3L1_10_12_t3_2 = W3L1_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                W3L1_10_12_t3_3 = W3L1_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -3404,11 +2870,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 13)>::type>
                 B3P_1_3_out_p_1 = B3P_1_3_out.zero_add(beaver3_tuples[4].a);  // B3P_1_3_out'_1, mask=a17
                 B3P_4_6_out_p = B3P_4_6_out.zero_add(beaver3_tuples[4].b);  // B3P_4_6_out', mask=b17
                 // and4_137: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r94
-                L1_B0_t3 = B3P_1_3_out.prepare_dot4_and_assign(B3P_4_6_out, B3P_7_9_out, W3L1_10_12_out, r94, beaver4_tuples[0]);  // and4_137
+                L1_B0_t3 = B3P_1_3_out.prepare_dot4_and_assign(B3P_4_6_out, B3P_7_9_out, W3L1_10_12_out, SET_ALL_ZERO(), beaver4_tuples[0]);  // and4_137
                 // and_135: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r92
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r92, triples[12].c);  // and_135
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[12].c);  // and_135
                 // and3_136: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=r93
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r93, beaver3_tuples[4]);  // and3_136
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, FUNC_XOR(FUNC_XOR(r92, r93), r94), beaver3_tuples[4]);  // and3_136
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
@@ -3447,44 +2913,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 14)>::type>
 
     DATATYPE r47;
     DATATYPE r48;
-    DATATYPE r49;
-    DATATYPE r50;
-    DATATYPE r51;
-    DATATYPE r52;
-    DATATYPE r53;
-    DATATYPE r54;
-    DATATYPE r55;
-    DATATYPE r56;
-    DATATYPE r57;
-    DATATYPE r58;
-    DATATYPE r59;
     DATATYPE r60;
     DATATYPE r61;
-    DATATYPE r62;
-    DATATYPE r63;
-    DATATYPE r64;
-    DATATYPE r65;
-    DATATYPE r66;
-    DATATYPE r67;
-    DATATYPE r68;
-    DATATYPE r69;
-    DATATYPE r70;
-    DATATYPE r71;
-    DATATYPE r72;
     DATATYPE r73;
     DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
-    DATATYPE r77;
-    DATATYPE r78;
-    DATATYPE r79;
-    DATATYPE r80;
-    DATATYPE r81;
     DATATYPE r82;
-    DATATYPE r83;
-    DATATYPE r84;
-    DATATYPE r85;
-    DATATYPE r86;
     DATATYPE r87;
     DATATYPE r88;
     DATATYPE r89;
@@ -3499,36 +2932,13 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 14)>::type>
     DATATYPE r98;
     DATATYPE r99;
     DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
-    DATATYPE r104;
-    DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
     DATATYPE r108;
     DATATYPE r109;
     DATATYPE r110;
-    DATATYPE r111;
-    DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
-    DATATYPE r115;
-    DATATYPE r116;
-    DATATYPE r117;
     DATATYPE r118;
     DATATYPE r119;
     DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
-    DATATYPE r123;
-    DATATYPE r124;
-    DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
     DATATYPE r129;
-    DATATYPE r130;
 
     Share B2G_10_11_out;
     Share B2G_10_11_out_s1;
@@ -3732,44 +3142,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 14)>::type>
             // Random mask values (shared across mask expressions)
             r47 = getRandomVal(PSELF);
             r48 = getRandomVal(PSELF);
-            r49 = getRandomVal(PSELF);
-            r50 = getRandomVal(PSELF);
-            r51 = getRandomVal(PSELF);
-            r52 = getRandomVal(PSELF);
-            r53 = getRandomVal(PSELF);
-            r54 = getRandomVal(PSELF);
-            r55 = getRandomVal(PSELF);
-            r56 = getRandomVal(PSELF);
-            r57 = getRandomVal(PSELF);
-            r58 = getRandomVal(PSELF);
-            r59 = getRandomVal(PSELF);
             r60 = getRandomVal(PSELF);
             r61 = getRandomVal(PSELF);
-            r62 = getRandomVal(PSELF);
-            r63 = getRandomVal(PSELF);
-            r64 = getRandomVal(PSELF);
-            r65 = getRandomVal(PSELF);
-            r66 = getRandomVal(PSELF);
-            r67 = getRandomVal(PSELF);
-            r68 = getRandomVal(PSELF);
-            r69 = getRandomVal(PSELF);
-            r70 = getRandomVal(PSELF);
-            r71 = getRandomVal(PSELF);
-            r72 = getRandomVal(PSELF);
             r73 = getRandomVal(PSELF);
             r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
-            r77 = getRandomVal(PSELF);
-            r78 = getRandomVal(PSELF);
-            r79 = getRandomVal(PSELF);
-            r80 = getRandomVal(PSELF);
-            r81 = getRandomVal(PSELF);
             r82 = getRandomVal(PSELF);
-            r83 = getRandomVal(PSELF);
-            r84 = getRandomVal(PSELF);
-            r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
             r87 = getRandomVal(PSELF);
             r88 = getRandomVal(PSELF);
             r89 = getRandomVal(PSELF);
@@ -3784,36 +3161,13 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 14)>::type>
             r98 = getRandomVal(PSELF);
             r99 = getRandomVal(PSELF);
             r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
-            r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
             r108 = getRandomVal(PSELF);
             r109 = getRandomVal(PSELF);
             r110 = getRandomVal(PSELF);
-            r111 = getRandomVal(PSELF);
-            r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
-            r116 = getRandomVal(PSELF);
-            r117 = getRandomVal(PSELF);
             r118 = getRandomVal(PSELF);
             r119 = getRandomVal(PSELF);
             r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
-            r123 = getRandomVal(PSELF);
-            r124 = getRandomVal(PSELF);
-            r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
             r129 = getRandomVal(PSELF);
-            r130 = getRandomVal(PSELF);
 
         }
     }
@@ -3858,9 +3212,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 14)>::type>
                 b_11_p = b[11].zero_add(triples[9].b);  // b[11]', mask=b12
                 b_12_p = b[12].zero_add(triples[10].a);  // b[12]', mask=a13
                 b_13_p = b[13].zero_add(triples[10].b);  // b[13]', mask=b13
-                B2P_10_11_t1 = a[10].mult_a_known_to_evaluators_dot(a[11], r84);  // and_a_121
-                B2P_10_11_t2 = a[10].mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r83, r84));  // and_a_122
-                B2P_10_11_t3 = a[11].mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r82, r83));  // and_a_123
+                B2P_10_11_t1 = a[10].mult_a_known_to_evaluators_dot(a[11], SET_ALL_ZERO());  // and_a_121
+                B2P_10_11_t2 = a[10].mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_122
+                B2P_10_11_t3 = a[11].mult_a_known_to_evaluators_dot(b[10], r82);  // and_a_123
                 B2P_10_11_out_s1 = B2P_10_11_t1 ^ B2P_10_11_t2;  // B2P_10_11_out_s1
                 B2P_10_11_out_s2 = B2P_10_11_out_s1 ^ B2P_10_11_t3;  // B2P_10_11_out_s2
                 B2P_10_11_out_s2.mask_and_send_dot_without_remask();
@@ -3870,103 +3224,103 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 14)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r87);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r59);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r72);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 W2G_12_13_x1x2 = a[12].mult_a_known_to_evaluators(a[13]);  // and_a_128
-                W2G_12_13_t1 = a[12].mult_a_known_to_evaluators_dot(b[12], r86);  // and_a_129
+                W2G_12_13_t1 = a[12].mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_129
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r88);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r53);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r52, r53));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r50, r51));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r51, r52));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r58, r59));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r66);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r65, r66));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r63, r64));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r64, r65));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r71, r72));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r79);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r78, r79));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r76, r77));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r77, r78));  // and_a_102
-                W2G_12_13_t2 = W2G_12_13_x1x2.mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r85, r86));  // and_a_130
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
+                W2G_12_13_t2 = W2G_12_13_x1x2.mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_130
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r98
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r98, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r47-r48)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r47, r48), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r99
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r99, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r100
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r100, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r108
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r108, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r60-r61)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r60, r61), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r109
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r109, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r110
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r110, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r118
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r118, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r73-r74)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r73, r74), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r119
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r119, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r120
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r120, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_127: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r129
-                W2G_12_13_y1y2 = b_12_p.prepare_dot_and_assign(b_13_p, r129, triples[10].c);  // and_127
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r90);  // and_a_11
+                W2G_12_13_y1y2 = b_12_p.prepare_dot_and_assign(b_13_p, SET_ALL_ZERO(), triples[10].c);  // and_127
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r56, r57));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r69, r70));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
                 W2G_12_13_out_s1 = W2G_12_13_t1 ^ W2G_12_13_t2;  // W2G_12_13_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r89);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r48, r49));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r93);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r91);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r47));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r92);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r49, r50));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r57, r58));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r61, r62));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[11].b, r54));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r55, r56));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r60));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r54, r55));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r62, r63));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r70, r71));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r74, r75));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[3].c, r67));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r68, r69));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r73));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r67, r68));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r75, r76));  // and_a_104
-                W2G_12_13_t3 = a[13].mult_a_known_to_evaluators_dot_pending(W2G_12_13_y1y2, FUNC_XOR(triples[12].b, r85));  // and_a_131
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r87, r88), r89), r90), r91), r92), r93));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[11].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[3].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                W2G_12_13_t3 = a[13].mult_a_known_to_evaluators_dot_pending(W2G_12_13_y1y2, triples[12].b);  // and_a_131
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -4022,10 +3376,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 14)>::type>
                 W2G_12_13_out.complete_and();
                 B2P_10_11_out = B2P_10_11_out_s2 ^ B2G_10_11_y1y2;  // B2P_10_11_out
                 B2G_10_11_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_115
-                B2G_10_11_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r81);  // and_a_116
-                B2G_10_11_t2 = B2G_10_11_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r80, r81));  // and_a_117
+                B2G_10_11_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_116
+                B2G_10_11_t2 = B2G_10_11_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_117
                 B2G_10_11_out_s1 = B2G_10_11_t1 ^ B2G_10_11_t2;  // B2G_10_11_out_s1
-                B2G_10_11_t3 = a[11].mult_a_known_to_evaluators_dot(B2G_10_11_y1y2, FUNC_XOR(beaver4_tuples[0].d, r80));  // and_a_118
+                B2G_10_11_t3 = a[11].mult_a_known_to_evaluators_dot(B2G_10_11_y1y2, beaver4_tuples[0].d);  // and_a_118
                 B2G_10_11_out = B2G_10_11_out_s1 ^ B2G_10_11_t3;  // B2G_10_11_out
                 B2G_10_11_out.mask_and_send_dot_without_remask();
                 break;
@@ -4038,11 +3392,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 14)>::type>
                 B3P_4_6_out_p_1 = B3P_4_6_out.zero_add(beaver4_tuples[0].b);  // B3P_4_6_out'_1, mask=b16
                 B3P_7_9_out_p = B3P_7_9_out.zero_add(beaver4_tuples[0].c);  // B3P_7_9_out', mask=c16
                 // and_134: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r94
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r94, triples[11].c);  // and_134
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[11].c);  // and_134
                 // and3_135: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=r95
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r95, beaver3_tuples[3]);  // and3_135
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_135
                 // and4_136: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r96
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B2G_10_11_out, r96, beaver4_tuples[0]);  // and4_136
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B2G_10_11_out, FUNC_XOR(FUNC_XOR(r94, r95), r96), beaver4_tuples[0]);  // and4_136
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
@@ -4090,52 +3444,12 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 15)>::type>
 
     DATATYPE r54;
     DATATYPE r55;
-    DATATYPE r56;
-    DATATYPE r57;
-    DATATYPE r58;
-    DATATYPE r59;
-    DATATYPE r60;
-    DATATYPE r61;
-    DATATYPE r62;
-    DATATYPE r63;
-    DATATYPE r64;
-    DATATYPE r65;
-    DATATYPE r66;
     DATATYPE r67;
     DATATYPE r68;
-    DATATYPE r69;
-    DATATYPE r70;
-    DATATYPE r71;
-    DATATYPE r72;
-    DATATYPE r73;
-    DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
-    DATATYPE r77;
-    DATATYPE r78;
-    DATATYPE r79;
     DATATYPE r80;
     DATATYPE r81;
-    DATATYPE r82;
-    DATATYPE r83;
-    DATATYPE r84;
-    DATATYPE r85;
-    DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
-    DATATYPE r90;
-    DATATYPE r91;
-    DATATYPE r92;
     DATATYPE r93;
     DATATYPE r94;
-    DATATYPE r95;
-    DATATYPE r96;
-    DATATYPE r97;
-    DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
     DATATYPE r102;
     DATATYPE r103;
     DATATYPE r104;
@@ -4150,45 +3464,16 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 15)>::type>
     DATATYPE r113;
     DATATYPE r114;
     DATATYPE r115;
-    DATATYPE r116;
-    DATATYPE r117;
-    DATATYPE r118;
-    DATATYPE r119;
-    DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
     DATATYPE r123;
     DATATYPE r124;
     DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
-    DATATYPE r129;
-    DATATYPE r130;
-    DATATYPE r131;
-    DATATYPE r132;
     DATATYPE r133;
     DATATYPE r134;
     DATATYPE r135;
-    DATATYPE r136;
-    DATATYPE r137;
-    DATATYPE r138;
-    DATATYPE r139;
-    DATATYPE r140;
-    DATATYPE r141;
-    DATATYPE r142;
     DATATYPE r143;
     DATATYPE r144;
     DATATYPE r145;
-    DATATYPE r146;
-    DATATYPE r147;
-    DATATYPE r148;
-    DATATYPE r149;
-    DATATYPE r150;
-    DATATYPE r151;
-    DATATYPE r152;
     DATATYPE r153;
-    DATATYPE r154;
 
     Share B3G_10_12_out;
     Share B3G_10_12_out_s1;
@@ -4424,52 +3709,12 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 15)>::type>
             // Random mask values (shared across mask expressions)
             r54 = getRandomVal(PSELF);
             r55 = getRandomVal(PSELF);
-            r56 = getRandomVal(PSELF);
-            r57 = getRandomVal(PSELF);
-            r58 = getRandomVal(PSELF);
-            r59 = getRandomVal(PSELF);
-            r60 = getRandomVal(PSELF);
-            r61 = getRandomVal(PSELF);
-            r62 = getRandomVal(PSELF);
-            r63 = getRandomVal(PSELF);
-            r64 = getRandomVal(PSELF);
-            r65 = getRandomVal(PSELF);
-            r66 = getRandomVal(PSELF);
             r67 = getRandomVal(PSELF);
             r68 = getRandomVal(PSELF);
-            r69 = getRandomVal(PSELF);
-            r70 = getRandomVal(PSELF);
-            r71 = getRandomVal(PSELF);
-            r72 = getRandomVal(PSELF);
-            r73 = getRandomVal(PSELF);
-            r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
-            r77 = getRandomVal(PSELF);
-            r78 = getRandomVal(PSELF);
-            r79 = getRandomVal(PSELF);
             r80 = getRandomVal(PSELF);
             r81 = getRandomVal(PSELF);
-            r82 = getRandomVal(PSELF);
-            r83 = getRandomVal(PSELF);
-            r84 = getRandomVal(PSELF);
-            r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
-            r90 = getRandomVal(PSELF);
-            r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
             r93 = getRandomVal(PSELF);
             r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
-            r96 = getRandomVal(PSELF);
-            r97 = getRandomVal(PSELF);
-            r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
             r102 = getRandomVal(PSELF);
             r103 = getRandomVal(PSELF);
             r104 = getRandomVal(PSELF);
@@ -4484,45 +3729,16 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 15)>::type>
             r113 = getRandomVal(PSELF);
             r114 = getRandomVal(PSELF);
             r115 = getRandomVal(PSELF);
-            r116 = getRandomVal(PSELF);
-            r117 = getRandomVal(PSELF);
-            r118 = getRandomVal(PSELF);
-            r119 = getRandomVal(PSELF);
-            r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
             r123 = getRandomVal(PSELF);
             r124 = getRandomVal(PSELF);
             r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
-            r129 = getRandomVal(PSELF);
-            r130 = getRandomVal(PSELF);
-            r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
             r133 = getRandomVal(PSELF);
             r134 = getRandomVal(PSELF);
             r135 = getRandomVal(PSELF);
-            r136 = getRandomVal(PSELF);
-            r137 = getRandomVal(PSELF);
-            r138 = getRandomVal(PSELF);
-            r139 = getRandomVal(PSELF);
-            r140 = getRandomVal(PSELF);
-            r141 = getRandomVal(PSELF);
-            r142 = getRandomVal(PSELF);
             r143 = getRandomVal(PSELF);
             r144 = getRandomVal(PSELF);
             r145 = getRandomVal(PSELF);
-            r146 = getRandomVal(PSELF);
-            r147 = getRandomVal(PSELF);
-            r148 = getRandomVal(PSELF);
-            r149 = getRandomVal(PSELF);
-            r150 = getRandomVal(PSELF);
-            r151 = getRandomVal(PSELF);
-            r152 = getRandomVal(PSELF);
             r153 = getRandomVal(PSELF);
-            r154 = getRandomVal(PSELF);
 
         }
     }
@@ -4577,134 +3793,134 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 15)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r102);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r66);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r79);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r92);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 W2G_13_14_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_153
-                W2G_13_14_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r101);  // and_a_154
+                W2G_13_14_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_154
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r103);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r60);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r59, r60));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r57, r58));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r58, r59));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r65, r66));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r73);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r72, r73));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r70, r71));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r71, r72));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r78, r79));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r86);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r85, r86));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r83, r84));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r84, r85));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r91, r92));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r99);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r98, r99));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r96, r97));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r97, r98));  // and_a_140
-                W2G_13_14_t2 = W2G_13_14_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r100, r101));  // and_a_155
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
+                W2G_13_14_t2 = W2G_13_14_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_155
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r113
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r113, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r54-r55)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r54, r55), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r114
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r114, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r115
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r115, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r123
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r123, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r67-r68)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r67, r68), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r124
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r124, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r125
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r125, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r133
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r133, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r80-r81)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r80, r81), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r134
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r134, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r135
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r135, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r143
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r143, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r93-r94)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r93, r94), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r144
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r144, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r145
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r145, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_152: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r153
-                W2G_13_14_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, r153, triples[12].c);  // and_152
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r105);  // and_a_11
+                W2G_13_14_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, SET_ALL_ZERO(), triples[12].c);  // and_152
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r63, r64));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r76, r77));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r89, r90));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
                 W2G_13_14_out_s1 = W2G_13_14_t1 ^ W2G_13_14_t2;  // W2G_13_14_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r104);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r55, r56));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r108);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r106);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r54));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r107);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r56, r57));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r64, r65));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r68, r69));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[13].b, r61));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r62, r63));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r67));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r61, r62));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r69, r70));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r77, r78));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r81, r82));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[4].c, r74));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r75, r76));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r80));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r74, r75));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r82, r83));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r90, r91));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r94, r95));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r87));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r88, r89));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r93));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r87, r88));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r95, r96));  // and_a_142
-                W2G_13_14_t3 = a[14].mult_a_known_to_evaluators_dot_pending(W2G_13_14_y1y2, FUNC_XOR(triples[14].b, r100));  // and_a_156
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r102, r103), r104), r105), r106), r107), r108));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[13].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[4].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                W2G_13_14_t3 = a[14].mult_a_known_to_evaluators_dot_pending(W2G_13_14_y1y2, triples[14].b);  // and_a_156
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -4777,11 +3993,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 15)>::type>
                 B3P_4_6_out_p_1 = B3P_4_6_out.zero_add(beaver4_tuples[0].b);  // B3P_4_6_out'_1, mask=b19
                 B3P_7_9_out_p = B3P_7_9_out.zero_add(beaver4_tuples[0].c);  // B3P_7_9_out', mask=c19
                 // and_159: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r109
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r109, triples[13].c);  // and_159
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[13].c);  // and_159
                 // and3_160: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=r110
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r110, beaver3_tuples[4]);  // and3_160
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_160
                 // and4_161: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r111
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r111, beaver4_tuples[0]);  // and4_161
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r109, r110), r111), beaver4_tuples[0]);  // and4_161
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
@@ -4829,58 +4045,14 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 17)>::type>
 
     DATATYPE r58;
     DATATYPE r59;
-    DATATYPE r60;
-    DATATYPE r61;
-    DATATYPE r62;
-    DATATYPE r63;
-    DATATYPE r64;
-    DATATYPE r65;
-    DATATYPE r66;
-    DATATYPE r67;
-    DATATYPE r68;
-    DATATYPE r69;
-    DATATYPE r70;
     DATATYPE r71;
     DATATYPE r72;
-    DATATYPE r73;
-    DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
-    DATATYPE r77;
-    DATATYPE r78;
-    DATATYPE r79;
-    DATATYPE r80;
-    DATATYPE r81;
-    DATATYPE r82;
-    DATATYPE r83;
     DATATYPE r84;
     DATATYPE r85;
-    DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
-    DATATYPE r90;
-    DATATYPE r91;
-    DATATYPE r92;
-    DATATYPE r93;
-    DATATYPE r94;
-    DATATYPE r95;
-    DATATYPE r96;
     DATATYPE r97;
     DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
     DATATYPE r104;
-    DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
     DATATYPE r109;
-    DATATYPE r110;
-    DATATYPE r111;
     DATATYPE r112;
     DATATYPE r113;
     DATATYPE r114;
@@ -4895,46 +4067,16 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 17)>::type>
     DATATYPE r123;
     DATATYPE r124;
     DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
-    DATATYPE r129;
-    DATATYPE r130;
-    DATATYPE r131;
-    DATATYPE r132;
     DATATYPE r133;
     DATATYPE r134;
     DATATYPE r135;
-    DATATYPE r136;
-    DATATYPE r137;
-    DATATYPE r138;
-    DATATYPE r139;
-    DATATYPE r140;
-    DATATYPE r141;
-    DATATYPE r142;
     DATATYPE r143;
     DATATYPE r144;
     DATATYPE r145;
-    DATATYPE r146;
-    DATATYPE r147;
-    DATATYPE r148;
-    DATATYPE r149;
-    DATATYPE r150;
-    DATATYPE r151;
-    DATATYPE r152;
     DATATYPE r153;
     DATATYPE r154;
     DATATYPE r155;
-    DATATYPE r156;
-    DATATYPE r157;
-    DATATYPE r158;
-    DATATYPE r159;
-    DATATYPE r160;
-    DATATYPE r161;
-    DATATYPE r162;
-    DATATYPE r163;
     DATATYPE r164;
-    DATATYPE r165;
 
     Share B2G_13_14_out;
     Share B2G_13_14_out_s1;
@@ -5187,58 +4329,14 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 17)>::type>
             // Random mask values (shared across mask expressions)
             r58 = getRandomVal(PSELF);
             r59 = getRandomVal(PSELF);
-            r60 = getRandomVal(PSELF);
-            r61 = getRandomVal(PSELF);
-            r62 = getRandomVal(PSELF);
-            r63 = getRandomVal(PSELF);
-            r64 = getRandomVal(PSELF);
-            r65 = getRandomVal(PSELF);
-            r66 = getRandomVal(PSELF);
-            r67 = getRandomVal(PSELF);
-            r68 = getRandomVal(PSELF);
-            r69 = getRandomVal(PSELF);
-            r70 = getRandomVal(PSELF);
             r71 = getRandomVal(PSELF);
             r72 = getRandomVal(PSELF);
-            r73 = getRandomVal(PSELF);
-            r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
-            r77 = getRandomVal(PSELF);
-            r78 = getRandomVal(PSELF);
-            r79 = getRandomVal(PSELF);
-            r80 = getRandomVal(PSELF);
-            r81 = getRandomVal(PSELF);
-            r82 = getRandomVal(PSELF);
-            r83 = getRandomVal(PSELF);
             r84 = getRandomVal(PSELF);
             r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
-            r90 = getRandomVal(PSELF);
-            r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
-            r96 = getRandomVal(PSELF);
             r97 = getRandomVal(PSELF);
             r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
             r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
             r109 = getRandomVal(PSELF);
-            r110 = getRandomVal(PSELF);
-            r111 = getRandomVal(PSELF);
             r112 = getRandomVal(PSELF);
             r113 = getRandomVal(PSELF);
             r114 = getRandomVal(PSELF);
@@ -5253,46 +4351,16 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 17)>::type>
             r123 = getRandomVal(PSELF);
             r124 = getRandomVal(PSELF);
             r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
-            r129 = getRandomVal(PSELF);
-            r130 = getRandomVal(PSELF);
-            r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
             r133 = getRandomVal(PSELF);
             r134 = getRandomVal(PSELF);
             r135 = getRandomVal(PSELF);
-            r136 = getRandomVal(PSELF);
-            r137 = getRandomVal(PSELF);
-            r138 = getRandomVal(PSELF);
-            r139 = getRandomVal(PSELF);
-            r140 = getRandomVal(PSELF);
-            r141 = getRandomVal(PSELF);
-            r142 = getRandomVal(PSELF);
             r143 = getRandomVal(PSELF);
             r144 = getRandomVal(PSELF);
             r145 = getRandomVal(PSELF);
-            r146 = getRandomVal(PSELF);
-            r147 = getRandomVal(PSELF);
-            r148 = getRandomVal(PSELF);
-            r149 = getRandomVal(PSELF);
-            r150 = getRandomVal(PSELF);
-            r151 = getRandomVal(PSELF);
-            r152 = getRandomVal(PSELF);
             r153 = getRandomVal(PSELF);
             r154 = getRandomVal(PSELF);
             r155 = getRandomVal(PSELF);
-            r156 = getRandomVal(PSELF);
-            r157 = getRandomVal(PSELF);
-            r158 = getRandomVal(PSELF);
-            r159 = getRandomVal(PSELF);
-            r160 = getRandomVal(PSELF);
-            r161 = getRandomVal(PSELF);
-            r162 = getRandomVal(PSELF);
-            r163 = getRandomVal(PSELF);
             r164 = getRandomVal(PSELF);
-            r165 = getRandomVal(PSELF);
 
         }
     }
@@ -5346,9 +4414,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 17)>::type>
                 b_14_p = b[14].zero_add(triples[12].b);  // b[14]', mask=b16
                 b_15_p = b[15].zero_add(triples[13].a);  // b[15]', mask=a17
                 b_16_p = b[16].zero_add(triples[13].b);  // b[16]', mask=b17
-                B2P_13_14_t1 = a[13].mult_a_known_to_evaluators_dot(a[14], r106);  // and_a_159
-                B2P_13_14_t2 = a[13].mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r105, r106));  // and_a_160
-                B2P_13_14_t3 = a[14].mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r104, r105));  // and_a_161
+                B2P_13_14_t1 = a[13].mult_a_known_to_evaluators_dot(a[14], SET_ALL_ZERO());  // and_a_159
+                B2P_13_14_t2 = a[13].mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_160
+                B2P_13_14_t3 = a[14].mult_a_known_to_evaluators_dot(b[13], r104);  // and_a_161
                 B2P_13_14_out_s1 = B2P_13_14_t1 ^ B2P_13_14_t2;  // B2P_13_14_out_s1
                 B2P_13_14_out_s2 = B2P_13_14_out_s1 ^ B2P_13_14_t3;  // B2P_13_14_out_s2
                 B2P_13_14_out_s2.mask_and_send_dot_without_remask();
@@ -5358,134 +4426,134 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 17)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r112);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r70);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r83);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r96);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 W2G_15_16_x1x2 = a[15].mult_a_known_to_evaluators(a[16]);  // and_a_166
-                W2G_15_16_t1 = a[15].mult_a_known_to_evaluators_dot(b[15], r108);  // and_a_167
+                W2G_15_16_t1 = a[15].mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_167
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r113);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r64);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r63, r64));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r61, r62));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r62, r63));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r69, r70));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r77);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r76, r77));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r74, r75));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r75, r76));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r82, r83));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r90);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r89, r90));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r87, r88));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r88, r89));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r95, r96));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r103);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r102, r103));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r100, r101));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r101, r102));  // and_a_140
-                W2G_15_16_t2 = W2G_15_16_x1x2.mult_a_known_to_evaluators_dot(b[16], FUNC_XOR(r107, r108));  // and_a_168
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
+                W2G_15_16_t2 = W2G_15_16_x1x2.mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_168
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r123
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r123, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r58-r59)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r58, r59), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r124
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r124, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r125
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r125, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r133
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r133, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r71-r72)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r71, r72), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r134
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r134, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r135
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r135, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r143
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r143, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r84-r85)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r84, r85), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r144
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r144, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r145
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r145, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r153
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r153, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r97-r98)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r97, r98), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r154
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r154, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r155
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r155, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_165: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r164
-                W2G_15_16_y1y2 = b_15_p.prepare_dot_and_assign(b_16_p, r164, triples[13].c);  // and_165
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r115);  // and_a_11
+                W2G_15_16_y1y2 = b_15_p.prepare_dot_and_assign(b_16_p, SET_ALL_ZERO(), triples[13].c);  // and_165
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r67, r68));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r80, r81));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r93, r94));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
                 W2G_15_16_out_s1 = W2G_15_16_t1 ^ W2G_15_16_t2;  // W2G_15_16_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r114);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r59, r60));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r118);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r116);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r58));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r117);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r60, r61));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r68, r69));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r72, r73));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[14].b, r65));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r66, r67));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r71));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r65, r66));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r73, r74));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r81, r82));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r85, r86));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[4].c, r78));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r79, r80));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r84));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r78, r79));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r86, r87));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r94, r95));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r98, r99));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r91));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r92, r93));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r97));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r91, r92));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r99, r100));  // and_a_142
-                W2G_15_16_t3 = a[16].mult_a_known_to_evaluators_dot_pending(W2G_15_16_y1y2, FUNC_XOR(triples[15].b, r107));  // and_a_169
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r112, r113), r114), r115), r116), r117), r118));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[14].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[4].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                W2G_15_16_t3 = a[16].mult_a_known_to_evaluators_dot_pending(W2G_15_16_y1y2, triples[15].b);  // and_a_169
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -5556,10 +4624,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 17)>::type>
                 W2G_15_16_out.complete_and();
                 B2P_13_14_out = B2P_13_14_out_s2 ^ B2G_13_14_y1y2;  // B2P_13_14_out
                 B2G_13_14_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_153
-                B2G_13_14_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r111);  // and_a_154
-                B2G_13_14_t2 = B2G_13_14_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r110, r111));  // and_a_155
+                B2G_13_14_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_154
+                B2G_13_14_t2 = B2G_13_14_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_155
                 B2G_13_14_out_s1 = B2G_13_14_t1 ^ B2G_13_14_t2;  // B2G_13_14_out_s1
-                B2G_13_14_t3 = a[14].mult_a_known_to_evaluators_dot(B2G_13_14_y1y2, FUNC_XOR(FUNC_XOR(triples[16].b, r109), r110));  // and_a_156
+                B2G_13_14_t3 = a[14].mult_a_known_to_evaluators_dot(B2G_13_14_y1y2, FUNC_XOR(triples[16].b, r109));  // and_a_156
                 B2G_13_14_out = B2G_13_14_out_s1 ^ B2G_13_14_t3;  // B2G_13_14_out
                 B2G_13_14_out.mask_and_send_dot_without_remask();
                 break;
@@ -5572,11 +4640,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 17)>::type>
                 B3P_4_6_out_p_1 = B3P_4_6_out.zero_add(beaver4_tuples[0].b);  // B3P_4_6_out'_1, mask=b20
                 B3P_7_9_out_p = B3P_7_9_out.zero_add(beaver4_tuples[0].c);  // B3P_7_9_out', mask=c20
                 // and_172: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r119
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r119, triples[14].c);  // and_172
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[14].c);  // and_172
                 // and3_173: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=r120
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r120, beaver3_tuples[4]);  // and3_173
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_173
                 // and4_174: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r121
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r121, beaver4_tuples[0]);  // and4_174
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r119, r120), r121), beaver4_tuples[0]);  // and4_174
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
@@ -5628,66 +4696,15 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 18)>::type>
 
     DATATYPE r65;
     DATATYPE r66;
-    DATATYPE r67;
-    DATATYPE r68;
-    DATATYPE r69;
-    DATATYPE r70;
-    DATATYPE r71;
-    DATATYPE r72;
-    DATATYPE r73;
-    DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
-    DATATYPE r77;
     DATATYPE r78;
     DATATYPE r79;
-    DATATYPE r80;
-    DATATYPE r81;
-    DATATYPE r82;
-    DATATYPE r83;
-    DATATYPE r84;
-    DATATYPE r85;
-    DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
-    DATATYPE r90;
     DATATYPE r91;
     DATATYPE r92;
-    DATATYPE r93;
-    DATATYPE r94;
-    DATATYPE r95;
-    DATATYPE r96;
-    DATATYPE r97;
-    DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
     DATATYPE r104;
     DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
-    DATATYPE r109;
-    DATATYPE r110;
     DATATYPE r111;
     DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
-    DATATYPE r115;
-    DATATYPE r116;
-    DATATYPE r117;
-    DATATYPE r118;
-    DATATYPE r119;
     DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
-    DATATYPE r123;
-    DATATYPE r124;
-    DATATYPE r125;
-    DATATYPE r126;
     DATATYPE r127;
     DATATYPE r128;
     DATATYPE r129;
@@ -5702,55 +4719,19 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 18)>::type>
     DATATYPE r138;
     DATATYPE r139;
     DATATYPE r140;
-    DATATYPE r141;
-    DATATYPE r142;
-    DATATYPE r143;
-    DATATYPE r144;
-    DATATYPE r145;
-    DATATYPE r146;
-    DATATYPE r147;
     DATATYPE r148;
     DATATYPE r149;
     DATATYPE r150;
-    DATATYPE r151;
-    DATATYPE r152;
-    DATATYPE r153;
-    DATATYPE r154;
-    DATATYPE r155;
-    DATATYPE r156;
-    DATATYPE r157;
     DATATYPE r158;
     DATATYPE r159;
     DATATYPE r160;
-    DATATYPE r161;
-    DATATYPE r162;
-    DATATYPE r163;
-    DATATYPE r164;
-    DATATYPE r165;
-    DATATYPE r166;
-    DATATYPE r167;
     DATATYPE r168;
     DATATYPE r169;
     DATATYPE r170;
-    DATATYPE r171;
-    DATATYPE r172;
-    DATATYPE r173;
-    DATATYPE r174;
-    DATATYPE r175;
-    DATATYPE r176;
-    DATATYPE r177;
     DATATYPE r178;
     DATATYPE r179;
     DATATYPE r180;
-    DATATYPE r181;
-    DATATYPE r182;
-    DATATYPE r183;
-    DATATYPE r184;
-    DATATYPE r185;
-    DATATYPE r186;
-    DATATYPE r187;
     DATATYPE r188;
-    DATATYPE r189;
 
     Share B3G_10_12_out;
     Share B3G_10_12_out_s1;
@@ -6035,66 +5016,15 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 18)>::type>
             // Random mask values (shared across mask expressions)
             r65 = getRandomVal(PSELF);
             r66 = getRandomVal(PSELF);
-            r67 = getRandomVal(PSELF);
-            r68 = getRandomVal(PSELF);
-            r69 = getRandomVal(PSELF);
-            r70 = getRandomVal(PSELF);
-            r71 = getRandomVal(PSELF);
-            r72 = getRandomVal(PSELF);
-            r73 = getRandomVal(PSELF);
-            r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
-            r77 = getRandomVal(PSELF);
             r78 = getRandomVal(PSELF);
             r79 = getRandomVal(PSELF);
-            r80 = getRandomVal(PSELF);
-            r81 = getRandomVal(PSELF);
-            r82 = getRandomVal(PSELF);
-            r83 = getRandomVal(PSELF);
-            r84 = getRandomVal(PSELF);
-            r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
-            r90 = getRandomVal(PSELF);
             r91 = getRandomVal(PSELF);
             r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
-            r96 = getRandomVal(PSELF);
-            r97 = getRandomVal(PSELF);
-            r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
             r104 = getRandomVal(PSELF);
             r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
-            r109 = getRandomVal(PSELF);
-            r110 = getRandomVal(PSELF);
             r111 = getRandomVal(PSELF);
             r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
-            r116 = getRandomVal(PSELF);
-            r117 = getRandomVal(PSELF);
-            r118 = getRandomVal(PSELF);
-            r119 = getRandomVal(PSELF);
             r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
-            r123 = getRandomVal(PSELF);
-            r124 = getRandomVal(PSELF);
-            r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
             r127 = getRandomVal(PSELF);
             r128 = getRandomVal(PSELF);
             r129 = getRandomVal(PSELF);
@@ -6109,55 +5039,19 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 18)>::type>
             r138 = getRandomVal(PSELF);
             r139 = getRandomVal(PSELF);
             r140 = getRandomVal(PSELF);
-            r141 = getRandomVal(PSELF);
-            r142 = getRandomVal(PSELF);
-            r143 = getRandomVal(PSELF);
-            r144 = getRandomVal(PSELF);
-            r145 = getRandomVal(PSELF);
-            r146 = getRandomVal(PSELF);
-            r147 = getRandomVal(PSELF);
             r148 = getRandomVal(PSELF);
             r149 = getRandomVal(PSELF);
             r150 = getRandomVal(PSELF);
-            r151 = getRandomVal(PSELF);
-            r152 = getRandomVal(PSELF);
-            r153 = getRandomVal(PSELF);
-            r154 = getRandomVal(PSELF);
-            r155 = getRandomVal(PSELF);
-            r156 = getRandomVal(PSELF);
-            r157 = getRandomVal(PSELF);
             r158 = getRandomVal(PSELF);
             r159 = getRandomVal(PSELF);
             r160 = getRandomVal(PSELF);
-            r161 = getRandomVal(PSELF);
-            r162 = getRandomVal(PSELF);
-            r163 = getRandomVal(PSELF);
-            r164 = getRandomVal(PSELF);
-            r165 = getRandomVal(PSELF);
-            r166 = getRandomVal(PSELF);
-            r167 = getRandomVal(PSELF);
             r168 = getRandomVal(PSELF);
             r169 = getRandomVal(PSELF);
             r170 = getRandomVal(PSELF);
-            r171 = getRandomVal(PSELF);
-            r172 = getRandomVal(PSELF);
-            r173 = getRandomVal(PSELF);
-            r174 = getRandomVal(PSELF);
-            r175 = getRandomVal(PSELF);
-            r176 = getRandomVal(PSELF);
-            r177 = getRandomVal(PSELF);
             r178 = getRandomVal(PSELF);
             r179 = getRandomVal(PSELF);
             r180 = getRandomVal(PSELF);
-            r181 = getRandomVal(PSELF);
-            r182 = getRandomVal(PSELF);
-            r183 = getRandomVal(PSELF);
-            r184 = getRandomVal(PSELF);
-            r185 = getRandomVal(PSELF);
-            r186 = getRandomVal(PSELF);
-            r187 = getRandomVal(PSELF);
             r188 = getRandomVal(PSELF);
-            r189 = getRandomVal(PSELF);
 
         }
     }
@@ -6221,165 +5115,165 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 18)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r127);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r77);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r90);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r103);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 B3G_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_156
                 B3G_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_157
                 B3G_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_158
-                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r126);  // and_a_160
+                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_160
                 B3P_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_173
                 B3P_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_174
                 B3P_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_175
                 W2G_16_17_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_191
-                W2G_16_17_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], r119);  // and_a_192
+                W2G_16_17_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_192
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r128);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r71);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r70, r71));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r68, r69));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r69, r70));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r76, r77));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r84);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r83, r84));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r81, r82));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r82, r83));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r89, r90));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r97);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r96, r97));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r94, r95));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r95, r96));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r102, r103));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r110);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r109, r110));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r107, r108));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r108, r109));  // and_a_140
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
                 B3G_13_15_x1x2x3 = B3G_13_15_x1x2.mult_a_known_to_evaluators(a[15]);  // and_a_159
-                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r125, r126));  // and_a_161
-                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], r117);  // and_a_176
-                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r116, r117));  // and_a_177
-                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r114, r115));  // and_a_179
-                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r115, r116));  // and_a_178
-                W2G_16_17_t2 = W2G_16_17_x1x2.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r118, r119));  // and_a_193
+                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_161
+                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], SET_ALL_ZERO());  // and_a_176
+                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_177
+                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_179
+                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_178
+                W2G_16_17_t2 = W2G_16_17_x1x2.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_193
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r138
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r138, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r65-r66)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r65, r66), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r139
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r139, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r140
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r140, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r148
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r148, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r78-r79)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r78, r79), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r149
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r149, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r150
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r150, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r158
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r158, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r91-r92)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r91, r92), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r159
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r159, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r160
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r160, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r168
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r168, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r104-r105)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r104, r105), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r169
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r169, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r170
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r170, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_152: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r178
-                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, r178, triples[12].c);  // and_152
+                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, SET_ALL_ZERO(), triples[12].c);  // and_152
                 // and3_153: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r111-r112)
-                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, FUNC_XOR(r111, r112), beaver3_tuples[4]);  // and3_153
+                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_153
                 // and_154: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r179
-                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, r179, triples[13].c);  // and_154
+                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, SET_ALL_ZERO(), triples[13].c);  // and_154
                 // and_155: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r180
-                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, r180, triples[14].c);  // and_155
+                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, SET_ALL_ZERO(), triples[14].c);  // and_155
                 // and_190: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=r188
-                W2G_16_17_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, r188, triples[15].c);  // and_190
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r130);  // and_a_11
+                W2G_16_17_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, SET_ALL_ZERO(), triples[15].c);  // and_190
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r74, r75));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r87, r88));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r100, r101));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
-                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r123, r124));  // and_a_163
+                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_163
                 B3G_13_15_out_s1 = B3G_13_15_t1 ^ B3G_13_15_t2_1;  // B3G_13_15_out_s1
                 B3P_13_15_out_s1 = B3P_13_15_t1 ^ B3P_13_15_t2;  // B3P_13_15_out_s1
                 W2G_16_17_out_s1 = W2G_16_17_t1 ^ W2G_16_17_t2;  // W2G_16_17_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r129);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r66, r67));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r133);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r131);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r65));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r132);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r67, r68));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r75, r76));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r79, r80));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[16].b, r72));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r73, r74));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r78));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r72, r73));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r80, r81));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r88, r89));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r92, r93));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[5].c, r85));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r86, r87));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r91));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r85, r86));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r93, r94));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r101, r102));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r105, r106));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r98));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r99, r100));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r104));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r98, r99));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r106, r107));  // and_a_142
-                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r124, r125));  // and_a_162
-                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r112, r113));  // and_a_181
-                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, FUNC_XOR(FUNC_XOR(triples[18].b, r120), r121));  // and_a_166
-                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(r122, r123));  // and_a_164
-                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(triples[17].a, r111));  // and_a_182
-                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r121, r122));  // and_a_165
-                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r113, r114));  // and_a_180
-                W2G_16_17_t3 = a[17].mult_a_known_to_evaluators_dot_pending(W2G_16_17_y1y2, FUNC_XOR(triples[17].b, r118));  // and_a_194
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r127, r128), r129), r130), r131), r132), r133));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[16].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[5].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_162
+                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_181
+                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, SET_ALL_ZERO());  // and_a_166
+                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_164
+                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_182
+                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(triples[18].b, r120));  // and_a_165
+                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, triples[17].a);  // and_a_180
+                W2G_16_17_t3 = a[17].mult_a_known_to_evaluators_dot_pending(W2G_16_17_y1y2, triples[17].b);  // and_a_194
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -6467,11 +5361,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 18)>::type>
                 B3P_4_6_out_p_1 = B3P_4_6_out.zero_add(beaver4_tuples[0].b);  // B3P_4_6_out'_1, mask=b23
                 B3P_7_9_out_p = B3P_7_9_out.zero_add(beaver4_tuples[0].c);  // B3P_7_9_out', mask=c23
                 // and_197: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=r134
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r134, triples[16].c);  // and_197
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[16].c);  // and_197
                 // and3_198: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=r135
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r135, beaver3_tuples[5]);  // and3_198
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[5]);  // and3_198
                 // and4_199: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r136
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r136, beaver4_tuples[0]);  // and4_199
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r134, r135), r136), beaver4_tuples[0]);  // and4_199
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
@@ -6523,70 +5417,15 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 19)>::type>
 
     DATATYPE r72;
     DATATYPE r73;
-    DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
-    DATATYPE r77;
-    DATATYPE r78;
-    DATATYPE r79;
-    DATATYPE r80;
-    DATATYPE r81;
-    DATATYPE r82;
-    DATATYPE r83;
-    DATATYPE r84;
     DATATYPE r85;
     DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
-    DATATYPE r90;
-    DATATYPE r91;
-    DATATYPE r92;
-    DATATYPE r93;
-    DATATYPE r94;
-    DATATYPE r95;
-    DATATYPE r96;
-    DATATYPE r97;
     DATATYPE r98;
     DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
-    DATATYPE r104;
-    DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
-    DATATYPE r109;
-    DATATYPE r110;
     DATATYPE r111;
     DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
-    DATATYPE r115;
-    DATATYPE r116;
-    DATATYPE r117;
     DATATYPE r118;
     DATATYPE r119;
-    DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
-    DATATYPE r123;
-    DATATYPE r124;
-    DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
-    DATATYPE r129;
-    DATATYPE r130;
     DATATYPE r131;
-    DATATYPE r132;
-    DATATYPE r133;
-    DATATYPE r134;
-    DATATYPE r135;
-    DATATYPE r136;
-    DATATYPE r137;
     DATATYPE r138;
     DATATYPE r139;
     DATATYPE r140;
@@ -6601,61 +5440,22 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 19)>::type>
     DATATYPE r149;
     DATATYPE r150;
     DATATYPE r151;
-    DATATYPE r152;
-    DATATYPE r153;
-    DATATYPE r154;
-    DATATYPE r155;
-    DATATYPE r156;
-    DATATYPE r157;
-    DATATYPE r158;
     DATATYPE r159;
     DATATYPE r160;
     DATATYPE r161;
-    DATATYPE r162;
-    DATATYPE r163;
-    DATATYPE r164;
-    DATATYPE r165;
-    DATATYPE r166;
-    DATATYPE r167;
-    DATATYPE r168;
     DATATYPE r169;
     DATATYPE r170;
     DATATYPE r171;
-    DATATYPE r172;
-    DATATYPE r173;
-    DATATYPE r174;
-    DATATYPE r175;
-    DATATYPE r176;
-    DATATYPE r177;
-    DATATYPE r178;
     DATATYPE r179;
     DATATYPE r180;
     DATATYPE r181;
-    DATATYPE r182;
-    DATATYPE r183;
-    DATATYPE r184;
-    DATATYPE r185;
-    DATATYPE r186;
-    DATATYPE r187;
-    DATATYPE r188;
     DATATYPE r189;
     DATATYPE r190;
     DATATYPE r191;
-    DATATYPE r192;
-    DATATYPE r193;
-    DATATYPE r194;
-    DATATYPE r195;
-    DATATYPE r196;
-    DATATYPE r197;
-    DATATYPE r198;
     DATATYPE r199;
     DATATYPE r200;
     DATATYPE r201;
     DATATYPE r202;
-    DATATYPE r203;
-    DATATYPE r204;
-    DATATYPE r205;
-    DATATYPE r206;
 
     Share B3G_10_12_out;
     Share B3G_10_12_out_s1;
@@ -6961,70 +5761,15 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 19)>::type>
             // Random mask values (shared across mask expressions)
             r72 = getRandomVal(PSELF);
             r73 = getRandomVal(PSELF);
-            r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
-            r77 = getRandomVal(PSELF);
-            r78 = getRandomVal(PSELF);
-            r79 = getRandomVal(PSELF);
-            r80 = getRandomVal(PSELF);
-            r81 = getRandomVal(PSELF);
-            r82 = getRandomVal(PSELF);
-            r83 = getRandomVal(PSELF);
-            r84 = getRandomVal(PSELF);
             r85 = getRandomVal(PSELF);
             r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
-            r90 = getRandomVal(PSELF);
-            r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
-            r96 = getRandomVal(PSELF);
-            r97 = getRandomVal(PSELF);
             r98 = getRandomVal(PSELF);
             r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
-            r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
-            r109 = getRandomVal(PSELF);
-            r110 = getRandomVal(PSELF);
             r111 = getRandomVal(PSELF);
             r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
-            r116 = getRandomVal(PSELF);
-            r117 = getRandomVal(PSELF);
             r118 = getRandomVal(PSELF);
             r119 = getRandomVal(PSELF);
-            r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
-            r123 = getRandomVal(PSELF);
-            r124 = getRandomVal(PSELF);
-            r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
-            r129 = getRandomVal(PSELF);
-            r130 = getRandomVal(PSELF);
             r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
-            r133 = getRandomVal(PSELF);
-            r134 = getRandomVal(PSELF);
-            r135 = getRandomVal(PSELF);
-            r136 = getRandomVal(PSELF);
-            r137 = getRandomVal(PSELF);
             r138 = getRandomVal(PSELF);
             r139 = getRandomVal(PSELF);
             r140 = getRandomVal(PSELF);
@@ -7039,61 +5784,22 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 19)>::type>
             r149 = getRandomVal(PSELF);
             r150 = getRandomVal(PSELF);
             r151 = getRandomVal(PSELF);
-            r152 = getRandomVal(PSELF);
-            r153 = getRandomVal(PSELF);
-            r154 = getRandomVal(PSELF);
-            r155 = getRandomVal(PSELF);
-            r156 = getRandomVal(PSELF);
-            r157 = getRandomVal(PSELF);
-            r158 = getRandomVal(PSELF);
             r159 = getRandomVal(PSELF);
             r160 = getRandomVal(PSELF);
             r161 = getRandomVal(PSELF);
-            r162 = getRandomVal(PSELF);
-            r163 = getRandomVal(PSELF);
-            r164 = getRandomVal(PSELF);
-            r165 = getRandomVal(PSELF);
-            r166 = getRandomVal(PSELF);
-            r167 = getRandomVal(PSELF);
-            r168 = getRandomVal(PSELF);
             r169 = getRandomVal(PSELF);
             r170 = getRandomVal(PSELF);
             r171 = getRandomVal(PSELF);
-            r172 = getRandomVal(PSELF);
-            r173 = getRandomVal(PSELF);
-            r174 = getRandomVal(PSELF);
-            r175 = getRandomVal(PSELF);
-            r176 = getRandomVal(PSELF);
-            r177 = getRandomVal(PSELF);
-            r178 = getRandomVal(PSELF);
             r179 = getRandomVal(PSELF);
             r180 = getRandomVal(PSELF);
             r181 = getRandomVal(PSELF);
-            r182 = getRandomVal(PSELF);
-            r183 = getRandomVal(PSELF);
-            r184 = getRandomVal(PSELF);
-            r185 = getRandomVal(PSELF);
-            r186 = getRandomVal(PSELF);
-            r187 = getRandomVal(PSELF);
-            r188 = getRandomVal(PSELF);
             r189 = getRandomVal(PSELF);
             r190 = getRandomVal(PSELF);
             r191 = getRandomVal(PSELF);
-            r192 = getRandomVal(PSELF);
-            r193 = getRandomVal(PSELF);
-            r194 = getRandomVal(PSELF);
-            r195 = getRandomVal(PSELF);
-            r196 = getRandomVal(PSELF);
-            r197 = getRandomVal(PSELF);
-            r198 = getRandomVal(PSELF);
             r199 = getRandomVal(PSELF);
             r200 = getRandomVal(PSELF);
             r201 = getRandomVal(PSELF);
             r202 = getRandomVal(PSELF);
-            r203 = getRandomVal(PSELF);
-            r204 = getRandomVal(PSELF);
-            r205 = getRandomVal(PSELF);
-            r206 = getRandomVal(PSELF);
 
         }
     }
@@ -7164,178 +5870,178 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 19)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r138);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r84);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r97);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r110);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 B3G_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_156
                 B3G_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_157
                 B3G_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_158
-                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r137);  // and_a_160
+                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_160
                 B3P_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_173
                 B3P_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_174
                 B3P_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_175
                 W3L1_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_194
                 W3L1_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_195
                 W3L1_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_196
-                W3L1_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], r130);  // and_a_198
+                W3L1_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_198
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r139);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r78);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r77, r78));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r75, r76));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r76, r77));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r83, r84));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r91);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r90, r91));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r88, r89));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r89, r90));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r96, r97));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r104);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r103, r104));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r101, r102));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r102, r103));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r109, r110));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r117);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r116, r117));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r114, r115));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r115, r116));  // and_a_140
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
                 B3G_13_15_x1x2x3 = B3G_13_15_x1x2.mult_a_known_to_evaluators(a[15]);  // and_a_159
-                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r136, r137));  // and_a_161
-                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], r124);  // and_a_176
-                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r123, r124));  // and_a_177
-                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r121, r122));  // and_a_179
-                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r122, r123));  // and_a_178
+                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_161
+                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], SET_ALL_ZERO());  // and_a_176
+                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_177
+                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_179
+                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_178
                 W3L1_16_18_x1x2x3 = W3L1_16_18_x1x2.mult_a_known_to_evaluators(a[18]);  // and_a_197
-                W3L1_16_18_t2_1 = W3L1_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r129, r130));  // and_a_199
+                W3L1_16_18_t2_1 = W3L1_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_199
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r149
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r149, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r72-r73)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r72, r73), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r150
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r150, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r151
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r151, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r159
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r159, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r85-r86)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r85, r86), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r160
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r160, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r161
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r161, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r169
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r169, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r98-r99)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r98, r99), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r170
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r170, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r171
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r171, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r179
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r179, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r111-r112)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r111, r112), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r180
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r180, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r181
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r181, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_152: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r189
-                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, r189, triples[12].c);  // and_152
+                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, SET_ALL_ZERO(), triples[12].c);  // and_152
                 // and3_153: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r118-r119)
-                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, FUNC_XOR(r118, r119), beaver3_tuples[4]);  // and3_153
+                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_153
                 // and_154: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r190
-                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, r190, triples[13].c);  // and_154
+                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, SET_ALL_ZERO(), triples[13].c);  // and_154
                 // and_155: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r191
-                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, r191, triples[14].c);  // and_155
+                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, SET_ALL_ZERO(), triples[14].c);  // and_155
                 // and_190: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=r199
-                W3L1_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, r199, triples[15].c);  // and_190
+                W3L1_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, SET_ALL_ZERO(), triples[15].c);  // and_190
                 // and3_191: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=r200
-                W3L1_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, r200, beaver3_tuples[5]);  // and3_191
+                W3L1_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, SET_ALL_ZERO(), beaver3_tuples[5]);  // and3_191
                 // and_192: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=r201
-                W3L1_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, r201, triples[16].c);  // and_192
+                W3L1_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, SET_ALL_ZERO(), triples[16].c);  // and_192
                 // and_193: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=r202
-                W3L1_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, r202, triples[17].c);  // and_193
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r141);  // and_a_11
+                W3L1_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, SET_ALL_ZERO(), triples[17].c);  // and_193
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r81, r82));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r94, r95));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r107, r108));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
-                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r134, r135));  // and_a_163
+                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_163
                 B3G_13_15_out_s1 = B3G_13_15_t1 ^ B3G_13_15_t2_1;  // B3G_13_15_out_s1
                 B3P_13_15_out_s1 = B3P_13_15_t1 ^ B3P_13_15_t2;  // B3P_13_15_out_s1
-                W3L1_16_18_t3_1 = W3L1_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r127, r128));  // and_a_201
+                W3L1_16_18_t3_1 = W3L1_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_201
                 W3L1_16_18_out_s1 = W3L1_16_18_t1 ^ W3L1_16_18_t2_1;  // W3L1_16_18_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r140);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r73, r74));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r144);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r142);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r72));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r143);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r74, r75));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r82, r83));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r86, r87));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[18].b, r79));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r80, r81));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r85));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r79, r80));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r87, r88));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r95, r96));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r99, r100));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[6].c, r92));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r93, r94));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r98));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r92, r93));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r100, r101));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r108, r109));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r112, r113));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r105));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r106, r107));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r111));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r105, r106));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r113, r114));  // and_a_142
-                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r135, r136));  // and_a_162
-                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r119, r120));  // and_a_181
-                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, FUNC_XOR(FUNC_XOR(triples[20].b, r131), r132));  // and_a_166
-                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(r133, r134));  // and_a_164
-                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(triples[19].a, r118));  // and_a_182
-                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r132, r133));  // and_a_165
-                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r120, r121));  // and_a_180
-                W3L1_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(W3L1_16_18_y1y2, FUNC_XOR(r128, r129));  // and_a_200
-                W3L1_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(W3L1_16_18_y1y2y3, FUNC_XOR(triples[19].b, r125));  // and_a_204
-                W3L1_16_18_t3_2 = W3L1_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_16_18_y2y3, FUNC_XOR(r126, r127));  // and_a_202
-                W3L1_16_18_t3_3 = W3L1_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_16_18_y1y3, FUNC_XOR(r125, r126));  // and_a_203
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r138, r139), r140), r141), r142), r143), r144));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[18].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[6].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_162
+                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_181
+                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, SET_ALL_ZERO());  // and_a_166
+                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_164
+                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_182
+                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(triples[20].b, r131));  // and_a_165
+                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, triples[19].a);  // and_a_180
+                W3L1_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(W3L1_16_18_y1y2, SET_ALL_ZERO());  // and_a_200
+                W3L1_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(W3L1_16_18_y1y2y3, SET_ALL_ZERO());  // and_a_204
+                W3L1_16_18_t3_2 = W3L1_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_16_18_y2y3, SET_ALL_ZERO());  // and_a_202
+                W3L1_16_18_t3_3 = W3L1_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_16_18_y1y3, triples[19].b);  // and_a_203
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -7427,11 +6133,11 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 19)>::type>
                 B3P_4_6_out_p_1 = B3P_4_6_out.zero_add(beaver4_tuples[0].b);  // B3P_4_6_out'_1, mask=b26
                 B3P_7_9_out_p = B3P_7_9_out.zero_add(beaver4_tuples[0].c);  // B3P_7_9_out', mask=c26
                 // and_211: a18=triples[18].a, b18=triples[18].b, c18=triples[18].c, output mask=r145
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r145, triples[18].c);  // and_211
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[18].c);  // and_211
                 // and3_212: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=r146
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r146, beaver3_tuples[6]);  // and3_212
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[6]);  // and3_212
                 // and4_213: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r147
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r147, beaver4_tuples[0]);  // and4_213
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r145, r146), r147), beaver4_tuples[0]);  // and4_213
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
@@ -7483,71 +6189,16 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 20)>::type>
 
     DATATYPE r70;
     DATATYPE r71;
-    DATATYPE r72;
-    DATATYPE r73;
-    DATATYPE r74;
-    DATATYPE r75;
-    DATATYPE r76;
-    DATATYPE r77;
-    DATATYPE r78;
-    DATATYPE r79;
-    DATATYPE r80;
-    DATATYPE r81;
-    DATATYPE r82;
     DATATYPE r83;
     DATATYPE r84;
-    DATATYPE r85;
-    DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
-    DATATYPE r90;
-    DATATYPE r91;
-    DATATYPE r92;
-    DATATYPE r93;
-    DATATYPE r94;
-    DATATYPE r95;
     DATATYPE r96;
     DATATYPE r97;
-    DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
-    DATATYPE r104;
-    DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
     DATATYPE r109;
     DATATYPE r110;
-    DATATYPE r111;
-    DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
-    DATATYPE r115;
     DATATYPE r116;
     DATATYPE r117;
-    DATATYPE r118;
-    DATATYPE r119;
-    DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
-    DATATYPE r123;
-    DATATYPE r124;
     DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
-    DATATYPE r129;
     DATATYPE r130;
-    DATATYPE r131;
-    DATATYPE r132;
-    DATATYPE r133;
-    DATATYPE r134;
-    DATATYPE r135;
-    DATATYPE r136;
     DATATYPE r137;
     DATATYPE r138;
     DATATYPE r139;
@@ -7563,56 +6214,19 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 20)>::type>
     DATATYPE r149;
     DATATYPE r150;
     DATATYPE r151;
-    DATATYPE r152;
-    DATATYPE r153;
-    DATATYPE r154;
-    DATATYPE r155;
-    DATATYPE r156;
-    DATATYPE r157;
-    DATATYPE r158;
     DATATYPE r159;
     DATATYPE r160;
     DATATYPE r161;
-    DATATYPE r162;
-    DATATYPE r163;
-    DATATYPE r164;
-    DATATYPE r165;
-    DATATYPE r166;
-    DATATYPE r167;
-    DATATYPE r168;
     DATATYPE r169;
     DATATYPE r170;
     DATATYPE r171;
-    DATATYPE r172;
-    DATATYPE r173;
-    DATATYPE r174;
-    DATATYPE r175;
-    DATATYPE r176;
-    DATATYPE r177;
-    DATATYPE r178;
     DATATYPE r179;
     DATATYPE r180;
     DATATYPE r181;
-    DATATYPE r182;
-    DATATYPE r183;
-    DATATYPE r184;
-    DATATYPE r185;
-    DATATYPE r186;
-    DATATYPE r187;
-    DATATYPE r188;
     DATATYPE r189;
     DATATYPE r190;
     DATATYPE r191;
-    DATATYPE r192;
-    DATATYPE r193;
-    DATATYPE r194;
-    DATATYPE r195;
-    DATATYPE r196;
-    DATATYPE r197;
-    DATATYPE r198;
-    DATATYPE r199;
     DATATYPE r200;
-    DATATYPE r201;
 
     Share B2G_16_17_out;
     Share B2G_16_17_out_s1;
@@ -7915,71 +6529,16 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 20)>::type>
             // Random mask values (shared across mask expressions)
             r70 = getRandomVal(PSELF);
             r71 = getRandomVal(PSELF);
-            r72 = getRandomVal(PSELF);
-            r73 = getRandomVal(PSELF);
-            r74 = getRandomVal(PSELF);
-            r75 = getRandomVal(PSELF);
-            r76 = getRandomVal(PSELF);
-            r77 = getRandomVal(PSELF);
-            r78 = getRandomVal(PSELF);
-            r79 = getRandomVal(PSELF);
-            r80 = getRandomVal(PSELF);
-            r81 = getRandomVal(PSELF);
-            r82 = getRandomVal(PSELF);
             r83 = getRandomVal(PSELF);
             r84 = getRandomVal(PSELF);
-            r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
-            r90 = getRandomVal(PSELF);
-            r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
             r96 = getRandomVal(PSELF);
             r97 = getRandomVal(PSELF);
-            r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
-            r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
             r109 = getRandomVal(PSELF);
             r110 = getRandomVal(PSELF);
-            r111 = getRandomVal(PSELF);
-            r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
             r116 = getRandomVal(PSELF);
             r117 = getRandomVal(PSELF);
-            r118 = getRandomVal(PSELF);
-            r119 = getRandomVal(PSELF);
-            r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
-            r123 = getRandomVal(PSELF);
-            r124 = getRandomVal(PSELF);
             r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
-            r129 = getRandomVal(PSELF);
             r130 = getRandomVal(PSELF);
-            r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
-            r133 = getRandomVal(PSELF);
-            r134 = getRandomVal(PSELF);
-            r135 = getRandomVal(PSELF);
-            r136 = getRandomVal(PSELF);
             r137 = getRandomVal(PSELF);
             r138 = getRandomVal(PSELF);
             r139 = getRandomVal(PSELF);
@@ -7995,56 +6554,19 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 20)>::type>
             r149 = getRandomVal(PSELF);
             r150 = getRandomVal(PSELF);
             r151 = getRandomVal(PSELF);
-            r152 = getRandomVal(PSELF);
-            r153 = getRandomVal(PSELF);
-            r154 = getRandomVal(PSELF);
-            r155 = getRandomVal(PSELF);
-            r156 = getRandomVal(PSELF);
-            r157 = getRandomVal(PSELF);
-            r158 = getRandomVal(PSELF);
             r159 = getRandomVal(PSELF);
             r160 = getRandomVal(PSELF);
             r161 = getRandomVal(PSELF);
-            r162 = getRandomVal(PSELF);
-            r163 = getRandomVal(PSELF);
-            r164 = getRandomVal(PSELF);
-            r165 = getRandomVal(PSELF);
-            r166 = getRandomVal(PSELF);
-            r167 = getRandomVal(PSELF);
-            r168 = getRandomVal(PSELF);
             r169 = getRandomVal(PSELF);
             r170 = getRandomVal(PSELF);
             r171 = getRandomVal(PSELF);
-            r172 = getRandomVal(PSELF);
-            r173 = getRandomVal(PSELF);
-            r174 = getRandomVal(PSELF);
-            r175 = getRandomVal(PSELF);
-            r176 = getRandomVal(PSELF);
-            r177 = getRandomVal(PSELF);
-            r178 = getRandomVal(PSELF);
             r179 = getRandomVal(PSELF);
             r180 = getRandomVal(PSELF);
             r181 = getRandomVal(PSELF);
-            r182 = getRandomVal(PSELF);
-            r183 = getRandomVal(PSELF);
-            r184 = getRandomVal(PSELF);
-            r185 = getRandomVal(PSELF);
-            r186 = getRandomVal(PSELF);
-            r187 = getRandomVal(PSELF);
-            r188 = getRandomVal(PSELF);
             r189 = getRandomVal(PSELF);
             r190 = getRandomVal(PSELF);
             r191 = getRandomVal(PSELF);
-            r192 = getRandomVal(PSELF);
-            r193 = getRandomVal(PSELF);
-            r194 = getRandomVal(PSELF);
-            r195 = getRandomVal(PSELF);
-            r196 = getRandomVal(PSELF);
-            r197 = getRandomVal(PSELF);
-            r198 = getRandomVal(PSELF);
-            r199 = getRandomVal(PSELF);
             r200 = getRandomVal(PSELF);
-            r201 = getRandomVal(PSELF);
 
         }
     }
@@ -8107,9 +6629,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 20)>::type>
                 b_17_p = b[17].zero_add(triples[15].b);  // b[17]', mask=b20
                 b_18_p = b[18].zero_add(triples[16].a);  // b[18]', mask=a21
                 b_19_p = b[19].zero_add(triples[16].b);  // b[19]', mask=b21
-                B2P_16_17_t1 = a[16].mult_a_known_to_evaluators_dot(a[17], r127);  // and_a_197
-                B2P_16_17_t2 = a[16].mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r126, r127));  // and_a_198
-                B2P_16_17_t3 = a[17].mult_a_known_to_evaluators_dot(b[16], FUNC_XOR(r125, r126));  // and_a_199
+                B2P_16_17_t1 = a[16].mult_a_known_to_evaluators_dot(a[17], SET_ALL_ZERO());  // and_a_197
+                B2P_16_17_t2 = a[16].mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_198
+                B2P_16_17_t3 = a[17].mult_a_known_to_evaluators_dot(b[16], r125);  // and_a_199
                 B2P_16_17_out_s1 = B2P_16_17_t1 ^ B2P_16_17_t2;  // B2P_16_17_out_s1
                 B2P_16_17_out_s2 = B2P_16_17_out_s1 ^ B2P_16_17_t3;  // B2P_16_17_out_s2
                 B2P_16_17_out_s2.mask_and_send_dot_without_remask();
@@ -8119,165 +6641,165 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 20)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r138);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r82);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r95);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r108);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 B3G_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_156
                 B3G_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_157
                 B3G_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_158
-                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r136);  // and_a_160
+                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_160
                 B3P_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_173
                 B3P_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_174
                 B3P_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_175
                 W2G_18_19_x1x2 = a[18].mult_a_known_to_evaluators(a[19]);  // and_a_204
-                W2G_18_19_t1 = a[18].mult_a_known_to_evaluators_dot(b[18], r129);  // and_a_205
+                W2G_18_19_t1 = a[18].mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_205
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r139);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r76);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r75, r76));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r73, r74));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r74, r75));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r81, r82));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r89);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r88, r89));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r86, r87));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r87, r88));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r94, r95));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r102);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r101, r102));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r99, r100));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r100, r101));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r107, r108));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r115);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r114, r115));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r112, r113));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r113, r114));  // and_a_140
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
                 B3G_13_15_x1x2x3 = B3G_13_15_x1x2.mult_a_known_to_evaluators(a[15]);  // and_a_159
-                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r135, r136));  // and_a_161
-                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], r122);  // and_a_176
-                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r121, r122));  // and_a_177
-                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r119, r120));  // and_a_179
-                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r120, r121));  // and_a_178
-                W2G_18_19_t2 = W2G_18_19_x1x2.mult_a_known_to_evaluators_dot(b[19], FUNC_XOR(r128, r129));  // and_a_206
+                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_161
+                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], SET_ALL_ZERO());  // and_a_176
+                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_177
+                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_179
+                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_178
+                W2G_18_19_t2 = W2G_18_19_x1x2.mult_a_known_to_evaluators_dot(b[19], SET_ALL_ZERO());  // and_a_206
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r149
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r149, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r70-r71)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r70, r71), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r150
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r150, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r151
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r151, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r159
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r159, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r83-r84)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r83, r84), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r160
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r160, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r161
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r161, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r169
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r169, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r96-r97)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r96, r97), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r170
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r170, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r171
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r171, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r179
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r179, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r109-r110)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r109, r110), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r180
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r180, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r181
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r181, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_152: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r189
-                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, r189, triples[12].c);  // and_152
+                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, SET_ALL_ZERO(), triples[12].c);  // and_152
                 // and3_153: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r116-r117)
-                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, FUNC_XOR(r116, r117), beaver3_tuples[4]);  // and3_153
+                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_153
                 // and_154: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r190
-                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, r190, triples[13].c);  // and_154
+                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, SET_ALL_ZERO(), triples[13].c);  // and_154
                 // and_155: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r191
-                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, r191, triples[14].c);  // and_155
+                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, SET_ALL_ZERO(), triples[14].c);  // and_155
                 // and_203: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=r200
-                W2G_18_19_y1y2 = b_18_p.prepare_dot_and_assign(b_19_p, r200, triples[16].c);  // and_203
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r141);  // and_a_11
+                W2G_18_19_y1y2 = b_18_p.prepare_dot_and_assign(b_19_p, SET_ALL_ZERO(), triples[16].c);  // and_203
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r79, r80));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r92, r93));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r105, r106));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
-                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r133, r134));  // and_a_163
+                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_163
                 B3G_13_15_out_s1 = B3G_13_15_t1 ^ B3G_13_15_t2_1;  // B3G_13_15_out_s1
                 B3P_13_15_out_s1 = B3P_13_15_t1 ^ B3P_13_15_t2;  // B3P_13_15_out_s1
                 W2G_18_19_out_s1 = W2G_18_19_t1 ^ W2G_18_19_t2;  // W2G_18_19_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r140);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r71, r72));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r144);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r142);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r70));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r143);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r72, r73));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r80, r81));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r84, r85));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[17].b, r77));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r78, r79));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r83));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r77, r78));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r85, r86));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r93, r94));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r97, r98));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[5].c, r90));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r91, r92));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r96));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r90, r91));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r98, r99));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r106, r107));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r110, r111));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r103));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r104, r105));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r109));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r103, r104));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r111, r112));  // and_a_142
-                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r134, r135));  // and_a_162
-                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r117, r118));  // and_a_181
-                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, FUNC_XOR(FUNC_XOR(triples[19].b, r130), r131));  // and_a_166
-                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(r132, r133));  // and_a_164
-                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(beaver3_tuples[6].a, r116));  // and_a_182
-                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r131, r132));  // and_a_165
-                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r118, r119));  // and_a_180
-                W2G_18_19_t3 = a[19].mult_a_known_to_evaluators_dot_pending(W2G_18_19_y1y2, FUNC_XOR(beaver3_tuples[6].c, r128));  // and_a_207
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r138, r139), r140), r141), r142), r143), r144));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[17].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[5].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_162
+                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_181
+                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, SET_ALL_ZERO());  // and_a_166
+                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_164
+                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_182
+                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(triples[19].b, r130));  // and_a_165
+                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, beaver3_tuples[6].a);  // and_a_180
+                W2G_18_19_t3 = a[19].mult_a_known_to_evaluators_dot_pending(W2G_18_19_y1y2, beaver3_tuples[6].c);  // and_a_207
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -8363,10 +6885,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 20)>::type>
                 W2G_18_19_out.complete_and();
                 B2P_16_17_out = B2P_16_17_out_s2 ^ B2G_16_17_y1y2;  // B2P_16_17_out
                 B2G_16_17_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_191
-                B2G_16_17_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], r124);  // and_a_192
-                B2G_16_17_t2 = B2G_16_17_x1x2.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r123, r124));  // and_a_193
+                B2G_16_17_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_192
+                B2G_16_17_t2 = B2G_16_17_x1x2.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_193
                 B2G_16_17_out_s1 = B2G_16_17_t1 ^ B2G_16_17_t2;  // B2G_16_17_out_s1
-                B2G_16_17_t3 = a[17].mult_a_known_to_evaluators_dot(B2G_16_17_y1y2, FUNC_XOR(triples[18].b, r123));  // and_a_194
+                B2G_16_17_t3 = a[17].mult_a_known_to_evaluators_dot(B2G_16_17_y1y2, triples[18].b);  // and_a_194
                 B2G_16_17_out = B2G_16_17_out_s1 ^ B2G_16_17_t3;  // B2G_16_17_out
                 B2G_16_17_out.mask_and_send_dot_without_remask();
                 break;
@@ -8380,20 +6902,20 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 20)>::type>
                 B3P_7_9_out_p = B3P_7_9_out.zero_add(beaver4_tuples[0].c);  // B3P_7_9_out', mask=c24
                 B3P_13_15_out_p = B3P_13_15_out.zero_add(triples[18].a);  // B3P_13_15_out', mask=a26
                 // and_210: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=r145
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r145, triples[17].c);  // and_210
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[17].c);  // and_210
                 // and3_211: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=r146
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r146, beaver3_tuples[5]);  // and3_211
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[5]);  // and3_211
                 // and4_212: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r147
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r147, beaver4_tuples[0]);  // and4_212
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r145, r146), r147), beaver4_tuples[0]);  // and4_212
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
                 // and4_216: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=a28
                 L1_B0_P = B3P_1_3_out.prepare_and4_and_assign(B3P_4_6_out, B3P_7_9_out, B3P_10_12_out, triples[19].a, beaver4_tuples[1]);  // and4_216
                 // and3_218: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=(r130-r137)
-                L1_B1_t2 = B3P_13_15_out.prepare_dot3_and_assign(B2P_16_17_out, W2G_18_19_out, FUNC_XOR(r130, r137), beaver3_tuples[6]);  // and3_218
+                L1_B1_t2 = B3P_13_15_out.prepare_dot3_and_assign(B2P_16_17_out, W2G_18_19_out, SET_ALL_ZERO(), beaver3_tuples[6]);  // and3_218
                 // and_217: a18=triples[18].a, b18=triples[18].b, c18=triples[18].c, output mask=r137
-                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B2G_16_17_out, r137, triples[18].c);  // and_217
+                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B2G_16_17_out, r130, triples[18].c);  // and_217
                 L1_B1_s1 = L1_B1_t1 ^ L1_B1_t2;  // L1_B1_s1
                 L1_B1_s1.mask_and_send_dot_without_remask();
                 break;
@@ -8440,79 +6962,17 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 21)>::type>
 
     DATATYPE r77;
     DATATYPE r78;
-    DATATYPE r79;
-    DATATYPE r80;
-    DATATYPE r81;
-    DATATYPE r82;
-    DATATYPE r83;
-    DATATYPE r84;
-    DATATYPE r85;
-    DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
     DATATYPE r90;
     DATATYPE r91;
-    DATATYPE r92;
-    DATATYPE r93;
-    DATATYPE r94;
-    DATATYPE r95;
-    DATATYPE r96;
-    DATATYPE r97;
-    DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
     DATATYPE r103;
     DATATYPE r104;
-    DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
-    DATATYPE r109;
-    DATATYPE r110;
-    DATATYPE r111;
-    DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
-    DATATYPE r115;
     DATATYPE r116;
     DATATYPE r117;
-    DATATYPE r118;
-    DATATYPE r119;
-    DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
     DATATYPE r123;
     DATATYPE r124;
-    DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
-    DATATYPE r129;
-    DATATYPE r130;
-    DATATYPE r131;
-    DATATYPE r132;
-    DATATYPE r133;
-    DATATYPE r134;
-    DATATYPE r135;
     DATATYPE r136;
     DATATYPE r137;
-    DATATYPE r138;
-    DATATYPE r139;
-    DATATYPE r140;
-    DATATYPE r141;
-    DATATYPE r142;
-    DATATYPE r143;
-    DATATYPE r144;
     DATATYPE r145;
-    DATATYPE r146;
-    DATATYPE r147;
-    DATATYPE r148;
-    DATATYPE r149;
-    DATATYPE r150;
-    DATATYPE r151;
     DATATYPE r152;
     DATATYPE r153;
     DATATYPE r154;
@@ -8528,65 +6988,22 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 21)>::type>
     DATATYPE r164;
     DATATYPE r165;
     DATATYPE r166;
-    DATATYPE r167;
-    DATATYPE r168;
-    DATATYPE r169;
-    DATATYPE r170;
-    DATATYPE r171;
-    DATATYPE r172;
-    DATATYPE r173;
     DATATYPE r174;
     DATATYPE r175;
     DATATYPE r176;
-    DATATYPE r177;
-    DATATYPE r178;
-    DATATYPE r179;
-    DATATYPE r180;
-    DATATYPE r181;
-    DATATYPE r182;
-    DATATYPE r183;
     DATATYPE r184;
     DATATYPE r185;
     DATATYPE r186;
-    DATATYPE r187;
-    DATATYPE r188;
-    DATATYPE r189;
-    DATATYPE r190;
-    DATATYPE r191;
-    DATATYPE r192;
-    DATATYPE r193;
     DATATYPE r194;
     DATATYPE r195;
     DATATYPE r196;
-    DATATYPE r197;
-    DATATYPE r198;
-    DATATYPE r199;
-    DATATYPE r200;
-    DATATYPE r201;
-    DATATYPE r202;
-    DATATYPE r203;
     DATATYPE r204;
     DATATYPE r205;
     DATATYPE r206;
-    DATATYPE r207;
-    DATATYPE r208;
-    DATATYPE r209;
-    DATATYPE r210;
-    DATATYPE r211;
-    DATATYPE r212;
-    DATATYPE r213;
     DATATYPE r214;
     DATATYPE r215;
     DATATYPE r216;
-    DATATYPE r217;
-    DATATYPE r218;
-    DATATYPE r219;
-    DATATYPE r220;
-    DATATYPE r221;
-    DATATYPE r222;
-    DATATYPE r223;
     DATATYPE r224;
-    DATATYPE r225;
 
     Share B3G_10_12_out;
     Share B3G_10_12_out_s1;
@@ -8921,79 +7338,17 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 21)>::type>
             // Random mask values (shared across mask expressions)
             r77 = getRandomVal(PSELF);
             r78 = getRandomVal(PSELF);
-            r79 = getRandomVal(PSELF);
-            r80 = getRandomVal(PSELF);
-            r81 = getRandomVal(PSELF);
-            r82 = getRandomVal(PSELF);
-            r83 = getRandomVal(PSELF);
-            r84 = getRandomVal(PSELF);
-            r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
             r90 = getRandomVal(PSELF);
             r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
-            r96 = getRandomVal(PSELF);
-            r97 = getRandomVal(PSELF);
-            r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
             r103 = getRandomVal(PSELF);
             r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
-            r109 = getRandomVal(PSELF);
-            r110 = getRandomVal(PSELF);
-            r111 = getRandomVal(PSELF);
-            r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
             r116 = getRandomVal(PSELF);
             r117 = getRandomVal(PSELF);
-            r118 = getRandomVal(PSELF);
-            r119 = getRandomVal(PSELF);
-            r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
             r123 = getRandomVal(PSELF);
             r124 = getRandomVal(PSELF);
-            r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
-            r129 = getRandomVal(PSELF);
-            r130 = getRandomVal(PSELF);
-            r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
-            r133 = getRandomVal(PSELF);
-            r134 = getRandomVal(PSELF);
-            r135 = getRandomVal(PSELF);
             r136 = getRandomVal(PSELF);
             r137 = getRandomVal(PSELF);
-            r138 = getRandomVal(PSELF);
-            r139 = getRandomVal(PSELF);
-            r140 = getRandomVal(PSELF);
-            r141 = getRandomVal(PSELF);
-            r142 = getRandomVal(PSELF);
-            r143 = getRandomVal(PSELF);
-            r144 = getRandomVal(PSELF);
             r145 = getRandomVal(PSELF);
-            r146 = getRandomVal(PSELF);
-            r147 = getRandomVal(PSELF);
-            r148 = getRandomVal(PSELF);
-            r149 = getRandomVal(PSELF);
-            r150 = getRandomVal(PSELF);
-            r151 = getRandomVal(PSELF);
             r152 = getRandomVal(PSELF);
             r153 = getRandomVal(PSELF);
             r154 = getRandomVal(PSELF);
@@ -9009,65 +7364,22 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 21)>::type>
             r164 = getRandomVal(PSELF);
             r165 = getRandomVal(PSELF);
             r166 = getRandomVal(PSELF);
-            r167 = getRandomVal(PSELF);
-            r168 = getRandomVal(PSELF);
-            r169 = getRandomVal(PSELF);
-            r170 = getRandomVal(PSELF);
-            r171 = getRandomVal(PSELF);
-            r172 = getRandomVal(PSELF);
-            r173 = getRandomVal(PSELF);
             r174 = getRandomVal(PSELF);
             r175 = getRandomVal(PSELF);
             r176 = getRandomVal(PSELF);
-            r177 = getRandomVal(PSELF);
-            r178 = getRandomVal(PSELF);
-            r179 = getRandomVal(PSELF);
-            r180 = getRandomVal(PSELF);
-            r181 = getRandomVal(PSELF);
-            r182 = getRandomVal(PSELF);
-            r183 = getRandomVal(PSELF);
             r184 = getRandomVal(PSELF);
             r185 = getRandomVal(PSELF);
             r186 = getRandomVal(PSELF);
-            r187 = getRandomVal(PSELF);
-            r188 = getRandomVal(PSELF);
-            r189 = getRandomVal(PSELF);
-            r190 = getRandomVal(PSELF);
-            r191 = getRandomVal(PSELF);
-            r192 = getRandomVal(PSELF);
-            r193 = getRandomVal(PSELF);
             r194 = getRandomVal(PSELF);
             r195 = getRandomVal(PSELF);
             r196 = getRandomVal(PSELF);
-            r197 = getRandomVal(PSELF);
-            r198 = getRandomVal(PSELF);
-            r199 = getRandomVal(PSELF);
-            r200 = getRandomVal(PSELF);
-            r201 = getRandomVal(PSELF);
-            r202 = getRandomVal(PSELF);
-            r203 = getRandomVal(PSELF);
             r204 = getRandomVal(PSELF);
             r205 = getRandomVal(PSELF);
             r206 = getRandomVal(PSELF);
-            r207 = getRandomVal(PSELF);
-            r208 = getRandomVal(PSELF);
-            r209 = getRandomVal(PSELF);
-            r210 = getRandomVal(PSELF);
-            r211 = getRandomVal(PSELF);
-            r212 = getRandomVal(PSELF);
-            r213 = getRandomVal(PSELF);
             r214 = getRandomVal(PSELF);
             r215 = getRandomVal(PSELF);
             r216 = getRandomVal(PSELF);
-            r217 = getRandomVal(PSELF);
-            r218 = getRandomVal(PSELF);
-            r219 = getRandomVal(PSELF);
-            r220 = getRandomVal(PSELF);
-            r221 = getRandomVal(PSELF);
-            r222 = getRandomVal(PSELF);
-            r223 = getRandomVal(PSELF);
             r224 = getRandomVal(PSELF);
-            r225 = getRandomVal(PSELF);
 
         }
     }
@@ -9140,196 +7452,196 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 21)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r153);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r89);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r102);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r115);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 B3G_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_156
                 B3G_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_157
                 B3G_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_158
-                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r151);  // and_a_160
+                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_160
                 B3P_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_173
                 B3P_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_174
                 B3P_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_175
                 B3G_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_194
                 B3G_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_195
                 B3G_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_196
-                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], r135);  // and_a_198
+                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_198
                 B3P_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_211
                 B3P_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_212
                 B3P_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_213
                 W2G_19_20_x1x2 = a[19].mult_a_known_to_evaluators(a[20]);  // and_a_229
-                W2G_19_20_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], r144);  // and_a_230
+                W2G_19_20_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], SET_ALL_ZERO());  // and_a_230
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r154);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r83);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r82, r83));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r80, r81));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r81, r82));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r88, r89));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r96);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r95, r96));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r93, r94));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r94, r95));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r101, r102));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r109);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r108, r109));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r106, r107));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r107, r108));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r114, r115));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r122);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r121, r122));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r119, r120));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r120, r121));  // and_a_140
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
                 B3G_13_15_x1x2x3 = B3G_13_15_x1x2.mult_a_known_to_evaluators(a[15]);  // and_a_159
-                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r150, r151));  // and_a_161
-                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], r129);  // and_a_176
-                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r128, r129));  // and_a_177
-                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r126, r127));  // and_a_179
-                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r127, r128));  // and_a_178
+                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_161
+                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], SET_ALL_ZERO());  // and_a_176
+                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_177
+                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_179
+                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_178
                 B3G_16_18_x1x2x3 = B3G_16_18_x1x2.mult_a_known_to_evaluators(a[18]);  // and_a_197
-                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r134, r135));  // and_a_199
-                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], r142);  // and_a_214
-                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r141, r142));  // and_a_215
-                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], FUNC_XOR(r139, r140));  // and_a_217
-                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r140, r141));  // and_a_216
-                W2G_19_20_t2 = W2G_19_20_x1x2.mult_a_known_to_evaluators_dot(b[20], FUNC_XOR(r143, r144));  // and_a_231
+                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_199
+                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], SET_ALL_ZERO());  // and_a_214
+                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_215
+                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_217
+                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_216
+                W2G_19_20_t2 = W2G_19_20_x1x2.mult_a_known_to_evaluators_dot(b[20], SET_ALL_ZERO());  // and_a_231
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r164
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r164, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r77-r78)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r77, r78), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r165
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r165, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r166
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r166, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r174
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r174, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r90-r91)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r90, r91), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r175
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r175, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r176
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r176, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r184
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r184, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r103-r104)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r103, r104), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r185
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r185, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r186
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r186, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r194
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r194, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r116-r117)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r116, r117), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r195
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r195, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r196
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r196, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_152: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r204
-                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, r204, triples[12].c);  // and_152
+                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, SET_ALL_ZERO(), triples[12].c);  // and_152
                 // and3_153: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r123-r124)
-                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, FUNC_XOR(r123, r124), beaver3_tuples[4]);  // and3_153
+                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_153
                 // and_154: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r205
-                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, r205, triples[13].c);  // and_154
+                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, SET_ALL_ZERO(), triples[13].c);  // and_154
                 // and_155: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r206
-                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, r206, triples[14].c);  // and_155
+                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, SET_ALL_ZERO(), triples[14].c);  // and_155
                 // and_190: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=r214
-                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, r214, triples[15].c);  // and_190
+                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, SET_ALL_ZERO(), triples[15].c);  // and_190
                 // and3_191: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=(r136-r137)
-                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, FUNC_XOR(r136, r137), beaver3_tuples[5]);  // and3_191
+                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, SET_ALL_ZERO(), beaver3_tuples[5]);  // and3_191
                 // and_192: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=r215
-                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, r215, triples[16].c);  // and_192
+                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, SET_ALL_ZERO(), triples[16].c);  // and_192
                 // and_193: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=r216
-                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, r216, triples[17].c);  // and_193
+                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, SET_ALL_ZERO(), triples[17].c);  // and_193
                 // and_228: a18=triples[18].a, b18=triples[18].b, c18=triples[18].c, output mask=r224
-                W2G_19_20_y1y2 = b_19_p.prepare_dot_and_assign(b_20_p, r224, triples[18].c);  // and_228
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r156);  // and_a_11
+                W2G_19_20_y1y2 = b_19_p.prepare_dot_and_assign(b_20_p, SET_ALL_ZERO(), triples[18].c);  // and_228
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r86, r87));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r99, r100));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r112, r113));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
-                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r148, r149));  // and_a_163
+                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_163
                 B3G_13_15_out_s1 = B3G_13_15_t1 ^ B3G_13_15_t2_1;  // B3G_13_15_out_s1
                 B3P_13_15_out_s1 = B3P_13_15_t1 ^ B3P_13_15_t2;  // B3P_13_15_out_s1
-                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r132, r133));  // and_a_201
+                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_201
                 B3G_16_18_out_s1 = B3G_16_18_t1 ^ B3G_16_18_t2_1;  // B3G_16_18_out_s1
                 B3P_16_18_out_s1 = B3P_16_18_t1 ^ B3P_16_18_t2;  // B3P_16_18_out_s1
                 W2G_19_20_out_s1 = W2G_19_20_t1 ^ W2G_19_20_t2;  // W2G_19_20_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r155);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r78, r79));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r159);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r157);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r77));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r158);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r79, r80));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r87, r88));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r91, r92));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[19].b, r84));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r85, r86));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r90));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r84, r85));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r92, r93));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r100, r101));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r104, r105));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[6].c, r97));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r98, r99));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r103));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r97, r98));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r105, r106));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r113, r114));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r117, r118));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r110));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r111, r112));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r116));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r110, r111));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r118, r119));  // and_a_142
-                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r149, r150));  // and_a_162
-                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r124, r125));  // and_a_181
-                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, FUNC_XOR(FUNC_XOR(triples[21].b, r145), r146));  // and_a_166
-                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(r147, r148));  // and_a_164
-                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(beaver3_tuples[7].a, r123));  // and_a_182
-                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r146, r147));  // and_a_165
-                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r125, r126));  // and_a_180
-                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r133, r134));  // and_a_200
-                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r137, r138));  // and_a_219
-                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, FUNC_XOR(triples[20].b, r130));  // and_a_204
-                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(r131, r132));  // and_a_202
-                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(beaver3_tuples[7].b, r136));  // and_a_220
-                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r130, r131));  // and_a_203
-                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r138, r139));  // and_a_218
-                W2G_19_20_t3 = a[20].mult_a_known_to_evaluators_dot_pending(W2G_19_20_y1y2, FUNC_XOR(beaver3_tuples[7].c, r143));  // and_a_232
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r153, r154), r155), r156), r157), r158), r159));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[19].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[6].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_162
+                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_181
+                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, SET_ALL_ZERO());  // and_a_166
+                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_164
+                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_182
+                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(triples[21].b, r145));  // and_a_165
+                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, beaver3_tuples[7].a);  // and_a_180
+                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_200
+                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_219
+                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, SET_ALL_ZERO());  // and_a_204
+                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_202
+                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_220
+                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, triples[20].b);  // and_a_203
+                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, beaver3_tuples[7].b);  // and_a_218
+                W2G_19_20_t3 = a[20].mult_a_known_to_evaluators_dot_pending(W2G_19_20_y1y2, beaver3_tuples[7].c);  // and_a_232
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -9433,20 +7745,20 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 21)>::type>
                 B3P_7_9_out_p = B3P_7_9_out.zero_add(beaver4_tuples[0].c);  // B3P_7_9_out', mask=c27
                 B3P_13_15_out_p = B3P_13_15_out.zero_add(triples[20].a);  // B3P_13_15_out', mask=a29
                 // and_235: a19=triples[19].a, b19=triples[19].b, c19=triples[19].c, output mask=r160
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r160, triples[19].c);  // and_235
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[19].c);  // and_235
                 // and3_236: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=r161
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r161, beaver3_tuples[6]);  // and3_236
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[6]);  // and3_236
                 // and4_237: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r162
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r162, beaver4_tuples[0]);  // and4_237
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r160, r161), r162), beaver4_tuples[0]);  // and4_237
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
                 // and4_241: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=a31
                 L1_B0_P = B3P_1_3_out.prepare_and4_and_assign(B3P_4_6_out, B3P_7_9_out, B3P_10_12_out, triples[21].a, beaver4_tuples[1]);  // and4_241
                 // and3_243: a7=beaver3_tuples[7].a, b7=beaver3_tuples[7].b, c7=beaver3_tuples[7].c, output mask=(r145-r152)
-                L1_B1_t2 = B3P_13_15_out.prepare_dot3_and_assign(B3P_16_18_out, W2G_19_20_out, FUNC_XOR(r145, r152), beaver3_tuples[7]);  // and3_243
+                L1_B1_t2 = B3P_13_15_out.prepare_dot3_and_assign(B3P_16_18_out, W2G_19_20_out, SET_ALL_ZERO(), beaver3_tuples[7]);  // and3_243
                 // and_242: a20=triples[20].a, b20=triples[20].b, c20=triples[20].c, output mask=r152
-                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, r152, triples[20].c);  // and_242
+                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, r145, triples[20].c);  // and_242
                 L1_B1_s1 = L1_B1_t1 ^ L1_B1_t2;  // L1_B1_s1
                 L1_B1_s1.mask_and_send_dot_without_remask();
                 break;
@@ -9493,83 +7805,17 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 22)>::type>
 
     DATATYPE r84;
     DATATYPE r85;
-    DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
-    DATATYPE r90;
-    DATATYPE r91;
-    DATATYPE r92;
-    DATATYPE r93;
-    DATATYPE r94;
-    DATATYPE r95;
-    DATATYPE r96;
     DATATYPE r97;
     DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
-    DATATYPE r104;
-    DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
-    DATATYPE r109;
     DATATYPE r110;
     DATATYPE r111;
-    DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
-    DATATYPE r115;
-    DATATYPE r116;
-    DATATYPE r117;
-    DATATYPE r118;
-    DATATYPE r119;
-    DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
     DATATYPE r123;
     DATATYPE r124;
-    DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
-    DATATYPE r129;
     DATATYPE r130;
     DATATYPE r131;
-    DATATYPE r132;
-    DATATYPE r133;
-    DATATYPE r134;
-    DATATYPE r135;
-    DATATYPE r136;
-    DATATYPE r137;
-    DATATYPE r138;
-    DATATYPE r139;
-    DATATYPE r140;
-    DATATYPE r141;
-    DATATYPE r142;
     DATATYPE r143;
     DATATYPE r144;
-    DATATYPE r145;
-    DATATYPE r146;
-    DATATYPE r147;
-    DATATYPE r148;
-    DATATYPE r149;
-    DATATYPE r150;
-    DATATYPE r151;
-    DATATYPE r152;
-    DATATYPE r153;
-    DATATYPE r154;
-    DATATYPE r155;
     DATATYPE r156;
-    DATATYPE r157;
-    DATATYPE r158;
-    DATATYPE r159;
-    DATATYPE r160;
-    DATATYPE r161;
-    DATATYPE r162;
     DATATYPE r163;
     DATATYPE r164;
     DATATYPE r165;
@@ -9585,71 +7831,25 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 22)>::type>
     DATATYPE r175;
     DATATYPE r176;
     DATATYPE r177;
-    DATATYPE r178;
-    DATATYPE r179;
-    DATATYPE r180;
-    DATATYPE r181;
-    DATATYPE r182;
-    DATATYPE r183;
-    DATATYPE r184;
     DATATYPE r185;
     DATATYPE r186;
     DATATYPE r187;
-    DATATYPE r188;
-    DATATYPE r189;
-    DATATYPE r190;
-    DATATYPE r191;
-    DATATYPE r192;
-    DATATYPE r193;
-    DATATYPE r194;
     DATATYPE r195;
     DATATYPE r196;
     DATATYPE r197;
-    DATATYPE r198;
-    DATATYPE r199;
-    DATATYPE r200;
-    DATATYPE r201;
-    DATATYPE r202;
-    DATATYPE r203;
-    DATATYPE r204;
     DATATYPE r205;
     DATATYPE r206;
     DATATYPE r207;
-    DATATYPE r208;
-    DATATYPE r209;
-    DATATYPE r210;
-    DATATYPE r211;
-    DATATYPE r212;
-    DATATYPE r213;
-    DATATYPE r214;
     DATATYPE r215;
     DATATYPE r216;
     DATATYPE r217;
-    DATATYPE r218;
-    DATATYPE r219;
-    DATATYPE r220;
-    DATATYPE r221;
-    DATATYPE r222;
-    DATATYPE r223;
-    DATATYPE r224;
     DATATYPE r225;
     DATATYPE r226;
     DATATYPE r227;
-    DATATYPE r228;
-    DATATYPE r229;
-    DATATYPE r230;
-    DATATYPE r231;
-    DATATYPE r232;
-    DATATYPE r233;
-    DATATYPE r234;
     DATATYPE r235;
     DATATYPE r236;
     DATATYPE r237;
     DATATYPE r238;
-    DATATYPE r239;
-    DATATYPE r240;
-    DATATYPE r241;
-    DATATYPE r242;
 
     Share B3G_10_12_out;
     Share B3G_10_12_out_s1;
@@ -10005,83 +8205,17 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 22)>::type>
             // Random mask values (shared across mask expressions)
             r84 = getRandomVal(PSELF);
             r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
-            r90 = getRandomVal(PSELF);
-            r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
-            r96 = getRandomVal(PSELF);
             r97 = getRandomVal(PSELF);
             r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
-            r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
-            r109 = getRandomVal(PSELF);
             r110 = getRandomVal(PSELF);
             r111 = getRandomVal(PSELF);
-            r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
-            r116 = getRandomVal(PSELF);
-            r117 = getRandomVal(PSELF);
-            r118 = getRandomVal(PSELF);
-            r119 = getRandomVal(PSELF);
-            r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
             r123 = getRandomVal(PSELF);
             r124 = getRandomVal(PSELF);
-            r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
-            r129 = getRandomVal(PSELF);
             r130 = getRandomVal(PSELF);
             r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
-            r133 = getRandomVal(PSELF);
-            r134 = getRandomVal(PSELF);
-            r135 = getRandomVal(PSELF);
-            r136 = getRandomVal(PSELF);
-            r137 = getRandomVal(PSELF);
-            r138 = getRandomVal(PSELF);
-            r139 = getRandomVal(PSELF);
-            r140 = getRandomVal(PSELF);
-            r141 = getRandomVal(PSELF);
-            r142 = getRandomVal(PSELF);
             r143 = getRandomVal(PSELF);
             r144 = getRandomVal(PSELF);
-            r145 = getRandomVal(PSELF);
-            r146 = getRandomVal(PSELF);
-            r147 = getRandomVal(PSELF);
-            r148 = getRandomVal(PSELF);
-            r149 = getRandomVal(PSELF);
-            r150 = getRandomVal(PSELF);
-            r151 = getRandomVal(PSELF);
-            r152 = getRandomVal(PSELF);
-            r153 = getRandomVal(PSELF);
-            r154 = getRandomVal(PSELF);
-            r155 = getRandomVal(PSELF);
             r156 = getRandomVal(PSELF);
-            r157 = getRandomVal(PSELF);
-            r158 = getRandomVal(PSELF);
-            r159 = getRandomVal(PSELF);
-            r160 = getRandomVal(PSELF);
-            r161 = getRandomVal(PSELF);
-            r162 = getRandomVal(PSELF);
             r163 = getRandomVal(PSELF);
             r164 = getRandomVal(PSELF);
             r165 = getRandomVal(PSELF);
@@ -10097,71 +8231,25 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 22)>::type>
             r175 = getRandomVal(PSELF);
             r176 = getRandomVal(PSELF);
             r177 = getRandomVal(PSELF);
-            r178 = getRandomVal(PSELF);
-            r179 = getRandomVal(PSELF);
-            r180 = getRandomVal(PSELF);
-            r181 = getRandomVal(PSELF);
-            r182 = getRandomVal(PSELF);
-            r183 = getRandomVal(PSELF);
-            r184 = getRandomVal(PSELF);
             r185 = getRandomVal(PSELF);
             r186 = getRandomVal(PSELF);
             r187 = getRandomVal(PSELF);
-            r188 = getRandomVal(PSELF);
-            r189 = getRandomVal(PSELF);
-            r190 = getRandomVal(PSELF);
-            r191 = getRandomVal(PSELF);
-            r192 = getRandomVal(PSELF);
-            r193 = getRandomVal(PSELF);
-            r194 = getRandomVal(PSELF);
             r195 = getRandomVal(PSELF);
             r196 = getRandomVal(PSELF);
             r197 = getRandomVal(PSELF);
-            r198 = getRandomVal(PSELF);
-            r199 = getRandomVal(PSELF);
-            r200 = getRandomVal(PSELF);
-            r201 = getRandomVal(PSELF);
-            r202 = getRandomVal(PSELF);
-            r203 = getRandomVal(PSELF);
-            r204 = getRandomVal(PSELF);
             r205 = getRandomVal(PSELF);
             r206 = getRandomVal(PSELF);
             r207 = getRandomVal(PSELF);
-            r208 = getRandomVal(PSELF);
-            r209 = getRandomVal(PSELF);
-            r210 = getRandomVal(PSELF);
-            r211 = getRandomVal(PSELF);
-            r212 = getRandomVal(PSELF);
-            r213 = getRandomVal(PSELF);
-            r214 = getRandomVal(PSELF);
             r215 = getRandomVal(PSELF);
             r216 = getRandomVal(PSELF);
             r217 = getRandomVal(PSELF);
-            r218 = getRandomVal(PSELF);
-            r219 = getRandomVal(PSELF);
-            r220 = getRandomVal(PSELF);
-            r221 = getRandomVal(PSELF);
-            r222 = getRandomVal(PSELF);
-            r223 = getRandomVal(PSELF);
-            r224 = getRandomVal(PSELF);
             r225 = getRandomVal(PSELF);
             r226 = getRandomVal(PSELF);
             r227 = getRandomVal(PSELF);
-            r228 = getRandomVal(PSELF);
-            r229 = getRandomVal(PSELF);
-            r230 = getRandomVal(PSELF);
-            r231 = getRandomVal(PSELF);
-            r232 = getRandomVal(PSELF);
-            r233 = getRandomVal(PSELF);
-            r234 = getRandomVal(PSELF);
             r235 = getRandomVal(PSELF);
             r236 = getRandomVal(PSELF);
             r237 = getRandomVal(PSELF);
             r238 = getRandomVal(PSELF);
-            r239 = getRandomVal(PSELF);
-            r240 = getRandomVal(PSELF);
-            r241 = getRandomVal(PSELF);
-            r242 = getRandomVal(PSELF);
 
         }
     }
@@ -10241,209 +8329,209 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 22)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r164);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r96);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r109);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r122);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 B3G_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_156
                 B3G_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_157
                 B3G_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_158
-                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r162);  // and_a_160
+                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_160
                 B3P_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_173
                 B3P_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_174
                 B3P_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_175
                 B3G_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_194
                 B3G_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_195
                 B3G_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_196
-                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], r142);  // and_a_198
+                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_198
                 B3P_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_211
                 B3P_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_212
                 B3P_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_213
                 W3L1_19_21_x1x2 = a[19].mult_a_known_to_evaluators(a[20]);  // and_a_232
                 W3L1_19_21_x1x3 = a[19].mult_a_known_to_evaluators(a[21]);  // and_a_233
                 W3L1_19_21_x2x3 = a[20].mult_a_known_to_evaluators(a[21]);  // and_a_234
-                W3L1_19_21_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], r155);  // and_a_236
+                W3L1_19_21_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], SET_ALL_ZERO());  // and_a_236
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r165);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r90);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r89, r90));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r87, r88));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r88, r89));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r95, r96));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r103);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r102, r103));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r100, r101));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r101, r102));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r108, r109));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r116);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r115, r116));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r113, r114));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r114, r115));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r121, r122));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r129);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r128, r129));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r126, r127));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r127, r128));  // and_a_140
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
                 B3G_13_15_x1x2x3 = B3G_13_15_x1x2.mult_a_known_to_evaluators(a[15]);  // and_a_159
-                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r161, r162));  // and_a_161
-                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], r136);  // and_a_176
-                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r135, r136));  // and_a_177
-                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r133, r134));  // and_a_179
-                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r134, r135));  // and_a_178
+                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_161
+                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], SET_ALL_ZERO());  // and_a_176
+                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_177
+                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_179
+                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_178
                 B3G_16_18_x1x2x3 = B3G_16_18_x1x2.mult_a_known_to_evaluators(a[18]);  // and_a_197
-                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r141, r142));  // and_a_199
-                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], r149);  // and_a_214
-                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r148, r149));  // and_a_215
-                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], FUNC_XOR(r146, r147));  // and_a_217
-                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r147, r148));  // and_a_216
+                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_199
+                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], SET_ALL_ZERO());  // and_a_214
+                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_215
+                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_217
+                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_216
                 W3L1_19_21_x1x2x3 = W3L1_19_21_x1x2.mult_a_known_to_evaluators(a[21]);  // and_a_235
-                W3L1_19_21_t2_1 = W3L1_19_21_x1x2.mult_a_known_to_evaluators_dot(b[20], FUNC_XOR(r154, r155));  // and_a_237
+                W3L1_19_21_t2_1 = W3L1_19_21_x1x2.mult_a_known_to_evaluators_dot(b[20], SET_ALL_ZERO());  // and_a_237
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r175
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r175, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r84-r85)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r84, r85), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r176
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r176, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r177
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r177, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r185
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r185, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r97-r98)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r97, r98), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r186
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r186, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r187
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r187, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r195
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r195, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r110-r111)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r110, r111), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r196
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r196, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r197
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r197, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r205
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r205, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r123-r124)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r123, r124), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r206
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r206, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r207
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r207, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_152: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r215
-                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, r215, triples[12].c);  // and_152
+                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, SET_ALL_ZERO(), triples[12].c);  // and_152
                 // and3_153: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r130-r131)
-                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, FUNC_XOR(r130, r131), beaver3_tuples[4]);  // and3_153
+                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_153
                 // and_154: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r216
-                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, r216, triples[13].c);  // and_154
+                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, SET_ALL_ZERO(), triples[13].c);  // and_154
                 // and_155: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r217
-                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, r217, triples[14].c);  // and_155
+                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, SET_ALL_ZERO(), triples[14].c);  // and_155
                 // and_190: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=r225
-                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, r225, triples[15].c);  // and_190
+                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, SET_ALL_ZERO(), triples[15].c);  // and_190
                 // and3_191: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=(r143-r144)
-                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, FUNC_XOR(r143, r144), beaver3_tuples[5]);  // and3_191
+                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, SET_ALL_ZERO(), beaver3_tuples[5]);  // and3_191
                 // and_192: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=r226
-                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, r226, triples[16].c);  // and_192
+                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, SET_ALL_ZERO(), triples[16].c);  // and_192
                 // and_193: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=r227
-                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, r227, triples[17].c);  // and_193
+                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, SET_ALL_ZERO(), triples[17].c);  // and_193
                 // and_228: a18=triples[18].a, b18=triples[18].b, c18=triples[18].c, output mask=r235
-                W3L1_19_21_y1y2 = b_19_p.prepare_dot_and_assign(b_20_p, r235, triples[18].c);  // and_228
+                W3L1_19_21_y1y2 = b_19_p.prepare_dot_and_assign(b_20_p, SET_ALL_ZERO(), triples[18].c);  // and_228
                 // and3_229: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=r236
-                W3L1_19_21_y1y2y3 = b_19_p_1.prepare_dot3_and_assign(b_20_p_1, b_21_p, r236, beaver3_tuples[6]);  // and3_229
+                W3L1_19_21_y1y2y3 = b_19_p_1.prepare_dot3_and_assign(b_20_p_1, b_21_p, SET_ALL_ZERO(), beaver3_tuples[6]);  // and3_229
                 // and_230: a19=triples[19].a, b19=triples[19].b, c19=triples[19].c, output mask=r237
-                W3L1_19_21_y2y3 = b_20_p_2.prepare_dot_and_assign(b_21_p_1, r237, triples[19].c);  // and_230
+                W3L1_19_21_y2y3 = b_20_p_2.prepare_dot_and_assign(b_21_p_1, SET_ALL_ZERO(), triples[19].c);  // and_230
                 // and_231: a20=triples[20].a, b20=triples[20].b, c20=triples[20].c, output mask=r238
-                W3L1_19_21_y1y3 = b_19_p_2.prepare_dot_and_assign(b_21_p_2, r238, triples[20].c);  // and_231
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r167);  // and_a_11
+                W3L1_19_21_y1y3 = b_19_p_2.prepare_dot_and_assign(b_21_p_2, SET_ALL_ZERO(), triples[20].c);  // and_231
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r93, r94));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r106, r107));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r119, r120));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
-                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r159, r160));  // and_a_163
+                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_163
                 B3G_13_15_out_s1 = B3G_13_15_t1 ^ B3G_13_15_t2_1;  // B3G_13_15_out_s1
                 B3P_13_15_out_s1 = B3P_13_15_t1 ^ B3P_13_15_t2;  // B3P_13_15_out_s1
-                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r139, r140));  // and_a_201
+                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_201
                 B3G_16_18_out_s1 = B3G_16_18_t1 ^ B3G_16_18_t2_1;  // B3G_16_18_out_s1
                 B3P_16_18_out_s1 = B3P_16_18_t1 ^ B3P_16_18_t2;  // B3P_16_18_out_s1
-                W3L1_19_21_t3_1 = W3L1_19_21_x1x2x3.mult_a_known_to_evaluators_dot(b[21], FUNC_XOR(r152, r153));  // and_a_239
+                W3L1_19_21_t3_1 = W3L1_19_21_x1x2x3.mult_a_known_to_evaluators_dot(b[21], SET_ALL_ZERO());  // and_a_239
                 W3L1_19_21_out_s1 = W3L1_19_21_t1 ^ W3L1_19_21_t2_1;  // W3L1_19_21_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r166);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r85, r86));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r170);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r168);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r84));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r169);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r86, r87));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r94, r95));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r98, r99));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[21].b, r91));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r92, r93));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r97));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r91, r92));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r99, r100));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r107, r108));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r111, r112));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[7].c, r104));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r105, r106));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r110));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r104, r105));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r112, r113));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r120, r121));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r124, r125));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r117));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r118, r119));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r123));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r117, r118));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r125, r126));  // and_a_142
-                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r160, r161));  // and_a_162
-                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r131, r132));  // and_a_181
-                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, FUNC_XOR(FUNC_XOR(triples[23].b, r156), r157));  // and_a_166
-                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(r158, r159));  // and_a_164
-                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(beaver3_tuples[8].a, r130));  // and_a_182
-                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r157, r158));  // and_a_165
-                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r132, r133));  // and_a_180
-                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r140, r141));  // and_a_200
-                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r144, r145));  // and_a_219
-                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, FUNC_XOR(triples[22].b, r137));  // and_a_204
-                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(r138, r139));  // and_a_202
-                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(beaver3_tuples[8].b, r143));  // and_a_220
-                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r137, r138));  // and_a_203
-                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r145, r146));  // and_a_218
-                W3L1_19_21_t2_2 = a[20].mult_a_known_to_evaluators_dot_pending(W3L1_19_21_y1y2, FUNC_XOR(r153, r154));  // and_a_238
-                W3L1_19_21_t3_4 = a[21].mult_a_known_to_evaluators_dot_pending(W3L1_19_21_y1y2y3, FUNC_XOR(beaver3_tuples[8].c, r150));  // and_a_242
-                W3L1_19_21_t3_2 = W3L1_19_21_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_19_21_y2y3, FUNC_XOR(r151, r152));  // and_a_240
-                W3L1_19_21_t3_3 = W3L1_19_21_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_19_21_y1y3, FUNC_XOR(r150, r151));  // and_a_241
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r164, r165), r166), r167), r168), r169), r170));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[21].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[7].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_162
+                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_181
+                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, SET_ALL_ZERO());  // and_a_166
+                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_164
+                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_182
+                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(triples[23].b, r156));  // and_a_165
+                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, beaver3_tuples[8].a);  // and_a_180
+                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_200
+                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_219
+                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, SET_ALL_ZERO());  // and_a_204
+                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_202
+                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_220
+                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, triples[22].b);  // and_a_203
+                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, beaver3_tuples[8].b);  // and_a_218
+                W3L1_19_21_t2_2 = a[20].mult_a_known_to_evaluators_dot_pending(W3L1_19_21_y1y2, SET_ALL_ZERO());  // and_a_238
+                W3L1_19_21_t3_4 = a[21].mult_a_known_to_evaluators_dot_pending(W3L1_19_21_y1y2y3, SET_ALL_ZERO());  // and_a_242
+                W3L1_19_21_t3_2 = W3L1_19_21_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_19_21_y2y3, SET_ALL_ZERO());  // and_a_240
+                W3L1_19_21_t3_3 = W3L1_19_21_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_19_21_y1y3, beaver3_tuples[8].c);  // and_a_241
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -10551,20 +8639,20 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 22)>::type>
                 B3P_7_9_out_p = B3P_7_9_out.zero_add(beaver4_tuples[0].c);  // B3P_7_9_out', mask=c30
                 B3P_13_15_out_p = B3P_13_15_out.zero_add(triples[22].a);  // B3P_13_15_out', mask=a32
                 // and_249: a21=triples[21].a, b21=triples[21].b, c21=triples[21].c, output mask=r171
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r171, triples[21].c);  // and_249
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[21].c);  // and_249
                 // and3_250: a7=beaver3_tuples[7].a, b7=beaver3_tuples[7].b, c7=beaver3_tuples[7].c, output mask=r172
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r172, beaver3_tuples[7]);  // and3_250
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[7]);  // and3_250
                 // and4_251: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r173
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r173, beaver4_tuples[0]);  // and4_251
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r171, r172), r173), beaver4_tuples[0]);  // and4_251
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
                 // and4_255: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=a34
                 L1_B0_P = B3P_1_3_out.prepare_and4_and_assign(B3P_4_6_out, B3P_7_9_out, B3P_10_12_out, triples[23].a, beaver4_tuples[1]);  // and4_255
                 // and3_257: a8=beaver3_tuples[8].a, b8=beaver3_tuples[8].b, c8=beaver3_tuples[8].c, output mask=(r156-r163)
-                L1_B1_t2 = B3P_13_15_out.prepare_dot3_and_assign(B3P_16_18_out, W3L1_19_21_out, FUNC_XOR(r156, r163), beaver3_tuples[8]);  // and3_257
+                L1_B1_t2 = B3P_13_15_out.prepare_dot3_and_assign(B3P_16_18_out, W3L1_19_21_out, SET_ALL_ZERO(), beaver3_tuples[8]);  // and3_257
                 // and_256: a22=triples[22].a, b22=triples[22].b, c22=triples[22].c, output mask=r163
-                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, r163, triples[22].c);  // and_256
+                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, r156, triples[22].c);  // and_256
                 L1_B1_s1 = L1_B1_t1 ^ L1_B1_t2;  // L1_B1_s1
                 L1_B1_s1.mask_and_send_dot_without_remask();
                 break;
@@ -10611,84 +8699,18 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 23)>::type>
 
     DATATYPE r83;
     DATATYPE r84;
-    DATATYPE r85;
-    DATATYPE r86;
-    DATATYPE r87;
-    DATATYPE r88;
-    DATATYPE r89;
-    DATATYPE r90;
-    DATATYPE r91;
-    DATATYPE r92;
-    DATATYPE r93;
-    DATATYPE r94;
-    DATATYPE r95;
     DATATYPE r96;
     DATATYPE r97;
-    DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
-    DATATYPE r104;
-    DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
     DATATYPE r109;
     DATATYPE r110;
-    DATATYPE r111;
-    DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
-    DATATYPE r115;
-    DATATYPE r116;
-    DATATYPE r117;
-    DATATYPE r118;
-    DATATYPE r119;
-    DATATYPE r120;
-    DATATYPE r121;
     DATATYPE r122;
     DATATYPE r123;
-    DATATYPE r124;
-    DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
     DATATYPE r129;
     DATATYPE r130;
-    DATATYPE r131;
-    DATATYPE r132;
-    DATATYPE r133;
-    DATATYPE r134;
-    DATATYPE r135;
-    DATATYPE r136;
-    DATATYPE r137;
-    DATATYPE r138;
-    DATATYPE r139;
-    DATATYPE r140;
-    DATATYPE r141;
     DATATYPE r142;
     DATATYPE r143;
-    DATATYPE r144;
-    DATATYPE r145;
-    DATATYPE r146;
-    DATATYPE r147;
-    DATATYPE r148;
-    DATATYPE r149;
-    DATATYPE r150;
     DATATYPE r151;
-    DATATYPE r152;
-    DATATYPE r153;
-    DATATYPE r154;
-    DATATYPE r155;
     DATATYPE r156;
-    DATATYPE r157;
-    DATATYPE r158;
-    DATATYPE r159;
-    DATATYPE r160;
-    DATATYPE r161;
-    DATATYPE r162;
     DATATYPE r163;
     DATATYPE r164;
     DATATYPE r165;
@@ -10705,66 +8727,22 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 23)>::type>
     DATATYPE r176;
     DATATYPE r177;
     DATATYPE r178;
-    DATATYPE r179;
-    DATATYPE r180;
-    DATATYPE r181;
-    DATATYPE r182;
-    DATATYPE r183;
-    DATATYPE r184;
-    DATATYPE r185;
     DATATYPE r186;
     DATATYPE r187;
     DATATYPE r188;
-    DATATYPE r189;
-    DATATYPE r190;
-    DATATYPE r191;
-    DATATYPE r192;
-    DATATYPE r193;
-    DATATYPE r194;
-    DATATYPE r195;
     DATATYPE r196;
     DATATYPE r197;
     DATATYPE r198;
-    DATATYPE r199;
-    DATATYPE r200;
-    DATATYPE r201;
-    DATATYPE r202;
-    DATATYPE r203;
-    DATATYPE r204;
-    DATATYPE r205;
     DATATYPE r206;
     DATATYPE r207;
     DATATYPE r208;
-    DATATYPE r209;
-    DATATYPE r210;
-    DATATYPE r211;
-    DATATYPE r212;
-    DATATYPE r213;
-    DATATYPE r214;
-    DATATYPE r215;
     DATATYPE r216;
     DATATYPE r217;
     DATATYPE r218;
-    DATATYPE r219;
-    DATATYPE r220;
-    DATATYPE r221;
-    DATATYPE r222;
-    DATATYPE r223;
-    DATATYPE r224;
-    DATATYPE r225;
     DATATYPE r226;
     DATATYPE r227;
     DATATYPE r228;
-    DATATYPE r229;
-    DATATYPE r230;
-    DATATYPE r231;
-    DATATYPE r232;
-    DATATYPE r233;
-    DATATYPE r234;
-    DATATYPE r235;
-    DATATYPE r236;
     DATATYPE r237;
-    DATATYPE r238;
 
     Share B2G_19_20_out;
     Share B2G_19_20_out_s1;
@@ -11118,84 +9096,18 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 23)>::type>
             // Random mask values (shared across mask expressions)
             r83 = getRandomVal(PSELF);
             r84 = getRandomVal(PSELF);
-            r85 = getRandomVal(PSELF);
-            r86 = getRandomVal(PSELF);
-            r87 = getRandomVal(PSELF);
-            r88 = getRandomVal(PSELF);
-            r89 = getRandomVal(PSELF);
-            r90 = getRandomVal(PSELF);
-            r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
             r96 = getRandomVal(PSELF);
             r97 = getRandomVal(PSELF);
-            r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
-            r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
             r109 = getRandomVal(PSELF);
             r110 = getRandomVal(PSELF);
-            r111 = getRandomVal(PSELF);
-            r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
-            r116 = getRandomVal(PSELF);
-            r117 = getRandomVal(PSELF);
-            r118 = getRandomVal(PSELF);
-            r119 = getRandomVal(PSELF);
-            r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
             r122 = getRandomVal(PSELF);
             r123 = getRandomVal(PSELF);
-            r124 = getRandomVal(PSELF);
-            r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
             r129 = getRandomVal(PSELF);
             r130 = getRandomVal(PSELF);
-            r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
-            r133 = getRandomVal(PSELF);
-            r134 = getRandomVal(PSELF);
-            r135 = getRandomVal(PSELF);
-            r136 = getRandomVal(PSELF);
-            r137 = getRandomVal(PSELF);
-            r138 = getRandomVal(PSELF);
-            r139 = getRandomVal(PSELF);
-            r140 = getRandomVal(PSELF);
-            r141 = getRandomVal(PSELF);
             r142 = getRandomVal(PSELF);
             r143 = getRandomVal(PSELF);
-            r144 = getRandomVal(PSELF);
-            r145 = getRandomVal(PSELF);
-            r146 = getRandomVal(PSELF);
-            r147 = getRandomVal(PSELF);
-            r148 = getRandomVal(PSELF);
-            r149 = getRandomVal(PSELF);
-            r150 = getRandomVal(PSELF);
             r151 = getRandomVal(PSELF);
-            r152 = getRandomVal(PSELF);
-            r153 = getRandomVal(PSELF);
-            r154 = getRandomVal(PSELF);
-            r155 = getRandomVal(PSELF);
             r156 = getRandomVal(PSELF);
-            r157 = getRandomVal(PSELF);
-            r158 = getRandomVal(PSELF);
-            r159 = getRandomVal(PSELF);
-            r160 = getRandomVal(PSELF);
-            r161 = getRandomVal(PSELF);
-            r162 = getRandomVal(PSELF);
             r163 = getRandomVal(PSELF);
             r164 = getRandomVal(PSELF);
             r165 = getRandomVal(PSELF);
@@ -11212,66 +9124,22 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 23)>::type>
             r176 = getRandomVal(PSELF);
             r177 = getRandomVal(PSELF);
             r178 = getRandomVal(PSELF);
-            r179 = getRandomVal(PSELF);
-            r180 = getRandomVal(PSELF);
-            r181 = getRandomVal(PSELF);
-            r182 = getRandomVal(PSELF);
-            r183 = getRandomVal(PSELF);
-            r184 = getRandomVal(PSELF);
-            r185 = getRandomVal(PSELF);
             r186 = getRandomVal(PSELF);
             r187 = getRandomVal(PSELF);
             r188 = getRandomVal(PSELF);
-            r189 = getRandomVal(PSELF);
-            r190 = getRandomVal(PSELF);
-            r191 = getRandomVal(PSELF);
-            r192 = getRandomVal(PSELF);
-            r193 = getRandomVal(PSELF);
-            r194 = getRandomVal(PSELF);
-            r195 = getRandomVal(PSELF);
             r196 = getRandomVal(PSELF);
             r197 = getRandomVal(PSELF);
             r198 = getRandomVal(PSELF);
-            r199 = getRandomVal(PSELF);
-            r200 = getRandomVal(PSELF);
-            r201 = getRandomVal(PSELF);
-            r202 = getRandomVal(PSELF);
-            r203 = getRandomVal(PSELF);
-            r204 = getRandomVal(PSELF);
-            r205 = getRandomVal(PSELF);
             r206 = getRandomVal(PSELF);
             r207 = getRandomVal(PSELF);
             r208 = getRandomVal(PSELF);
-            r209 = getRandomVal(PSELF);
-            r210 = getRandomVal(PSELF);
-            r211 = getRandomVal(PSELF);
-            r212 = getRandomVal(PSELF);
-            r213 = getRandomVal(PSELF);
-            r214 = getRandomVal(PSELF);
-            r215 = getRandomVal(PSELF);
             r216 = getRandomVal(PSELF);
             r217 = getRandomVal(PSELF);
             r218 = getRandomVal(PSELF);
-            r219 = getRandomVal(PSELF);
-            r220 = getRandomVal(PSELF);
-            r221 = getRandomVal(PSELF);
-            r222 = getRandomVal(PSELF);
-            r223 = getRandomVal(PSELF);
-            r224 = getRandomVal(PSELF);
-            r225 = getRandomVal(PSELF);
             r226 = getRandomVal(PSELF);
             r227 = getRandomVal(PSELF);
             r228 = getRandomVal(PSELF);
-            r229 = getRandomVal(PSELF);
-            r230 = getRandomVal(PSELF);
-            r231 = getRandomVal(PSELF);
-            r232 = getRandomVal(PSELF);
-            r233 = getRandomVal(PSELF);
-            r234 = getRandomVal(PSELF);
-            r235 = getRandomVal(PSELF);
-            r236 = getRandomVal(PSELF);
             r237 = getRandomVal(PSELF);
-            r238 = getRandomVal(PSELF);
 
         }
     }
@@ -11343,9 +9211,9 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 23)>::type>
                 b_20_p = b[20].zero_add(triples[18].b);  // b[20]', mask=b24
                 b_21_p = b[21].zero_add(triples[19].a);  // b[21]', mask=a25
                 b_22_p = b[22].zero_add(triples[19].b);  // b[22]', mask=b25
-                B2P_19_20_t1 = a[19].mult_a_known_to_evaluators_dot(a[20], r153);  // and_a_235
-                B2P_19_20_t2 = a[19].mult_a_known_to_evaluators_dot(b[20], FUNC_XOR(r152, r153));  // and_a_236
-                B2P_19_20_t3 = a[20].mult_a_known_to_evaluators_dot(b[19], FUNC_XOR(r151, r152));  // and_a_237
+                B2P_19_20_t1 = a[19].mult_a_known_to_evaluators_dot(a[20], SET_ALL_ZERO());  // and_a_235
+                B2P_19_20_t2 = a[19].mult_a_known_to_evaluators_dot(b[20], SET_ALL_ZERO());  // and_a_236
+                B2P_19_20_t3 = a[20].mult_a_known_to_evaluators_dot(b[19], r151);  // and_a_237
                 B2P_19_20_out_s1 = B2P_19_20_t1 ^ B2P_19_20_t2;  // B2P_19_20_out_s1
                 B2P_19_20_out_s2 = B2P_19_20_out_s1 ^ B2P_19_20_t3;  // B2P_19_20_out_s2
                 B2P_19_20_out_s2.mask_and_send_dot_without_remask();
@@ -11355,196 +9223,196 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 23)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r165);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r95);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r108);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r121);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 B3G_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_156
                 B3G_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_157
                 B3G_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_158
-                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r162);  // and_a_160
+                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_160
                 B3P_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_173
                 B3P_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_174
                 B3P_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_175
                 B3G_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_194
                 B3G_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_195
                 B3G_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_196
-                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], r141);  // and_a_198
+                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_198
                 B3P_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_211
                 B3P_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_212
                 B3P_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_213
                 W2G_21_22_x1x2 = a[21].mult_a_known_to_evaluators(a[22]);  // and_a_242
-                W2G_21_22_t1 = a[21].mult_a_known_to_evaluators_dot(b[21], r155);  // and_a_243
+                W2G_21_22_t1 = a[21].mult_a_known_to_evaluators_dot(b[21], SET_ALL_ZERO());  // and_a_243
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r166);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r89);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r88, r89));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r86, r87));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r87, r88));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r94, r95));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r102);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r101, r102));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r99, r100));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r100, r101));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r107, r108));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r115);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r114, r115));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r112, r113));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r113, r114));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r120, r121));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r128);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r127, r128));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r125, r126));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r126, r127));  // and_a_140
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
                 B3G_13_15_x1x2x3 = B3G_13_15_x1x2.mult_a_known_to_evaluators(a[15]);  // and_a_159
-                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r161, r162));  // and_a_161
-                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], r135);  // and_a_176
-                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r134, r135));  // and_a_177
-                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r132, r133));  // and_a_179
-                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r133, r134));  // and_a_178
+                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_161
+                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], SET_ALL_ZERO());  // and_a_176
+                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_177
+                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_179
+                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_178
                 B3G_16_18_x1x2x3 = B3G_16_18_x1x2.mult_a_known_to_evaluators(a[18]);  // and_a_197
-                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r140, r141));  // and_a_199
-                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], r148);  // and_a_214
-                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r147, r148));  // and_a_215
-                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], FUNC_XOR(r145, r146));  // and_a_217
-                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r146, r147));  // and_a_216
-                W2G_21_22_t2 = W2G_21_22_x1x2.mult_a_known_to_evaluators_dot(b[22], FUNC_XOR(r154, r155));  // and_a_244
+                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_199
+                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], SET_ALL_ZERO());  // and_a_214
+                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_215
+                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_217
+                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_216
+                W2G_21_22_t2 = W2G_21_22_x1x2.mult_a_known_to_evaluators_dot(b[22], SET_ALL_ZERO());  // and_a_244
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r176
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r176, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r83-r84)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r83, r84), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r177
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r177, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r178
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r178, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r186
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r186, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r96-r97)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r96, r97), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r187
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r187, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r188
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r188, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r196
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r196, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r109-r110)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r109, r110), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r197
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r197, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r198
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r198, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r206
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r206, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r122-r123)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r122, r123), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r207
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r207, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r208
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r208, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_152: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r216
-                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, r216, triples[12].c);  // and_152
+                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, SET_ALL_ZERO(), triples[12].c);  // and_152
                 // and3_153: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r129-r130)
-                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, FUNC_XOR(r129, r130), beaver3_tuples[4]);  // and3_153
+                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_153
                 // and_154: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r217
-                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, r217, triples[13].c);  // and_154
+                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, SET_ALL_ZERO(), triples[13].c);  // and_154
                 // and_155: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r218
-                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, r218, triples[14].c);  // and_155
+                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, SET_ALL_ZERO(), triples[14].c);  // and_155
                 // and_190: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=r226
-                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, r226, triples[15].c);  // and_190
+                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, SET_ALL_ZERO(), triples[15].c);  // and_190
                 // and3_191: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=(r142-r143)
-                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, FUNC_XOR(r142, r143), beaver3_tuples[5]);  // and3_191
+                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, SET_ALL_ZERO(), beaver3_tuples[5]);  // and3_191
                 // and_192: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=r227
-                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, r227, triples[16].c);  // and_192
+                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, SET_ALL_ZERO(), triples[16].c);  // and_192
                 // and_193: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=r228
-                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, r228, triples[17].c);  // and_193
+                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, SET_ALL_ZERO(), triples[17].c);  // and_193
                 // and_241: a19=triples[19].a, b19=triples[19].b, c19=triples[19].c, output mask=r237
-                W2G_21_22_y1y2 = b_21_p.prepare_dot_and_assign(b_22_p, r237, triples[19].c);  // and_241
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r168);  // and_a_11
+                W2G_21_22_y1y2 = b_21_p.prepare_dot_and_assign(b_22_p, SET_ALL_ZERO(), triples[19].c);  // and_241
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r92, r93));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r105, r106));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r118, r119));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
-                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r159, r160));  // and_a_163
+                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_163
                 B3G_13_15_out_s1 = B3G_13_15_t1 ^ B3G_13_15_t2_1;  // B3G_13_15_out_s1
                 B3P_13_15_out_s1 = B3P_13_15_t1 ^ B3P_13_15_t2;  // B3P_13_15_out_s1
-                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r138, r139));  // and_a_201
+                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_201
                 B3G_16_18_out_s1 = B3G_16_18_t1 ^ B3G_16_18_t2_1;  // B3G_16_18_out_s1
                 B3P_16_18_out_s1 = B3P_16_18_t1 ^ B3P_16_18_t2;  // B3P_16_18_out_s1
                 W2G_21_22_out_s1 = W2G_21_22_t1 ^ W2G_21_22_t2;  // W2G_21_22_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r167);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r84, r85));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r171);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r169);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r83));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r170);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r85, r86));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r93, r94));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r97, r98));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[20].b, r90));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r91, r92));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r96));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r90, r91));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r98, r99));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r106, r107));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r110, r111));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[6].c, r103));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r104, r105));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r109));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r103, r104));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r111, r112));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r119, r120));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r123, r124));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r116));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r117, r118));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r122));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r116, r117));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r124, r125));  // and_a_142
-                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r160, r161));  // and_a_162
-                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r130, r131));  // and_a_181
-                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, FUNC_XOR(FUNC_XOR(triples[22].b, r156), r157));  // and_a_166
-                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(r158, r159));  // and_a_164
-                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(beaver4_tuples[2].a, r129));  // and_a_182
-                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r157, r158));  // and_a_165
-                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r131, r132));  // and_a_180
-                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r139, r140));  // and_a_200
-                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r143, r144));  // and_a_219
-                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, FUNC_XOR(triples[21].b, r136));  // and_a_204
-                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(r137, r138));  // and_a_202
-                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(beaver4_tuples[2].b, r142));  // and_a_220
-                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r136, r137));  // and_a_203
-                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r144, r145));  // and_a_218
-                W2G_21_22_t3 = a[22].mult_a_known_to_evaluators_dot_pending(W2G_21_22_y1y2, FUNC_XOR(beaver4_tuples[2].d, r154));  // and_a_245
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r165, r166), r167), r168), r169), r170), r171));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[20].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[6].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_162
+                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_181
+                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, SET_ALL_ZERO());  // and_a_166
+                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_164
+                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_182
+                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(triples[22].b, r156));  // and_a_165
+                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, beaver4_tuples[2].a);  // and_a_180
+                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_200
+                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_219
+                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, SET_ALL_ZERO());  // and_a_204
+                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_202
+                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_220
+                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, triples[21].b);  // and_a_203
+                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, beaver4_tuples[2].b);  // and_a_218
+                W2G_21_22_t3 = a[22].mult_a_known_to_evaluators_dot_pending(W2G_21_22_y1y2, beaver4_tuples[2].d);  // and_a_245
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -11645,10 +9513,10 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 23)>::type>
                 W2G_21_22_out.complete_and();
                 B2P_19_20_out = B2P_19_20_out_s2 ^ B2G_19_20_y1y2;  // B2P_19_20_out
                 B2G_19_20_x1x2 = a[19].mult_a_known_to_evaluators(a[20]);  // and_a_229
-                B2G_19_20_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], r150);  // and_a_230
-                B2G_19_20_t2 = B2G_19_20_x1x2.mult_a_known_to_evaluators_dot(b[20], FUNC_XOR(r149, r150));  // and_a_231
+                B2G_19_20_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], SET_ALL_ZERO());  // and_a_230
+                B2G_19_20_t2 = B2G_19_20_x1x2.mult_a_known_to_evaluators_dot(b[20], SET_ALL_ZERO());  // and_a_231
                 B2G_19_20_out_s1 = B2G_19_20_t1 ^ B2G_19_20_t2;  // B2G_19_20_out_s1
-                B2G_19_20_t3 = a[20].mult_a_known_to_evaluators_dot(B2G_19_20_y1y2, FUNC_XOR(beaver3_tuples[7].c, r149));  // and_a_232
+                B2G_19_20_t3 = a[20].mult_a_known_to_evaluators_dot(B2G_19_20_y1y2, beaver3_tuples[7].c);  // and_a_232
                 B2G_19_20_out = B2G_19_20_out_s1 ^ B2G_19_20_t3;  // B2G_19_20_out
                 B2G_19_20_out.mask_and_send_dot_without_remask();
                 break;
@@ -11664,22 +9532,22 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 23)>::type>
                 B3P_13_15_out_p_1 = B3P_13_15_out.zero_add(beaver3_tuples[7].a);  // B3P_13_15_out'_1, mask=a31
                 B3P_16_18_out_p = B3P_16_18_out.zero_add(beaver3_tuples[7].b);  // B3P_16_18_out', mask=b31
                 // and_248: a20=triples[20].a, b20=triples[20].b, c20=triples[20].c, output mask=r172
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r172, triples[20].c);  // and_248
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[20].c);  // and_248
                 // and3_249: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=r173
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r173, beaver3_tuples[6]);  // and3_249
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[6]);  // and3_249
                 // and4_250: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r174
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r174, beaver4_tuples[0]);  // and4_250
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r172, r173), r174), beaver4_tuples[0]);  // and4_250
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
                 // and4_254: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=a33
                 L1_B0_P = B3P_1_3_out.prepare_and4_and_assign(B3P_4_6_out, B3P_7_9_out, B3P_10_12_out, triples[22].a, beaver4_tuples[1]);  // and4_254
                 // and4_257: a2=beaver4_tuples[2].a, b2=beaver4_tuples[2].b, c2=beaver4_tuples[2].c, d2=beaver4_tuples[2].d, output mask=(r156-r163)
-                L1_B1_t3 = B3P_13_15_out.prepare_dot4_and_assign(B3P_16_18_out, B2P_19_20_out, W2G_21_22_out, FUNC_XOR(r156, r163), beaver4_tuples[2]);  // and4_257
+                L1_B1_t3 = B3P_13_15_out.prepare_dot4_and_assign(B3P_16_18_out, B2P_19_20_out, W2G_21_22_out, SET_ALL_ZERO(), beaver4_tuples[2]);  // and4_257
                 // and_255: a21=triples[21].a, b21=triples[21].b, c21=triples[21].c, output mask=r164
-                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, r164, triples[21].c);  // and_255
+                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, SET_ALL_ZERO(), triples[21].c);  // and_255
                 // and3_256: a7=beaver3_tuples[7].a, b7=beaver3_tuples[7].b, c7=beaver3_tuples[7].c, output mask=(r163-r164)
-                L1_B1_t2 = B3P_13_15_out_p_1.prepare_dot3_and_assign(B3P_16_18_out_p, B2G_19_20_out, FUNC_XOR(r163, r164), beaver3_tuples[7]);  // and3_256
+                L1_B1_t2 = B3P_13_15_out_p_1.prepare_dot3_and_assign(B3P_16_18_out_p, B2G_19_20_out, r156, beaver3_tuples[7]);  // and3_256
                 L1_B1_s1 = L1_B1_t1 ^ L1_B1_t2;  // L1_B1_s1
                 L1_B1_s2 = L1_B1_s1 ^ L1_B1_t3;  // L1_B1_s2
                 L1_B1_s2.mask_and_send_dot_without_remask();
@@ -11727,92 +9595,19 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 24)>::type>
 
     DATATYPE r90;
     DATATYPE r91;
-    DATATYPE r92;
-    DATATYPE r93;
-    DATATYPE r94;
-    DATATYPE r95;
-    DATATYPE r96;
-    DATATYPE r97;
-    DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
     DATATYPE r103;
     DATATYPE r104;
-    DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
-    DATATYPE r109;
-    DATATYPE r110;
-    DATATYPE r111;
-    DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
-    DATATYPE r115;
     DATATYPE r116;
     DATATYPE r117;
-    DATATYPE r118;
-    DATATYPE r119;
-    DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
-    DATATYPE r123;
-    DATATYPE r124;
-    DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
     DATATYPE r129;
     DATATYPE r130;
-    DATATYPE r131;
-    DATATYPE r132;
-    DATATYPE r133;
-    DATATYPE r134;
-    DATATYPE r135;
     DATATYPE r136;
     DATATYPE r137;
-    DATATYPE r138;
-    DATATYPE r139;
-    DATATYPE r140;
-    DATATYPE r141;
-    DATATYPE r142;
-    DATATYPE r143;
-    DATATYPE r144;
-    DATATYPE r145;
-    DATATYPE r146;
-    DATATYPE r147;
-    DATATYPE r148;
     DATATYPE r149;
     DATATYPE r150;
-    DATATYPE r151;
-    DATATYPE r152;
-    DATATYPE r153;
-    DATATYPE r154;
-    DATATYPE r155;
-    DATATYPE r156;
-    DATATYPE r157;
-    DATATYPE r158;
-    DATATYPE r159;
-    DATATYPE r160;
-    DATATYPE r161;
     DATATYPE r162;
     DATATYPE r163;
-    DATATYPE r164;
-    DATATYPE r165;
-    DATATYPE r166;
-    DATATYPE r167;
-    DATATYPE r168;
-    DATATYPE r169;
-    DATATYPE r170;
     DATATYPE r171;
-    DATATYPE r172;
-    DATATYPE r173;
-    DATATYPE r174;
-    DATATYPE r175;
-    DATATYPE r176;
-    DATATYPE r177;
     DATATYPE r178;
     DATATYPE r179;
     DATATYPE r180;
@@ -11829,75 +9624,25 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 24)>::type>
     DATATYPE r191;
     DATATYPE r192;
     DATATYPE r193;
-    DATATYPE r194;
-    DATATYPE r195;
-    DATATYPE r196;
-    DATATYPE r197;
-    DATATYPE r198;
-    DATATYPE r199;
-    DATATYPE r200;
     DATATYPE r201;
     DATATYPE r202;
     DATATYPE r203;
-    DATATYPE r204;
-    DATATYPE r205;
-    DATATYPE r206;
-    DATATYPE r207;
-    DATATYPE r208;
-    DATATYPE r209;
-    DATATYPE r210;
     DATATYPE r211;
     DATATYPE r212;
     DATATYPE r213;
-    DATATYPE r214;
-    DATATYPE r215;
-    DATATYPE r216;
-    DATATYPE r217;
-    DATATYPE r218;
-    DATATYPE r219;
-    DATATYPE r220;
     DATATYPE r221;
     DATATYPE r222;
     DATATYPE r223;
-    DATATYPE r224;
-    DATATYPE r225;
-    DATATYPE r226;
-    DATATYPE r227;
-    DATATYPE r228;
-    DATATYPE r229;
-    DATATYPE r230;
     DATATYPE r231;
     DATATYPE r232;
     DATATYPE r233;
-    DATATYPE r234;
-    DATATYPE r235;
-    DATATYPE r236;
-    DATATYPE r237;
-    DATATYPE r238;
-    DATATYPE r239;
-    DATATYPE r240;
     DATATYPE r241;
     DATATYPE r242;
     DATATYPE r243;
-    DATATYPE r244;
-    DATATYPE r245;
-    DATATYPE r246;
-    DATATYPE r247;
-    DATATYPE r248;
-    DATATYPE r249;
-    DATATYPE r250;
     DATATYPE r251;
     DATATYPE r252;
     DATATYPE r253;
-    DATATYPE r254;
-    DATATYPE r255;
-    DATATYPE r256;
-    DATATYPE r257;
-    DATATYPE r258;
-    DATATYPE r259;
-    DATATYPE r260;
     DATATYPE r261;
-    DATATYPE r262;
 
     Share B3G_10_12_out;
     Share B3G_10_12_out_s1;
@@ -12283,92 +10028,19 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 24)>::type>
             // Random mask values (shared across mask expressions)
             r90 = getRandomVal(PSELF);
             r91 = getRandomVal(PSELF);
-            r92 = getRandomVal(PSELF);
-            r93 = getRandomVal(PSELF);
-            r94 = getRandomVal(PSELF);
-            r95 = getRandomVal(PSELF);
-            r96 = getRandomVal(PSELF);
-            r97 = getRandomVal(PSELF);
-            r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
             r103 = getRandomVal(PSELF);
             r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
-            r109 = getRandomVal(PSELF);
-            r110 = getRandomVal(PSELF);
-            r111 = getRandomVal(PSELF);
-            r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
             r116 = getRandomVal(PSELF);
             r117 = getRandomVal(PSELF);
-            r118 = getRandomVal(PSELF);
-            r119 = getRandomVal(PSELF);
-            r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
-            r123 = getRandomVal(PSELF);
-            r124 = getRandomVal(PSELF);
-            r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
             r129 = getRandomVal(PSELF);
             r130 = getRandomVal(PSELF);
-            r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
-            r133 = getRandomVal(PSELF);
-            r134 = getRandomVal(PSELF);
-            r135 = getRandomVal(PSELF);
             r136 = getRandomVal(PSELF);
             r137 = getRandomVal(PSELF);
-            r138 = getRandomVal(PSELF);
-            r139 = getRandomVal(PSELF);
-            r140 = getRandomVal(PSELF);
-            r141 = getRandomVal(PSELF);
-            r142 = getRandomVal(PSELF);
-            r143 = getRandomVal(PSELF);
-            r144 = getRandomVal(PSELF);
-            r145 = getRandomVal(PSELF);
-            r146 = getRandomVal(PSELF);
-            r147 = getRandomVal(PSELF);
-            r148 = getRandomVal(PSELF);
             r149 = getRandomVal(PSELF);
             r150 = getRandomVal(PSELF);
-            r151 = getRandomVal(PSELF);
-            r152 = getRandomVal(PSELF);
-            r153 = getRandomVal(PSELF);
-            r154 = getRandomVal(PSELF);
-            r155 = getRandomVal(PSELF);
-            r156 = getRandomVal(PSELF);
-            r157 = getRandomVal(PSELF);
-            r158 = getRandomVal(PSELF);
-            r159 = getRandomVal(PSELF);
-            r160 = getRandomVal(PSELF);
-            r161 = getRandomVal(PSELF);
             r162 = getRandomVal(PSELF);
             r163 = getRandomVal(PSELF);
-            r164 = getRandomVal(PSELF);
-            r165 = getRandomVal(PSELF);
-            r166 = getRandomVal(PSELF);
-            r167 = getRandomVal(PSELF);
-            r168 = getRandomVal(PSELF);
-            r169 = getRandomVal(PSELF);
-            r170 = getRandomVal(PSELF);
             r171 = getRandomVal(PSELF);
-            r172 = getRandomVal(PSELF);
-            r173 = getRandomVal(PSELF);
-            r174 = getRandomVal(PSELF);
-            r175 = getRandomVal(PSELF);
-            r176 = getRandomVal(PSELF);
-            r177 = getRandomVal(PSELF);
             r178 = getRandomVal(PSELF);
             r179 = getRandomVal(PSELF);
             r180 = getRandomVal(PSELF);
@@ -12385,75 +10057,25 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 24)>::type>
             r191 = getRandomVal(PSELF);
             r192 = getRandomVal(PSELF);
             r193 = getRandomVal(PSELF);
-            r194 = getRandomVal(PSELF);
-            r195 = getRandomVal(PSELF);
-            r196 = getRandomVal(PSELF);
-            r197 = getRandomVal(PSELF);
-            r198 = getRandomVal(PSELF);
-            r199 = getRandomVal(PSELF);
-            r200 = getRandomVal(PSELF);
             r201 = getRandomVal(PSELF);
             r202 = getRandomVal(PSELF);
             r203 = getRandomVal(PSELF);
-            r204 = getRandomVal(PSELF);
-            r205 = getRandomVal(PSELF);
-            r206 = getRandomVal(PSELF);
-            r207 = getRandomVal(PSELF);
-            r208 = getRandomVal(PSELF);
-            r209 = getRandomVal(PSELF);
-            r210 = getRandomVal(PSELF);
             r211 = getRandomVal(PSELF);
             r212 = getRandomVal(PSELF);
             r213 = getRandomVal(PSELF);
-            r214 = getRandomVal(PSELF);
-            r215 = getRandomVal(PSELF);
-            r216 = getRandomVal(PSELF);
-            r217 = getRandomVal(PSELF);
-            r218 = getRandomVal(PSELF);
-            r219 = getRandomVal(PSELF);
-            r220 = getRandomVal(PSELF);
             r221 = getRandomVal(PSELF);
             r222 = getRandomVal(PSELF);
             r223 = getRandomVal(PSELF);
-            r224 = getRandomVal(PSELF);
-            r225 = getRandomVal(PSELF);
-            r226 = getRandomVal(PSELF);
-            r227 = getRandomVal(PSELF);
-            r228 = getRandomVal(PSELF);
-            r229 = getRandomVal(PSELF);
-            r230 = getRandomVal(PSELF);
             r231 = getRandomVal(PSELF);
             r232 = getRandomVal(PSELF);
             r233 = getRandomVal(PSELF);
-            r234 = getRandomVal(PSELF);
-            r235 = getRandomVal(PSELF);
-            r236 = getRandomVal(PSELF);
-            r237 = getRandomVal(PSELF);
-            r238 = getRandomVal(PSELF);
-            r239 = getRandomVal(PSELF);
-            r240 = getRandomVal(PSELF);
             r241 = getRandomVal(PSELF);
             r242 = getRandomVal(PSELF);
             r243 = getRandomVal(PSELF);
-            r244 = getRandomVal(PSELF);
-            r245 = getRandomVal(PSELF);
-            r246 = getRandomVal(PSELF);
-            r247 = getRandomVal(PSELF);
-            r248 = getRandomVal(PSELF);
-            r249 = getRandomVal(PSELF);
-            r250 = getRandomVal(PSELF);
             r251 = getRandomVal(PSELF);
             r252 = getRandomVal(PSELF);
             r253 = getRandomVal(PSELF);
-            r254 = getRandomVal(PSELF);
-            r255 = getRandomVal(PSELF);
-            r256 = getRandomVal(PSELF);
-            r257 = getRandomVal(PSELF);
-            r258 = getRandomVal(PSELF);
-            r259 = getRandomVal(PSELF);
-            r260 = getRandomVal(PSELF);
             r261 = getRandomVal(PSELF);
-            r262 = getRandomVal(PSELF);
 
         }
     }
@@ -12535,227 +10157,227 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 24)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r180);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r102);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r115);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r128);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 B3G_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_156
                 B3G_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_157
                 B3G_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_158
-                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r177);  // and_a_160
+                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_160
                 B3P_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_173
                 B3P_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_174
                 B3P_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_175
                 B3G_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_194
                 B3G_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_195
                 B3G_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_196
-                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], r148);  // and_a_198
+                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_198
                 B3P_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_211
                 B3P_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_212
                 B3P_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_213
                 B3G_19_21_x1x2 = a[19].mult_a_known_to_evaluators(a[20]);  // and_a_232
                 B3G_19_21_x1x3 = a[19].mult_a_known_to_evaluators(a[21]);  // and_a_233
                 B3G_19_21_x2x3 = a[20].mult_a_known_to_evaluators(a[21]);  // and_a_234
-                B3G_19_21_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], r161);  // and_a_236
+                B3G_19_21_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], SET_ALL_ZERO());  // and_a_236
                 B3P_19_21_x1x2 = a[19].mult_a_known_to_evaluators(a[20]);  // and_a_249
                 B3P_19_21_x2x3 = a[20].mult_a_known_to_evaluators(a[21]);  // and_a_250
                 B3P_19_21_x1x3 = a[19].mult_a_known_to_evaluators(a[21]);  // and_a_251
                 W2G_22_23_x1x2 = a[22].mult_a_known_to_evaluators(a[23]);  // and_a_267
-                W2G_22_23_t1 = a[22].mult_a_known_to_evaluators_dot(b[22], r170);  // and_a_268
+                W2G_22_23_t1 = a[22].mult_a_known_to_evaluators_dot(b[22], SET_ALL_ZERO());  // and_a_268
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r181);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r96);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r95, r96));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r93, r94));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r94, r95));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r101, r102));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r109);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r108, r109));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r106, r107));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r107, r108));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r114, r115));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r122);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r121, r122));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r119, r120));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r120, r121));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r127, r128));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r135);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r134, r135));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r132, r133));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r133, r134));  // and_a_140
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
                 B3G_13_15_x1x2x3 = B3G_13_15_x1x2.mult_a_known_to_evaluators(a[15]);  // and_a_159
-                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r176, r177));  // and_a_161
-                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], r142);  // and_a_176
-                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r141, r142));  // and_a_177
-                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r139, r140));  // and_a_179
-                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r140, r141));  // and_a_178
+                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_161
+                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], SET_ALL_ZERO());  // and_a_176
+                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_177
+                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_179
+                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_178
                 B3G_16_18_x1x2x3 = B3G_16_18_x1x2.mult_a_known_to_evaluators(a[18]);  // and_a_197
-                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r147, r148));  // and_a_199
-                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], r155);  // and_a_214
-                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r154, r155));  // and_a_215
-                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], FUNC_XOR(r152, r153));  // and_a_217
-                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r153, r154));  // and_a_216
+                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_199
+                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], SET_ALL_ZERO());  // and_a_214
+                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_215
+                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_217
+                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_216
                 B3G_19_21_x1x2x3 = B3G_19_21_x1x2.mult_a_known_to_evaluators(a[21]);  // and_a_235
-                B3G_19_21_t2_1 = B3G_19_21_x1x2.mult_a_known_to_evaluators_dot(b[20], FUNC_XOR(r160, r161));  // and_a_237
-                B3P_19_21_t1 = B3P_19_21_x1x2.mult_a_known_to_evaluators_dot(a[21], r168);  // and_a_252
-                B3P_19_21_t2 = B3P_19_21_x1x2.mult_a_known_to_evaluators_dot(b[21], FUNC_XOR(r167, r168));  // and_a_253
-                B3P_19_21_t4 = B3P_19_21_x2x3.mult_a_known_to_evaluators_dot(b[19], FUNC_XOR(r165, r166));  // and_a_255
-                B3P_19_21_t3 = B3P_19_21_x1x3.mult_a_known_to_evaluators_dot(b[20], FUNC_XOR(r166, r167));  // and_a_254
-                W2G_22_23_t2 = W2G_22_23_x1x2.mult_a_known_to_evaluators_dot(b[23], FUNC_XOR(r169, r170));  // and_a_269
+                B3G_19_21_t2_1 = B3G_19_21_x1x2.mult_a_known_to_evaluators_dot(b[20], SET_ALL_ZERO());  // and_a_237
+                B3P_19_21_t1 = B3P_19_21_x1x2.mult_a_known_to_evaluators_dot(a[21], SET_ALL_ZERO());  // and_a_252
+                B3P_19_21_t2 = B3P_19_21_x1x2.mult_a_known_to_evaluators_dot(b[21], SET_ALL_ZERO());  // and_a_253
+                B3P_19_21_t4 = B3P_19_21_x2x3.mult_a_known_to_evaluators_dot(b[19], SET_ALL_ZERO());  // and_a_255
+                B3P_19_21_t3 = B3P_19_21_x1x3.mult_a_known_to_evaluators_dot(b[20], SET_ALL_ZERO());  // and_a_254
+                W2G_22_23_t2 = W2G_22_23_x1x2.mult_a_known_to_evaluators_dot(b[23], SET_ALL_ZERO());  // and_a_269
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r191
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r191, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r90-r91)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r90, r91), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r192
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r192, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r193
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r193, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r201
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r201, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r103-r104)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r103, r104), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r202
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r202, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r203
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r203, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r211
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r211, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r116-r117)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r116, r117), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r212
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r212, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r213
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r213, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r221
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r221, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r129-r130)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r129, r130), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r222
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r222, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r223
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r223, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_152: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r231
-                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, r231, triples[12].c);  // and_152
+                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, SET_ALL_ZERO(), triples[12].c);  // and_152
                 // and3_153: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r136-r137)
-                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, FUNC_XOR(r136, r137), beaver3_tuples[4]);  // and3_153
+                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_153
                 // and_154: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r232
-                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, r232, triples[13].c);  // and_154
+                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, SET_ALL_ZERO(), triples[13].c);  // and_154
                 // and_155: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r233
-                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, r233, triples[14].c);  // and_155
+                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, SET_ALL_ZERO(), triples[14].c);  // and_155
                 // and_190: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=r241
-                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, r241, triples[15].c);  // and_190
+                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, SET_ALL_ZERO(), triples[15].c);  // and_190
                 // and3_191: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=(r149-r150)
-                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, FUNC_XOR(r149, r150), beaver3_tuples[5]);  // and3_191
+                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, SET_ALL_ZERO(), beaver3_tuples[5]);  // and3_191
                 // and_192: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=r242
-                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, r242, triples[16].c);  // and_192
+                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, SET_ALL_ZERO(), triples[16].c);  // and_192
                 // and_193: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=r243
-                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, r243, triples[17].c);  // and_193
+                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, SET_ALL_ZERO(), triples[17].c);  // and_193
                 // and_228: a18=triples[18].a, b18=triples[18].b, c18=triples[18].c, output mask=r251
-                B3G_19_21_y1y2 = b_19_p.prepare_dot_and_assign(b_20_p, r251, triples[18].c);  // and_228
+                B3G_19_21_y1y2 = b_19_p.prepare_dot_and_assign(b_20_p, SET_ALL_ZERO(), triples[18].c);  // and_228
                 // and3_229: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=(r162-r163)
-                B3G_19_21_y1y2y3 = b_19_p_1.prepare_dot3_and_assign(b_20_p_1, b_21_p, FUNC_XOR(r162, r163), beaver3_tuples[6]);  // and3_229
+                B3G_19_21_y1y2y3 = b_19_p_1.prepare_dot3_and_assign(b_20_p_1, b_21_p, SET_ALL_ZERO(), beaver3_tuples[6]);  // and3_229
                 // and_230: a19=triples[19].a, b19=triples[19].b, c19=triples[19].c, output mask=r252
-                B3G_19_21_y2y3 = b_20_p_2.prepare_dot_and_assign(b_21_p_1, r252, triples[19].c);  // and_230
+                B3G_19_21_y2y3 = b_20_p_2.prepare_dot_and_assign(b_21_p_1, SET_ALL_ZERO(), triples[19].c);  // and_230
                 // and_231: a20=triples[20].a, b20=triples[20].b, c20=triples[20].c, output mask=r253
-                B3G_19_21_y1y3 = b_19_p_2.prepare_dot_and_assign(b_21_p_2, r253, triples[20].c);  // and_231
+                B3G_19_21_y1y3 = b_19_p_2.prepare_dot_and_assign(b_21_p_2, SET_ALL_ZERO(), triples[20].c);  // and_231
                 // and_266: a21=triples[21].a, b21=triples[21].b, c21=triples[21].c, output mask=r261
-                W2G_22_23_y1y2 = b_22_p.prepare_dot_and_assign(b_23_p, r261, triples[21].c);  // and_266
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r183);  // and_a_11
+                W2G_22_23_y1y2 = b_22_p.prepare_dot_and_assign(b_23_p, SET_ALL_ZERO(), triples[21].c);  // and_266
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r99, r100));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r112, r113));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r125, r126));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
-                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r174, r175));  // and_a_163
+                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_163
                 B3G_13_15_out_s1 = B3G_13_15_t1 ^ B3G_13_15_t2_1;  // B3G_13_15_out_s1
                 B3P_13_15_out_s1 = B3P_13_15_t1 ^ B3P_13_15_t2;  // B3P_13_15_out_s1
-                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r145, r146));  // and_a_201
+                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_201
                 B3G_16_18_out_s1 = B3G_16_18_t1 ^ B3G_16_18_t2_1;  // B3G_16_18_out_s1
                 B3P_16_18_out_s1 = B3P_16_18_t1 ^ B3P_16_18_t2;  // B3P_16_18_out_s1
-                B3G_19_21_t3_1 = B3G_19_21_x1x2x3.mult_a_known_to_evaluators_dot(b[21], FUNC_XOR(r158, r159));  // and_a_239
+                B3G_19_21_t3_1 = B3G_19_21_x1x2x3.mult_a_known_to_evaluators_dot(b[21], SET_ALL_ZERO());  // and_a_239
                 B3G_19_21_out_s1 = B3G_19_21_t1 ^ B3G_19_21_t2_1;  // B3G_19_21_out_s1
                 B3P_19_21_out_s1 = B3P_19_21_t1 ^ B3P_19_21_t2;  // B3P_19_21_out_s1
                 W2G_22_23_out_s1 = W2G_22_23_t1 ^ W2G_22_23_t2;  // W2G_22_23_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r182);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r91, r92));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r186);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r184);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r90));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r185);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r92, r93));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r100, r101));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r104, r105));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[22].b, r97));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r98, r99));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r103));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r97, r98));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r105, r106));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r113, r114));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r117, r118));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[7].c, r110));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r111, r112));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r116));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r110, r111));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r118, r119));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r126, r127));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r130, r131));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r123));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r124, r125));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r129));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r123, r124));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r131, r132));  // and_a_142
-                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r175, r176));  // and_a_162
-                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r137, r138));  // and_a_181
-                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, FUNC_XOR(FUNC_XOR(triples[24].b, r171), r172));  // and_a_166
-                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(r173, r174));  // and_a_164
-                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(beaver4_tuples[2].a, r136));  // and_a_182
-                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r172, r173));  // and_a_165
-                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r138, r139));  // and_a_180
-                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r146, r147));  // and_a_200
-                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r150, r151));  // and_a_219
-                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, FUNC_XOR(triples[23].b, r143));  // and_a_204
-                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(r144, r145));  // and_a_202
-                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(beaver4_tuples[2].b, r149));  // and_a_220
-                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r143, r144));  // and_a_203
-                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r151, r152));  // and_a_218
-                B3G_19_21_t2_2 = a[20].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2, FUNC_XOR(r159, r160));  // and_a_238
-                B3P_19_21_t6 = a[21].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2, FUNC_XOR(r163, r164));  // and_a_257
-                B3G_19_21_t3_4 = a[21].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2y3, FUNC_XOR(beaver3_tuples[8].c, r156));  // and_a_242
-                B3G_19_21_t3_2 = B3G_19_21_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_19_21_y2y3, FUNC_XOR(r157, r158));  // and_a_240
-                B3P_19_21_t8 = a[19].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y2y3, FUNC_XOR(beaver4_tuples[2].c, r162));  // and_a_258
-                B3G_19_21_t3_3 = B3G_19_21_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y3, FUNC_XOR(r156, r157));  // and_a_241
-                B3P_19_21_t5 = a[20].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y3, FUNC_XOR(r164, r165));  // and_a_256
-                W2G_22_23_t3 = a[23].mult_a_known_to_evaluators_dot_pending(W2G_22_23_y1y2, FUNC_XOR(beaver4_tuples[2].d, r169));  // and_a_270
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r180, r181), r182), r183), r184), r185), r186));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[22].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[7].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_162
+                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_181
+                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, SET_ALL_ZERO());  // and_a_166
+                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_164
+                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_182
+                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(triples[24].b, r171));  // and_a_165
+                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, beaver4_tuples[2].a);  // and_a_180
+                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_200
+                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_219
+                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, SET_ALL_ZERO());  // and_a_204
+                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_202
+                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_220
+                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, triples[23].b);  // and_a_203
+                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, beaver4_tuples[2].b);  // and_a_218
+                B3G_19_21_t2_2 = a[20].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2, SET_ALL_ZERO());  // and_a_238
+                B3P_19_21_t6 = a[21].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2, SET_ALL_ZERO());  // and_a_257
+                B3G_19_21_t3_4 = a[21].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2y3, SET_ALL_ZERO());  // and_a_242
+                B3G_19_21_t3_2 = B3G_19_21_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_19_21_y2y3, SET_ALL_ZERO());  // and_a_240
+                B3P_19_21_t8 = a[19].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y2y3, SET_ALL_ZERO());  // and_a_258
+                B3G_19_21_t3_3 = B3G_19_21_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y3, beaver3_tuples[8].c);  // and_a_241
+                B3P_19_21_t5 = a[20].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y3, beaver4_tuples[2].c);  // and_a_256
+                W2G_22_23_t3 = a[23].mult_a_known_to_evaluators_dot_pending(W2G_22_23_y1y2, beaver4_tuples[2].d);  // and_a_270
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -12876,22 +10498,22 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 24)>::type>
                 B3P_13_15_out_p_1 = B3P_13_15_out.zero_add(beaver3_tuples[8].a);  // B3P_13_15_out'_1, mask=a34
                 B3P_16_18_out_p = B3P_16_18_out.zero_add(beaver3_tuples[8].b);  // B3P_16_18_out', mask=b34
                 // and_273: a22=triples[22].a, b22=triples[22].b, c22=triples[22].c, output mask=r187
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r187, triples[22].c);  // and_273
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[22].c);  // and_273
                 // and3_274: a7=beaver3_tuples[7].a, b7=beaver3_tuples[7].b, c7=beaver3_tuples[7].c, output mask=r188
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r188, beaver3_tuples[7]);  // and3_274
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[7]);  // and3_274
                 // and4_275: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r189
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r189, beaver4_tuples[0]);  // and4_275
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r187, r188), r189), beaver4_tuples[0]);  // and4_275
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
                 // and4_279: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=a36
                 L1_B0_P = B3P_1_3_out.prepare_and4_and_assign(B3P_4_6_out, B3P_7_9_out, B3P_10_12_out, triples[24].a, beaver4_tuples[1]);  // and4_279
                 // and4_282: a2=beaver4_tuples[2].a, b2=beaver4_tuples[2].b, c2=beaver4_tuples[2].c, d2=beaver4_tuples[2].d, output mask=(r171-r178)
-                L1_B1_t3 = B3P_13_15_out.prepare_dot4_and_assign(B3P_16_18_out, B3P_19_21_out, W2G_22_23_out, FUNC_XOR(r171, r178), beaver4_tuples[2]);  // and4_282
+                L1_B1_t3 = B3P_13_15_out.prepare_dot4_and_assign(B3P_16_18_out, B3P_19_21_out, W2G_22_23_out, SET_ALL_ZERO(), beaver4_tuples[2]);  // and4_282
                 // and_280: a23=triples[23].a, b23=triples[23].b, c23=triples[23].c, output mask=r179
-                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, r179, triples[23].c);  // and_280
+                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, SET_ALL_ZERO(), triples[23].c);  // and_280
                 // and3_281: a8=beaver3_tuples[8].a, b8=beaver3_tuples[8].b, c8=beaver3_tuples[8].c, output mask=(r178-r179)
-                L1_B1_t2 = B3P_13_15_out_p_1.prepare_dot3_and_assign(B3P_16_18_out_p, B3G_19_21_out, FUNC_XOR(r178, r179), beaver3_tuples[8]);  // and3_281
+                L1_B1_t2 = B3P_13_15_out_p_1.prepare_dot3_and_assign(B3P_16_18_out_p, B3G_19_21_out, r171, beaver3_tuples[8]);  // and3_281
                 L1_B1_s1 = L1_B1_t1 ^ L1_B1_t2;  // L1_B1_s1
                 L1_B1_s2 = L1_B1_s1 ^ L1_B1_t3;  // L1_B1_s2
                 L1_B1_s2.mask_and_send_dot_without_remask();
@@ -12939,96 +10561,19 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 25)>::type>
 
     DATATYPE r97;
     DATATYPE r98;
-    DATATYPE r99;
-    DATATYPE r100;
-    DATATYPE r101;
-    DATATYPE r102;
-    DATATYPE r103;
-    DATATYPE r104;
-    DATATYPE r105;
-    DATATYPE r106;
-    DATATYPE r107;
-    DATATYPE r108;
-    DATATYPE r109;
     DATATYPE r110;
     DATATYPE r111;
-    DATATYPE r112;
-    DATATYPE r113;
-    DATATYPE r114;
-    DATATYPE r115;
-    DATATYPE r116;
-    DATATYPE r117;
-    DATATYPE r118;
-    DATATYPE r119;
-    DATATYPE r120;
-    DATATYPE r121;
-    DATATYPE r122;
     DATATYPE r123;
     DATATYPE r124;
-    DATATYPE r125;
-    DATATYPE r126;
-    DATATYPE r127;
-    DATATYPE r128;
-    DATATYPE r129;
-    DATATYPE r130;
-    DATATYPE r131;
-    DATATYPE r132;
-    DATATYPE r133;
-    DATATYPE r134;
-    DATATYPE r135;
     DATATYPE r136;
     DATATYPE r137;
-    DATATYPE r138;
-    DATATYPE r139;
-    DATATYPE r140;
-    DATATYPE r141;
-    DATATYPE r142;
     DATATYPE r143;
     DATATYPE r144;
-    DATATYPE r145;
-    DATATYPE r146;
-    DATATYPE r147;
-    DATATYPE r148;
-    DATATYPE r149;
-    DATATYPE r150;
-    DATATYPE r151;
-    DATATYPE r152;
-    DATATYPE r153;
-    DATATYPE r154;
-    DATATYPE r155;
     DATATYPE r156;
     DATATYPE r157;
-    DATATYPE r158;
-    DATATYPE r159;
-    DATATYPE r160;
-    DATATYPE r161;
-    DATATYPE r162;
-    DATATYPE r163;
-    DATATYPE r164;
-    DATATYPE r165;
-    DATATYPE r166;
-    DATATYPE r167;
-    DATATYPE r168;
     DATATYPE r169;
     DATATYPE r170;
-    DATATYPE r171;
-    DATATYPE r172;
-    DATATYPE r173;
-    DATATYPE r174;
-    DATATYPE r175;
-    DATATYPE r176;
-    DATATYPE r177;
-    DATATYPE r178;
-    DATATYPE r179;
-    DATATYPE r180;
-    DATATYPE r181;
     DATATYPE r182;
-    DATATYPE r183;
-    DATATYPE r184;
-    DATATYPE r185;
-    DATATYPE r186;
-    DATATYPE r187;
-    DATATYPE r188;
     DATATYPE r189;
     DATATYPE r190;
     DATATYPE r191;
@@ -13045,81 +10590,28 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 25)>::type>
     DATATYPE r202;
     DATATYPE r203;
     DATATYPE r204;
-    DATATYPE r205;
-    DATATYPE r206;
-    DATATYPE r207;
-    DATATYPE r208;
-    DATATYPE r209;
-    DATATYPE r210;
-    DATATYPE r211;
     DATATYPE r212;
     DATATYPE r213;
     DATATYPE r214;
-    DATATYPE r215;
-    DATATYPE r216;
-    DATATYPE r217;
-    DATATYPE r218;
-    DATATYPE r219;
-    DATATYPE r220;
-    DATATYPE r221;
     DATATYPE r222;
     DATATYPE r223;
     DATATYPE r224;
-    DATATYPE r225;
-    DATATYPE r226;
-    DATATYPE r227;
-    DATATYPE r228;
-    DATATYPE r229;
-    DATATYPE r230;
-    DATATYPE r231;
     DATATYPE r232;
     DATATYPE r233;
     DATATYPE r234;
-    DATATYPE r235;
-    DATATYPE r236;
-    DATATYPE r237;
-    DATATYPE r238;
-    DATATYPE r239;
-    DATATYPE r240;
-    DATATYPE r241;
     DATATYPE r242;
     DATATYPE r243;
     DATATYPE r244;
-    DATATYPE r245;
-    DATATYPE r246;
-    DATATYPE r247;
-    DATATYPE r248;
-    DATATYPE r249;
-    DATATYPE r250;
-    DATATYPE r251;
     DATATYPE r252;
     DATATYPE r253;
     DATATYPE r254;
-    DATATYPE r255;
-    DATATYPE r256;
-    DATATYPE r257;
-    DATATYPE r258;
-    DATATYPE r259;
-    DATATYPE r260;
-    DATATYPE r261;
     DATATYPE r262;
     DATATYPE r263;
     DATATYPE r264;
-    DATATYPE r265;
-    DATATYPE r266;
-    DATATYPE r267;
-    DATATYPE r268;
-    DATATYPE r269;
-    DATATYPE r270;
-    DATATYPE r271;
     DATATYPE r272;
     DATATYPE r273;
     DATATYPE r274;
     DATATYPE r275;
-    DATATYPE r276;
-    DATATYPE r277;
-    DATATYPE r278;
-    DATATYPE r279;
 
     Share B3G_10_12_out;
     Share B3G_10_12_out_s1;
@@ -13526,96 +11018,19 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 25)>::type>
             // Random mask values (shared across mask expressions)
             r97 = getRandomVal(PSELF);
             r98 = getRandomVal(PSELF);
-            r99 = getRandomVal(PSELF);
-            r100 = getRandomVal(PSELF);
-            r101 = getRandomVal(PSELF);
-            r102 = getRandomVal(PSELF);
-            r103 = getRandomVal(PSELF);
-            r104 = getRandomVal(PSELF);
-            r105 = getRandomVal(PSELF);
-            r106 = getRandomVal(PSELF);
-            r107 = getRandomVal(PSELF);
-            r108 = getRandomVal(PSELF);
-            r109 = getRandomVal(PSELF);
             r110 = getRandomVal(PSELF);
             r111 = getRandomVal(PSELF);
-            r112 = getRandomVal(PSELF);
-            r113 = getRandomVal(PSELF);
-            r114 = getRandomVal(PSELF);
-            r115 = getRandomVal(PSELF);
-            r116 = getRandomVal(PSELF);
-            r117 = getRandomVal(PSELF);
-            r118 = getRandomVal(PSELF);
-            r119 = getRandomVal(PSELF);
-            r120 = getRandomVal(PSELF);
-            r121 = getRandomVal(PSELF);
-            r122 = getRandomVal(PSELF);
             r123 = getRandomVal(PSELF);
             r124 = getRandomVal(PSELF);
-            r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
-            r127 = getRandomVal(PSELF);
-            r128 = getRandomVal(PSELF);
-            r129 = getRandomVal(PSELF);
-            r130 = getRandomVal(PSELF);
-            r131 = getRandomVal(PSELF);
-            r132 = getRandomVal(PSELF);
-            r133 = getRandomVal(PSELF);
-            r134 = getRandomVal(PSELF);
-            r135 = getRandomVal(PSELF);
             r136 = getRandomVal(PSELF);
             r137 = getRandomVal(PSELF);
-            r138 = getRandomVal(PSELF);
-            r139 = getRandomVal(PSELF);
-            r140 = getRandomVal(PSELF);
-            r141 = getRandomVal(PSELF);
-            r142 = getRandomVal(PSELF);
             r143 = getRandomVal(PSELF);
             r144 = getRandomVal(PSELF);
-            r145 = getRandomVal(PSELF);
-            r146 = getRandomVal(PSELF);
-            r147 = getRandomVal(PSELF);
-            r148 = getRandomVal(PSELF);
-            r149 = getRandomVal(PSELF);
-            r150 = getRandomVal(PSELF);
-            r151 = getRandomVal(PSELF);
-            r152 = getRandomVal(PSELF);
-            r153 = getRandomVal(PSELF);
-            r154 = getRandomVal(PSELF);
-            r155 = getRandomVal(PSELF);
             r156 = getRandomVal(PSELF);
             r157 = getRandomVal(PSELF);
-            r158 = getRandomVal(PSELF);
-            r159 = getRandomVal(PSELF);
-            r160 = getRandomVal(PSELF);
-            r161 = getRandomVal(PSELF);
-            r162 = getRandomVal(PSELF);
-            r163 = getRandomVal(PSELF);
-            r164 = getRandomVal(PSELF);
-            r165 = getRandomVal(PSELF);
-            r166 = getRandomVal(PSELF);
-            r167 = getRandomVal(PSELF);
-            r168 = getRandomVal(PSELF);
             r169 = getRandomVal(PSELF);
             r170 = getRandomVal(PSELF);
-            r171 = getRandomVal(PSELF);
-            r172 = getRandomVal(PSELF);
-            r173 = getRandomVal(PSELF);
-            r174 = getRandomVal(PSELF);
-            r175 = getRandomVal(PSELF);
-            r176 = getRandomVal(PSELF);
-            r177 = getRandomVal(PSELF);
-            r178 = getRandomVal(PSELF);
-            r179 = getRandomVal(PSELF);
-            r180 = getRandomVal(PSELF);
-            r181 = getRandomVal(PSELF);
             r182 = getRandomVal(PSELF);
-            r183 = getRandomVal(PSELF);
-            r184 = getRandomVal(PSELF);
-            r185 = getRandomVal(PSELF);
-            r186 = getRandomVal(PSELF);
-            r187 = getRandomVal(PSELF);
-            r188 = getRandomVal(PSELF);
             r189 = getRandomVal(PSELF);
             r190 = getRandomVal(PSELF);
             r191 = getRandomVal(PSELF);
@@ -13632,81 +11047,28 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 25)>::type>
             r202 = getRandomVal(PSELF);
             r203 = getRandomVal(PSELF);
             r204 = getRandomVal(PSELF);
-            r205 = getRandomVal(PSELF);
-            r206 = getRandomVal(PSELF);
-            r207 = getRandomVal(PSELF);
-            r208 = getRandomVal(PSELF);
-            r209 = getRandomVal(PSELF);
-            r210 = getRandomVal(PSELF);
-            r211 = getRandomVal(PSELF);
             r212 = getRandomVal(PSELF);
             r213 = getRandomVal(PSELF);
             r214 = getRandomVal(PSELF);
-            r215 = getRandomVal(PSELF);
-            r216 = getRandomVal(PSELF);
-            r217 = getRandomVal(PSELF);
-            r218 = getRandomVal(PSELF);
-            r219 = getRandomVal(PSELF);
-            r220 = getRandomVal(PSELF);
-            r221 = getRandomVal(PSELF);
             r222 = getRandomVal(PSELF);
             r223 = getRandomVal(PSELF);
             r224 = getRandomVal(PSELF);
-            r225 = getRandomVal(PSELF);
-            r226 = getRandomVal(PSELF);
-            r227 = getRandomVal(PSELF);
-            r228 = getRandomVal(PSELF);
-            r229 = getRandomVal(PSELF);
-            r230 = getRandomVal(PSELF);
-            r231 = getRandomVal(PSELF);
             r232 = getRandomVal(PSELF);
             r233 = getRandomVal(PSELF);
             r234 = getRandomVal(PSELF);
-            r235 = getRandomVal(PSELF);
-            r236 = getRandomVal(PSELF);
-            r237 = getRandomVal(PSELF);
-            r238 = getRandomVal(PSELF);
-            r239 = getRandomVal(PSELF);
-            r240 = getRandomVal(PSELF);
-            r241 = getRandomVal(PSELF);
             r242 = getRandomVal(PSELF);
             r243 = getRandomVal(PSELF);
             r244 = getRandomVal(PSELF);
-            r245 = getRandomVal(PSELF);
-            r246 = getRandomVal(PSELF);
-            r247 = getRandomVal(PSELF);
-            r248 = getRandomVal(PSELF);
-            r249 = getRandomVal(PSELF);
-            r250 = getRandomVal(PSELF);
-            r251 = getRandomVal(PSELF);
             r252 = getRandomVal(PSELF);
             r253 = getRandomVal(PSELF);
             r254 = getRandomVal(PSELF);
-            r255 = getRandomVal(PSELF);
-            r256 = getRandomVal(PSELF);
-            r257 = getRandomVal(PSELF);
-            r258 = getRandomVal(PSELF);
-            r259 = getRandomVal(PSELF);
-            r260 = getRandomVal(PSELF);
-            r261 = getRandomVal(PSELF);
             r262 = getRandomVal(PSELF);
             r263 = getRandomVal(PSELF);
             r264 = getRandomVal(PSELF);
-            r265 = getRandomVal(PSELF);
-            r266 = getRandomVal(PSELF);
-            r267 = getRandomVal(PSELF);
-            r268 = getRandomVal(PSELF);
-            r269 = getRandomVal(PSELF);
-            r270 = getRandomVal(PSELF);
-            r271 = getRandomVal(PSELF);
             r272 = getRandomVal(PSELF);
             r273 = getRandomVal(PSELF);
             r274 = getRandomVal(PSELF);
             r275 = getRandomVal(PSELF);
-            r276 = getRandomVal(PSELF);
-            r277 = getRandomVal(PSELF);
-            r278 = getRandomVal(PSELF);
-            r279 = getRandomVal(PSELF);
 
         }
     }
@@ -13795,240 +11157,240 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 25)>::type>
                 B3G_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_4
                 B3G_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_5
                 B3G_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_6
-                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], r191);  // and_a_8
+                B3G_1_3_t1 = a[1].mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_8
                 B3P_1_3_x1x2 = a[1].mult_a_known_to_evaluators(a[2]);  // and_a_21
                 B3P_1_3_x2x3 = a[2].mult_a_known_to_evaluators(a[3]);  // and_a_22
                 B3P_1_3_x1x3 = a[1].mult_a_known_to_evaluators(a[3]);  // and_a_23
                 B3G_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_42
                 B3G_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_43
                 B3G_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_44
-                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], r109);  // and_a_46
+                B3G_4_6_t1 = a[4].mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_46
                 B3P_4_6_x1x2 = a[4].mult_a_known_to_evaluators(a[5]);  // and_a_59
                 B3P_4_6_x2x3 = a[5].mult_a_known_to_evaluators(a[6]);  // and_a_60
                 B3P_4_6_x1x3 = a[4].mult_a_known_to_evaluators(a[6]);  // and_a_61
                 B3G_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_80
                 B3G_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_81
                 B3G_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_82
-                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], r122);  // and_a_84
+                B3G_7_9_t1 = a[7].mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_84
                 B3P_7_9_x1x2 = a[7].mult_a_known_to_evaluators(a[8]);  // and_a_97
                 B3P_7_9_x2x3 = a[8].mult_a_known_to_evaluators(a[9]);  // and_a_98
                 B3P_7_9_x1x3 = a[7].mult_a_known_to_evaluators(a[9]);  // and_a_99
                 B3G_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_118
                 B3G_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_119
                 B3G_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_120
-                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], r135);  // and_a_122
+                B3G_10_12_t1 = a[10].mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_122
                 B3P_10_12_x1x2 = a[10].mult_a_known_to_evaluators(a[11]);  // and_a_135
                 B3P_10_12_x2x3 = a[11].mult_a_known_to_evaluators(a[12]);  // and_a_136
                 B3P_10_12_x1x3 = a[10].mult_a_known_to_evaluators(a[12]);  // and_a_137
                 B3G_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_156
                 B3G_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_157
                 B3G_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_158
-                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], r188);  // and_a_160
+                B3G_13_15_t1 = a[13].mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_160
                 B3P_13_15_x1x2 = a[13].mult_a_known_to_evaluators(a[14]);  // and_a_173
                 B3P_13_15_x2x3 = a[14].mult_a_known_to_evaluators(a[15]);  // and_a_174
                 B3P_13_15_x1x3 = a[13].mult_a_known_to_evaluators(a[15]);  // and_a_175
                 B3G_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_194
                 B3G_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_195
                 B3G_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_196
-                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], r155);  // and_a_198
+                B3G_16_18_t1 = a[16].mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_198
                 B3P_16_18_x1x2 = a[16].mult_a_known_to_evaluators(a[17]);  // and_a_211
                 B3P_16_18_x2x3 = a[17].mult_a_known_to_evaluators(a[18]);  // and_a_212
                 B3P_16_18_x1x3 = a[16].mult_a_known_to_evaluators(a[18]);  // and_a_213
                 B3G_19_21_x1x2 = a[19].mult_a_known_to_evaluators(a[20]);  // and_a_232
                 B3G_19_21_x1x3 = a[19].mult_a_known_to_evaluators(a[21]);  // and_a_233
                 B3G_19_21_x2x3 = a[20].mult_a_known_to_evaluators(a[21]);  // and_a_234
-                B3G_19_21_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], r168);  // and_a_236
+                B3G_19_21_t1 = a[19].mult_a_known_to_evaluators_dot(b[19], SET_ALL_ZERO());  // and_a_236
                 B3P_19_21_x1x2 = a[19].mult_a_known_to_evaluators(a[20]);  // and_a_249
                 B3P_19_21_x2x3 = a[20].mult_a_known_to_evaluators(a[21]);  // and_a_250
                 B3P_19_21_x1x3 = a[19].mult_a_known_to_evaluators(a[21]);  // and_a_251
                 W3L1_22_24_x1x2 = a[22].mult_a_known_to_evaluators(a[23]);  // and_a_270
                 W3L1_22_24_x1x3 = a[22].mult_a_known_to_evaluators(a[24]);  // and_a_271
                 W3L1_22_24_x2x3 = a[23].mult_a_known_to_evaluators(a[24]);  // and_a_272
-                W3L1_22_24_t1 = a[22].mult_a_known_to_evaluators_dot(b[22], r181);  // and_a_274
+                W3L1_22_24_t1 = a[22].mult_a_known_to_evaluators_dot(b[22], SET_ALL_ZERO());  // and_a_274
                 B3G_1_3_x1x2x3 = B3G_1_3_x1x2.mult_a_known_to_evaluators(a[3]);  // and_a_7
-                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], r192);  // and_a_9
-                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], r103);  // and_a_24
-                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], FUNC_XOR(r102, r103));  // and_a_25
-                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], FUNC_XOR(r100, r101));  // and_a_27
-                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], FUNC_XOR(r101, r102));  // and_a_26
+                B3G_1_3_t2_1 = B3G_1_3_x1x2.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_9
+                B3P_1_3_t1 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(a[3], SET_ALL_ZERO());  // and_a_24
+                B3P_1_3_t2 = B3P_1_3_x1x2.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_25
+                B3P_1_3_t4 = B3P_1_3_x2x3.mult_a_known_to_evaluators_dot(b[1], SET_ALL_ZERO());  // and_a_27
+                B3P_1_3_t3 = B3P_1_3_x1x3.mult_a_known_to_evaluators_dot(b[2], SET_ALL_ZERO());  // and_a_26
                 B3G_4_6_x1x2x3 = B3G_4_6_x1x2.mult_a_known_to_evaluators(a[6]);  // and_a_45
-                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r108, r109));  // and_a_47
-                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], r116);  // and_a_62
-                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r115, r116));  // and_a_63
-                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], FUNC_XOR(r113, r114));  // and_a_65
-                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], FUNC_XOR(r114, r115));  // and_a_64
+                B3G_4_6_t2_1 = B3G_4_6_x1x2.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_47
+                B3P_4_6_t1 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(a[6], SET_ALL_ZERO());  // and_a_62
+                B3P_4_6_t2 = B3P_4_6_x1x2.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_63
+                B3P_4_6_t4 = B3P_4_6_x2x3.mult_a_known_to_evaluators_dot(b[4], SET_ALL_ZERO());  // and_a_65
+                B3P_4_6_t3 = B3P_4_6_x1x3.mult_a_known_to_evaluators_dot(b[5], SET_ALL_ZERO());  // and_a_64
                 B3G_7_9_x1x2x3 = B3G_7_9_x1x2.mult_a_known_to_evaluators(a[9]);  // and_a_83
-                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r121, r122));  // and_a_85
-                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], r129);  // and_a_100
-                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r128, r129));  // and_a_101
-                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], FUNC_XOR(r126, r127));  // and_a_103
-                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], FUNC_XOR(r127, r128));  // and_a_102
+                B3G_7_9_t2_1 = B3G_7_9_x1x2.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_85
+                B3P_7_9_t1 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(a[9], SET_ALL_ZERO());  // and_a_100
+                B3P_7_9_t2 = B3P_7_9_x1x2.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_101
+                B3P_7_9_t4 = B3P_7_9_x2x3.mult_a_known_to_evaluators_dot(b[7], SET_ALL_ZERO());  // and_a_103
+                B3P_7_9_t3 = B3P_7_9_x1x3.mult_a_known_to_evaluators_dot(b[8], SET_ALL_ZERO());  // and_a_102
                 B3G_10_12_x1x2x3 = B3G_10_12_x1x2.mult_a_known_to_evaluators(a[12]);  // and_a_121
-                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r134, r135));  // and_a_123
-                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], r142);  // and_a_138
-                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r141, r142));  // and_a_139
-                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], FUNC_XOR(r139, r140));  // and_a_141
-                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], FUNC_XOR(r140, r141));  // and_a_140
+                B3G_10_12_t2_1 = B3G_10_12_x1x2.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_123
+                B3P_10_12_t1 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(a[12], SET_ALL_ZERO());  // and_a_138
+                B3P_10_12_t2 = B3P_10_12_x1x2.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_139
+                B3P_10_12_t4 = B3P_10_12_x2x3.mult_a_known_to_evaluators_dot(b[10], SET_ALL_ZERO());  // and_a_141
+                B3P_10_12_t3 = B3P_10_12_x1x3.mult_a_known_to_evaluators_dot(b[11], SET_ALL_ZERO());  // and_a_140
                 B3G_13_15_x1x2x3 = B3G_13_15_x1x2.mult_a_known_to_evaluators(a[15]);  // and_a_159
-                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r187, r188));  // and_a_161
-                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], r149);  // and_a_176
-                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r148, r149));  // and_a_177
-                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], FUNC_XOR(r146, r147));  // and_a_179
-                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], FUNC_XOR(r147, r148));  // and_a_178
+                B3G_13_15_t2_1 = B3G_13_15_x1x2.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_161
+                B3P_13_15_t1 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(a[15], SET_ALL_ZERO());  // and_a_176
+                B3P_13_15_t2 = B3P_13_15_x1x2.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_177
+                B3P_13_15_t4 = B3P_13_15_x2x3.mult_a_known_to_evaluators_dot(b[13], SET_ALL_ZERO());  // and_a_179
+                B3P_13_15_t3 = B3P_13_15_x1x3.mult_a_known_to_evaluators_dot(b[14], SET_ALL_ZERO());  // and_a_178
                 B3G_16_18_x1x2x3 = B3G_16_18_x1x2.mult_a_known_to_evaluators(a[18]);  // and_a_197
-                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r154, r155));  // and_a_199
-                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], r162);  // and_a_214
-                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r161, r162));  // and_a_215
-                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], FUNC_XOR(r159, r160));  // and_a_217
-                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], FUNC_XOR(r160, r161));  // and_a_216
+                B3G_16_18_t2_1 = B3G_16_18_x1x2.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_199
+                B3P_16_18_t1 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(a[18], SET_ALL_ZERO());  // and_a_214
+                B3P_16_18_t2 = B3P_16_18_x1x2.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_215
+                B3P_16_18_t4 = B3P_16_18_x2x3.mult_a_known_to_evaluators_dot(b[16], SET_ALL_ZERO());  // and_a_217
+                B3P_16_18_t3 = B3P_16_18_x1x3.mult_a_known_to_evaluators_dot(b[17], SET_ALL_ZERO());  // and_a_216
                 B3G_19_21_x1x2x3 = B3G_19_21_x1x2.mult_a_known_to_evaluators(a[21]);  // and_a_235
-                B3G_19_21_t2_1 = B3G_19_21_x1x2.mult_a_known_to_evaluators_dot(b[20], FUNC_XOR(r167, r168));  // and_a_237
-                B3P_19_21_t1 = B3P_19_21_x1x2.mult_a_known_to_evaluators_dot(a[21], r175);  // and_a_252
-                B3P_19_21_t2 = B3P_19_21_x1x2.mult_a_known_to_evaluators_dot(b[21], FUNC_XOR(r174, r175));  // and_a_253
-                B3P_19_21_t4 = B3P_19_21_x2x3.mult_a_known_to_evaluators_dot(b[19], FUNC_XOR(r172, r173));  // and_a_255
-                B3P_19_21_t3 = B3P_19_21_x1x3.mult_a_known_to_evaluators_dot(b[20], FUNC_XOR(r173, r174));  // and_a_254
+                B3G_19_21_t2_1 = B3G_19_21_x1x2.mult_a_known_to_evaluators_dot(b[20], SET_ALL_ZERO());  // and_a_237
+                B3P_19_21_t1 = B3P_19_21_x1x2.mult_a_known_to_evaluators_dot(a[21], SET_ALL_ZERO());  // and_a_252
+                B3P_19_21_t2 = B3P_19_21_x1x2.mult_a_known_to_evaluators_dot(b[21], SET_ALL_ZERO());  // and_a_253
+                B3P_19_21_t4 = B3P_19_21_x2x3.mult_a_known_to_evaluators_dot(b[19], SET_ALL_ZERO());  // and_a_255
+                B3P_19_21_t3 = B3P_19_21_x1x3.mult_a_known_to_evaluators_dot(b[20], SET_ALL_ZERO());  // and_a_254
                 W3L1_22_24_x1x2x3 = W3L1_22_24_x1x2.mult_a_known_to_evaluators(a[24]);  // and_a_273
-                W3L1_22_24_t2_1 = W3L1_22_24_x1x2.mult_a_known_to_evaluators_dot(b[23], FUNC_XOR(r180, r181));  // and_a_275
+                W3L1_22_24_t2_1 = W3L1_22_24_x1x2.mult_a_known_to_evaluators_dot(b[23], SET_ALL_ZERO());  // and_a_275
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r202
-                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, r202, triples[0].c);  // and_0
+                B3G_1_3_y1y2 = b_1_p.prepare_dot_and_assign(b_2_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 // and3_1: a0=beaver3_tuples[0].a, b0=beaver3_tuples[0].b, c0=beaver3_tuples[0].c, output mask=(r97-r98)
-                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, FUNC_XOR(r97, r98), beaver3_tuples[0]);  // and3_1
+                B3G_1_3_y1y2y3 = b_1_p_1.prepare_dot3_and_assign(b_2_p_1, b_3_p, SET_ALL_ZERO(), beaver3_tuples[0]);  // and3_1
                 // and_2: a1=triples[1].a, b1=triples[1].b, c1=triples[1].c, output mask=r203
-                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, r203, triples[1].c);  // and_2
+                B3G_1_3_y2y3 = b_2_p_2.prepare_dot_and_assign(b_3_p_1, SET_ALL_ZERO(), triples[1].c);  // and_2
                 // and_3: a2=triples[2].a, b2=triples[2].b, c2=triples[2].c, output mask=r204
-                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, r204, triples[2].c);  // and_3
+                B3G_1_3_y1y3 = b_1_p_2.prepare_dot_and_assign(b_3_p_2, SET_ALL_ZERO(), triples[2].c);  // and_3
                 // and_38: a3=triples[3].a, b3=triples[3].b, c3=triples[3].c, output mask=r212
-                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, r212, triples[3].c);  // and_38
+                B3G_4_6_y1y2 = b_4_p.prepare_dot_and_assign(b_5_p, SET_ALL_ZERO(), triples[3].c);  // and_38
                 // and3_39: a1=beaver3_tuples[1].a, b1=beaver3_tuples[1].b, c1=beaver3_tuples[1].c, output mask=(r110-r111)
-                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, FUNC_XOR(r110, r111), beaver3_tuples[1]);  // and3_39
+                B3G_4_6_y1y2y3 = b_4_p_1.prepare_dot3_and_assign(b_5_p_1, b_6_p, SET_ALL_ZERO(), beaver3_tuples[1]);  // and3_39
                 // and_40: a4=triples[4].a, b4=triples[4].b, c4=triples[4].c, output mask=r213
-                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, r213, triples[4].c);  // and_40
+                B3G_4_6_y2y3 = b_5_p_2.prepare_dot_and_assign(b_6_p_1, SET_ALL_ZERO(), triples[4].c);  // and_40
                 // and_41: a5=triples[5].a, b5=triples[5].b, c5=triples[5].c, output mask=r214
-                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, r214, triples[5].c);  // and_41
+                B3G_4_6_y1y3 = b_4_p_2.prepare_dot_and_assign(b_6_p_2, SET_ALL_ZERO(), triples[5].c);  // and_41
                 // and_76: a6=triples[6].a, b6=triples[6].b, c6=triples[6].c, output mask=r222
-                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, r222, triples[6].c);  // and_76
+                B3G_7_9_y1y2 = b_7_p.prepare_dot_and_assign(b_8_p, SET_ALL_ZERO(), triples[6].c);  // and_76
                 // and3_77: a2=beaver3_tuples[2].a, b2=beaver3_tuples[2].b, c2=beaver3_tuples[2].c, output mask=(r123-r124)
-                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, FUNC_XOR(r123, r124), beaver3_tuples[2]);  // and3_77
+                B3G_7_9_y1y2y3 = b_7_p_1.prepare_dot3_and_assign(b_8_p_1, b_9_p, SET_ALL_ZERO(), beaver3_tuples[2]);  // and3_77
                 // and_78: a7=triples[7].a, b7=triples[7].b, c7=triples[7].c, output mask=r223
-                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, r223, triples[7].c);  // and_78
+                B3G_7_9_y2y3 = b_8_p_2.prepare_dot_and_assign(b_9_p_1, SET_ALL_ZERO(), triples[7].c);  // and_78
                 // and_79: a8=triples[8].a, b8=triples[8].b, c8=triples[8].c, output mask=r224
-                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, r224, triples[8].c);  // and_79
+                B3G_7_9_y1y3 = b_7_p_2.prepare_dot_and_assign(b_9_p_2, SET_ALL_ZERO(), triples[8].c);  // and_79
                 // and_114: a9=triples[9].a, b9=triples[9].b, c9=triples[9].c, output mask=r232
-                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, r232, triples[9].c);  // and_114
+                B3G_10_12_y1y2 = b_10_p.prepare_dot_and_assign(b_11_p, SET_ALL_ZERO(), triples[9].c);  // and_114
                 // and3_115: a3=beaver3_tuples[3].a, b3=beaver3_tuples[3].b, c3=beaver3_tuples[3].c, output mask=(r136-r137)
-                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, FUNC_XOR(r136, r137), beaver3_tuples[3]);  // and3_115
+                B3G_10_12_y1y2y3 = b_10_p_1.prepare_dot3_and_assign(b_11_p_1, b_12_p, SET_ALL_ZERO(), beaver3_tuples[3]);  // and3_115
                 // and_116: a10=triples[10].a, b10=triples[10].b, c10=triples[10].c, output mask=r233
-                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, r233, triples[10].c);  // and_116
+                B3G_10_12_y2y3 = b_11_p_2.prepare_dot_and_assign(b_12_p_1, SET_ALL_ZERO(), triples[10].c);  // and_116
                 // and_117: a11=triples[11].a, b11=triples[11].b, c11=triples[11].c, output mask=r234
-                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, r234, triples[11].c);  // and_117
+                B3G_10_12_y1y3 = b_10_p_2.prepare_dot_and_assign(b_12_p_2, SET_ALL_ZERO(), triples[11].c);  // and_117
                 // and_152: a12=triples[12].a, b12=triples[12].b, c12=triples[12].c, output mask=r242
-                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, r242, triples[12].c);  // and_152
+                B3G_13_15_y1y2 = b_13_p.prepare_dot_and_assign(b_14_p, SET_ALL_ZERO(), triples[12].c);  // and_152
                 // and3_153: a4=beaver3_tuples[4].a, b4=beaver3_tuples[4].b, c4=beaver3_tuples[4].c, output mask=(r143-r144)
-                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, FUNC_XOR(r143, r144), beaver3_tuples[4]);  // and3_153
+                B3G_13_15_y1y2y3 = b_13_p_1.prepare_dot3_and_assign(b_14_p_1, b_15_p, SET_ALL_ZERO(), beaver3_tuples[4]);  // and3_153
                 // and_154: a13=triples[13].a, b13=triples[13].b, c13=triples[13].c, output mask=r243
-                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, r243, triples[13].c);  // and_154
+                B3G_13_15_y2y3 = b_14_p_2.prepare_dot_and_assign(b_15_p_1, SET_ALL_ZERO(), triples[13].c);  // and_154
                 // and_155: a14=triples[14].a, b14=triples[14].b, c14=triples[14].c, output mask=r244
-                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, r244, triples[14].c);  // and_155
+                B3G_13_15_y1y3 = b_13_p_2.prepare_dot_and_assign(b_15_p_2, SET_ALL_ZERO(), triples[14].c);  // and_155
                 // and_190: a15=triples[15].a, b15=triples[15].b, c15=triples[15].c, output mask=r252
-                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, r252, triples[15].c);  // and_190
+                B3G_16_18_y1y2 = b_16_p.prepare_dot_and_assign(b_17_p, SET_ALL_ZERO(), triples[15].c);  // and_190
                 // and3_191: a5=beaver3_tuples[5].a, b5=beaver3_tuples[5].b, c5=beaver3_tuples[5].c, output mask=(r156-r157)
-                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, FUNC_XOR(r156, r157), beaver3_tuples[5]);  // and3_191
+                B3G_16_18_y1y2y3 = b_16_p_1.prepare_dot3_and_assign(b_17_p_1, b_18_p, SET_ALL_ZERO(), beaver3_tuples[5]);  // and3_191
                 // and_192: a16=triples[16].a, b16=triples[16].b, c16=triples[16].c, output mask=r253
-                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, r253, triples[16].c);  // and_192
+                B3G_16_18_y2y3 = b_17_p_2.prepare_dot_and_assign(b_18_p_1, SET_ALL_ZERO(), triples[16].c);  // and_192
                 // and_193: a17=triples[17].a, b17=triples[17].b, c17=triples[17].c, output mask=r254
-                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, r254, triples[17].c);  // and_193
+                B3G_16_18_y1y3 = b_16_p_2.prepare_dot_and_assign(b_18_p_2, SET_ALL_ZERO(), triples[17].c);  // and_193
                 // and_228: a18=triples[18].a, b18=triples[18].b, c18=triples[18].c, output mask=r262
-                B3G_19_21_y1y2 = b_19_p.prepare_dot_and_assign(b_20_p, r262, triples[18].c);  // and_228
+                B3G_19_21_y1y2 = b_19_p.prepare_dot_and_assign(b_20_p, SET_ALL_ZERO(), triples[18].c);  // and_228
                 // and3_229: a6=beaver3_tuples[6].a, b6=beaver3_tuples[6].b, c6=beaver3_tuples[6].c, output mask=(r169-r170)
-                B3G_19_21_y1y2y3 = b_19_p_1.prepare_dot3_and_assign(b_20_p_1, b_21_p, FUNC_XOR(r169, r170), beaver3_tuples[6]);  // and3_229
+                B3G_19_21_y1y2y3 = b_19_p_1.prepare_dot3_and_assign(b_20_p_1, b_21_p, SET_ALL_ZERO(), beaver3_tuples[6]);  // and3_229
                 // and_230: a19=triples[19].a, b19=triples[19].b, c19=triples[19].c, output mask=r263
-                B3G_19_21_y2y3 = b_20_p_2.prepare_dot_and_assign(b_21_p_1, r263, triples[19].c);  // and_230
+                B3G_19_21_y2y3 = b_20_p_2.prepare_dot_and_assign(b_21_p_1, SET_ALL_ZERO(), triples[19].c);  // and_230
                 // and_231: a20=triples[20].a, b20=triples[20].b, c20=triples[20].c, output mask=r264
-                B3G_19_21_y1y3 = b_19_p_2.prepare_dot_and_assign(b_21_p_2, r264, triples[20].c);  // and_231
+                B3G_19_21_y1y3 = b_19_p_2.prepare_dot_and_assign(b_21_p_2, SET_ALL_ZERO(), triples[20].c);  // and_231
                 // and_266: a21=triples[21].a, b21=triples[21].b, c21=triples[21].c, output mask=r272
-                W3L1_22_24_y1y2 = b_22_p.prepare_dot_and_assign(b_23_p, r272, triples[21].c);  // and_266
+                W3L1_22_24_y1y2 = b_22_p.prepare_dot_and_assign(b_23_p, SET_ALL_ZERO(), triples[21].c);  // and_266
                 // and3_267: a7=beaver3_tuples[7].a, b7=beaver3_tuples[7].b, c7=beaver3_tuples[7].c, output mask=r273
-                W3L1_22_24_y1y2y3 = b_22_p_1.prepare_dot3_and_assign(b_23_p_1, b_24_p, r273, beaver3_tuples[7]);  // and3_267
+                W3L1_22_24_y1y2y3 = b_22_p_1.prepare_dot3_and_assign(b_23_p_1, b_24_p, SET_ALL_ZERO(), beaver3_tuples[7]);  // and3_267
                 // and_268: a22=triples[22].a, b22=triples[22].b, c22=triples[22].c, output mask=r274
-                W3L1_22_24_y2y3 = b_23_p_2.prepare_dot_and_assign(b_24_p_1, r274, triples[22].c);  // and_268
+                W3L1_22_24_y2y3 = b_23_p_2.prepare_dot_and_assign(b_24_p_1, SET_ALL_ZERO(), triples[22].c);  // and_268
                 // and_269: a23=triples[23].a, b23=triples[23].b, c23=triples[23].c, output mask=r275
-                W3L1_22_24_y1y3 = b_22_p_2.prepare_dot_and_assign(b_24_p_2, r275, triples[23].c);  // and_269
-                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], r194);  // and_a_11
+                W3L1_22_24_y1y3 = b_22_p_2.prepare_dot_and_assign(b_24_p_2, SET_ALL_ZERO(), triples[23].c);  // and_269
+                B3G_1_3_t3_1 = B3G_1_3_x1x2x3.mult_a_known_to_evaluators_dot(b[3], SET_ALL_ZERO());  // and_a_11
                 B3G_1_3_out_s1 = B3G_1_3_t1 ^ B3G_1_3_t2_1;  // B3G_1_3_out_s1
                 B3P_1_3_out_s1 = B3P_1_3_t1 ^ B3P_1_3_t2;  // B3P_1_3_out_s1
-                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], FUNC_XOR(r106, r107));  // and_a_49
+                B3G_4_6_t3_1 = B3G_4_6_x1x2x3.mult_a_known_to_evaluators_dot(b[6], SET_ALL_ZERO());  // and_a_49
                 B3G_4_6_out_s1 = B3G_4_6_t1 ^ B3G_4_6_t2_1;  // B3G_4_6_out_s1
                 B3P_4_6_out_s1 = B3P_4_6_t1 ^ B3P_4_6_t2;  // B3P_4_6_out_s1
-                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], FUNC_XOR(r119, r120));  // and_a_87
+                B3G_7_9_t3_1 = B3G_7_9_x1x2x3.mult_a_known_to_evaluators_dot(b[9], SET_ALL_ZERO());  // and_a_87
                 B3G_7_9_out_s1 = B3G_7_9_t1 ^ B3G_7_9_t2_1;  // B3G_7_9_out_s1
                 B3P_7_9_out_s1 = B3P_7_9_t1 ^ B3P_7_9_t2;  // B3P_7_9_out_s1
-                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], FUNC_XOR(r132, r133));  // and_a_125
+                B3G_10_12_t3_1 = B3G_10_12_x1x2x3.mult_a_known_to_evaluators_dot(b[12], SET_ALL_ZERO());  // and_a_125
                 B3G_10_12_out_s1 = B3G_10_12_t1 ^ B3G_10_12_t2_1;  // B3G_10_12_out_s1
                 B3P_10_12_out_s1 = B3P_10_12_t1 ^ B3P_10_12_t2;  // B3P_10_12_out_s1
-                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], FUNC_XOR(r185, r186));  // and_a_163
+                B3G_13_15_t3_1 = B3G_13_15_x1x2x3.mult_a_known_to_evaluators_dot(b[15], SET_ALL_ZERO());  // and_a_163
                 B3G_13_15_out_s1 = B3G_13_15_t1 ^ B3G_13_15_t2_1;  // B3G_13_15_out_s1
                 B3P_13_15_out_s1 = B3P_13_15_t1 ^ B3P_13_15_t2;  // B3P_13_15_out_s1
-                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], FUNC_XOR(r152, r153));  // and_a_201
+                B3G_16_18_t3_1 = B3G_16_18_x1x2x3.mult_a_known_to_evaluators_dot(b[18], SET_ALL_ZERO());  // and_a_201
                 B3G_16_18_out_s1 = B3G_16_18_t1 ^ B3G_16_18_t2_1;  // B3G_16_18_out_s1
                 B3P_16_18_out_s1 = B3P_16_18_t1 ^ B3P_16_18_t2;  // B3P_16_18_out_s1
-                B3G_19_21_t3_1 = B3G_19_21_x1x2x3.mult_a_known_to_evaluators_dot(b[21], FUNC_XOR(r165, r166));  // and_a_239
+                B3G_19_21_t3_1 = B3G_19_21_x1x2x3.mult_a_known_to_evaluators_dot(b[21], SET_ALL_ZERO());  // and_a_239
                 B3G_19_21_out_s1 = B3G_19_21_t1 ^ B3G_19_21_t2_1;  // B3G_19_21_out_s1
                 B3P_19_21_out_s1 = B3P_19_21_t1 ^ B3P_19_21_t2;  // B3P_19_21_out_s1
-                W3L1_22_24_t3_1 = W3L1_22_24_x1x2x3.mult_a_known_to_evaluators_dot(b[24], FUNC_XOR(r178, r179));  // and_a_277
+                W3L1_22_24_t3_1 = W3L1_22_24_x1x2x3.mult_a_known_to_evaluators_dot(b[24], SET_ALL_ZERO());  // and_a_277
                 W3L1_22_24_out_s1 = W3L1_22_24_t1 ^ W3L1_22_24_t2_1;  // W3L1_22_24_out_s1
-                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, r193);  // and_a_10
-                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, FUNC_XOR(r98, r99));  // and_a_29
-                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, r197);  // and_a_14
-                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, r195);  // and_a_12
-                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, FUNC_XOR(beaver4_tuples[1].a, r97));  // and_a_30
-                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, r196);  // and_a_13
-                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(r99, r100));  // and_a_28
-                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r107, r108));  // and_a_48
-                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, FUNC_XOR(r111, r112));  // and_a_67
-                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, FUNC_XOR(triples[24].b, r104));  // and_a_52
-                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(r105, r106));  // and_a_50
-                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, FUNC_XOR(beaver4_tuples[1].b, r110));  // and_a_68
-                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r104, r105));  // and_a_51
-                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, FUNC_XOR(r112, r113));  // and_a_66
-                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r120, r121));  // and_a_86
-                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, FUNC_XOR(r124, r125));  // and_a_105
-                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, FUNC_XOR(beaver3_tuples[8].c, r117));  // and_a_90
-                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(r118, r119));  // and_a_88
-                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, FUNC_XOR(beaver4_tuples[1].c, r123));  // and_a_106
-                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r117, r118));  // and_a_89
-                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, FUNC_XOR(r125, r126));  // and_a_104
-                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r133, r134));  // and_a_124
-                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, FUNC_XOR(r137, r138));  // and_a_143
-                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, FUNC_XOR(beaver4_tuples[0].d, r130));  // and_a_128
-                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(r131, r132));  // and_a_126
-                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, FUNC_XOR(beaver4_tuples[1].d, r136));  // and_a_144
-                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r130, r131));  // and_a_127
-                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, FUNC_XOR(r138, r139));  // and_a_142
-                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r186, r187));  // and_a_162
-                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, FUNC_XOR(r144, r145));  // and_a_181
-                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, FUNC_XOR(FUNC_XOR(triples[26].b, r182), r183));  // and_a_166
-                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(r184, r185));  // and_a_164
-                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, FUNC_XOR(beaver4_tuples[2].a, r143));  // and_a_182
-                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r183, r184));  // and_a_165
-                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(r145, r146));  // and_a_180
-                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r153, r154));  // and_a_200
-                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, FUNC_XOR(r157, r158));  // and_a_219
-                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, FUNC_XOR(triples[25].b, r150));  // and_a_204
-                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(r151, r152));  // and_a_202
-                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, FUNC_XOR(beaver4_tuples[2].b, r156));  // and_a_220
-                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r150, r151));  // and_a_203
-                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, FUNC_XOR(r158, r159));  // and_a_218
-                B3G_19_21_t2_2 = a[20].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2, FUNC_XOR(r166, r167));  // and_a_238
-                B3P_19_21_t6 = a[21].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2, FUNC_XOR(r170, r171));  // and_a_257
-                B3G_19_21_t3_4 = a[21].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2y3, FUNC_XOR(beaver3_tuples[9].c, r163));  // and_a_242
-                B3G_19_21_t3_2 = B3G_19_21_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_19_21_y2y3, FUNC_XOR(r164, r165));  // and_a_240
-                B3P_19_21_t8 = a[19].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y2y3, FUNC_XOR(beaver4_tuples[2].c, r169));  // and_a_258
-                B3G_19_21_t3_3 = B3G_19_21_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y3, FUNC_XOR(r163, r164));  // and_a_241
-                B3P_19_21_t5 = a[20].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y3, FUNC_XOR(r171, r172));  // and_a_256
-                W3L1_22_24_t2_2 = a[23].mult_a_known_to_evaluators_dot_pending(W3L1_22_24_y1y2, FUNC_XOR(r179, r180));  // and_a_276
-                W3L1_22_24_t3_4 = a[24].mult_a_known_to_evaluators_dot_pending(W3L1_22_24_y1y2y3, FUNC_XOR(beaver4_tuples[2].d, r176));  // and_a_280
-                W3L1_22_24_t3_2 = W3L1_22_24_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_22_24_y2y3, FUNC_XOR(r177, r178));  // and_a_278
-                W3L1_22_24_t3_3 = W3L1_22_24_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_22_24_y1y3, FUNC_XOR(r176, r177));  // and_a_279
+                B3G_1_3_t2_2 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_10
+                B3P_1_3_t6 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2, SET_ALL_ZERO());  // and_a_29
+                B3G_1_3_t3_4 = a[3].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y2y3, SET_ALL_ZERO());  // and_a_14
+                B3G_1_3_t3_2 = B3G_1_3_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_12
+                B3P_1_3_t8 = a[1].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y2y3, SET_ALL_ZERO());  // and_a_30
+                B3G_1_3_t3_3 = B3G_1_3_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(FUNC_XOR(r191, r192), r193), r194), r195), r196), r197));  // and_a_13
+                B3P_1_3_t5 = a[2].mult_a_known_to_evaluators_dot_pending(B3G_1_3_y1y3, beaver4_tuples[1].a);  // and_a_28
+                B3G_4_6_t2_2 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_48
+                B3P_4_6_t6 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2, SET_ALL_ZERO());  // and_a_67
+                B3G_4_6_t3_4 = a[6].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y2y3, SET_ALL_ZERO());  // and_a_52
+                B3G_4_6_t3_2 = B3G_4_6_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_50
+                B3P_4_6_t8 = a[4].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y2y3, SET_ALL_ZERO());  // and_a_68
+                B3G_4_6_t3_3 = B3G_4_6_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, triples[24].b);  // and_a_51
+                B3P_4_6_t5 = a[5].mult_a_known_to_evaluators_dot_pending(B3G_4_6_y1y3, beaver4_tuples[1].b);  // and_a_66
+                B3G_7_9_t2_2 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_86
+                B3P_7_9_t6 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2, SET_ALL_ZERO());  // and_a_105
+                B3G_7_9_t3_4 = a[9].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y2y3, SET_ALL_ZERO());  // and_a_90
+                B3G_7_9_t3_2 = B3G_7_9_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_88
+                B3P_7_9_t8 = a[7].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y2y3, SET_ALL_ZERO());  // and_a_106
+                B3G_7_9_t3_3 = B3G_7_9_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver3_tuples[8].c);  // and_a_89
+                B3P_7_9_t5 = a[8].mult_a_known_to_evaluators_dot_pending(B3G_7_9_y1y3, beaver4_tuples[1].c);  // and_a_104
+                B3G_10_12_t2_2 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_124
+                B3P_10_12_t6 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2, SET_ALL_ZERO());  // and_a_143
+                B3G_10_12_t3_4 = a[12].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y2y3, SET_ALL_ZERO());  // and_a_128
+                B3G_10_12_t3_2 = B3G_10_12_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_126
+                B3P_10_12_t8 = a[10].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y2y3, SET_ALL_ZERO());  // and_a_144
+                B3G_10_12_t3_3 = B3G_10_12_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[0].d);  // and_a_127
+                B3P_10_12_t5 = a[11].mult_a_known_to_evaluators_dot_pending(B3G_10_12_y1y3, beaver4_tuples[1].d);  // and_a_142
+                B3G_13_15_t2_2 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_162
+                B3P_13_15_t6 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2, SET_ALL_ZERO());  // and_a_181
+                B3G_13_15_t3_4 = a[15].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y2y3, SET_ALL_ZERO());  // and_a_166
+                B3G_13_15_t3_2 = B3G_13_15_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_164
+                B3P_13_15_t8 = a[13].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y2y3, SET_ALL_ZERO());  // and_a_182
+                B3G_13_15_t3_3 = B3G_13_15_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, FUNC_XOR(triples[26].b, r182));  // and_a_165
+                B3P_13_15_t5 = a[14].mult_a_known_to_evaluators_dot_pending(B3G_13_15_y1y3, beaver4_tuples[2].a);  // and_a_180
+                B3G_16_18_t2_2 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_200
+                B3P_16_18_t6 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2, SET_ALL_ZERO());  // and_a_219
+                B3G_16_18_t3_4 = a[18].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y2y3, SET_ALL_ZERO());  // and_a_204
+                B3G_16_18_t3_2 = B3G_16_18_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_202
+                B3P_16_18_t8 = a[16].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y2y3, SET_ALL_ZERO());  // and_a_220
+                B3G_16_18_t3_3 = B3G_16_18_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, triples[25].b);  // and_a_203
+                B3P_16_18_t5 = a[17].mult_a_known_to_evaluators_dot_pending(B3G_16_18_y1y3, beaver4_tuples[2].b);  // and_a_218
+                B3G_19_21_t2_2 = a[20].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2, SET_ALL_ZERO());  // and_a_238
+                B3P_19_21_t6 = a[21].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2, SET_ALL_ZERO());  // and_a_257
+                B3G_19_21_t3_4 = a[21].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y2y3, SET_ALL_ZERO());  // and_a_242
+                B3G_19_21_t3_2 = B3G_19_21_x1x3.mult_a_known_to_evaluators_dot_pending(B3G_19_21_y2y3, SET_ALL_ZERO());  // and_a_240
+                B3P_19_21_t8 = a[19].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y2y3, SET_ALL_ZERO());  // and_a_258
+                B3G_19_21_t3_3 = B3G_19_21_x2x3.mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y3, beaver3_tuples[9].c);  // and_a_241
+                B3P_19_21_t5 = a[20].mult_a_known_to_evaluators_dot_pending(B3G_19_21_y1y3, beaver4_tuples[2].c);  // and_a_256
+                W3L1_22_24_t2_2 = a[23].mult_a_known_to_evaluators_dot_pending(W3L1_22_24_y1y2, SET_ALL_ZERO());  // and_a_276
+                W3L1_22_24_t3_4 = a[24].mult_a_known_to_evaluators_dot_pending(W3L1_22_24_y1y2y3, SET_ALL_ZERO());  // and_a_280
+                W3L1_22_24_t3_2 = W3L1_22_24_x1x3.mult_a_known_to_evaluators_dot_pending(W3L1_22_24_y2y3, SET_ALL_ZERO());  // and_a_278
+                W3L1_22_24_t3_3 = W3L1_22_24_x2x3.mult_a_known_to_evaluators_dot_pending(W3L1_22_24_y1y3, beaver4_tuples[2].d);  // and_a_279
                 B3P_1_3_out_s2 = B3P_1_3_out_s1 ^ B3P_1_3_t3;  // B3P_1_3_out_s2
                 B3P_4_6_out_s2 = B3P_4_6_out_s1 ^ B3P_4_6_t3;  // B3P_4_6_out_s2
                 B3P_7_9_out_s2 = B3P_7_9_out_s1 ^ B3P_7_9_t3;  // B3P_7_9_out_s2
@@ -14153,22 +11515,22 @@ class PPA_MSB_4Way_A_AB<k, Share, typename std::enable_if<(k == 25)>::type>
                 B3P_13_15_out_p_1 = B3P_13_15_out.zero_add(beaver3_tuples[9].a);  // B3P_13_15_out'_1, mask=a37
                 B3P_16_18_out_p = B3P_16_18_out.zero_add(beaver3_tuples[9].b);  // B3P_16_18_out', mask=b37
                 // and_287: a24=triples[24].a, b24=triples[24].b, c24=triples[24].c, output mask=r198
-                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, r198, triples[24].c);  // and_287
+                L1_B0_t1 = B3P_1_3_out_p.prepare_dot_and_assign(B3G_4_6_out, SET_ALL_ZERO(), triples[24].c);  // and_287
                 // and3_288: a8=beaver3_tuples[8].a, b8=beaver3_tuples[8].b, c8=beaver3_tuples[8].c, output mask=r199
-                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, r199, beaver3_tuples[8]);  // and3_288
+                L1_B0_t2 = B3P_1_3_out_p_1.prepare_dot3_and_assign(B3P_4_6_out_p, B3G_7_9_out, SET_ALL_ZERO(), beaver3_tuples[8]);  // and3_288
                 // and4_289: a0=beaver4_tuples[0].a, b0=beaver4_tuples[0].b, c0=beaver4_tuples[0].c, d0=beaver4_tuples[0].d, output mask=r200
-                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, r200, beaver4_tuples[0]);  // and4_289
+                L1_B0_t3 = B3P_1_3_out_p_2.prepare_dot4_and_assign(B3P_4_6_out_p_1, B3P_7_9_out_p, B3G_10_12_out, FUNC_XOR(FUNC_XOR(r198, r199), r200), beaver4_tuples[0]);  // and4_289
                 L1_B0_s1 = L1_B0_t1 ^ L1_B0_t2;  // L1_B0_s1
                 L1_B0_s2 = L1_B0_s1 ^ L1_B0_t3;  // L1_B0_s2
                 L1_B0_s2.mask_and_send_dot_without_remask();
                 // and4_293: a1=beaver4_tuples[1].a, b1=beaver4_tuples[1].b, c1=beaver4_tuples[1].c, d1=beaver4_tuples[1].d, output mask=a39
                 L1_B0_P = B3P_1_3_out.prepare_and4_and_assign(B3P_4_6_out, B3P_7_9_out, B3P_10_12_out, triples[26].a, beaver4_tuples[1]);  // and4_293
                 // and4_296: a2=beaver4_tuples[2].a, b2=beaver4_tuples[2].b, c2=beaver4_tuples[2].c, d2=beaver4_tuples[2].d, output mask=(r182-r189)
-                L1_B1_t3 = B3P_13_15_out.prepare_dot4_and_assign(B3P_16_18_out, B3P_19_21_out, W3L1_22_24_out, FUNC_XOR(r182, r189), beaver4_tuples[2]);  // and4_296
+                L1_B1_t3 = B3P_13_15_out.prepare_dot4_and_assign(B3P_16_18_out, B3P_19_21_out, W3L1_22_24_out, SET_ALL_ZERO(), beaver4_tuples[2]);  // and4_296
                 // and_294: a25=triples[25].a, b25=triples[25].b, c25=triples[25].c, output mask=r190
-                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, r190, triples[25].c);  // and_294
+                L1_B1_t1 = B3P_13_15_out_p.prepare_dot_and_assign(B3G_16_18_out, SET_ALL_ZERO(), triples[25].c);  // and_294
                 // and3_295: a9=beaver3_tuples[9].a, b9=beaver3_tuples[9].b, c9=beaver3_tuples[9].c, output mask=(r189-r190)
-                L1_B1_t2 = B3P_13_15_out_p_1.prepare_dot3_and_assign(B3P_16_18_out_p, B3G_19_21_out, FUNC_XOR(r189, r190), beaver3_tuples[9]);  // and3_295
+                L1_B1_t2 = B3P_13_15_out_p_1.prepare_dot3_and_assign(B3P_16_18_out_p, B3G_19_21_out, r182, beaver3_tuples[9]);  // and3_295
                 L1_B1_s1 = L1_B1_t1 ^ L1_B1_t2;  // L1_B1_s1
                 L1_B1_s2 = L1_B1_s1 ^ L1_B1_t3;  // L1_B1_s2
                 L1_B1_s2.mask_and_send_dot_without_remask();

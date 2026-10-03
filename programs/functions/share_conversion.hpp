@@ -48,7 +48,7 @@
 #if PPA4_MSB == 1
 // the a-known circuit at 64 bits and its narrow forms are generated (scripts/circuits/gen_64bit_adders.py); the split
 // variant exists for 8/16/32 bits only, at 64 bits the AB circuit takes the public m as a share with mask 0
-#if A_KNOWN_TO_EVALUATORS_OPT == 1 && (BITLENGTH != 64 || ADDITIONAL_PPA_THREADS == 0)
+#if A_KNOWN_TO_EVALUATORS_OPT == 1 && A2BITS_PPA4_AB == 0 && (BITLENGTH != 64 || ADDITIONAL_PPA_THREADS == 0)
 #if ADDITIONAL_PPA_THREADS > 0
 #include "adders/zero_add_adders/ppa_msb_4way_and_a_ab_split.hpp"
 #else
@@ -108,7 +108,7 @@
 #endif
 // The cut's narrow adders (CUT_FRAC_NARROW): those of the ADDER_TYPE family (narrow32/, narrow64/); the split a-known
 // four-way circuit has none, A2bits PPA4 then takes the AB one, the public m as a share of mask 0
-#if PPA4_MSB == 1 && A_KNOWN_TO_EVALUATORS_OPT == 1 && ROT_PREPROCESSING_OPT == 1 && ADDITIONAL_PPA_THREADS > 0
+#if PPA4_MSB == 1 && A_KNOWN_TO_EVALUATORS_OPT == 1 && ROT_PREPROCESSING_OPT == 1 && ADDITIONAL_PPA_THREADS > 0 && A2BITS_PPA4_AB == 0
 #include "adders/zero_add_adders/ppa_msb_4way_and_ab.hpp"
 #define NARROW_ADDER_TYPE PPA_MSB_4Way_AB
 #else

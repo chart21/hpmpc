@@ -1088,11 +1088,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 64)>::type>
     static constexpr int BeaverTripleCount = 62;
     triple<DATATYPE> triples[BeaverTripleCount];
 
-    DATATYPE r125;
-    DATATYPE r126;
     DATATYPE r127;
     DATATYPE r128;
-    DATATYPE r129;
 
     Share carry_10;
     Share carry_11;
@@ -1420,11 +1417,8 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 64)>::type>
                 triples[i] = retrieveBooleanTriple<DATATYPE>();
             }
             // Random mask values (shared across mask expressions)
-            r125 = getRandomVal(PSELF);
-            r126 = getRandomVal(PSELF);
             r127 = getRandomVal(PSELF);
             r128 = getRandomVal(PSELF);
-            r129 = getRandomVal(PSELF);
 
         }
     }
@@ -1441,12 +1435,12 @@ class RCA_MSB_A_AB<k, Share, typename std::enable_if<(k == 64)>::type>
                 y_62_p = y[62].zero_add(triples[0].a);  // y[62]', mask=a0
                 y_63_p = y[63].zero_add(triples[0].b);  // y[63]', mask=b0
                 x1x2_lsb = x[62].mult_a_known_to_evaluators(x[63]);  // and_a_1
-                t1_lsb = x[62].mult_a_known_to_evaluators_dot(y[62], r126);  // and_a_2
-                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[63], FUNC_XOR(r125, r126));  // and_a_3
+                t1_lsb = x[62].mult_a_known_to_evaluators_dot(y[62], SET_ALL_ZERO());  // and_a_2
+                t2_lsb = x1x2_lsb.mult_a_known_to_evaluators_dot(y[63], SET_ALL_ZERO());  // and_a_3
                 // and_0: a0=triples[0].a, b0=triples[0].b, c0=triples[0].c, output mask=r128
-                y1y2_lsb = y_62_p.prepare_dot_and_assign(y_63_p, r128, triples[0].c);  // and_0
+                y1y2_lsb = y_62_p.prepare_dot_and_assign(y_63_p, SET_ALL_ZERO(), triples[0].c);  // and_0
                 s1_lsb = t1_lsb ^ t2_lsb;  // s1_lsb
-                t3_lsb = x[63].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(FUNC_XOR(triples[1].a, x[61].get_mask()), r125));  // and_a_4
+                t3_lsb = x[63].mult_a_known_to_evaluators_dot_pending(y1y2_lsb, FUNC_XOR(triples[1].a, x[61].get_mask()));  // and_a_4
                 carry_62 = s1_lsb ^ t3_lsb;  // carry[62]
                 carry_62.mask_and_send_dot_without_remask();
                 break;
